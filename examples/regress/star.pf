@@ -4,7 +4,8 @@ System_type(star,binary,agn,previous)                 star
 Central_object.mass(msol)                  52.5
 Central_object.radius(cm)                  1.32e12
 Central_object.radiation(yes,no)                  yes
-Central_object.rad_type_to_make_wind(0=bb,1=models)   0
+
+Central_object.rad_type_to_make_wind(bb,models)                   bb
 Central_object.temp                        42000
 
 ### Parameters for the Disk (if there is one)
@@ -42,7 +43,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
+Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                850
@@ -55,8 +56,7 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-
-Reverb.type(none,photon,wind,matom)                  none
+Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv

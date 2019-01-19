@@ -4,13 +4,13 @@ System_type(star,binary,agn,previous)                 star
 Central_object.mass(msol)                  0.8
 Central_object.radius(cm)                  7e+08
 Central_object.radiation(yes,no)                  yes
-Central_object.rad_type_to_make_wind(0=bb,1=models)   0
+Central_object.rad_type_to_make_wind(bb,models)                   bb
 Central_object.temp                        40000
 
 ### Parameters for the Disk (if there is one)
 Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
-Disk.rad_type_to_make_wind(0=bb,1=models)   0
+Disk.rad_type_to_make_wind(bb,models)                    bb
 Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         1e-08
 Disk.radmax(cm)                            2.4e+10
@@ -66,8 +66,8 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
-Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
+Central_object.rad_type_in_final_spectrum(bb,models,uniform)                    bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                    bb
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                850

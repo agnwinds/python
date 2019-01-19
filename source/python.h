@@ -118,7 +118,7 @@ int CURRENT_PHOT;               /* A diagnostic so that one can always determine
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_BREM    -6
 #define SPECTYPE_NONE	 -3
-#define SPECTYPE_MODEL	 -99  // This is just used briefly, before a model number is assigned
+#define SPECTYPE_MODEL	 -99    // This is just used briefly, before a model number is assigned
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -1456,11 +1456,11 @@ int xxxbound;
 
 
 
-typedef struct  rdpar_choices {
-    char choices[10][LINELENGTH];
-   int  vals[10];
-   int  n;
-} dummy_choices, *ChoicePtr; 
+typedef struct rdpar_choices
+{
+  char choices[10][LINELENGTH];
+  int vals[10];
+  int n;
+} dummy_choices, *ChoicePtr;
 
 struct rdpar_choices zz_spec;
-

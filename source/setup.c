@@ -187,42 +187,38 @@ get_spectype (yesno, question, spectype)
      int *spectype;
 {
   char model_list[LINELENGTH];
-  int stype;
+  char one_choice[LINELENGTH];
+  char choices[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
+  int i;
+  int init_choices (), get_choices ();
 
   if (yesno)
   {
-    /* XXX The next few lines convert the value of spectype to values that correspond to what is requested
-     * in the rdpar statement, and then once we have the answer they are converted back to values that the
-     * program uses internally.  Presumably this was done for historical reasons, having to do with running
-     * old .pf files, but it is quite awkward, and we need to fix this kind of thing.  ksl
+    init_choices ();            // Populate the spect array
+
+    /* Locate the word that corresponds to the spectype that was entered
      */
 
-    // First convert the spectype to the way the questionis supposed to be answered
-    if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
-      stype = 0;
-    else if (*spectype == SPECTYPE_UNIFORM)
-      stype = 2;
-    else if (*spectype == SPECTYPE_POW)
-      stype = 3;
-    else
-      stype = 1;
+    for (i = 0; i < zz_spec.n; i++)
+    {
+      if (*spectype == zz_spec.vals[i])
+      {
+        strcpy (one_choice, zz_spec.choices[i]);
+        break;
+      }
+    }
 
-    /* Now get the response */
-    rdint (question, &stype);
+    if (i == zz_spec.n)
+    {
+      Error ("get_spectype: Programming error.  Unknown spectype %d\n", *spectype);
+      exit (0);
+    }
 
-    /* Now convert the response back to the values which python uses */
-    if (stype == 0)
-      *spectype = SPECTYPE_BB;  // bb
-    else if (stype == 2)
-      *spectype = SPECTYPE_UNIFORM;     // uniform
-    else if (stype == 3)
-      *spectype = SPECTYPE_POW; // power law
-    else if (stype == 4)
-      *spectype = SPECTYPE_CL_TAB;      // broken power law
-    else if (stype == 5)
-      *spectype = SPECTYPE_BREM;        // bremstrahlung
-    else
+    get_choices (question, choices, &zz_spec);
+    *spectype = rdchoice (question, choices, one_choice);
+
+    if (*spectype == SPECTYPE_MODEL)
     {
       if (geo.run_type == RUN_TYPE_PREVIOUS)
       {                         // Continuing an old model

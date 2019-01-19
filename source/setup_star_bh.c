@@ -75,7 +75,8 @@ get_stellar_params ()
 //OLD      rdint ("Central_object.radiation(y=1)", &geo.star_radiation);
     get_spectype (geo.star_radiation,
                   //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
-                  "Central_object.rad_type_to_make_wind(0=bb,1=models)", &geo.star_ion_spectype);
+                  //"Central_object.rad_type_to_make_wind(0=bb,1=models)", &geo.star_ion_spectype);
+                  "Central_object.rad_type_to_make_wind(bb,models)", &geo.star_ion_spectype);
 
 
     if (geo.star_radiation)
@@ -173,9 +174,12 @@ get_bl_and_agn_params (lstar)
   }
 
 
-  get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)", &geo.bl_ion_spectype);
+  get_spectype (geo.bl_radiation,
+                //"Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)", &geo.bl_ion_spectype);
+                "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
-                "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
+                //"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
+                "Rad_type_for_agn(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
 
   if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
   {

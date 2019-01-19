@@ -649,15 +649,20 @@ main (argc, argv)
 
     get_spectype (geo.star_radiation,
                   //"Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  "Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.star_spectype);
+                  //"Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.star_spectype);
+                  "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
     get_spectype (geo.disk_radiation,
                   //"Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  "Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.disk_spectype);
+                  //"Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.disk_spectype);
+                  "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
     get_spectype (geo.bl_radiation,
                   //"Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  "Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
-    geo.agn_spectype = 3;
-    get_spectype (geo.agn_radiation, "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
+                  //"Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
+                  "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
+    geo.agn_spectype = SPECTYPE_POW;
+    get_spectype (geo.agn_radiation,
+                  //"Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
+                  "Rad_type_for_agn(power,cloudy,brems)_in_final_spectrum", &geo.agn_spectype);
     if (geo.agn_radiation && geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
     {
       Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",

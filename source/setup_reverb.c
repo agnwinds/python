@@ -89,7 +89,7 @@ get_meta_params (void)
   //OLD meta_param = 0;               // initialize to no reverberation tracking
   //OLD rdint ("Reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
 
-  strcpy (answer, "off");
+  strcpy (answer, "none");
   meta_param = rdchoice ("Reverb.type(none,photon,wind,matom)", "0,1,2,3", answer);
 
   switch (meta_param)

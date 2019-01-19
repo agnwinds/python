@@ -1203,10 +1203,24 @@ string2int (word, string_choices, string_values, string_answer)
   nchoices =
     sscanf (values, "%d %d %d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7], &xv[8], &xv[9]);
 
+
+  /* Check that one of the values is not one of the values that is an error return value, -9998 or -9999.  If
+   * xv is one of these values then the program will remain confused and so we exit 
+   */
+
+  for (i = 0; i < nchoices; i++)
+  {
+    if (xv[i] == -9998 || xv[i] == -9999)
+    {
+      Error ("string2int: Internal programming error: value for rdchoice is an error retrun value\n");
+      exit (0);
+    }
+  }
+
   /* Perform a minimum match on the anser */
 
   matched = 0;
-  ivalue = -99;
+  ivalue = -9998;
   ibest = -1;                   //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
@@ -1224,8 +1238,7 @@ string2int (word, string_choices, string_values, string_answer)
 
   if (matched > 1)
   {
-    printf ("XX multiple matches\n");
-    ivalue = -999;
+    ivalue = -9999;
     return (ivalue);
   }
 
@@ -1340,12 +1353,12 @@ rdchoice (question, answers, answer)
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
     ianswer = string2int (string_answer, dummy, answers, full_answer);
-    if (ianswer == -99)
+    if (ianswer == -9998)
     {
       Error ("rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;
     }
-    if (ianswer == -999)
+    if (ianswer == -9999)
     {
       Error ("rdchoice: Multiple matches of  %s input to answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;

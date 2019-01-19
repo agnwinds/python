@@ -197,12 +197,12 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c \
-		setup_reverb.c setup_line_transfer.c rdpar_init.c
+		setup_reverb.c setup_line_transfer.c 
 
 #
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto
-kpar_source = rdpar.c xlog.c synonyms.c rdpar_init.c
+kpar_source = rdpar.c xlog.c synonyms.c 
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c windsave2table.c windsave2table_sub.c
 

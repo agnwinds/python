@@ -7,14 +7,14 @@ Central_object.radius(cm)                  8.85667e+14
 ### Parameters for the Disk (if there is one)
 Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
-Disk.rad_type_to_make_wind(0=bb,1=models)   0
+Disk.rad_type_to_make_wind(bb,models)                   bb
 Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         5
 Disk.radmax(cm)                            1e17
 
 ### Parameters for BL or AGN
 QSO_BH_radiation(yes,no)                        yes
-Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind   3
+Rad_type_for_agn(bb,models,power,cloudy,brems)                power
 lum_agn(ergs/s)                            1e43
 AGN.power_law_index                        -0.9
 AGN.geometry_for_pl_source(sphere,lamp_post)               sphere
@@ -53,8 +53,8 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
-Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum   3
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+Rad_type_for_agn(power,cloudy,brems)_in_final_spectrum                power
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                200
@@ -74,7 +74,6 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-
 Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
