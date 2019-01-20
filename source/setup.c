@@ -586,7 +586,7 @@ init_ionization ()
 
 
   strcpy (answer, "matrix_bb");
-  geo.ioniz_mode = rdchoice ("Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
+  geo.ioniz_mode = rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {

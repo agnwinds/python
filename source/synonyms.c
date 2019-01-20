@@ -56,7 +56,9 @@ char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.typ
   "@Extra.diagnostics", "File.with.model2read", "Number.of.wind.components", "Old_windfile",
   "Model_file", "agn_power_law_index", "hydro_file", "Hydro_thetamax",
   "kn.acceleration_exponent", "kn.acceleration_length", "kn.d", "kn.mdot_r_exponent",
-  "kn.rmax", "kn.rmin", "kn.v_infinity", "kn.v_zero",
+  "kn.rmax", "kn.rmin", "kn.v_infinity", "kn.v_zero","QSO_BH_radiation","lum_agn","AGN.power_law_index",
+  "AGN.blackbody_temp","@AGN.power_law_cutoff","AGN.geometry_for_pl_source","Rad_type_for_agn","Rad_type_for_agn",
+  "wind.mdot","Wind_ionization","Wind_radiation","Wind_type",
   NULL
 };
 
@@ -90,13 +92,16 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
   "@Diag.extra", "Wind.model2import", "Wind.number_of_components", "Wind.old_windfile",
   "Input_spectra.model_file", "AGN.power_law_index", "Hydro.file", "Hydro.thetamax",
   "KWD.acceleration_exponent", "KWD.acceleration_length", "KWD.d", "KWD.mdot_r_exponent",
-  "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero",
+  "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero","BH.radiation","BH.lum","BH.power_law_index",
+  "BH.blackbody_temp","@Bh.power_law_cutoff","BH.geometry_for_pl_source",
+  "BH.rad_type_in_final_spectrum","BH.rad_type_to_make_wind",
+  "Wind.mdot","Wind.ionization","Wind.radiation","Wind.type",
   NULL
 };
 
 
 
-int number_of_names = 89;
+int number_of_names = 101;
 
 #define MIN(a,b) ((a)<b ? a:b)
 

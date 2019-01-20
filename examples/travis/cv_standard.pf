@@ -1,39 +1,32 @@
-
-System_type(star,binary,agn,previous)                  binary
+System_type(star,binary,agn,previous)               binary
 
 ### Parameters for the Central Object
 Central_object.mass(msol)                  0.8
 Central_object.radius(cm)                  7e+08
+Central_object.radiation(yes,no)                  yes
 
-Central_object.radiation(yes,no)                   yes
-Central_object.rad_type_to_make_wind(0=bb,1=models)   0
+Central_object.rad_type_to_make_wind(bb,models)                    bb
 Central_object.temp                        40000
 Binary.mass_sec(msol)                      0.6
 Binary.period(hr)                          5.57
 
 ### Parameters for the Disk (if there is one)
+Disk.type(none,flat,vertically.extended)                 flat
+Disk.radiation(yes,no)                          yes
 
-Disk.type(none,flat,vertically.extended)                  flat
-
-Disk.radiation(yes,no)                           yes
-Disk.rad_type_to_make_wind(0=bb,1=models)   0
-
-Disk.temperature.profile(standard,readin,yso)                 standard
+Disk.rad_type_to_make_wind(bb,models)                    bb
+Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         1e-8
 Disk.radmax(cm)                            2.4e+10
 
 ### Parameters for BL or AGN
-
-Boundary_layer.radiation(yes,no)                    no
+Boundary_layer.radiation(yes,no)                   no
 
 ### Parameters descibing the various winds or coronae in the system
-
-Wind_radiation(yes,no)                         yes 
+Wind.radiation(yes,no)                          yes
 Wind.number_of_components                  1
-
-Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   SV
-
-Wind.coord_system(spherical,cylindrical,polar,cyl_var)                  cylindrical
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
+Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               30
 Wind.dim.in.z_or_theta.direction           30
 
@@ -41,17 +34,14 @@ Wind.dim.in.z_or_theta.direction           30
 Photons_per_cycle                          100000
 Ionization_cycles                          10
 Spectrum_cycles                            10
-
-Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                  matrix_bb
-
-Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)                 thermal_trapping
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)            matrix_bb
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
 Atomic_data                                data/standard78
-
-Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)                    absorb
+Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
 
 ### Parameters for Domain 0
-wind.mdot(msol/yr)                         1e-9
+Wind.mdot(msol/yr)                         1e-9
 SV.diskmin(units_of_rstar)                 4
 SV.diskmax(units_of_rstar)                 12
 SV.thetamin(deg)                           20
@@ -66,8 +56,9 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
-Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
+
+Central_object.rad_type_in_final_spectrum(bb,models,uniform)                    bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                    bb
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                800
@@ -85,14 +76,12 @@ Spectrum.orbit_phase(0=inferior_conjunction)   0.5
 Spectrum.orbit_phase(0=inferior_conjunction)   0.5
 Spectrum.orbit_phase(0=inferior_conjunction)   0.5
 Spectrum.orbit_phase(0=inferior_conjunction)   0.5
-
-Spectrum.live_or_die(live.or.die,extract)                 extract
-
-Spectrum.type(flambda,fnu,basic)                    flambda
+Spectrum.live_or_die(live.or.die,extract)              extract
+Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-Reverb.type(0=off,1=photon,2=wind,3=matom)   0
+
+Reverb.type(none,photon,wind,matom)                    none
 
 ### Other parameters
-
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv

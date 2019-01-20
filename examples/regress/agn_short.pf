@@ -13,16 +13,16 @@ Disk.mdot(msol/yr)                         5
 Disk.radmax(cm)                            1e17
 
 ### Parameters for BL or AGN
-QSO_BH_radiation(yes,no)                        yes
-Rad_type_for_agn(bb,models,power,cloudy,brems)                power
-lum_agn(ergs/s)                            1e43
-AGN.power_law_index                        -0.9
-AGN.geometry_for_pl_source(sphere,lamp_post)               sphere
+BH.radiation(yes,no)                            yes
+BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)                power
+BH.lum(ergs/s)                             1e43
+BH.power_law_index                         -0.9
+BH.geometry_for_pl_source(sphere,lamp_post)               sphere
 
 ### Parameters descibing the various winds or coronae in the system
-Wind_radiation(yes,no)                          yes
+Wind.radiation(yes,no)                          yes
 Wind.number_of_components                  1
-Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
 Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               30
 Wind.dim.in.z_or_theta.direction           30
@@ -31,14 +31,14 @@ Wind.dim.in.z_or_theta.direction           30
 Photons_per_cycle                          2000000
 Ionization_cycles                          3
 Spectrum_cycles                            2
-Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
 
 ### Parameters for Domain 0
-wind.mdot(msol/yr)                         5
+Wind.mdot(msol/yr)                         5
 SV.diskmin(units_of_rstar)                 50
 SV.diskmax(units_of_rstar)                 100
 SV.thetamin(deg)                           70
@@ -54,7 +54,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 ### Parameters defining the spectra seen by observers
 
 Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
-Rad_type_for_agn(power,cloudy,brems)_in_final_spectrum                power
+BH.rad_type_in_final_spectrum(power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                200

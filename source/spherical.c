@@ -31,31 +31,6 @@
    gradients.
 
 */
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   spherical_ds_in_cell calculates the distance to the far
-//OLD         boundary of the cell in which the photon bundle resides.
-//OLD
-//OLD  Arguments:
-//OLD   p       Photon pointer
-//OLD
-//OLD
-//OLD  Returns:
-//OLD   Distance to the far boundary of the cell in which the photon
-//OLD   currently resides.  Negative numbers (and zero) should be
-//OLD   regarded as errors.
-//OLD
-//OLD Description:
-//OLD
-//OLD Notes:
-//OLD
-//OLD History:
-//OLD   05apr   ksl     55d: Adapted from rtheta.c
-//OLD   15aug   ksl     Domains incorporated
-//OLD
-//OLD **************************************************************/
 
 
 /**********************************************************/

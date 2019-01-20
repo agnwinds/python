@@ -508,9 +508,8 @@ main (argc, argv)
       rdpar_comment ("Parameters descibing the various winds or coronae in the system");
 
       strcpy (answer, "yes");
-      geo.wind_radiation = rdchoice ("Wind_radiation(yes,no)", "1,0", answer);
+      geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
 
-//OLD     rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
       /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom
          mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in
          setup_domains.c, see issue #390 */
@@ -662,7 +661,7 @@ main (argc, argv)
     geo.agn_spectype = SPECTYPE_POW;
     get_spectype (geo.agn_radiation,
                   //"Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
-                  "Rad_type_for_agn(power,cloudy,brems)_in_final_spectrum", &geo.agn_spectype);
+                  "BH.rad_type_in_final_spectrum(power,cloudy,brems)", &geo.agn_spectype);
     if (geo.agn_radiation && geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
     {
       Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",

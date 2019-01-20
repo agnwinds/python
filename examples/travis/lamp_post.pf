@@ -1,39 +1,31 @@
-
-System_type(star,binary,agn,previous)                    agn
+System_type(star,binary,agn,previous)                  agn
 
 ### Parameters for the Central Object
 Central_object.mass(msol)                  1e9
 Central_object.radius(cm)                  8.85667e+14
 
 ### Parameters for the Disk (if there is one)
+Disk.type(none,flat,vertically.extended)                 flat
+Disk.radiation(yes,no)                          yes
 
-Disk.type(none,flat,vertically.extended)                    flat
-
-Disk.radiation(yes,no)                            yes
-Disk.rad_type_to_make_wind(0=bb,1=models)   0
-
-Disk.temperature.profile(standard,readin,yso)                    standard
+Disk.rad_type_to_make_wind(bb,models)                    bb
+Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         5
 Disk.radmax(cm)                            1e17
 
 ### Parameters for BL or AGN
-
-QSO_BH_radiation(yes,no)                          yes
-Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind   3
-lum_agn(ergs/s)                            1e43
-AGN.power_law_index                        -0.9
-
-AGN.geometry_for_pl_source(sphere,lamp_post)                    lamp_post
+BH.radiation(yes,no)                            yes
+BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)                power
+BH.lum(ergs/s)                             1e43
+BH.power_law_index                         -0.9
+BH.geometry_for_pl_source(sphere,lamp_post)            lamp_post
 AGN.lamp_post_height(r_g)                  10
 
 ### Parameters descibing the various winds or coronae in the system
-
-Wind_radiation(yes,no)                            yes
+Wind.radiation(yes,no)                          yes
 Wind.number_of_components                  1
-
-Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                    SV
-
-Wind.coord_system(spherical,cylindrical,polar,cyl_var)                    cylindrical
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
+Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               100
 Wind.dim.in.z_or_theta.direction           100
 
@@ -41,17 +33,14 @@ Wind.dim.in.z_or_theta.direction           100
 Photons_per_cycle                          200000
 Ionization_cycles                          30
 Spectrum_cycles                            20
-
-Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                    matrix_pow
-
-Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)                    escape_prob
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
-
-Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)                    absorb
+Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
 
 ### Parameters for Domain 0
-wind.mdot(msol/yr)                         5
+Wind.mdot(msol/yr)                         5
 SV.diskmin(units_of_rstar)                 50
 SV.diskmax(units_of_rstar)                 100
 SV.thetamin(deg)                           70
@@ -66,8 +55,9 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)   0
-Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum   3
+
+Disk.rad_type_in_final_spectrum(bb,models,uniform)               bb     
+BH.rad_type_in_final_spectrum(power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                200
@@ -83,14 +73,12 @@ Spectrum.angle(0=pole)                     75
 Spectrum.angle(0=pole)                     80
 Spectrum.angle(0=pole)                     85
 Spectrum.angle(0=pole)                     89
-
-Spectrum.live_or_die(live.or.die,extract)                    extract
-
-Spectrum.type(flambda,fnu,basic)          flambda     
+Spectrum.live_or_die(live.or.die,extract)              extract
+Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-Reverb.type(0=off,1=photon,2=wind,3=matom)   0
+
+Reverb.type(none,photon,wind,matom)                    none
 
 ### Other parameters
-
-Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                    AGN
+Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                  agn

@@ -10,7 +10,7 @@ Central_object.temp                        40000
 ### Parameters for the Disk (if there is one)
 Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
-Disk.rad_type_to_make_wind(bb,models)                    bb
+Disk.rad_type_to_make_wind(bb,models)                   bb
 Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         1e-08
 Disk.radmax(cm)                            2.4e+10
@@ -19,13 +19,13 @@ Disk.radmax(cm)                            2.4e+10
 Boundary_layer.radiation(yes,no)                   no
 
 ### Parameters descibing the various winds or coronae in the system
-Wind_radiation(yes,no)                          yes
+Wind.radiation(yes,no)                          yes
 Wind.number_of_components                  2
-Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                 star
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                 star
 Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               30
 Wind.dim.in.z_or_theta.direction           30
-Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
 Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               30
 Wind.dim.in.z_or_theta.direction           30
@@ -34,7 +34,7 @@ Wind.dim.in.z_or_theta.direction           30
 Photons_per_cycle                          100000
 Ionization_cycles                          2
 Spectrum_cycles                            2
-Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                 ml93
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                 ml93
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
@@ -51,7 +51,7 @@ Wind.t.init                                40000
 Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters for Domain 1
-wind.mdot(msol/yr)                         1e-09
+Wind.mdot(msol/yr)                         1e-09
 SV.diskmin(units_of_rstar)                 4
 SV.diskmax(units_of_rstar)                 12
 SV.thetamin(deg)                           20
@@ -66,8 +66,8 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Central_object.rad_type_in_final_spectrum(bb,models,uniform)                    bb
-Disk.rad_type_in_final_spectrum(bb,models,uniform)                    bb
+Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                850

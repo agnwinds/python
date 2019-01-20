@@ -160,10 +160,8 @@ get_bl_and_agn_params (lstar)
   {
     geo.star_radiation = 0;     // 70b - AGN do not have a star at the center */
     geo.bl_radiation = 0;
-    //OLD geo.agn_radiation = 1;
     strcpy (answer, "yes");
-    geo.agn_radiation = rdchoice ("QSO_BH_radiation(yes,no)", "1,0", answer);
-    //OLD rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    geo.agn_radiation = rdchoice ("BH.radiation(yes,no)", "1,0", answer);
   }
   else
   {
@@ -179,7 +177,7 @@ get_bl_and_agn_params (lstar)
                 "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
                 //"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
-                "Rad_type_for_agn(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
+                "BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
 
   if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
   {
@@ -247,14 +245,14 @@ get_bl_and_agn_params (lstar)
        once the AGN blackbody temp is read in, otherwise set by user */
     if (geo.agn_ion_spectype != SPECTYPE_BB)
     {
-      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-      Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+      rddoub ("BH.lum(ergs/s)", &geo.lum_agn);
+      Log ("OK, the BH lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
     if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
     {
       geo.alpha_agn = (-1.5);
-      rddoub ("AGN.power_law_index", &geo.alpha_agn);
+      rddoub ("BH.power_law_index", &geo.alpha_agn);
 
       if (geo.alpha_agn == -1.0)        //deal with the pathological case
       {
@@ -264,7 +262,7 @@ get_bl_and_agn_params (lstar)
       {
         geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
       }
-      Log ("AGN Input parameters give a power law constant of %e\n", geo.const_agn);
+      Log ("BH Input parameters give a power law constant of %e\n", geo.const_agn);
     }
     else if (geo.agn_ion_spectype == SPECTYPE_BREM)
     {
@@ -282,9 +280,9 @@ get_bl_and_agn_params (lstar)
     else if (geo.agn_ion_spectype == SPECTYPE_BB)
     {
       /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
-      rddoub ("AGN.blackbody_temp(K)", &geo.alpha_agn);
+      rddoub ("BH.blackbody_temp(K)", &geo.alpha_agn);
       geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
-      Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+      Log ("OK, the BH/agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
@@ -292,10 +290,10 @@ get_bl_and_agn_params (lstar)
        default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-      rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub ("@BH.power_law_cutoff", &geo.pl_low_cutoff);
 
     strcpy (answer, "sphere");
-    geo.pl_geometry = rdchoice ("AGN.geometry_for_pl_source(sphere,lamp_post)", "0,1", answer);
+    geo.pl_geometry = rdchoice ("BH.geometry_for_pl_source(sphere,lamp_post)", "0,1", answer);
 
     //OLD rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
 

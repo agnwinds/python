@@ -349,55 +349,12 @@ rtheta_wind_complete (ndom, w)
 }
 
 
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   rtheta_volume(w) calculates the wind volume of a cylindrical cell
-//OLD   allowing for the fact that some cells
-//OLD
-//OLD  Arguments:
-//OLD   WindPtr w;    the entire wind
-//OLD  Returns:
-//OLD
-//OLD  Description:
-//OLD   This is a brute-froce integration of the volume
-//OLD
-//OLD   ksl--04aug--some of the machinations regarding what to to at the
-//OLD   edge of the wind seem bizarre, like a substiture for figuring out
-//OLD   what one actually should be doing.  However, volume > 0 is used
-//OLD   for making certain choices in the existing code, and so one does
-//OLD   need to be careful.  The existing code does not accurately calcuate
-//OLD   the volume in the sense that it does not weight accroding to rho!
-//OLD
-//OLD  Notes:
-//OLD   Where_in grid does not tell you whether the photon is in the wind or not.
-//OLD  History:
-//OLD   04aug   ksl     52a -- Moved from wind2d
-//OLD   05apr   ksl     55d -- Modified to include the determination of whether
-//OLD                   a cell was completely in the wind or not.  This
-//OLD                   functionality had been in define_wind.
-//OLD   06nov   ksl     58b -- Minor modification to use defined variables
-//OLD                   W_ALL_INWIND, etc. instead of hardcoded vlues
-//OLD   03apr   ksl     68c -- Added robust check of whether a cell was
-//OLD                   in the wind or not to speed up the volume
-//OLD                   calculation (and allow one to use a high resolution
-//OLD                   for the numerical integration when a cell is
-//OLD                   partially in the wind
-//OLD   11aug   ksl     70b -- Added possibility of finding the volumes
-//OLD                   in multiple components. See python.h for discussion
-//OLD                   of the relationship betwedn PART and LLL
-//OLD
-//OLD
-//OLD **************************************************************/
 #define RESOLUTION   1000
-
-
 
 
 /**********************************************************/
 /**
- * @brief      rtheta_volume(w) calculates the wind volume of a cell in rtheta coordinate sysem
+ * @brief      calculates the wind volume of a cell in rtheta coordinate sysem
  * 	allowing for the fact that some cells may not be in the active wind region
  *
  * @param [in] int  ndom   The domain of interest
@@ -406,12 +363,6 @@ rtheta_wind_complete (ndom, w)
  *
  * @details
  *
- * 	ksl--04aug--some of the machinations regarding what to to at the
- * 	edge of the wind seem bizarre, like a substiture for figuring out
- * 	what one actually should be doing.  However, volume > 0 is used
- * 	for making certain choices in the existing code, and so one does
- * 	need to be careful.  The existing code does not accurately calcuate
- * 	the volume in the sense that it does not weight accroding to rho!
  *
  * ### Notes ###
  *
@@ -420,7 +371,6 @@ rtheta_wind_complete (ndom, w)
  *
  * In calculating volumes we allow for the fact that a cell
  * exists above and below the plane of the disk
- *
  *
  *
  **********************************************************/
@@ -542,24 +492,6 @@ rtheta_volumes (ndom, w)
 
 
       }
-//OLD     /* JM/ksl 1711 -- the following two if statements are for if the inwind values are
-//OLD        already assigned, for example by an imported model */
-//OLD     /* need to zero volumes for cells not in the wind */
-//OLD
-//OLD     /* the logic is pretty awkward.  It seems as if we already knew a cell was in or ou
-//OLD      * of the wind, then we should put these at the top rather than at the bottom of the
-//OLD      * loop, here and in cylindrical_volummes
-//OLD      */
-//OLD
-//OLD     else if (w[n].inwind == W_NOT_INWIND)
-//OLD       {
-//OLD         w[n].vol = 0.0;
-//OLD       }
-//OLD
-//OLD     else if (w[n].inwind == W_ALL_INWIND)
-//OLD       {
-//OLD         w[n].vol = cell_volume;
-//OLD       }
 
     }
   }
@@ -569,42 +501,6 @@ rtheta_volumes (ndom, w)
 
 
 
-//OLD /***********************************************************
-//OLD                      Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   rtheta_where_in_grid locates the grid position of the vector,
-//OLD   when one is using rtheta coordinates.
-//OLD
-//OLD  Arguments:
-//OLD   double x[];
-//OLD  Returns:
-//OLD   where_in_grid normally  returns the cell number associated with
-//OLD           a position.  If the position is in the grid this will be a positive
-//OLD           integer < NDIM*MDIM.
-//OLD   x is inside the grid        -1
-//OLD   x is outside the grid       -2
-//OLD  Description:
-//OLD
-//OLD
-//OLD  Notes:
-//OLD   Where_in grid does not tell you whether the x is in the wind or not.
-//OLD
-//OLD   What one means by inside or outside the grid may well be different
-//OLD   for different coordinate systems.
-//OLD
-//OLD
-//OLD
-//OLD  History:
-//OLD   04aug   ksl     52a -- Adapted from the same routine for cylindrical
-//OLD                   systems.
-//OLD           13sep   nsh     76b -- Changed calls to fraction to take account of
-//OLD                   new modes.
-//OLD   15aug   ksl     Added domains.
-//OLD
-//OLD **************************************************************/
-
-
 
 
 /**********************************************************/
@@ -612,20 +508,19 @@ rtheta_volumes (ndom, w)
  * @brief      locates the grid position of the vector,
  * 	when one is using rtheta coordinates.
  *
- * @param [in, out] int  ndom   The domain of interest
- * @param [in, out] double  x[]   A three-vector defining a position
+ * @param [in] int  ndom   The domain of interest
+ * @param [in] double  x[]   A three-vector defining a position
  * @return     Returns the cell number associated with
  *  		a position. If x is inside the grid, the routine
  *  		returns -1, if outside -2
  *
  * @details
- * ??? DESCRIPTION ???
  *
  * ### Notes ###
  * Where_in grid does not tell you whether the x is in the wind or not.
  *
- * 	What one means by inside or outside the grid may well be different
- * 	for different coordinate systems.
+ * What one means by inside or outside the grid may well be different
+ * for different coordinate systems.
  *
  **********************************************************/
 
@@ -668,46 +563,25 @@ rtheta_where_in_grid (ndom, x)
   return (n);
 }
 
-//OLD /***********************************************************
-//OLD                      Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   rtheta_get_random_location
-//OLD
-//OLD  Arguments:
-//OLD   int n -- Cell in which random poition is to be generated
-//OLD  Returns:
-//OLD   double x -- the position
-//OLD  Description:
-//OLD
-//OLD
-//OLD  Notes:
-//OLD
-//OLD
-//OLD
-//OLD  History:
-//OLD   04aug   ksl     52a -- Moved from where_in_wind as incorporated
-//OLD                   multiple coordinate systems
-//OLD   11aug   ksl     70b - Modifications to incoporate multiple
-//OLD                   components
-//OLD   15aug   ksl     Allow for mulitple domains
-//OLD
-//OLD **************************************************************/
-
 
 /**********************************************************/
 /**
- * @brief
+ * @brief  generate a position in cell that is in the wind.
  *
- * @param [in, out] int  n   -- Cell in which random poition is to be generated
- * @param [in, out] double  x[]   ???
- * @return     double x -- the position
+ * @param [in] int  n   Cell in which random poition is to be generated
+ * @param [out] double  x[]   The position that was randomly genrated in the cell
+ * @return     An integer indicated whether 
+ * whether this position is above or below the midplane
  *
  * @details
- * ??? DESCRIPTION ???
+ *
+ * The routine generates a position that is in the cell and in the wind.
+ *
  *
  * ### Notes ###
- * ??? NOTES ???
+ *
+ * There is no check in the routine to see if there is any volume in the
+ * wind, so one could get stuck here if there is no wind volume in the cell
  *
  **********************************************************/
 
@@ -737,14 +611,11 @@ rtheta_get_random_location (n, x)
   while (inwind != W_ALL_INWIND)
   {
     r = sqrt (rmin * rmin +
-//            (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin)); DONE
               random_number (0.0, 1.0) * (rmax * rmax - rmin * rmin));
 
-//      theta = asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin)); DONE
     theta = asin (sthetamin + random_number (0.0, 1.0) * (sthetamax - sthetamin));
 
 
-//      phi = 2. * PI * (rand () / MAXRAND); DONE
     phi = 2. * PI * random_number (0.0, 1.0);
 
 /* Project from r, theta phi to x y z  */
@@ -756,7 +627,6 @@ rtheta_get_random_location (n, x)
                                                    because the boundaries of the wind split the grid cell */
   }
 
-//  zz = rand () / MAXRAND - 0.5;       //positions above are all at +z distances DONE
   zz = random_number (-1.0, 1.0);       //positions above are all at +z distances
 
 
@@ -769,43 +639,6 @@ rtheta_get_random_location (n, x)
 
 
 
-//OLD /***********************************************************
-//OLD                      Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   rtheta_extend_density  extends the density to
-//OLD   regions just outside the wind regiions so that
-//OLD   extrapolations of density can be made there
-//OLD
-//OLD  Arguments:
-//OLD  Returns:
-//OLD  Description:
-//OLD
-//OLD
-//OLD  Notes:
-//OLD       Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
-//OLD      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-//OLD      cell that is just inside (or outside) the wind.
-//OLD
-//OLD      SS asked whether we should also be extending the wind for other parameters, especially ne.  At present we do not interpolate
-//OLD      on ne so this is not necessary.  If we did do that it would be required.
-//OLD
-//OLD      In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
-//OLD      In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
-//OLD      from the z axis), and then in r.
-//OLD      In spherical coordinates, the grid increases as one might expect in r..
-//OLD      *
-//OLD      06may      ksl     57+ -- Trying simply to use mappings to extend the grid in density space.  The
-//OLD      danger is that we will do other things, e.g update some of the wrong parameters.
-//OLD
-//OLD
-//OLD
-//OLD
-//OLD  History:
-//OLD   05apr   ksl     56 -- Moved functionality from wind updates
-//OLD
-//OLD **************************************************************/
-
 
 
 /**********************************************************/
@@ -814,28 +647,26 @@ rtheta_get_random_location (n, x)
  * 	regions just outside the wind regiions so that
  * 	extrapolations of density can be made there
  *
- * @param [in, out] int  ndom   ???
- * @param [in, out] WindPtr  w   ???
- * @return     ??? RETURNS ???
+ * @param [in] int  ndom   The domain for which the density needs to be extraplaoted
+ * @param [out] WindPtr  w   The entire wind
+ * @return     Always return zero
  *
  * @details
- * ??? DESCRIPTION ???
+ * For a specific domain, this routine extrapolates denisties just outside the wind in the x and z directions.
  *
  * ### Notes ###
- * Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
- *      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
- *      cell that is just inside (or outside) the wind.
  *
- *      SS asked whether we should also be extending the wind for other parameters, especially ne.  At present we do not interpolate
- *      on ne so this is not necessary.  If we did do that it would be required.
+ * Aall that is done here is to assign a plasma cell to wind cells that lie just outside the boundary of the
+ * wind.   This is needed in order to ease the interpolation of  densities at positions close to the 
+ * edge of the wind.
  *
- *      In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
- *      In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
- *      from the z axis), and then in r.
- *      In spherical coordinates, the grid increases as one might expect in r..
- *      *
- *      06may      ksl     57+ -- Trying simply to use mappings to extend the grid in density space.  The
- *      danger is that we will do other things, e.g update some of the wrong parameters.
+ * In principle, therefore all of the variables are accessible.  In practice, the only variables that are 
+ * used are ion densites 
+ *
+ * Note that problems could arise if one incremented something in the Plasma Ptr
+ * based on a windcell that is not in the wind for a specific domain
+ *
+ *      
  *
  **********************************************************/
 
