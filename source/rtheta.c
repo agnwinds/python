@@ -23,7 +23,7 @@
 /**********************************************************/
 /**
  * @brief      calculates the distance to the far
- *         boundary of the cell in which the photon bundle resides.
+ * boundary of the cell in which the photon bundle resides.
  *
  * @param [in] int  ndom   The domain in which the photon bundle is though to exist
  * @param [in, out] PhotPtr  p   Photon pointer
@@ -32,10 +32,13 @@
  * 	regarded as errors.
  *
  * @details
- * ??? DESCRIPTION ???
  *
- * ### Notes ###
- * ??? NOTES ???
+ * The routine solves the quadratic equations that are needed
+ * to find the distance to the far edge of the cell in rtheta
+ * coordinates.
+ *
+ * A rthedta cell is defined by two radii and two cones.
+ *
  *
  **********************************************************/
 
@@ -49,7 +52,6 @@ rtheta_ds_in_cell (ndom, p)
 
   int n, ix, iz;
   double s, smax;
-
 
 
   /* Check that that the photon is in the domain it is supposed to be
@@ -610,8 +612,7 @@ rtheta_get_random_location (n, x)
   inwind = W_NOT_INWIND;
   while (inwind != W_ALL_INWIND)
   {
-    r = sqrt (rmin * rmin +
-              random_number (0.0, 1.0) * (rmax * rmax - rmin * rmin));
+    r = sqrt (rmin * rmin + random_number (0.0, 1.0) * (rmax * rmax - rmin * rmin));
 
     theta = asin (sthetamin + random_number (0.0, 1.0) * (sthetamax - sthetamin));
 

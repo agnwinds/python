@@ -1,39 +1,21 @@
 
 
+/***********************************************************/
+/** @file   rdpar_init.c
+ * @author  ksl
+ * @date   January, 2019
+ * @brief  Routines for setting up choices for a rdchoice 
+ * command in the situation where only some of the options
+ * that are potentially available are actually made available
+ *
+ * The routines are currently only used in connection with
+ * choosing what type of spectra (bb, power law, etc) to be
+ * used for different sources (e.g the disk, the central object).
+ *
+ * In principle, one could use the mechanisms here to make
+ * sure that a rdchoice command was set up properly.  
+***********************************************************/
 
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:
-
-  Description:
-
-  Arguments:  (Input via .pf file)
-
-
-  Returns:
-
-  Notes:
-
-  This is roughly what the Makefile should look like. Uncomment the mv
-  statement to store binary in ~/bin
-
-CC = gcc
-CFLAGS = -c -g -I$$HOME/include -Wall
-LDFLAGS= -L$$HOME/lib -lm -lkpar
-BIN = $$HOME/bin
-
-simple: simple.o
-	gcc simple.o  $(LDFLAGS) -o simple
-#	mv $@ $(BIN)
-
-
-
-  History:
-2004	ksl	Coded as better.c
-
- ************************************************************************/
 
 #include <stdio.h>
 #include <strings.h>
@@ -68,6 +50,34 @@ simple: simple.o
 
 int xinit_choices = 0;
 
+
+/**********************************************************/
+/**
+ * @brief   initilize a structure that provides a connection
+ * between the string names for an input accessed by rdchoice
+ * to an integer.
+*
+ * @return Alwsys returns 0
+ *
+ *
+ * @details     
+ *
+ * This routine is associated with reading data in via the rdchoice
+ * commaind, which lets the user type in a string to specify an
+ * option in the program.  The structue contains all of the 
+ * possible rdchoice options for a given command.
+ *
+ *
+ * ### Notes ###
+ * 
+ * Currently, one one structure is intialized, one which is 
+ * associated with spectral types.
+ *
+ * However, it would be straightforward to add additional
+ * structures for different rdchoice variables, by adding 
+ * addional structures.
+ *
+**********************************************************/
 int
 init_choices ()
 {
@@ -99,21 +109,59 @@ init_choices ()
   xinit_choices = 1;
 
 
-  //OLD printf ("Verify %s\n", zz_spec.choices[1]);
-
-
   return (0);
 }
 
 
+
+/**********************************************************/
+/**
+ * @brief   construct a string that contains the allowed set
+ * of choices posed in a rdchoice command
+ * @param  [in] char *question  A string containing the question
+ * @param  [out] char *choices  The choices that correspond to the 
+ * options in the question
+ * @param  struct rdpar_choices *qstruct  The structure that contains
+ * the full set of choices
+*
+ * @return Always returns 0
+ * 
+ *
+ * @details     
+ *
+ * This routine is general, but was implemented specifically to deal
+ * with spectral types, where the spectral choices for the disk may
+ * be different from those for a BH as a central object.
+ *
+ * A typical question to be parsed will be of the form: 
+ *
+ * disk.spec_type(bb,models)
+ *
+ * wheres there are other types of spectra, power, brems, that 
+ * Python can produce.
+ *
+ * This routine reads the quesion, and returns a string that
+ * contains the numbers that correspond to the choices bb, and models
+ *
+ * Following this, rdchoice can be called with the allowed choices.
+ *
+ *
+ * ### Notes ###
+ *
+ * This routine does not do any kind of minimum match.  The choices,
+ * items within the parenthese must exactly match those in the
+ * structure.
+ *
+ * Init_choices must have been called, prior to get_choices.   
+ * If not, Python exits with an error.
+ * 
+**********************************************************/
 int
 get_choices (question, choices, qstruct)
      char *question;
      char *choices;
      struct rdpar_choices *qstruct;
 {
-  //char *xchoices[] = {"bb", "uniform", "power", "cloudy", "brems", "none", "model"};
-  // int xvals      [] = {SPECTYPE_BB, SPECTYPE_UNIFORM, SPECTYPE_POW, SPECTYPE_CL_TAB, SPECTYPE_BREM, SPECTYPE_NONE, SPECTYPE_MODEL};
   int num_choices = 7;
 
 
@@ -125,7 +173,7 @@ get_choices (question, choices, qstruct)
 
   if (xinit_choices == 0)
   {
-    Error ("init_choices needs to have been called before get_choices.  Programming error\n");
+    Error ("get_choices: init_choices needs to have been called before get_choices.  Programming error\n");
     exit (0);
   }
 
@@ -154,18 +202,9 @@ get_choices (question, choices, qstruct)
 
 
   snprintf (dummy, nstop - nstart, "%s", &question[nstart + 1]);
-  //OLDprintf ("dummy2 %s\n", dummy);
-
-  //OLD strcpy (dummy, " ");
-  //OLD  strncpy (dummy, &question[nstart + 1], nstop - nstart - 1);
-
-  //OLD printf ("question %s\n", question);
-  //OLD printf ("dummy %d %d %lu %s\n", nstart, nstop, strlen (question), dummy);
-
 
   strcpy (dummy, " ");
   strcpy (dummy, question);
-  //OLD printf ("question %s\n", dummy);
   int ncommas = 0;
   int nparen = 0;
   int i = 0;
@@ -188,20 +227,14 @@ get_choices (question, choices, qstruct)
       dummy[i] = ' ';
     }
   }
-  //OLD printf ("question %s\n", dummy);
 
   cur_num = sscanf (dummy, "%*s %s %s %s %s %s %s %s %s %s %s",
                     cur_choices[0], cur_choices[1],
                     cur_choices[2], cur_choices[3],
                     cur_choices[4], cur_choices[5], cur_choices[6], cur_choices[7], cur_choices[8], cur_choices[9]);
 
-  //OLD printf ("The current number of choices is %d\n", cur_num);
 
   /* Now we have to find out the values associated with these choices */
-  //OLD printf ("Test1 %s\n", qstruct->choices[1]);
-  //OLD printf ("Test2 %d\n", qstruct->vals[1]);
-  //OLD printf ("Test3 %s\n", zz_spec.choices[1]);
-  //OLD printf ("Test4 %d\n", zz_spec.vals[1]);
 
 
   for (i = 0; i < cur_num; i++)
@@ -210,14 +243,13 @@ get_choices (question, choices, qstruct)
     {
       if (strncmp (cur_choices[i], qstruct->choices[j], strlen (qstruct->choices[j])) == 0)
       {
-        //OLD printf ("gotcha  %s  s %d\n", qstruct->choices[j], qstruct->vals[j]);
         cur_values[i] = qstruct->vals[j];
         break;
       }
       if (j == num_choices)
       {
-        Error ("Did not match %s\n", cur_choices[i]);
-        Error ("This is a programming error\n");
+        Error ("get_choices: No  match for %s\n", cur_choices[i]);
+        Error ("get_choices: This is a programming error\n");
         exit (0);
       }
     }
@@ -233,13 +265,7 @@ get_choices (question, choices, qstruct)
     sprintf (cur_string, "%s,%d", cur_string, cur_values[i]);
   }
 
-  //OLD printf ("The new string is %s\n", cur_string);
   strcpy (choices, cur_string);
-
-
-
-
-
 
   return (0);
 }
