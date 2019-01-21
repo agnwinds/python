@@ -1,43 +1,31 @@
-System_type(star,binary,agn,previous)                    star
+System_type(star,binary,agn,previous)                 star
 
 ### Parameters for the Central Object
 Central_object.mass(msol)                  0.8
 Central_object.radius(cm)                  7e8
-Central_object.radiation(yes,no)                    yes
-Central_object.rad_type_to_make_wind(bb,models)                    bb
+Central_object.radiation(yes,no)                  yes
+Central_object.rad_type_to_make_wind(bb,models)                   bb
 Central_object.temp                        40000
 
 ### Parameters for the Disk (if there is one)
-Disk.type(none,flat,vertically.extended)                    flat
-Disk.radiation(yes,no)                            yes
-Disk.rad_type_to_make_wind(bb,models)                    bb
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Disk.temperature.profile(standard,readin,yso) replace answer 0 in 0,1,2 with its string equivalent
-Disk.temperature.profile(standard,readin,yso)                    standard
+Disk.type(none,flat,vertically.extended)                 flat
+Disk.radiation(yes,no)                          yes
+Disk.rad_type_to_make_wind(bb,models)                   bb
+Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         1e-8
 Disk.radmax(cm)                            2.38e10
 
 ### Parameters for BL or AGN
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Boundary_layer.radiation(yes,no) replace answer 1 in 1,0 with its string equivalent
-Boundary_layer.radiation(yes,no)                    yes
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Boundary_layer.rad_type_to_make_wind(bb,models,power) replace answer 0 in -1,-99,-4 with its string equivalent
-Boundary_layer.rad_type_to_make_wind(bb,models,power)                    bb
+Boundary_layer.radiation(yes,no)                  yes
+Boundary_layer.rad_type_to_make_wind(bb,models,power)                   bb
 Boundary_layer.luminosity(ergs/s)          0
 Boundary_layer.temp(K)                     10000
 
 ### Parameters descibing the various winds or coronae in the system
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Wind.radiation(yes,no) replace answer 0 in 1,0 with its string equivalent
-Wind.radiation(yes,no)                            no
+Wind.radiation(yes,no)                           no
 Wind.number_of_components                  1
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported) replace answer 0 in 0,1,3,4,5,6,7,9,10 with its string equivalent
-Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                    sv
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Wind.coord_system(spherical,cylindrical,polar,cyl_var) replace answer 1 in 0,1,2,3 with its string equivalent
-Wind.coord_system(spherical,cylindrical,polar,cyl_var)                    cylindrical
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
+Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               5
 Wind.dim.in.z_or_theta.direction           5
 
@@ -45,16 +33,10 @@ Wind.dim.in.z_or_theta.direction           5
 Photons_per_cycle                          10000
 Ionization_cycles                          1
 Spectrum_cycles                            100
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow) replace answer 3 in 0,3,1,4,2,8,9 with its string equivalent
-Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                    ml93
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping) replace answer 3 in 0,1,2,3,5,6,7 with its string equivalent
-Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)                    escape_prob
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                 ml93
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad) replace answer 0 in 1,0,2 with its string equivalent
-Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)                    absorb
+Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
 
 ### Parameters for Domain 0
@@ -69,16 +51,12 @@ SV.acceleration_length(cm)                 7e10
 SV.acceleration_exponent                   1.5
 Wind.radmax(cm)                            1e12
 Wind.t.init                                40000
-Wind.filling_factor(01=smooth,<1=clumped)   1
-0
-### Parameters defin0ing the spectra seen by observers
+Wind.filling_factor(1=smooth,<1=clumped)   1
 
+### Parameters defining the spectra seen by observers
 
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Central_object.rad_type_in_final_spectrum(bb,models,uniform) replace answer 0 in -1,-99,-2 with its string equivalent
-Central_object.rad_type_in_final_spectrum(bb,models,uniform)                    bb
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Disk.rad_type_in_final_spectrum(bb,models,uniform) replace answer 0 in -1,-99,-2 with its string equivalent
-Disk.rad_type_in_final_spectrum(bb,models,uniform)                    bb
+Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                4000
@@ -96,19 +74,11 @@ Spectrum.angle(0=pole)                     40
 Spectrum.angle(0=pole)                     50
 Spectrum.angle(0=pole)                     60
 Spectrum.angle(0=pole)                     80
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Spectrum.live_or_die(live.or.die,extract) replace answer 1 in 0,1 with its string equivalent
-Spectrum.live_or_die(live.or.die,extract)                    extract
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Spectrum.type(flambda,fnu,basic) replace answer 1 in 1,2,3 with its string equivalent
-Spectrum.type(flambda,fnu,basic)                    flambda
+Spectrum.live_or_die(live.or.die,extract)              extract
+Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Reverb.type(none,photon,wind,matom) replace answer 0 in 0,1,2,3 with its string equivalent
-Reverb.type(none,photon,wind,matom)                    none
+Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
-
-### Deprecated use of rdchoice. NO ERROR CHECKS! For Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic) replace answer 2 in 0,2,3,7,1,4,5,6,8 with its string equivalent
-Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                    cv
+Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv
