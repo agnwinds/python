@@ -223,11 +223,12 @@ get_atomic_data (masterfile)
      char masterfile[];
 {
 
-  FILE *fopen (), *fptr, *mptr;
-  //*vptr;
-  char *fgets (), aline[LINELENGTH];
+  FILE *fptr, *mptr;  //, fopen ();
+  char aline[LINELENGTH];  //, *fgets ();
 
-  char file[LINELENGTH];
+  char *py_dir;
+  char masterfile_path[LINELENGTH];
+  char file[LINELENGTH], atomic_file[LINELENGTH];
 
   char word[LINELENGTH];
   int n, m, i, j;
@@ -251,7 +252,7 @@ get_atomic_data (masterfile)
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
-  int index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
+  // int index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
   int nwords;
   int nlte, nmax;
   int mflag;                    //flag to identify reading data for macro atoms
@@ -260,7 +261,7 @@ get_atomic_data (masterfile)
   char configname[15];
   double e, rl;
   double xe[NCROSS], xx[NCROSS];
-  double a21 ();
+  // double a21 ();
   int nlines_simple;
   int nspline;
   double tmin;
@@ -609,14 +610,28 @@ structure does not have this property! */
 
   /* OK now we can try to read in the data from the data files */
 
-  if ((mptr = fopen (masterfile, "r")) == NULL)
+  py_dir = getenv ("PYTHON");
+  if (py_dir[strlen (py_dir) - 1] != '/')
+    strcat (py_dir, "/");
+ 
+  strcpy (masterfile_path, py_dir);
+  strcat (masterfile_path, masterfile);
+
+  if ((mptr = fopen (masterfile_path, "r")) == NULL)
   {
-    Error ("Get_atomic_data:  Could not open masterfile %s\n", masterfile);
-    Exit (0);
+    Error ("Get_atomic_data:  Could not open masterfile %s\n", masterfile_path);
+    if ((mptr = fopen (masterfile, "r")) == NULL)
+    {
+      Error ("Get_atomic_data: Could not open masterfile %s either\n",
+             masterfile);
+      exit (1);
+    }
+    Log ("Get_atomicdata: reading from masterfile %s in current directory\n",
+         masterfile);
   }
   else
   {
-    Log ("Get_atomicdata: Reading from masterfile %s\n", masterfile);
+    Log ("Get_atomicdata: Reading from masterfile %s\n", masterfile_path);
   }
 
 /* Open and read each line in the masterfile in turn */
@@ -628,14 +643,22 @@ structure does not have this property! */
 
       /* Open one of the files designated in the masterfile and begin to read it */
 
-      if ((fptr = fopen (file, "r")) == NULL)
+      strcpy (atomic_file, py_dir);
+      strcat (atomic_file, file);
+
+      if ((fptr = fopen (atomic_file, "r")) == NULL)
       {
-        Error ("Get_atomic_data:  Could not open %s\n", file);
-        Exit (0);
+        Error ("Get_atomic_data:  Could not open %s\n", atomic_file);
+        if ((fptr = fopen (file, "r")) == NULL)
+        {
+          Error ("Get_atomicdata: Could not open %s\n", file);
+          exit (1);
+        }
+        Log_silent ("Get_atomic_data: Now reading data from %s\n", file);
       }
       else
       {
-        Log_silent ("Get_atomic_data: Now reading data from %s\n", file);
+        Log_silent ("Get_atomic_data: Now reading data from %s\n", atomic_file);
         lineno = 1;
       }
 

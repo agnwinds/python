@@ -112,6 +112,7 @@ add_executable(python
         source/xlog.c
         source/log.h
         source/get_models.c
+        source/setup_line_transfer.c
         )
 
 add_executable(py_wind
@@ -208,6 +209,7 @@ add_executable(py_wind
         source/py_wind_macro.c
         source/py_wind_sub.c
         source/py_wind_write.c
+        source/setup_line_transfer.c
         )
 
 add_executable(windsave2table
@@ -301,10 +303,11 @@ add_executable(windsave2table
         source/get_models.c
         source/windsave2table.c
         source/windsave2table_sub.c
+        source/setup_line_transfer.c
         )
 
 # Include external libs
 find_package(GSL REQUIRED)
-target_link_libraries(python GSL::gsl GSL::gslcblas)
-target_link_libraries(py_wind GSL::gsl GSL::gslcblas)
-target_link_libraries(windsave2table GSL::gsl GSL::gslcblas)
+target_link_libraries(python GSL::gsl GSL::gslcblas m)
+target_link_libraries(py_wind GSL::gsl GSL::gslcblas m)
+target_link_libraries(windsave2table GSL::gsl GSL::gslcblas m)
