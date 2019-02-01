@@ -324,13 +324,18 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, f
         #     p.ylim(lims[1][0], lims[1][1])
 
         if axes == "log":
-             # log axes
+            # log axes
             p.loglog()
             p.loglog()
 
-        p.xlim(1e16,1e20)
-        p.ylim(1e16,1e20)
+        # Figure out the "best" values for the lower and upper limits
+        lower_lim = x[0][0] if x[0][0] != 0 else x[1][0]
+        upper_lim = x[-1][0]
 
+        p.xlim(lower_lim, upper_lim)
+        p.ylim(lower_lim, upper_lim)
+
+    p.tight_layout()
     p.savefig("%s_%s.png" % (fname_prefix, fname))
 
     return 0
