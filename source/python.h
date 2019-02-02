@@ -366,7 +366,6 @@ struct geometry
   double tstar_init;            /* The temperature of the star, before backscattering is taken into account */
   double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
 
-//OLD  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 

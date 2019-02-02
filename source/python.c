@@ -516,6 +516,7 @@ main (argc, argv)
 
       if (geo.run_type == RUN_TYPE_NEW)
       {
+        geo.ndomain = 1;
         rdint ("Wind.number_of_components", &geo.ndomain);
 
 

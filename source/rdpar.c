@@ -1217,7 +1217,7 @@ string2int (word, string_choices, string_values, string_answer)
     }
   }
 
-  /* Perform a minimum match on the anser */
+  /* Perform a minimum match on the answer */
 
   matched = 0;
   ivalue = -9998;
@@ -1365,7 +1365,10 @@ rdchoice (question, answers, answer)
     }
   }
 
-  fprintf (rdout_ptr, "%-30s %20s\n", question, full_answer);
+  if (query != OLD)
+  {
+    fprintf (rdout_ptr, "%-30s %20s\n", question, full_answer);
+  }
   strcpy (answer, string_answer);
   rdpar_choice = 0;
   return (ianswer);
