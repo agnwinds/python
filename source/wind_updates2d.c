@@ -106,7 +106,7 @@ WindPtr (w);
    * size must must be increased.
    */
 
-  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 115) * (floor (NPLASMA / np_mpi_global) + 1);
+  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 118) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -411,6 +411,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].dmo_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].dp_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 //OLD        MPI_Pack (&plasmamain[n].npdf, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 //OLD        MPI_Pack (plasmamain[n].pdf_x, LPDF, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 //OLD        MPI_Pack (plasmamain[n].pdf_y, LPDF, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -551,6 +552,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dp_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
 //OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].npdf, 1, MPI_INT, MPI_COMM_WORLD);
 //OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].pdf_x, LPDF, MPI_INT, MPI_COMM_WORLD);
 //OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].pdf_y, LPDF, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -913,6 +915,9 @@ WindPtr (w);
       agn_ip /= (w[n].r * w[n].r);
       agn_ip /= plasmamain[nshell].rho * rho2nh;
       /* Report luminosities, IP and other diagnositic quantities */
+		printf ("BLAH dmo_dt r %e phi %e \n",sqrt(plasmamain[nshell].dmo_dt[0]*plasmamain[nshell].dmo_dt[0]+plasmamain[nshell].dmo_dt[2]*plasmamain[nshell].dmo_dt[2]),plasmamain[nshell].dmo_dt[1]);
+		printf ("BLAH dp_dt r %e phi %e \n",sqrt(plasmamain[nshell].dp_dt[0]*plasmamain[nshell].dp_dt[0]+plasmamain[nshell].dp_dt[2]*plasmamain[nshell].dp_dt[2]),plasmamain[nshell].dp_dt[1]);
+		
       Log
         ("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Measured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
          geo.lum_agn, plasmamain[nshell].t_e,
@@ -1070,6 +1075,7 @@ wind_rad_init ()
 	
 	
 	for (i=0;i<3;i++) plasmamain[n].dmo_dt[i]=0.0; //Zero the radiation force calculation
+	for (i=0;i<3;i++) plasmamain[n].dp_dt[i]=0.0; //Zero the radiation force calculation
 
     if (geo.rt_mode == RT_MODE_MACRO)
       macromain[n].kpkt_rates_known = -1;

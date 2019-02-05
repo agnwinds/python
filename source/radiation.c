@@ -166,7 +166,7 @@ radiation (p, ds)
   double frac_tot_abs, frac_auger_abs, z_abs;
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
-  double density, ft, tau, tau2;
+  double density, ft, tau, tau2,tau_temp;
   double energy_abs;
   int n, nion;
   double q, x, z;
@@ -200,7 +200,7 @@ radiation (p, ds)
   
   /* compute the initial momentum of the photon */
   
-  stuff_v (p->lmn, p_in);  //Get the firection
+  stuff_v (p->lmn, p_in);  //Get the direction
   renorm (p_in, p->w / C);  //Renormalise to momentum
 
   /* Create phot, a photon at the position we are moving to 
@@ -432,20 +432,42 @@ radiation (p, ds)
   {                             /* Need differentiate between thick and thin cases */
     x = exp (-tau);
     energy_abs = w_in * (1. - x);
-    w_out = w_in * x;  //Use this temporarily for momentum change
 	 
   }
   else
   {
     tau2 = tau * tau;
     energy_abs = w_in * (tau - 0.5 * tau2);
-    w_out = w_in * (1. - tau + 0.5 * tau2);      //Use this temporarily for momentum change
 	 
   }
   
   
   /*Try to compute change in momentum - include compton scattering at this point */
    
+  tau_temp=(frac_comp+frac_ind_comp)*ds;
+  
+  if (sane_check (tau_temp))
+  {
+    Error ("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n", frac_ff, frac_comp, frac_ind_comp);
+  }
+/* Calculate the heating effect*/
+
+  if (tau_temp > 0.0001)
+  {                             /* Need differentiate between thick and thin cases */
+    x = exp (-tau_temp);
+    w_out = w_in * x;  //Use this temporarily for momentum change
+	 
+  }
+  else
+  {
+    tau2 = tau_temp * tau_temp;
+    w_out = w_in * (1. - tau_temp + 0.5 * tau2);      //Use this temporarily for momentum change
+	 
+  }
+	
+	
+	
+	
 
   stuff_v (p->lmn, p_out);
   renorm (p_out, w_out / C);
