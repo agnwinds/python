@@ -173,13 +173,14 @@ radiation (p, ds)
   double w_ave, w_in, w_out;
   double den_config ();
   int nconf;
+  double p_in[3], p_out[3], dp[3], dp_cyl[3]; //The initial and final momentum.
 //  double weight_of_packet, y;  //to do with augerion calcs, now deprecated
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot;
-  int ndom;
+  int ndom,i;
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
@@ -196,6 +197,11 @@ radiation (p, ds)
   /* calculate velocity at original position */
   vwind_xyz (ndom, p, v_inner); // get velocity vector at new pos
   v1 = dot (p->lmn, v_inner);   // get direction cosine
+  
+  /* compute the initial momentum of the photon */
+  
+  stuff_v (p->lmn, p_in);  //Get the firection
+  renorm (p_in, p->w / C);  //Renormalise to momentum
 
   /* Create phot, a photon at the position we are moving to 
    *  note that the actual movement of the photon gets done after 
@@ -426,12 +432,36 @@ radiation (p, ds)
   {                             /* Need differentiate between thick and thin cases */
     x = exp (-tau);
     energy_abs = w_in * (1. - x);
+    w_out = w_in * x;  //Use this temporarily for momentum change
+	 
   }
   else
   {
     tau2 = tau * tau;
     energy_abs = w_in * (tau - 0.5 * tau2);
+    w_out = w_in * (1. - tau + 0.5 * tau2);      //Use this temporarily for momentum change
+	 
   }
+  
+  
+  /*Try to compute change in momentum - include compton scattering at this point */
+   
+
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, w_out / C);
+  vsub (p_out, p_in, dp); //compute change in momentum
+  
+
+  project_from_xyz_cyl (p->x, dp, dp_cyl);
+  
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->dp_dt[i] += dp_cyl[i];
+  }
+  
+  
 
   /* Calculate the reduction in weight - compton scattering is not included, it is now included at scattering
      however induced compton heating is not implemented at scattering, so it should remain here for the time being
@@ -1276,6 +1306,7 @@ mean_intensity (xplasma, freq, mode)
   double expo;
 
   J = 0.0;                      // Avoid 03 error
+
 
 
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)    /*If we are using power law ionization, use PL estimators */
