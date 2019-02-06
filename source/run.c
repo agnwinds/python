@@ -144,9 +144,9 @@ calculate_ionization (restart_stat)
   while (geo.wcycle < geo.wcycles)
   {                             /* This allows you to build up photons in bunches */
 
-    xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK", geo.wcycle, geo.wcycles);
+    xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK", geo.wcycle + 1, geo.wcycles);
 
-    Log ("!!Python: Beginning cycle %d of %d for defining wind\n", geo.wcycle, geo.wcycles);
+    Log ("!!Python: Beginning cycle %d of %d for defining wind\n", geo.wcycle + 1, geo.wcycles);
     Log_flush ();               /* Flush the log file (so that we know where are if there are problems */
 
     /* Initialize all of the arrays, etc, that need initialization for each cycle
@@ -364,7 +364,7 @@ calculate_ionization (restart_stat)
     wind_update (w);
 
 
-    Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle, timer ());
+    Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle + 1, timer ());
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 
@@ -402,7 +402,7 @@ calculate_ionization (restart_stat)
     /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
 
-    xsignal (files.root, "%-20s Finished %d of %d ionization cycle \n", "OK", geo.wcycle, geo.wcycles);
+    xsignal (files.root, "%-20s Finished %d of %d ionization cycle \n", "OK", geo.wcycle + 1, geo.wcycles);
     geo.wcycle++;               //Increment ionisation cycles
 
 
@@ -579,11 +579,11 @@ make_spectra (restart_stat)
   while (geo.pcycle < geo.pcycles)
   {                             /* This allows you to build up photons in bunches */
 
-    xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK", geo.pcycle, geo.pcycles);
+    xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK", geo.pcycle + 1, geo.pcycles);
 
 
 
-    Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle, geo.pcycles);
+    Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle + 1, geo.pcycles);
     Log_flush ();               /*NSH June 13 Added call to flush logfile */
     if (!geo.wind_radiation)
       iwind = -1;               /* Do not generate photons from wind */
@@ -652,11 +652,11 @@ make_spectra (restart_stat)
 #ifdef MPI_ON
     }
 #endif
-    Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n", geo.pcycle, timer ());
+    Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n", geo.pcycle + 1, timer ());
 
     /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
-    xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK", geo.pcycle, geo.pcycles);
+    xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK", geo.pcycle + 1, geo.pcycles);
 
     geo.pcycle++;               // Increment the spectral cycles
 
