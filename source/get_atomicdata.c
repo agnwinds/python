@@ -223,8 +223,8 @@ get_atomic_data (masterfile)
      char masterfile[];
 {
 
-  FILE *fptr, *mptr;  //, fopen ();
-  char aline[LINELENGTH];  //, *fgets ();
+  FILE *fptr, *mptr;            //, fopen ();
+  char aline[LINELENGTH];       //, *fgets ();
 
   char *py_dir;
   char masterfile_path[LINELENGTH];
@@ -610,28 +610,33 @@ structure does not have this property! */
 
   /* OK now we can try to read in the data from the data files */
 
+  /*
+   * If the PYTHON envrionment variable is set up correctly, we can construct
+   * an absolute path to the data directory instead of requiring to use
+   * Setup_Py_Dir to create a symbolic link to the data directory. If the data
+   * cannot be found with this path, then Python will fall back to the original
+   * method of searching via the symbolic link created by Setup_Py_Dir
+   */
+
   py_dir = getenv ("PYTHON");
   if (py_dir[strlen (py_dir) - 1] != '/')
     strcat (py_dir, "/");
- 
   strcpy (masterfile_path, py_dir);
   strcat (masterfile_path, masterfile);
 
   if ((mptr = fopen (masterfile_path, "r")) == NULL)
   {
-    Error ("Get_atomic_data:  Could not open masterfile %s\n", masterfile_path);
+    Error ("Get_atomic_data: Could not open masterfile %s\nSearching for data in current working directory\n", masterfile_path);
     if ((mptr = fopen (masterfile, "r")) == NULL)
     {
-      Error ("Get_atomic_data: Could not open masterfile %s either\n",
-             masterfile);
+      Error ("Get_atomic_data: Could not find masterfile %s in current directory\n", masterfile);
       exit (1);
     }
-    Log ("Get_atomicdata: reading from masterfile %s in current directory\n",
-         masterfile);
+    Log ("Get_atomic_data: reading from masterfile %s in current directory\n", masterfile);
   }
   else
   {
-    Log ("Get_atomicdata: Reading from masterfile %s\n", masterfile_path);
+    Log ("Get_atomic_data: Reading from masterfile %s\n", masterfile_path);
   }
 
 /* Open and read each line in the masterfile in turn */
@@ -641,24 +646,29 @@ structure does not have this property! */
     if (sscanf (aline, "%s", file) == 1 && file[0] != '#')
     {
 
-      /* Open one of the files designated in the masterfile and begin to read it */
+      /*
+       * Open one of the files designated in the masterfile and begin to read it
+       * Here, we are also constructing an absolute path using the PYTHON
+       * environment variable. If the data can't be read using this path, it will
+       * fall back to the normal method searching via the symbolic link data
+       */
 
       strcpy (atomic_file, py_dir);
       strcat (atomic_file, file);
 
       if ((fptr = fopen (atomic_file, "r")) == NULL)
       {
-        Error ("Get_atomic_data:  Could not open %s\n", atomic_file);
+        Error ("Get_atomic_data: Could not open %s\nSearching for data in current working directory\n", atomic_file);
         if ((fptr = fopen (file, "r")) == NULL)
         {
-          Error ("Get_atomicdata: Could not open %s\n", file);
+          Error ("Get_atomic_data: Could not open %s in current directory\n", file);
           exit (1);
         }
-        Log_silent ("Get_atomic_data: Now reading data from %s\n", file);
+        Log_silent ("Get_atomic_data: Reading data from %s\n", file);
       }
       else
       {
-        Log_silent ("Get_atomic_data: Now reading data from %s\n", atomic_file);
+        Log_silent ("Get_atomic_data: Reading data from %s\n", atomic_file);
         lineno = 1;
       }
 
