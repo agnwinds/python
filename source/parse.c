@@ -81,7 +81,7 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-t") == 0)
       {
-        if (i + 1 >= argc || (sscanf (argv[i + 1], "%lf", &time_max) != 1))
+        if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
         {
           Error ("python: Expected time after -t switch\n");
           exit (0);
@@ -94,7 +94,7 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-v") == 0)
       {
-        if (i + 1 >= argc || sscanf (argv[i + 1], "%d", &verbosity) != 1)
+        if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
         {
           Error ("python: Expected verbosity after -v switch\n");
           exit (0);
@@ -107,7 +107,7 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-e") == 0)
       {
-        if (i + 1 >= argc || sscanf (argv[i + 1], "%d", &max_errors) != 1)
+        if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
         {
           Error ("python: Expected max errors after -e switch\n");
           exit (0);
@@ -153,8 +153,9 @@ parse_command_line (argc, argv)
         Log ("Logarithmic photon stepping enabled\n");
         modes.photon_speedup = 1;
 
-        if (i + 1 >= argc || sscanf (argv[i + 1], "%i", &PHOT_STEPS) != 1)
+        if (sscanf (argv[i + 1], "%i", &PHOT_STEPS) != 1)
         {
+          Log ("n_steps not provided, will search .pf for min and max NPHOT\n");
           PHOT_STEPS = 0;
           i++;
         }
