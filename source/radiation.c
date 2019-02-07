@@ -444,7 +444,7 @@ radiation (p, ds)
   
   /*Try to compute change in momentum - include compton scattering at this point */
    
-  tau_temp=(frac_comp+frac_ind_comp)*ds;
+  tau_temp=(kappa_tot)*ds;
   
   if (sane_check (tau_temp))
   {
