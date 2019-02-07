@@ -90,11 +90,13 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
-
-int NPHOT;                      /* The number of photon bundles created.  defined in python.c */
+int PHOT_STEPS;                 /* The switch for turning on the photon increase algorithm */
+int NPHOT_MIN;                  /* The minimum number of photon bundles created per  */
+int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
+int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 int CURRENT_PHOT;               /* A diagnostic so that one can always determine what the current photon number being run is */
 
-#define NWAVE  			       10000    //Increasing from 4000 to 10000 (SS June 04)
+#define NWAVE  			  10000 //Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			500
 
 /* Define the structures */
@@ -1372,6 +1374,7 @@ struct advanced_modes
   int fixed_temp;               // do not alter temperature from that set in the parameter file
   int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
+  int photon_speedup;
 }
 modes;
 

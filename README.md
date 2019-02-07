@@ -1,7 +1,7 @@
 # Python
 
 Python is a (confusingly named) Monte Carlo radiative transfer code which uses the Sobolev approximation.
-It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews and Sam Mangham. 
+It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham and Edward Parkinson.
 The code has been used for a variety of research projects invovling the winds of cataclysmic variables, of young stellar 
 objects, and of AGN.
 

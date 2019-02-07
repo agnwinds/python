@@ -81,10 +81,10 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-t") == 0)
       {
-        if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
+        if (i + 1 >= argc || (sscanf (argv[i + 1], "%lf", &time_max) != 1))
         {
           Error ("python: Expected time after -t switch\n");
-          Exit (0);
+          exit (0);
         }
         set_max_time (files.root, time_max);
         i++;
@@ -94,10 +94,10 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-v") == 0)
       {
-        if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
+        if (i + 1 >= argc || sscanf (argv[i + 1], "%d", &verbosity) != 1)
         {
           Error ("python: Expected verbosity after -v switch\n");
-          Exit (0);
+          exit (0);
         }
         Log_set_verbosity (verbosity);
         i++;
@@ -107,10 +107,10 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-e") == 0)
       {
-        if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
+        if (i + 1 >= argc || sscanf (argv[i + 1], "%d", &max_errors) != 1)
         {
           Error ("python: Expected max errors after -e switch\n");
-          Exit (0);
+          exit (0);
         }
         Log_quit_after_n_errors (max_errors);
         i++;
@@ -148,6 +148,19 @@ parse_command_line (argc, argv)
         modes.quit_after_inputs = 1;
         j = i;
       }
+      else if (strcmp (argv[i], "-p") == 0)
+      {
+        Log ("Logarithmic photon stepping enabled\n");
+        modes.photon_speedup = 1;
+
+        if (i + 1 >= argc || sscanf (argv[i + 1], "%i", &PHOT_STEPS) != 1)
+        {
+          PHOT_STEPS = 0;
+          i++;
+        }
+        i++;
+        j = i;
+      }
       else if (strcmp (argv[i], "--dry-run") == 0)
       {
         modes.quit_after_inputs = 1;
@@ -163,7 +176,7 @@ parse_command_line (argc, argv)
         int git_diff_status = GIT_DIFF_STATUS;
         if (git_diff_status > 0)
           Log ("This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
-        Exit (0);
+        exit (0);
       }
 
       else if (strncmp (argv[i], "-", 1) == 0)
@@ -177,8 +190,8 @@ parse_command_line (argc, argv)
 
     if (j + 1 == argc)
     {
-      Error ("All of the command line has been consumed without specifying a parameter file name, so Exiting\n");
-      Exit (0);
+      Error ("All of the command line has been consumed without specifying a parameter file name, so exiting\n");
+      exit (0);
     }
 
 
@@ -232,7 +245,7 @@ help ()
 \n\
 This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (spherical) stellar wind \n\
 \n\
-Usage:  py [-h] [-r] [-t time_max] [-v n] [--dry-run] [-i] [--version] [--rseed]  xxx  or simply py \n\
+Usage:  py [-h] [-r] [-t time_max] [-v n] [--dry-run] [-i] [--version] [--rseed] [-p n_steps] xxx  or simply py \n\
 \n\
 where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
 \n\
@@ -254,12 +267,13 @@ and the switches have the following meanings \n\
 \n\
 Other switches exist but these are not intended for the general user.\n\
 These are largely diagnostic or for special cases. These include\n\
- -d            Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
-               Python will then query the user for information about what to do with a series of \n\
-               inputs beginning with @ \n\
- -e            Change the maximum number of errors before the progam will quit\n\
- -f            Invoke a fixed temperature mode, used for runs with Zeus \n\
- -z            Invoke a special mode for that causes Python to start with a run from Zeus\n\
+ -d             Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
+                Python will then query the user for information about what to do with a series of \n\
+                inputs beginning with @ \n\
+ -e             Change the maximum number of errors before the progam will quit\n\
+ -f             Invoke a fixed temperature mode, used for runs with Zeus \n\
+ -z             Invoke a special mode for that causes Python to start with a run from Zeus\n\
+ -p n_steps     Invoke the photon logarithmic stepping algorithm which in some cases can result in a speed up\n\
 \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\
@@ -267,7 +281,7 @@ of the parameter file and inputs will be requested from the command line. \n\
 \n\
 ";                              // End of string to provide one with help
 
-  printf ("%s\n", some_help);
+  Log ("%s\n", some_help);
 
-  Exit (0);                     // Note that here we simply do want to exit, not use Exit
+  exit (0);
 }
