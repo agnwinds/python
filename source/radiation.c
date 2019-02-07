@@ -1246,7 +1246,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
     }
   }
   
-  xplasma->f_es+=(w_ave*ds*THOMPSON);
+  xplasma->f_es+=(w_ave*ds*alpha (p->freq) * THOMPSON);
 
   return (0);
 }
