@@ -205,7 +205,7 @@ calculate_ionization (restart_stat)
       if (!p)
       {
         Error ("Could not reallocate memory for %i photons for p and photmain\n", NPHOT);
-        Exit (0);
+        Exit (1);
       }
 
       nphot_next_cycle += nphot_cycle_gap;

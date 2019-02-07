@@ -630,7 +630,7 @@ structure does not have this property! */
     if ((mptr = fopen (masterfile, "r")) == NULL)
     {
       Error ("Get_atomic_data: Could not find masterfile %s in current directory\n", masterfile);
-      exit (1);
+      Exit (1);
     }
     Log ("Get_atomic_data: reading from masterfile %s in current directory\n", masterfile);
   }
@@ -662,7 +662,7 @@ structure does not have this property! */
         if ((fptr = fopen (file, "r")) == NULL)
         {
           Error ("Get_atomic_data: Could not open %s in current directory\n", file);
-          exit (1);
+          Exit (1);
         }
         Log_silent ("Get_atomic_data: Reading data from %s\n", file);
       }
