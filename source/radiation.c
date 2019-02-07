@@ -444,7 +444,7 @@ radiation (p, ds)
   
   /*Try to compute change in momentum - include compton scattering at this point */
    
-  tau_temp=(kappa_tot)*ds;
+  tau_temp=(frac_comp)*ds;
   
   if (sane_check (tau_temp))
   {
@@ -1245,6 +1245,8 @@ update_banded_estimators (xplasma, p, ds, w_ave)
       xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
     }
   }
+  
+  xplasma->f_es+=(w_ave*ds*THOMPSON);
 
   return (0);
 }

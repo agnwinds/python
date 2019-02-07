@@ -859,6 +859,8 @@ typedef struct plasma
 
   double dmo_dt[3];             /*Radiative force of wind */
   double dp_dt[3];             /*Radiative force of wind */
+  double f_es;
+  
   
 //OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
 //OLD  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */

@@ -106,7 +106,7 @@ WindPtr (w);
    * size must must be increased.
    */
 
-  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 118) * (floor (NPLASMA / np_mpi_global) + 1);
+  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 119) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -267,6 +267,10 @@ WindPtr (w);
 
     plasmamain[n].xi *= 4. * PI;
     plasmamain[n].xi /= (volume * nh);
+	
+	printf ("BLAH %e %e %e\n",plasmamain[n].f_es,volume,plasmamain[n].ne*volume);
+	plasmamain[n].f_es /=(volume* C);
+	plasmamain[n].f_es *=(volume* plasmamain[n].ne);
 
     /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e
      * previous value of t_e.  Note that this may not be  best way to determien the cooling.
@@ -412,6 +416,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].dmo_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].dp_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].f_es, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 //OLD        MPI_Pack (&plasmamain[n].npdf, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 //OLD        MPI_Pack (plasmamain[n].pdf_x, LPDF, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 //OLD        MPI_Pack (plasmamain[n].pdf_y, LPDF, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -553,6 +558,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dp_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].f_es, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+		
 //OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].npdf, 1, MPI_INT, MPI_COMM_WORLD);
 //OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].pdf_x, LPDF, MPI_INT, MPI_COMM_WORLD);
 //OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].pdf_y, LPDF, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -917,7 +924,7 @@ WindPtr (w);
       /* Report luminosities, IP and other diagnositic quantities */
 		printf ("BLAH dmo_dt r %e phi %e \n",sqrt(plasmamain[nshell].dmo_dt[0]*plasmamain[nshell].dmo_dt[0]+plasmamain[nshell].dmo_dt[2]*plasmamain[nshell].dmo_dt[2]),plasmamain[nshell].dmo_dt[1]);
 		printf ("BLAH dp_dt r %e phi %e \n",sqrt(plasmamain[nshell].dp_dt[0]*plasmamain[nshell].dp_dt[0]+plasmamain[nshell].dp_dt[2]*plasmamain[nshell].dp_dt[2]),plasmamain[nshell].dp_dt[1]);
-		
+		printf ("BLAH f_es %e\n",plasmamain[nshell].f_es);
       Log
         ("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Measured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
          geo.lum_agn, plasmamain[nshell].t_e,
@@ -1049,6 +1056,8 @@ wind_rad_init ()
     plasmamain[n].j_direct = plasmamain[n].j_scatt = 0.0;       //NSH 1309 zero j banded by number of scatters
     plasmamain[n].ip = 0.0;
     plasmamain[n].xi = 0.0;
+    plasmamain[n].f_es = 0.0;
+
     plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
     plasmamain[n].mean_ds = 0.0;
     plasmamain[n].n_ds = 0;
