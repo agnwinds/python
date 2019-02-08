@@ -193,6 +193,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /*Compute the angle averaged cross section */
 
   kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
+  
+  
 
 
 /* The next section checks to see if the frequency difference on
@@ -260,7 +262,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity
-
 
 
 /* Finally begin the loop over the resonances that can interact

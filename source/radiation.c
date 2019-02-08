@@ -179,7 +179,7 @@ radiation (p, ds)
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
-  struct photon phot;
+  struct photon phot,phot_mid;
   int ndom,i;
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
@@ -440,50 +440,6 @@ radiation (p, ds)
     energy_abs = w_in * (tau - 0.5 * tau2);
 	 
   }
-  
-  
-  /*Try to compute change in momentum - include compton scattering at this point */
-   
-  tau_temp=(frac_comp)*ds;
-  
-  if (sane_check (tau_temp))
-  {
-    Error ("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n", frac_ff, frac_comp, frac_ind_comp);
-  }
-/* Calculate the heating effect*/
-
-  if (tau_temp > 0.0001)
-  {                             /* Need differentiate between thick and thin cases */
-    x = exp (-tau_temp);
-    w_out = w_in * x;  //Use this temporarily for momentum change
-	 
-  }
-  else
-  {
-    tau2 = tau_temp * tau_temp;
-    w_out = w_in * (1. - tau_temp + 0.5 * tau2);      //Use this temporarily for momentum change
-	 
-  }
-	
-	
-	
-	
-
-  stuff_v (p->lmn, p_out);
-  renorm (p_out, w_out / C);
-  vsub (p_out, p_in, dp); //compute change in momentum
-  
-
-  project_from_xyz_cyl (p->x, dp, dp_cyl);
-  
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
-  for (i = 0; i < 3; i++)
-  {
-    xplasma->dp_dt[i] += dp_cyl[i];
-  }
-  
-  
 
   /* Calculate the reduction in weight - compton scattering is not included, it is now included at scattering
      however induced compton heating is not implemented at scattering, so it should remain here for the time being
@@ -617,6 +573,52 @@ radiation (p, ds)
 
     }
   }
+  
+  
+  stuff_phot (p, &phot_mid);        // copy photon ptr
+  move_phot (&phot_mid, ds/2.);        // get the location of the photon mid-path
+  
+  
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, z*frac_ff / C);
+  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_ff[i] += dp_cyl[i];
+  }	 
+  
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, (z * (frac_tot+frac_auger)) / C);
+  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_bf[i] += dp_cyl[i];
+  }	
+  
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, w_ave*ds*klein_nishina (p->freq));
+  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_es[i] += dp_cyl[i];
+  }	
+  
+  
+  
+  
+  
+
+  
+  
+  
+	  
+	  
 
   /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
   /*. Commented out by NSH 2018 */
@@ -1246,7 +1248,8 @@ update_banded_estimators (xplasma, p, ds, w_ave)
     }
   }
   
-  xplasma->f_es+=(w_ave*ds*alpha (p->freq) * THOMPSON);
+  
+
 
   return (0);
 }
