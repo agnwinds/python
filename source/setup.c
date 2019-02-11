@@ -619,16 +619,14 @@ init_ionization ()
 
   /* Setup options associated with non radiative process that can affect the thermal balance.  At present
    * these are adiabatic heating and an extra heating term explicitly implemented for FU Ori stars.  The
-   * default is set to 2.  Adiabatic heating only
-   * XXX - JM -- Don't understand this default - default 2 suggests no adiabatic cooling and nonthermal emission on. 
-   * XXX - JM -- Also, we should use define statements for the 4 modes here. 
+   * default is set to 0.  Adiabatic cooling only
+   * XXX - JM -- we should use define statements for the 4 modes here?
    */
 
-  thermal_opt = 2;
+  thermal_opt = 0;
 
-  rdint
-    ("Thermal_balance_options(0=adiabatic_only,1=all_off,2=nonthermal_only,3=all_on)",
-     &thermal_opt);
+  rdchoice("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)","0,1,2,3"
+            &thermal_opt);
 
   if (thermal_opt == 0)
     {
