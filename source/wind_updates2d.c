@@ -668,7 +668,7 @@ WindPtr (w);
   {
     Log ("Outputting heatcool file for connecting to zeus\n");
     fptr = fopen ("py_heatcool.dat", "w");
-    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z\n");
 
   }
 
@@ -788,7 +788,11 @@ WindPtr (w);
         fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);       //Line cooling must include all recombination cooling
         fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);      //ff cooling
         fprintf (fptr, "%e ", plasmamain[nplasma].rho); //density
-        fprintf (fptr, "%e\n", plasmamain[nplasma].rho * rho2nh);       //hydrogen number density
+        fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);       //hydrogen number density
+		fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
+		fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);    //electron scattering radiation force in the phi(rotational) directionz direction
+		fprintf (fptr, "%e\n ", plasmamain[nplasma].rad_force_es[2]);    //electron scattering radiation force in the z direction
+
       }
     }
     fclose (fptr);

@@ -1370,11 +1370,11 @@ mo_summary (w, rootname, ochoice)
             sqrt (xplasma->dmo_dt[0] * xplasma->dmo_dt[0] +
                   xplasma->dmo_dt[1] * xplasma->dmo_dt[1] + xplasma->dmo_dt[2] * xplasma->dmo_dt[2]);
         else if (ichoice == 1)
-          x = xplasma->dmo_dt[0];
+          x = xplasma->rad_force_es[0];
         else if (ichoice == 2)
-          x = xplasma->dmo_dt[1];
+          x = xplasma->rad_force_es[1];
         else if (ichoice == 3)
-          x = xplasma->dmo_dt[2];
+          x = xplasma->rad_force_es[2];
 		else
 			x=xplasma->f_es;
       }
