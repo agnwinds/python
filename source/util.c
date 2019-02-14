@@ -5,9 +5,11 @@
  * @date   April, 2018
  *
  * @brief  These are very simple utilities within Python that do not
- *   fall into a larger catergory like those in vector.
+ *   fall into a larger category like those in vector.
  *
  * ### Notes ###
+ *
+ * These routines all have to do with wind cells. 
  *
  * These routines should probably be refactored into other routines
  *
@@ -28,199 +30,6 @@
 
 
 
-
-
-
-
-/**********************************************************/
-/**
- * @brief Perform linear/logarithmic interpolation of an array
- *
- * @param [in] double  value   The value used for interpoaltion
- * @param [in] double  array[]   An array containing a set of asceding values
- * @param [in] int  npts   The size of the array
- * @param [out] int *  ival  The lower index to use in the interpolation
- * of the array which need to be used to interpolate on
- * @param [out] double *  f   The fraction of the upper point to use in the interpolation
- * @param [in] int  mode  A switch to choose linear(0)  or lograrithmic(1) interpolation
- * @return     Usually returns 0, but returns -1 if the input value is less
- * than the first elememnt in the array, and 1 if it is greater than the
- * last element int he array.  In either of these cases, the fractions are
- * set up only to access one array element
- *
- * @details
- *
- *
- * Typically one has two parallel arrays, one containing a set of values,
- * in the original case frequencies, and another containing some function
- * of those values.  This routine finds the fraction of the function at
- * two point in the data array to interpolate.
- *
- * The values for the input array can be interpolated linear or logarithmically.
- * that is the fraction that is returned are based on the values in the
- * array or the logarithm of them.
- *
- *
- * The routine uses bisection
- *
- *
- *
- * ### Notes ###
- *
- * fraction is a utility written to speed up the search for the bracketing
- * topbase photionization x-sections, but in principle it should work in
- * other situations within python (which at one time at least contributed
- * significantly to the runtime for Python).
- *
- * Today, fraction is called directly in the routines that are used to set up coordinate
- * systems, and indirectly through linterp (below) which should be inspected
- * to see how the logarithmic interpolation is supposed to work.
- *
- * The routine is similar to the numerical * recipes routine locate.
- * There may be a gsl routine as well.  The routine
- * should probably be replaced.
- *
- *
- **********************************************************/
-
-int
-fraction (value, array, npts, ival, f, mode)
-     double array[];            // The array in we want to search
-     int npts, *ival;           // ival is the lower point
-     double value;              // The value we want to index
-     double *f;                 // The fractional "distance" to the next point in the array
-     int mode;                  // 0 = compute in linear space, 1=compute in log space
-{
-  int imin, imax, ihalf;
-
-  if (value < array[0])
-  {
-    *ival = 0;
-    *f = 0.0;
-    return (-1);
-  }
-
-  imax = npts - 1;
-  if (value > array[imax])
-  {
-    *ival = npts - 2;
-    *f = 1.0;
-    return (1);
-  }
-
-
-
-  imin = 0;
-
-/* In what follows, there is a specific issue as to how to treat
-the situation where the value is exactly on an array element. Right
-now this is set to try to identify the array element below the one
-on which the value sits, and to set the fraction to 1.  This was
-to reflect the behavior of the search routine in where_in_grid. */
-
-  while (imax - imin > 1)
-  {
-    ihalf = (imin + imax) >> 1; // Compute a midpoint >> is a bitwise right shift
-    if (value > array[ihalf])
-    {
-      imin = ihalf;
-    }
-    else
-      imax = ihalf;
-  }
-
-// So array[imin] just <= value
-
-  if (mode == 0)
-    *f = (value - array[imin]) / (array[imax] - array[imin]);   //linear interpolation
-  else if (mode == 1)
-    *f = (log (value) - log (array[imin])) / (log (array[imax]) - log (array[imin]));   //log interpolation
-  else
-  {
-    Error ("Fraction - unknown mode %i\n", mode);
-    Exit (0);
-    return (0);
-  }
-
-  *ival = imin;
-
-  return (0);
-}
-
-
-
-
-
-
-
-/**********************************************************/
-/**
- * @brief      Perform a linear interpolation on two parallel arrays, the fist
- * of which contains a set of values to be interpolated and the second of
- * which has the function at those values
- *
- * @param [in] double  x   A value
- * @param [in] double  xarray[]   The array that is interplated
- * @param [in] double  yarray[]   The array that contains a function of the values in xaray
- * @param [in] int  xdim   The length of the two arrays
- * @param [out] double *  y   The resulting intepolated value
- * @param [in] int  mode   A switch to choose linear(0) or "logarithmic" (1)
- * interpolation
- *
- * @return     The number of the array element that is used for the lower of the two
- * elements taht are intepolated on.
- *
- * @details
- * Given a number x, and an array of x's in xarray, and functional
- * values y = f(x) in yarray and the dimension of xarray and yarray,
- * linterp calculates y, the linearly interpolated value of y(x). It
- * also returns the element in the xarray so that one can consider
- * not doing a search to find the right array element in certain
- * circumstances
-
- *
- * ### Notes ###
- *
- * For mode 0, the value that is retuned is
- *
- * (1-f)*y[nelem]+f*[nelem+1)
- *
- * For mode 1, the value returned is
- * exp ((1. - f) * log (y[nelem]) + f * log (y[nelem + 1]))
- *
- *
- **********************************************************/
-
-int
-linterp (x, xarray, yarray, xdim, y, mode)
-     double x;                  // The value that we wish to index i
-     double xarray[], yarray[];
-     int xdim;
-     double *y;
-     int mode;                  //0 = linear, 1 = log
-{
-  int nelem = 0;
-  double frac;
-
-
-  fraction (x, xarray, xdim, &nelem, &frac, mode);
-
-  if (mode == 0)
-    *y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
-  else if (mode == 1)
-    *y = exp ((1. - frac) * log (yarray[nelem]) + frac * log (yarray[nelem + 1]));
-  else
-  {
-    Error ("linterp - unknown mode %i\n", mode);
-    Exit (0);
-  }
-
-  return (nelem);
-
-}
-
-
-
 int ierr_coord_fraction = 0;
 
 /**********************************************************/
@@ -232,7 +41,7 @@ int ierr_coord_fraction = 0;
  *
  * @param [in] int  ndom   The domain in where the interpolation will take place
  * @param [in] int  ichoice  interpolate on vertices (0), interpolate on
- * centers (1)>
+ * centers (1)
  * @param [in] double  x[]   the 3-vector position for which you want
  * the fractinal position
  * @param [out] int  ii[]    an array that contains the 1-d element

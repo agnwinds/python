@@ -19,142 +19,6 @@
 
 
 
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD Synopsis:
-//OLD   get_atomic_data(masterfile) is a generalized subroutine for reading atomic data
-//OLD   into a set of structures defined in "atomic.h"   (Space for the structures is
-//OLD   also allocated in this routine.
-//OLD
-//OLD
-//OLD
-//OLD Arguments:
-//OLD   masterfile is a file which contains the names of the files which will be read
-//OLD   as atomic data.  (This allows one to group the atomic data into logical units.)
-//OLD
-//OLD Returns:
-//OLD
-//OLD
-//OLD Description:
-//OLD   get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
-//OLD   otherwise noted, e.g ionization potentials are converted to ergs.
-//OLD
-//OLD   The order of the data is important.  Elements should be defined before ions; ions
-//OLD   before levels, levels before  lines etc.  In most if not all cases, one can either define all
-//OLD         of the elements first, all of the ions, etc ... or the first element and its ions, the
-//OLD         second element and its ions etc. Commenting out an element in the datafile has the effect of
-//OLD   eliminating all of the data associated with that element, e.g ions, lines, etc.
-//OLD
-//OLD   The program assumes that the ions for a given element are grouped together,
-//OLD         that the levels for a given element are grouped together, etc.
-//OLD
-//OLD   If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
-//OLD   x-sections should be read first.  The routine will ignore data in the VFKY list if there
-//OLD   is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
-//OLD   on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
-//OLD   would be difficult because you would have to drop various bits of Topbase data out of the
-//OLD         middle of the structure or mark it NG or something.)
-//OLD
-//OLD   Similarly, as a general rule the macro information should be provided before the simple
-//OLD   ions are described, and the macro lines should be presented before simple lines.
-//OLD
-//OLD   The only data which can be mixed up completely is the line array.
-//OLD
-//OLD   Finally, get_atomic_data creates a pointer array to  lines, which has the lines in
-//OLD   frequency ascending order.   This is actually done by a small subroutine index_lines
-//OLD   which in turn calls a Numerical Recipes routine.
-//OLD
-//OLD Notes:
-//OLD   NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA
-//OLD   IS TO BE USED.  Specifically nothing here should be specific to the Monte Carlo calculations
-//OLD   for which the routines were written. These routines are just ways to read in the atomic data
-//OLD
-//OLD   For completeness the macro atom information should be probably be printed to the data file,
-//OLD   or alteranatively the printing to the data file should be eliminated altogether as a waste
-//OLD   of time -- ksl
-//OLD History:
-//OLD   97jan   ksl     Coded and debugged as part of Python effort.
-//OLD   97oct2  ck      Added steps to read in recombination fractions
-//OLD   98feb27 ksl     Revised photoionization inputs so now use Verner, Ferland, Korista, & Yakolev
-//OLD                   formalism
-//OLD   98apr4  ksl     Modified to read multiplicites of lower and upper states of resonance lines, and
-//OLD                   to exclude lines in which the oscillator strengths or frequencies etc were zero
-//OLD   98may23 ksl     Corrected error which allowed ions to be read for which there were no elements.
-//OLD                   Also fixed initialization of phot_info
-//OLD   99jan4  ksl     Added code to keep track of the lowest frequency for which photoionization
-//OLD                   can occur (phot_freq_min).
-//OLD   99nov28 ksl     Modified so that the datafiles it looks for are now in a subdirectory atomic.
-//OLD                   This follows the approach I have been adopting in other programs of putting
-//OLD                   data into a subdirectory of the program in which the program is being run.  This
-//OLD                   way one can merely link to the appropriate directory
-//OLD   00nov27 ksl     Updated program to make it easier to consider different sets of atomic data
-//OLD                   Also converted program so that it would use the standard logging procedures.
-//OLD         00nov28 ksl       Updated program to accept transitions which do not arise from ground states
-//OLD   01jul11 ksl     Updated program to accept levels as produced by kurucz, using for example
-//OLD                   gfall.dat .  This was in preparation for incorporating some non-LTE aspects
-//OLD                   into python
-//OLD   01sep24 ksl     Updated program to define some levels to use in a non_lte calculation.  I
-//OLD                   assume that the number of levels to consider in non_lte is the last integer
-//OLD                   on the ion line.
-//OLD   01sep24 ksl     Elimated use of foo_ion and foo_ele.  These were simply confusing.
-//OLD   01sep25 ksl     Incorporated topbase levels and photoinization cross sections.
-//OLD   01nov22 ksl     Hopefully sorted out all of the various read formats to allow for use
-//OLD                   of the output files of various programs in py_atomic.
-//OLD   01dec12 ksl     Have split the configurations into to indentifiable groups, those which are
-//OLD                   to be treated on the fly -- aka LTE --  and those which in principle can
-//OLD                   be treated in detail -- aka non-LTE.  In practice, we are also making modifica-
-//OLD                   tions to the lines on the fly.  Any configureation with is "non-LTE" has space
-//OLD                   in the levden array for that ion.
-//OLD   02jun   ksl     Converted all multiplicities from integers to doubles, since in some cases
-//OLD                   one may have non-integer g's and also to prevent gu/gl divisions from giving
-//OLD                   incorrect answer.
-//OLD         04Feb19 SS      Made modifications to read atomic data in format suitable for the proposed implementation
-//OLD                         of Macro Atoms. Modifications should preserve all the previous options and place Macro
-//OLD                         Atoms data at top of hierarchy - i.e. other data read later should be ignored.
-//OLD         04Mar   SS      Minor changes (following suggestions of ksl).
-//OLD   04Apr   ksl     Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line
-//OLD                   that is not part of a macro atom.).  Simplified inputs so that when one reads IonM
-//OLD                   it is assumed to be a macro-ion.  If it is just Ion or IonV, then the assumption is that
-//OLD                   it is a "simple" ion
-//OLD   04Dec   ksl     Made use of DEBUG to eliminate printout of many error in get_atomic_data that
-//OLD                   are really part of normal flow of program.  To print out these lines, set
-//OLD                   DEBUG to a nonzero value at top of program
-//OLD   04dec   ksl     54a-Modified the macro atom reading portion of the program so that one can limit levels
-//OLD                   in the elements_ions section of the input and "seamlessly" avoid reading them in
-//OLD                   elsewhere.  This makes the macro portion of the program consistent with the
-//OLD                   "simple" atom approach.
-//OLD   04dec   ksl     54b-Added a bit clearer set of comments and reorganized a bit to collect all of the
-//OLD                   indexing in one place. There is no change in funtionality regarding this.
-//OLD   05jul   ksl     56d -- Added if DEBUG lines so that data.out is not normally printed
-//OLD   06jul   ksl     57+ -- Modified so that calloc is used to allocate space for structures
-//OLD   06aug   ksl     57h -- Added checks to ensure that macro_info which is set to -1 in various
-//OLD                   of the structures, is set to 0 or 1 somewhere in the process.  This simplifies
-//OLD                   some of the switches in the program.  Note that I did not check for self-consitency
-//OLD                   just that the value is not -1, which it was initially.
-//OLD   080810  ksl     62 -- Modified the way in which levels are read in.  Basically the routine assumes
-//OLD                   and prevents one from reading in more than one level type, e.g macro_atom, top_base
-//OLD                   record, kurucz record etc.  One cannot use more than one type anymore.
-//OLD   080812  ksl     62 -- Made additional changes to make sure photoionization records were only
-//OLD                   linked to levels for which the density could be calculated.  (Note, that there
-//OLD                   may be a problem if we decide to use topbase data for ions with 0 nlte levels
-//OLD                   allowed, i.e. zero levels in which we keep track of the density.
-//OLD         081115  nsh     70 -- added in structures and routines to read in data to implement
-//OLD                   dielectronic recombination.
-//OLD   11dec   ksl     71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
-//OLD   12jun   nsh     72 - added structures and routines to read in partition function data from
-//OLD                   cardona 2010
-//OLD                   than once
-//OLD   12jul   nsh     73 - added structures and routines to read in badnell style total recombination rate data
-//OLD         12sept    nsh     73 - added structures and routines to read in gaunt factor data from Sutherland 1998
-//OLD   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120.
-//OLD   14nov   nsh     78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
-//OLD                  Also used write_atomicdata to control if summary is written to file.
-//OLD   15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
-//OLD   17jan NSH 81c -- Added collision strengths
-//OLD **************************************************************/
-
-
 
 #define LINELENGTH 400
 #define MAXWORDS    20
@@ -209,10 +73,11 @@
  *
  * get_atomic data is intended to be stand-alone, that is one should be able to use it for routines
  * other than Python, e.g for another routine intended to calculate the ionization state of
- * a plasma in colissional equlibrium
+ * a plasma in collisional equilibrium.
  *
- * To this end, the routines populate stuctures in atomic.h, which are not part of python.h.  It's imporant
- * that future modificatiosn to get_atomic_data maintain this indepence..
+ * To this end, the routines populate stuctures in atomic.h, which are not part of python.h, and 
+ * one should avoid calling routines like Exit(0) that are very python centric.  It's important
+ * that future modifications to get_atomic_data maintain this independence.
  *
  *
  *
@@ -3460,4 +3325,445 @@ check_xsections ()
   }
 
   return 0;
+}
+
+
+
+
+/*
+
+   q21 calculates and returns the collisional de-excitation coefficient q21
+
+   Notes:  This uses a simple approximation for the effective_collision_strength omega.
+   ?? I am not sure where this came from at present and am indeed no sure that
+   omega is omega(2->1) as it should be.  This should be carefully checked.??
+   This has no been improved, and wherever possible we use tabulated collision
+   stength data from Chianti (after Burgess and Tully 1992)
+
+   c21=n_e * q21
+   q12 = g_2/g_1 q21 exp(-h nu / kT )
+
+   History:
+   98aug        ksl     Recoded from other routines so that one always calculates q21 in
+			the same way.
+	01nov	ksl	Add tracking mechanism so if called with same conditions it
+			returns without recalculation
+	12oct	nsh	Added, then commented out approximate gaunt factor given in
+			hazy 2.
+	17jan	nsh Added code to use the actual collision strength date from chianti
+
+ */
+
+
+/// (8*PI)/(sqrt(3) *nu_1Rydberg
+#define ECS_CONSTANT 4.773691e16
+
+struct lines *q21_line_ptr;
+double q21_a, q21_t_old;
+
+
+/**********************************************************/
+/**
+ * @brief      calculates and returns the collisional de-excitation coefficient q21
+ *
+ * @param [in] struct lines *  line_ptr   A single line
+ * @param [in] double  t   The temperature at wich to calculate the coefficient
+ * @return    The collisional de-excitiation coefficient
+ *
+ * @details
+ * This routine uses stored coefficients if we have them, or the Van Regemortor
+ * approximation if we do not.
+ *
+ * ### Notes ###
+ * the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt
+ * factor to calculate collision strengths. There is one regime in which kt < hnu. For that
+ * consult equation 4.20 and 4.21 of Hazy.
+************************************************************/
+
+double
+q21 (line_ptr, t)
+     struct lines *line_ptr;
+     double t;
+{
+  double gaunt, gbar;
+  double omega;
+  double u0;
+  double upsilon ();
+
+
+  if (q21_line_ptr != line_ptr || t != q21_t_old)
+  {
+
+
+    u0 = (BOLTZMANN * t) / (H * line_ptr->freq);
+
+    if (line_ptr->istate == 1 && u0 < 2)        // neutrals at low energy. Used 2 to give continuous function.
+      gaunt = u0 / 10.0;
+    else                        // low energy electrons, positive ions
+      gaunt = 0.2;
+
+
+
+    if (line_ptr->coll_index < 0)       //if we do not have a collision strength for this line use the g-bar formulation
+    {
+      omega = ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
+    }
+    else                        //otherwise use the collision strength directly. NB what we call omega, most people including hazy call upsilon.
+    {
+      omega = upsilon (line_ptr->coll_index, u0);
+      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;
+    }
+
+
+    q21_a = 8.629e-6 / (sqrt (t) * line_ptr->gu) * omega;
+    q21_t_old = t;
+  }
+
+  return (q21_a);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the collisional excitation coefficient for a line
+ *
+ * @param [in] struct lines *  line_ptr   The line of interest
+ * @param [in] double  t   The temperature of interest
+ * @return     The collisional excitation coeffient
+ *
+ * @details
+ * The routine calls q21 and uses detailed balance to derive q12
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+double
+q12 (line_ptr, t)
+     struct lines *line_ptr;
+     double t;
+{
+  double x;
+  double q21 ();
+  double exp ();
+
+  x = line_ptr->gu / line_ptr->gl * q21 (line_ptr, t) * exp (-H_OVER_K * line_ptr->freq / t);
+
+  return (x);
+}
+
+
+/*
+   a21 alculates and returns the Einstein A coefficient
+   History:
+   98aug        ksl     Coded and debugged
+   99jan        ksl Modified so would shortcircuit calculation if
+   called multiple times for same a
+ */
+#define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
+
+struct lines *a21_line_ptr;
+double a21_a;
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the Einstein A coefficient for aline
+ *
+ * @param [in out] struct lines *  line_ptr   The structure that describes a single line
+ * @return     The Einstein A coefficient
+ *
+ * @details
+ * Using the oscillator strecnth and the multiplicity (which are
+ * read in) calculate A
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+double
+a21 (line_ptr)
+     struct lines *line_ptr;
+{
+  double freq;
+
+  if (a21_line_ptr != line_ptr)
+  {
+    freq = line_ptr->freq;
+    a21_a = A21_CONSTANT * line_ptr->gl / line_ptr->gu * freq * freq * line_ptr->f;
+    a21_line_ptr = line_ptr;
+  }
+
+  return (a21_a);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      calculates the thermally averaged collision strength thermally excited line emission.
+ *
+ * @param [in out] int  n_coll   the index of the collision strength record we are working with
+ * @param [in out] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
+ * @return     upsilon - the thermally averaged collision strength for a given line at a given temp
+ *
+ * @details
+ *
+ * ### Notes ###
+ * It uses data extracted from Chianti stored in coll_stren.
+ * The paper to consult is Burgess and Tully A&A 254,436 (1992).
+ * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
+ * divided by Plancks constant times the frequency of the line under analysis.
+ *
+ *
+ **********************************************************/
+
+double
+upsilon (n_coll, u0)
+     int n_coll;
+     double u0;
+{
+  double x;                     //The scaled temperature
+  double y;                     //The scaled collision sterngth
+  double upsilon;               //The actual collision strength
+  int linterp ();
+
+  /* first we compute x. This is the "reduced temperature" from
+     Burgess & Tully 1992. */
+  x = 0.0;
+  if (coll_stren[n_coll].type == 1 || coll_stren[n_coll].type == 4)
+  {
+    x = 1. - (log (coll_stren[n_coll].scaling_param) / log (u0 + coll_stren[n_coll].scaling_param));
+  }
+  else if (coll_stren[n_coll].type == 2 || coll_stren[n_coll].type == 3)
+  {
+    x = u0 / (u0 + coll_stren[n_coll].scaling_param);
+  }
+  else
+  {
+    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    exit (0);
+  }
+
+
+  /* we now compute y from the interpolation formulae
+     y is the reduced upsilon from Burgess & Tully 1992. */
+  linterp (x, coll_stren[n_coll].sct, coll_stren[n_coll].scups, coll_stren[n_coll].n_points, &y, 0);
+
+  /*  now we extract upsilon from y  - there are four different parametrisations */
+
+  upsilon = 0.0;
+  if (coll_stren[n_coll].type == 1)
+  {
+    upsilon = y * (log (u0 + exp (1)));
+  }
+  else if (coll_stren[n_coll].type == 2)
+  {
+    upsilon = y;
+  }
+  else if (coll_stren[n_coll].type == 3)
+  {
+    upsilon = y / (u0 + 1);
+  }
+  else if (coll_stren[n_coll].type == 4)
+  {
+    upsilon = y * (log (u0 + coll_stren[n_coll].scaling_param));
+  }
+  else
+  {
+    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    exit (0);
+  }
+  return (upsilon);
+}
+
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief Perform linear/logarithmic interpolation of an array
+ *
+ * @param [in] double  value   The value used for interpoaltion
+ * @param [in] double  array[]   An array containing a set of asceding values
+ * @param [in] int  npts   The size of the array
+ * @param [out] int *  ival  The lower index to use in the interpolation
+ * of the array which need to be used to interpolate on
+ * @param [out] double *  f   The fraction of the upper point to use in the interpolation
+ * @param [in] int  mode  A switch to choose linear(0)  or lograrithmic(1) interpolation
+ * @return     Usually returns 0, but returns -1 if the input value is less
+ * than the first elememnt in the array, and 1 if it is greater than the
+ * last element int he array.  In either of these cases, the fractions are
+ * set up only to access one array element
+ *
+ * @details
+ *
+ *
+ * Typically one has two parallel arrays, one containing a set of values,
+ * in the original case frequencies, and another containing some function
+ * of those values.  This routine finds the fraction of the function at
+ * two point in the data array to interpolate.
+ *
+ * The values for the input array can be interpolated linear or logarithmically.
+ * that is the fraction that is returned are based on the values in the
+ * array or the logarithm of them.
+ *
+ *
+ * The routine uses bisection
+ *
+ *
+ *
+ * ### Notes ###
+ *
+ * fraction is a utility written to speed up the search for the bracketing
+ * topbase photionization x-sections, but in principle it should work in
+ * other situations within python (which at one time at least contributed
+ * significantly to the runtime for Python).
+ *
+ * Today, fraction is called directly in the routines that are used to set up coordinate
+ * systems, and indirectly through linterp (below) which should be inspected
+ * to see how the logarithmic interpolation is supposed to work.
+ *
+ * The routine is similar to the numerical * recipes routine locate.
+ * There may be a gsl routine as well.  The routine
+ * should probably be replaced.
+ *
+ *
+ **********************************************************/
+
+int
+fraction (value, array, npts, ival, f, mode)
+     double array[];            // The array in we want to search
+     int npts, *ival;           // ival is the lower point
+     double value;              // The value we want to index
+     double *f;                 // The fractional "distance" to the next point in the array
+     int mode;                  // 0 = compute in linear space, 1=compute in log space
+{
+  int imin, imax, ihalf;
+
+  if (value < array[0])
+  {
+    *ival = 0;
+    *f = 0.0;
+    return (-1);
+  }
+
+  imax = npts - 1;
+  if (value > array[imax])
+  {
+    *ival = npts - 2;
+    *f = 1.0;
+    return (1);
+  }
+
+
+
+  imin = 0;
+
+/* In what follows, there is a specific issue as to how to treat
+the situation where the value is exactly on an array element. Right
+now this is set to try to identify the array element below the one
+on which the value sits, and to set the fraction to 1.  This was
+to reflect the behavior of the search routine in where_in_grid. */
+
+  while (imax - imin > 1)
+  {
+    ihalf = (imin + imax) >> 1; // Compute a midpoint >> is a bitwise right shift
+    if (value > array[ihalf])
+    {
+      imin = ihalf;
+    }
+    else
+      imax = ihalf;
+  }
+
+// So array[imin] just <= value
+
+  if (mode == 0)
+    *f = (value - array[imin]) / (array[imax] - array[imin]);   //linear interpolation
+  else if (mode == 1)
+    *f = (log (value) - log (array[imin])) / (log (array[imax]) - log (array[imin]));   //log interpolation
+  else
+  {
+    Error ("Fraction - unknown mode %i\n", mode);
+    exit (0);
+    return (0);
+  }
+
+  *ival = imin;
+
+  return (0);
+}
+
+
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Perform a linear interpolation on two parallel arrays, the first
+ * of which contains a set of values to be interpolated and the second of
+ * which has the function at those values
+ *
+ * @param [in] double  x   A value
+ * @param [in] double  xarray[]   The array that is interpolated
+ * @param [in] double  yarray[]   The array that contains a function of the values in xarray
+ * @param [in] int  xdim   The length of the two arrays
+ * @param [out] double *  y   The resulting interpolated value
+ * @param [in] int  mode   A switch to choose linear(0) or "logarithmic" (1)
+ * interpolation
+ *
+ * @return     The number of the array element that is used for the lower of the two
+ * elements that are interpolated on.
+ *
+ * @details
+ * Given a number x, and an array of x's in xarray, and functional
+ * values y = f(x) in yarray and the dimension of xarray and yarray,
+ * linterp calculates y, the linearly interpolated value of y(x). It
+ * also returns the element in the xarray so that one can consider
+ * not doing a search to find the right array element in certain
+ * circumstances
+
+ *
+ * ### Notes ###
+ *
+ * For mode 0, the value that is returned is
+ *
+ * (1-f)*y[nelem]+f*[nelem+1)
+ *
+ * For mode 1, the value returned is
+ * exp ((1. - f) * log (y[nelem]) + f * log (y[nelem + 1]))
+ *
+ *
+ **********************************************************/
+
+int
+linterp (x, xarray, yarray, xdim, y, mode)
+     double x;                  // The value that we wish to index i
+     double xarray[], yarray[];
+     int xdim;
+     double *y;
+     int mode;                  //0 = linear, 1 = log
+{
+  int nelem = 0;
+  double frac;
+
+
+  fraction (x, xarray, xdim, &nelem, &frac, mode);
+
+  if (mode == 0)
+    *y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
+  else if (mode == 1)
+    *y = exp ((1. - frac) * log (yarray[nelem]) + frac * log (yarray[nelem + 1]));
+  else
+  {
+    Error ("linterp - unknown mode %i\n", mode);
+    exit (0);
+  }
+
+  return (nelem);
+
 }

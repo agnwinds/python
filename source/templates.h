@@ -15,6 +15,10 @@ int index_inner_cross (void);
 void indexx (int n, float arrin[], int indx[]);
 int limit_lines (double freqmin, double freqmax);
 int check_xsections (void);
+double q21 (struct lines *line_ptr, double t);
+double q12 (struct lines *line_ptr, double t);
+double a21 (struct lines *line_ptr);
+double upsilon (int n_coll, double u0);
 /* python.c */
 int main (int argc, char *argv[]);
 /* photon2d.c */
@@ -218,16 +222,12 @@ int read_non_standard_disk_profile (char *tprofile);
 /* lines.c */
 double total_line_emission (WindPtr one, double f1, double f2);
 double lum_lines (WindPtr one, int nmin, int nmax);
-double q21 (struct lines *line_ptr, double t);
-double q12 (struct lines *line_ptr, double t);
-double a21 (struct lines *line_ptr);
 double two_level_atom (struct lines *line_ptr, PlasmaPtr xplasma, double *d1, double *d2);
 double line_nsigma (struct lines *line_ptr, PlasmaPtr xplasma);
 double scattering_fraction (struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape (struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape_from_tau (double tau);
 int line_heat (PlasmaPtr xplasma, PhotPtr pp, int nres);
-double upsilon (int n_coll, double u0);
 /* continuum.c */
 double one_continuum (int spectype, double t, double g, double freqmin, double freqmax);
 double emittance_continuum (int spectype, double freqmin, double freqmax, double t, double g);
