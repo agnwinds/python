@@ -269,5 +269,5 @@ of the parameter file and inputs will be requested from the command line. \n\
 
   printf ("%s\n", some_help);
 
-  Exit (0);                     // Note that here we simply do want to exit, not use Exit
+  exit (0);                     // Note that here we simply do want to exit, not use Exit
 }

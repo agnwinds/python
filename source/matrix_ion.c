@@ -239,12 +239,11 @@ matrix_ion_populations (xplasma, mode)
     {
       for (nn = 0; nn < nrows; nn++)
       {
-//                                              printf ("%30.25e ",rate_matrix[mm][nn]);
         a_data[mm * nrows + nn] = rate_matrix[mm][nn];
       }
     }
 
-    /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
+    /* Replaced inline array allocation with calloc, which will work with older version of c compilers calloc also sets the
        elements to zero, which is required */
 
     b_data = (double *) calloc (nrows, sizeof (double));
@@ -626,6 +625,9 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
  *
  * ### Notes ###
  *
+ * nplasma is only used to indicate a cell number, if the 
+ * calculation fails.
+ *
  **********************************************************/
 
 int
@@ -641,7 +643,6 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      solution via gsl_linalg_LU_refine */
   double test_val;
   double lndet;
-//OLD  FILE *dptr;
 
   gsl_permutation *p;
   gsl_matrix_view m;
@@ -699,32 +700,12 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   }
 
-
-//OLD  The next lines are a more conservative way to check for a possible falure 
-//OLD  and should be deleted if problems with this do not crop up
-//OLD  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
-
-
-//OLD   if (lndet < log (DBL_MIN * 1e4))
-//OLD   {
-//OLD     Error ("Solve_matrix: LU ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
-//OLD 
-//OLD     }
-//OLD 
-//OLD     return (4);
-//OLD 
-//OLD   }
-
-
   ierr = gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
   if (ierr)
   {
     lndet = gsl_linalg_LU_lndet (&m.matrix);    // get the determinant to report to user
     Error ("Solve_matrix: gsl_linalg_LU_solve failure (%d %.3e) for cell %i \n", ierr, lndet, nplasma);
-//OLD    dptr = fopen ("lower.txt", "w");
-//OLD    gsl_matrix_fprintf (dptr, &m.matrix, "%.2e");
-//OLD    fclose (dptr);
 
     return (4);
 
