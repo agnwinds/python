@@ -85,30 +85,30 @@ GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" 
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
 # Test if indent is installed. We use a different version on mac and linux.
-OS_TYPE := $(shell uname -s)
-ifeq ($(OS_TYPE), Darwin)
-	INDENT_PATH := $(shell which gnuindent)
-	INDENT_VERSION = $(shell gnuindent -version)
-else
-	INDENT_PATH := $(shell which indent)
-	INDENT_VERSION := $(shell indent -version)
-endif
+# OS_TYPE := $(shell uname -s)
+# ifeq ($(OS_TYPE), Darwin)
+# 	INDENT_PATH := $(shell which gnuindent)
+# 	INDENT_VERSION = $(shell gnuindent -version)
+# else
+# 	INDENT_PATH := $(shell which indent)
+# 	INDENT_VERSION := $(shell indent -version)
+# endif
 
-ifeq (, $(INDENT_PATH))
-	#If indent is not installed, error
-	INDENT_STRING = Gnuindent not installed so not indenting code
-	INDENT_CMD = 
-else
-	ifeq (GNU,$(firstword $(INDENT_VERSION)))
-		INDENT_STRING = Indenting code with $(INDENT_VERSION)
-		# this command runs indent with GNU styling
-		INDENT_CMD = $(INDENT_PATH) -gnu -l140 -bli0 -nut *.c *.h
-	else
-		# if it is not GNU indent then do not run
-		INDENT_STRING = $(INDENT_PATH) is not the GNU version
-		INDENT_CMD = 
-	endif
-endif
+# ifeq (, $(INDENT_PATH))
+# 	#If indent is not installed, error
+# 	INDENT_STRING = Gnuindent not installed so not indenting code
+# 	INDENT_CMD = 
+# else
+# 	ifeq (GNU,$(firstword $(INDENT_VERSION)))
+# 		INDENT_STRING = Indenting code with $(INDENT_VERSION)
+# 		# this command runs indent with GNU styling
+# 		INDENT_CMD = $(INDENT_PATH) -gnu -l140 -bli0 -nut *.c *.h
+# 	else
+# 		# if it is not GNU indent then do not run
+# 		INDENT_STRING = $(INDENT_PATH) is not the GNU version
+# 		INDENT_CMD = 
+# 	endif
+# endif
 
 
 INCLUDE = ../include
@@ -138,7 +138,7 @@ endif
 LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 82h
+VERSION = 82k
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
@@ -148,9 +148,9 @@ startup:
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
-indent:
-	@echo $(INDENT_STRING)
-	$(INDENT_CMD)
+# indent:
+# 	@echo $(INDENT_STRING)
+# 	$(INDENT_CMD)
 
 
 foo: foo.o signal.o time.o
@@ -170,12 +170,12 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		matom.o estimators.o wind_sum.o yso.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o  \
 		agn.o shell_wind.o compton.o zeta.o dielectronic.o \
-		spectral_estimators.o variable_temperature.o matom_diag.o \
+		spectral_estimators.o matom_diag.o \
 		xlog.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o \
-		setup_reverb.o
+		setup_reverb.o setup_line_transfer.o
 		
 
 
@@ -192,12 +192,12 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		matom.c estimators.c wind_sum.c yso.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c  \
 		agn.c shell_wind.c compton.c zeta.c dielectronic.c \
-		spectral_estimators.c variable_temperature.c matom_diag.c \
+		spectral_estimators.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup_star_bh.c setup_domains.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c \
-		setup_reverb.c
+		setup_reverb.c setup_line_transfer.c
 
 #
 # kpar_source is now declared seaprately from python_source so that the file log.h 
@@ -231,7 +231,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
-        variable_temperature.o bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
+		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o
 
@@ -254,7 +254,7 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
-        	variable_temperature.o bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
+		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o cooling.o   
 
 
@@ -264,8 +264,12 @@ windsave2table: $(table_objects)
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 
+run_indent:
+	../py_progs/run_indent.py -all
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
-all: clean windsave2table python py_wind
+all: clean run_indent python windsave2table py_wind
 
 
 FILE = get_atomicdata.o atomic.o

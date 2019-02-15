@@ -22,11 +22,11 @@
 
 
 /* A couple of external things for use in the routines for computing gamma's below. */
-struct topbase_phot *cont_ext_ptr2; //continuum pointer passed externally
-double temp_ext2;                   //temperature passed externally
-double temp_ext_rad;                //radiation temperature passed externally 
+struct topbase_phot *cont_ext_ptr2;     //continuum pointer passed externally
+double temp_ext2;               //temperature passed externally
+double temp_ext_rad;            //radiation temperature passed externally 
 
-#define ALPHA_SP_CONSTANT 5.79618e-36 //
+#define ALPHA_SP_CONSTANT 5.79618e-36   //
 
 /**********************************************************/
 /**
@@ -161,7 +161,7 @@ bf_estimators_increment (one, p, ds)
         if (m > config[llvl].n_bfu_jump - 1)
         {
           Error ("bf_estimators_increment: could not identify bf transition. Abort. \n");
-          exit (0);
+          Exit (0);
         }
 
         // Now calculate the contributions and add them on.
@@ -357,7 +357,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   if (n == nmax)
   {
     Error ("bb_estimators_increment: could not identify bb transition. Abort. \n");
-    exit (0);
+    Exit (0);
   }
 
 
@@ -382,15 +382,16 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   }
   else
   {
-    Error ("bb_estimators_increment: trying to add negative contribution to jbar. Abort. \n");
-    exit (0);
+    Error ("bb_estimators_increment: trying to add negative contribution to jbar. %e. See #436\n", y);
+    return (0);
+//OLD    Exit (0);
   }
 
   /* Record contribution to energy absorbed by macro atoms. */
 
   mplasma->matom_abs[line_ptr->nconfigu] += weight_of_packet * (1. - exp (-tau_sobolev));
 
-  return (0); 
+  return (0);
 }
 
 /**********************************************************/
@@ -431,7 +432,7 @@ mc_estimator_normalise (n)
   double volume;
   int i, j;
   double stimfac, line_freq, stat_weight_ratio;
-  double heat_contribution;
+  double heat_contribution, lower_density, upper_density;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -523,14 +524,15 @@ mc_estimator_normalise (n)
     {
 
       /* The correction for stimulated emission is (1 - n_lower * g_upper / n_upper / g_lower) */
-
-      stimfac = den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu) / den_config (xplasma, i);
+      lower_density = den_config (xplasma, i);
+      upper_density = den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu);
+      stimfac = upper_density / lower_density;
       stimfac = stimfac * config[i].g / config[line[config[i].bbu_jump[j]].nconfigu].g;
       if (stimfac < 1.0 && stimfac >= 0.0)
       {
         stimfac = 1. - stimfac; //all's well
       }
-      else
+      else if (upper_density > DENSITY_PHOT_MIN && lower_density > DENSITY_PHOT_MIN)
       {
         Error ("mc_estimator_normalise: bb stimulated correction factor is out of bound. Abort.\n");
         Error ("stimfac %g, i %d, line[config[i].bbu_jump[j]].nconfigu %d\n", stimfac, i, line[config[i].bbu_jump[j]].nconfigu);
@@ -538,7 +540,11 @@ mc_estimator_normalise (n)
           ("estimators: den_config (xplasma, i) %g  den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu) %g \n",
            den_config (xplasma, i), den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu));
         stimfac = 0.0;
-        //exit (0);
+        //Exit (0);
+      }
+      else
+      {
+        stimfac = 0.0;
       }
 
       //get the line frequency
@@ -1017,11 +1023,11 @@ get_gamma (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;     //external cont pointer
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
-    {
-      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
-    }
+  if ((H_OVER_K * (flast - fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
 
 
   gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
@@ -1096,11 +1102,11 @@ get_gamma_e (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;     //external cont pointer
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
-    {
-      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
-    }
+  if ((H_OVER_K * (flast - fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
 
 
   gamma_e_value = qromb (gamma_e_integrand, fthresh, flast, 1e-4);
@@ -1177,13 +1183,13 @@ get_alpha_st (cont_ptr, xplasma)
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
 
-  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
-    {
-      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
-    }
+  if ((H_OVER_K * (flast - fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
 
-  
+
   alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
 
 
@@ -1273,13 +1279,13 @@ get_alpha_st_e (cont_ptr, xplasma)
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
 
-  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
-    {
-      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
-    }
+  if ((H_OVER_K * (flast - fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
 
-  
+
   alpha_st_e_value = qromb (alpha_st_e_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
@@ -1335,5 +1341,3 @@ alpha_st_e_integrand (freq)
 
   return (integrand);
 }
-
-

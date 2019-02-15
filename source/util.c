@@ -138,7 +138,8 @@ to reflect the behavior of the search routine in where_in_grid. */
   else
   {
     Error ("Fraction - unknown mode %i\n", mode);
-    exit (0);
+    Exit (0);
+    return (0);
   }
 
   *ival = imin;
@@ -198,7 +199,7 @@ linterp (x, xarray, yarray, xdim, y, mode)
      double *y;
      int mode;                  //0 = linear, 1 = log
 {
-  int nelem;
+  int nelem = 0;
   double frac;
 
 
@@ -211,7 +212,7 @@ linterp (x, xarray, yarray, xdim, y, mode)
   else
   {
     Error ("linterp - unknown mode %i\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   return (nelem);
@@ -308,7 +309,6 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
    * one wants to interpolate on vertex points (0) or
    * midpoints (1)
    */
-
   if (ichoice == 0)
   {
     xx = zdom[ndom].wind_x;
@@ -321,6 +321,7 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
   }
 
   /* Now convert x to the appropriate coordinate system */
+  r = z = 0.0;
   if (zdom[ndom].coord_type == CYLIND)
   {
     r = sqrt (x[0] * x[0] + x[1] * x[1]);
@@ -339,7 +340,7 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
   else
   {
     Error ("coord_fraction: Unknown coordinate type %d for doman\n", zdom[ndom].coord_type, ndom);
-    exit (0);
+    Exit (0);
   }
 
   if (zdom[ndom].coord_type == SPHERICAL)

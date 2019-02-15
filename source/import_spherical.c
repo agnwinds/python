@@ -26,8 +26,8 @@
 
 
 
-# define LINELEN 512
-# define NCELLS  512
+#define LINELEN 512
+#define NCELLS  512
 
 /* The next variables have to be external because we need them to be available later on */
 
@@ -85,38 +85,38 @@ import_1d (ndom, filename)
 
 
   if ((fptr = fopen (filename, "r")) == NULL)
-    {
-      Error ("import_1d: No such file\n");
-      exit (0);
-    }
+  {
+    Error ("import_1d: No such file\n");
+    Exit (0);
+  }
 
 
   ncell = 0;
   while (fgets (line, 512, fptr) != NULL)
+  {
+    n = sscanf (line, " %d %le %le %le %le", &icell, &q1, &q2, &q3, &q4);
+    if (n < 4)
     {
-      n = sscanf (line, " %d %le %le %le %le", &icell, &q1, &q2, &q3, &q4);
-      if (n < 4)
-	{
-	  continue;
-	}
-      else
-	{
-	  xx_1d.element[ncell] = icell;
-	  xx_1d.r[ncell] = q1;
-	  xx_1d.v[ncell] = q2;
-	  xx_1d.rho[ncell] = q3;
-	  if (n > 4)
-	    {
-	      xx_1d.t[ncell] = q4;
-	    }
-	  else
-	    {
-	      xx_1d.t[ncell] = 10000.;
-	    }
-	  ncell++;
-
-	}
+      continue;
     }
+    else
+    {
+      xx_1d.element[ncell] = icell;
+      xx_1d.r[ncell] = q1;
+      xx_1d.v[ncell] = q2;
+      xx_1d.rho[ncell] = q3;
+      if (n > 4)
+      {
+        xx_1d.t[ncell] = q4;
+      }
+      else
+      {
+        xx_1d.t[ncell] = 10000.;
+      }
+      ncell++;
+
+    }
+  }
 
 
   xx_1d.ndim = ncell;
@@ -125,7 +125,7 @@ import_1d (ndom, filename)
    * one has to define mdim and ndim of zdom here, so that the correct
    * number of wind cells will be allocated */
 
-  zdom[ndom].ndim2=zdom[ndom].ndim = xx_1d.ndim;
+  zdom[ndom].ndim2 = zdom[ndom].ndim = xx_1d.ndim;
   zdom[ndom].mdim = 1;
 
   return (0);
@@ -169,42 +169,45 @@ spherical_make_grid_import (w, ndom)
 
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
   zdom[ndom].rmin = xx_1d.r[0];
-  zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max =
-    zdom[ndom].rmax = xx_1d.r[xx_1d.ndim - 1];
+  zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max = zdom[ndom].rmax = xx_1d.r[xx_1d.ndim - 1];
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
 
   for (j = 0; j < xx_1d.ndim; j++)
-    {
-      n = j + zdom[ndom].nstart;
-      w[n].r = xx_1d.r[j];
-      /* Put the radial velocity in v[0] */
-      w[n].v[0]=xx_1d.v[j];
-    }
+  {
+    n = j + zdom[ndom].nstart;
+    w[n].r = xx_1d.r[j];
+    /* Put the radial velocity in v[0] */
+    w[n].v[0] = xx_1d.v[j];
+  }
 
-      /* Need to define the midpoints of the grid */
+  /* Need to define the midpoints of the grid */
 
   for (j = 0; j < zdom[ndom].ndim; j++)
+  {
+    n = j + zdom[ndom].nstart;
+    if (j < zdom[ndom].ndim - 1)
     {
-      n = j + zdom[ndom].nstart;
-      if (j < zdom[ndom].ndim - 1)
-	{
-	  w[n].rcen = 0.5 * (w[n].r + w[n + 1].r);
-	}
-      else
-	{
-	  w[n].rcen = w[n].r * 1.005;
-	}
-      w[n].x[1] = w[n].xcen[1] = 0.0;
-      w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
-      w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
+      w[n].rcen = 0.5 * (w[n].r + w[n + 1].r);
     }
+    else
+    {
+      w[n].rcen = w[n].r * 1.005;
+    }
+    w[n].x[1] = w[n].xcen[1] = 0.0;
+    w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
+    w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
+  }
 
-  spherical_wind_complete(ndom,w);
+  /* Since we assume all of the cells are in the wind in a spherical wind
+   * we can use the standard routine to finish everything off
+   */
+
+  spherical_wind_complete (ndom, w);
   return (0);
 }
 
 
-/* The next section calculates velocites.
+/* The next section calculates velocities.
  *
  * One could follow the zeus_hydro approach of getting those velocities from the original grid.
  * but for consistency with the 2d case we get it by interpolating on values in the cells
@@ -220,7 +223,7 @@ spherical_make_grid_import (w, ndom)
  *
  *
  * @param [in] int  ndom   The domain of the imported model
- * @param [in] double *  x   A postion (3d)
+ * @param [in] double *  x   A position (3d)
  * @param [out] double *  v   The velocity at x
  * @return     The speeed at x
  *
@@ -245,16 +248,16 @@ velocity_1d (ndom, x, v)
 {
   double speed;
   double r;
-  int nelem,nn, nnn[4];
+  int nelem, nn, nnn[4];
   double frac[4];
   r = length (x);
 
 
   coord_fraction (ndom, 0, x, nnn, frac, &nelem);
-  speed=0;
+  speed = 0;
   for (nn = 0; nn < nelem; nn++)
   {
-      speed+=wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
+    speed += wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
   }
 
 
@@ -301,18 +304,18 @@ rho_1d (ndom, x)
   r = length (x);
   n = 0;
   while (r > xx_1d.r[n] && n < xx_1d.ndim)
-    {
-      n++;
-    }
+  {
+    n++;
+  }
 
   if (n < xx_1d.ndim)
-    {
-      rho = xx_1d.rho[n];
-    }
+  {
+    rho = xx_1d.rho[n];
+  }
   else
-    {
-      rho = xx_1d.rho[xx_1d.ndim - 1];
-    }
+  {
+    rho = xx_1d.rho[xx_1d.ndim - 1];
+  }
 
 
   Log ("rho %e \n", rho);
