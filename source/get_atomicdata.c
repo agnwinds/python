@@ -625,13 +625,8 @@ structure does not have this property! */
 
           if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) == 6)
           {
+              continue;
           }
-//OLD          // It's a new style ion line specifying levels to treat in nlte
-//OLD             else if (nwords == 4)
-//OLD               {           //It's an old style ion line
-//OLD                 nlte = 0;
-//OLD         nmax = 10;
-//OLD       }
           else
           {
             Error ("get_atomic_data: file %s line %d: Ion istate line incorrectly formatted\n", file, lineno);
@@ -3133,68 +3128,23 @@ indexx (n, arrin, indx)
   }
 }
 
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
-//OLD   which can be used to limit the lines searched for resonances to a specific
-//OLD   frequency range.
-//OLD
-//OLD Arguments:
-//OLD   double freqmin, freqmax  a range of frequencies in which one is interested in the lines
-//OLD
-//OLD Returns:
-//OLD   limit_lines returns the number of lines that are potentially in resonance.  If limit_lines
-//OLD   returns 0 there are no lines of interest and one does not need to worry about any
-//OLD   resonaces at this frequency.  If limit_lines returns a number greater than 0, then
-//OLD   the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
-//OLD   nline_delt is also set which is the number of lines that are in the specified range
-//OLD
-//OLD Description:
-//OLD   limit_lines  define the lines that are close to a given frequency.  The degree of closeness
-//OLD   is defined by v. The routine must be used in conjuction with get_atomic_data which
-//OLD   will have created an ordered list of the lines.
-//OLD Notes:
-//OLD   Limit_lines needs to be used somewhat carefully.  Carefully means checking the
-//OLD   return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
-//OLD   were no lines in the region of interest.  Assuming there were lines in thte range,
-//OLD   one must sum over lines from nline_min to nline_max inclusive.
-//OLD
-//OLD   One might wonder why nline_max is not set to one larger than the last line which
-//OLD   is in range.  This is because depending on how the velocity is trending you may
-//OLD   want to sum from the highest frequency line to the lowest.
-//OLD
-//OLD ?? It is unclear to me whether given that limit lines is very similar
-//OLD from call to call
-//OLD that it would not be more efficeint to expand from previous
-//OLD limits rather than adopt the approach hre 02may
-//OLD
-//OLD History:
-//OLD   97jan      ksl  Coded and debugged as part of Python effort.
-//OLD   98apr4  ksl     Modified inputs so one gives freqmin and freqmax directly
-//OLD   01nov   ksl     Rewritten to handle large numbers of lines more
-//OLD                   efficiently
-//OLD
-//OLD **************************************************************/
-
-
 
 
 
 /**********************************************************/
 /**
- * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
- * 	which can be used to limit the lines searched for resonances to a specific
- * 	frequency range.
+ * @brief      uses freqmin and freqmax to set limits on which lines in the
+ * frequency ordered list of lines need to be
+ * considered when, for example,  calculating which lines have Sobolev surfaces
+ * along a path. 
  *
- * @param [in, out] double  freqmin   The minimum frequency we are interested in
- * @param [in, out] double  freqmax   The maximum frequency we are interested in
+ *
+ * @param [in] double  freqmin   The minimum frequency we are interested in
+ * @param [in] double  freqmax   The maximum frequency we are interested in
  * @return     the number of lines that are potentially in resonance.
  *
  * limit_lines sets the external variables nline_min and nline_max for use with
  * other routines
- *
  *
  *
  * If limit_lines
