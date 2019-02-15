@@ -625,7 +625,7 @@ structure does not have this property! */
 
           if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) == 6)
           {
-              continue;
+            continue;
           }
           else
           {
