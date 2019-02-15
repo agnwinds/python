@@ -282,7 +282,7 @@ of the parameter file and inputs will be requested from the command line. \n\
 \n\
 ";                              // End of string to provide one with help
 
-  Log ("%s\n", some_help);
+  printf ("%s\n", some_help);
 
-  exit (0);
+  exit (0);                     // Note that here we simply do want to exit, not use Exit
 }

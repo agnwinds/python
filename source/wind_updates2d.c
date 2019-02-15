@@ -1056,6 +1056,10 @@ wind_rad_init ()
     plasmamain[n].bf_simple_ionpool_out = 0.0;
     plasmamain[n].bf_simple_ionpool_in = 0.0;
 
+
+    for (i = 0; i < 3; i++)
+      plasmamain[n].dmo_dt[i] = 0.0;    //Zero the radiation force calculation
+
     if (geo.rt_mode == RT_MODE_MACRO)
       macromain[n].kpkt_rates_known = -1;
 
