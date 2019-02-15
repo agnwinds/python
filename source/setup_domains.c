@@ -77,26 +77,6 @@ get_domain_params (ndom)
   /* Define the coordinate system for the grid and allocate memory for the wind structure */
   strcpy (answer, "cylindrical");
   zdom[ndom].coord_type = rdchoice ("Wind.coord_system(spherical,cylindrical,polar,cyl_var)", "0,1,2,3", answer);
-//OLD  rdint ("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
-//OLD  switch (input_int)
-//OLD  {
-//OLD  case 0:
-//OLD    zdom[ndom].coord_type = SPHERICAL;
-//OLD    break;
-//OLD  case 1:
-//OLD    zdom[ndom].coord_type = CYLIND;
-//OLD    break;
-//OLD  case 2:
-//OLD    zdom[ndom].coord_type = RTHETA;
-//OLD    break;
-//OLD  case 3:
-//OLD    zdom[ndom].coord_type = CYLVAR;
-//OLD    break;
-//OLD  default:
-//OLD    Error ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-//OLD          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-//OLD  }
-
 
   if (zdom[ndom].wind_type == IMPORT)
   {

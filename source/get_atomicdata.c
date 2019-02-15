@@ -5,6 +5,7 @@
  * @date   March, 2018
  *
  * @brief  Read in all of the atomic data for use with Python
+ * and other similar programs
  *
  ***********************************************************/
 
@@ -16,6 +17,8 @@
 
 #include "atomic.h"
 #include "log.h"
+// If routines are added cproto > atomic_proto.h should be run
+#include "atomic_proto.h"
 
 
 

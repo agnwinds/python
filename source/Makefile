@@ -200,7 +200,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		setup_reverb.c setup_line_transfer.c 
 
 #
-# kpar_source is now declared seaprately from python_source so that the file log.h 
+# kpar_source is now declared separately from python_source so that the file log.h 
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c 
 
@@ -210,7 +210,9 @@ prototypes:
 	cp templates.h templates.h.old
 	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} > foo.h  
 	cp foo.h templates.h
+	rm foo.h
 	cproto -I$(INCLUDE) $(kpar_source) > log.h 
+	cproto  -I$(INCLUDE) get_atomicdata.c > atomic_proto.h
 
 python: startup  python.o $(python_objects)
 	$(CC)  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python

@@ -19,6 +19,8 @@ double q21 (struct lines *line_ptr, double t);
 double q12 (struct lines *line_ptr, double t);
 double a21 (struct lines *line_ptr);
 double upsilon (int n_coll, double u0);
+int fraction (double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp (double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 /* python.c */
 int main (int argc, char *argv[]);
 /* photon2d.c */
@@ -297,8 +299,6 @@ int reposition (PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping (PhotPtr p, int *nnscat);
 /* util.c */
-int fraction (double value, double array[], int npts, int *ival, double *f, int mode);
-int linterp (double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 int coord_fraction (int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell (int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij (int ndom, int n, int *i, int *j);

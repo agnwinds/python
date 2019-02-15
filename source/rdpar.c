@@ -559,7 +559,8 @@ string_process_from_file (question, dummy)
   char firstword[LINELEN], secondword[LINELEN];
   char *line, *fgets_return;
   char *ccc, *index (), *fgets ();
-  int nwords, wordlength;
+  int nwords = 0;               // Initialise to avoid warning
+  int wordlength;
   char old_question[LINELEN];
   char xfirstword[LINELEN], xquestion[LINELEN];
   int i;
