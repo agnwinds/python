@@ -136,10 +136,6 @@ get_atomic_data (masterfile)
   int lev_type;
   int nn;
   double yield;
-//  int nn, nl, dumnn, dumnl, dumz, dumistate, n_verner, ion_index,
-//    target_index;
-//  double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
-//  double adi, t0di, bdi, t1di;
   double gstemp[BAD_GS_RR_PARAMS];      //Temporary storage for badnell resolved GS RR rates
   double temp[LINELENGTH];      //Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;          //Flags to say what part of data is being read in for DR and RR
@@ -623,11 +619,7 @@ structure does not have this property! */
 
         case 'i':
 
-          if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) == 6)
-          {
-            continue;
-          }
-          else
+          if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) != 6)
           {
             Error ("get_atomic_data: file %s line %d: Ion istate line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
