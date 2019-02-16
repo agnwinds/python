@@ -139,7 +139,7 @@ Log_init (filename)
   if ((diagptr = fopen (filename, "w")) == NULL)
   {
     printf ("Yikes: could not even open log file %s\n", filename);
-    exit (0);
+    Exit (0);
   }
   init_log = 1;
 
@@ -149,7 +149,7 @@ Log_init (filename)
   if (errorlog == NULL)
   {
     printf ("There is a problem in allocating memory for the errorlog structure\n");
-    exit (0);
+    Exit (0);
   }
 
   return (0);
@@ -184,7 +184,7 @@ Log_append (filename)
   if ((diagptr = fopen (filename, "a")) == NULL)
   {
     printf ("Yikes: could not even open log file %s\n", filename);
-    exit (0);
+    Exit (0);
   }
   init_log = 1;
 
@@ -194,7 +194,7 @@ Log_append (filename)
   if (errorlog == NULL)
   {
     printf ("There is a problem in allocating memory for the errorlog structure\n");
-    exit (0);
+    Exit (0);
   }
 
   return (0);
@@ -588,7 +588,7 @@ error_count (char *format)
     {
       printf ("Exceeded number of different errors that can be stored\n");
       error_summary ("Quitting because there are too many differnt types of errors\n");
-      exit (0);
+      Exit (0);
     }
   }
   else
@@ -599,7 +599,7 @@ error_count (char *format)
     if (n == max_errors)
     {
       error_summary ("Something is drastically wrong for any error to occur so much!\n");
-      exit (0);
+      Exit (0);
     }
   }
   return (n + 1);
@@ -638,6 +638,7 @@ error_summary (message)
     Log ("%9d -- %s", errorlog[n].n, errorlog[n].description);
   }
 
+  Log_flush ();
   return (0);
 }
 
@@ -721,6 +722,8 @@ Log_set_mpi_rank (rank, n_mpi)
  *
  * ###Notes###
  *
+ * 26/11/18 EP: removed if statement so Log_parallel really does print a message
+ * to stdout for all MPI processes.
  *
  **********************************************************/
 
@@ -734,10 +737,9 @@ Log_parallel (char *format, ...)
     return (0);
 
   va_start (ap, format);
-  va_copy (ap2, ap);            
+  va_copy (ap2, ap);
 
-  if (my_rank == 0)
-    result = vprintf (format, ap);
+  result = vprintf (format, ap);
 
   fprintf (diagptr, "Para: ");
   result = vfprintf (diagptr, format, ap2);
@@ -782,12 +784,64 @@ Debug (char *format, ...)
     Log_init ("logfile");
 
   va_start (ap, format);
-  va_copy (ap2, ap);            
-  if (my_rank == 0)             
+  va_copy (ap2, ap);
+  if (my_rank == 0)
     vprintf ("Debug: ", ap);
   result = vprintf (format, ap);
   fprintf (diagptr, "Debug: ");
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
   return (result);
+}
+
+
+
+
+/**********************************************************/
+/**
+ *  @brief Wrapper function to exit MPI/Python.
+ *
+ *  @param[in] int error_code. An integer classifying the error. Note that this
+ *  number should be a positive non-zero integer.
+ *
+ *  @details
+ *  When MPI is in use, using the standard C library exit function can be somewhat
+ *  dangerous, as if a process exits with return code 0, MPI assumes that the
+ *  process has exited correctly and the program will continue. This results in
+ *  a deadlock and without any safety mechanism can result in an MPI run never
+ *  finishing. Hence, in multiprocessor mode, one should use use MPI_Abort
+ *  (which isn't a very graceful) to ensure that if a process does need to exit,
+ *  then all processes will exit with it.
+ *
+ *  Before exiting, an error summary is printed to screen and and log is flushed
+ *  to ensure everything is up to date to aid with error diagnosis.
+ *
+ *  ### Programming Notes ###
+ *
+ *  Maybe this function belongs elsewhere.
+ *
+ *  The error summary is only printed to the master processes' stdout, but the
+ *  error summary can also be found in each MPI processes' diag file.
+ *
+ **********************************************************/
+
+#ifdef MPI_ON
+#include <mpi.h>
+#endif
+
+void
+Exit (int error_code)
+{
+  error_summary ("Error summary prior to exit");
+  Log_flush ();
+
+#ifdef MPI_ON
+  Log_parallel ("MPI PROCESS %i: MPI exiting Python processes with error %i. ", my_rank, error_code);
+  Log_parallel ("Check the diag files for more info\n");
+  MPI_Abort (MPI_COMM_WORLD, error_code);
+#else
+  Log ("\n--------------------------------------------------------------------------\n");
+  Log ("Exit: Python exiting with error %i\n", error_code);
+  exit (error_code);
+#endif
 }

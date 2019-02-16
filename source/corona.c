@@ -121,7 +121,7 @@ get_corona_params (ndom)
     else
     {
       Error ("corona: Cannot define z coordinates unless zdom[ndom].mdim is defined. Aborting\n");
-      exit (0);
+      Exit (0);
     }
   }
 
@@ -214,6 +214,7 @@ corona_velocity (ndom, x, v)
 
 double
 corona_rho (ndom, x)
+     int ndom;
      double x[];
 {
   double rho;
@@ -221,10 +222,10 @@ corona_rho (ndom, x)
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     Error ("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");
-    exit (0);
+    Exit (0);
   }
 
-  rho = zdom[ndom].corona_base_density * exp (-(fabs(x[2])) / zdom[ndom].corona_scale_height);
+  rho = zdom[ndom].corona_base_density * exp (-(fabs (x[2])) / zdom[ndom].corona_scale_height);
 
   if (rho < 1.e-10)
     rho = 1.e-10;               // A floor to the density appears to be needed for some of the

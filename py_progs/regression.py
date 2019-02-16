@@ -111,7 +111,11 @@ def sum_errors(root='1d_sn'):
         errors[i]=errors[i].strip()
         words=errors[i].split(' -- ')
         error_names.append(words[1])
-        error_counts.append(int(words[0]))
+        try:
+            error_counts.append(int(words[0]))
+        except ValueError:
+            print('Error:sum_errors: %s in root %s' % (errors[i],root))
+            error_counts.append(-999)
         i+=1
 
     # print(errors)
@@ -211,8 +215,10 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
 		
     if os.path.isdir(pf_dir):
         pf_files=glob(pf_dir+'/*pf')
+        txt_files=glob(pf_dir+'/*.txt')
     elif os.path.isdir('%s/examples/%s' % (PYTHON,pf_dir)):
         pf_files=glob('%s/examples/%s/*pf' % (PYTHON,pf_dir))
+        txt_files=glob('%s/examples/%s/*.txt' % (PYTHON,pf_dir))
     else:
         print('Error: The pf directory %s does not appear to exist' % pf_dir)
         return
@@ -250,6 +256,11 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
             command='mpirun -np %d %s %s >%s.stdout.txt' % (np,version,pf,root_name)
         commands.append(command)
         root_names.append(root_name)
+
+    # get any text files if any
+
+    for one in txt_files:
+        shutil.copy(one,out_dir)
     			
 
     print('The commands that will be executed will be:')

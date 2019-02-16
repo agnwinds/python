@@ -47,6 +47,7 @@
  ***********************************************************/
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -150,19 +151,20 @@ bands_init (imode, band)
   double fmax;
   double f1_log, f2_log, df;
   int ii;
+  char answer[LINELENGTH];
 
   freqmin = C / 12000e-8;       /*20000 A */
 
-  tmax = 30000.;  /* This sets a floor on freqmax */
+  tmax = 30000.;                /* This sets a floor on freqmax */
 
-  for (ii=0;ii<geo.ndomain;ii++){
-      if (zdom[ii].twind>tmax){
-          tmax=zdom[ii].twind;
-      }
+  for (ii = 0; ii < geo.ndomain; ii++)
+  {
+    if (zdom[ii].twind > tmax)
+    {
+      tmax = zdom[ii].twind;
+    }
   }
 
-//OLD  if (geo.twind_init > tmax)
-//OLD    tmax = geo.twind_init;
   if (geo.tstar > tmax)
     tmax = geo.tstar;
   if (geo.t_bl > tmax && geo.lum_bl > 0.0)
@@ -178,7 +180,7 @@ bands_init (imode, band)
   else
     Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
   geo.tmax = tmax;              /*this a global variable so it is available to the code to make informed guesses as to the possible 
-                                  location of any BB driven exponential dropoff in the spectrum */
+                                   location of any BB driven exponential dropoff in the spectrum */
   t = tmax;
   f1 = freqmin;
   f2 = freqmax;
@@ -187,8 +189,12 @@ bands_init (imode, band)
 
   if (imode == -1)
   {
-    mode = 2;
-    rdint ("Photon_sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)", &mode);
+    strcpy (answer, "cv");
+    mode =
+      rdchoice ("Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)", "0,2,3,7,1,4,5,6,8",
+                answer);
+    //OLD mode = 2;
+    //OLD rdint ("Photon_sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)", &mode);
   }
   else
   {
@@ -226,12 +232,12 @@ bands_init (imode, band)
     if (f1 > band->f2[0])
     {
       Error ("bands_init: f1 (%e) > 13.599/HEV)\n", f1);
-      exit (0);
+      Exit (0);
     }
     if (f2 < band->f2[2])
     {
       Error ("bands_init: f2 (%e) < 54.418/HEV)\n", f2);
-      exit (0);
+      Exit (0);
     }
 
   }
@@ -250,12 +256,12 @@ bands_init (imode, band)
     if (f1 > band->f2[0])
     {
       Error ("bands_init: f1 (%e) > 13.599/HEV)\n", f1);
-      exit (0);
+      Exit (0);
     }
     if (f2 < band->f2[2])
     {
       Error ("bands_init: f2 (%e) < 54.418/HEV)\n", f2);
-      exit (0);
+      Exit (0);
     }
 
   }
@@ -307,7 +313,7 @@ bands_init (imode, band)
     if (geo.agn_ion_spectype != SPECTYPE_CL_TAB)
     {
       Error ("Trying to use a broken power law banding without setting spectype to broken power law - must set spectype to 4\n");
-      exit (0);
+      Exit (0);
     }
     rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
 
@@ -540,7 +546,7 @@ bands_init (imode, band)
   else
   {
     Error ("bands_init: Unknown mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -710,7 +716,8 @@ freqs_init (freqmin, freqmax)
   Log_silent ("freqs_init: There were %d final intervals\n", geo.nxfreq);
   for (n = 0; n < geo.nxfreq; n++)
   {
-    Log_silent ("freqs_init: %8.2f (%8.2e)    %8.2f (%8.2e)  \n", geo.xfreq[n] * HEV, geo.xfreq[n], geo.xfreq[n + 1] * HEV, geo.xfreq[n + 1]);
+    Log_silent ("freqs_init: %8.2f (%8.2e)    %8.2f (%8.2e)  \n", geo.xfreq[n] * HEV, geo.xfreq[n], geo.xfreq[n + 1] * HEV,
+                geo.xfreq[n + 1]);
   }
 
 

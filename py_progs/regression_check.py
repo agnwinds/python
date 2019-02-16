@@ -57,6 +57,7 @@ import os
 from glob import glob
 
 import difflib  # To compare text files
+import regression_plot # To make plots
 
 
 def diff_two_files(file1,file2):
@@ -224,7 +225,11 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
     table1=Table([name1,root1],names=['name','root1'])
     table2=Table([name2,root2],names=['name','root2'])
 
-    combined=join(table1,table2,join_type='left',keys=['name'])
+    try:
+        combined=join(table1,table2,join_type='left',keys=['name'])
+    except ValueError:
+        print('Error: regression_check: run1 %s len %d run2 %s len %d\n' % (run1,len(table1),run2,len(table2)))
+        return
 
     # print(combined)
 
@@ -238,10 +243,12 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
         print('COMPARING %s' % one['name'])
 
         ext='.out.pf'
-        x1=one['root1']+ext
-        x2=one['root2']+ext
+        # x1=one['root1']+ext
+        # x2=one['root2']+ext
 
         try:
+            x1=one['root1']+ext
+            x2=one['root2']+ext
             result=diff_two_files(x1,x2)
             # print('There were differences in %5d lines in %s' % (len(result)//2,ext))
             out.write('There were differences in %5d lines in %s\n' % (len(result)//2,ext))
@@ -250,13 +257,17 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
             pf_count.append(len(result)//2)
         except ValueError:
             pf_count.append(-99)
+        except TypeError:
+            pf_count.append(-99)
 
 
         ext='.log_spec_tot'
-        x1=one['root1']+ext
-        x2=one['root2']+ext
+        # x1=one['root1']+ext
+        # x2=one['root2']+ext
 
         try:
+            x1=one['root1']+ext
+            x2=one['root2']+ext
             result=diff_two_files(x1,x2)
             # print('There were differences in %5d lines in %s' % (len(result)//2,ext))
             out.write('There were differences in %5d lines in %s\n' % (len(result)//2,ext))
@@ -264,15 +275,19 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
             if len(result)<50:
                 out.write(''.join(result))
         except ValueError:
-            log_spec_tot.count.append(-99)
+            log_spec_tot_count.append(-99)
+        except TypeError:
+            log_spec_tot_count.append(-99)
 
 
 
         ext='.spec'
-        x1=one['root1']+ext
-        x2=one['root2']+ext
+        # x1=one['root1']+ext
+        # x2=one['root2']+ext
 
         try:
+            x1=one['root1']+ext
+            x2=one['root2']+ext
             result=diff_two_files(x1,x2)
             # print('There were differences in %5d lines in %s' % (len(result)//2,ext))
             out.write('There were differences in %5d lines in %s\n' % (len(result)//2,ext))
@@ -280,6 +295,8 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
             if len(result)<50:
                 out.write(''.join(result))
         except ValueError:
+            spec_count.append(-99)
+        except TypeError:
             spec_count.append(-99)
 
 
@@ -293,6 +310,10 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
 
     print(combined)
 
+    print('\n Make plots of the spectra which will be stored in Xcompare\n')
+    regression_plot.do_all(run1,run2)
+    print('Plotting completed')
+
 
 
     return
@@ -304,11 +325,13 @@ def get_other_directory(run1):
     the regression directory that was most recently created that is not
     run1
     '''
-    x=glob('py*')
+    # x=glob('py*')
+    x=glob('*/')
     dirs=[]
     modtime=[]
     for one in x:
-        if os.path.isdir(one) and one!='run1':
+        one=one.rstrip('/')
+        if os.path.isdir(one) and one!=run1:
             dirs.append(one)
             modtime.append(os.path.getmtime(one))
 

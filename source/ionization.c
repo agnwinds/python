@@ -44,94 +44,90 @@ ion_abundances (xplasma, mode)
 
 
   if (mode == IONMODE_ML93_FIXTE)
-    {
+  {
 /* on-the-spot approximation using existing t_e.   This routine does not attempt
 to match heating and cooling in the wind element! */
 
-      if ((ireturn = nebular_concentrations (xplasma, NEBULARMODE_ML93)))
-	{
-	  Error
-	    ("ionization_abundances: nebular_concentrations failed to converge\n");
-	  Error
-	    ("ionization_abundances: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n",
-	     xplasma->j, xplasma->t_e, xplasma->w);
-	}
+    if ((ireturn = nebular_concentrations (xplasma, NEBULARMODE_ML93)))
+    {
+      Error ("ionization_abundances: nebular_concentrations failed to converge\n");
+      Error ("ionization_abundances: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n", xplasma->j, xplasma->t_e, xplasma->w);
     }
+  }
   else if (mode == IONMODE_LTE_TR)
-    {
+  {
 /* LTE using t_r */
-      ireturn = nebular_concentrations (xplasma, NEBULARMODE_TR);
-    }
+    ireturn = nebular_concentrations (xplasma, NEBULARMODE_TR);
+  }
   else if (mode == IONMODE_LTE_TE)
-    {
+  {
 /* LTE using t_e */
-      ireturn = nebular_concentrations (xplasma, NEBULARMODE_TE);
-    }
+    ireturn = nebular_concentrations (xplasma, NEBULARMODE_TE);
+  }
   else if (mode == IONMODE_FIXED)
-    {				//  Hardwired concentrations
+  {                             //  Hardwired concentrations
 
-      ireturn = fix_concentrations (xplasma, 0);
-    }
+    ireturn = fix_concentrations (xplasma, 0);
+  }
   else if (mode == IONMODE_ML93)
-    {
+  {
 /* On the spot, with one_shot at updating t_e before calculating densities */
 
 /* Shift values to old */
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->dt_e_old = xplasma->dt_e;
+    xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
+    xplasma->t_e_old = xplasma->t_e;
+    xplasma->t_r_old = xplasma->t_r;
+    xplasma->lum_tot_old = xplasma->lum_tot;
 
-      ireturn = one_shot (xplasma, mode);
+    ireturn = one_shot (xplasma, mode);
 
 /* Convergence check */
-      convergence (xplasma);
-    }
+    convergence (xplasma);
+  }
   else if (mode == IONMODE_MATRIX_BB)
-    {
-      /* New abundances have been computed using matrix scheme with dilute blackbody model for J_nu
-         We can now attempt to balance heating and cooling with the new abundance in the
-         same way as mode 3. */
+  {
+    /* New abundances have been computed using matrix scheme with dilute blackbody model for J_nu
+       We can now attempt to balance heating and cooling with the new abundance in the
+       same way as mode 3. */
 
 /* Shift values to old */
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->dt_e_old = xplasma->dt_e;
+    xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
+    xplasma->t_e_old = xplasma->t_e;
+    xplasma->t_r_old = xplasma->t_r;
+    xplasma->lum_tot_old = xplasma->lum_tot;
 
-      ireturn = one_shot (xplasma, mode);
+    ireturn = one_shot (xplasma, mode);
 
 /* Convergence check */
-      convergence (xplasma);
-    }
+    convergence (xplasma);
+  }
   else if (IONMODE_MATRIX_SPECTRALMODEL)
-    {
+  {
 
 /*  spectral_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
 
-      ireturn = spectral_estimators (xplasma);
+    ireturn = spectral_estimators (xplasma);
 
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->dt_e_old = xplasma->dt_e;
+    xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
+    xplasma->t_e_old = xplasma->t_e;
+    xplasma->t_r_old = xplasma->t_r;
+    xplasma->lum_tot_old = xplasma->lum_tot;
 
 
-      ireturn = one_shot (xplasma, mode);
+    ireturn = one_shot (xplasma, mode);
 
 
 /* Convergence check */
-      convergence (xplasma);
-    }
+    convergence (xplasma);
+  }
   else
-    {
-      Error ("ion_abundances: Could not calculate abundances for mode %d\n",
-	     mode);
-      exit (0);
-    }
+  {
+    Error ("ion_abundances: Could not calculate abundances for mode %d\n", mode);
+    Exit (0);
+  }
 
   /* If we want the Auger effect deal with it now. Initially, this is
      put in here, right at the end of the ionization calculation -
@@ -162,18 +158,18 @@ to match heating and cooling in the wind element! */
  *
  * @details
  * The routine attempts to determine whether a cell is
- * on the track to a final solution by checking whether
+ * on the track towards a final solution by checking whether
  * the electron and radiation temperatures are getting
- * smaller with cycle and whetehr the difference between
- * heating and cooling is drroping.
+ * smaller with each cycle and whether the difference between
+ * heating and cooling is decreasing.
  *
  * The routine returns a number between 0 and 3,
  * depending on the number of convergence checks that
- * are passed.  If all convergence tests are pssed
- * then the number returned will be 0
+ * are passed.  If all convergence tests are passed
+ * then the number returned will be 0.
  *
- * The routine also adjust the gain which controls how
- * far the electron temperture can change in a cycle.
+ * The routine also adjusts the gain which controls how
+ * much the electron temperature can change in a cycle.
  *
  * ### Notes ###
  *
@@ -183,46 +179,43 @@ int
 convergence (xplasma)
      PlasmaPtr xplasma;
 {
-  int trcheck, techeck, hccheck, whole_check, converging;
+  int trcheck, techeck, hccheck, whole_check;
+  double min_gain = 0.1, gain_damp = 0.7, max_gain, gain_amp, cyc_frac;
   double epsilon;
 
-  trcheck = techeck = hccheck = converging = 0;
-  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;	//NSH 70g - zero the global variables
+  trcheck = techeck = hccheck = 0;
+  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;   //NSH 70g - zero the global variables
   epsilon = 0.05;
 
-  /* Check the fractional change in tempperatature and if is less than
-   * epsiolong increment trcheck and techeck
+  /* Check the fractional change in temperature and if is less than
+   * epsilon, increment trcheck and techeck
    */
 
-  if ((xplasma->converge_t_r =
-       fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old +
-						 xplasma->t_r)) > epsilon)
+  if ((xplasma->converge_t_r =  // Radiation temperature
+       fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r)) > epsilon)
     xplasma->trcheck = trcheck = 1;
-  if (xplasma->t_e < TMAX)
-    {
-      if ((xplasma->converge_t_e =
-	   fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
-						     xplasma->t_e)) > epsilon)
-	xplasma->techeck = techeck = 1;
-      if ((xplasma->converge_hc =
-	   fabs (xplasma->heat_tot - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
-	xplasma->hccheck = hccheck = 1;
-    }
-  else				//If the cell has reached the maximum temperature
-    {
-      xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;	//we mark it as overlimit
-    }
 
-//110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
-//111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
+  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1
+   * - 110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
+   * - 111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
+   * - 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
+   *   cool_adiabatic is large and negative - and hence heating
+   * - NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!)
+   * - NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to
+   *   converge if we are hitting the maximum temperature
+   */
 
-  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
-  /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
-     cool_adiabatic is large and negative - and hence heating */
+  if (xplasma->t_e < TMAX)      // Electron temperature and heat/cooling
+  {
+    if ((xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e)) > epsilon)
+      xplasma->techeck = techeck = 1;
 
-/* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
+    if ((xplasma->converge_hc = fabs (xplasma->heat_tot - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
+      xplasma->hccheck = hccheck = 1;
+  }
+  else                          // If the cell has reached the maximum temperature we mark it as over-limit
+    xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;
 
-/* NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to converge if we are hitting the maximum temperature */
   /* whole_check is the sum of the temperature checks and the heating check */
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
@@ -230,26 +223,45 @@ convergence (xplasma)
   /* Converging is a situation where the change in electron
    * temperature is dropping with time and the cell is oscillating
    * around a temperature.  If that is the case, we drop the
-   * amount by which the temperature can change in this cycle
+   * amount by which the temperature can change in this cycle. Else if the cell
+   * is not converging, we increase the amount by which the temperature can
+   * change in this cycle.
    */
 
-  if (xplasma->dt_e_old * xplasma->dt_e < 0
-      && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))
-    converging = 1;
-  xplasma->converging = converging;
+  if (xplasma->dt_e_old * xplasma->dt_e < 0 && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old)) // The cell is converging
+  {
+    xplasma->converging = 1;
 
-  if (converging == 1)
-    {				// Not converging
-      xplasma->gain *= 0.7;
-      if (xplasma->gain < 0.1)
-	xplasma->gain = 0.1;
-    }
-  else
+    xplasma->gain *= gain_damp;
+    if (xplasma->gain < min_gain)
+      xplasma->gain = min_gain;
+  }
+  else                          // The cell is not converging
+  {
+    /*
+     * EP: allow the gain to increase more for the first cyc_frac * cycles to
+     * allow the plasma to change temperature more rapidly -- right now this
+     * is controlled by some magic numbers and should probably be fine tuned
+     * to find the best numbers
+     */
+
+    cyc_frac = 0.5;
+
+    if (geo.wcycle <= floor (cyc_frac * geo.wcycles))
     {
-      xplasma->gain *= 1.1;
-      if (xplasma->gain > 0.8)
-	xplasma->gain = 0.8;
+      gain_amp = 1.5;
+      max_gain = 0.999;
     }
+    else
+    {
+      gain_amp = 1.1;
+      max_gain = 0.8;
+    }
+
+    xplasma->gain *= gain_amp;
+    if (xplasma->gain > max_gain)
+      xplasma->gain = max_gain;
+  }
 
   return (whole_check);
 }
@@ -258,7 +270,7 @@ convergence (xplasma)
 
 /**********************************************************/
 /**
- * @brief      The routien summarizes the how well the wind converging
+ * @brief      The routine summarizes the how well the wind converging
  * to a solution as a whole
  *
  * @return     Always returns 0
@@ -278,30 +290,30 @@ check_convergence ()
 {
   int n;
   int nconverge, nconverging, ntot;
-  int nte, ntr, nhc;		//NSH 70g - three new counters for the different convergence criteria
-  int nmax;			//NSH 130725 - counter for cells which are marked as converged, but over temp
+  int nte, ntr, nhc;            //NSH 70g - three new counters for the different convergence criteria
+  int nmax;                     //NSH 130725 - counter for cells which are marked as converged, but over temp
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
   ntr = nte = nhc = nmax = 0;
 
   for (n = 0; n < NPLASMA; n++)
-    {
-      ntot++;
-      if (plasmamain[n].converge_whole == 0)
-	nconverge++;
-      if (plasmamain[n].trcheck == 0)
-	ntr++;
-      if (plasmamain[n].techeck == 0)
-	nte++;
-      if (plasmamain[n].hccheck == 0)
-	nhc++;
-      if (plasmamain[n].techeck == 2)
-	nmax++;
-      if (plasmamain[n].converging == 0)
-	nconverging++;
+  {
+    ntot++;
+    if (plasmamain[n].converge_whole == 0)
+      nconverge++;
+    if (plasmamain[n].trcheck == 0)
+      ntr++;
+    if (plasmamain[n].techeck == 0)
+      nte++;
+    if (plasmamain[n].hccheck == 0)
+      nhc++;
+    if (plasmamain[n].techeck == 2)
+      nmax++;
+    if (plasmamain[n].converging == 0)
+      nconverging++;
 
-    }
+  }
 
   xconverge = ((double) nconverge) / ntot;
   xconverging = ((double) nconverging) / ntot;
@@ -364,25 +376,25 @@ one_shot (xplasma, mode)
   te_old = xplasma->t_e;
 
   if (modes.zeus_connect == 1 || modes.fixed_temp == 1)
-    {
-      te_new = te_old;		//We don't want to change the temperature
-      xxxplasma = xplasma;
-      zero_emit (te_old);	//But we do still want to compute all heating and cooling rates
-    }
-  else				//Do things to normal way - look for a new temperature
-    {
-      te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);	//compute the new t_e - no limits on where it can go
-      xplasma->t_e = (1 - gain) * te_old + gain * te_new;	/*Allow the temperature to move by a fraction gain towards
-								   the equilibrium temperature */
+  {
+    te_new = te_old;            //We don't want to change the temperature
+    xxxplasma = xplasma;
+    zero_emit (te_old);         //But we do still want to compute all heating and cooling rates
+  }
+  else                          //Do things to normal way - look for a new temperature
+  {
+    te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);     //compute the new t_e - no limits on where it can go
+    xplasma->t_e = (1 - gain) * te_old + gain * te_new; /*Allow the temperature to move by a fraction gain towards
+                                                           the equilibrium temperature */
 
-      /* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from
-       * the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
-      if (xplasma->t_e > TMAX)	//check to see if we have maxed out the temperature.
-	{
-	  xplasma->t_e = TMAX;
-	}
-	zero_emit(xplasma->t_e);  //Get the heating and cooling rates correctly for the new temperature
+    /* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from
+     * the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
+    if (xplasma->t_e > TMAX)    //check to see if we have maxed out the temperature.
+    {
+      xplasma->t_e = TMAX;
     }
+    zero_emit (xplasma->t_e);   //Get the heating and cooling rates correctly for the new temperature
+  }
 
 
 
@@ -393,38 +405,32 @@ meaning in nebular concentrations.
 */
 
   if (mode == IONMODE_ML93)
-    mode = NEBULARMODE_ML93; // This is weird, why not continue
+    mode = NEBULARMODE_ML93;    // This is weird, why not continue
   else if (mode <= 1 || mode == 5 || mode > 9)
-    {
-      /* There is no mode 5 at present  - SIM + two new modes in Feb 2012  + mode 5 now removed */
+  {
+    /* There is no mode 5 at present  - SIM + two new modes in Feb 2012  + mode 5 now removed */
 
-      Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n",
-	     mode);
-      exit (0);
-    }
+    Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n", mode);
+    Exit (0);
+  }
 
   if (xplasma->t_r > 10.)
-    {				/* Then modify to an on the spot approx */
-      if (nebular_concentrations (xplasma, mode))
-	{
-	  Error
-	    ("ionization_on_the_spot: nebular_concentrations failed to converge\n");
-	  Error
-	    ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e nphot %i\n",
-	     xplasma->j, xplasma->t_e, xplasma->w, xplasma->ntot);
-	}
-      if (xplasma->ne < 0 || VERY_BIG < xplasma->ne)
-	{
-	  Error ("ionization_on_the_spot: ne = %8.2e out of range\n",
-		 xplasma->ne);
-	}
-    }
-  else
+  {                             /* Then modify to an on the spot approx */
+    if (nebular_concentrations (xplasma, mode))
     {
-      Error ("ionization_on_the_spot: t_r exceptionally small %g\n",
-	     xplasma->t_r);
-      exit (0);
+      Error ("ionization_on_the_spot: nebular_concentrations failed to converge\n");
+      Error ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e nphot %i\n", xplasma->j, xplasma->t_e, xplasma->w, xplasma->ntot);
     }
+    if (xplasma->ne < 0 || VERY_BIG < xplasma->ne)
+    {
+      Error ("ionization_on_the_spot: ne = %8.2e out of range\n", xplasma->ne);
+    }
+  }
+  else
+  {
+    Error ("ionization_on_the_spot: t_r exceptionally small %g\n", xplasma->t_r);
+    Exit (0);
+  }
 
 
   return (0);
@@ -488,17 +494,17 @@ calc_te (xplasma, tmin, tmax)
    */
 
   if ((z1 * z2 < 0.0))
-    {				// Then the interval is bracketed
-      xplasma->t_e = zbrent (zero_emit, tmin, tmax, 50.);
-    }
+  {                             // Then the interval is bracketed
+    xplasma->t_e = zbrent (zero_emit, tmin, tmax, 50.);
+  }
   else if (fabs (z1) < fabs (z2))
-    {
-      xplasma->t_e = tmin;
-    }
+  {
+    xplasma->t_e = tmin;
+  }
   else
-    {
-      xplasma->t_e = tmax;
-    }
+  {
+    xplasma->t_e = tmax;
+  }
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
 
@@ -574,7 +580,7 @@ zero_emit (t)
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
 
-  cooling(xxxplasma,t);
+  cooling (xxxplasma, t);
 
   difference = xxxplasma->heat_tot - xxxplasma->cool_tot;
 
