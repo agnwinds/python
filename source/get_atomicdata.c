@@ -5,6 +5,7 @@
  * @date   March, 2018
  *
  * @brief  Read in all of the atomic data for use with Python
+ * and other similar programs
  *
  ***********************************************************/
 
@@ -16,143 +17,9 @@
 
 #include "atomic.h"
 #include "log.h"
+// If routines are added cproto > atomic_proto.h should be run
+#include "atomic_proto.h"
 
-
-
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD Synopsis:
-//OLD   get_atomic_data(masterfile) is a generalized subroutine for reading atomic data
-//OLD   into a set of structures defined in "atomic.h"   (Space for the structures is
-//OLD   also allocated in this routine.
-//OLD
-//OLD
-//OLD
-//OLD Arguments:
-//OLD   masterfile is a file which contains the names of the files which will be read
-//OLD   as atomic data.  (This allows one to group the atomic data into logical units.)
-//OLD
-//OLD Returns:
-//OLD
-//OLD
-//OLD Description:
-//OLD   get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
-//OLD   otherwise noted, e.g ionization potentials are converted to ergs.
-//OLD
-//OLD   The order of the data is important.  Elements should be defined before ions; ions
-//OLD   before levels, levels before  lines etc.  In most if not all cases, one can either define all
-//OLD         of the elements first, all of the ions, etc ... or the first element and its ions, the
-//OLD         second element and its ions etc. Commenting out an element in the datafile has the effect of
-//OLD   eliminating all of the data associated with that element, e.g ions, lines, etc.
-//OLD
-//OLD   The program assumes that the ions for a given element are grouped together,
-//OLD         that the levels for a given element are grouped together, etc.
-//OLD
-//OLD   If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
-//OLD   x-sections should be read first.  The routine will ignore data in the VFKY list if there
-//OLD   is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
-//OLD   on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
-//OLD   would be difficult because you would have to drop various bits of Topbase data out of the
-//OLD         middle of the structure or mark it NG or something.)
-//OLD
-//OLD   Similarly, as a general rule the macro information should be provided before the simple
-//OLD   ions are described, and the macro lines should be presented before simple lines.
-//OLD
-//OLD   The only data which can be mixed up completely is the line array.
-//OLD
-//OLD   Finally, get_atomic_data creates a pointer array to  lines, which has the lines in
-//OLD   frequency ascending order.   This is actually done by a small subroutine index_lines
-//OLD   which in turn calls a Numerical Recipes routine.
-//OLD
-//OLD Notes:
-//OLD   NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA
-//OLD   IS TO BE USED.  Specifically nothing here should be specific to the Monte Carlo calculations
-//OLD   for which the routines were written. These routines are just ways to read in the atomic data
-//OLD
-//OLD   For completeness the macro atom information should be probably be printed to the data file,
-//OLD   or alteranatively the printing to the data file should be eliminated altogether as a waste
-//OLD   of time -- ksl
-//OLD History:
-//OLD   97jan   ksl     Coded and debugged as part of Python effort.
-//OLD   97oct2  ck      Added steps to read in recombination fractions
-//OLD   98feb27 ksl     Revised photoionization inputs so now use Verner, Ferland, Korista, & Yakolev
-//OLD                   formalism
-//OLD   98apr4  ksl     Modified to read multiplicites of lower and upper states of resonance lines, and
-//OLD                   to exclude lines in which the oscillator strengths or frequencies etc were zero
-//OLD   98may23 ksl     Corrected error which allowed ions to be read for which there were no elements.
-//OLD                   Also fixed initialization of phot_info
-//OLD   99jan4  ksl     Added code to keep track of the lowest frequency for which photoionization
-//OLD                   can occur (phot_freq_min).
-//OLD   99nov28 ksl     Modified so that the datafiles it looks for are now in a subdirectory atomic.
-//OLD                   This follows the approach I have been adopting in other programs of putting
-//OLD                   data into a subdirectory of the program in which the program is being run.  This
-//OLD                   way one can merely link to the appropriate directory
-//OLD   00nov27 ksl     Updated program to make it easier to consider different sets of atomic data
-//OLD                   Also converted program so that it would use the standard logging procedures.
-//OLD         00nov28 ksl       Updated program to accept transitions which do not arise from ground states
-//OLD   01jul11 ksl     Updated program to accept levels as produced by kurucz, using for example
-//OLD                   gfall.dat .  This was in preparation for incorporating some non-LTE aspects
-//OLD                   into python
-//OLD   01sep24 ksl     Updated program to define some levels to use in a non_lte calculation.  I
-//OLD                   assume that the number of levels to consider in non_lte is the last integer
-//OLD                   on the ion line.
-//OLD   01sep24 ksl     Elimated use of foo_ion and foo_ele.  These were simply confusing.
-//OLD   01sep25 ksl     Incorporated topbase levels and photoinization cross sections.
-//OLD   01nov22 ksl     Hopefully sorted out all of the various read formats to allow for use
-//OLD                   of the output files of various programs in py_atomic.
-//OLD   01dec12 ksl     Have split the configurations into to indentifiable groups, those which are
-//OLD                   to be treated on the fly -- aka LTE --  and those which in principle can
-//OLD                   be treated in detail -- aka non-LTE.  In practice, we are also making modifica-
-//OLD                   tions to the lines on the fly.  Any configureation with is "non-LTE" has space
-//OLD                   in the levden array for that ion.
-//OLD   02jun   ksl     Converted all multiplicities from integers to doubles, since in some cases
-//OLD                   one may have non-integer g's and also to prevent gu/gl divisions from giving
-//OLD                   incorrect answer.
-//OLD         04Feb19 SS      Made modifications to read atomic data in format suitable for the proposed implementation
-//OLD                         of Macro Atoms. Modifications should preserve all the previous options and place Macro
-//OLD                         Atoms data at top of hierarchy - i.e. other data read later should be ignored.
-//OLD         04Mar   SS      Minor changes (following suggestions of ksl).
-//OLD   04Apr   ksl     Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line
-//OLD                   that is not part of a macro atom.).  Simplified inputs so that when one reads IonM
-//OLD                   it is assumed to be a macro-ion.  If it is just Ion or IonV, then the assumption is that
-//OLD                   it is a "simple" ion
-//OLD   04Dec   ksl     Made use of DEBUG to eliminate printout of many error in get_atomic_data that
-//OLD                   are really part of normal flow of program.  To print out these lines, set
-//OLD                   DEBUG to a nonzero value at top of program
-//OLD   04dec   ksl     54a-Modified the macro atom reading portion of the program so that one can limit levels
-//OLD                   in the elements_ions section of the input and "seamlessly" avoid reading them in
-//OLD                   elsewhere.  This makes the macro portion of the program consistent with the
-//OLD                   "simple" atom approach.
-//OLD   04dec   ksl     54b-Added a bit clearer set of comments and reorganized a bit to collect all of the
-//OLD                   indexing in one place. There is no change in funtionality regarding this.
-//OLD   05jul   ksl     56d -- Added if DEBUG lines so that data.out is not normally printed
-//OLD   06jul   ksl     57+ -- Modified so that calloc is used to allocate space for structures
-//OLD   06aug   ksl     57h -- Added checks to ensure that macro_info which is set to -1 in various
-//OLD                   of the structures, is set to 0 or 1 somewhere in the process.  This simplifies
-//OLD                   some of the switches in the program.  Note that I did not check for self-consitency
-//OLD                   just that the value is not -1, which it was initially.
-//OLD   080810  ksl     62 -- Modified the way in which levels are read in.  Basically the routine assumes
-//OLD                   and prevents one from reading in more than one level type, e.g macro_atom, top_base
-//OLD                   record, kurucz record etc.  One cannot use more than one type anymore.
-//OLD   080812  ksl     62 -- Made additional changes to make sure photoionization records were only
-//OLD                   linked to levels for which the density could be calculated.  (Note, that there
-//OLD                   may be a problem if we decide to use topbase data for ions with 0 nlte levels
-//OLD                   allowed, i.e. zero levels in which we keep track of the density.
-//OLD         081115  nsh     70 -- added in structures and routines to read in data to implement
-//OLD                   dielectronic recombination.
-//OLD   11dec   ksl     71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
-//OLD   12jun   nsh     72 - added structures and routines to read in partition function data from
-//OLD                   cardona 2010
-//OLD                   than once
-//OLD   12jul   nsh     73 - added structures and routines to read in badnell style total recombination rate data
-//OLD         12sept    nsh     73 - added structures and routines to read in gaunt factor data from Sutherland 1998
-//OLD   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120.
-//OLD   14nov   nsh     78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
-//OLD                  Also used write_atomicdata to control if summary is written to file.
-//OLD   15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
-//OLD   17jan NSH 81c -- Added collision strengths
-//OLD **************************************************************/
 
 
 
@@ -209,10 +76,11 @@
  *
  * get_atomic data is intended to be stand-alone, that is one should be able to use it for routines
  * other than Python, e.g for another routine intended to calculate the ionization state of
- * a plasma in colissional equlibrium
+ * a plasma in collisional equilibrium.
  *
- * To this end, the routines populate stuctures in atomic.h, which are not part of python.h.  It's imporant
- * that future modificatiosn to get_atomic_data maintain this indepence..
+ * To this end, the routines populate stuctures in atomic.h, which are not part of python.h, and 
+ * one should avoid calling routines like Exit(0) that are very python centric.  It's important
+ * that future modifications to get_atomic_data maintain this independence.
  *
  *
  *
@@ -272,10 +140,6 @@ get_atomic_data (masterfile)
   int lev_type;
   int nn;
   double yield;
-//  int nn, nl, dumnn, dumnl, dumz, dumistate, n_verner, ion_index,
-//    target_index;
-//  double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
-//  double adi, t0di, bdi, t1di;
   double gstemp[BAD_GS_RR_PARAMS];      //Temporary storage for badnell resolved GS RR rates
   double temp[LINELENGTH];      //Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;          //Flags to say what part of data is being read in for DR and RR
@@ -303,7 +167,7 @@ get_atomic_data (masterfile)
   if (ele == NULL)
   {
     Error ("There is a problem in allocating memory for the element structure\n");
-    Exit (0);
+    exit (0);
   }
   else
   {
@@ -322,7 +186,7 @@ get_atomic_data (masterfile)
   if (ion == NULL)
   {
     Error ("There is a problem in allocating memory for the ion structure\n");
-    Exit (0);
+    exit (0);
   }
   else
   {
@@ -342,7 +206,7 @@ get_atomic_data (masterfile)
   if (config == NULL)
   {
     Error ("There is a problem in allocating memory for the config structure\n");
-    Exit (0);
+    exit (0);
   }
   else
   {
@@ -363,7 +227,7 @@ get_atomic_data (masterfile)
   if (line == NULL)
   {
     Error ("There is a problem in allocating memory for the line structure\n");
-    Exit (0);
+    exit (0);
   }
   else
   {
@@ -750,7 +614,7 @@ structure does not have this property! */
           {
             Error ("Get_atomic_data: file %s line %d: Element line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);  /* Immediate replace by number density relative to H */
           nelements++;
@@ -758,7 +622,7 @@ structure does not have this property! */
           {
             Error ("getatomic_data: file %s line %d: More elements than allowed. Increase NELEMENTS in atomic.h\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           break;
 
@@ -791,20 +655,11 @@ structure does not have this property! */
 
         case 'i':
 
-          if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) == 6)
-          {
-          }
-//OLD          // It's a new style ion line specifying levels to treat in nlte
-//OLD             else if (nwords == 4)
-//OLD               {           //It's an old style ion line
-//OLD                 nlte = 0;
-//OLD         nmax = 10;
-//OLD       }
-          else
+          if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) != 6)
           {
             Error ("get_atomic_data: file %s line %d: Ion istate line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 // Now check that an element line for this ion has already been read
           n = 0;
@@ -828,7 +683,7 @@ structure does not have this property! */
             if (nlte_levels > NLTE_LEVELS)
             {
               Error ("get_atomic_data: nlte_levels (%d) > NLTE_LEVELS (%d)\n", nlte_levels, NLTE_LEVELS);
-              Exit (0);
+              exit (0);
             }
 
           }
@@ -854,7 +709,7 @@ structure does not have this property! */
             Error
               ("getatomic_data: file %s line %d: %d ions is more than %d allowed. Increase NIONS in atomic.h\n",
                file, lineno, nions, NIONS);
-            Exit (0);
+            exit (0);
           }
           break;
 
@@ -1011,7 +866,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
           {
             Error ("get_atomic_data: file %s line %d: Level line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
             return (0);
           }
 // Now check that the ion for this level is already known.  If not break out
@@ -1085,14 +940,14 @@ a level type has not been established
             if (nlevels_macro != nlevels)
             {
               Error ("get_atomicdata: Simple level has appeared before macro level. Not allowed.\n");
-              Exit (0);
+              exit (0);
             }
             nlevels_macro++;
 
             if (nlevels_macro > NLEVELS_MACRO)
             {
               Error ("get_atomicdata: Too many macro atom levels. Increase NLEVELS_MACRO. Abort. \n");
-              Exit (0);
+              exit (0);
             }
           }
           else
@@ -1164,7 +1019,7 @@ is already incremented
           if (nlevels > NLEVELS)
           {
             Error ("getatomic_data: file %s line %d: More energy levels than allowed. Increase NLEVELS in atomic.h\n", file, lineno);
-            Exit (0);
+            exit (0);
           }
           break;
 
@@ -1190,7 +1045,7 @@ is already incremented
           {
             Error ("get_atomic_data: file %s line %d: Level line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
             return (0);
           }
 /* Check whether the ion for this level is known.  If not, skip the level */
@@ -1281,7 +1136,7 @@ described as macro-levels. */
           if (nlevels > NLEVELS)
           {
             Error ("getatomic_data: file %s line %d: More energy levels than allowed. Increase NLEVELS in atomic.h\n", file, lineno);
-            Exit (0);
+            exit (0);
           }
           break;
 
@@ -1381,7 +1236,7 @@ described as macro-levels. */
               {
                 Error ("Get_atomic_data: Problem reading topbase photoionization record\n");
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
               sscanf (aline, "%*s %le %le", &xe[n], &xx[n]);
               lineno++;
@@ -1418,7 +1273,7 @@ described as macro-levels. */
             if (config[n].n_bfd_jump > NBFJUMPS)
             {
               Error ("get_atomic_data: Too many downward b-f jump for ion %d\n", config[n].istate);
-              Exit (0);
+              exit (0);
             }
 
 
@@ -1430,7 +1285,7 @@ described as macro-levels. */
             if (config[m].n_bfu_jump > NBFJUMPS)
             {
               Error ("get_atomic_data: Too many upward b-f jump for ion %d\n", config[m].istate);
-              Exit (0);
+              exit (0);
             }
 
 
@@ -1475,7 +1330,7 @@ described as macro-levels. */
             if (nphot_total > NTOP_PHOT)
             {
               Error ("get_atomicdata: More macro photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n", NTOP_PHOT);
-              Exit (0);
+              exit (0);
             }
             break;
           }
@@ -1492,7 +1347,7 @@ described as macro-levels. */
               {
                 Error ("Get_atomic_data: Problem reading topbase photoionization record\n");
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
               sscanf (aline, "%*s %le %le", &xe[n], &xx[n]);
               lineno++;
@@ -1547,7 +1402,7 @@ described as macro-levels. */
                   ("Get_atomic_data: file %s VFKY and Topbase photoionization x-sections in wrong order for nion %d\n",
                    file, config[n].nion);
                 Error ("             Read topbase x-sections before VFKY if using both types!!\n");
-                Exit (0);
+                exit (0);
               }
               ion[config[n].nion].ntop++;
               for (n = 0; n < np; n++)
@@ -1569,7 +1424,7 @@ described as macro-levels. */
               {
                 Error
                   ("get_atomicdata: More TopBase photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n", NTOP_PHOT);
-                Exit (0);
+                exit (0);
               }
             }
             else
@@ -1596,7 +1451,7 @@ described as macro-levels. */
               {
                 Error ("Get_atomic_data: Problem reading Vfky photoionization record\n");
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
               sscanf (aline, "%*s %le %le", &xe[n], &xx[n]);
               lineno++;
@@ -1662,12 +1517,12 @@ described as macro-levels. */
             if (nxphot > NIONS)
             {
               Error ("getatomic_data: file %s line %d: More photoionization edges than IONS.\n", file, lineno);
-              Exit (0);
+              exit (0);
             }
             if (nphot_total > NTOP_PHOT)
             {
               Error ("get_atomicdata: More photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n", NTOP_PHOT);
-              Exit (0);
+              exit (0);
             }
 
             break;
@@ -1677,7 +1532,7 @@ described as macro-levels. */
             Error ("get_atomic_data: file %s line %d: photoionization line incorrectly formatted\n", file, lineno);
             Log ("Make sure you are using the tabulated verner cross sections (photo_vfky_tabulated.data)\n");
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 
           /* Input inner shell cross section data */
@@ -1689,7 +1544,7 @@ described as macro-levels. */
           {
             Error ("Inner shell ionization data incorrectly formatted\n");
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           for (n = 0; n < np; n++)
           {
@@ -1698,7 +1553,7 @@ described as macro-levels. */
             {
               Error ("Get_atomic_data: Problem reading VY inner shell record\n");
               Error ("Get_atomic_data: %s\n", aline);
-              Exit (0);
+              exit (0);
             }
             sscanf (aline, "%*s %le %le", &xe[n], &xx[n]);
             lineno++;
@@ -1732,7 +1587,7 @@ described as macro-levels. */
           if (n_inner_tot > N_INNER * NIONS)
           {
             Error ("getatomic_data: file %s line %d: Inner edges than we have room for.\n", file, lineno);
-            Exit (0);
+            exit (0);
           }
           break;
 
@@ -1751,7 +1606,7 @@ described as macro-levels. */
 		    {
 		      Error ("Auger input incorrectly formatted\n");
 		      Error ("Get_atomic_data: %s\n", aline);
-		      Exit (0);
+		      exit (0);
 		    }
 		  if (nauger < NAUGER)
 		    {
@@ -1760,7 +1615,7 @@ described as macro-levels. */
 			{
 			  Error
 			    ("get_atomic data:  Could not open photo_verner.data\n");
-			  Exit (0);
+			  exit (0);
 			}
 		      ion_index = -2;
 		      target_index = -1;
@@ -1927,7 +1782,7 @@ described as macro-levels. */
             if (mflag != 1)
             {
               Error ("get_atomicdata: Can't read macro-line after some simple lines. Reorder the input files!\n");
-              Exit (0);
+              exit (0);
             }
 
             mflag = 1;          //flag to identify macro atom case (SS)
@@ -1936,7 +1791,7 @@ described as macro-levels. */
             {
               Error ("get_atomic_data: file %s line %d: LinMacro line incorrectly formatted\n", file, lineno);
               Error ("Get_atomic_data: %s\n", aline);
-              Exit (0);
+              exit (0);
             }
 
             el = EV2ERGS * el;
@@ -1970,7 +1825,7 @@ described as macro-levels. */
             if (config[n].n_bbu_jump > NBBJUMPS)
             {
               Error ("get_atomic_data: Too many upward b-b jumps for ion %d\n", config[n].istate);
-              Exit (0);
+              exit (0);
             }
 
             nconfigu = m;       //record upper configuration (SS)
@@ -1980,7 +1835,7 @@ described as macro-levels. */
             if (config[m].n_bbd_jump > NBBJUMPS)
             {
               Error ("get_atomic_data: Too many downward b-b jumps for ion %d\n", config[m].istate);
-              Exit (0);
+              exit (0);
             }
 
 
@@ -2019,7 +1874,7 @@ described as macro-levels. */
             {
               Error ("get_atomic_data: file %s line %d: Resonance line incorrectly formatted\n", file, lineno);
               Error ("Get_atomic_data: %s\n", aline);
-              Exit (0);
+              exit (0);
             }
           }
 
@@ -2048,7 +1903,7 @@ would like to have simple lines for macro-ions */
               if (ion[n].macro_info == -1 && mflag == 1)
               {
                 Error ("Getatomic_data: Macro Atom line data supplied for ion %d\n but there is no suitable level data\n", n);
-                Exit (0);
+                exit (0);
               }
               line[nlines].nion = n;
               line[nlines].z = z;
@@ -2080,7 +1935,7 @@ would like to have simple lines for macro-ions */
           if (nlines > NLINES)
           {
             Error ("getatomic_data: file %s line %d: More lines than allowed. Increase NLINES in atomic.h\n", file, lineno);
-            Exit (0);
+            exit (0);
           }
           break;
 
@@ -2102,7 +1957,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("get_atomic_data: file %s line %d ground state fracs   frac table incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           for (n = 0; n < nions; n++)
           {
@@ -2146,7 +2001,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with dielectronic recombination data\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 
           istate = ne;          //         get the ionisation state we are recombining from
@@ -2216,7 +2071,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with dielectronic recombination data\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 
           istate = ne;          //         get the ionisation state we are recombining from
@@ -2273,7 +2128,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with badnell total RR data\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 
           istate = ne;          //         get the traditional ionisation state
@@ -2298,12 +2153,12 @@ would like to have simple lines for macro-ions */
               {
                 Error ("More than one badnell total RR rate for ion %i\n", n);
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
               else              //if flag is not a positive number, we have a problem
               {
                 Error ("Total radiative recombination flag giving odd results\n");
-                Exit (0);
+                exit (0);
               }
             }                   //close if statement that selects appropriate ion to add data to
           }                     //close loop over ions
@@ -2336,7 +2191,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with shull total RR data\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 
           istate = ne;          //         get the traditional ionisation state
@@ -2361,12 +2216,12 @@ would like to have simple lines for macro-ions */
               {
                 Error ("More than one total RR rate for ion %i\n", n);
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
               else              //if flag is not a positive number, we have a problem
               {
                 Error ("Total radiative recombination flag giving odd results\n");
-                Exit (0);
+                exit (0);
               }
             }                   //close if statement that selects appropriate ion to add data to
           }                     //close loop over ions
@@ -2398,7 +2253,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with badnell GS RR data\n");
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           istate = z - ne + 1;  //         get the traditional ionisation state
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
@@ -2430,12 +2285,12 @@ would like to have simple lines for macro-ions */
                 {
                   Error ("More than one temp line for badnell GS RR rate for ion %i\n", n);
                   Error ("Get_atomic_data: %s\n", aline);
-                  Exit (0);
+                  exit (0);
                 }
                 else            //some other odd thing had happened
                 {
                   Error ("Get_atomic_data: %s\n", aline);
-                  Exit (0);
+                  exit (0);
                 }
               }
               else if (gsflag == 'R')   //it is a rate line
@@ -2452,18 +2307,18 @@ would like to have simple lines for macro-ions */
                 {
                   Error ("More than one rate line for badnell GS RR rate for ion %i\n", n);
                   Error ("Get_atomic_data: %s\n", aline);
-                  Exit (0);
+                  exit (0);
                 }
                 else            //some other odd thing had happened
                 {
                   Error ("Get_atomic_data: %s\n", aline);
-                  Exit (0);
+                  exit (0);
                 }
               }
               else              //We have some problem with this line
               {
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
             }                   //end of loop over dealing with data for a discovered ion
           }                     //end of loop over ions
@@ -2494,7 +2349,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with sutherland gaunt data\n");
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           if (gaunt_n_gsqrd == 0 || gsqrdtemp > gaunt_total[gaunt_n_gsqrd - 1].log_gsqrd)       //We will use it if it's our first piece of data or is in order
           {
@@ -2509,7 +2364,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with gaunt data\n");
             Error ("Get_atomic_data %s\n", aline);
-            Exit (0);
+            exit (0);
           }
 
 
@@ -2535,7 +2390,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with Dere DI data\n");
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
@@ -2589,7 +2444,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with electron yield data\n");
             Error ("Get_atomic_data %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           for (n = 0; n < n_inner_tot; n++)
           {
@@ -2637,7 +2492,7 @@ would like to have simple lines for macro-ions */
           {
             Error ("Something wrong with fluorescent yield data\n");
             Error ("Get_atomic_data %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           for (n = 0; n < n_inner_tot; n++)
           {
@@ -2697,7 +2552,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
           {
             Error ("Get_atomic_data: file %s line %d: Collision strength line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
-            Exit (0);
+            exit (0);
           }
           for (n = 0; n < nlines; n++)  //loop over all the lines we have read in - look for a match
           {
@@ -2707,7 +2562,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               if (line[n].coll_index > -1)      //We already have a collision strength record from this line - throw an error and quit
               {
                 Error ("Get_atomic_data More than one collision strength record for line %i\n", n);
-                Exit (0);
+                exit (0);
               }
 
               coll_stren[n_coll_stren].n = n_coll_stren;
@@ -2727,7 +2582,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               {
                 Error ("Get_atomic_data: Problem reading collision strength record\n");
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
 
               /* JM 1709 -- increased number of entries read up to max of 20 */
@@ -2747,7 +2602,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               {
                 Error ("Get_atomic_data: Problem reading collision strength record\n");
                 Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
+                exit (0);
               }
 
               nparam =
@@ -2861,7 +2716,7 @@ exit if there is an element with no ions */
 // In principle, there might be a program which uses elements but not ions, but it seems unlikely,
 // therefore stop if there is not at least one ion for each element
       Error ("Get_atomic_data: There were no ions for element %d %s\n", nelem, ele[nelem].name);
-      Exit (0);
+      exit (0);
     }
   }
 
@@ -2913,7 +2768,7 @@ or zero so that simple checks of true and false can be used for them */
     if (ion[n].macro_info == -1)
     {
       Error ("Ion %d for element %s and ion %d is of unknown type\n", n, ion[n].z, ion[n].istate);
-      Exit (0);
+      exit (0);
     }
   }
 
@@ -2922,7 +2777,7 @@ or zero so that simple checks of true and false can be used for them */
     if (config[n].macro_info == -1)
     {
       Error ("Level %d for element %s and ion %d is of unknown type\n", n, config[n].z, config[n].istate);
-      Exit (0);
+      exit (0);
     }
   }
 
@@ -2931,7 +2786,7 @@ or zero so that simple checks of true and false can be used for them */
     if (line[n].macro_info == -1)
     {
       Error ("Level %d for element %s and ion %d is of unknown type\n", n, line[n].z, line[n].istate);
-      Exit (0);
+      exit (0);
     }
   }
 
@@ -2940,7 +2795,7 @@ or zero so that simple checks of true and false can be used for them */
     if (phot_top[n].macro_info == -1)
     {
       Error ("Photoionization cross-section %d for element %s and ion %d is of unknown type\n", n, phot_top[n].z, phot_top[n].istate);
-      Exit (0);
+      exit (0);
     }
   }
 
@@ -2979,7 +2834,7 @@ or zero so that simple checks of true and false can be used for them */
     if ((fptr = fopen ("data.out", "w")) == NULL)
     {
       Error ("get_atomic data:  Could not open data.out\n");
-      Exit (0);
+      exit (0);
     }
 
     fprintf (fptr, "This file contains data which was read in by get_atomicdata\n");
@@ -3301,68 +3156,23 @@ indexx (n, arrin, indx)
   }
 }
 
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD  Synopsis:
-//OLD   limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
-//OLD   which can be used to limit the lines searched for resonances to a specific
-//OLD   frequency range.
-//OLD
-//OLD Arguments:
-//OLD   double freqmin, freqmax  a range of frequencies in which one is interested in the lines
-//OLD
-//OLD Returns:
-//OLD   limit_lines returns the number of lines that are potentially in resonance.  If limit_lines
-//OLD   returns 0 there are no lines of interest and one does not need to worry about any
-//OLD   resonaces at this frequency.  If limit_lines returns a number greater than 0, then
-//OLD   the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
-//OLD   nline_delt is also set which is the number of lines that are in the specified range
-//OLD
-//OLD Description:
-//OLD   limit_lines  define the lines that are close to a given frequency.  The degree of closeness
-//OLD   is defined by v. The routine must be used in conjuction with get_atomic_data which
-//OLD   will have created an ordered list of the lines.
-//OLD Notes:
-//OLD   Limit_lines needs to be used somewhat carefully.  Carefully means checking the
-//OLD   return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
-//OLD   were no lines in the region of interest.  Assuming there were lines in thte range,
-//OLD   one must sum over lines from nline_min to nline_max inclusive.
-//OLD
-//OLD   One might wonder why nline_max is not set to one larger than the last line which
-//OLD   is in range.  This is because depending on how the velocity is trending you may
-//OLD   want to sum from the highest frequency line to the lowest.
-//OLD
-//OLD ?? It is unclear to me whether given that limit lines is very similar
-//OLD from call to call
-//OLD that it would not be more efficeint to expand from previous
-//OLD limits rather than adopt the approach hre 02may
-//OLD
-//OLD History:
-//OLD   97jan      ksl  Coded and debugged as part of Python effort.
-//OLD   98apr4  ksl     Modified inputs so one gives freqmin and freqmax directly
-//OLD   01nov   ksl     Rewritten to handle large numbers of lines more
-//OLD                   efficiently
-//OLD
-//OLD **************************************************************/
-
-
 
 
 
 /**********************************************************/
 /**
- * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
- * 	which can be used to limit the lines searched for resonances to a specific
- * 	frequency range.
+ * @brief      uses freqmin and freqmax to set limits on which lines in the
+ * frequency ordered list of lines need to be
+ * considered when, for example,  calculating which lines have Sobolev surfaces
+ * along a path. 
  *
- * @param [in, out] double  freqmin   The minimum frequency we are interested in
- * @param [in, out] double  freqmax   The maximum frequency we are interested in
+ *
+ * @param [in] double  freqmin   The minimum frequency we are interested in
+ * @param [in] double  freqmax   The maximum frequency we are interested in
  * @return     the number of lines that are potentially in resonance.
  *
  * limit_lines sets the external variables nline_min and nline_max for use with
  * other routines
- *
  *
  *
  * If limit_lines
@@ -3493,4 +3303,445 @@ check_xsections ()
   }
 
   return 0;
+}
+
+
+
+
+/*
+
+   q21 calculates and returns the collisional de-excitation coefficient q21
+
+   Notes:  This uses a simple approximation for the effective_collision_strength omega.
+   ?? I am not sure where this came from at present and am indeed no sure that
+   omega is omega(2->1) as it should be.  This should be carefully checked.??
+   This has no been improved, and wherever possible we use tabulated collision
+   stength data from Chianti (after Burgess and Tully 1992)
+
+   c21=n_e * q21
+   q12 = g_2/g_1 q21 exp(-h nu / kT )
+
+   History:
+   98aug        ksl     Recoded from other routines so that one always calculates q21 in
+			the same way.
+	01nov	ksl	Add tracking mechanism so if called with same conditions it
+			returns without recalculation
+	12oct	nsh	Added, then commented out approximate gaunt factor given in
+			hazy 2.
+	17jan	nsh Added code to use the actual collision strength date from chianti
+
+ */
+
+
+/// (8*PI)/(sqrt(3) *nu_1Rydberg
+#define ECS_CONSTANT 4.773691e16
+
+struct lines *q21_line_ptr;
+double q21_a, q21_t_old;
+
+
+/**********************************************************/
+/**
+ * @brief      calculates and returns the collisional de-excitation coefficient q21
+ *
+ * @param [in] struct lines *  line_ptr   A single line
+ * @param [in] double  t   The temperature at wich to calculate the coefficient
+ * @return    The collisional de-excitiation coefficient
+ *
+ * @details
+ * This routine uses stored coefficients if we have them, or the Van Regemortor
+ * approximation if we do not.
+ *
+ * ### Notes ###
+ * the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt
+ * factor to calculate collision strengths. There is one regime in which kt < hnu. For that
+ * consult equation 4.20 and 4.21 of Hazy.
+************************************************************/
+
+double
+q21 (line_ptr, t)
+     struct lines *line_ptr;
+     double t;
+{
+  double gaunt, gbar;
+  double omega;
+  double u0;
+  double upsilon ();
+
+
+  if (q21_line_ptr != line_ptr || t != q21_t_old)
+  {
+
+
+    u0 = (BOLTZMANN * t) / (H * line_ptr->freq);
+
+    if (line_ptr->istate == 1 && u0 < 2)        // neutrals at low energy. Used 2 to give continuous function.
+      gaunt = u0 / 10.0;
+    else                        // low energy electrons, positive ions
+      gaunt = 0.2;
+
+
+
+    if (line_ptr->coll_index < 0)       //if we do not have a collision strength for this line use the g-bar formulation
+    {
+      omega = ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
+    }
+    else                        //otherwise use the collision strength directly. NB what we call omega, most people including hazy call upsilon.
+    {
+      omega = upsilon (line_ptr->coll_index, u0);
+      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;
+    }
+
+
+    q21_a = 8.629e-6 / (sqrt (t) * line_ptr->gu) * omega;
+    q21_t_old = t;
+  }
+
+  return (q21_a);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the collisional excitation coefficient for a line
+ *
+ * @param [in] struct lines *  line_ptr   The line of interest
+ * @param [in] double  t   The temperature of interest
+ * @return     The collisional excitation coeffient
+ *
+ * @details
+ * The routine calls q21 and uses detailed balance to derive q12
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+double
+q12 (line_ptr, t)
+     struct lines *line_ptr;
+     double t;
+{
+  double x;
+  double q21 ();
+  double exp ();
+
+  x = line_ptr->gu / line_ptr->gl * q21 (line_ptr, t) * exp (-H_OVER_K * line_ptr->freq / t);
+
+  return (x);
+}
+
+
+/*
+   a21 alculates and returns the Einstein A coefficient
+   History:
+   98aug        ksl     Coded and debugged
+   99jan        ksl Modified so would shortcircuit calculation if
+   called multiple times for same a
+ */
+#define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
+
+struct lines *a21_line_ptr;
+double a21_a;
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the Einstein A coefficient for aline
+ *
+ * @param [in out] struct lines *  line_ptr   The structure that describes a single line
+ * @return     The Einstein A coefficient
+ *
+ * @details
+ * Using the oscillator strecnth and the multiplicity (which are
+ * read in) calculate A
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+double
+a21 (line_ptr)
+     struct lines *line_ptr;
+{
+  double freq;
+
+  if (a21_line_ptr != line_ptr)
+  {
+    freq = line_ptr->freq;
+    a21_a = A21_CONSTANT * line_ptr->gl / line_ptr->gu * freq * freq * line_ptr->f;
+    a21_line_ptr = line_ptr;
+  }
+
+  return (a21_a);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      calculates the thermally averaged collision strength thermally excited line emission.
+ *
+ * @param [in out] int  n_coll   the index of the collision strength record we are working with
+ * @param [in out] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
+ * @return     upsilon - the thermally averaged collision strength for a given line at a given temp
+ *
+ * @details
+ *
+ * ### Notes ###
+ * It uses data extracted from Chianti stored in coll_stren.
+ * The paper to consult is Burgess and Tully A&A 254,436 (1992).
+ * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
+ * divided by Plancks constant times the frequency of the line under analysis.
+ *
+ *
+ **********************************************************/
+
+double
+upsilon (n_coll, u0)
+     int n_coll;
+     double u0;
+{
+  double x;                     //The scaled temperature
+  double y;                     //The scaled collision sterngth
+  double upsilon;               //The actual collision strength
+  int linterp ();
+
+  /* first we compute x. This is the "reduced temperature" from
+     Burgess & Tully 1992. */
+  x = 0.0;
+  if (coll_stren[n_coll].type == 1 || coll_stren[n_coll].type == 4)
+  {
+    x = 1. - (log (coll_stren[n_coll].scaling_param) / log (u0 + coll_stren[n_coll].scaling_param));
+  }
+  else if (coll_stren[n_coll].type == 2 || coll_stren[n_coll].type == 3)
+  {
+    x = u0 / (u0 + coll_stren[n_coll].scaling_param);
+  }
+  else
+  {
+    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    exit (0);
+  }
+
+
+  /* we now compute y from the interpolation formulae
+     y is the reduced upsilon from Burgess & Tully 1992. */
+  linterp (x, coll_stren[n_coll].sct, coll_stren[n_coll].scups, coll_stren[n_coll].n_points, &y, 0);
+
+  /*  now we extract upsilon from y  - there are four different parametrisations */
+
+  upsilon = 0.0;
+  if (coll_stren[n_coll].type == 1)
+  {
+    upsilon = y * (log (u0 + exp (1)));
+  }
+  else if (coll_stren[n_coll].type == 2)
+  {
+    upsilon = y;
+  }
+  else if (coll_stren[n_coll].type == 3)
+  {
+    upsilon = y / (u0 + 1);
+  }
+  else if (coll_stren[n_coll].type == 4)
+  {
+    upsilon = y * (log (u0 + coll_stren[n_coll].scaling_param));
+  }
+  else
+  {
+    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    exit (0);
+  }
+  return (upsilon);
+}
+
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief Perform linear/logarithmic interpolation of an array
+ *
+ * @param [in] double  value   The value used for interpoaltion
+ * @param [in] double  array[]   An array containing a set of asceding values
+ * @param [in] int  npts   The size of the array
+ * @param [out] int *  ival  The lower index to use in the interpolation
+ * of the array which need to be used to interpolate on
+ * @param [out] double *  f   The fraction of the upper point to use in the interpolation
+ * @param [in] int  mode  A switch to choose linear(0)  or lograrithmic(1) interpolation
+ * @return     Usually returns 0, but returns -1 if the input value is less
+ * than the first elememnt in the array, and 1 if it is greater than the
+ * last element int he array.  In either of these cases, the fractions are
+ * set up only to access one array element
+ *
+ * @details
+ *
+ *
+ * Typically one has two parallel arrays, one containing a set of values,
+ * in the original case frequencies, and another containing some function
+ * of those values.  This routine finds the fraction of the function at
+ * two point in the data array to interpolate.
+ *
+ * The values for the input array can be interpolated linear or logarithmically.
+ * that is the fraction that is returned are based on the values in the
+ * array or the logarithm of them.
+ *
+ *
+ * The routine uses bisection
+ *
+ *
+ *
+ * ### Notes ###
+ *
+ * fraction is a utility written to speed up the search for the bracketing
+ * topbase photionization x-sections, but in principle it should work in
+ * other situations within python (which at one time at least contributed
+ * significantly to the runtime for Python).
+ *
+ * Today, fraction is called directly in the routines that are used to set up coordinate
+ * systems, and indirectly through linterp (below) which should be inspected
+ * to see how the logarithmic interpolation is supposed to work.
+ *
+ * The routine is similar to the numerical * recipes routine locate.
+ * There may be a gsl routine as well.  The routine
+ * should probably be replaced.
+ *
+ *
+ **********************************************************/
+
+int
+fraction (value, array, npts, ival, f, mode)
+     double array[];            // The array in we want to search
+     int npts, *ival;           // ival is the lower point
+     double value;              // The value we want to index
+     double *f;                 // The fractional "distance" to the next point in the array
+     int mode;                  // 0 = compute in linear space, 1=compute in log space
+{
+  int imin, imax, ihalf;
+
+  if (value < array[0])
+  {
+    *ival = 0;
+    *f = 0.0;
+    return (-1);
+  }
+
+  imax = npts - 1;
+  if (value > array[imax])
+  {
+    *ival = npts - 2;
+    *f = 1.0;
+    return (1);
+  }
+
+
+
+  imin = 0;
+
+/* In what follows, there is a specific issue as to how to treat
+the situation where the value is exactly on an array element. Right
+now this is set to try to identify the array element below the one
+on which the value sits, and to set the fraction to 1.  This was
+to reflect the behavior of the search routine in where_in_grid. */
+
+  while (imax - imin > 1)
+  {
+    ihalf = (imin + imax) >> 1; // Compute a midpoint >> is a bitwise right shift
+    if (value > array[ihalf])
+    {
+      imin = ihalf;
+    }
+    else
+      imax = ihalf;
+  }
+
+// So array[imin] just <= value
+
+  if (mode == 0)
+    *f = (value - array[imin]) / (array[imax] - array[imin]);   //linear interpolation
+  else if (mode == 1)
+    *f = (log (value) - log (array[imin])) / (log (array[imax]) - log (array[imin]));   //log interpolation
+  else
+  {
+    Error ("Fraction - unknown mode %i\n", mode);
+    exit (0);
+    return (0);
+  }
+
+  *ival = imin;
+
+  return (0);
+}
+
+
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Perform a linear interpolation on two parallel arrays, the first
+ * of which contains a set of values to be interpolated and the second of
+ * which has the function at those values
+ *
+ * @param [in] double  x   A value
+ * @param [in] double  xarray[]   The array that is interpolated
+ * @param [in] double  yarray[]   The array that contains a function of the values in xarray
+ * @param [in] int  xdim   The length of the two arrays
+ * @param [out] double *  y   The resulting interpolated value
+ * @param [in] int  mode   A switch to choose linear(0) or "logarithmic" (1)
+ * interpolation
+ *
+ * @return     The number of the array element that is used for the lower of the two
+ * elements that are interpolated on.
+ *
+ * @details
+ * Given a number x, and an array of x's in xarray, and functional
+ * values y = f(x) in yarray and the dimension of xarray and yarray,
+ * linterp calculates y, the linearly interpolated value of y(x). It
+ * also returns the element in the xarray so that one can consider
+ * not doing a search to find the right array element in certain
+ * circumstances
+
+ *
+ * ### Notes ###
+ *
+ * For mode 0, the value that is returned is
+ *
+ * (1-f)*y[nelem]+f*[nelem+1)
+ *
+ * For mode 1, the value returned is
+ * exp ((1. - f) * log (y[nelem]) + f * log (y[nelem + 1]))
+ *
+ *
+ **********************************************************/
+
+int
+linterp (x, xarray, yarray, xdim, y, mode)
+     double x;                  // The value that we wish to index i
+     double xarray[], yarray[];
+     int xdim;
+     double *y;
+     int mode;                  //0 = linear, 1 = log
+{
+  int nelem = 0;
+  double frac;
+
+
+  fraction (x, xarray, xdim, &nelem, &frac, mode);
+
+  if (mode == 0)
+    *y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
+  else if (mode == 1)
+    *y = exp ((1. - frac) * log (yarray[nelem]) + frac * log (yarray[nelem + 1]));
+  else
+  {
+    Error ("linterp - unknown mode %i\n", mode);
+    exit (0);
+  }
+
+  return (nelem);
+
 }

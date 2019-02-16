@@ -166,7 +166,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
 		sv.o ionization.o  levels.o gradv.o reposition.o \
-		anisowind.o util.o density.o  bands.o time.o \
+		anisowind.o wind_util.o density.o  bands.o time.o \
 		matom.o estimators.o wind_sum.o yso.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o  \
 		agn.o shell_wind.o compton.o zeta.o dielectronic.o \
@@ -188,7 +188,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
 		sv.c ionization.c  levels.c gradv.c reposition.c \
-		anisowind.c util.c density.c  bands.c time.c \
+		anisowind.c wind_util.c density.c  bands.c time.c \
 		matom.c estimators.c wind_sum.c yso.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c  \
 		agn.c shell_wind.c compton.c zeta.c dielectronic.c \
@@ -200,7 +200,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		setup_reverb.c setup_line_transfer.c 
 
 #
-# kpar_source is now declared seaprately from python_source so that the file log.h 
+# kpar_source is now declared separately from python_source so that the file log.h 
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c 
 
@@ -210,7 +210,9 @@ prototypes:
 	cp templates.h templates.h.old
 	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} > foo.h  
 	cp foo.h templates.h
+	rm foo.h
 	cproto -I$(INCLUDE) $(kpar_source) > log.h 
+	cproto  -I$(INCLUDE) get_atomicdata.c > atomic_proto.h
 
 python: startup  python.o $(python_objects)
 	$(CC)  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
@@ -222,7 +224,7 @@ D:
 	@echo 'Debugging Mode'
 
 py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
-		emission.o recomb.o util.o  \
+		emission.o recomb.o wind_util.o  \
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
@@ -246,7 +248,7 @@ py_wind: startup $(py_wind_objects)
 
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
-		emission.o recomb.o util.o  \
+		emission.o recomb.o wind_util.o  \
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \

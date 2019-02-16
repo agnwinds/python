@@ -107,8 +107,6 @@ get_meta_params (void)
     geo.reverb = REV_MATOM;
     break;
   default:
-    //OLD Error ("reverb.type: Invalid reverb mode.\n \
-    //OLD   Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
 
     //  With rdchoice it should not be possible to get here
     Error ("reverb.type: Invalid reverb mode.\n \
