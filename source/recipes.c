@@ -359,6 +359,18 @@ free_vector (a, i, j)
  *
  * ### Notes ###
  *
+ * This function is a "fail safe" algorithm and is a hybrid between the bisection
+ * and Newton-Raphson rooting finding algorithms. Whenever the N-R method would
+ * taken the solution out of bounds, or whenever the N-R algorithm is not reducing
+ * the size of the bracketed interval rapidly enough, the bisection method takes
+ * over, which is, apparently, the fail-safe property of this algorithm.
+ *
+ * 15/02/19: EP added an Exit call as realistically if there is no change in
+ *           sign between fl and fh, then there is no root to converge towards
+ *           in the bracketed interval. Note that in Numerical Recipes in C, when
+ *           this error is encounted the routine nerror is called, which leads
+ *           to the program exiting.
+ *
  **********************************************************/
 
 double
@@ -372,8 +384,10 @@ rtsafe (void (*funcd) (double, double *, double *), double x1, double x2, double
   (*funcd) (x2, &fh, &df);
   if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0))
   {
-    Error ("rtsafe: x1 %8.3e x2 %8.3e fl %8.3e fh %8.3e \n", x1, x2, fl, fh);
     Error ("rtsafe: Root must be bracketed in RTSAFE\n");
+    Error ("rtsafe: x1 %8.3e f1 %8.3e x2 %8.3e f2 %8.3e \n", x1, fl, x2, fh);
+    Error ("rtsafe: expected f1 * f2 <= 0 but got %8.3e", fl * fh);
+    Exit (1);                   // We should be exiting here
   }
   if (fl == 0.0)
     return x1;

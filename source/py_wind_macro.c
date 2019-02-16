@@ -662,7 +662,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
   if (f == NULL)
   {
     printf ("Error opening file!\n");
-    exit (1);
+    Exit (0);
   }
 
   xplasma = &plasmamain[nplasma];
