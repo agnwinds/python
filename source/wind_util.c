@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  util.c
+/** @file  wind_util.c
  * @author ksl
  * @date   April, 2018
  *
@@ -11,9 +11,7 @@
  *
  * These routines all have to do with wind cells. 
  *
- * These routines should probably be refactored into other routines
- *
- * It may be useful to rethink them in addition, as they were all
+ * It may be useful to rethink routins at some point, as they were all
  * written prior to the existence of domains, and domains are
  * just grafted on.
  *

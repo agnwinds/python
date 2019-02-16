@@ -298,7 +298,7 @@ int dvds_ave (void);
 int reposition (PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping (PhotPtr p, int *nnscat);
-/* util.c */
+/* wind_util.c */
 int coord_fraction (int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell (int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij (int ndom, int n, int *i, int *j);
