@@ -94,9 +94,10 @@ where_in_wind (x, ndomain)
    * because the way we have defined the vertically extended
    * disk the height does not go to zero at rstar */
 
-  if (length(x)<geo.rstar) {
-      *ndomain = -1;
-      return(W_IN_STAR);
+  if (length (x) < geo.rstar)
+  {
+    *ndomain = -1;
+    return (W_IN_STAR);
   }
 
 

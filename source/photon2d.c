@@ -152,13 +152,13 @@ translate_in_space (pp)
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
                                            From here on we should be in the grid  */
 
-      /* XXX this is a test.  We check at the start whether we are in the grid */
+    /* XXX this is a test.  We check at the start whether we are in the grid */
 
     if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
     {
     }
 
-      /* XXX this ends the test */
+    /* XXX this ends the test */
 
 
 
