@@ -135,7 +135,7 @@ endif
 # LDFLAGS= -L$(LIB)  -lm -lkpar  -lgsl -lgslcblas ../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
 # LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
-LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas 
+LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas -lrt
 
 #Note that version should be a single string without spaces. 
 VERSION = 83
