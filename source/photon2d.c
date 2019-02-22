@@ -135,7 +135,7 @@ translate_in_space (pp)
      PhotPtr pp;
 {
   double ds, delta, s, smax;
-  double x;
+  //OLD double x;
   int ndom, ndom_next;
   struct photon ptest;
   int ifail;
@@ -684,7 +684,7 @@ double xsouth[] = {
 /**
  * @brief      determines whether the photon has encountered the star of disk or
  * reached the edges of the grid and returns the appropriate
- * tatus.
+ * status.
  *
  * @param [in, out] PhotPtr  p   A photon at its new proposed location.  On exiting the routine
  * this will contain the position of the photon after taking wind boundaries (e.g wind cones)
@@ -698,7 +698,7 @@ double xsouth[] = {
  * * The photon has hit the star				P_HIT_STAR
  * * The photon has hit the disk				P_HIT_DISK
  * * The photon has reached the edge of grid 		P_ESCAPE
- * * The status is undeterminable                    5
+ * * The status is undeterminable                   P_ERROR
  *
  * If a photon does not fall into one of these categories, walls returns the old status, which is stored in
  * p->istat
@@ -718,7 +718,7 @@ double xsouth[] = {
  * If one of the walls has been hit, the routine should have moved the photon to that wall, but not
  * othewise changed it.
  *
- * The routine also calculates the normal to the surface that was hit, which is inteneded to
+ * The routine also calculates the normal to the surface that was hit, which is intended to
  * be used by trans_phot to redirect the photon
  *
  * ### Notes ###
@@ -770,15 +770,17 @@ walls (p, pold, normal)
        */
 
       s = ds_to_disk (pold, 0);
-      if (s <= 0)
+      if (s <= -1)  // -1 allows  for very small errors in the calculation of the distance to the disk
       {
-        Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n", pold->np,pold->x[0], pold->x[1], pold->x[2], s);
-        s = ds_to_disk (pold, 0);
+        Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n", pold->np, pold->x[0],
+               pold->x[1], pold->x[2], s);
+        //OLD s = ds_to_disk (pold, 0);
       }
       else if (s == VERY_BIG)
       {
-        Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e\n", pold->np, pold->x[0], pold->x[1], pold->x[2]);
-        s = ds_to_disk (pold, 0);
+        Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e (%11.4e/%11.4e %11.4e/%11.4e %11.4e) \n", pold->np, pold->x[0],
+               pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]),z, ds_to_disk (pold, 1));
+        //OLD s = ds_to_disk (pold, 0);
       }
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);
