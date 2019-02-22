@@ -166,8 +166,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 /**
  * @brief      Determine how many photons to allocate to each band
  *
- * @param [in] double  f1   A minimum frequency (NOT USED)
- * @param [in] double  f2   A maximum frequency (NOT USED)
  * @param [in] int  ioniz_or_final   indicate whether this is for an ioniz_or_final
  * @param [in] int  iwind   indicates where wind photons are created
  * @param [in,out] struct xbands *  band   is a pointer to the band sturctue where everythin is
@@ -322,8 +320,8 @@ calculates the boundaries of the various disk annulae depending on f1 and f2 */
 
 /* The choices associated with iwind are
 iwind = -1 	Don't generate any wind photons at all
-         1      Create wind photons and force a reinitialization of the wind
-         0      Create wind photons but remain open to the question of whether
+         1  Create wind photons and force a reinitialization of the wind
+         0  Create wind photons but remain open to the question of whether
 		the wind needs to be reinitialized.  Initialization is forced
 		in that case by init
 */
@@ -402,14 +400,15 @@ iwind = -1 	Don't generate any wind photons at all
 
 /**********************************************************/
 /**
- * @brief      just makes photons
+ * @brief      just makes photons (in a particular wavelength range for
+ * all radiation sources)
  *
  * @param [out] PhotPtr  p   The entire photon structure
  * @param [in] double  f1   The minimum frequency for generating photons
  * @param [in] double  f2   The maximum frequency for generating photons
  * @param [in] int  ioniz_or_final   A flag indicating whether this if for an ionization or detailed
  * spectral cycle (Used to determine what underlying spectrum, e.g bb or detailed models) to sample
- * @param [in] int  iwind   A flag indicating whether or not to genrate any wind photons.
+ * @param [in] int  iwind   A flag indicating whether or not to generate any wind photons.
  * @param [in] double  weight   The weight of photons to generate
  * @param [in] int  iphot_start   The position in the photon structure to start storing photons
  * @param [in] int  nphotons   The number of photons to generate
@@ -417,7 +416,7 @@ iwind = -1 	Don't generate any wind photons at all
  *
  * @details
  * make_phot controls the actual generation of photons.  All of the initializations should
- * have been done previously (xdefine_phot).  xmake_phot cycles throght the various possible
+ * have been done previously (xdefine_phot).  xmake_phot cycles through the various possible
  * sources of the wind, including for example, the disk, the central object, and the
  * wind, and creates photons for each, using the ratio of the band limited luminosites to the
  * total band limited luminosity to determine how many photons to select from each source.
