@@ -3363,7 +3363,8 @@ q21 (line_ptr, t)
      struct lines *line_ptr;
      double t;
 {
-  double gaunt, gbar;
+  double gaunt;
+//OLD  double gbar;
   double omega;
   double u0;
   double upsilon ();
@@ -3389,7 +3390,7 @@ q21 (line_ptr, t)
     else                        //otherwise use the collision strength directly. NB what we call omega, most people including hazy call upsilon.
     {
       omega = upsilon (line_ptr->coll_index, u0);
-      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;
+//OLD      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;
     }
 
 

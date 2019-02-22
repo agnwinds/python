@@ -51,9 +51,7 @@ int
 do_windsave2table (root)
      char *root;
 {
-  int ochoice;
   int ndom;
-  ochoice = 1;
   char rootname[LINELENGTH];
   int create_master_table (), create_heat_table (), create_ion_table ();
 
@@ -129,7 +127,7 @@ create_master_table (ndom, rootname)
 
 
   int i, ii, jj;
-  int nstart, nstop, ndim2;
+  int nstart, ndim2;
   int n, ncols;
   FILE *fopen (), *fptr;
 
@@ -204,7 +202,6 @@ create_master_table (ndom, rootname)
 
 
   nstart = zdom[ndom].nstart;
-  nstop = zdom[ndom].nstop;
   ndim2 = zdom[ndom].ndim2;
 
 
@@ -374,7 +371,7 @@ create_heat_table (ndom, rootname)
 
 
   int i, ii, jj;
-  int nstart, nstop, ndim2;
+  int nstart, ndim2;
   int n, ncols;
   FILE *fopen (), *fptr;
 
@@ -451,7 +448,6 @@ create_heat_table (ndom, rootname)
 
 
   nstart = zdom[ndom].nstart;
-  nstop = zdom[ndom].nstop;
   ndim2 = zdom[ndom].ndim2;
 
 
@@ -572,7 +568,7 @@ create_ion_table (ndom, rootname, iz)
   char element_name[20];
   int istate[50];
   char one_line[1024], start[132], one_value[20];
-  int nstart, nstop, ndim2;
+  int nstart, ndim2;
 
 
   int i, ii, jj, n;
@@ -614,7 +610,6 @@ create_ion_table (ndom, rootname, iz)
   }
 
   nstart = zdom[ndom].nstart;
-  nstop = zdom[ndom].nstop;
   ndim2 = zdom[ndom].ndim2;
 
 
@@ -725,12 +720,11 @@ get_ion (ndom, element, istate, iswitch)
   char name[LINELENGTH];
   int nplasma;
   double *x;
-  int nstart, nstop, ndim2;
+  int nstart, ndim2;
   double nh;
 
 
   nstart = zdom[ndom].nstart;
-  nstop = zdom[ndom].nstop;
   ndim2 = zdom[ndom].ndim2;
 
   x = (double *) calloc (sizeof (double), ndim2);
@@ -826,10 +820,9 @@ get_one (ndom, variable_name)
   int nplasma;
   double *x;
   int ndim2;
-  int nstart, nstop;
+  int nstart;
 
   nstart = zdom[ndom].nstart;
-  nstop = zdom[ndom].nstop;
   ndim2 = zdom[ndom].ndim2;
 
   x = (double *) calloc (sizeof (double), ndim2);
