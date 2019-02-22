@@ -772,12 +772,12 @@ walls (p, pold, normal)
       s = ds_to_disk (pold, 0);
       if (s <= 0)
       {
-        Error ("walls: The previous position %e %e %e was inside the disk, correcting by  %e \n", pold->x[0], pold->x[1], pold->x[2], s);
+        Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n", pold->np,pold->x[0], pold->x[1], pold->x[2], s);
         s = ds_to_disk (pold, 0);
       }
       else if (s == VERY_BIG)
       {
-        Error ("walls: Should not miss disk at this position %e %e %e\n", pold->x[0], pold->x[1], pold->x[2]);
+        Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e\n", pold->np, pold->x[0], pold->x[1], pold->x[2]);
         s = ds_to_disk (pold, 0);
       }
       stuff_phot (pold, p);
