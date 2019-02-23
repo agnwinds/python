@@ -125,7 +125,7 @@ init_geo ()
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
 
 
-  strcpy (geo.atomic_filename, "data/standard78");
+  strcpy (geo.atomic_filename, "data/standard80");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype
@@ -187,42 +187,38 @@ get_spectype (yesno, question, spectype)
      int *spectype;
 {
   char model_list[LINELENGTH];
-  int stype;
+  char one_choice[LINELENGTH];
+  char choices[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
+  int i;
+  int init_choices (), get_choices ();
 
   if (yesno)
   {
-    /* XXX The next few lines convert the value of spectype to values that correspond to what is requested
-     * in the rdpar statement, and then once we have the answer they are converted back to values that the
-     * program uses internally.  Presumably this was done for historical reasons, having to do with running
-     * old .pf files, but it is quite awkward, and we need to fix this kind of thing.  ksl
+    init_choices ();            // Populate the spect array
+
+    /* Locate the word that corresponds to the spectype that was entered
      */
 
-    // First convert the spectype to the way the questionis supposed to be answered
-    if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
-      stype = 0;
-    else if (*spectype == SPECTYPE_UNIFORM)
-      stype = 2;
-    else if (*spectype == SPECTYPE_POW)
-      stype = 3;
-    else
-      stype = 1;
+    for (i = 0; i < zz_spec.n; i++)
+    {
+      if (*spectype == zz_spec.vals[i])
+      {
+        strcpy (one_choice, zz_spec.choices[i]);
+        break;
+      }
+    }
 
-    /* Now get the response */
-    rdint (question, &stype);
+    if (i == zz_spec.n)
+    {
+      Error ("get_spectype: Programming error.  Unknown spectype %d\n", *spectype);
+      exit (0);
+    }
 
-    /* Now convert the response back to the values which python uses */
-    if (stype == 0)
-      *spectype = SPECTYPE_BB;  // bb
-    else if (stype == 2)
-      *spectype = SPECTYPE_UNIFORM;     // uniform
-    else if (stype == 3)
-      *spectype = SPECTYPE_POW; // power law
-    else if (stype == 4)
-      *spectype = SPECTYPE_CL_TAB;      // broken power law
-    else if (stype == 5)
-      *spectype = SPECTYPE_BREM;        // bremstrahlung
-    else
+    get_choices (question, choices, &zz_spec);
+    *spectype = rdchoice (question, choices, one_choice);
+
+    if (*spectype == SPECTYPE_MODEL)
     {
       if (geo.run_type == RUN_TYPE_PREVIOUS)
       {                         // Continuing an old model
@@ -508,30 +504,56 @@ PhotPtr
 init_photons ()
 {
   PhotPtr p;
-  double x;
 
   /* Although Photons_per_cycle is really an integer,
-     read in as a double so it is easier for input */
+     read in as a double so it is easier for input
+     (in scientific notation) */
 
-  x = 100000;
-  rddoub ("Photons_per_cycle", &x);
-  NPHOT = x;                    // NPHOT is photons/cycle
+  double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
+
+  rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
+  if ((NPHOT = (int) nphot) <= 0)
+  {
+    Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
+    Exit (1);
+  }
+
+  if (modes.photon_speedup)
+  {
+    Log ("Photon logarithmic stepping algorithm enabled\n");
+    if (!PHOT_STEPS)
+    {
+      rddoub ("Min_photons_per_cycle", &min_nphot);
+      rddoub ("Max_photons_per_cycle", &max_nphot);
+    }
+    else
+      min_nphot /= pow (10, PHOT_STEPS);
+
+    NPHOT_MAX = NPHOT;
+    NPHOT = NPHOT_MIN = (int) min_nphot;
+    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
+    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
+  }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
-
   NPHOT /= np_mpi_global;
+  if (modes.photon_speedup)
+  {
+    NPHOT_MIN /= np_mpi_global;
+    NPHOT_MAX /= np_mpi_global;
+    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
+    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
+  }
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
-
   rdint ("Spectrum_cycles", &geo.pcycles);
-
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    Exit (0);                   //There is really nothing to do!
+    Exit (1);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -552,7 +574,6 @@ init_photons ()
     if ((NPHOT * sizeof (p_dummy)) > 1e9)
       Error ("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
   }
-
 
   return (p);
 }
@@ -590,7 +611,7 @@ init_ionization ()
 
 
   strcpy (answer, "matrix_bb");
-  geo.ioniz_mode = rdchoice ("Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
+  geo.ioniz_mode = rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {

@@ -144,10 +144,12 @@
 #include <string.h>
 #include <ctype.h>
 #include "log.h"
+#include "strict.h"
 #define LINELEN		256
 #define	OLD		100
 #define	NORMAL		1
 #define REISSUE		-199
+
 
 
 FILE *rdin_ptr, *rdout_ptr;     /* Pointers to the input and output files */
@@ -356,7 +358,6 @@ cpar (filename)
   if (rename ("tmp.rdpar", filename) != 0 && verbose)
     printf ("Could not rename %s to %s", "tmp.rdpar\n", filename);
 
-//OLD  printf ("A new .pf file %s has been written\n", filename);
   return (NORMAL);
 }
 
@@ -558,7 +559,8 @@ string_process_from_file (question, dummy)
   char firstword[LINELEN], secondword[LINELEN];
   char *line, *fgets_return;
   char *ccc, *index (), *fgets ();
-  int nwords, wordlength;
+  int nwords = 0;               // Initialise to avoid warning
+  int wordlength;
   char old_question[LINELEN];
   char xfirstword[LINELEN], xquestion[LINELEN];
   int i;
@@ -610,6 +612,8 @@ string_process_from_file (question, dummy)
 
     if (check_synonyms (question, old_question) == 1 && strncmp (old_question, firstword, wordlength) == 0)
     {
+      strict = 1;
+      Error ("Had to parse a synonym. Program will stop after writing out a new parameter file\n");
       break;
     }
 
@@ -1200,14 +1204,27 @@ string2int (word, string_choices, string_values, string_answer)
   nchoices =
     sscanf (values, "%d %d %d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7], &xv[8], &xv[9]);
 
-  /* Perform a minimum match on the anser */
+
+  /* Check that one of the values is not one of the values that is an error return value, -9998 or -9999.  If
+   * xv is one of these values then the program will remain confused and so we exit 
+   */
+
+  for (i = 0; i < nchoices; i++)
+  {
+    if (xv[i] == -9998 || xv[i] == -9999)
+    {
+      Error ("string2int: Internal programming error: value for rdchoice is an error retrun value\n");
+      exit (0);
+    }
+  }
+
+  /* Perform a minimum match on the answer */
 
   matched = 0;
-  ivalue = -99;
+  ivalue = -9998;
   ibest = -1;                   //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
-//OLD    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
     if (strncmp (word, xs[i], strlen (word)) == 0)
     {
       ivalue = xv[i];
@@ -1222,8 +1239,7 @@ string2int (word, string_choices, string_values, string_answer)
 
   if (matched > 1)
   {
-    printf ("XX multiple matches\n");
-    ivalue = -999;
+    ivalue = -9999;
     return (ivalue);
   }
 
@@ -1231,7 +1247,6 @@ string2int (word, string_choices, string_values, string_answer)
 
   if (ibest >= 0)
   {
-    // OLD printf ("XX %s %d\n", xs[ibest], ivalue);
     strcpy (string_answer, xs[ibest]);
   }
 
@@ -1309,12 +1324,12 @@ rdchoice (question, answers, answer)
     if (sscanf (string_answer, "%d%s", &ianswer, dummy) == 1)
     {
       strcpy (answer, string_answer);
-      //OLD printf ("OK\n");
       rdpar_comment ("Deprecated use of rdchoice. NO ERROR CHECKS! For %s replace answer %s in %s with its string equivalent",
                      question, string_answer, answers);
       fprintf (rdout_ptr, "%-30s %20s\n", question, string_answer);
       Error ("rdchoice: Deprecated use of rdchoice. NO ERROR CHECKS! For %s replace answer %s in %s with its string equivalent \n",
              question, string_answer, answers);
+      strict = 1;
       rdpar_choice = 0;
       return (ianswer);
     }
@@ -1339,20 +1354,22 @@ rdchoice (question, answers, answer)
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
     ianswer = string2int (string_answer, dummy, answers, full_answer);
-    // OLD printf ("XXX the answer was %s\n", full_answer);
-    if (ianswer == -99)
+    if (ianswer == -9998)
     {
       Error ("rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;
     }
-    if (ianswer == -999)
+    if (ianswer == -9999)
     {
       Error ("rdchoice: Multiple matches of  %s input to answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;
     }
   }
 
-  fprintf (rdout_ptr, "%-30s %20s\n", question, full_answer);
+  if (query != OLD)
+  {
+    fprintf (rdout_ptr, "%-30s %20s\n", question, full_answer);
+  }
   strcpy (answer, string_answer);
   rdpar_choice = 0;
   return (ianswer);

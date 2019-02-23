@@ -343,6 +343,10 @@ struct plane diskplane, disktop, diskbottom;
  *
  * ###Notes###
  *
+ * The z-height of a vertically extended disk is defined by 
+ * zdisk.  The outside edge of the disk is assumed to be 
+ * a cylinder at geo.diskrad
+ *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
  * on the distance between the current position and footpoint
@@ -353,8 +357,7 @@ struct plane diskplane, disktop, diskbottom;
  * one can imagine that one might get into trouble for a very
  * flared (bowl-shaped) disk.
  *
- * Significant portions of the routine were rewritten in 1802 by
- * ksl to better handle flared disks.
+ *
  *
  **********************************************************/
 
@@ -365,7 +368,7 @@ ds_to_disk (p, allow_negative)
 {
   double x1, x2;
   double s, s_negative, s_test;
-  double s_plane, s_top, s_bottom, s_sphere;
+  double s_plane, s_top, s_bottom, s_diskrad;
   double s_disk = 0;
   double r, r_top, r_bottom;
   double smin, smax;
@@ -401,8 +404,6 @@ ds_to_disk (p, allow_negative)
 
   }
 
-  /* Now calculate the place where the photon hits the diskplane */
-
   s_test = s_plane = ds_to_plane (&diskplane, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_test);
@@ -431,9 +432,10 @@ ds_to_disk (p, allow_negative)
    * boundary
    *
    * For the vertically extended disk we have to keep track of
-   * the smallest postive value and the smallest (in absolute
+   * the smallest positive value and the smallest (in absolute
    * terms negative value.
-   * OK now we have to deal with the hard case.  We would like to
+   * 
+   * We would like to
    * avoid actually having to calculate the intercept to the disk
    * if we can because this is likely time consuming. So we first
    * determine this, by checking where the ray hits a sphere that
@@ -460,6 +462,11 @@ ds_to_disk (p, allow_negative)
     }
   }
 
+  /* So at this point, the distance to the top plane is
+   * known, and stored in s_top and if this hits within
+   * geo.diskrad stored in either s, or s_negative
+   */
+
 
 
   s_test = s_bottom = ds_to_plane (&diskbottom, p);
@@ -479,11 +486,23 @@ ds_to_disk (p, allow_negative)
     }
   }
 
-  s_test = s_sphere = ds_to_sphere (geo.diskrad, p);
+  /* So at this point, the distance to the bottom plane is
+   * known, and stored in s_bottom  and if this hits within
+   * geo.diskrad stored in either s, or s_negative (if these
+   * distances are smaller than they were in absolute value
+   *
+   * Now we check whether the photon hits the cylinder that 
+   * defines the outer edge of the disk
+   */
+
+  s_test = s_diskrad = ds_to_cylinder (geo.diskrad, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_test);
 
-  /* At this point phit is on the sphere but our check here is whether its on the diks or not
+  /* At this point phit is on the cylinder but but we need to 
+   * check whether it is hitting the outside edge of the disk
+   * so we check where exactly it hit.  If it hit the 
+   * edge we once again look to reduce the distances
    */
 
   if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
@@ -521,29 +540,29 @@ ds_to_disk (p, allow_negative)
 
 
   /*  First we check the unlikely case that the photon hit the edge of the
-   *  disk.  This is easy because if so s will be the same as s_sphere
+   *  disk.  This is easy because if so s will be the same as s_diskrad
    *  */
 
-  if (s == s_sphere)
+  if (s == s_diskrad)
   {
     return (s);
   }
 
   /*  Now we need to find exactly where we have hit the disk.  This
-   *  is not trivial.  Basically we need to bracket the possibilites
+   *  is not trivial.  Basically we need to bracket the possibilities
    *
    * At this point we know the photon is on a path that passes
    * through (or passed through the disk) and we must locate it.
    * There are two possibilities.  It hit the disk edge, or it hit
    * the face of the disk.  Most of the time it will hit the disk face
    * so we will calculate this first, and then check if s is less
-   * than s_sphere.
+   * than s_diskrad.
    *
    * To setup rtsafe, we have to find distances which bracket what
    * we want.  smax should be no more than the distance to the
    * disk_plane (assuming we have a photon headed toward the plane)
    *
-   * Note that the next little section is inted to select between the
+   * Note that the next little section is intended to select between the
    * top and bottom face of the disk
    */
 

@@ -58,7 +58,7 @@ get_domain_params (ndom)
 
 
   strcpy (answer, "SV");
-  zdom[ndom].wind_type = rdchoice ("Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)", "0,1,3,4,5,6,7,9,10", answer);
+  zdom[ndom].wind_type = rdchoice ("Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)", "0,1,3,4,5,6,7,9,10", answer);
 //OLD  rdint ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,10=imported)", &zdom[ndom].wind_type);
 
 //OLD  if (zdom[ndom].wind_type == 2)
@@ -77,26 +77,6 @@ get_domain_params (ndom)
   /* Define the coordinate system for the grid and allocate memory for the wind structure */
   strcpy (answer, "cylindrical");
   zdom[ndom].coord_type = rdchoice ("Wind.coord_system(spherical,cylindrical,polar,cyl_var)", "0,1,2,3", answer);
-//OLD  rdint ("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
-//OLD  switch (input_int)
-//OLD  {
-//OLD  case 0:
-//OLD    zdom[ndom].coord_type = SPHERICAL;
-//OLD    break;
-//OLD  case 1:
-//OLD    zdom[ndom].coord_type = CYLIND;
-//OLD    break;
-//OLD  case 2:
-//OLD    zdom[ndom].coord_type = RTHETA;
-//OLD    break;
-//OLD  case 3:
-//OLD    zdom[ndom].coord_type = CYLVAR;
-//OLD    break;
-//OLD  default:
-//OLD    Error ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-//OLD          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-//OLD  }
-
 
   if (zdom[ndom].wind_type == IMPORT)
   {

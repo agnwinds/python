@@ -32,7 +32,7 @@ Description:
 Primary routines:
 
     steer  Processes the command line options and then calls do_all_angles
-    do_all_angles Produces the plot 
+    do_all_angles Produces the plot  (do_all_angles(root) is the routine to call from a script
 
 Notes:
                                        
