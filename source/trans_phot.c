@@ -277,7 +277,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double x_dfudge_check[3];
   int ndom;
   double normal[3];
-  double ds1, ds2;
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
 
