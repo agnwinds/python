@@ -770,7 +770,7 @@ walls (p, pold, normal)
        */
 
       s = ds_to_disk (pold, 0);
-      if (s <= -1)  // -1 allows  for very small errors in the calculation of the distance to the disk
+      if (s <= -1)              // -1 allows  for very small errors in the calculation of the distance to the disk
       {
         Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n", pold->np, pold->x[0],
                pold->x[1], pold->x[2], s);
@@ -778,9 +778,10 @@ walls (p, pold, normal)
       }
       else if (s == VERY_BIG)
       {
-        Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e (%11.4e/%11.4e %11.4e/%11.4e %11.4e) \n", pold->np, pold->x[0],
-               pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]),z, ds_to_disk (pold, 1));
+        Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e (%11.4e/%11.4e %11.4e/%11.4e %11.4e) \n", pold->np,
+               pold->x[0], pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]), z, ds_to_disk (pold, 1));
         //OLD s = ds_to_disk (pold, 0);
+        save_photons (pold, "Disk");
       }
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);

@@ -5,7 +5,7 @@
  * @date   May, 2018
  *
  * @brief
- * consolidates an approach to providing extra diagnositcs
+ * consolidates an approach to providing extra diagnostics
  * for debugging python, Some of the diagnostics allow one to change
  * defaults in python while others allow traking of and contains initialization routines
  * that control which diagnosics are a
@@ -274,7 +274,7 @@ init_extra_diagnostics ()
  * @param [in] WindPtr  one   WindPtr for the cell
  * @param [in] PhotPtr  p   Photon pointer (for one photon)
  * @param [in] double  ds   ds travelled
- * @param [in] double  w_ave   The avereage weight of the pohton as it travelled
+ * @param [in] double  w_ave   The average weight of the photon as it travelled
  * @return     Always returns 0
  *
  * @details
@@ -316,8 +316,8 @@ save_photon_stats (one, p, ds, w_ave)
 
 /**********************************************************/
 /**
- * @brief      saves informations about phtoons in
- *     a particulare wavelength gange
+ * @brief      saves informations about photons in
+ *     a particulare wavelength range
  *
  * @param [in] int  n   The number of the spectrum
  * @param [in] PhotPtr  p   The photon before being doppler shifted
@@ -378,8 +378,6 @@ save_photons (p, comment)
      char comment[];
 {
   save_photon_number += 1;
-//OLD  if (save_photon_number > 1000000)
-//OLD    return (0);
 
   fprintf (epltptr,
            "PHOTON %3d %3d %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %s \n",
