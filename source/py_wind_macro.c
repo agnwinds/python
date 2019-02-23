@@ -479,19 +479,10 @@ copy_plasma (x1, x2)
     Error ("calloc_dyn_plasma: Error in allocating memory for partition\n");
     exit (0);
   }
-  if ((x2->levden = calloc (sizeof (double), nlte_levels)) == NULL)
-  {
-    Error ("calloc_dyn_plasma: Error in allocating memory for levden\n");
-    exit (0);
-  }
   for (i = 0; i < nions; i++)
   {
     x2->density[i] = x1->density[i];
     x2->partition[i] = x1->partition[i];
-  }
-  for (i = 0; i < nlte_levels; i++)
-  {
-    x2->levden[i] = x1->levden[i];
   }
 
 
