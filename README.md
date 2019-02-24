@@ -61,4 +61,4 @@ and run the code by typing, e.g.
 
 Please see the [wiki](https://github.com/agnwinds/python/wiki/Installing-and-Running-Python) and docs folder for how to use the code.
 
-Any comments, email jm8g08@soton.ac.uk or long@stsci.edu.
+Any comments, email one of the addresses above.
