@@ -86,8 +86,21 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   double natural_weight, weight;
   double ftot;
   int n;
-  int iphot_start;
-  double kpkt_fraction;
+  int iphot_start, nphot_rad, nphot_k;
+  long nphot_tot_rad;
+
+  /* if we are generate nonradiative kpackets, then we need to subtract 
+     off the fraction reserved for k-packets */
+  if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO) && (ioniz_or_final == 0))
+  {
+    nphot_rad = NPHOT - (geo.frac_extra_kpkts * NPHOT);
+    nphot_tot_rad = nphot_tot - (geo.frac_extra_kpkts * nphot_tot);
+  }
+  else
+  {
+    nphot_rad = NPHOT;
+    nphot_tot_rad = nphot_tot;
+  }
 
   if (freq_sampling == 0)
   {                             /* Original approach, uniform sampling of entire wavelength interval,
@@ -95,18 +108,18 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
     if (f1 != f1_old || f2 != f2_old || iwind != iwind_old)
     {                           // The reinitialization is required
-      xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON, 1.0);
+      xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON);
     }
     /* The weight of each photon is designed so that all of the photons add up to the
        luminosity of the photosphere.  This implies that photons must be generated in such
        a way that it mimics the energy distribution of the star. */
 
-    geo.weight = (weight) = (geo.f_tot) / (nphot_tot);
+    geo.weight = (weight) = (geo.f_tot) / (nphot_tot_rad);
 
     for (n = 0; n < NPHOT; n++)
       p[n].path = -1.0;         /* SWM - Zero photon paths */
 
-    xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, 0, NPHOT);
+    xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, 0, nphot_rad);
   }
   else
   {                             /* Use banding, create photons with different weights in different wavelength
@@ -118,19 +131,9 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     for (n = 0; n < NPHOT; n++)
       p[n].path = -1.0;         /* SWM - Zero photon paths */
 
-/* Now generate the photons */
+    /* Now generate the photons */
 
     iphot_start = 0;
-
-    /* if we are making kpkts then split them evenly throughout the bands */
-    if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO) 
-      {
-        kpkt_fraction = 1.0 / xband.nbands;
-      }
-    else 
-      {
-        kpkt_fraction = 0.0;
-      }
 
     for (n = 0; n < xband.nbands; n++)
     {
@@ -142,13 +145,13 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
         Log ("Defining photons for band %d...\n", n);
 
-        xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind, PRINT_ON, kpkt_fraction);
+        xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind, PRINT_ON);
 
         /* The weight of each photon is designed so that all of the photons add up to the
            luminosity of the photosphere.  This implies that photons must be generated in such
            a way that it mimics the energy distribution of the star. */
 
-        geo.weight = (natural_weight) = (ftot) / (nphot_tot);
+        geo.weight = (natural_weight) = (ftot) / (nphot_tot_rad);
         xband.weight[n] = weight = natural_weight * xband.nat_fraction[n] / xband.used_fraction[n];
         xmake_phot (p, xband.f1[n], xband.f2[n], ioniz_or_final, iwind, weight, iphot_start, xband.nphot[n]);
 
@@ -157,13 +160,35 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     }
   }
 
+  /* deal with k-packets generated from nonradiative heating */
+  if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO))
+  {
+    /* calculate the non-radiative kpkt luminosity throughout the wind */
+    geo.f_kpkt = get_kpkt_heating_f (); 
+
+    /* get the number of photons we have reserved in the photon structure */
+    nphot_k = geo.frac_extra_kpkts * NPHOT; 
+    weight = (geo.f_kpkt) / (nphot_k);
+
+    /* throw an error if the k-packet weight is too high or low */
+    if ( weight > (100.0 * natural_weight) || weight < (0.01 * natural_weight) )
+    {
+      Error("define_phot: kpkt weight is %8.4e compared to characteristic photon weight %8.4e\n", weight, natural_weight);
+    }
+    Log ("!! xdefine_phot: total & banded kpkt luminosity due to non-radiative heating: %8.2e %8.2e \n", geo.heat_shock, geo.f_kpkt);
+
+
+    /* generate the actual photons produced by the k-packets */
+    photo_gen_kpkt (p, weight, iphot_start, nphot_k);
+  }
+
 
   for (n = 0; n < NPHOT; n++)
   {
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;
-    if (geo.reverb != REV_NONE && p[n].path < 0.0)      //SWM - Set path lengths for disk, star etc.
+    if (geo.reverb != REV_NONE && p[n].path < 0.0) // SWM - Set path lengths for disk, star etc.
       simple_paths_gen_phot (&p[n]);
   }
   return (0);
@@ -206,19 +231,22 @@ populate_bands (ioniz_or_final, iwind, band)
 
 {
   double ftot, frac_used, z;
-  int n, nphot, most;
-  double kpkt_fraction;
+  int n, nphot, most, nphot_rad;
 
   /* Get all of the band limited luminosities */
   ftot = 0.0;
 
-  kpkt_fraction = 1.0 / band->nbands;
+  /* this is the number of photons minus the number reserved for k-packets */
+  if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO))
+    nphot_rad = NPHOT - (geo.frac_extra_kpkts * NPHOT);
+  else
+    nphot_rad = NPHOT;
 
   for (n = 0; n < band->nbands; n++)    // Now get the band limited luminosities
   {
     if (band->f1[n] < band->f2[n])
     {
-      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind, PRINT_OFF, kpkt_fraction);
+      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind, PRINT_OFF);
 
       ftot += band->flux[n] = geo.f_tot;
     }
@@ -247,7 +275,7 @@ populate_bands (ioniz_or_final, iwind, band)
   for (n = 0; n < band->nbands; n++)
   {
     band->used_fraction[n] = band->min_fraction[n] + (1 - frac_used) * band->nat_fraction[n];
-    nphot += band->nphot[n] = NPHOT * band->used_fraction[n];
+    nphot += band->nphot[n] = nphot_rad * band->used_fraction[n];
     if (band->used_fraction[n] > z)
     {
       z = band->used_fraction[n];
@@ -255,13 +283,13 @@ populate_bands (ioniz_or_final, iwind, band)
     }
   }
 
-/* Because of roundoff errors nphot may not sum to the desired value, namely NPHOT.  So
-add a few more photons to the band with most photons already. It should only be a few, at most
-one photon for each band.*/
+  /* Because of roundoff errors nphot may not sum to the desired value, namely NPHOT less kpackets.  
+  So add a few more photons to the band with most photons already. It should only be a few, at most
+  one photon for each band.*/
 
-  if (nphot < NPHOT)
+  if (nphot < nphot_rad)
   {
-    band->nphot[most] += (NPHOT - nphot);
+    band->nphot[most] += (nphot_rad - nphot);
   }
 
   return (ftot);
@@ -281,7 +309,6 @@ one photon for each band.*/
  * 1-> it is for the final spectrum calculation
  * @param [in] int  iwind   if 0, include wind photons; if 1 include wind photons and force a recalcuation of
  * ion denisities, if -1, ignore the possibility of wind photons
- * @param [in] double kpkt_fraction fraction of kpkts to put into this band (1/nbands)
  * @return     Always returns 0
  *
  * @details
@@ -301,13 +328,11 @@ one photon for each band.*/
  **********************************************************/
 
 int
-xdefine_phot (f1, f2, ioniz_or_final, iwind, print_mode, kpkt_fraction)
+xdefine_phot (f1, f2, ioniz_or_final, iwind, print_mode)
      double f1, f2;
      int ioniz_or_final;
      int iwind;
      int print_mode;
-     double kpkt_fraction;
-
 {
 
   /* First determine if you need to reinitialize because the frequency boundaries are
@@ -378,20 +403,12 @@ iwind = -1 	Don't generate any wind photons at all
 
     matom_emiss_report ();      // function which logs the macro atom level emissivites
   }
-  else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
-  {
-    /* calculate the non-radiative kpkt luminosity throughout the wind */
-    geo.f_kpkt = get_kpkt_heating_f (kpkt_fraction);  
-  }
-
 
   geo.f_tot = geo.f_star + geo.f_disk + geo.f_bl + geo.f_wind + geo.f_kpkt + geo.f_matom + geo.f_agn;
   geo.lum_tot = geo.lum_star + geo.lum_disk + geo.lum_bl + geo.lum_agn + geo.lum_wind;
 
   if (print_mode == PRINT_ON)
   {
-    if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO && geo.matom_radiation == 0)
-      Log ("!! xdefine_phot: total & banded kpkt luminosity due to non-radiative heating:  %8.2e %8.2e \n", geo.heat_shock, geo.f_kpkt);
     if (geo.adiabatic)
       Log ("!! xdefine_phot: heating & cooling  due to adiabatic processes:         %8.2e %8.2e \n", geo.heat_adiabatic, geo.cool_adiabatic);
 
@@ -584,7 +601,7 @@ stellar photons */
     iphot_start += nphot;
   }
 
-/* Generate the agn photons */
+  /* Generate the agn photons */
 
   if (geo.agn_radiation)
   {
@@ -617,12 +634,12 @@ stellar photons */
 
   /* Now do macro atoms and k-packets. SS June 04 */
 
-  if (geo.matom_radiation || (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO))
+  if (geo.matom_radiation)
   {
     nphot = nkpkt;
     if (nphot > 0)
     {
-      if (ioniz_or_final == 0 && (geo.nonthermal ==  0))
+      if (ioniz_or_final == 0)
       {
         Error ("xmake_phot: generating photons by k-packets when performing ionization cycle without shock heating. Abort.\n");
         exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)
@@ -649,7 +666,6 @@ stellar photons */
     }
     iphot_start += nphot;
   }
-
 
   return (0);
 }

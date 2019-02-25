@@ -625,8 +625,7 @@ init_ionization ()
 
   thermal_opt = 0;
 
-  rdchoice("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)","0,1,2,3"
-            &thermal_opt);
+  rdchoice("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)","0,1,2,3",&thermal_opt);
 
   if (thermal_opt == 0)
     {
@@ -671,6 +670,12 @@ init_ionization ()
       rddoub ("Thermal_balance_options.extra_heating", &geo.shock_factor);
       geo.shock_factor /= (4*PI*pow(geo.rstar,3));
       Log("The non_thermal emissivity at the base is %.2e\n", geo.shock_factor);
+
+      if (geo.rt_mode = RT_MODE_MACRO)
+      {
+        geo.frac_extra_kpkts = 0.1;
+        rddoub ("Thermal_balance_options.extra_kpacket_frac", &geo.frac_extra_kpkts);
+      }
     }
 
 

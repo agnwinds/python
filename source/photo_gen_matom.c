@@ -65,8 +65,7 @@ get_kpkt_f ()
  **********************************************************/
 
 double
-get_kpkt_heating_f (fraction)
-  double fraction;
+get_kpkt_heating_f ()
 {
   int n, nwind;
   double lum, shock_kpkt_luminosity;
@@ -81,9 +80,9 @@ get_kpkt_heating_f (fraction)
 
     /* what we do depends on how the "net heating mode" is defined */
     if (KPKT_NET_HEAT_MODE)
-      shock_kpkt_luminosity = fraction * (shock_heating(one) - plasmamain[n].cool_adiabatic);
+      shock_kpkt_luminosity = (shock_heating(one) - plasmamain[n].cool_adiabatic);
     else
-      shock_kpkt_luminosity = fraction * shock_heating(one);
+      shock_kpkt_luminosity = shock_heating(one);
 
     if (shock_kpkt_luminosity > 0)
     {
@@ -161,7 +160,7 @@ get_matom_f (mode)
 #endif
 
     /* add the non-radiative k-packet heating to the kpkt_abs quantity */
-    get_kpkt_heating_f (1.0);
+    get_kpkt_heating_f ();
 
     which_out = 0;
     n_tries = 5000000;

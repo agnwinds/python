@@ -558,17 +558,17 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     }
   }
 
-  Log ("\nNo. of photons which have scattered n times.     The max number of scatters seen was %d\n", max_scat);
-  for (i = 0; i <= max_scat; i++)
-  {
-      if (nscat[i]>0) {
-          maxscat=i;
-      }
-  }
+  Log ("\nNo. of photons which have scattered n times. The max number of scatters seen was %d\n", max_scat);
+  // for (i = 0; i <= max_scat; i++)
+  // {
+  //     if (nscat[i]>0) {
+  //         maxscat=i;
+  //     }
+  // }
 
 
   Log ("\nNo. of photons which have scattered n times\n");
-  for (i = 0; i <= maxscat; i++)
+  for (i = 0; i <= max_scat; i++)
   {
     Log ("%6d", nscat[i]);
     if ((i % 10) == 9)
