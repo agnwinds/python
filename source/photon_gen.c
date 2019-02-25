@@ -163,7 +163,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   }
 
   /* deal with k-packets generated from nonradiative heating */
-  if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO))
+  if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO) && (ioniz_or_final == 0))
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
     geo.f_kpkt = get_kpkt_heating_f (); 
