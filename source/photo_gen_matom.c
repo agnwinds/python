@@ -605,6 +605,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     while (test > fmax || test < fmin)
     {
+      pp.w = p[n].w;
       kpkt (&pp, &nres, &esc_ptr, kpkt_mode); 
 
       if (esc_ptr == 0 && kpkt_mode == KPKT_MODE_CONTINUUM)
