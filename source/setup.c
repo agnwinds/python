@@ -625,7 +625,7 @@ init_ionization ()
 
   thermal_opt = 0;
 
-  rdchoice("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)","0,1,2,3",&thermal_opt);
+  thermal_opt = rdchoice("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)", "0,1,2,3", answer);
 
   if (thermal_opt == 0)
     {

@@ -87,14 +87,16 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   double ftot;
   int n;
   int iphot_start, nphot_rad, nphot_k;
-  long nphot_tot_rad;
+  long nphot_tot_rad, nphot_tot_k;
 
-  /* if we are generate nonradiative kpackets, then we need to subtract 
+  /* if we are generating nonradiative kpackets, then we need to subtract 
      off the fraction reserved for k-packets */
   if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO) && (ioniz_or_final == 0))
   {
-    nphot_rad = NPHOT - (geo.frac_extra_kpkts * NPHOT);
-    nphot_tot_rad = nphot_tot - (geo.frac_extra_kpkts * nphot_tot);
+    nphot_k = (geo.frac_extra_kpkts * NPHOT);
+    nphot_rad = NPHOT - nphot_k;
+    nphot_tot_k = (geo.frac_extra_kpkts * nphot_tot);
+    nphot_tot_rad = nphot_tot - nphot_tot_k; 
   }
   else
   {
@@ -167,14 +169,17 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     geo.f_kpkt = get_kpkt_heating_f (); 
 
     /* get the number of photons we have reserved in the photon structure */
-    nphot_k = geo.frac_extra_kpkts * NPHOT; 
-    weight = (geo.f_kpkt) / (nphot_k);
+    //nphot_k = geo.frac_extra_kpkts * NPHOT; 
+    weight = (geo.f_kpkt) / (nphot_tot_k);
 
     /* throw an error if the k-packet weight is too high or low */
-    if ( weight > (100.0 * natural_weight) || weight < (0.01 * natural_weight) )
+    if ( weight > (100.0 * natural_weight) || weight < (0.01 * natural_weight))
     {
       Error("define_phot: kpkt weight is %8.4e compared to characteristic photon weight %8.4e\n", weight, natural_weight);
     }
+    if (sane_check(weight))
+      Error("define_phot: kpkt weight is %8.4e!\n", weight);
+
     Log ("!! xdefine_phot: total & banded kpkt luminosity due to non-radiative heating: %8.2e %8.2e \n", geo.heat_shock, geo.f_kpkt);
 
 

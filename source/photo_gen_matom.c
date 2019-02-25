@@ -555,7 +555,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   double fmin, fmax;
 
   photstop = photstart + nphot;
-  Log ("photo_gen_kpkt creates nphot %5d photons from %5d to %5d \n", nphot, photstart, photstop);
+  Log ("photo_gen_kpkt creates nphot %5d photons from %5d to %5d, weight %8.4e \n", nphot, photstart, photstop, weight);
 
   if (geo.ioniz_or_extract)
   {
@@ -606,6 +606,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     while (test > fmax || test < fmin)
     {
       kpkt (&pp, &nres, &esc_ptr, kpkt_mode); 
+
       if (esc_ptr == 0 && kpkt_mode == KPKT_MODE_CONTINUUM)
       {
         test = 0.0;
@@ -623,6 +624,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     p[n].freq = pp.freq;
     p[n].nres = nres;
     p[n].w = pp.w;
+
 
     /* The photon frequency is now known. */
 
