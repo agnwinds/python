@@ -864,6 +864,9 @@ wind_div_v ()
     div += xxx[2] = (v2[2] - v1[2]) / delta;
 
 
+	printf ("BLAH cell %i div=%e\n",icell,div);
+
+
     /* we have now evaluated the divergence, so can store in the wind pointer */
     wmain[icell].div_v = div;
 
