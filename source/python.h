@@ -861,12 +861,12 @@ typedef struct plasma
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
-  double rad_force_es[3];             /*Radiative force of wind */
-  double rad_force_ff[3];             /*Radiative force of wind */
-  double rad_force_bf[3];             /*Radiative force of wind */
-  
-  
-  
+  double rad_force_es[3];       /*Radiative force of wind */
+  double rad_force_ff[3];       /*Radiative force of wind */
+  double rad_force_bf[3];       /*Radiative force of wind */
+
+
+
 //OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
 //OLD  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
 //OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */

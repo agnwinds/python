@@ -1354,7 +1354,7 @@ mo_summary (w, rootname, ochoice)
       strcpy (name, "F_rad_x");
     else if (ichoice == 2)
       strcpy (name, "F_rad_y");
-    else 
+    else
       strcpy (name, "F_rad_z");
 
 
@@ -1372,7 +1372,7 @@ mo_summary (w, rootname, ochoice)
           x = xplasma->rad_force_es[0];
         else if (ichoice == 2)
           x = xplasma->rad_force_es[1];
-        else 
+        else
           x = xplasma->rad_force_es[2];
       }
       aaa[n] = x;
@@ -1399,7 +1399,7 @@ mo_summary (w, rootname, ochoice)
         strcat (filename, ".f_rad_y");
         write_array (filename, ochoice);
       }
-      else 
+      else
       {
         strcpy (filename, rootname);
         strcat (filename, ".f_rad_z");

@@ -267,7 +267,8 @@ WindPtr (w);
 
     plasmamain[n].xi *= 4. * PI;
     plasmamain[n].xi /= (volume * nh);
-	for (i=0;i<3;i++) plasmamain[n].rad_force_es[i]=plasmamain[n].rad_force_es[i]*(volume* plasmamain[n].ne)/(volume* C);
+    for (i = 0; i < 3; i++)
+      plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * C);
 
     /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e
      * previous value of t_e.  Note that this may not be  best way to determien the cooling.
@@ -648,7 +649,8 @@ WindPtr (w);
   {
     Log ("Outputting heatcool file for connecting to zeus\n");
     fptr = fopen ("py_heatcool.dat", "w");
-    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z\n");
+    fprintf (fptr,
+             "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z\n");
 
   }
 
@@ -768,10 +770,10 @@ WindPtr (w);
         fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);       //Line cooling must include all recombination cooling
         fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);      //ff cooling
         fprintf (fptr, "%e ", plasmamain[nplasma].rho); //density
-        fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);       //hydrogen number density
-		fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
-		fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);    //electron scattering radiation force in the phi(rotational) directionz direction
-		fprintf (fptr, "%e\n ", plasmamain[nplasma].rad_force_es[2]);    //electron scattering radiation force in the z direction
+        fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
+        fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);     //electron scattering radiation force in the w(x) direction
+        fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);     //electron scattering radiation force in the phi(rotational) directionz direction
+        fprintf (fptr, "%e\n ", plasmamain[nplasma].rad_force_es[2]);   //electron scattering radiation force in the z direction
 
       }
     }
@@ -1067,11 +1069,15 @@ wind_rad_init ()
        ionization pool in indivisible packet mode */
     plasmamain[n].bf_simple_ionpool_out = 0.0;
     plasmamain[n].bf_simple_ionpool_in = 0.0;
-	
-	for (i=0;i<3;i++) plasmamain[n].dmo_dt[i]=0.0; //Zero the radiation force calculation
-	for (i=0;i<3;i++) plasmamain[n].rad_force_es[i]=0.0; //Zero the radiation force calculation
-	for (i=0;i<3;i++) plasmamain[n].rad_force_ff[i]=0.0; //Zero the radiation force calculation
-	for (i=0;i<3;i++) plasmamain[n].rad_force_bf[i]=0.0; //Zero the radiation force calculation
+
+    for (i = 0; i < 3; i++)
+      plasmamain[n].dmo_dt[i] = 0.0;    //Zero the radiation force calculation
+    for (i = 0; i < 3; i++)
+      plasmamain[n].rad_force_es[i] = 0.0;      //Zero the radiation force calculation
+    for (i = 0; i < 3; i++)
+      plasmamain[n].rad_force_ff[i] = 0.0;      //Zero the radiation force calculation
+    for (i = 0; i < 3; i++)
+      plasmamain[n].rad_force_bf[i] = 0.0;      //Zero the radiation force calculation
 
 
     if (geo.rt_mode == RT_MODE_MACRO)

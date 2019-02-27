@@ -200,8 +200,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /*Compute the angle averaged cross section */
 
   kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
-  
-  
+
+
 
 
 /* The next section checks to see if the frequency difference on
