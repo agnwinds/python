@@ -15,6 +15,12 @@ int index_inner_cross (void);
 void indexx (int n, float arrin[], int indx[]);
 int limit_lines (double freqmin, double freqmax);
 int check_xsections (void);
+double q21 (struct lines *line_ptr, double t);
+double q12 (struct lines *line_ptr, double t);
+double a21 (struct lines *line_ptr);
+double upsilon (int n_coll, double u0);
+int fraction (double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp (double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 /* python.c */
 int main (int argc, char *argv[]);
 /* photon2d.c */
@@ -218,21 +224,16 @@ int read_non_standard_disk_profile (char *tprofile);
 /* lines.c */
 double total_line_emission (WindPtr one, double f1, double f2);
 double lum_lines (WindPtr one, int nmin, int nmax);
-double q21 (struct lines *line_ptr, double t);
-double q12 (struct lines *line_ptr, double t);
-double a21 (struct lines *line_ptr);
 double two_level_atom (struct lines *line_ptr, PlasmaPtr xplasma, double *d1, double *d2);
 double line_nsigma (struct lines *line_ptr, PlasmaPtr xplasma);
 double scattering_fraction (struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape (struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape_from_tau (double tau);
 int line_heat (PlasmaPtr xplasma, PhotPtr pp, int nres);
-double upsilon (int n_coll, double u0);
 /* continuum.c */
 double one_continuum (int spectype, double t, double g, double freqmin, double freqmax);
 double emittance_continuum (int spectype, double freqmin, double freqmax, double t, double g);
 double model_int (double lambda);
-double f (double lambda, void *params);
 /* emission.c */
 double wind_luminosity (double f1, double f2);
 double total_emission (WindPtr one, double f1, double f2);
@@ -297,9 +298,7 @@ int dvds_ave (void);
 int reposition (PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping (PhotPtr p, int *nnscat);
-/* util.c */
-int fraction (double value, double array[], int npts, int *ival, double *f, int mode);
-int linterp (double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+/* wind_util.c */
 int coord_fraction (int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell (int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij (int ndom, int n, int *i, int *j);
@@ -313,6 +312,8 @@ int freqs_init (double freqmin, double freqmax);
 /* time.c */
 double timer (void);
 int get_time (char curtime[]);
+struct timespec init_timer_t0 (void);
+void print_timer_duration (char *msg, struct timespec timer_t0);
 /* matom.c */
 int matom (PhotPtr p, int *nres, int *escape);
 double b12 (struct lines *line_ptr);

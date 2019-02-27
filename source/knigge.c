@@ -66,7 +66,7 @@ get_knigge_wind_params (ndom)
   Log ("Creating KWD wind in domain %d\n", ndom);
 
   zdom[ndom].wind_mdot = 0.1 * geo.disk_mdot / (MSOL / YR);
-  rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
+  rddoub ("Wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
   zdom[ndom].wind_mdot *= MSOL / YR;
 
 

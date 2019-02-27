@@ -16,6 +16,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
    declare deparately from templates. This is because some functions
    only use log.h and don't use python.h due to repeated definitions */
 #include "log.h"
+#include "strict.h"
 
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
@@ -89,11 +90,13 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
-
-int NPHOT;                      /* The number of photon bundles created.  defined in python.c */
+int PHOT_STEPS;                 /* The switch for turning on the photon increase algorithm */
+int NPHOT_MIN;                  /* The minimum number of photon bundles created per  */
+int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
+int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 int CURRENT_PHOT;               /* A diagnostic so that one can always determine what the current photon number being run is */
 
-#define NWAVE  			       10000    //Increasing from 4000 to 10000 (SS June 04)
+#define NWAVE  			  10000 //Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			500
 
 /* Define the structures */
@@ -117,6 +120,7 @@ int CURRENT_PHOT;               /* A diagnostic so that one can always determine
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_BREM    -6
 #define SPECTYPE_NONE	 -3
+#define SPECTYPE_MODEL	 -99    // This is just used briefly, before a model number is assigned
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -364,7 +368,6 @@ struct geometry
   double tstar_init;            /* The temperature of the star, before backscattering is taken into account */
   double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
 
-//OLD  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
@@ -715,7 +718,7 @@ typedef struct wind
   double dfudge;                /* A number which defines a push through distance for this cell, which replaces the
                                    global variable DFUDGE in many instances */
   enum inwind_enum
-  { W_IN_DISK = -5, W_IGNORE = -2, W_NOT_INWIND = -1,
+  { W_IN_DISK = -5, W_IN_STAR = -4, W_IGNORE = -2, W_NOT_INWIND = -1,
     W_ALL_INWIND = 0, W_PART_INWIND = 1, W_NOT_ASSIGNED = -999
   } inwind;
   Wind_Paths_Ptr paths, *line_paths;    // SWM 6-2-15 Path data struct for each cell
@@ -862,7 +865,6 @@ typedef struct plasma
   double rad_force_ff[3];             /*Radiative force of wind */
   double rad_force_bf[3];             /*Radiative force of wind */
   
-  double f_es,f_es2;
   
   
 //OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
@@ -1378,6 +1380,7 @@ struct advanced_modes
   int fixed_temp;               // do not alter temperature from that set in the parameter file
   int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
+  int photon_speedup;
 }
 modes;
 
@@ -1446,3 +1449,26 @@ files;
 #define BOUND_OUTER_RHO 8
 
 int xxxbound;
+
+
+/* Structures associated with rdchoice.  This 
+ * shtructure is required only in cases where one 
+ * wants to use rdchoice multiple times with different
+ * options.  But it can, or course be used for 
+ * any such call.  It allows one to assoicated
+ * a input word with an output value, using the routine
+ * get_choices.  There needs to be one structure
+ * for each input variable.  At present, this is only
+ * used for the selection of spec_types
+ */
+
+
+
+typedef struct rdpar_choices
+{
+  char choices[10][LINELENGTH];
+  int vals[10];
+  int n;
+} dummy_choices, *ChoicePtr;
+
+struct rdpar_choices zz_spec;

@@ -166,14 +166,14 @@ radiation (p, ds)
   double frac_tot_abs, frac_auger_abs, z_abs;
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
-  double density, ft, tau, tau2,tau_temp;
+  double density, ft, tau, tau2;
   double energy_abs;
   int n, nion;
   double q, x, z;
   double w_ave, w_in, w_out;
   double den_config ();
   int nconf;
-  double p_in[3], p_out[3], dp[3], dp_cyl[3]; //The initial and final momentum.
+  double p_in[3], p_out[3], dp_cyl[3]; //The initial and final momentum.
 //  double weight_of_packet, y;  //to do with augerion calcs, now deprecated
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;

@@ -344,6 +344,8 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
+  strict = 0;
+
   restart_stat = parse_command_line (argc, argv);
 
   /* If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will
@@ -506,15 +508,15 @@ main (argc, argv)
       rdpar_comment ("Parameters descibing the various winds or coronae in the system");
 
       strcpy (answer, "yes");
-      geo.wind_radiation = rdchoice ("Wind_radiation(yes,no)", "1,0", answer);
+      geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
 
-//OLD     rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
       /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom
          mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in
          setup_domains.c, see issue #390 */
 
       if (geo.run_type == RUN_TYPE_NEW)
       {
+        geo.ndomain = 1;
         rdint ("Wind.number_of_components", &geo.ndomain);
 
 
@@ -647,15 +649,20 @@ main (argc, argv)
 
     get_spectype (geo.star_radiation,
                   //"Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  "Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.star_spectype);
+                  //"Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.star_spectype);
+                  "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
     get_spectype (geo.disk_radiation,
                   //"Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  "Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.disk_spectype);
+                  //"Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.disk_spectype);
+                  "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
     get_spectype (geo.bl_radiation,
                   //"Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  "Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
-    geo.agn_spectype = 3;
-    get_spectype (geo.agn_radiation, "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
+                  //"Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
+                  "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
+    geo.agn_spectype = SPECTYPE_POW;
+    get_spectype (geo.agn_radiation,
+                  //"Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
+                  "BH.rad_type_in_final_spectrum(power,cloudy,brems)", &geo.agn_spectype);
     if (geo.agn_radiation && geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
     {
       Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",
@@ -720,7 +727,14 @@ main (argc, argv)
   if (modes.quit_after_inputs)
   {
     Log ("This was was run with the -i or --dry-run flag set, so quitting now inputs have been gathered.\n");
-    Exit (0);
+    exit (0);
+  }
+
+
+  if (strict)
+  {
+    Log ("Some of the input have not been updated for the current version of Python.  Please correct and rerun\n");
+    exit (0);
   }
 
   /* INPUTS ARE FINALLY COMPLETE */

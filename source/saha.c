@@ -97,7 +97,7 @@ nebular_concentrations (xplasma, mode)
   else if (mode == NEBULARMODE_MATRIX_BB)
   {
 
-    /* Use rate matrices based on pairiwise bb approxmaitions
+    /* Use rate matrices based on pairiwise bb approximations
      * to the spectra
      */
 

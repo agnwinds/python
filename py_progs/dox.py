@@ -229,7 +229,7 @@ def gen_header(xtype='int',xname='get_domain_params',xvar=['int ndom','double *f
         if one=='void':
             pass
         else:
-            string='* @param  %s  ?????\n' % one
+            string='* @param  [in,out] %s  ?????\n' % one
             header+=string
     header+=header_end
     return header

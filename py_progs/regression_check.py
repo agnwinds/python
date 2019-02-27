@@ -325,10 +325,12 @@ def get_other_directory(run1):
     the regression directory that was most recently created that is not
     run1
     '''
-    x=glob('py*')
+    # x=glob('py*')
+    x=glob('*/')
     dirs=[]
     modtime=[]
     for one in x:
+        one=one.rstrip('/')
         if os.path.isdir(one) and one!=run1:
             dirs.append(one)
             modtime.append(os.path.getmtime(one))
