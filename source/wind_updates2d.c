@@ -106,7 +106,7 @@ WindPtr (w);
    * size must must be increased.
    */
 
-  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 115) * (floor (NPLASMA / np_mpi_global) + 1);
+  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 126) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -267,6 +267,7 @@ WindPtr (w);
 
     plasmamain[n].xi *= 4. * PI;
     plasmamain[n].xi /= (volume * nh);
+	for (i=0;i<3;i++) plasmamain[n].rad_force_es[i]=plasmamain[n].rad_force_es[i]*(volume* plasmamain[n].ne)/(volume* C);
 
     /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e
      * previous value of t_e.  Note that this may not be  best way to determien the cooling.
@@ -411,6 +412,9 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].dmo_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].rad_force_es, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].rad_force_ff, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].rad_force_bf, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].gain, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].converge_t_r, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].converge_t_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -545,6 +549,9 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].rad_force_es, 3, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].rad_force_ff, 3, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].rad_force_bf, 3, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].gain, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].converge_t_r, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].converge_t_e, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -641,7 +648,7 @@ WindPtr (w);
   {
     Log ("Outputting heatcool file for connecting to zeus\n");
     fptr = fopen ("py_heatcool.dat", "w");
-    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z\n");
 
   }
 
@@ -761,7 +768,11 @@ WindPtr (w);
         fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);       //Line cooling must include all recombination cooling
         fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);      //ff cooling
         fprintf (fptr, "%e ", plasmamain[nplasma].rho); //density
-        fprintf (fptr, "%e\n", plasmamain[nplasma].rho * rho2nh);       //hydrogen number density
+        fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);       //hydrogen number density
+		fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
+		fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);    //electron scattering radiation force in the phi(rotational) directionz direction
+		fprintf (fptr, "%e\n ", plasmamain[nplasma].rad_force_es[2]);    //electron scattering radiation force in the z direction
+
       }
     }
     fclose (fptr);
@@ -1032,6 +1043,7 @@ wind_rad_init ()
     plasmamain[n].j_direct = plasmamain[n].j_scatt = 0.0;       //NSH 1309 zero j banded by number of scatters
     plasmamain[n].ip = 0.0;
     plasmamain[n].xi = 0.0;
+
     plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
     plasmamain[n].mean_ds = 0.0;
     plasmamain[n].n_ds = 0;
@@ -1055,10 +1067,12 @@ wind_rad_init ()
        ionization pool in indivisible packet mode */
     plasmamain[n].bf_simple_ionpool_out = 0.0;
     plasmamain[n].bf_simple_ionpool_in = 0.0;
+	
+	for (i=0;i<3;i++) plasmamain[n].dmo_dt[i]=0.0; //Zero the radiation force calculation
+	for (i=0;i<3;i++) plasmamain[n].rad_force_es[i]=0.0; //Zero the radiation force calculation
+	for (i=0;i<3;i++) plasmamain[n].rad_force_ff[i]=0.0; //Zero the radiation force calculation
+	for (i=0;i<3;i++) plasmamain[n].rad_force_bf[i]=0.0; //Zero the radiation force calculation
 
-
-    for (i = 0; i < 3; i++)
-      plasmamain[n].dmo_dt[i] = 0.0;    //Zero the radiation force calculation
 
     if (geo.rt_mode == RT_MODE_MACRO)
       macromain[n].kpkt_rates_known = -1;

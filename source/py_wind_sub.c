@@ -1345,7 +1345,7 @@ mo_summary (w, rootname, ochoice)
   /* Note that EOF actually causes an exit via rdpar */
   while (rdint ("|F_rad|=0;Frac_x=1,Frad_y=2,Frad_z=3,return=other", &ichoice) != EOF)
   {
-    if (ichoice < 0 || ichoice > 3)
+    if (ichoice < 0 || ichoice > 4)
       return (0);
 
     if (ichoice == 0)
@@ -1354,8 +1354,9 @@ mo_summary (w, rootname, ochoice)
       strcpy (name, "F_rad_x");
     else if (ichoice == 2)
       strcpy (name, "F_rad_y");
-    else
+    else 
       strcpy (name, "F_rad_z");
+
 
     for (n = 0; n < NDIM2; n++)
     {
@@ -1368,11 +1369,11 @@ mo_summary (w, rootname, ochoice)
             sqrt (xplasma->dmo_dt[0] * xplasma->dmo_dt[0] +
                   xplasma->dmo_dt[1] * xplasma->dmo_dt[1] + xplasma->dmo_dt[2] * xplasma->dmo_dt[2]);
         else if (ichoice == 1)
-          x = xplasma->dmo_dt[0];
+          x = xplasma->rad_force_es[0];
         else if (ichoice == 2)
-          x = xplasma->dmo_dt[1];
-        else
-          x = xplasma->dmo_dt[2];
+          x = xplasma->rad_force_es[1];
+        else 
+          x = xplasma->rad_force_es[2];
       }
       aaa[n] = x;
     }
@@ -1398,7 +1399,7 @@ mo_summary (w, rootname, ochoice)
         strcat (filename, ".f_rad_y");
         write_array (filename, ochoice);
       }
-      else if (ichoice == 3)
+      else 
       {
         strcpy (filename, rootname);
         strcat (filename, ".f_rad_z");
