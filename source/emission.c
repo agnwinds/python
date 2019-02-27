@@ -137,7 +137,7 @@ total_emission (one, f1, f2)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  t_e = xplasma->t_e;		
+  t_e = xplasma->t_e;
 
 
   if (f2 < f1)

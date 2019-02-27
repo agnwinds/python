@@ -336,19 +336,20 @@ adiabatic_cooling (one, t)
  **********************************************************/
 
 
-double shock_heating(one)
-    WindPtr one;
+double
+shock_heating (one)
+     WindPtr one;
 {
   int nplasma;
-  double x,r;
+  double x, r;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  r = length(one->xcen)/geo.rstar;
+  r = length (one->xcen) / geo.rstar;
 
-  x = geo.shock_factor/(r*r*r*r);
+  x = geo.shock_factor / (r * r * r * r);
 
   x *= xplasma->vol;
 
@@ -387,7 +388,7 @@ double shock_heating(one)
 double
 wind_cooling ()
 {
-  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;       
+  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;
   double nonthermal;
   int n;
   double x;
@@ -395,7 +396,7 @@ wind_cooling ()
 
 
   cool = lum_lines = cool_rr = lum_ff = cool_comp = 0;
-  cool_dr = cool_di = cool_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  cool_dr = cool_di = cool_adiab = heat_adiab = 0;      //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   nonthermal = 0;
 
   for (n = 0; n < NDIM2; n++)
@@ -404,13 +405,13 @@ wind_cooling ()
     if (wmain[n].vol > 0.0)
     {
       nplasma = wmain[n].nplasma;
-      cool += x = cooling (&plasmamain[nplasma],plasmamain[nplasma].t_e); 
+      cool += x = cooling (&plasmamain[nplasma], plasmamain[nplasma].t_e);
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
-      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the compton luminosity for that cell.
-      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the DR luminosity for the cell.
-      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the DI luminosity for the cell.
+      cool_comp += plasmamain[nplasma].cool_comp;       //1108 NSH Increment the compton luminosity for that cell.
+      cool_dr += plasmamain[nplasma].cool_dr;   //1109 NSH Increment the DR luminosity for the cell.
+      cool_di += plasmamain[nplasma].cool_di;   //1408 NSH Increment the DI luminosity for the cell.
 
       if (geo.adiabatic)        //Caculate the total adiatbaic heating/cooling separating these into two variables
       {
@@ -431,9 +432,9 @@ wind_cooling ()
       }
 
       /* Caculate the non-thermal heating (for FU Ori models with extra wind heating */
-      if (geo.nonthermal) 
+      if (geo.nonthermal)
       {
-          nonthermal+=plasmamain[nplasma].heat_shock;
+        nonthermal += plasmamain[nplasma].heat_shock;
       }
 
 
@@ -453,12 +454,12 @@ wind_cooling ()
   geo.lum_lines = lum_lines;
   geo.cool_rr = cool_rr;
   geo.lum_ff = lum_ff;
-  geo.cool_comp = cool_comp;      //The compton luminosity
-  geo.cool_dr = cool_dr;          //the DR luminosity
-  geo.cool_di = cool_di;          //the DI luminosity 
+  geo.cool_comp = cool_comp;    //The compton luminosity
+  geo.cool_dr = cool_dr;        //the DR luminosity
+  geo.cool_di = cool_di;        //the DI luminosity 
   geo.cool_adiabatic = cool_adiab;
   geo.heat_adiabatic = heat_adiab;
-  geo.heat_shock=nonthermal;
+  geo.heat_shock = nonthermal;
 
 
   return (cool);

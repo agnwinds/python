@@ -494,7 +494,7 @@ struct geometry
                                  */
   int nonthermal;               /* 0 --> No extra heating due to shocks
                                    1 --> Extra heating due to shocks (etc)  (Added for FU Ori)
-                                */
+                                 */
 
   double shock_factor;          /* A scaling factor used for including an extra heating term (for FU Ori stars
                                  */
@@ -507,7 +507,7 @@ struct geometry
   double pl_t_r, pl_t_e, pl_w;
   double pl_nh;
 
-  /* Variables having to do with heating and cooling*/
+  /* Variables having to do with heating and cooling */
 
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind; /* The total luminosities of the disk, star, bl, & wind 
                                                            are actually not used in a fundamental way in the program */
@@ -519,7 +519,7 @@ struct geometry
   double cool_dr;               /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double cool_adiabatic;        /*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
-  double heat_shock; /*1806 - ksl - The amount of extra heating going into the wind due to shock heating. Added for FU Ori project */
+  double heat_shock;            /*1806 - ksl - The amount of extra heating going into the wind due to shock heating. Added for FU Ori project */
 
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;    /* The integrated specific L between a freq min and max which are
                                                            used to establish the fraction of photons of various types */
@@ -862,7 +862,7 @@ typedef struct plasma
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
-  double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project*/
+  double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
 
   /* JM 1807 -- these routines are for the BF_SIMPLE_EMISSIVITY_APPROACH
      they allow one to inspect the net flow of energy into and from the simple ion 
@@ -1426,7 +1426,7 @@ files;
 
 /* modes for kpkt calculations */
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
-#define KPKT_MODE_ALL        1  /* account for all cooling processes */  
+#define KPKT_MODE_ALL        1  /* account for all cooling processes */
 
 /* this variable controls whether to use the 
    Altered mode for bound-free in "simple-macro mode" */

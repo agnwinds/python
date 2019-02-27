@@ -625,53 +625,52 @@ init_ionization ()
 
   thermal_opt = 0;
 
-  rdchoice("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)","0,1,2,3"
-            &thermal_opt);
+  rdchoice ("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)", "0,1,2,3", &thermal_opt);
 
   if (thermal_opt == 0)
-    {
-      geo.adiabatic = 1;
-      geo.nonthermal = 0;
-    }
+  {
+    geo.adiabatic = 1;
+    geo.nonthermal = 0;
+  }
 
   else if (thermal_opt == 1)
-    {
-      geo.adiabatic = 0;
-      geo.nonthermal = 0;
-    }
+  {
+    geo.adiabatic = 0;
+    geo.nonthermal = 0;
+  }
   else if (thermal_opt == 2)
-    {
-      geo.adiabatic = 0;
-      geo.nonthermal = 1;
-    }
+  {
+    geo.adiabatic = 0;
+    geo.nonthermal = 1;
+  }
 
   else if (thermal_opt == 3)
-    {
-      geo.adiabatic = 1;
-      geo.nonthermal = 1;
-    }
+  {
+    geo.adiabatic = 1;
+    geo.nonthermal = 1;
+  }
   else
-    {
-      Error ("Unknown thermal balance mode %d\n", thermal_opt);
-      exit (0);
-    }
+  {
+    Error ("Unknown thermal balance mode %d\n", thermal_opt);
+    exit (0);
+  }
 
   if (geo.nonthermal)
-    {
-        /* The shock heating is defined initally as a luminosity to be added to wind
-         * but is immediately converted to a luminosity per unit volumne
-         *
-         * Since nearly all systems that we are dealing with have a star we initialize
-         * the amount of extra heating as a fraction of the stellar luminosity
-         *
-         * See cooling.c shock_heating
-         */
+  {
+    /* The shock heating is defined initally as a luminosity to be added to wind
+     * but is immediately converted to a luminosity per unit volumne
+     *
+     * Since nearly all systems that we are dealing with have a star we initialize
+     * the amount of extra heating as a fraction of the stellar luminosity
+     *
+     * See cooling.c shock_heating
+     */
 
-      geo.shock_factor=0.001*4*PI*pow(geo.rstar,2)*STEFAN_BOLTZMANN*pow(geo.tstar,4.);
-      rddoub ("Thermal_balance_options.extra_heating", &geo.shock_factor);
-      geo.shock_factor /= (4*PI*pow(geo.rstar,3));
-      Log("The non_thermal emissivity at the base is %.2e\n", geo.shock_factor);
-    }
+    geo.shock_factor = 0.001 * 4 * PI * pow (geo.rstar, 2) * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
+    rddoub ("Thermal_balance_options.extra_heating", &geo.shock_factor);
+    geo.shock_factor /= (4 * PI * pow (geo.rstar, 3));
+    Log ("The non_thermal emissivity at the base is %.2e\n", geo.shock_factor);
+  }
 
 
   /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */

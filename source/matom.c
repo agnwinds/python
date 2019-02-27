@@ -356,7 +356,7 @@ matom (p, nres, escape)
        now select what happens next. Start by choosing the random threshold value at which the
        event will occur. */
 
-    threshold = random_number(0.0,1.0);
+    threshold = random_number (0.0, 1.0);
 
 
     if ((pjnorm_known[uplvl] + penorm_known[uplvl]) <= 0.0)
@@ -377,8 +377,8 @@ matom (p, nres, escape)
 
     n = 0;
 
-    threshold = random_number(0.0,1.0);
-	
+    threshold = random_number (0.0, 1.0);
+
     threshold = threshold * pjnorm_known[uplvl_old];
     while (run_tot < threshold)
     {
@@ -439,8 +439,8 @@ matom (p, nres, escape)
   run_tot = 0;
   n = 0;
 
-  threshold = random_number(0.0,1.0);
-  
+  threshold = random_number (0.0, 1.0);
+
   threshold = threshold * penorm_known[uplvl];  //normalise to total emission prob.
   while (run_tot < threshold)
   {
@@ -455,8 +455,8 @@ matom (p, nres, escape)
        or collisional (k-packet). Get a random number and then use the ratio of the collisional
        emission probability to the (already known) collisional+radiative probability to decide whether
        collisional or radiative deactivation occurs. */
-    choice = random_number(0.0,1.0);
-	
+    choice = random_number (0.0, 1.0);
+
 
     line_ptr = &line[config[uplvl].bbd_jump[n]];        //pointer for the bb transition
 
@@ -497,8 +497,8 @@ matom (p, nres, escape)
     rad_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n - nbbd];     //again using recomb_sp rather than alpha_sp (SS July 04)
     coll_rate = q_recomb (cont_ptr, t_e) * ne;
 
-    choice = random_number(0.0,1.0);
-	
+    choice = random_number (0.0, 1.0);
+
     if (choice > (coll_rate / (rad_rate + coll_rate)))
     {                           //radiative deactivation
       *escape = 1;
@@ -988,21 +988,23 @@ kpkt (p, nres, escape, mode)
   /* only include adiabatic cooling if we're in the right mode. First set a default 
      where adiabatic cooling is zero. This will be true if the mode isn't KPKT_MODE_ALL,
      and also if we are in KPKT_NET_HEAT_MODE and shock heating beats adiabatic cooling. 
-     */
+   */
   /* first subtract off the "true" adiabatic cooling */
   cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;
-  cooling_adiabatic = 0.0; // this variable decides the probability of destruction and is altered below.
+  cooling_adiabatic = 0.0;      // this variable decides the probability of destruction and is altered below.
 
   if (mode == KPKT_MODE_ALL)
   {
     /* if we are in KPKT_NET_HEAT_MODE and cooling beats shock heating then include
        the net cooling channel */
-    if (KPKT_NET_HEAT_MODE && geo.nonthermal) {
-      if (xplasma->cool_adiabatic > xplasma->heat_shock) {
+    if (KPKT_NET_HEAT_MODE && geo.nonthermal)
+    {
+      if (xplasma->cool_adiabatic > xplasma->heat_shock)
+      {
         cooling_adiabatic = (xplasma->cool_adiabatic - xplasma->heat_shock) / xplasma->vol / xplasma->ne;
       }
     }
-    else 
+    else
     {
       /* this is the only situation where we genuinely want the destruction channel
          to be exactly equal to the adiabatic cooling */
@@ -1019,7 +1021,7 @@ kpkt (p, nres, escape, mode)
   /* The cooling rates for the recombination and collisional processes are now known. 
      Choose which process destroys the k-packet with a random number. */
 
-  destruction_choice = random_number(0.0,1.0) * cooling_normalisation;
+  destruction_choice = random_number (0.0, 1.0) * cooling_normalisation;
 
 
   if (destruction_choice < mplasma->cooling_bftot)
@@ -1159,8 +1161,7 @@ kpkt (p, nres, escape, mode)
   else
   {
     /* We want destruction by collisional ionization in a macro atom. */
-    destruction_choice =
-      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - cooling_adiabatic;
+    destruction_choice = destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - cooling_adiabatic;
 
     for (i = 0; i < nphot_total; i++)
     {
@@ -1515,8 +1516,8 @@ emit_matom (w, p, nres, upper)
      now select what happens next. Start by choosing the random threshold value at which the
      event will occur. */
 
-  threshold = random_number(0.0,1.0);
-  
+  threshold = random_number (0.0, 1.0);
+
 
   run_tot = 0;
   n = 0;
@@ -1540,7 +1541,7 @@ emit_matom (w, p, nres, upper)
     *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
     /* continuua are indicated by nres > NLINES */
 
-   p->freq = matom_select_bf_freq (one, config[uplvl].bfd_jump[n - nbbd]);
+    p->freq = matom_select_bf_freq (one, config[uplvl].bfd_jump[n - nbbd]);
 
 
     /* Co-moving frequency - changed to rest frequency by doppler */

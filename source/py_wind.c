@@ -628,7 +628,7 @@ one_choice (choice, root, ochoice)
     collision_summary (wmain, root, ochoice);   //
     break;
   case '*':
-    shock_heating_summary (wmain, root, ochoice);       
+    shock_heating_summary (wmain, root, ochoice);
     break;
 
   case 'q':                    /* quit */

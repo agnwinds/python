@@ -123,14 +123,14 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     iphot_start = 0;
 
     /* if we are making kpkts then split them evenly throughout the bands */
-    if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO) 
-      {
-        kpkt_fraction = 1.0 / xband.nbands;
-      }
-    else 
-      {
-        kpkt_fraction = 0.0;
-      }
+    if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
+    {
+      kpkt_fraction = 1.0 / xband.nbands;
+    }
+    else
+    {
+      kpkt_fraction = 0.0;
+    }
 
     for (n = 0; n < xband.nbands; n++)
     {
@@ -381,7 +381,7 @@ iwind = -1 	Don't generate any wind photons at all
   else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
-    geo.f_kpkt = get_kpkt_heating_f (kpkt_fraction);  
+    geo.f_kpkt = get_kpkt_heating_f (kpkt_fraction);
   }
 
 
@@ -393,7 +393,8 @@ iwind = -1 	Don't generate any wind photons at all
     if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO && geo.matom_radiation == 0)
       Log ("!! xdefine_phot: total & banded kpkt luminosity due to non-radiative heating:  %8.2e %8.2e \n", geo.heat_shock, geo.f_kpkt);
     if (geo.adiabatic)
-      Log ("!! xdefine_phot: heating & cooling  due to adiabatic processes:         %8.2e %8.2e \n", geo.heat_adiabatic, geo.cool_adiabatic);
+      Log ("!! xdefine_phot: heating & cooling  due to adiabatic processes:         %8.2e %8.2e \n", geo.heat_adiabatic,
+           geo.cool_adiabatic);
 
     Log
       ("!! xdefine_phot: lum_tot %8.2e lum_star %8.2e lum_disk %8.2e lum_bl %8.2e lum_agn %8.2e lum_wind %8.2e\n",
@@ -494,7 +495,7 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
   if (geo.matom_radiation || geo.nonthermal)
   {
     nkpkt = geo.f_kpkt / geo.f_tot * nphotons;
-    
+
     if (geo.matom_radiation)
       nmatom = geo.f_matom / geo.f_tot * nphotons;
   }
@@ -622,7 +623,7 @@ stellar photons */
     nphot = nkpkt;
     if (nphot > 0)
     {
-      if (ioniz_or_final == 0 && (geo.nonthermal ==  0))
+      if (ioniz_or_final == 0 && (geo.nonthermal == 0))
       {
         Error ("xmake_phot: generating photons by k-packets when performing ionization cycle without shock heating. Abort.\n");
         exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)

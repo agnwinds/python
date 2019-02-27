@@ -285,9 +285,9 @@ WindPtr (w);
       plasmamain[n].cool_adiabatic = 0.0;
 
     if (geo.nonthermal)
-        plasmamain[n].heat_shock=shock_heating(&w[nwind]);
+      plasmamain[n].heat_shock = shock_heating (&w[nwind]);
     else
-        plasmamain[n].heat_shock=0;
+      plasmamain[n].heat_shock = 0;
 
 
     /* Calculate the densities in various ways depending on the ioniz_mode */
@@ -656,8 +656,8 @@ WindPtr (w);
 
   //NSH 0717 - first we need to ensure the cooling and luminosities reflect the current temperature
 
-  cool_sum = wind_cooling ();       /*We call wind_cooling here to obtain an up to date set of cooling rates */
-  lum_sum = wind_luminosity (0.0, VERY_BIG);       /*and we also call wind_luminosity to get the luminosities */
+  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  lum_sum = wind_luminosity (0.0, VERY_BIG);    /*and we also call wind_luminosity to get the luminosities */
 
 
 

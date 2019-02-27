@@ -540,9 +540,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     Log ("spectrum_create: Fraction of photons lost:  %4.2f wi/ freq. low, %4.2f w/freq hi\n", nlow / nphot, nhigh / nphot);
   }
 
-  /* Find the maximum number of scatters to shorten the numbers of lines written
-   * to record sctteres
-   */
+
 
   max_scat = max_res = 0;
 
@@ -561,15 +559,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   Log ("\nNo. of photons which have scattered n times.     The max number of scatters seen was %d\n", max_scat);
   for (i = 0; i <= max_scat; i++)
   {
-      if (nscat[i]>0) {
-          maxscat=i;
-      }
-  }
-
-
-  Log ("\nNo. of photons which have scattered n times\n");
-  for (i = 0; i <= maxscat; i++)
-  {
     Log ("%6d", nscat[i]);
     if ((i % 10) == 9)
       Log ("\n");
@@ -582,7 +571,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     if ((i % 10) == 9)
       Log ("\n");
   }
-  Log ("\n\nNo of photons and their fates\n!!PhotFate: ");
+  Log ("\nNo of photons and their fates\n!!PhotFate: ");
   for (i = 0; i < NSTAT; i++)
   {
     Log ("%6d", nstat[i]);

@@ -397,24 +397,23 @@ be optional which variables beyond here are moved to structures othere than Wind
   {
     if (geo.adiabatic)
     {
-	  nwind = plasmamain[i].nwind;
-	  plasmamain[i].cool_adiabatic =
-	    adiabatic_cooling (&w[nwind], plasmamain[i].t_e);
-	}
+      nwind = plasmamain[i].nwind;
+      plasmamain[i].cool_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[i].t_e);
+    }
     else
-	{
-	  plasmamain[i].cool_adiabatic = 0.0;
-	}
+    {
+      plasmamain[i].cool_adiabatic = 0.0;
+    }
 
     if (geo.nonthermal)
-	{
-	  nwind = plasmamain[i].nwind;
-	  plasmamain[i].heat_shock = shock_heating (&w[nwind]);
-	}
+    {
+      nwind = plasmamain[i].nwind;
+      plasmamain[i].heat_shock = shock_heating (&w[nwind]);
+    }
     else
-	{
-	  plasmamain[i].heat_shock = 0.0;
-	}
+    {
+      plasmamain[i].heat_shock = 0.0;
+    }
   }
 
 

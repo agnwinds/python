@@ -418,7 +418,7 @@ shock_heating_summary (w, rootname, ochoice)
     aaa[n] = 0;
     if (w[n].vol > 0.0)
     {
-      tot += aaa[n] = shock_heating(&w[n]);
+      tot += aaa[n] = shock_heating (&w[n]);
     }
   }
 
