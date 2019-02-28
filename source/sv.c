@@ -45,7 +45,7 @@ get_sv_wind_params (ndom)
   Log ("Creating an SV wind in domain %d\n", ndom);
 
   zdom[ndom].wind_mdot = 0.1 * geo.disk_mdot / (MSOL / YR);     // Convert to MSOL/YR for easy of data entry
-  rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
+  rddoub ("Wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
   zdom[ndom].wind_mdot *= MSOL / YR;
 
 

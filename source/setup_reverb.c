@@ -82,11 +82,16 @@ get_meta_params (void)
 
   int meta_param, i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
+  char answer[LINELENGTH];
 
   rdpar_comment ("Parameters for Reverberation Modeling (if needed)");
 
-  meta_param = 0;               // initialize to no reverberation tracking
-  rdint ("Reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
+  //OLD meta_param = 0;               // initialize to no reverberation tracking
+  //OLD rdint ("Reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
+
+  strcpy (answer, "none");
+  meta_param = rdchoice ("Reverb.type(none,photon,wind,matom)", "0,1,2,3", answer);
+
   switch (meta_param)
   {                             //Read in reverb tyoe, if any
   case 0:
@@ -102,8 +107,10 @@ get_meta_params (void)
     geo.reverb = REV_MATOM;
     break;
   default:
+
+    //  With rdchoice it should not be possible to get here
     Error ("reverb.type: Invalid reverb mode.\n \
-      Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
+      Valid modes are None, Photon, Wind, Matom.\n");
   }
 
   // ========== DEAL WITH DISK SETTINGS ==========

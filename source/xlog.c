@@ -37,7 +37,7 @@
  *  to a file with several routines
  *  - Log_set_verbosity(vlevel)			Set the verbosity of the what is printed to the screen and the log file
  * 	- Log_print_max(print_max)			Set the number of times a single error will be 
- * 	    output to the scren and the log file
+ * 	    output to the screen and the log file
  *
  *  In most cases, it is sufficient to log to the screen only from thread 0.  there are a few times, one might want to 
  *  send a message to the screen from any thread. For this purpose there is a specific command:

@@ -173,13 +173,14 @@ radiation (p, ds)
   double w_ave, w_in, w_out;
   double den_config ();
   int nconf;
+  double p_in[3], p_out[3], dp_cyl[3];  //The initial and final momentum.
 //  double weight_of_packet, y;  //to do with augerion calcs, now deprecated
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
-  struct photon phot;
-  int ndom;
+  struct photon phot, phot_mid;
+  int ndom, i;
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
@@ -196,6 +197,11 @@ radiation (p, ds)
   /* calculate velocity at original position */
   vwind_xyz (ndom, p, v_inner); // get velocity vector at new pos
   v1 = dot (p->lmn, v_inner);   // get direction cosine
+
+  /* compute the initial momentum of the photon */
+
+  stuff_v (p->lmn, p_in);       //Get the direction
+  renorm (p_in, p->w / C);      //Renormalise to momentum
 
   /* Create phot, a photon at the position we are moving to 
    *  note that the actual movement of the photon gets done after 
@@ -426,11 +432,13 @@ radiation (p, ds)
   {                             /* Need differentiate between thick and thin cases */
     x = exp (-tau);
     energy_abs = w_in * (1. - x);
+
   }
   else
   {
     tau2 = tau * tau;
     energy_abs = w_in * (tau - 0.5 * tau2);
+
   }
 
   /* Calculate the reduction in weight - compton scattering is not included, it is now included at scattering
@@ -566,8 +574,39 @@ radiation (p, ds)
     }
   }
 
+  stuff_phot (p, &phot_mid);    // copy photon ptr
+  move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path
 
 
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, z * frac_ff / C);
+  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_ff[i] += dp_cyl[i];
+  }
+
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, (z * (frac_tot + frac_auger)) / C);
+  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_bf[i] += dp_cyl[i];
+  }
+
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, w_ave * ds * klein_nishina (p->freq));
+  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+  if (p->x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_es[i] += dp_cyl[i];
+  }
 
   return (0);
 }
@@ -1179,6 +1218,9 @@ update_banded_estimators (xplasma, p, ds, w_ave)
     }
   }
 
+
+
+
   return (0);
 }
 
@@ -1261,6 +1303,7 @@ mean_intensity (xplasma, freq, mode)
   double expo;
 
   J = 0.0;                      // Avoid 03 error
+
 
 
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)    /*If we are using power law ionization, use PL estimators */
