@@ -80,9 +80,9 @@ get_kpkt_heating_f ()
 
     /* what we do depends on how the "net heating mode" is defined */
     if (KPKT_NET_HEAT_MODE)
-      shock_kpkt_luminosity = (shock_heating(one) - plasmamain[n].cool_adiabatic);
+      shock_kpkt_luminosity = (shock_heating (one) - plasmamain[n].cool_adiabatic);
     else
-      shock_kpkt_luminosity = shock_heating(one);
+      shock_kpkt_luminosity = shock_heating (one);
 
     if (shock_kpkt_luminosity > 0)
     {
@@ -606,7 +606,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     while (test > fmax || test < fmin)
     {
       pp.w = p[n].w;
-      kpkt (&pp, &nres, &esc_ptr, kpkt_mode); 
+      kpkt (&pp, &nres, &esc_ptr, kpkt_mode);
 
       if (esc_ptr == 0 && kpkt_mode == KPKT_MODE_CONTINUUM)
       {

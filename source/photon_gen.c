@@ -96,7 +96,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     nphot_k = (geo.frac_extra_kpkts * NPHOT);
     nphot_rad = NPHOT - nphot_k;
     nphot_tot_k = (geo.frac_extra_kpkts * nphot_tot);
-    nphot_tot_rad = nphot_tot - nphot_tot_k; 
+    nphot_tot_rad = nphot_tot - nphot_tot_k;
   }
   else
   {
@@ -166,19 +166,19 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO) && (ioniz_or_final == 0))
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
-    geo.f_kpkt = get_kpkt_heating_f (); 
+    geo.f_kpkt = get_kpkt_heating_f ();
 
     /* get the number of photons we have reserved in the photon structure */
     //nphot_k = geo.frac_extra_kpkts * NPHOT; 
     weight = (geo.f_kpkt) / (nphot_tot_k);
 
     /* throw an error if the k-packet weight is too high or low */
-    if ( weight > (100.0 * natural_weight) || weight < (0.01 * natural_weight))
+    if (weight > (100.0 * natural_weight) || weight < (0.01 * natural_weight))
     {
-      Error("define_phot: kpkt weight is %8.4e compared to characteristic photon weight %8.4e\n", weight, natural_weight);
+      Error ("define_phot: kpkt weight is %8.4e compared to characteristic photon weight %8.4e\n", weight, natural_weight);
     }
-    if (sane_check(weight))
-      Error("define_phot: kpkt weight is %8.4e!\n", weight);
+    if (sane_check (weight))
+      Error ("define_phot: kpkt weight is %8.4e!\n", weight);
 
     Log ("!! xdefine_phot: total & banded kpkt luminosity due to non-radiative heating: %8.2e %8.2e \n", geo.heat_shock, geo.f_kpkt);
 
@@ -193,7 +193,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;
-    if (geo.reverb != REV_NONE && p[n].path < 0.0) // SWM - Set path lengths for disk, star etc.
+    if (geo.reverb != REV_NONE && p[n].path < 0.0)      // SWM - Set path lengths for disk, star etc.
       simple_paths_gen_phot (&p[n]);
   }
   return (0);
@@ -287,8 +287,8 @@ populate_bands (ioniz_or_final, iwind, band)
   }
 
   /* Because of roundoff errors nphot may not sum to the desired value, namely NPHOT less kpackets.  
-  So add a few more photons to the band with most photons already. It should only be a few, at most
-  one photon for each band.*/
+     So add a few more photons to the band with most photons already. It should only be a few, at most
+     one photon for each band. */
 
   if (nphot < nphot_rad)
   {
