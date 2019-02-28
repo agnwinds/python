@@ -26,7 +26,7 @@ Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)              reflect
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
+Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)                  adiabatic
 Wind.mdot(msol/yr)                         1e-9
 SV.diskmin(units_of_rstar)                 4
 SV.diskmax(units_of_rstar)                 12
@@ -58,7 +58,11 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 Reverb.type(none,photon,wind,matom)                 none
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv
-m.orbit_phase(0=inferior_conjunction)   0.5
+ole)                     45
+Spectrum.angle(0=pole)                     62.5
+Spectrum.angle(0=pole)                     80
+Spectrum.orbit_phase(0=inferior_conjunction)   0.5
+Spectrum.orbit_phase(0=inferior_conjunction)   0.5
 Spectrum.orbit_phase(0=inferior_conjunction)   0.5
 Spectrum.orbit_phase(0=inferior_conjunction)   0.5
 Spectrum.orbit_phase(0=inferior_conjunction)   0.5

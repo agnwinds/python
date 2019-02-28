@@ -18,7 +18,7 @@ Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
+Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)                  adiabatic
 Stellar_wind.mdot(msol/yr)                 5.1e-6
 Stellar_wind.radmin(cm)                    1.32e12
 Stellar_wind.radmax(cm)                    1e13
@@ -36,7 +36,11 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 Reverb.type(none,photon,wind,matom)                 none
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv
-ctrum.wavemax(Angstroms)                1850
+.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+
+### The minimum and maximum wavelengths in the final spectra
+Spectrum.wavemin(Angstroms)                850
+Spectrum.wavemax(Angstroms)                1850
 
 ### The observers and their location relative to the system
 Spectrum.no_observers                      1

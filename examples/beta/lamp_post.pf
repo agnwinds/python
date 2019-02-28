@@ -7,8 +7,7 @@ Central_object.radius(cm)                  8.85667e+14
 ### Parameters for the Disk (if there is one)
 Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
-
-Disk.rad_type_to_make_wind(bb,models)                    bb
+Disk.rad_type_to_make_wind(bb,models)                   bb
 Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         5
 Disk.radmax(cm)                            1e17
@@ -37,7 +36,8 @@ Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
+
+Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)                 adiabatic
 
 ### Parameters for Domain 0
 Wind.mdot(msol/yr)                         5
@@ -55,8 +55,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-
-Disk.rad_type_in_final_spectrum(bb,models,uniform)               bb     
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 BH.rad_type_in_final_spectrum(power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
@@ -77,8 +76,7 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-
-Reverb.type(none,photon,wind,matom)                    none
+Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                  agn

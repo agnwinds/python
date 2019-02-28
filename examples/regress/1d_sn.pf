@@ -28,7 +28,8 @@ Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard_sn_kurucz
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   1
+
+Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)                   all_off
 
 ### Parameters for Domain 0
 Homologous.boundary_mdot(msol/yr)          26.8
