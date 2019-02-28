@@ -210,7 +210,7 @@ convergence (xplasma)
     if ((xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e)) > epsilon)
       xplasma->techeck = techeck = 1;
 
-    if ((xplasma->converge_hc = fabs (xplasma->heat_tot - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
+    if ((xplasma->converge_hc = fabs (xplasma->heat_tot + xplasma->heat_shock - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->heat_shock + xplasma->cool_tot)) > epsilon)
       xplasma->hccheck = hccheck = 1;
   }
   else                          // If the cell has reached the maximum temperature we mark it as over-limit

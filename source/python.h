@@ -501,6 +501,8 @@ struct geometry
 
   double shock_factor;          /* A scaling factor used for including an extra heating term (for FU Ori stars
                                  */
+  double frac_extra_kpkts;      /* in the case that we have extra heating and macro-atoms, the fraction of 
+                                   photons to reserve for those generated directly by k-packets */
 
   int auger_ionization;         /*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
 
