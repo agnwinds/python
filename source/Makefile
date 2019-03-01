@@ -31,10 +31,11 @@ FC = g77
 # FC = gfortran
 # speciify any extra compiler flags here
 EXTRA_FLAGS =
+LDFLAGS = 
 
 
-#Check a load of compiler options
-#this is mostly to address issue $100
+# Check a load of compiler options
+# This is mostly to address GitHub issues #100 and #474
 ifeq (mpicc, $(CC))		
 	# you're using mpicc, so we'll compile with the DMPI_ON flag
 	MPI_FLAG = -DMPI_ON
@@ -47,6 +48,7 @@ ifeq (mpicc, $(CC))
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
+	# for issue #474, we don't need to add -lrt as the mpicc wrapper will do this for us
 	ifeq (gcc, $(MPI_COMPILER))
 		GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 		ifeq ("$(GCCVERSIONGTEQ4)", "1")
@@ -65,11 +67,21 @@ else ifeq (gcc, $(CC))
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
+	# for old versions of gcc, we need to link -lrt for our timing routines
 	GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 	ifeq ("$(GCCVERSIONGTEQ4)", "1")
 		EXTRA_FLAGS += -fno-aggressive-loop-optimizations
 		COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
+	else
+		# This is to ensure that we don't add -lrt to clang which uses an old version of gcc
+		# Most likely, this check should be smarter i.e. check if it really is clang and we
+		# should probably check for masOS 10.12 or later 
+		OS := $(shell uname -s)
+		ifneq (Darwin, $(OS))
+			LDFLAGS += -lrt
+			COMPILER_PRINT_STRING += with -lrt
+		endif
 	endif
 
 else	# you must be using clang or icc
@@ -135,7 +147,7 @@ endif
 # LDFLAGS= -L$(LIB)  -lm -lkpar  -lgsl -lgslcblas ../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
 # LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
-LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas 
+LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
 
@@ -148,7 +160,7 @@ startup:
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
-
+	
 # indent:
 # 	@echo $(INDENT_STRING)
 # 	$(INDENT_CMD)
@@ -216,9 +228,9 @@ prototypes:
 	cproto  -I$(INCLUDE) get_atomicdata.c > atomic_proto.h
 
 python: startup  python.o $(python_objects)
-	$(CC)  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-		cp $@ $(BIN)/py
-		mv $@ $(BIN)/py$(VERSION)
+	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
+	cp $@ $(BIN)/py
+	mv $@ $(BIN)/py$(VERSION)
 
 #This line is jsut so you can use make D python for debugging
 D:	
