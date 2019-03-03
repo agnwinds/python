@@ -129,7 +129,7 @@ int CURRENT_PHOT;               /* A diagnostic so that one can always determine
  * wind and the disk
  */
 
-// This is intialized in init_goe, but it my need to be in geo in order to be able to read
+// This is intialized in init_geo, but it my need to be in geo in order to be able to read
 // everything back
 
 enum coord_type_enum

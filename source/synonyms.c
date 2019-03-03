@@ -58,7 +58,7 @@ char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.typ
   "kn.acceleration_exponent", "kn.acceleration_length", "kn.d", "kn.mdot_r_exponent",
   "kn.rmax", "kn.rmin", "kn.v_infinity", "kn.v_zero", "QSO_BH_radiation", "lum_agn", "AGN.power_law_index",
   "AGN.blackbody_temp", "@AGN.power_law_cutoff", "AGN.geometry_for_pl_source", "Rad_type_for_agn", "Rad_type_for_agn",
-  "wind.mdot", "Wind_ionization", "Wind_radiation", "Wind_type",
+  "wind.mdot", "Wind_ionization", "Wind_radiation", "Wind_type", "Thermal_balance_options",
   NULL
 };
 
@@ -95,13 +95,13 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
   "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero", "BH.radiation", "BH.lum", "BH.power_law_index",
   "BH.blackbody_temp", "@Bh.power_law_cutoff", "BH.geometry_for_pl_source",
   "BH.rad_type_in_final_spectrum", "BH.rad_type_to_make_wind",
-  "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type",
+  "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type", "Wind_heating.extra_processes",
   NULL
 };
 
 
 
-int number_of_names = 101;
+int number_of_names = 102;
 
 #define MIN(a,b) ((a)<b ? a:b)
 

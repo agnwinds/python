@@ -36,7 +36,7 @@ Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_at
 Atomic_data                                data/standard80
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)              reflect
 
-Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)                 adiabatic
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)                    none
 
 ### Parameters for Domain 0
 Hydro.file                                 hdf000002nsh_dw33.zeu

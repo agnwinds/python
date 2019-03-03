@@ -36,8 +36,7 @@ Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-
-Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)                  adiabatic
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
 ### Parameters for Domain 0
 Wind.mdot(msol/yr)                         1e-9

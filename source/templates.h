@@ -555,6 +555,11 @@ int get_meta_params (void);
 /* setup_line_transfer.c */
 int get_line_transfer_mode (void);
 int line_transfer_help_message (void);
+/* cv.c */
+double wdrad (double m);
+double diskrad (double m1, double m2, double period);
+double roche2 (double q, double a);
+double logg (double mass, double rwd);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);
