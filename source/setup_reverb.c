@@ -32,14 +32,14 @@
  * ### reverb.type ###
  * Sets whether or not to do reverb mapping, and if so how to
  * assign photon starting paths for non-CO photons.
- * 0. None
- * 1. 'Photon', starting paths set by distance to the CO.
- * 2. 'Wind', photons generated in the wind assigned starting
- *    paths from the distribution of paths heating the wind
- *    cell they were spawned in.
- * 3. 'Matom', as wind but photons generated in a line assigned
- *    starting paths from the distribution of paths of photons
- *    that de-excited into that line. For lines in matom_lines.
+ *   'none': Off
+ *   'photon': starting paths set by distance to the CO.
+ *   'wind': photons generated in the wind assigned starting
+ *     paths from the distribution of paths heating the wind
+ *     cell they were spawned in.
+ *   'matom': as wind but photons generated in a line assigned
+ *     starting paths from the distribution of paths of photons
+ *     that de-excited into that line. For lines in matom_lines.
  *
  * ### reverb.matom_lines, reverb.matom_line ###
  * The number of macro-atom lines to track (above). Internal
@@ -47,22 +47,22 @@
  *
  * ### reverb.disk_type ###
  * How the starting paths of photons from the disk are assigned.
- * 0. Set by distance to the CO.
- * 1. Set to 0. Not recommended.
- * 2. Ignored. Disk photons do not contribute to 'wind' and
- *    'matom' distributions.
+ *   'correlated': Set by distance to the CO.
+ *   'uncorrelated': Set to 0. Not recommended.
+ *   'ignored': Disk photons do not contribute to 'wind' and
+ *     'matom' distributions.
  *
  * ### reverb.path_bins ###
  * How many bins to store wind & matom path distributions in.
  * Typically 1000.
  *
  * ### reverb.visualisation ###
- * 0. No visualisation
- * 1. Output a .vtk file showing the mean paths in each cell,
- *    for visualising in something like VisIt or Paraview.
- * 2. Output a series of files dumping the path distributions
- *    for cells set by reverb.dump_cells.
- * 3. Output both.
+ *   'none': No visualisation
+ *   'vtk': Output a .vtk file showing the mean paths in each cell,
+ *     for visualising in something like VisIt or Paraview.
+ *   'dump': Output a series of files dumping the path distributions
+ *     for cells set by reverb.dump_cells.
+ *   'both': Output both.
  *
  * ### reverb.dump_cells, reverb.dump_cell_x, reverb.dump_cell_z ###
  * The number of cells to dump the path distributions for, and the
@@ -75,86 +75,46 @@
  *
  * ### Notes ###
  * 6/5/18 - Documented by SWM
+ * 17/2/19 - Updated to use rdchoice
  **********************************************************/
 int
 get_meta_params (void)
 {
 
-  int meta_param, i, j, k, z, istate, levl, levu;
+  int i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
+  char values[LINELENGTH], answer[LINELENGTH];
 
   rdpar_comment ("Parameters for Reverberation Modeling (if needed)");
 
-  meta_param = 0;               // initialize to no reverberation tracking
-  rdint ("Reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
-  switch (meta_param)
-  {                             //Read in reverb tyoe, if any
-  case 0:
-    geo.reverb = REV_NONE;
-    break;
-  case 1:
-    geo.reverb = REV_PHOTON;
-    break;
-  case 2:
-    geo.reverb = REV_WIND;
-    break;
-  case 3:
-    geo.reverb = REV_MATOM;
-    break;
-  default:
-    Error ("reverb.type: Invalid reverb mode.\n \
-      Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
-  }
+  // ========== DEAL WITH BASIC REVERB TYPE ==========
+  strcpy (answer, "none");
+  sprintf (values, "%d,%d,%d,%d", REV_NONE, REV_PHOTON, REV_WIND, REV_MATOM);
+  geo.reverb = rdchoice("Reverb.type(none,photon,wind,matom)", values, answer);
 
   // ========== DEAL WITH DISK SETTINGS ==========
-  if (geo.disk_type > 0 && geo.reverb != REV_NONE)
+  if (geo.disk_type != DISK_NONE && geo.reverb != REV_NONE)
   {
-    rdint ("Reverb.disk_type(0=correlated_with_co,1=uncorrelated,2=ignore_disk_photons)", &meta_param);
-    switch (meta_param)
-    {                           //Read in reverb tyoe, if any
-    case 0:
-      geo.reverb_disk = REV_DISK_CORRELATED;
-      break;
-    case 1:
-      geo.reverb_disk = REV_DISK_UNCORRELATED;
-      break;
-    case 2:
-      geo.reverb_disk = REV_DISK_IGNORE;
-      break;
-    default:
-      Error ("Reverb.disk_type: Invalid reverb disk mode.\n \
-        Valid modes are 0=Correlated with central source, 1=Uncorrelated, 2=Ignore.\n");
-    }
+    strcpy (answer, "correlated");
+    sprintf (values, "%d,%d,%d", REV_DISK_CORRELATED, REV_DISK_UNCORRELATED, REV_DISK_IGNORE);
+    geo.reverb_disk = rdchoice("Reverb.disk_type(correlated,uncorrelated,ignore)", values, answer);
   }
 
   // ========== DEAL WITH VISUALISATION SETTINGS ==========
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {                             //If this requires further parameters, set defaults
+  {
+    //If this requires further parameters, set defaults
     geo.reverb_lines = 0;
     geo.reverb_path_bins = 1000;
     geo.reverb_angle_bins = 100;
     geo.reverb_dump_cells = 0;
     geo.reverb_vis = REV_VIS_NONE;
+
     rdint ("Reverb.path_bins", &geo.reverb_path_bins);
-    rdint ("Reverb.visualisation(0=none,1=.vtk,2=cell_dump,3=both)", &meta_param);
-    switch (meta_param)
-    {                           //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
-    case 0:
-      geo.reverb_vis = REV_VIS_NONE;
-      break;
-    case 1:
-      geo.reverb_vis = REV_VIS_VTK;
-      break;
-    case 2:
-      geo.reverb_vis = REV_VIS_DUMP;
-      break;
-    case 3:
-      geo.reverb_vis = REV_VIS_BOTH;
-      break;
-    default:
-      Error ("Reverb.visualisation: Invalid mode.\n \
-        Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
-    }
+
+    strcpy (answer, "none");
+    sprintf (values, "%d,%d,%d,%d", REV_VIS_NONE, REV_VIS_VTK, REV_VIS_DUMP, REV_VIS_BOTH);
+    geo.reverb_vis = rdchoice("Reverb.visualisation(none,vtk,dump,both)", values, answer);
 
     if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
       //If we're producing a 3d visualisation, select bins. This is just for aesthetics
