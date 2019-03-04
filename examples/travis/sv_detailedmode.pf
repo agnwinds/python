@@ -28,6 +28,7 @@ Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)               
 Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               5
 Wind.dim.in.z_or_theta.direction           5
+@Diag.adjust_grid(yes,no)                        no
 
 ### Parameters associated with photon number, cycles,ionization and radiative transfer options
 Photons_per_cycle                          10000
@@ -36,6 +37,7 @@ Spectrum_cycles                            100
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                 ml93
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
+@Diag.write_atomicdata(yes,no)                   no
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
@@ -75,10 +77,17 @@ Spectrum.angle(0=pole)                     50
 Spectrum.angle(0=pole)                     60
 Spectrum.angle(0=pole)                     80
 Spectrum.live_or_die(live.or.die,extract)              extract
+@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)                   no
+@Spectrum.select_photons_by_position(yes,no)                   no
 Spectrum.type(flambda,fnu,basic)              flambda
+@Diag.use_standard_care_factors(yes,no)                   no
+@Diag.fractional_distance_photon_may_travel                  0.5
+@Diag.lowest_ion_density_for_photoabs                1e-10
+@Diag.keep_photoabs_in_final_spectra(yes,no)                   no
 
 ### Parameters for Reverberation Modeling (if needed)
 Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv
+@Diag.extra(yes,no)                              no
