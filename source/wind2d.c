@@ -392,14 +392,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 /* Calculate the the divergence of the wind at the center of each grid cell */
   wind_div_v ();
 
-/* Now calculate the adiabatic cooling.  Note: adiabatic cooling is not used in
- * the program at present.  There are issues concerning how to incorporate it
- * into the macro atom approach, as well as questions concerning the appropriate
- * calculation.  If changes are made to this, then they must also be made in
- * the corresponding portion of wind_updates.  04nov -- ksl
- */
-
-/*06may -- ksl -- This is awkward because liminosities are now part of plasma structure */
+/* Now calculate the adiabatic cooling and shock heating */
   for (i = 0; i < NPLASMA; i++)
   {
     if (geo.adiabatic)
@@ -408,8 +401,22 @@ be optional which variables beyond here are moved to structures othere than Wind
       plasmamain[i].cool_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[i].t_e);
     }
     else
+    {
       plasmamain[i].cool_adiabatic = 0.0;
+    }
+
+    if (geo.nonthermal)
+    {
+      nwind = plasmamain[i].nwind;
+      plasmamain[i].heat_shock = shock_heating (&w[nwind]);
+    }
+    else
+    {
+      plasmamain[i].heat_shock = 0.0;
+    }
   }
+
+
 
 
   /* Calculate one over dvds */

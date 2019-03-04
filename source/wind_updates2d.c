@@ -286,6 +286,11 @@ WindPtr (w);
     else
       plasmamain[n].cool_adiabatic = 0.0;
 
+    if (geo.nonthermal)
+      plasmamain[n].heat_shock = shock_heating (&w[nwind]);
+    else
+      plasmamain[n].heat_shock = 0;
+
 
     /* Calculate the densities in various ways depending on the ioniz_mode */
 
@@ -412,6 +417,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].lum_rr_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].heat_shock, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].dmo_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].rad_force_es, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].rad_force_ff, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -549,6 +555,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_shock, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].rad_force_es, 3, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].rad_force_ff, 3, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -658,8 +665,9 @@ WindPtr (w);
 
   //NSH 0717 - first we need to ensure the cooling and luminosities reflect the current temperature
 
-  cool_sum = wind_cooling (0.0, VERY_BIG);      /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
   lum_sum = wind_luminosity (0.0, VERY_BIG);    /*and we also call wind_luminosity to get the luminosities */
+
 
 
   xsum = psum = ausum = lsum = fsum = csum = icsum = apsum = aausum = abstot = 0;       //1108 NSH zero the new csum counter for compton heating

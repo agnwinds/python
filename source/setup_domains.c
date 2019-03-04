@@ -247,7 +247,7 @@ get_wind_params (ndom)
     Exit (0);
   }
 
-//OLD  rddoub ("Wind.t.init", &geo.twind_init);
+  zdom[ndom].twind = 40000;
   rddoub ("Wind.t.init", &zdom[ndom].twind);
 
 
@@ -262,7 +262,6 @@ get_wind_params (ndom)
   geo.rmax_sq = geo.rmax * geo.rmax;
 
   /* Get the filling factor of the wind */
-  // XXX  This may  not in the right place to set the filling factor.  
 
   zdom[ndom].fill = 1.;
 

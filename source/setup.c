@@ -76,12 +76,12 @@ init_geo ()
 
 /*  The domains have been created but have not been initialized at all */
 
-  zdom[0].coord_type = 1;
+  zdom[0].coord_type = CYLIND;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
   zdom[0].log_linear = 0;       /* Set intervals to be logarithmic */
 
-  zdom[1].coord_type = 1;
+  zdom[1].coord_type = CYLIND;
   zdom[1].ndim = 30;
   zdom[1].mdim = 10;
   zdom[1].log_linear = 0;       /* Set intervals to be logarithmic */
@@ -89,7 +89,7 @@ init_geo ()
 
   geo.disk_z0 = geo.disk_z1 = 0.0;
   geo.adiabatic = 1;            // Default is now set so that adiabatic cooling is included in the wind
-  geo.auger_ionization = 1;     //Default is on.
+  geo.auger_ionization = TRUE;  //Default is on.
 
 
   geo.run_type = 0;             // Not a restart of a previous run
@@ -105,15 +105,14 @@ init_geo ()
   geo.m_sec = 0.4 * MSOL;
   geo.period = 3.2 * 3600;
   geo.tstar = 40000;
-//OLD  geo.twind_init = 40000;
 
   geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
   geo.line_mode = 3;            /* default is escape probabilites */
 
-  geo.star_radiation = 1;       /* 1 implies star will radiate */
-  geo.disk_radiation = 1;       /* 1 implies disk will radiate */
-  geo.bl_radiation = 0;         /*1 implies boundary layer will radiate */
-  geo.wind_radiation = 0;       /* 1 implies wind will radiate */
+  geo.star_radiation = TRUE;    /* 1 implies star will radiate */
+  geo.disk_radiation = TRUE;    /* 1 implies disk will radiate */
+  geo.bl_radiation = FALSE;     /*1 implies boundary layer will radiate */
+  geo.wind_radiation = TRUE;    /* 1 implies wind will radiate */
 
   geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
   geo.diskrad = 2.4e10;
@@ -634,30 +633,79 @@ init_ionization ()
   get_line_transfer_mode ();
 
 
-  thermal_opt = 0;              /* NSH 131213 Set the option to zero - the default. The lines allow allow the
-                                   user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
-                                   to start off with. */
-
   strcpy (answer, "reflect");
   geo.absorb_reflect = rdchoice ("Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)", "1,0,2", answer);
-  //OLD rdint ("Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)", &geo.absorb_reflect);
 
-  // XXX Next line needs to be re-written to use rdchooce when FU ORi branch is merged
-  rdint ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
 
-  if (thermal_opt == 1)
+  /* Setup options associated with non radiative process that can affect the thermal balance.  At present
+   * these are adiabatic heating and an extra heating term explicitly implemented for FU Ori stars.  The
+   * default is set to 0.  Adiabatic cooling only
+   */
+
+  strcpy (answer, "adiabatic");
+
+//OLD  thermal_opt = rdchoice ("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)", "0,1,2,3", answer);
+//  thermal_opt = rdchoice ("Thermal_balance_options(off,adiabatic_only,nonthermal_only,all_on)", "1,0,2,3", answer);
+  thermal_opt = rdchoice ("Wind_heating.extra_processes(none,adiabatic,nonthermal,both)", "1,0,2,3", answer);
+
+  if (thermal_opt == 0)
+  {
+    geo.adiabatic = 1;
+    geo.nonthermal = 0;
+  }
+
+  else if (thermal_opt == 1)
   {
     geo.adiabatic = 0;
+    geo.nonthermal = 0;
+  }
+  else if (thermal_opt == 2)
+  {
+    geo.adiabatic = 0;
+    geo.nonthermal = 1;
   }
 
-  else if (thermal_opt > 1 || thermal_opt < 0)
+  else if (thermal_opt == 3)
+  {
+    geo.adiabatic = 1;
+    geo.nonthermal = 1;
+  }
+  else
   {
     Error ("Unknown thermal balance mode %d\n", thermal_opt);
-    Exit (0);
+    exit (0);
   }
 
+  if (geo.nonthermal)
+  {
+    /* The shock heating is defined initally as a luminosity to be added to wind
+     * but is immediately converted to a luminosity per unit volumne
+     *
+     * Since nearly all systems that we are dealing with have a star we initialize
+     * the amount of extra heating as a fraction of the stellar luminosity
+     *
+     * See cooling.c shock_heating
+     */
 
-  /* Prevent bf calculation of macro_estimaters when no macro atoms are present.   */
+    Log
+      ("Warning: Non-thermal heating has been selected.  This is a very special option put in place for modelling FU Ori stars, and should be used with extreme caution\n");
+
+    geo.shock_factor = 0.001 * 4 * PI * pow (geo.rstar, 2) * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
+    //OLD rddoub ("Thermal_balance_options.extra_heating", &geo.shock_factor);
+    rddoub ("Wind_heating.extra_luminosity", &geo.shock_factor);
+    geo.shock_factor /= (4 * PI * pow (geo.rstar, 3));
+    Log ("The non_thermal emissivity at the base is %.2e\n", geo.shock_factor);
+
+    if (geo.rt_mode == RT_MODE_MACRO)
+    {
+      geo.frac_extra_kpkts = 0.1;
+      // OLD rddoub ("Thermal_balance_options.extra_kpacket_frac", &geo.frac_extra_kpkts);
+      rddoub ("Wind_heating.kpacket_frac", &geo.frac_extra_kpkts);
+
+    }
+  }
+
+  /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
     geo.macro_simple = 1;       // Make everything simple if no macro atoms -- 57h

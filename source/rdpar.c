@@ -169,6 +169,8 @@ int rd_rank = 0;                // rank of mpi process, set to zero
 
 int rdpar_nrec = 0;
 
+int rdpar_warning = 0;          // A variable used to allow one to print out a warning the first time oen moves to interactive mode
+
 struct rdpar
 {
   char name[LINELEN];
@@ -388,7 +390,7 @@ rdpar_init ()
   if ((rdout_ptr = fopen ("tmp.rdpar", "w")) == NULL)
   {
     printf ("Error: rdpar_init: Problem opening tmp.rdpar\n");
-    Exit (0);
+    exit (0);
   }
   rdpar_stat = 1;
   strcpy (current_filename, "tmp.rdpar.out");
@@ -481,7 +483,7 @@ string_process_from_command_line (question, dummy)
   if (fgets (tdummy, LINELEN, stdin) == NULL)
   {
     printf ("Exiting since rdpar got EOF in interactive mode\n");
-    Exit (0);
+    exit (0);
     return (0);
   }
   else if (tdummy[0] == '\n')
@@ -643,7 +645,12 @@ string_process_from_file (question, dummy)
   if (rdpar_cursor == rdpar_ntot)
   {
     // printf ("Error: string_proces: Unexpectedly reached EOF\n");
-    printf ("Switching to interactive mode for this variable\n");
+    if (rdpar_warning == 0)
+    {
+      printf
+        ("Switching to interactive mode for this variable.\nAdditional inputs from the terminal may be required to complete the .pf file\n");
+      rdpar_warning = 1;
+    }
     return (string_process_from_command_line (question, dummy));
   }
   else
