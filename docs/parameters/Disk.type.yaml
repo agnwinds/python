@@ -3,9 +3,9 @@ description: |
   Parameter defining whether there is a disk in the system
 type: Enum (Int)
 values:
-  0: no.disk
-  1: standard.flat.disk
-  2: vertically.extended.disk
+  none: no.disk
+  flat: standard.flat.disk
+  vertically.extended: vertically.extended.disk
 parent:
   parameter: This question is always asked
 file: setup_disk.c

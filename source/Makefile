@@ -10,7 +10,7 @@
 # 05jan	ksl	54f  Modified Makefile so that the Version number is automatically
 # 		copied to version.h  Also fixed so that one does not need to put
 # 		a new filename in two separate places, and so that the latest
-# 		compile version automatically becomve shte 
+# 		compile version automatically becomve shte
 # 05apr	ksl	55c   Modified in a way that implies that one must have gsl as part
 # 		of the Python directory tree.  This is because I was having problems
 # 		with gsl after we went to Redhat Enterprise at the Institute, and
@@ -31,11 +31,12 @@ FC = g77
 # FC = gfortran
 # speciify any extra compiler flags here
 EXTRA_FLAGS =
+LDFLAGS =
 
 
-#Check a load of compiler options
-#this is mostly to address issue $100
-ifeq (mpicc, $(CC))		
+# Check a load of compiler options
+# This is mostly to address GitHub issues #100 and #474
+ifeq (mpicc, $(CC))
 	# you're using mpicc, so we'll compile with the DMPI_ON flag
 	MPI_FLAG = -DMPI_ON
 
@@ -47,13 +48,14 @@ ifeq (mpicc, $(CC))
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
+	# for issue #474, we don't need to add -lrt as the mpicc wrapper will do this for us
 	ifeq (gcc, $(MPI_COMPILER))
 		GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 		ifeq ("$(GCCVERSIONGTEQ4)", "1")
 			EXTRA_FLAGS += -fno-aggressive-loop-optimizations 	# add the flag to EXTRA_FLAGS
 			COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
 		endif
-	endif	
+	endif
 
 else ifeq (gcc, $(CC))
 	# no mpicc,
@@ -65,11 +67,21 @@ else ifeq (gcc, $(CC))
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
+	# for old versions of gcc, we need to link -lrt for our timing routines
 	GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 	ifeq ("$(GCCVERSIONGTEQ4)", "1")
 		EXTRA_FLAGS += -fno-aggressive-loop-optimizations
 		COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
+	else
+		# This is to ensure that we don't add -lrt to clang which uses an old version of gcc
+		# Most likely, this check should be smarter i.e. check if it really is clang and we
+		# should probably check for masOS 10.12 or later
+		OS := $(shell uname -s)
+		ifneq (Darwin, $(OS))
+			LDFLAGS += -lrt
+			COMPILER_PRINT_STRING += with -lrt
+		endif
 	endif
 
 else	# you must be using clang or icc
@@ -97,7 +109,7 @@ GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 # ifeq (, $(INDENT_PATH))
 # 	#If indent is not installed, error
 # 	INDENT_STRING = Gnuindent not installed so not indenting code
-# 	INDENT_CMD = 
+# 	INDENT_CMD =
 # else
 # 	ifeq (GNU,$(firstword $(INDENT_VERSION)))
 # 		INDENT_STRING = Indenting code with $(INDENT_VERSION)
@@ -106,7 +118,7 @@ GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 # 	else
 # 		# if it is not GNU indent then do not run
 # 		INDENT_STRING = $(INDENT_PATH) is not the GNU version
-# 		INDENT_CMD = 
+# 		INDENT_CMD =
 # 	endif
 # endif
 
@@ -117,15 +129,15 @@ BIN = ../bin
 
 ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
-# to use profiler make with arguments "make D python" 
-# this can be altered to whatever is best	
+# to use profiler make with arguments "make D python"
+# this can be altered to whatever is best
 	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
-	FFLAGS = -g -pg   
+	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
 # Use this for large runs
 	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
-	FFLAGS =         
+	FFLAGS =
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
 
@@ -134,11 +146,12 @@ endif
 # next line for debugging when concerned about memory problems and duma installed in python directory
 # LDFLAGS= -L$(LIB)  -lm -lkpar  -lgsl -lgslcblas ../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
-# LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
-LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas 
+# LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas
+LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
-#Note that version should be a single string without spaces. 
-VERSION = 82k
+#Note that version should be a single string without spaces.
+
+VERSION = 83
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
@@ -166,7 +179,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
 		sv.o ionization.o  levels.o gradv.o reposition.o \
-		anisowind.o util.o density.o  bands.o time.o \
+		anisowind.o wind_util.o density.o  bands.o time.o \
 		matom.o estimators.o wind_sum.o yso.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o  \
 		agn.o shell_wind.o compton.o zeta.o dielectronic.o \
@@ -175,8 +188,8 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o \
-		setup_reverb.o setup_line_transfer.o
-		
+		setup_reverb.o setup_line_transfer.o rdpar_init.o
+
 
 
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
@@ -188,7 +201,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
 		sv.c ionization.c  levels.c gradv.c reposition.c \
-		anisowind.c util.c density.c  bands.c time.c \
+		anisowind.c wind_util.c density.c  bands.c time.c \
 		matom.c estimators.c wind_sum.c yso.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c  \
 		agn.c shell_wind.c compton.c zeta.c dielectronic.c \
@@ -200,29 +213,31 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		setup_reverb.c setup_line_transfer.c
 
 #
-# kpar_source is now declared seaprately from python_source so that the file log.h 
+# kpar_source is now declared separately from python_source so that the file log.h
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c windsave2table.c windsave2table_sub.c
 
-prototypes: 
+prototypes:
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} > foo.h  
+	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} > foo.h
 	cp foo.h templates.h
-	cproto -I$(INCLUDE) $(kpar_source) > log.h 
+	rm foo.h
+	cproto -I$(INCLUDE) $(kpar_source) > log.h
+	cproto  -I$(INCLUDE) get_atomicdata.c > atomic_proto.h
 
 python: startup  python.o $(python_objects)
-	$(CC)  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-		cp $@ $(BIN)/py
-		mv $@ $(BIN)/py$(VERSION)
+	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
+	cp $@ $(BIN)/py
+	mv $@ $(BIN)/py$(VERSION)
 
 #This line is jsut so you can use make D python for debugging
-D:	
+D:
 	@echo 'Debugging Mode'
 
 py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
-		emission.o recomb.o util.o  \
+		emission.o recomb.o wind_util.o  \
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
@@ -233,7 +248,8 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
-		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o
+		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
+		rdpar_init.o
 
 
 
@@ -245,7 +261,7 @@ py_wind: startup $(py_wind_objects)
 
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
-		emission.o recomb.o util.o  \
+		emission.o recomb.o wind_util.o  \
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
@@ -254,12 +270,12 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
-		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o cooling.o   
+		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o cooling.o
 
 
 
-windsave2table: $(table_objects) 
+windsave2table: $(table_objects)
 	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)

@@ -4,7 +4,7 @@ description: |
   distributions for wind cells.
 type: Enum (Int)
 values:
-  0: |
+  correlated: |
     **Correlated**
 
     This mode assumes that disk emission is correlated with the
@@ -13,7 +13,7 @@ values:
     state and luminosity of the disk surface layer is mostly determined by
     unscattered photons from the central source.
 
-  1: |
+  uncorrelated: |
     **Uncorrelated**
 
     This mode generates photons with a delay of 0 wherever in the
@@ -21,7 +21,7 @@ values:
     ignored in preference to 0 or 2. It will, in practise, generally work out
     similar to type 0 as most of the UV photons are generated close-in to the CO.
 
-  2: |
+  ignore: |
     **Ignored**
 
     This mode assumes that disk photons do *not* correlate

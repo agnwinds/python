@@ -3,15 +3,15 @@ description: |
   Multi-line description, must keep indentation.
 type: Enum (Int)
 values:
-  0: SV
-  1: Star
-  3: Hydro
-  4: corona
-  5: knigge
-  6: homologous
-  7: yso
-  9: shell
-  10: imported
+  SV: SV
+  star: Star
+  hydro: Hydro
+  corona: Corona
+  kwd: KWD
+  homologous: Homologous
+  yso: YSO
+  shell: Shell
+  imported: Imported
 parent:
   parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 file: setup_domains.c
