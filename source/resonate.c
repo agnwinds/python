@@ -42,11 +42,13 @@ double cds_v2_old, cds_dvds2_old;
  * @param [in,out] double *  tau   Initially the current optical depth for
  * the photon; finally the optical depth at the distance the photon can be
  * moved.
- * @param [out] int *  nres   the number of the resonance if there was one, -1 if there was no resonant scatter
+ * @param [out] int *  nres   the number of the resonance, -1 if it was electron 
+ * scatttering, -2 if it was ff, -99 if the
+ * distance is not limited by some kind of scatter.
  * @param [in] double  smax   the maximum distance the photon can
  * travel in the cell
- * @param [out] int *  istat   A flag indidicating whether the
- * photon should scatter if it traels the distance estimated, 0 if no, TAU_SCAT if yes.
+ * @param [out] int *  istat   A flag indicating whether the
+ * photon should scatter if it travels the distance estimated, 0 if no, TAU_SCAT if yes.
  * @return     The distance the photon can travel
  *
  * calculate_ds finds the distance the photon can travel subject to a
@@ -69,6 +71,11 @@ double cds_v2_old, cds_dvds2_old;
  * coordinate gridding, such as the maximum distance the photon
  * can travel before hitting the edge of the
  * shell should be calculated outside of this routine.
+ *
+ * 180519 - ksl - I modified the behavior ot this routine so that nres
+ * indicates that a scattering event is not limiting the maximum
+ * distance.  nres is now -99 if there was no scatter, instead of
+ * -1
  *
  *
  **********************************************************/
@@ -195,6 +202,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
 
 
+
+
 /* The next section checks to see if the frequency difference on
  * the two sides is very small and if not limits the resonances
  * one has to worry about
@@ -260,7 +269,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity
-
 
 
 /* Finally begin the loop over the resonances that can interact
@@ -428,7 +436,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
 /* If the photon reaches this point it was not scattered by resonances.
- * ds_current is either 0 if there were no resonances or the postion of the
+ * ds_current is either 0 if there were no resonances or the position of the
  * "last" resonance if there were resonances.  But we need to check one
  * last time to see if it was scattered by continuum process.
  * Note: ksl -- It is generally a bad policy to have a bunch of repeated code
@@ -469,17 +477,22 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 /**********************************************************/
 /**
- * @brief      determine what continuum
+ * @brief      determine what the continuum
  * process was that caused the scatter and returns this to
  * the main routine.
  *
  * @param [in] double  kap_cont   The continuum opacity
  * @param [in] double  kap_es   The electron scattering opacity
  * @param [in] double  kap_ff   The free free opacity
- * @param [in] PlasmaPtr  xplasma   The plasma cell where everyting is being
+ * @param [in] PlasmaPtr  xplasma   The plasma cell where everything is being
  * calculated
  * @return     The process that cause the photon to stop/scatter at a particular
  * point
+ *
+ *  * -1 implies electron scattering
+ *  * -2 implies free-free
+ *  * 0 or greater implies a specific photionization process was responsible (and 
+ *  also that the program was operating in macro-atom mode.
  *
  * @details
  * This routine is called to determine which of several continuum proceseses
@@ -495,6 +508,11 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * routine a random number is generated and this is used to determine
  * which of the processes was responsible.  Data for the opacity due to
  * photonionization is passed remotely via the PlasmaPtr.
+ *
+ * In a program running in the two level approxiamtion, electron scattering
+ * and ff emsision are treated as scattering processes, but photionionization
+ * is not.  In macro-atom mode, photoionization is treated as a scattering 
+ * process.
  *
  **********************************************************/
 

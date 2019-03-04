@@ -158,18 +158,18 @@ to match heating and cooling in the wind element! */
  *
  * @details
  * The routine attempts to determine whether a cell is
- * on the track to a final solution by checking whether
+ * on the track towards a final solution by checking whether
  * the electron and radiation temperatures are getting
- * smaller with cycle and whetehr the difference between
- * heating and cooling is drroping.
+ * smaller with each cycle and whether the difference between
+ * heating and cooling is decreasing.
  *
  * The routine returns a number between 0 and 3,
  * depending on the number of convergence checks that
- * are passed.  If all convergence tests are pssed
- * then the number returned will be 0
+ * are passed.  If all convergence tests are passed
+ * then the number returned will be 0.
  *
- * The routine also adjust the gain which controls how
- * far the electron temperture can change in a cycle.
+ * The routine also adjusts the gain which controls how
+ * much the electron temperature can change in a cycle.
  *
  * ### Notes ###
  *
@@ -179,41 +179,43 @@ int
 convergence (xplasma)
      PlasmaPtr xplasma;
 {
-  int trcheck, techeck, hccheck, whole_check, converging;
+  int trcheck, techeck, hccheck, whole_check;
+  double min_gain = 0.1, gain_damp = 0.7, max_gain, gain_amp, cyc_frac;
   double epsilon;
 
-  trcheck = techeck = hccheck = converging = 0;
+  trcheck = techeck = hccheck = 0;
   xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;   //NSH 70g - zero the global variables
   epsilon = 0.05;
 
-  /* Check the fractional change in tempperatature and if is less than
-   * epsiolong increment trcheck and techeck
+  /* Check the fractional change in temperature and if is less than
+   * epsilon, increment trcheck and techeck
    */
 
-  if ((xplasma->converge_t_r = fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r)) > epsilon)
+  if ((xplasma->converge_t_r =  // Radiation temperature
+       fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r)) > epsilon)
     xplasma->trcheck = trcheck = 1;
-  if (xplasma->t_e < TMAX)
+
+  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1
+   * - 110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
+   * - 111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
+   * - 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
+   *   cool_adiabatic is large and negative - and hence heating
+   * - NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!)
+   * - NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to
+   *   converge if we are hitting the maximum temperature
+   */
+
+  if (xplasma->t_e < TMAX)      // Electron temperature and heat/cooling
   {
     if ((xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e)) > epsilon)
       xplasma->techeck = techeck = 1;
+
     if ((xplasma->converge_hc = fabs (xplasma->heat_tot - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
       xplasma->hccheck = hccheck = 1;
   }
-  else                          //If the cell has reached the maximum temperature
-  {
-    xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;        //we mark it as overlimit
-  }
+  else                          // If the cell has reached the maximum temperature we mark it as over-limit
+    xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;
 
-//110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
-//111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
-
-  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
-  /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
-     cool_adiabatic is large and negative - and hence heating */
-
-/* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
-
-/* NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to converge if we are hitting the maximum temperature */
   /* whole_check is the sum of the temperature checks and the heating check */
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
@@ -221,24 +223,44 @@ convergence (xplasma)
   /* Converging is a situation where the change in electron
    * temperature is dropping with time and the cell is oscillating
    * around a temperature.  If that is the case, we drop the
-   * amount by which the temperature can change in this cycle
+   * amount by which the temperature can change in this cycle. Else if the cell
+   * is not converging, we increase the amount by which the temperature can
+   * change in this cycle.
    */
 
-  if (xplasma->dt_e_old * xplasma->dt_e < 0 && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))
-    converging = 1;
-  xplasma->converging = converging;
-
-  if (converging == 1)
-  {                             // Not converging
-    xplasma->gain *= 0.7;
-    if (xplasma->gain < 0.1)
-      xplasma->gain = 0.1;
-  }
-  else
+  if (xplasma->dt_e_old * xplasma->dt_e < 0 && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old)) // The cell is converging
   {
-    xplasma->gain *= 1.1;
-    if (xplasma->gain > 0.8)
-      xplasma->gain = 0.8;
+    xplasma->converging = 1;
+
+    xplasma->gain *= gain_damp;
+    if (xplasma->gain < min_gain)
+      xplasma->gain = min_gain;
+  }
+  else                          // The cell is not converging
+  {
+    /*
+     * EP: allow the gain to increase more for the first cyc_frac * cycles to
+     * allow the plasma to change temperature more rapidly -- right now this
+     * is controlled by some magic numbers and should probably be fine tuned
+     * to find the best numbers
+     */
+
+    cyc_frac = 0.5;
+
+    if (geo.wcycle <= floor (cyc_frac * geo.wcycles))
+    {
+      gain_amp = 1.5;
+      max_gain = 0.999;
+    }
+    else
+    {
+      gain_amp = 1.1;
+      max_gain = 0.8;
+    }
+
+    xplasma->gain *= gain_amp;
+    if (xplasma->gain > max_gain)
+      xplasma->gain = max_gain;
   }
 
   return (whole_check);
@@ -248,7 +270,7 @@ convergence (xplasma)
 
 /**********************************************************/
 /**
- * @brief      The routien summarizes the how well the wind converging
+ * @brief      The routine summarizes the how well the wind converging
  * to a solution as a whole
  *
  * @return     Always returns 0

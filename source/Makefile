@@ -189,7 +189,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o
-
+	
 
 
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
@@ -299,4 +299,4 @@ libatomic.a:  get_atomicdata.o atomic.o
 
 
 clean :
-	rm -f *.o  *~ 
+	rm -f *.o  *~

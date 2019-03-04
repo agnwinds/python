@@ -89,7 +89,9 @@ get_disk_params ()
 //OLD  geo.disk_radiation=1;
 //OLD  rdint ("Disk.radiation(y=1)", &geo.disk_radiation);
 
-  get_spectype (geo.disk_radiation, "Disk.rad_type_to_make_wind(0=bb,1=models)", &geo.disk_ion_spectype);
+  get_spectype (geo.disk_radiation,
+                //"Disk.rad_type_to_make_wind(0=bb,1=models)", &geo.disk_ion_spectype);
+                "Disk.rad_type_to_make_wind(bb,models)", &geo.disk_ion_spectype);
 
 
   geo.disk_tprofile = DISK_TPROFILE_STANDARD;

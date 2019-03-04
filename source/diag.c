@@ -5,10 +5,10 @@
  * @date   May, 2018
  *
  * @brief
- * consolidates an approach to providing extra diagnositcs
- * for debugging python, Some of the diagnostics allow one to change
- * defaults in python while others allow traking of and contains initialization routines
- * that control which diagnosics are a
+ * This routine consolidates an approach to providing extra diagnostics
+ * for debugging python. It also
+ * contains initialization routines
+ * that control which diagnosics are tracked.
  *
  * The first few functions are associated with gather information about what
  * one wants to track
@@ -27,9 +27,10 @@
  *
  *  * (0) check that one of the existing diagnostics is insuffient for your needs
  *  * (1) add a routine here that writes to the diagnostic file.
- *  * (2) add a rdpar statement in get_extra_diagnostics
- *  * (3) Assure that your new routine has the appropriate doxygne description,
- *  * (4) Add a yaml file for the new rdpare statemnt), and
+ *  * (2) add a rdchoice statement in get_extra_diagnostics that allows you to track
+ *  this diagnositic
+ *  * (3) Assure that your new routine has the appropriate doxygen description,
+ *  * (4) Add a yaml file for the new rdpar statement), and
  *  * (5) call the routine with the approriate condidtions from wherever you wish.
  *
  * As written, you must put your routine here.  This is done on purpose
@@ -45,14 +46,18 @@
  * A current example is print_dvds_info, which is totally contained within
  * gradv.c
  *
- * This approached was adopted, based onthe discution isssue #338
+ * This approached was adopted, based onthe discussion isssue #338
  * A detailed look at the subroutines indicates that this, especially the
  * part having to do with writing to a single diagnostic file is a work
  * in progress.
  *
- * Right now there are a numer of very similar routines, some of
+ * Right now there are a number of very similar routines, some of
  * which might be combined.
  *
+ * Note that as most of these routines are currently writen, one should
+ * check whether the that appropriate flag is set, before calling 
+ * the routine.  Otherwise, one may write to a file that has not been
+ * opened.
  *
  *
  ***********************************************************/
@@ -110,6 +115,7 @@ int
 get_standard_care_factors ()
 {
   int istandard;
+  char answer[LINELENGTH];
   istandard = 1;
   SMAX_FRAC = 0.5;
   DENSITY_PHOT_MIN = 1.e-10;
@@ -118,13 +124,17 @@ get_standard_care_factors ()
 
   if (modes.iadvanced)
   {
-    rdint ("@Diag.use_standard_care_factors(1=yes)", &istandard);
+    strcpy (answer, "no");
+    //OLD rdint ("@Diag.use_standard_care_factors(1=yes)", &istandard);
+    istandard = rdchoice ("@Diag.use_standard_care_factors(yes,no)", "1,0", answer);
 
     if (!istandard)
     {
       rddoub ("@Diag.fractional_distance_photon_may_travel", &SMAX_FRAC);
       rddoub ("@Diag.lowest_ion_density_for_photoabs", &DENSITY_PHOT_MIN);
-      rdint ("@Diag.keep_photoabs_in_final_spectra(1=yes)", &modes.keep_photoabs);
+      //OLD rdint ("@Diag.keep_photoabs_in_final_spectra(1=yes)", &modes.keep_photoabs);
+      strcpy (answer, "no");
+      modes.keep_photoabs = rdchoice ("@Diag.keep_photoabs_in_final_spectra(yes,no)", "1,0", answer);
     }
   }
   return (0);
@@ -156,19 +166,40 @@ get_standard_care_factors ()
 int
 get_extra_diagnostics ()
 {
+  char answer[LINELENGTH];
   if (modes.iadvanced == 0)
     Error ("Getting extra_diagnostics but advanced mode is off!\n");
 
   Log ("get_extra_diagnostics: Getting extra diagnostics as requested...\n");
 
   /* read the options. */
-  rdint ("@Diag.save_cell_statistics", &modes.save_cell_stats);
-  rdint ("@Diag.keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
-  rdint ("@Diag.make_ioncycle_tables", &modes.make_tables);
-  rdint ("@Diag.save_photons", &modes.save_photons);
-  rdint ("@Diag.save_extract_photons", &modes.save_extract_photons);
-  rdint ("@Diag.print_dvds_info", &modes.print_dvds_info);
-  rdint ("@Diag.track_resonant_scatters", &modes.track_resonant_scatters);
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.save_cell_statistics", &modes.save_cell_stats);
+  modes.save_cell_stats = rdchoice ("@Diag.save_cell_statistics(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
+  modes.keep_ioncycle_windsaves = rdchoice ("@Diag.keep_ioncycle_windsaves(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.make_ioncycle_tables", &modes.make_tables);
+  modes.make_tables = rdchoice ("@Diag.make_ioncycle_tables(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.save_photons", &modes.save_photons);
+  modes.save_photons = rdchoice ("@Diag.save_photons(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.save_extract_photons", &modes.save_extract_photons);
+  modes.save_extract_photons = rdchoice ("@Diag.save_extract_photons(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.print_dvds_info", &modes.print_dvds_info);
+  modes.print_dvds_info = rdchoice ("@Diag.print_dvds_info(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  //OLD rdint ("@Diag.track_resonant_scatters", &modes.track_resonant_scatters);
+  modes.track_resonant_scatters = rdchoice ("@Diag.track_resonant_scatters(yes,no)", "1,0", answer);
 
   if (modes.save_cell_stats || modes.save_photons || modes.save_extract_photons | modes.track_resonant_scatters)
   {
@@ -274,13 +305,13 @@ init_extra_diagnostics ()
  * @param [in] WindPtr  one   WindPtr for the cell
  * @param [in] PhotPtr  p   Photon pointer (for one photon)
  * @param [in] double  ds   ds travelled
- * @param [in] double  w_ave   The avereage weight of the pohton as it travelled
+ * @param [in] double  w_ave   The average weight of the photon as it travelled
  * @return     Always returns 0
  *
  * @details
  * The routine checks whether this is one of a number of cells in which one
  * wishes to record the photons statitics and if so writes out information
- * about the phtoon to a file.
+ * about the photon to a file.
  *
  * ### Notes ###
  * Called from radiation
@@ -316,8 +347,8 @@ save_photon_stats (one, p, ds, w_ave)
 
 /**********************************************************/
 /**
- * @brief      saves informations about phtoons in
- *     a particulare wavelength gange
+ * @brief      saves informations about photons in
+ *     a particulare wavelength range
  *
  * @param [in] int  n   The number of the spectrum
  * @param [in] PhotPtr  p   The photon before being doppler shifted
@@ -378,8 +409,6 @@ save_photons (p, comment)
      char comment[];
 {
   save_photon_number += 1;
-//OLD  if (save_photon_number > 1000000)
-//OLD    return (0);
 
   fprintf (epltptr,
            "PHOTON %3d %3d %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %s \n",
