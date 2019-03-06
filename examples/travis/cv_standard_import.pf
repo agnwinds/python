@@ -4,7 +4,7 @@ System_type(star,binary,agn,previous)               binary
 Central_object.mass(msol)                  0.8
 Central_object.radius(cm)                  7e+08
 Central_object.radiation(yes,no)                  yes
-Central_object.rad_type_to_make_wind(bb,models)                    bb
+Central_object.rad_type_to_make_wind(bb,models)                   bb
 Central_object.temp                        40000
 Binary.mass_sec(msol)                      0.6
 Binary.period(hr)                          5.57
@@ -12,7 +12,7 @@ Binary.period(hr)                          5.57
 ### Parameters for the Disk (if there is one)
 Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
-Disk.rad_type_to_make_wind(bb,models)                    bb
+Disk.rad_type_to_make_wind(bb,models)                   bb
 Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         1e-8
 Disk.radmax(cm)                            2.4e+10
@@ -35,7 +35,7 @@ Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
 Atomic_data                                data/standard78
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
 ### Parameters for Domain 0
 Wind.radmax(cm)                            1e+12
@@ -44,8 +44,8 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Central_object.rad_type_in_final_spectrum(bb,models,uniform)                    bb
-Disk.rad_type_in_final_spectrum(bb,models,uniform)                    bb
+Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                800
@@ -67,8 +67,7 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-
-Reverb.type(none,photon,wind,matom)                    none
+Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv

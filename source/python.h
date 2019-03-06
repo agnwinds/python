@@ -8,8 +8,7 @@ int np_mpi_global;              /// Global variable which holds the number of MP
 
 int rank_global;
 
-// DEBUG is deprecated, see #111, #120
-//#define DEBUG                                 0       /* 0 means do not debug */
+
 int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
 /* the functions contained in log., rdpar.c and lineio.c are
@@ -130,7 +129,7 @@ int CURRENT_PHOT;               /* A diagnostic so that one can always determine
  * wind and the disk
  */
 
-// This is intialized in init_goe, but it my need to be in geo in order to be able to read
+// This is intialized in init_geo, but it my need to be in geo in order to be able to read
 // everything back
 
 enum coord_type_enum
@@ -361,7 +360,6 @@ struct geometry
 
   double rmax, rmax_sq;         /* The maximum distance to which a photon should be followed */
 
-
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */
 
   double mstar, rstar, rstar_sq, tstar, gstar;  /* Basic parameters for the star (often a WD) in the system */
@@ -497,6 +495,15 @@ struct geometry
   int adiabatic;                /*0-> Do not include adiabatic heating in calculating the cooling of the wind
                                    1-> Use adiabatic heating in calculating the cooling of the wind
                                  */
+  int nonthermal;               /* 0 --> No extra heating due to shocks
+                                   1 --> Extra heating due to shocks (etc)  (Added for FU Ori)
+                                 */
+
+  double shock_factor;          /* A scaling factor used for including an extra heating term (for FU Ori stars
+                                 */
+  double frac_extra_kpkts;      /* in the case that we have extra heating and macro-atoms, the fraction of 
+                                   photons to reserve for those generated directly by k-packets */
+
   int auger_ionization;         /*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
 
 /* Initial values for defining wind structure for a planar geometry.  These are currently only used by balance and this
@@ -505,21 +512,11 @@ struct geometry
   double pl_t_r, pl_t_e, pl_w;
   double pl_nh;
 
+  /* Variables having to do with heating and cooling */
+
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind; /* The total luminosities of the disk, star, bl, & wind 
                                                            are actually not used in a fundamental way in the program */
   double lum_agn;               /*The total luminosity of the AGN or point source at the center */
-  int pl_geometry;              /* geometry of X-ray point source */
-#define PL_GEOMETRY_SPHERE 0
-#define PL_GEOMETRY_LAMP_POST 1
-  double lamp_post_height;      /* height of X-ray point source if lamp post */
-
-/* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
-  double agn_cltab_low;         //break at which the low frequency power law ends
-  double agn_cltab_hi;          //break at which the high frequency power law cuts in
-  double agn_cltab_low_alpha;   //photon index for the low frequency end
-  double agn_cltab_hi_alpha;    //photon index for the high frequency end       
-
-
   double lum_ff, lum_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
   double cool_rr;               /*1706 NSH - the cooling rate due to radiative recombination - not the same as the luminosity */
   double cool_comp;             /*1108 NSH The luminosity of the wind as a result of compton cooling */
@@ -527,6 +524,8 @@ struct geometry
   double cool_dr;               /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double cool_adiabatic;        /*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
+  double heat_shock;            /*1806 - ksl - The amount of extra heating going into the wind due to shock heating. Added for FU Ori project */
+
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;    /* The integrated specific L between a freq min and max which are
                                                            used to establish the fraction of photons of various types */
 
@@ -543,7 +542,13 @@ struct geometry
   double f_matom, f_kpkt;       /*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
                                    energy emitted in the band via k-packets and macro atoms respectively. */
 
-// The next set of parameters relate to the secondary
+//70i - nsh 111007 - put cool_tot_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+
+  double n_ioniz, cool_tot_ioniz;
+
+/* The next set of parameters relate to the secondary
+ */
+
   double m_sec, q;              /* Mass of the secondary, mass ratio of system */
   double period;                /* Period of the systems in seconds */
   double a, l1, l2, phi;        /* Separation of primary and secondary, distance of l1 from primary,phi at l1 */
@@ -553,7 +558,9 @@ struct geometry
   double t_bl;                  /*temperature of the boundary layer */
   double weight;                /*weight factor for photons/defined in define_phot */
 
-// The next set of parameters relate to the central source of an AGN
+/* The next set of parameters relate to the central source of an AGN
+ */
+
   double brem_temp;             /*The temperature of a bremsstrahlung source */
   double brem_alpha;            /*The exponent of the nu term for a bremstrahlung source */
 
@@ -567,9 +574,16 @@ struct geometry
   double d_agn;                 /* the distance to the agn - only used in balance to calculate the ioinsation fraction */
 
 
-//70i - nsh 111007 - put cool_tot_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+  int pl_geometry;              /* geometry of X-ray point source */
+#define PL_GEOMETRY_SPHERE 0
+#define PL_GEOMETRY_LAMP_POST 1
+  double lamp_post_height;      /* height of X-ray point source if lamp post */
 
-  double n_ioniz, cool_tot_ioniz;
+/* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
+  double agn_cltab_low;         //break at which the low frequency power law ends
+  double agn_cltab_hi;          //break at which the high frequency power law cuts in
+  double agn_cltab_low_alpha;   //photon index for the low frequency end
+  double agn_cltab_hi_alpha;    //photon index for the high frequency end       
 
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];    /* The masterfile for the atomic data */
@@ -578,7 +592,7 @@ struct geometry
   //Added by SWM for tracking C-IV/H-A hotspots
   int nres_halpha;
 
-  /* Variables used for revereration mapping */
+  /* Variables used for reverberation mapping */
 
   double fraction_converged, reverb_fraction_converged;
   int reverb_filter_lines, *reverb_filter_line;
@@ -853,6 +867,8 @@ typedef struct plasma
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
+  double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
+
   /* JM 1807 -- these routines are for the BF_SIMPLE_EMISSIVITY_APPROACH
      they allow one to inspect the net flow of energy into and from the simple ion 
      ionization pool */
@@ -861,12 +877,12 @@ typedef struct plasma
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
-  double rad_force_es[3];             /*Radiative force of wind */
-  double rad_force_ff[3];             /*Radiative force of wind */
-  double rad_force_bf[3];             /*Radiative force of wind */
-  
-  
-  
+  double rad_force_es[3];       /*Radiative force of wind */
+  double rad_force_ff[3];       /*Radiative force of wind */
+  double rad_force_bf[3];       /*Radiative force of wind */
+
+
+
 //OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
 //OLD  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
 //OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
@@ -884,7 +900,6 @@ typedef struct plasma
 
 
 
-//  double gamma_inshl[NAUGER];   /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
   enum spec_mod_type_enum
@@ -900,8 +915,6 @@ typedef struct plasma
 
   double exp_temp[NXBANDS];     /*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];        /*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell */
-//OLD  double sim_ip;                /*Ionisation parameter for the cell as defined in Sim etal 2010 */
-//OLD  double ferland_ip;            /* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;                    /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   double xi;                    /*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
@@ -1425,16 +1438,25 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
+
+/* modes for kpkt calculations */
+#define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
+#define KPKT_MODE_ALL        1  /* account for all cooling processes */
+
 /* this variable controls whether to use the 
    Altered mode for bound-free in "simple-macro mode" */
 #define BF_SIMPLE_EMISSIVITY_APPROACH 1
+
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
 #define ALPHA_MATOM_NUMAX_LIMIT 30      /* maximum value for h nu / k T to be considered in integrals */
 
 
-/* DIAGNOSTIC for understanding problems imported models
- *
+/* non-radiative heat flow mode */
+#define KPKT_NET_HEAT_MODE 0
+
+
+/* DIAGNOSTIC for understanding problems with imported models
  */
 
 

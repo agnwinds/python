@@ -62,6 +62,10 @@ get_stellar_params ()
   {
     geo.rstar = 6. * G * geo.mstar / (C * C);   //correction - ISCO is 6x Rg NSH 121025
   }
+  else
+  {
+    geo.rstar = wdrad (geo.mstar);
+  }
 
   rddoub ("Central_object.radius(cm)", &geo.rstar);
 
@@ -72,7 +76,6 @@ get_stellar_params ()
   {
     strcpy (answer, "yes");
     geo.star_radiation = rdchoice ("Central_object.radiation(yes,no)", "1,0", answer);
-//OLD      rdint ("Central_object.radiation(y=1)", &geo.star_radiation);
     get_spectype (geo.star_radiation,
                   //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
                   //"Central_object.rad_type_to_make_wind(0=bb,1=models)", &geo.star_ion_spectype);

@@ -95,15 +95,18 @@ wind_luminosity (f1, f2)
 
 /**********************************************************/
 /**
- * @brief      Calculate the band-limited total emission of a single cell
+ * @brief      Calculate the band-limited emission of a single cell
  *
  * @param [in] WindPtr  one   The wind cell of interest
  * @param [in] double  f1   The minimum frequency for the calculation
  * @param [in] double  f2   The maximum frequency for the calculation
  * @return
- * It returns the total luminosity, but also stores the luminosity due
- * to various types of emssion, e.g ff, fb, lines, compton into the
- * Plasms cells
+ * It returns the total luminosity (within frequency limits) 
+ *
+ * The routine also stores 
+ * the luminosity due
+ * to various emission processes, e.g ff, fb, lines, compton into 
+ * varius variables in thea associated Plasma cell
  *
  * @details
  *
@@ -111,11 +114,12 @@ wind_luminosity (f1, f2)
  * Total emission gives the total enery loss due to photons.  It does
  * not include other cooling sources, e. g. adiabatic expansion.
  *
- * It returns the total luminosity, but also stores the luminosity due
- * to various types of emssion, e.g ff, fb, lines, compton into the
- * Plasms cell assocatied with the wind cell.
+ * The name total emission is a misnomer.  The returns a
+ * band limited luminosity.  This is because the routine can be used
+ * to establish the number of photons to be emitted by the wind. 
  *
- * Comment:  Compton cooling is not included here.
+ * Comment:  Compton cooling is not included here because this
+ * does not result in new photons.
  *
  *
  **********************************************************/
@@ -133,7 +137,7 @@ total_emission (one, f1, f2)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  t_e = xplasma->t_e;           // Change so calls to total emission are simpler
+  t_e = xplasma->t_e;
 
 
   if (f2 < f1)

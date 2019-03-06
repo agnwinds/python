@@ -161,7 +161,10 @@ get_line_transfer_mode ()
     if (modes.iadvanced)
     {
 
-      rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+      //OLD  rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+
+      strcpy (answer, "no");
+      write_atomicdata = rdchoice ("@Diag.write_atomicdata(yes,no)", "1,0", answer);
       if (write_atomicdata)
         Log ("You have opted to save a summary of the atomic data\n");
     }

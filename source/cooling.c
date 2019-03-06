@@ -291,19 +291,80 @@ adiabatic_cooling (one, t)
 }
 
 
+/**********************************************************/
+/**
+ * @brief      determines the amount of
+ * 	shock related heating n a cell, in units of luminosity.
+ *
+ * @param [in] WindPtr  one   pointer to wind cell
+ * @return The amount os shock-heating in a cell according
+ * to a specific formula.  
+ *
+ * @details
+ *
+ * Calculates the shock-related heating according to
+ * a simple formula provided by Lee Hartmann.  The
+ * formula is supposed to represent
+ *
+ *
+ * H = C * (r/rstar)**-4 
+ *
+ * where c is given by
+ *
+ *
+ * H_tot/(4PI rstar**3)
+ *
+ * and H_tot is
+ *
+ * eta*Mdot_wind*v_infty**3
+ *
+ * that is a fraction of the kinetic energy of the wind
+ *
+ *
+ *
+ * ### Notes ###
+ *
+ * This is implemented for the FU Ori project and may not be
+ * appropriate in other situations.
+ *
+ *
+ * The heating is multiplied by the volume of the plasma in
+ * the cell, and so the units are ergs/s.  
+ *
+ * This is implemented analagously to adiabatic cooling
+ *
+ **********************************************************/
 
+
+double
+shock_heating (one)
+     WindPtr one;
+{
+  int nplasma;
+  double x, r;
+  PlasmaPtr xplasma;
+
+  nplasma = one->nplasma;
+  xplasma = &plasmamain[nplasma];
+
+  r = length (one->xcen) / geo.rstar;
+
+  x = geo.shock_factor / (r * r * r * r);
+
+  x *= xplasma->vol;
+
+  return (x);
+}
 
 /**********************************************************/
 /**
  * @brief      calculate the cooling rate of the entire
  * wind between freqencies f1 and f2 (including non-radiative processes
  *
- * @param [in] double  f1   The minimum frequency
- * @param [in] double  f2   The maximum frequency
  * @return     The total cooling rate of the wind
  *
  * Various parameters in geo having to do with the total cooling
- * for the various properties are also populated.
+ * for the for specific processes are also populated.
  *
  * @details
  * This routine cycles through all of the wind cells and
@@ -315,43 +376,44 @@ adiabatic_cooling (one, t)
  * cooling.
  *
  * Non-radiative process include adiabatic cooling, Compton cooling,
- * dielectronic recombination, direct ionization
+ * dielectronic recombination, direct ionization, and in some cases
+ * non-thermal or shock heating)
  *
  * Adiabatic cooling is summed separately for cells where the
  * adiabatic cooling is positive (tends to cool the wind) and
- * negative (tends to heat the wind..
+ * negative (tends to heat the wind.)
  *
  **********************************************************/
 
 double
-wind_cooling (f1, f2)
-     double f1, f2;             /* freqmin and freqmax */
+wind_cooling ()
 {
-  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab; //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
-  //1109 NSH Added a new variable for dielectronic cooling
-  //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
+  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;
+  double nonthermal;
   int n;
   double x;
   int nplasma;
 
 
-  cool = lum_lines = cool_rr = lum_ff = cool_comp = cool_dr = cool_di = cool_adiab = heat_adiab = 0;    //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  cool = lum_lines = cool_rr = lum_ff = cool_comp = 0;
+  cool_dr = cool_di = cool_adiab = heat_adiab = 0;      //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  nonthermal = 0;
+
   for (n = 0; n < NDIM2; n++)
   {
 
     if (wmain[n].vol > 0.0)
     {
       nplasma = wmain[n].nplasma;
-      cool += x = cooling (&plasmamain[nplasma], plasmamain[nplasma].t_e);      //1708 - changed this call - now computes cooling rather than luminosity - also we popultate a local
-      //array called cool, rather than the xplasma array - this was overrwting the xplasma array with incorrect data.
+      cool += x = cooling (&plasmamain[nplasma], plasmamain[nplasma].t_e);
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
-      cool_comp += plasmamain[nplasma].cool_comp;       //1108 NSH Increment the new counter by the compton luminosity for that cell.
-      cool_dr += plasmamain[nplasma].cool_dr;   //1109 NSH Increment the new counter by the DR luminosity for the cell.
-      cool_di += plasmamain[nplasma].cool_di;   //1408 NSH Increment the new counter by the DI luminosity for the cell.
+      cool_comp += plasmamain[nplasma].cool_comp;       //1108 NSH Increment the compton luminosity for that cell.
+      cool_dr += plasmamain[nplasma].cool_dr;   //1109 NSH Increment the DR luminosity for the cell.
+      cool_di += plasmamain[nplasma].cool_di;   //1408 NSH Increment the DI luminosity for the cell.
 
-      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
+      if (geo.adiabatic)        //Caculate the total adiatbaic heating/cooling separating these into two variables
       {
 
         if (plasmamain[nplasma].cool_adiabatic >= 0.0)
@@ -369,6 +431,13 @@ wind_cooling (f1, f2)
         cool_adiab = 0.0;
       }
 
+      /* Caculate the non-thermal heating (for FU Ori models with extra wind heating */
+      if (geo.nonthermal)
+      {
+        nonthermal += plasmamain[nplasma].heat_shock;
+      }
+
+
 
       if (x < 0)
         Error ("wind_cooling: xtotal emission %8.4e is < 0!\n", x);
@@ -378,18 +447,19 @@ wind_cooling (f1, f2)
     }
   }
 
-/* Deciding which of these to fill is tricky because geo contains
-   values for geo.lum_wind and geo.f_wind separately.  Could be cleaner.
-   ksl 98mar6 */
+
+  /* Store the results into the geo structure */
+
 
   geo.lum_lines = lum_lines;
   geo.cool_rr = cool_rr;
   geo.lum_ff = lum_ff;
-  geo.cool_comp = cool_comp;    //1108 NSH The total compton luminosity of the wind is stored in the geo structure
-  geo.cool_dr = cool_dr;        //1109 NSH the total DR luminosity of the wind is stored in the geo structure
-  geo.cool_di = cool_di;        //1408 NSH the total DI luminosity of the wind is stored in the geo structure
+  geo.cool_comp = cool_comp;    //The compton luminosity
+  geo.cool_dr = cool_dr;        //the DR luminosity
+  geo.cool_di = cool_di;        //the DI luminosity 
   geo.cool_adiabatic = cool_adiab;
   geo.heat_adiabatic = heat_adiab;
+  geo.heat_shock = nonthermal;
 
 
   return (cool);

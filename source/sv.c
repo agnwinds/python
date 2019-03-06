@@ -49,8 +49,8 @@ get_sv_wind_params (ndom)
   zdom[ndom].wind_mdot *= MSOL / YR;
 
 
-  zdom[ndom].sv_rmin = 2.8e9;
-  zdom[ndom].sv_rmax = 8.4e9;
+//OLD  zdom[ndom].sv_rmin = 2.8e9;
+//OLD  zdom[ndom].sv_rmax = 8.4e9;
   zdom[ndom].sv_thetamin = 20. / RADIAN;
   zdom[ndom].sv_thetamax = 65. / RADIAN;
   zdom[ndom].sv_gamma = 1.;
@@ -60,8 +60,8 @@ get_sv_wind_params (ndom)
   zdom[ndom].sv_v_infinity = 3; /* Final speed of wind in units of escape velocity */
   zdom[ndom].sv_lambda = 0.0;   /* Mass loss rate exponent */
 
-  windmin = zdom[ndom].sv_rmin / geo.rstar;
-  windmax = zdom[ndom].sv_rmax / geo.rstar;
+  windmin = 4;
+  windmax = 12;
   rddoub ("SV.diskmin(units_of_rstar)", &windmin);
   rddoub ("SV.diskmax(units_of_rstar)", &windmax);
 
