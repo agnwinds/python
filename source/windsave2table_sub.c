@@ -53,8 +53,6 @@ do_windsave2table (root)
 {
   int ndom;
   char rootname[LINELENGTH];
-  int create_master_table (), create_heat_table (), create_ion_table ();
-
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
@@ -63,6 +61,8 @@ do_windsave2table (root)
 
     create_master_table (ndom, rootname);
     create_heat_table (ndom, rootname);
+    create_ion_table (ndom, rootname, 1);
+    create_ion_table (ndom, rootname, 2);
     create_ion_table (ndom, rootname, 6);
     create_ion_table (ndom, rootname, 7);
     create_ion_table (ndom, rootname, 8);
@@ -119,8 +119,6 @@ create_master_table (ndom, rootname)
      char rootname[];
 {
   char filename[132];
-  double *get_one ();
-  double *get_ion ();
   double *c[50], *converge;
   char column_name[50][20];
   char one_line[1024], start[132], one_value[20];
@@ -129,7 +127,7 @@ create_master_table (ndom, rootname)
   int i, ii, jj;
   int nstart, ndim2;
   int n, ncols;
-  FILE *fopen (), *fptr;
+  FILE *fptr;
 
   strcpy (filename, rootname);
   strcat (filename, ".master.txt");
@@ -363,8 +361,6 @@ create_heat_table (ndom, rootname)
      char rootname[];
 {
   char filename[132];
-  double *get_one ();
-  double *get_ion ();
   double *c[50], *converge;
   char column_name[50][20];
   char one_line[1024], start[132], one_value[20];
@@ -373,7 +369,7 @@ create_heat_table (ndom, rootname)
   int i, ii, jj;
   int nstart, ndim2;
   int n, ncols;
-  FILE *fopen (), *fptr;
+  FILE *fptr;
 
   strcpy (filename, rootname);
   strcat (filename, ".heat.txt");
@@ -561,8 +557,6 @@ create_ion_table (ndom, rootname, iz)
      int iz;                    // Where z is the element
 {
   char filename[132];
-  double *get_one ();
-  double *get_ion ();
   double *c[50];
   int first_ion, number_ions;
   char element_name[20];
@@ -572,7 +566,7 @@ create_ion_table (ndom, rootname, iz)
 
 
   int i, ii, jj, n;
-  FILE *fopen (), *fptr;
+  FILE *fptr;
 
 /* First we actually need to determine what ions exits, but we will ignore this for now */
 
