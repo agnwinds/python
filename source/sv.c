@@ -87,6 +87,7 @@ get_sv_wind_params (ndom)
 
   if (modes.iadvanced)
   {
+    strcpy (answer, "fixed");
     zdom[ndom].sv_v_zero_mode = rdchoice ("@SV.v_zero_mode(fixed,sound_speed)", "0,1", answer);
     if (zdom[ndom].sv_v_zero_mode == FIXED)
       rddoub ("@SV.v_zero(cm/s)", &zdom[ndom].sv_v_zero);
