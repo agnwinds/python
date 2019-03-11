@@ -1,9 +1,9 @@
 
 ===============
-spectrum_cycles
+Spectrum_cycles
 ===============
 
-spectrum_cycles
+Spectrum_cycles
 ===============
 Multi-line description, must keep indentation.
 

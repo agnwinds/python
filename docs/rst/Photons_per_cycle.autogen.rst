@@ -1,9 +1,9 @@
 
 =================
-photons_per_cycle
+Photons_per_cycle
 =================
 
-photons_per_cycle
+Photons_per_cycle
 =================
 The number of photons (really energy packets) that are
 generated in each ionization or spectral cycle
