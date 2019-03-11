@@ -245,6 +245,9 @@ typedef struct domain
   double sv_lambda;             /* power law exponent describing from  what portion of disk wind is radiated */
   double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;  /* parameters defining the goemetry of the wind */
   double sv_v_zero;             /* velocity at base of wind */
+  int sv_v_zero_mode;           /* use fixed initial velocity or multiple of sound speed */
+#define FIXED 0
+#define SOUND_SPEED 1
   double sv_r_scale, sv_alpha;  /* the scale length and power law exponent for the velocity law */
   double sv_v_infinity;         /* the factor by which the velocity at infinity exceeds the excape velocity */
 

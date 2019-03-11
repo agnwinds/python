@@ -41,6 +41,7 @@ get_sv_wind_params (ndom)
      int ndom;
 {
   double windmin, windmax, theta_min, theta_max;
+  char answer[LINELENGTH];
 
   Log ("Creating an SV wind in domain %d\n", ndom);
 
@@ -54,7 +55,9 @@ get_sv_wind_params (ndom)
   zdom[ndom].sv_thetamin = 20. / RADIAN;
   zdom[ndom].sv_thetamax = 65. / RADIAN;
   zdom[ndom].sv_gamma = 1.;
-  zdom[ndom].sv_v_zero = 6e5;   /* velocity at base of wind */
+  /* JM -- this can be altered in advanced mode below */
+  zdom[ndom].sv_v_zero_mode = FIXED;
+  zdom[ndom].sv_v_zero = 6e5;
   zdom[ndom].sv_r_scale = 7e10; /*Accleration length scale for wind */
   zdom[ndom].sv_alpha = 1.5;    /* Accleration scale exponent */
   zdom[ndom].sv_v_infinity = 3; /* Final speed of wind in units of escape velocity */
@@ -82,6 +85,15 @@ get_sv_wind_params (ndom)
   rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
   rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
 
+  if (modes.iadvanced)
+  {
+    strcpy (answer, "fixed");
+    zdom[ndom].sv_v_zero_mode = rdchoice ("@SV.v_zero_mode(fixed,sound_speed)", "0,1", answer);
+    if (zdom[ndom].sv_v_zero_mode == FIXED)
+      rddoub ("@SV.v_zero(cm/s)", &zdom[ndom].sv_v_zero);
+    else if (zdom[ndom].sv_v_zero_mode == SOUND_SPEED)
+      rddoub ("@SV.v_zero(multiple_of_sound_speed)", &zdom[ndom].sv_v_zero);
+  }
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   zdom[ndom].rmin = geo.rstar;
@@ -135,9 +147,9 @@ sv_velocity (x, v, ndom)
   struct photon ptest;
   double xtest[3];
   double s;
-  double ds_to_disk ();
+  double vzero;
 
-  zzz = v_escape = -99.;
+  zzz = v_escape = vzero = -99.;
 
 
   rzero = sv_find_wind_rzero (ndom, x);
@@ -164,8 +176,12 @@ sv_velocity (x, v, ndom)
     ldist = length (x);
   }
 
+  /* Depending on the mode, we can set the initial velocity as fixed or by the sound speed. See #482. */
+  if (zdom[ndom].sv_v_zero_mode == FIXED)
+    vzero = zdom[ndom].sv_v_zero;
+  else
+    vzero = kn_vzero (rzero) * zdom[ndom].sv_v_zero;
 
-  vl = zdom[ndom].sv_v_zero;
   if (ldist > 0)
   {
     zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
@@ -175,7 +191,7 @@ sv_velocity (x, v, ndom)
     else
       v_escape = sqrt (2. * G * geo.mstar / rzero);
 
-    vl = zdom[ndom].sv_v_zero + (zdom[ndom].sv_v_infinity * v_escape - zdom[ndom].sv_v_zero) * zzz / (1. + zzz);
+    vl = vzero + (zdom[ndom].sv_v_infinity * v_escape - vzero) * zzz / (1. + zzz);
   }
 
   v[0] = vl * sin (theta);
