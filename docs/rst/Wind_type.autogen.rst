@@ -11,23 +11,23 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-0. SV
+SV. SV
 
-1. Star
+star. Star
 
-3. Hydro
+hydro. Hydro
 
-4. corona
+corona. Corona
 
-5. knigge
+kwd. KWD
 
-6. homologous
+homologous. Homologous
 
-7. yso
+yso. YSO
 
-9. shell
+shell. Shell
 
-10. imported
+imported. Imported
 
 
 **Parent(s):**
