@@ -823,8 +823,8 @@ wind_div_v ()
   double xxx[3];
   int ndom;
   double scaling;
-  
-  scaling=1e-3; //The scaling factor applied to 'delta' the distance away from the central point that the div_v calcs are done
+
+  scaling = 1e-3;               //The scaling factor applied to 'delta' the distance away from the central point that the div_v calcs are done
 
 
   for (icell = 0; icell < NDIM2; icell++)
@@ -835,18 +835,18 @@ wind_div_v ()
     ndom = wmain[icell].ndom;
 
 //    delta = 0.01 * x_zero[2];   //delta is the distance across which we measure e.g. dv_x/dx
-	
-	if (x_zero[1]!=0)
-	{
-	    delta=fabs(fmin(wmain[icell].x[0]-x_zero[0],fmin(wmain[icell].x[1]-x_zero[1],wmain[icell].x[2]-x_zero[2])));
-	}
-	else
-	{
-	    delta=fabs(fmin(wmain[icell].x[0]-x_zero[0],wmain[icell].x[2]-x_zero[2]));		
-	}
-	delta=delta*scaling;
-	
-	
+
+    if (x_zero[1] != 0)
+    {
+      delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], fmin (wmain[icell].x[1] - x_zero[1], wmain[icell].x[2] - x_zero[2])));
+    }
+    else
+    {
+      delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], wmain[icell].x[2] - x_zero[2]));
+    }
+    delta = delta * scaling;
+
+
     if (delta == 0)
     {
       Error ("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n", icell);
@@ -888,7 +888,7 @@ wind_div_v ()
     div += xxx[2] = (v2[2] - v1[2]) / delta;
 
 
-//	printf ("BLAH cell %i div=%e\n",icell,div);
+//      printf ("BLAH cell %i div=%e\n",icell,div);
 
 
     /* we have now evaluated the divergence, so can store in the wind pointer */
