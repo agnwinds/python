@@ -1,6 +1,7 @@
 # This is the git ignore for python
 # ignore binaries in bin/ such as e.g. py78a
 bin/py*
+bin/windsave2table*
 
 # Object files
 *.o
@@ -38,6 +39,18 @@ software/gsl-1.15/Makefile
 software/gsl-1.15/*/Makefile
 software/gsl-1.15/*.dSYM
 software/gsl-1.15/*/*.dSYM
+software/gsl-1.15/bin/
+software/gsl-1.15/share/
+include/gsl/
+lib/pkgconfig/
+
+# the configure Makefile should not be tracked 
+Makefile
+
+# doxygen stuff
+docs/doxygen/html/
+docs/doxygen/latex/
+
 
 # python and system files
 *.pyc
