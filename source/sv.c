@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -143,7 +144,7 @@ sv_velocity (x, v, ndom)
      int ndom;
 {
   double r, rzero, theta, speed;
-  double ldist, zzz, v_escape, vl;
+  double ldist, zzz, v_escape, vl=0.0;
   struct photon ptest;
   double xtest[3];
   double s;
