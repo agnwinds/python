@@ -214,7 +214,7 @@ calculate_ionization (restart_stat)
         Log ("NPHOT will next increase to %e on cycle %i\n", (double) NPHOT * 10, nphot_next_cycle);
     }
 
-    Log ("NPHOT: %1.2e photons will be transported for CYCLE %i\n", (double) NPHOT, geo.wcycle);
+    Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle);
 
     /* Create the photons that need to be transported through the wind
      *
