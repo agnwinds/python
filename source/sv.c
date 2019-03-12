@@ -144,7 +144,7 @@ sv_velocity (x, v, ndom)
      int ndom;
 {
   double r, rzero, theta, speed;
-  double ldist, zzz, v_escape, vl=0.0;
+  double ldist, zzz, v_escape, vl = 0.0;
   struct photon ptest;
   double xtest[3];
   double s;
