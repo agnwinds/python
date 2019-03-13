@@ -62,6 +62,58 @@
 
 
 
+/**********************************************************/
+/**
+ * @brief Parse the command line arguments given to windsave2table
+ *
+ * @param[in] int argc        The number of arguments in the command line
+ * @param[in] char *argv[]    The command line arguments
+ * @param[out] char root[]    The rootname of the Python simulation
+ *
+ * @return void
+ *
+ * @details
+ *
+ **********************************************************/
+
+void
+parse_arguments (int argc, char *argv[], char root[])
+{
+  int i;
+  char input[LINELENGTH];
+
+  if (argc == 1)
+  {
+    printf ("Root for wind file :");
+    fgets (input, LINELENGTH, stdin);
+    get_root (root, input);
+  }
+  else
+  {
+    for (i = 1; i < argc; i++)
+    {
+      if (!strcmp (argv[i], "--version"))
+      {
+        printf ("Python Version %s\n", VERSION);
+        printf ("windsave2table built from git commit hash %s\n", GIT_COMMIT_HASH);
+        if (GIT_DIFF_STATUS)
+          printf ("This version was compiled with %i files with uncommitted changes.\n", GIT_DIFF_STATUS);
+        exit (0);
+      }
+      else if (!strncmp (argv[i], "-", 1))
+      {
+        printf ("Unknown switch %s\n", argv[i]);
+        printf ("Use --version or provide a Python root\n");
+        exit (0);
+      }
+      else
+      {
+        strcpy (input, argv[argc - 1]);
+        get_root (root, input);
+      }
+    }
+  }
+}
 
 /**********************************************************/
 /** 
@@ -95,16 +147,11 @@ main (argc, argv)
      int argc;
      char *argv[];
 {
-
-
   char *fgets_return;
-  char root[LINELENGTH], input[LINELENGTH];
+  char root[LINELENGTH];
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
-  int create_master_table (), create_ion_table ();
-  int do_windsave2table ();
-
 
 
   strcpy (parameter_file, "NONE");
@@ -112,18 +159,13 @@ main (argc, argv)
   /* Next command stops Debug statements printing out in py_wind */
   Log_set_verbosity (3);
 
-  if (argc == 1)
-  {
-    printf ("Root for wind file :");
-    fgets_return = fgets (input, LINELENGTH, stdin);
-    get_root (root, input);
-  }
-  else
-  {
-    strcpy (input, argv[argc - 1]);
-    get_root (root, input);
-  }
+  /*
+   * EP: added some extra argument parsing for windsave2table - specifically
+   * because I was having some trouble with knowing when windsave2table was
+   * last compiled and on what commit this was
+   */
 
+  parse_arguments (argc, argv, root);
 
   printf ("Reading data from file %s\n", root);
 

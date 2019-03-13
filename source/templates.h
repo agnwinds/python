@@ -313,8 +313,8 @@ int freqs_init (double freqmin, double freqmax);
 /* time.c */
 double timer (void);
 int get_time (char curtime[]);
-struct timespec init_timer_t0 (void);
-void print_timer_duration (char *msg, struct timespec timer_t0);
+struct timeval init_timer_t0 (void);
+void print_timer_duration (char *msg, struct timeval timer_t0);
 /* matom.c */
 int matom (PhotPtr p, int *nres, int *escape);
 double b12 (struct lines *line_ptr);

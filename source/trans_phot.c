@@ -89,7 +89,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int absorb_reflect;           /* this is a variable used to store geo.absorb_reflect during exxtract */
   double p_norm, tau_norm;
   int nreport;
-  struct timespec timer_t0;
+  struct timeval timer_t0;
 
   nreport = 100000;
   if (nreport < NPHOT / 100)
@@ -201,9 +201,9 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   /* This is the end of the loop over all of the photons; after this the routine returns */
 
   /* Line to complete watchdog timer */
-  Log ("\n\n");
+  Log ("\n");
 
-  print_timer_duration ("PHOTON TRANSPORT COMPLETED", timer_t0);
+  print_timer_duration ("!!python: photon transport completed in", timer_t0);
 
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
   if (n_lost_to_dfudge > 0)

@@ -35,7 +35,7 @@ LDFLAGS =
 
 
 # Check a load of compiler options
-# This is mostly to address GitHub issues #100 and #474
+# This is mostly to address GitHub issues #100
 ifeq (mpicc, $(CC))
 	# you're using mpicc, so we'll compile with the DMPI_ON flag
 	MPI_FLAG = -DMPI_ON
@@ -48,7 +48,6 @@ ifeq (mpicc, $(CC))
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
-	# for issue #474, we don't need to add -lrt as the mpicc wrapper will do this for us
 	ifeq (gcc, $(MPI_COMPILER))
 		GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 		ifeq ("$(GCCVERSIONGTEQ4)", "1")
@@ -67,23 +66,12 @@ else ifeq (gcc, $(CC))
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
-	# for old versions of gcc, we need to link -lrt for our timing routines
 	GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 	ifeq ("$(GCCVERSIONGTEQ4)", "1")
 		EXTRA_FLAGS += -fno-aggressive-loop-optimizations
 		COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
-	else
-		# This is to ensure that we don't add -lrt to clang which uses an old version of gcc
-		# Most likely, this check should be smarter i.e. check if it really is clang and we
-		# should probably check for masOS 10.12 or later
-		OS := $(shell uname -s)
-		ifneq (Darwin, $(OS))
-			LDFLAGS += -lrt
-			COMPILER_PRINT_STRING += with -lrt
-		endif
 	endif
-
 else	# you must be using clang or icc
 	MPI_FLAG =
 
@@ -189,7 +177,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o
-	
+
 
 
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
