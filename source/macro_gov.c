@@ -65,7 +65,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
   escape = 0;                   //start with it not being ready to escape as an r-packet
 
-
   while (escape == 0)
   {
     if (matom_or_kpkt == 1)     //excite a macro atom - depending on simple/macro choice call different routines
@@ -162,7 +161,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       }
       else
       {
-        kpkt (p, nres, &escape);
+        kpkt (p, nres, &escape, KPKT_MODE_ALL); // 1 implies include the possibility of deactivation due to non-thermal processes
 
       }
 

@@ -72,9 +72,6 @@ get_disk_params ()
   sprintf (values, "%d,%d,%d", DISK_NONE, DISK_FLAT, DISK_VERTICALLY_EXTENDED);
   geo.disk_type = rdchoice ("Disk.type(none,flat,vertically.extended)", values, answer);
 
-//OLD  rdint
-//OLD    ("Disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
-//OLD     &geo.disk_type);
 
   if (geo.disk_type == DISK_NONE)
   {
@@ -86,8 +83,6 @@ get_disk_params ()
 
   strcpy (answer, "yes");
   geo.disk_radiation = rdchoice ("Disk.radiation(yes,no)", "1,0", answer);
-//OLD  geo.disk_radiation=1;
-//OLD  rdint ("Disk.radiation(y=1)", &geo.disk_radiation);
 
   get_spectype (geo.disk_radiation,
                 //"Disk.rad_type_to_make_wind(0=bb,1=models)", &geo.disk_ion_spectype);
@@ -100,8 +95,6 @@ get_disk_params ()
   sprintf (values, "%d,%d,%d", DISK_TPROFILE_STANDARD, DISK_TPROFILE_READIN, DISK_TPROFILE_YSO);
   geo.disk_tprofile = rdchoice ("Disk.temperature.profile(standard,readin,yso)", values, answer);
 
-//OLD  rdint ("Disk.temperature.profile(0=Shakura-Sunyaev;1=readin,2=yso)",
-//OLD    &geo.disk_tprofile);
   if (geo.disk_tprofile == DISK_TPROFILE_STANDARD)
   {
     geo.disk_mdot /= (MSOL / YR);       // Convert to msol/yr to simplify input
@@ -119,7 +112,11 @@ get_disk_params ()
   }
 
   /* Set a default for diskrad for an AGN */
-  if (geo.system_type == SYSTEM_TYPE_AGN)
+  if (geo.system_type == SYSTEM_TYPE_BINARY)
+  {
+    geo.diskrad = diskrad (geo.mstar, geo.m_sec, geo.period);
+  }
+  else if (geo.system_type == SYSTEM_TYPE_AGN)
   {
     geo.diskrad = 100. * geo.r_agn;
   }

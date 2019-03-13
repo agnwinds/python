@@ -37,9 +37,9 @@ Spectrum_cycles                            100
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                 ml93
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
-@Diag.write_atomicdata(0=no,anything_else=yes)                    0
+@Diag.write_atomicdata(yes,no)                   no
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
 ### Parameters for Domain 0
 Wind.mdot(msol/yr)                         1e-20
@@ -51,6 +51,8 @@ SV.mdot_r_exponent                         0
 SV.v_infinity(in_units_of_vescape          3
 SV.acceleration_length(cm)                 7e10
 SV.acceleration_exponent                   1.5
+@SV.v_zero_mode(fixed,sound_speed)		   fixed 
+@SV.v_zero(cm/s)						   6e5
 Wind.radmax(cm)                            1e12
 Wind.t.init                                40000
 Wind.filling_factor(1=smooth,<1=clumped)   1

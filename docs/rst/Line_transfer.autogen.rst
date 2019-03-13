@@ -5,10 +5,10 @@ Line_transfer
 
 Line_transfer
 =============
-The way in which line transfer and scattering is dealt with 
+The way in which line transfer and scattering is dealt with
 in the code. Governs whether we adopt any approximations
-for radiative transfer, whether to use the indivisible packet 
-and macro-atom machinery, and whether to use isotropic or 
+for radiative transfer, whether to use the indivisible packet
+and macro-atom machinery, and whether to use isotropic or
 anisotropic scattering.
 
 Mode 5 is recommended for non-macro atom runs,
@@ -18,59 +18,44 @@ while mode 7 is recommended for macro-atom runs.
 
 **Values:**
 
-0. *pure.abs*
+pure_abs. *Pure absorption*
    
-   The spure absortion approximation.
+   The pure absortion approximation.
 
-1. *pure.scat*
+pure_scat. *Pure scattering*
    
-   The spure scattering approximation.
+   The pure scattering approximation.
 
-2. *sing.scat*
+sing_scat. *Single scattering*
    
    The single scattering approximation.
 
-3. *escape.prob*
+escape_prob. *Escape probability*
    
    Resonance scattering and electron scattering is dealt with isotropically.
    free-free, compton and bound-free opacities attenuate the weight of the photon
-   wind emission produces additional photons, which have their directions chosen isotropically. 
+   wind emission produces additional photons, which have their directions chosen isotropically.
    The amount of radiation produced is attenuated by the escape probability.
 
-4. *escape.prob, approximate anisotropic scattering*
+thermal_trapping. *Escape probability + anisotropic scattering*
    
-   Resonance scattering and electron scattering is dealt with using the semi-analytic isotropic scattering routine.
-   free-free, compton and bound-free opacities attenuate the weight of the photon
-   wind emission produces additional photons, which have their directions chosen isotropically. 
-   The amount of radiation produced is attenuated by the escape probability.
-
-5. *escape.prob, anisotropic scattering*
-   
-   as mode 4, but we use 
-   the 'thermal trapping method' to choose an 
-   anistropic direction when an r-packet deactivation 
+   as mode 4, but we use
+   the 'thermal trapping method' to choose an
+   anistropic direction when an r-packet deactivation
    or scatter occurs.
 
-6. *macro_atoms*
+macro_atoms. *Macro-atoms*
    
    use macro-atom line transfer.
-   Packets are indivisible and thus all opacities are dealt with by activate a macro-atom, scattering, 
+   Packets are indivisible and thus all opacities are dealt with by activate a macro-atom, scattering,
    or creating a k-packet.
-   the new direction following electron scattering or deactivation of 
+   the new direction following electron scattering or deactivation of
    a macro atom is chosen isotropically.
 
-7. *macro_atoms+aniso.scattering*
+macro_atoms_thermal_trapping. *Macro-atoms + anisotropic scattering*
    
-   as mode 6, but we use the 'thermal trapping method' to choose an anistropic direction 
+   as macro_atoms, but we use the 'thermal trapping method' to choose an anistropic direction
    when an r-packet deactivation or scatter occurs.
-
-8. *macro_atoms, anisotropic Scattering, All simple ions*
-   
-   as mode 7, but we treat all ions as simple
-
-9. *macro_atoms, anisotropic Scattering, All simple ions*
-   
-   as mode 8, but we use semi-analytic scattering mode
 
 
 **Parent(s):**

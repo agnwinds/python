@@ -574,7 +574,6 @@ radiation (p, ds)
     }
   }
 
-
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path
 
@@ -608,35 +607,6 @@ radiation (p, ds)
   {
     xplasma->rad_force_es[i] += dp_cyl[i];
   }
-
-
-
-
-
-
-
-
-
-
-
-
-  /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
-  /*. Commented out by NSH 2018 */
-//  for (n = 0; n < nauger; n++)
-//  {
-//    ft = augerion[n].freq_t;
-//    if (p->freq > ft)
-//    {
-
-//      weight_of_packet = w_ave;
-//      x = sigma_phot_verner (&augerion[n], freq);       //this is the cross section
-//      y = weight_of_packet * x * ds;
-
-//      xplasma->gamma_inshl[n] += y / (freq * H * xplasma->vol);
-//    }
-//  }
-
-
 
   return (0);
 }

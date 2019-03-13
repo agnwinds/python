@@ -11,11 +11,11 @@ Parameter defining whether there is a disk in the system
 
 **Values:**
 
-0. no.disk
+none. no.disk
 
-1. standard.flat.disk
+flat. standard.flat.disk
 
-2. vertically.extended.disk
+vertically.extended. vertically.extended.disk
 
 
 **Parent(s):**
@@ -46,6 +46,25 @@ is the power law index
 **File:** setup_disk.c
 
 
+Disk.radmax
+===========
+The outer edge of the disk.  Photons inside this radius are
+absorbed or re-radiated.  Photons which are outside this radius
+pass through the disk plane.
+
+**Type:** rddoub
+
+**Unit:** cm
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  disk.type_: disktype must be 1 or 2, standard or vertically extended disk
+
+
+**File:** setup_disk.c
+
+
 Disk.rad_type_for_disk_to_make_wind
 ===================================
 The disk is generally described in terms of a run of temperature and possibly gravity with radius.  The spectrum
@@ -66,79 +85,6 @@ models which are read in and sampled.
 
 
 **File:** python.c
-
-
-Disk.radmax
-===========
-The outer edge of the disk.  Photons inside this radius are
-absorbed or re-radiated.  Photons which are outside this radius
-pass through the disk plane.
-
-**Type:** rddoub
-
-**Unit:** cm
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  disk.type_: disktype must be 1 or 2, standard or vertically extended disk
-
-
-**File:** setup_disk.c
-
-
-Disk.radiation
-==============
-Multi-line description, must keep indentation.
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_disk.c
-
-
-----------------------------------------
-
-Disk.temperature.profile
-------------------------
-The choice of disk temperature profile
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. standard - A Shakura - Sunyaev  disk, with a hard inner boundar
-
-1. readin - read the profile in from a file; the user will be queried for the name of the file
-
-2. analytic - A profile designed for the situation where the disk is being illuminated by star
-
-
-**Parent(s):**
-  Disk.radiation_: This input is requested for all disks that radiate
-
-
-**File:** setup_disk.c
-
-
-----------------------------------------
-
-Disk.T_profile_file
-^^^^^^^^^^^^^^^^^^^
-When the user chooses to read in the temperature profile as a
-function of radius, the user is asked the name of the file that
-contains the desired profile.
-
-**Type:** String
-
-**Parent(s):**
-  Disk.temperature.profile_: Unspecified
-
-
-**File:** setup_disk.c
 
 
 Disk.mdot
@@ -165,6 +111,62 @@ outer disk will be this * disk.radmax
 
 **Parent(s):**
   disk_type_: disk_type=vertically extended
+
+
+**File:** setup_disk.c
+
+
+Disk.radiation
+==============
+Multi-line description, must keep indentation.
+
+**Type:** Boolean(yes/no)
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup_disk.c
+
+
+----------------------------------------
+
+Disk.temperature.profile
+------------------------
+The choice of disk temperature profile
+
+**Type:** Enum (Int)
+
+**Values:**
+
+standard. A Shakura - Sunyaev  disk, with a hard inner boundar
+
+readin. Read the profile in from a file; the user will be queried for the name of the file
+
+yso. YSO???
+
+analytic. DEPRECATED??? A profile designed for the situation where the disk is being illuminated by star
+
+
+**Parent(s):**
+  Disk.radiation_: This input is requested for all disks that radiate
+
+
+**File:** setup_disk.c
+
+
+----------------------------------------
+
+Disk.T_profile_file
+^^^^^^^^^^^^^^^^^^^
+When the user chooses to read in the temperature profile as a
+function of radius, the user is asked the name of the file that
+contains the desired profile.
+
+**Type:** String
+
+**Parent(s):**
+  Disk.temperature.profile_: Unspecified
 
 
 **File:** setup_disk.c

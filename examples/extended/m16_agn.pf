@@ -1,14 +1,11 @@
-
-System_type(star,binary,agn,previous)                    agn
+System_type(star,binary,agn,previous)                  agn
 
 ### Parameters for the Central Object
 Central_object.mass(msol)                  1e9
 Central_object.radius(cm)                  8.85667e+14
 
 ### Parameters for the Disk (if there is one)
-
-Disk.type(none,flat,vertically.extended)                    flat
-Disk.radiation(yes,no)                          1.0
+Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
 Disk.rad_type_to_make_wind(bb,models)                   bb
 Disk.temperature.profile(standard,readin,yso)             standard
@@ -19,7 +16,7 @@ Disk.radmax(cm)                            1e+17
 BH.radiation(yes,no)                            yes
 BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)                power
 BH.lum(ergs/s)                             1e+45
-BH.power_law_index                            -0.9
+BH.power_law_index                         -0.9
 BH.geometry_for_pl_source(sphere,lamp_post)               sphere
 
 ### Parameters descibing the various winds or coronae in the system
@@ -37,8 +34,8 @@ Spectrum_cycles                            5.0
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping) macro_atoms_thermal_trapping
 Atomic_data                                data/h10_hetop_lohe1_standard78
-Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)              absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0.0
+Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
 ### Parameters for Domain 0
 Wind.mdot(msol/yr)                         5.0

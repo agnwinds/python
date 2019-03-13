@@ -8,25 +8,22 @@ Central_object.radius(cm)                  8.85667e+14
 Disk.type(none,flat,vertically.extended)                 flat
 Disk.radiation(yes,no)                          yes
 Disk.rad_type_to_make_wind(bb,models)                   bb
-Disk.temperature.profile(standard,readin,yso)                    standard
+Disk.temperature.profile(standard,readin,yso)             standard
 Disk.mdot(msol/yr)                         5
 Disk.radmax(cm)                            1e17
 
 ### Parameters for BL or AGN
-
-
-BH.radiation(yes,no)                              yes
+BH.radiation(yes,no)                            yes
 BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)                power
 BH.lum(ergs/s)                             1e43
 BH.power_law_index                         -0.9
-BH.geometry_for_pl_source(sphere,lamp_post)                    sphere
+BH.geometry_for_pl_source(sphere,lamp_post)               sphere
 
 ### Parameters descibing the various winds or coronae in the system
-
-Wind.radiation(yes,no)                            yes
+Wind.radiation(yes,no)                          yes
 Wind.number_of_components                  1
-Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                    SV
-Wind.coord_system(spherical,cylindrical,polar,cyl_var)                    cylindrical
+Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
+Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
 Wind.dim.in.x_or_r.direction               100
 Wind.dim.in.z_or_theta.direction           100
 
@@ -34,11 +31,11 @@ Wind.dim.in.z_or_theta.direction           100
 Photons_per_cycle                          20000000
 Ionization_cycles                          30
 Spectrum_cycles                            20
-Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                    matrix_pow
-Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)                    escape_prob
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          escape_prob
 Atomic_data                                data/standard78
-Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)                    absorb
-Thermal_balance_options(0=everything.on,1=no.adiabatic)   0
+Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
 ### Parameters for Domain 0
 Wind.mdot(msol/yr)                         5
@@ -56,7 +53,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Disk.rad_type_in_final_spectrum(bb,models,uniform)                    bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 BH.rad_type_in_final_spectrum(power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
@@ -73,14 +70,11 @@ Spectrum.angle(0=pole)                     75
 Spectrum.angle(0=pole)                     80
 Spectrum.angle(0=pole)                     85
 Spectrum.angle(0=pole)                     89
-Spectrum.live_or_die(live.or.die,extract)                    extract
-
-Spectrum.type(flambda,fnu,basic)                    flambda
+Spectrum.live_or_die(live.or.die,extract)              extract
+Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-
-Reverb.type(none,photon,wind,matom)                    none
+Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
-
-Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                    AGN
+Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                  agn

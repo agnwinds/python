@@ -7,10 +7,10 @@ description: |
 type: Int
 unit: None
 values:
-    -1: Select only photons generated from below (-z) the disk
-     0: Select photons regardless of where they are generated.
-     1: Select only photons orginating above the disk  
-     2: Select photons by defining a spherical region
+    "-1": Select only photons generated from below (-z) the disk
+    "0": Select photons regardless of where they are generated.
+    "1": Select only photons orginating above the disk
+    "2": Select photons by defining a spherical region
 
 parent:
   Select_photons_by_position: y

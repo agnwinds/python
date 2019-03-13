@@ -247,7 +247,8 @@ double gaunt_ff (double gsquared);
 double cooling (PlasmaPtr xxxplasma, double t);
 double xtotal_emission (WindPtr one, double f1, double f2);
 double adiabatic_cooling (WindPtr one, double t);
-double wind_cooling (double f1, double f2);
+double shock_heating (WindPtr one);
+double wind_cooling (void);
 /* recomb.c */
 double fb_topbase_partial (double freq);
 double integ_fb (double t, double f1, double f2, int nion, int fb_choice, int mode);
@@ -319,7 +320,7 @@ int matom (PhotPtr p, int *nres, int *escape);
 double b12 (struct lines *line_ptr);
 double alpha_sp (struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp_integrand (double freq);
-int kpkt (PhotPtr p, int *nres, int *escape);
+int kpkt (PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb (PhotPtr p, int *nres, int *escape);
 int fake_matom_bf (PhotPtr p, int *nres, int *escape);
 int emit_matom (WindPtr w, PhotPtr p, int *nres, int upper);
@@ -473,6 +474,7 @@ int setup_windcone (void);
 double get_disk_params (void);
 /* photo_gen_matom.c */
 double get_kpkt_f (void);
+double get_kpkt_heating_f (void);
 double get_matom_f (int mode);
 int photo_gen_kpkt (PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom (PhotPtr p, double weight, int photstart, int nphot);
@@ -553,11 +555,17 @@ int get_meta_params (void);
 /* setup_line_transfer.c */
 int get_line_transfer_mode (void);
 int line_transfer_help_message (void);
+/* cv.c */
+double wdrad (double m);
+double diskrad (double m1, double m2, double period);
+double roche2 (double q, double a);
+double logg (double mass, double rwd);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);
 int position_summary (WindPtr w);
 int abs_summary (WindPtr w, char rootname[], int ochoice);
+int shock_heating_summary (WindPtr w, char rootname[], int ochoice);
 int adiabatic_cooling_summary (WindPtr w, char rootname[], int ochoice);
 int lum_summary (WindPtr w, char rootname[], int ochoice);
 int photo_summary (WindPtr w, char rootname[], int ochoice);

@@ -1,4 +1,4 @@
-name: photons_per_cycle
+name: Photons_per_cycle
 description: |
   The number of photons (really energy packets) that are
   generated in each ionization or spectral cycle
