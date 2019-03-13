@@ -201,7 +201,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   /* This is the end of the loop over all of the photons; after this the routine returns */
 
   /* Line to complete watchdog timer */
-  Log ("\n\n");
+  Log ("\n");
 
   print_timer_duration ("!!python: photon transport completed in", timer_t0);
 
