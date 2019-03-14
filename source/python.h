@@ -1075,11 +1075,12 @@ typedef struct photon
     P_ESCAPE = 2,               //Escaped to reach the universe,
     P_HIT_STAR = 3,             //absorbed by photosphere of star,
     P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
-    P_ERROR = 5,                //Too many calls to translate without something happening
+    P_ERROR = 5,                //Tryint to scatter a photon in a location where it should not scatter
     P_ABSORB = 6,               //Photoabsorbed within wind
     P_HIT_DISK = 7,             //Banged into disk
     P_SEC = 8,                  //Photon hit secondary
-    P_ADIABATIC = 9             //records that a photon created a kpkt which was destroyed by adiabatic cooling
+    P_ADIABATIC = 9,            //records that a photon created a kpkt which was destroyed by adiabatic cooling
+    P_ERROR_MATOM = 10          //Some kind of error in processing of a photon which excited a macroattom
   } istat;                      /*status of photon. */
 
   int nscat;                    /*number of scatterings */

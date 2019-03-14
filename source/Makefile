@@ -1,30 +1,16 @@
 # This is the makefile for the python related programs
 #
 # usage      make [CC=...] [D] python
+# 			 make [CC=...] [D] all to remake all of the routines, and assure they
+# 			 					are properly indented.
 #
 # Adding D causes the routine to be run in a way that profiling and ddd can be used.
 # Otherwise the run will be optimized to run as fast as possible. CC is an option to choose
 # a different compiler other than mpicc.
 #
-# History
-# 05jan	ksl	54f  Modified Makefile so that the Version number is automatically
-# 		copied to version.h  Also fixed so that one does not need to put
-# 		a new filename in two separate places, and so that the latest
-# 		compile version automatically becomve shte
-# 05apr	ksl	55c   Modified in a way that implies that one must have gsl as part
-# 		of the Python directory tree.  This is because I was having problems
-# 		with gsl after we went to Redhat Enterprise at the Institute, and
-# 		so that Stuart and I could standardise on the distribution.
-# 08jul	ksl	Removed pfop from routines so no need to complile with g77
-# 13jun jm      Added capability to switch to use debugger routne
-#
-# 13jun jm/ss	SS added parallel flag -DMPI_ON and mpicc wrapper for gcc
-#		is now used as C compiler
-# 13jul jm	can now compiled with gcc using 'make CC=gcc python'
-# 13jul jm	kpar is now integrated into python and compiled here
 
 
-#MPICC is now default compiler- currently code will not compile with gcc
+#MPICC is now default compiler
 CC = mpicc
 # CC = gcc	can use GCC either from command line or by uncommenting this
 FC = g77
@@ -84,31 +70,6 @@ endif
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
-# Test if indent is installed. We use a different version on mac and linux.
-# OS_TYPE := $(shell uname -s)
-# ifeq ($(OS_TYPE), Darwin)
-# 	INDENT_PATH := $(shell which gnuindent)
-# 	INDENT_VERSION = $(shell gnuindent -version)
-# else
-# 	INDENT_PATH := $(shell which indent)
-# 	INDENT_VERSION := $(shell indent -version)
-# endif
-
-# ifeq (, $(INDENT_PATH))
-# 	#If indent is not installed, error
-# 	INDENT_STRING = Gnuindent not installed so not indenting code
-# 	INDENT_CMD =
-# else
-# 	ifeq (GNU,$(firstword $(INDENT_VERSION)))
-# 		INDENT_STRING = Indenting code with $(INDENT_VERSION)
-# 		# this command runs indent with GNU styling
-# 		INDENT_CMD = $(INDENT_PATH) -gnu -l140 -bli0 -nut *.c *.h
-# 	else
-# 		# if it is not GNU indent then do not run
-# 		INDENT_STRING = $(INDENT_PATH) is not the GNU version
-# 		INDENT_CMD =
-# 	endif
-# endif
 
 
 INCLUDE = ../include
@@ -139,7 +100,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 83
+VERSION = 83x
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information

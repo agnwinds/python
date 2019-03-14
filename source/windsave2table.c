@@ -147,7 +147,7 @@ main (argc, argv)
      int argc;
      char *argv[];
 {
-  char *fgets_return;
+  //OLD char *fgets_return;
   char root[LINELENGTH];
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];

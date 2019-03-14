@@ -168,7 +168,10 @@ matom (p, nres, escape)
   else
   {
     Error ("matom: upper level not identified. nres = %d\n", *nres);
-    Exit (0);
+    *escape = 1;
+    p->istat = P_ERROR_MATOM;
+    return (0);
+    //OLD Exit (0);
   }
 
   /* Now follows the main loop to govern the macro atom jumps. Keeps jumping until
@@ -233,12 +236,18 @@ matom (p, nres, escape)
         if (jprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 1). Abort.");
-          Exit (0);
+          *escape = 1;
+          p->istat = P_ERROR_MATOM;
+          return (0);
+          //OLD Exit (0);
         }
         if (eprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 2). Abort.");
-          Exit (0);
+          *escape = 1;
+          p->istat = P_ERROR_MATOM;
+          return (0);
+          //OLD Exit (0);
         }
 
         pjnorm += jprbs[m];
@@ -266,12 +275,15 @@ matom (p, nres, escape)
         if (jprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 3). Abort.");
-          Exit (0);
+          *escape = 1;
+          p->istat = P_ERROR_MATOM;
+          return (0);
+          //OLD Exit (0);
         }
         if (eprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 4). Abort.");
-          Exit (0);
+          //OLD Exit (0);
         }
         pjnorm += jprbs[m];
         penorm += eprbs[m];
@@ -307,7 +319,10 @@ matom (p, nres, escape)
         if (jprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 5). Abort.");
-          Exit (0);
+          *escape = 1;
+          p->istat = P_ERROR_MATOM;
+          return (0);
+          //OLD Exit (0);
         }
         pjnorm += jprbs[m];
         m++;
@@ -361,7 +376,10 @@ matom (p, nres, escape)
     if ((pjnorm_known[uplvl] + penorm_known[uplvl]) <= 0.0)
     {
       Error ("matom: macro atom level has no way out %d %g %g\n", uplvl, pjnorm_known[uplvl], penorm_known[uplvl]);
-      Exit (0);
+      *escape = 1;
+      p->istat = P_ERROR_MATOM;
+      return (0);
+      //OLD Exit (0);
     }
 
     if (((pjnorm_known[uplvl] / (pjnorm_known[uplvl] + penorm_known[uplvl])) < threshold) || (pjnorm_known[uplvl] == 0))
@@ -410,7 +428,10 @@ matom (p, nres, escape)
     else
     {
       Error ("Trying to jump but nowhere to go! Matom. Abort");
-      Exit (0);
+      *escape = 1;
+      p->istat = P_ERROR_MATOM;
+      return (0);
+      //OLD Exit (0);
     }
 
 /* ksl: Check added to verify that the level actually changed */
@@ -428,7 +449,10 @@ matom (p, nres, escape)
   if (njumps == MAXJUMPS)
   {
     Error ("Matom: jumped %d times with no emission. Abort.\n", MAXJUMPS);
-    Exit (0);
+    *escape = 1;
+    p->istat = P_ERROR_MATOM;
+    return (0);
+    //OLD Exit (0);
   }
 
 
@@ -518,7 +542,10 @@ matom (p, nres, escape)
   else
   {
     Error ("Trying to emitt from Macro Atom but no available route (matom). Abort.");
-    Exit (0);
+    *escape = 1;
+    p->istat = P_ERROR_MATOM;
+    return (0);
+    //OLD Exit (0);
   }
 
   return (0);
@@ -924,14 +951,20 @@ kpkt (p, nres, escape, mode)
       cooling_ff = mplasma->cooling_ff = 0.0;
       Error ("kpkt: A scattering event in cell %d with vol = 0???\n", one->nwind);
       //Diagnostic      return(-1);  //57g -- Cannot diagnose with an exit
-      Exit (0);
+      *escape = 1;
+      p->istat = P_ERROR_MATOM;
+      return (0);
+      //OLD Exit (0);
     }
 
 
     if (cooling_ff < 0)
     {
       Error ("kpkt: ff cooling rate negative. Abort.");
-      Exit (0);
+      *escape = 1;
+      p->istat = P_ERROR_MATOM;
+      return (0);
+      //OLD Exit (0);
     }
     else
     {
@@ -1039,7 +1072,10 @@ kpkt (p, nres, escape, mode)
         if (i > nphot_total - 1)
         {
           Error ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
-          Exit (0);
+          *escape = 1;
+          p->istat = P_ERROR_MATOM;
+          return (0);
+          //OLD Exit (0);
         }
 
         /* If it gets here, all seems fine. Now set nres for the destruction process. */
@@ -1172,7 +1208,10 @@ kpkt (p, nres, escape, mode)
         if (i > nphot_total - 1)
         {
           Error ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
-          Exit (0);
+          *escape = 1;
+          p->istat = P_ERROR_MATOM;
+          return (0);
+          //OLD Exit (0);
         }
 
         /* Now set nres for the destruction process. */
@@ -1198,7 +1237,10 @@ kpkt (p, nres, escape, mode)
     ("matom.c: cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_bf_coltot %g cooling_adiabatic %g\n",
      mplasma->cooling_bftot, mplasma->cooling_bbtot, mplasma->cooling_ff, mplasma->cooling_bf_coltot, mplasma->cooling_adiabatic);
 
-  Exit (0);
+  *escape = 1;
+  p->istat = P_ERROR_MATOM;
+  return (0);
+  //OLD Exit (0);
 
   return (0);
 }
