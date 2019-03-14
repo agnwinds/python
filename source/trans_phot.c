@@ -109,10 +109,9 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
     CURRENT_PHOT = nphot;       /* A diagnostic to make it easier to determine what photon is causing a problem */
     /* This is just a watchdog method to tell the user the program is still running */
 
-//OLD      if (nphot % 100000 == 0)
     if (nphot % nreport == 0)
     {
-      Log ("Cycle %d/%d: Photon %10d of %10d or %6.1f per cent \n", geo.wcycle, geo.pcycle, nphot, NPHOT, nphot * 100. / NPHOT);
+      Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle, geo.pcycle, basename, nphot, NPHOT, nphot * 100. / NPHOT);
     }
 
     Log_flush ();
@@ -633,7 +632,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   }
   /* This is the end of the loop over a photon */
 
-  /* The next section is for diagnostic purpposes.  There are two possibilities.  If you wish to know where
+  /* The next section is for diagnostic purposes.  There are two possibilities.  If you wish to know where
    * the photon was last while in the wind, you want to track p; if you wish to know where it hits the
    * outer boundary of the calculation you would want pp.  So one should keep both lines below, and comment
    * out the one you do not want. */
