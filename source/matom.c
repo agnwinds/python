@@ -22,7 +22,6 @@
 /** 
  * @brief The core of the implementation of Macro Atoms in python
  *
- * @param [in]     WindPtr w   the ptr to the structure defining the wind
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
  * @param [out]  int escape  flag to tell us whether the matom de-activation
