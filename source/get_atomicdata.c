@@ -94,7 +94,7 @@ get_atomic_data (masterfile)
   FILE *fptr, *mptr;            //, fopen ();
   char aline[LINELENGTH];       //, *fgets ();
 
-  char *py_dir;
+  char py_dir[LINELENGTH], *xpy_dir;
   char masterfile_path[LINELENGTH];
   char file[LINELENGTH], atomic_file[LINELENGTH];
 
@@ -482,9 +482,17 @@ structure does not have this property! */
    * method of searching via the symbolic link created by Setup_Py_Dir
    */
 
-  py_dir = getenv ("PYTHON");
-  if (py_dir[strlen (py_dir) - 1] != '/')
-    strcat (py_dir, "/");
+  xpy_dir = getenv ("PYTHON");
+  if (xpy_dir == NULL)
+  {
+    strcpy (py_dir, "");
+  }
+  else if (xpy_dir[strlen (xpy_dir) - 1] != '/')
+  {
+    strcat (xpy_dir, "/");
+    strcpy (py_dir, xpy_dir);
+  }
+
   strcpy (masterfile_path, py_dir);
   strcat (masterfile_path, masterfile);
 
@@ -494,7 +502,7 @@ structure does not have this property! */
     if ((mptr = fopen (masterfile, "r")) == NULL)
     {
       Error ("Get_atomic_data: Could not find masterfile %s in current directory\n", masterfile);
-      Exit (1);
+      exit (1);
     }
     Log ("Get_atomic_data: reading from masterfile %s in current directory\n", masterfile);
   }
@@ -526,7 +534,7 @@ structure does not have this property! */
         if ((fptr = fopen (file, "r")) == NULL)
         {
           Error ("Get_atomic_data: Could not open %s in current directory\n", file);
-          Exit (1);
+          exit (1);
         }
         Log_silent ("Get_atomic_data: Reading data from %s\n", file);
       }
