@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <sys/stat.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -43,6 +44,8 @@
 int
 get_line_transfer_mode ()
 {
+  int rc;  // Return code from running Setup_Py_Dir
+  struct stat file_stat;  // Used to check the atomic data exists
   char answer[LINELENGTH];
 
   int user_line_mode = 0;
@@ -167,6 +170,24 @@ get_line_transfer_mode ()
       write_atomicdata = rdchoice ("@Diag.write_atomicdata(yes,no)", "1,0", answer);
       if (write_atomicdata)
         Log ("You have opted to save a summary of the atomic data\n");
+    }
+
+    /*
+     * Check that geo.atomic_filename exists - i.e. that the directory is readable
+     * and in the directory Python is being executed from. If it isn't - then
+     * try to run Setup_Py_Dir. If both fail, then warn the user and exit Python
+     */
+
+    if (stat (geo.atomic_filename, &file_stat))
+    {
+      Log ("Unable to open atomic masterfile %s\n", geo.atomic_filename);
+      Log ("Running Setup_Py_Dir to try and fix the situation\n");
+      rc = system ("Setup_Py_Dir");
+      if (rc)
+      {
+        Error ("Unable to open %s and run Setup_Py_Dir\n", geo.atomic_filename);
+        Exit (1);
+      }
     }
 
     get_atomic_data (geo.atomic_filename);
