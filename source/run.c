@@ -300,7 +300,7 @@ calculate_ionization (restart_stat)
       {
         zz_disk += p[nn].w;
       }
-      else if (p[nn].istat == P_ERROR)
+      else if (p[nn].istat == P_ERROR || p[nn].istat == P_ERROR_MATOM)
       {
         zz_err += p[nn].w;
       }

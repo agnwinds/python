@@ -111,7 +111,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
     if (nphot % nreport == 0)
     {
-      Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle, geo.pcycle, basename, nphot, NPHOT, nphot * 100. / NPHOT);
+      Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle, geo.pcycle, basename, nphot, NPHOT,
+           nphot * 100. / NPHOT);
     }
 
     Log_flush ();
@@ -617,6 +618,13 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     if (pp.istat == P_ADIABATIC)
     {
       istat = pp.istat = p->istat = P_ADIABATIC;
+      stuff_phot (&pp, p);
+      break;
+    }
+
+    if (pp.istat == P_ERROR_MATOM)
+    {
+      istat = pp.istat = p->istat = P_ERROR_MATOM;
       stuff_phot (&pp, p);
       break;
     }
