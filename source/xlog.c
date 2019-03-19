@@ -116,7 +116,7 @@ FILE *diagptr;
 int init_log = 0;
 int log_verbosity = 5;          // A parameter which can be used to suppress what would normally be logged or printed
 
-void Exit (int error_code);  // To avoid re-defintions of the Exit function
+void Exit (int error_code);     // To avoid re-defintions of the Exit function
 
 /**********************************************************/
 /** 

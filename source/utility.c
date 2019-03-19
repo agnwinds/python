@@ -55,8 +55,9 @@ Exit (int error_code)
 {
 #ifdef MPI_ON
 
-  Log_parallel ("Rank %i: Python exiting all processes with error %i\n", rank_global, error_code);
-  Log_parallel ("Check diag/%s_%i.diag for more information\n", files.root, rank_global);
+  Log_parallel ("--------------------------------------------------------------------------\n"
+                "Aborting rank %i: Python exiting all processes with error %i\n"
+                "                  Check diag/%s_%i.diag for more information\n", rank_global, error_code, files.root, rank_global);
 
   if (np_mpi_global > 1)
   {
@@ -70,9 +71,9 @@ Exit (int error_code)
   }
 
 #else
-  Log ("\n--------------------------------------------------------------------------\n");
-  Log ("Python exiting with error %i\n", error_code);
-  Log ("Check diag/%s.diag for more information\n", files.root);
+  Log ("--------------------------------------------------------------------------\n"
+       "Aborting: Python exiting all processes with error %i\n"
+       "          Check diag/%s.diag for more information\n", error_code, files.root);
   error_summary ("summary prior to abort");
   exit (error_code);
 #endif
