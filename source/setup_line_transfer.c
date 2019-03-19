@@ -44,8 +44,8 @@
 int
 get_line_transfer_mode ()
 {
-  int rc;  // Return code from running Setup_Py_Dir
-  struct stat file_stat;  // Used to check the atomic data exists
+  int rc;                       // Return code from running Setup_Py_Dir
+  struct stat file_stat;        // Used to check the atomic data exists
   char answer[LINELENGTH];
 
   int user_line_mode = 0;

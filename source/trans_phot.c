@@ -111,7 +111,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
     if (nphot % nreport == 0)
     {
-      Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle, geo.pcycle, basename, nphot, NPHOT, nphot * 100. / NPHOT);
+      Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle, geo.pcycle, basename, nphot, NPHOT,
+           nphot * 100. / NPHOT);
     }
 
     Log_flush ();
