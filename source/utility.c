@@ -54,22 +54,15 @@ void
 Exit (int error_code)
 {
 #ifdef MPI_ON
-
   Log_parallel ("--------------------------------------------------------------------------\n"
-                "Aborting rank %i: Python exiting all processes with error %i\n"
-                "                  Check diag/%s_%i.diag for more information\n", rank_global, error_code, files.root, rank_global);
+                "Aborting rank %04i: Python exiting all processes with error %i\n"
+                "                    Check diag/%s_%i.diag for more information\n", rank_global, error_code, files.root, rank_global);
+  error_summary_parallel ("summary prior to MPI abort");
 
   if (np_mpi_global > 1)
-  {
-    error_summary_parallel ("summary prior to MPI abort");
     MPI_Abort (MPI_COMM_WORLD, error_code);
-  }
   else
-  {
-    error_summary ("summary prior to abort");
     exit (error_code);
-  }
-
 #else
   Log ("--------------------------------------------------------------------------\n"
        "Aborting: Python exiting all processes with error %i\n"

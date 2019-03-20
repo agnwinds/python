@@ -80,12 +80,18 @@ void
 parse_arguments (int argc, char *argv[], char root[])
 {
   int i;
+  char *fget_rc;
   char input[LINELENGTH];
 
   if (argc == 1)
   {
     printf ("Root for wind file :");
-    fgets (input, LINELENGTH, stdin);
+    fget_rc = fgets (input, LINELENGTH, stdin);
+    if (!fget_rc)
+    {
+      printf ("No root file provided, exiting\n");
+      exit (0);
+    }
     get_root (root, input);
   }
   else
@@ -147,7 +153,6 @@ main (argc, argv)
      int argc;
      char *argv[];
 {
-  char *fgets_return;
   char root[LINELENGTH];
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
