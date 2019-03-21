@@ -77,7 +77,7 @@
  ***********************************************************/
 
 #ifdef MPI_ON
-  #include <mpi.h>
+#include <mpi.h>
 #endif
 
 #include <stdio.h>
@@ -875,8 +875,7 @@ Exit (int error_code)
     error_code = EXIT_FAILURE;
   }
 
-  Log ("--------------------------------------------------------------------------\n"
-       "Aborting: exiting with error %i\n", error_code);
+  Log ("--------------------------------------------------------------------------\nAborting: exiting with error %i\n", error_code);
   error_summary ("summary prior to abort");
 
   exit (error_code);

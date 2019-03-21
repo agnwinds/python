@@ -52,14 +52,19 @@ parse_command_line (argc, argv)
   char dummy[LINELENGTH];
   int mkdir ();
   double time_max;
-  char *fgets_result;
+  char *fgets_rc;
 
   restart_stat = 0;
 
   if (argc == 1)
   {
     printf ("Parameter file name (e.g. my_model.pf, or just my_model):");
-    fgets_result = fgets (dummy, LINELENGTH, stdin);
+    fgets_rc = fgets (dummy, LINELENGTH, stdin);
+    if (!fgets_rc)
+    {
+      Error ("Input rootname is NULL or invalid\n");
+      Exit (1);
+    }
     get_root (files.root, dummy);
     strcpy (files.diag, files.root);
     strcat (files.diag, ".diag");
