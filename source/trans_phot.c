@@ -622,6 +622,13 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       break;
     }
 
+    if (pp.istat == P_ERROR_MATOM)
+    {
+      istat = pp.istat = p->istat = P_ERROR_MATOM;
+      stuff_phot (&pp, p);
+      break;
+    }
+
     /* This appears partly to be an insurance policy. It is not obvious that for example nscat
      * and nrscat need to be updated */
 

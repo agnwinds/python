@@ -409,17 +409,13 @@ struct geometry
                                    - 1 means use emissivities for BOTH macro atom levels and kpkts. 0 means don't
                                    (which is correct for the ionization cycles. */
   int ioniz_mode;               /* describes the type of ionization calculation which will
-                                   be carried out.  0=on the spot, 1=LTE, 2=fixed ionization
-                                   fractions,  3 means to recalculate the ionization structure 
-                                   based on the energy absorbed in the wind (mod_on_the_spot), 4
-                                   is a test.  It is currently set to do the same as 3, except
-                                   that ground state mulitpliciites are used instead of 
-                                   a partition function */
+                                   be carried out.  The various ioniz_modes are defined by #defines IONMODE_MATRIX_BB
+                                   etc.  See the documentation in this file for what these mean. */
   int macro_ioniz_mode;         /* Added by SS Apr04 to control the use of macro atom populations and
                                    ionization fractions. If it is set to 1 then macro atom populations
                                    computed from estimators are used. If set to 0 then the macro atom
                                    populations are computed as for minor ions. By default it is set to
-                                   0 initially in python.c and then set to 1 the first time that
+                                   0 initially and then set to 1 the first time that
                                    Monte Carlo estimators are normalised. */
   int ioniz_or_extract;         /* Set to 1 (true) during ionization cycles, set to 0 (false) during calculation of
                                    detailed spectrum.  Originally introduced by SS in July04 as he added
@@ -1043,11 +1039,8 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_LTE_TE 4        // LTE using t_e
 #define IONMODE_FIXED 2         // Hardwired concentrations
 #define IONMODE_ML93 3          // Lucy Mazzali
-//OLD #define IONMODE_LTE_SIM 4 // LTE with SIM correction
-//OLD #define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
-//OLD #define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
-#define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model
+#define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model based on power laws
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0        // LTE using t_r
@@ -1075,11 +1068,12 @@ typedef struct photon
     P_ESCAPE = 2,               //Escaped to reach the universe,
     P_HIT_STAR = 3,             //absorbed by photosphere of star,
     P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
-    P_ERROR = 5,                //Too many calls to translate without something happening
+    P_ERROR = 5,                //Tryint to scatter a photon in a location where it should not scatter
     P_ABSORB = 6,               //Photoabsorbed within wind
     P_HIT_DISK = 7,             //Banged into disk
     P_SEC = 8,                  //Photon hit secondary
-    P_ADIABATIC = 9             //records that a photon created a kpkt which was destroyed by adiabatic cooling
+    P_ADIABATIC = 9,            //records that a photon created a kpkt which was destroyed by adiabatic cooling
+    P_ERROR_MATOM = 10          //Some kind of error in processing of a photon which excited a macroattom
   } istat;                      /*status of photon. */
 
   int nscat;                    /*number of scatterings */
