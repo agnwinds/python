@@ -75,6 +75,11 @@
  *	
  *
  ***********************************************************/
+
+#ifdef MPI_ON
+  #include <mpi.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,15 +92,16 @@
 
 /* definitions of what is logged at what verboisty level */
 
-#define SHOW_PARALLEL		1
-#define SHOW_LOG  		2
-#define SHOW_ERROR		2
-#define SHOW_DEBUG	  	4
+#define SHOW_PARALLEL		  1
+#define SHOW_LOG  		    2
+#define SHOW_ERROR		    2
+#define SHOW_DEBUG	  	  4
 #define SHOW_LOG_SILENT  	5
 #define SHOW_ERROR_SILENT	5
 
 
 int my_rank = 0;                // rank of mpi process, set to zero
+int n_mpi_procs = 0;            // the number of mpi processes
 
 int log_print_max = 100;        // Maximum number of times a single error will be reported.  
                                 // Note that it will still be counted.
@@ -116,8 +122,6 @@ FILE *diagptr;
 int init_log = 0;
 int log_verbosity = 5;          // A parameter which can be used to suppress what would normally be logged or printed
 
-void Exit (int error_code);     // To avoid re-defintions of the Exit function
-
 /**********************************************************/
 /** 
  * @brief      Open a log file 
@@ -134,8 +138,6 @@ int
 Log_init (filename)
      char *filename;
 {
-  FILE *fopen ();
-
   if ((diagptr = fopen (filename, "w")) == NULL)
   {
     printf ("Yikes: could not even open log file %s\n", filename);
@@ -179,8 +181,6 @@ int
 Log_append (filename)
      char *filename;
 {
-  FILE *fopen ();
-
   if ((diagptr = fopen (filename, "a")) == NULL)
   {
     printf ("Yikes: could not even open log file %s\n", filename);
@@ -662,12 +662,15 @@ int
 error_summary_parallel (char *msg)
 {
   int i;
+
   Log_parallel ("\nError summary for thread %i: %s\n", my_rank, msg);
   Log_parallel ("Recurrences --  Description\n");
+
   for (i = 0; i < nerrors; i++)
     Log_parallel ("%9d -- %s", errorlog[i].n, errorlog[i].description);
 
   Log_flush ();
+
   return 0;
 }
 
@@ -726,6 +729,7 @@ Log_set_mpi_rank (rank, n_mpi)
      int rank, n_mpi;
 {
   my_rank = rank;
+  n_mpi_procs = n_mpi;
   rdpar_set_mpi_rank (rank);    //this just communicates the rank to rdpar      
 
   return (0);
@@ -820,4 +824,61 @@ Debug (char *format, ...)
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
   return (result);
+}
+
+
+/**********************************************************/
+/**
+ *  @brief Wrapper function to exit MPI/Python.
+ *
+ *  @param[in] int error_code. An integer classifying the error. Note that this
+ *  number should be a non-zero integer.
+ *
+ *  @details
+ *  When MPI is in use, using the standard C library exit function can be somewhat
+ *  dangerous, as if a process exits with return code 0, MPI assumes that the
+ *  process has exited correctly and the program will continue. This results in
+ *  a deadlock and without any safety mechanism can result in an MPI run never
+ *  finishing. Hence, in multiprocessor mode, one should use use MPI_Abort
+ *  (which isn't a very graceful) to ensure that if a process does need to exit,
+ *  then all processes will exit with it.
+ *
+ *  Before exiting, an error summary is printed to screen and and log is flushed
+ *  to ensure everything is up to date to aid with error diagnosis.
+ *
+ *  ### Notes ###
+ *
+ **********************************************************/
+
+void
+Exit (int error_code)
+{
+#ifdef MPI_ON
+  if (error_code == 0)
+  {
+    Log_parallel ("!!Exit: error codes should be non-zero!\n");
+    error_code = EXIT_FAILURE;
+  }
+
+  Log_parallel ("--------------------------------------------------------------------------\n"
+                "Aborting rank %04i: exiting all processes with error %i\n", my_rank, error_code);
+  error_summary_parallel ("summary prior to abort");
+
+  if (n_mpi_procs > 1)
+    MPI_Abort (MPI_COMM_WORLD, error_code);
+  else
+    exit (error_code);
+#else
+  if (error_code == 0)
+  {
+    Log ("!!Exit: error codes should be non-zero!\n");
+    error_code = EXIT_FAILURE;
+  }
+
+  Log ("--------------------------------------------------------------------------\n"
+       "Aborting: exiting with error %i\n", error_code);
+  error_summary ("summary prior to abort");
+
+  exit (error_code);
+#endif
 }

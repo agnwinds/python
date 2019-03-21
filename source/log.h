@@ -43,3 +43,5 @@ int Log_parallel (char *format, ...);
 int Debug (char *format, ...);
 /* synonyms.c */
 int check_synonyms (char new_question[], char old_question[]);
+/* xlog_util.c */
+void Exit (int error_code);

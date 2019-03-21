@@ -114,7 +114,7 @@ add_executable(python
         source/setup_line_transfer.c
         source/cv.c
         source/wind_util.c
-        source/utility.c)
+        )
 
 add_executable(py_wind
         source/bb.c
@@ -212,7 +212,6 @@ add_executable(py_wind
         source/setup_line_transfer.c
         source/cv.c
         source/wind_util.c
-        source/utility.c
         )
 
 add_executable(windsave2table
@@ -308,7 +307,6 @@ add_executable(windsave2table
         source/setup_line_transfer.c
         source/cv.c
         source/wind_util.c
-        source/utility.c
         )
 
 # Include external libs
