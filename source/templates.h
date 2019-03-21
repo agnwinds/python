@@ -642,3 +642,5 @@ int create_heat_table (int ndom, char rootname[]);
 int create_ion_table (int ndom, char rootname[], int iz);
 double *get_ion (int ndom, int element, int istate, int iswitch);
 double *get_one (int ndom, char variable_name[]);
+/* utility.c */
+void Exit (int error_code);
