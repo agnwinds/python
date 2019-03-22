@@ -508,8 +508,8 @@ init_photons ()
      read in as a double so it is easier for input
      (in scientific notation) */
 
-  double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
 
+  double nphot = 1e5;
   rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
   if ((NPHOT = (int) nphot) <= 0)
   {
@@ -517,33 +517,10 @@ init_photons ()
     Exit (1);
   }
 
-//DEL  if (modes.photon_speedup)
-//DEL  {
-//DEL    Log ("Photon logarithmic stepping algorithm enabled\n");
-//DEL    if (!PHOT_STEPS)
-//DEL    {
-//DEL      rddoub ("Min_photons_per_cycle", &min_nphot);
-//DEL      rddoub ("Max_photons_per_cycle", &max_nphot);
-//DEL    }
-//DEL    else
-//DEL      min_nphot /= pow (10, PHOT_STEPS);
-//DEL
-//DEL    NPHOT_MAX = NPHOT;
-//DEL    NPHOT = NPHOT_MIN = (int) min_nphot;
-//DEL    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
-//DEL    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
-//DEL  }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
   NPHOT /= np_mpi_global;
-//DEL  if (modes.photon_speedup)
-//DEL  {
-//DEL    NPHOT_MIN /= np_mpi_global;
-//DEL    NPHOT_MAX /= np_mpi_global;
-//DEL    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
-//DEL    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
-//DEL  }
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
