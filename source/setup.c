@@ -517,33 +517,33 @@ init_photons ()
     Exit (1);
   }
 
-  if (modes.photon_speedup)
-  {
-    Log ("Photon logarithmic stepping algorithm enabled\n");
-    if (!PHOT_STEPS)
-    {
-      rddoub ("Min_photons_per_cycle", &min_nphot);
-      rddoub ("Max_photons_per_cycle", &max_nphot);
-    }
-    else
-      min_nphot /= pow (10, PHOT_STEPS);
-
-    NPHOT_MAX = NPHOT;
-    NPHOT = NPHOT_MIN = (int) min_nphot;
-    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
-    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
-  }
+//DEL  if (modes.photon_speedup)
+//DEL  {
+//DEL    Log ("Photon logarithmic stepping algorithm enabled\n");
+//DEL    if (!PHOT_STEPS)
+//DEL    {
+//DEL      rddoub ("Min_photons_per_cycle", &min_nphot);
+//DEL      rddoub ("Max_photons_per_cycle", &max_nphot);
+//DEL    }
+//DEL    else
+//DEL      min_nphot /= pow (10, PHOT_STEPS);
+//DEL
+//DEL    NPHOT_MAX = NPHOT;
+//DEL    NPHOT = NPHOT_MIN = (int) min_nphot;
+//DEL    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
+//DEL    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
+//DEL  }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
   NPHOT /= np_mpi_global;
-  if (modes.photon_speedup)
-  {
-    NPHOT_MIN /= np_mpi_global;
-    NPHOT_MAX /= np_mpi_global;
-    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
-    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
-  }
+//DEL  if (modes.photon_speedup)
+//DEL  {
+//DEL    NPHOT_MIN /= np_mpi_global;
+//DEL    NPHOT_MAX /= np_mpi_global;
+//DEL    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
+//DEL    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
+//DEL  }
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
@@ -558,6 +558,13 @@ init_photons ()
   /* Allocate the memory for the photon structure now that NPHOT is established */
 
   photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
+  /* If the number of photons per cycle is changed, NPHOT can be less, so we define NPHOT_MAX 
+   * to the maximum number of photons that one can create.  NPHOT is used extensively with 
+   * Python.  It is the NPHOT in a particular cycle, in a given thread.
+   */
+
+  NPHOT_MAX = NPHOT;
+
 
   if (p == NULL)
   {

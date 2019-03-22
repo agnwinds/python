@@ -90,7 +90,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
                                    angle over which photons will be accepted must be defined */
 
 int PHOT_STEPS;                 /* The switch for turning on the photon increase algorithm */
-int NPHOT_MIN;                  /* The minimum number of photon bundles created per  */
+//DEL int NPHOT_MIN;                  /* The minimum number of photon bundles created per  */
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 int CURRENT_PHOT;               /* A diagnostic so that one can always determine what the current photon number being run is */
