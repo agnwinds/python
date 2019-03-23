@@ -63,12 +63,10 @@ calculate_ionization (restart_stat)
 
   char dummy[LINELENGTH];
 
-  double freqmin, freqmax;
-  long nphot_to_define;
+  double freqmin, freqmax, x;
+  long nphot_to_define, nphot_min;
   int iwind;
 
-  int nphot_steps = 0, nphot_next_cycle = geo.wcycles;
-  int nphot_cycle_gap = geo.wcycles;
 
 #ifdef MPI_ON
   int ioniz_spec_helpers;
@@ -128,18 +126,6 @@ calculate_ionization (restart_stat)
     delay_dump_prep (restart_stat);
   }
 
-  /*
-   * EP: if the photon increment speed up is being used, figure out at which
-   * cycle NPHOT will be increased.
-   */
-
-  if (modes.photon_speedup)
-  {
-    nphot_steps = PHOT_STEPS + 1;
-    nphot_next_cycle = nphot_cycle_gap = geo.wcycles / nphot_steps;
-    Log ("NPHOT will increase %i times every %i cycles\n", nphot_steps - 1, nphot_cycle_gap);
-  }
-
 
   while (geo.wcycle < geo.wcycles)
   {                             /* This allows you to build up photons in bunches */
@@ -167,51 +153,22 @@ calculate_ionization (restart_stat)
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
 
-    if (modes.photon_speedup && geo.wcycle == nphot_next_cycle)
+
+    /* If we are using photon speed up mode then the number of photons varies by cycle in the
+     * ionization phase.  We set this up here
+     */
+
+    if (modes.photon_speedup)
     {
-      /*
-       * EP: If photon incrementing is enabled, figure out the number of photons
-       * to use. When in multiprocessor mode, there is a bit of messing about with
-       * multiplying and division to ensure that NPHOT is set correctly across
-       * all processes for an arbitrary number of MPI processes. Previously,
-       * NPHOT would be increased incorrectly by a value of 10 / np_mpi_global
-       * leading to less photons than we wanted
-       */
+      nphot_min = NPHOT_MAX / pow (10., PHOT_RANGE);
 
-#ifdef MPI_ON
-      NPHOT *= np_mpi_global;
-#endif
-      NPHOT *= 10;
-#ifdef MPI_ON
-      NPHOT /= np_mpi_global;
-#endif
-
-      /*
-       * EP: we don't want NPHOT to become larger than NPHOT_MAX, which can
-       * happen with some values of ionisation cycles and values of NPHOT_MIN
-       * and NPHOT_MAX
-       */
-
+      x = log10 (NPHOT_MAX / nphot_min) / (geo.wcycles - 1);
+      NPHOT = nphot_min * pow (10., (x * geo.wcycle));
       if (NPHOT > NPHOT_MAX)
-        NPHOT = NPHOT_MAX;
-
-      /*
-       * EP: both p and photmain realloc'd otherwise photmain would end
-       * up not pointing to anything and segfault in make_spectra()
-       */
-
-      p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
-
-      if (!p)
       {
-        Error ("Could not reallocate memory for %i photons for p and photmain\n", NPHOT);
-        Exit (1);
+        NPHOT = NPHOT_MAX;
       }
-
-      nphot_next_cycle += nphot_cycle_gap;
-
-      if (NPHOT * 10 <= NPHOT_MAX)
-        Log ("NPHOT will next increase to %e on cycle %i\n", (double) NPHOT * 10, nphot_next_cycle);
+      //OLD NPHOT = ((geo.wcycle + 1.0) / geo.wcycles) * NPHOT_MAX;
     }
 
     Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle);
@@ -600,6 +557,8 @@ make_spectra (restart_stat)
        JM 130306 must convert NPHOT and pcycles to double precision variable nphot_to_define
 
      */
+
+    NPHOT = NPHOT_MAX;          // Assure that we really are creating as many photons as we expect.
 
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);

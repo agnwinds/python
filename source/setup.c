@@ -508,8 +508,8 @@ init_photons ()
      read in as a double so it is easier for input
      (in scientific notation) */
 
-  double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
 
+  double nphot = 1e5;
   rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
   if ((NPHOT = (int) nphot) <= 0)
   {
@@ -517,33 +517,10 @@ init_photons ()
     Exit (1);
   }
 
-  if (modes.photon_speedup)
-  {
-    Log ("Photon logarithmic stepping algorithm enabled\n");
-    if (!PHOT_STEPS)
-    {
-      rddoub ("Min_photons_per_cycle", &min_nphot);
-      rddoub ("Max_photons_per_cycle", &max_nphot);
-    }
-    else
-      min_nphot /= pow (10, PHOT_STEPS);
-
-    NPHOT_MAX = NPHOT;
-    NPHOT = NPHOT_MIN = (int) min_nphot;
-    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
-    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
-  }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
   NPHOT /= np_mpi_global;
-  if (modes.photon_speedup)
-  {
-    NPHOT_MIN /= np_mpi_global;
-    NPHOT_MAX /= np_mpi_global;
-    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
-    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
-  }
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
@@ -558,6 +535,13 @@ init_photons ()
   /* Allocate the memory for the photon structure now that NPHOT is established */
 
   photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
+  /* If the number of photons per cycle is changed, NPHOT can be less, so we define NPHOT_MAX 
+   * to the maximum number of photons that one can create.  NPHOT is used extensively with 
+   * Python.  It is the NPHOT in a particular cycle, in a given thread.
+   */
+
+  NPHOT_MAX = NPHOT;
+
 
   if (p == NULL)
   {
