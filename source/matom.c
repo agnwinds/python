@@ -167,11 +167,11 @@ matom (p, nres, escape)
   }
   else
   {
-    Error ("matom: upper level not identified. nres = %d\n", *nres);
+    Error ("matom: upper level not identified. nres = %d in photon %d of cycle %d/%d in thread %d\n",
+           *nres, p->np, geo.wcycle, geo.pcycle, rank_global);
     *escape = 1;
     p->istat = P_ERROR_MATOM;
     return (0);
-    //OLD Exit (0);
   }
 
   /* Now follows the main loop to govern the macro atom jumps. Keeps jumping until

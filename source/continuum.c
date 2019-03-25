@@ -191,7 +191,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 
     if (cdf_gen_from_array (&comp[spectype].xcdf, w_local, f_local, nwave, lambdamin, lambdamax) != 0)
     {
-      Error ("In one_continuum after return from cdf_gen_from_array\n");
+      Error ("One_continuum: after return from cdf_gen_from_array\n");
     }
     old_freqmin = freqmin;
     old_freqmax = freqmax;
