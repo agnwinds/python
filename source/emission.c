@@ -238,7 +238,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   double xlum, xlumsum, lum;
   double v[3];
   int icell, icell_old;
-  int nplasma;
+  int nplasma = 0;
   int nnscat;
   int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
@@ -540,6 +540,12 @@ total_free (one, t_e, f1, f2)
     return (0.0);
   }
 
+  if (t_e < TMIN)
+  {
+    return (0.0);
+  }
+
+
 
 
 
@@ -620,7 +626,7 @@ ff (one, t_e, freq)
   PlasmaPtr xplasma;
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  if (t_e < 100.)
+  if (t_e < TMIN)
     return (0.0);
   if (gaunt_n_gsqrd == 0)       //Maintain old behaviour
   {
