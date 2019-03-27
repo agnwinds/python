@@ -888,14 +888,15 @@ typedef struct plasma
 //OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
   double gain;                  /* The gain being used in interations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
-                                                           The first wo  are the fraction changes in t_r, t_e between this and the last cycle. The third
+                                                           The first two are the fractional changes in t_r, t_e between this and the last cycle. The third
                                                            number is the fraction between heating and cooling divided by the sum of the 2       */
   int trcheck, techeck, hccheck;        /* NSH the individual convergence checks used to calculate converge_whole.  Each of these values
                                            is 0 if the fractional change or in the case of the last check error is less than a value, currently
                                            set to 0.05.  ksl 111126   
                                            NSH 130725 - this number is now also used to say if the cell is over temperature - it is set to 2 in this case   */
   int converge_whole, converging;       /* converge_whole is the sum of the indvidual convergence checks.  It is 0 if all of the
-                                           convergence checks indicated convergence.subroutine convergence feels point is converged, converging is an
+                                           convergence checks indicated convergence. 
+                                           converging is an
                                            indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
 
 
