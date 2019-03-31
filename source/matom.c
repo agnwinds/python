@@ -375,7 +375,10 @@ matom (p, nres, escape)
 
     if ((pjnorm_known[uplvl] + penorm_known[uplvl]) <= 0.0)
     {
-      Error ("matom: macro atom level has no way out %d %g %g\n", uplvl, pjnorm_known[uplvl], penorm_known[uplvl]);
+      Error ("matom: macro atom level has no way out: uplvl %d pj %g pe %g t_e %.3g  ne %.3g\n", uplvl, pjnorm_known[uplvl],
+             penorm_known[uplvl], t_e, ne);
+      Error ("matom: macro atom level has no way out: z %d istate %d nion %d ilv %d nbfu %d nbfd %d nbbu %d nbbd %d\n", config[uplvl].z,
+             config[uplvl].istate, config[uplvl].nion, config[uplvl].ilv, nbfu, nbfd, nbbu, nbbd);
       *escape = 1;
       p->istat = P_ERROR_MATOM;
       return (0);
