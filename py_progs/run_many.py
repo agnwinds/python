@@ -128,9 +128,9 @@ def doit(filename='all.ls',nj=2,np=1,outputfile='out.txt'):
     print('List =',filename)
 
 
-    command='nice  py '
+    command='nice 5 py -p '
     if np>1:
-        command='nice mpirun -np %d py ' % np
+        command='nice 5 mpirun -np %d py -p ' % np
 
 
     try:
