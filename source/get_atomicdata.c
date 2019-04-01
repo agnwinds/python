@@ -117,7 +117,7 @@ get_atomic_data (masterfile)
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
-  // int index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
+  int simple_line_ignore[NIONS];
   int nwords;
   int nlte, nmax;
   int mflag;                    //flag to identify reading data for macro atoms
@@ -253,6 +253,7 @@ get_atomic_data (masterfile)
 
   for (n = 0; n < NIONS; n++)
   {
+    simple_line_ignore[n] = 0;  // diagnostic counter for how many lines ignored
     ion[n].z = (-1);
     ion[n].istate = (-1);
     ion[n].ip = (-1);
@@ -1859,7 +1860,8 @@ but this is proably not what we want if we move all bf & fb transitions to macro
 would like to have simple lines for macro-ions */
               if (ion[n].macro_info == 1 && mflag == -1)
               {
-                Error ("Get_atomic_data: Simple line data ignored for Macro-ion: %d\n", n);
+                /* count how many times this happens to report to user */
+                simple_line_ignore[n] += 1;
                 break;
               }
 
@@ -2879,6 +2881,13 @@ or zero so that simple checks of true and false can be used for them */
 
   check_xsections ();           // debug routine, only prints if verbosity > 4
 
+  /* report ignored simple lines for macro-ions */
+  for (n = 0; n < NIONS; n++)
+  {
+    if (simple_line_ignore[n] > 0)
+      Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
+  }
+
   return (0);
 }
 
@@ -3268,6 +3277,11 @@ check_xsections ()
       Error
         ("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
          nion, ion[nion].z, ion[nion].istate);
+    }
+
+    if (ion[nion].macro_info != phot_top[n].macro_info)
+    {
+      Error ("Macro info for ion doesn't match with xsection!! Could be serious.\n");
     }
   }
 

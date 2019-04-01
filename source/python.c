@@ -727,6 +727,7 @@ main (argc, argv)
   if (modes.quit_after_inputs)
   {
     Log ("This was was run with the -i or --dry-run flag set, so quitting now inputs have been gathered.\n");
+    error_summary ("dry run.");
     exit (0);
   }
 
