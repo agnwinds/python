@@ -117,7 +117,8 @@ get_atomic_data (masterfile)
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
-  int simple_line_ignore[NIONS], cstren_no_line;
+  int simple_line_ignore[NIONS], nerr_cstren_ignore;
+  int nerr_multi_fluor_yield, nerr_elec_yield, nerr_multi_elec_yield;
   int nwords;
   int nlte, nmax;
   int mflag;                    //flag to identify reading data for macro atoms
@@ -286,6 +287,7 @@ get_atomic_data (masterfile)
 
   nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;     //Added counter for DR//
   n_elec_yield_tot = n_fluor_yield_tot = 0;     //Counters for electron and fluorescent photon yields
+  nerr_multi_elec_yield = nerr_multi_fluor_yield = nerr_elec_yield = 0; // Counters for errors 
 
   /*This initializes the top_phot array - it is used for all ionization processes so some elements
      are only used in some circumstances
@@ -431,7 +433,7 @@ get_atomic_data (masterfile)
 
 /* The following lines initialise the collision strengths */
   n_coll_stren = 0;             //The number of data sets
-  cstren_no_line = 0;           // counter to track how many times we don't find a matching line 
+  nerr_cstren_ignore = 0;       // counter to track how many times we don't find a matching line 
   for (n = 0; n < NLINES; n++)
   {
     coll_stren[n].n = -1;       //Internal index
@@ -2434,7 +2436,8 @@ would like to have simple lines for macro-ions */
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
+                nerr_multi_elec_yield++;
+                //Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
               }
             }
           }
@@ -2478,7 +2481,8 @@ would like to have simple lines for macro-ions */
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
+                nerr_multi_fluor_yield++;
+                //Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
               }
             }
           }
@@ -2591,7 +2595,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
           {
             fgets (aline, LINELENGTH, fptr);
             fgets (aline, LINELENGTH, fptr);
-            cstren_no_line++;
+            nerr_cstren_ignore++;
           }
           break;
 
@@ -2626,10 +2630,10 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
     if (inner_cross[n].n_elec_yield != -1)
       n_elec_yield_tot++;
     else
-      Error ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
+      nerr_elec_yield++;
+    //Error ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
     if (inner_cross[n].n_fluor_yield != -1)
       n_fluor_yield_tot++;
-
   }
 
   Log ("Data of %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n", nelements, nions, nlevels, nlines, ntop_phot);
@@ -2661,8 +2665,17 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
       Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
   }
   /* report ignored collision strengths */
-  if (cstren_no_line > 0) 
-    Error ("Ignored %d collision strengths with no matching line transition\n", cstren_no_line);
+  if (nerr_cstren_ignore > 0)
+    Error ("Ignored %d collision strengths with no matching line, there are %d records with match \n", nerr_cstren_ignore, n_coll_stren);
+  /* report multi fluorescent yields */
+  if (nerr_multi_fluor_yield > 0)
+    Error ("Ignored %d multiple fluorescent yields, there are %d records with match \n", nerr_multi_fluor_yield, n_fluor_yield_tot);
+  /* report multi electron yields */
+  if (nerr_multi_elec_yield > 0)
+    Error ("Ignored %d multiple electron yields, there are %d records with match \n", nerr_multi_elec_yield, n_elec_yield_tot);
+  /* report ignored collision strengths */
+  if (nerr_elec_yield > 0)
+    Error ("Found %d inner_cross with no electron yield, there are %d records with match \n", nerr_elec_yield, n_elec_yield_tot);
 
 
 /* Now begin a series of calculations with the data that has been read in in order
