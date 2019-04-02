@@ -136,16 +136,17 @@ get_atomic_data (masterfile)
   int bb_max, bf_max;
   int lev_type;
   int nn;
-  double yield;
+//  double yield;
   double gstemp[BAD_GS_RR_PARAMS];      //Temporary storage for badnell resolved GS RR rates
   double temp[LINELENGTH];      //Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;          //Flags to say what part of data is being read in for DR and RR
   double gstmin, gstmax;        //The range of temperatures for which all ions have GS RR rates
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;    //Temporary storage for gaunt factors
   int n_elec_yield_tot;         //The number of inner shell cross sections with matching electron yield arrays
-  int n_fluor_yield_tot;        //The number of inner shell cross sections with matching fluorescent photon yield arrays
+  int inner_no_e_yield;        //The number of inner shell cross sections with no yields
+//  int n_fluor_yield_tot;        //The number of inner shell cross sections with matching fluorescent photon yield arrays
   double I, Ea;                 //The ionization energy and mean electron energy for electron yields
-  double energy;                //The energy of inner shell fluorescent photons
+//  double energy;                //The energy of inner shell fluorescent photons
   int c_l, c_u;                 //Chianti level indicators
   double en, gf, hlt, sp;       //Parameters in collision strangth file
   int type;                     //used in collision strength
@@ -285,7 +286,8 @@ get_atomic_data (masterfile)
   }
 
   nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;     //Added counter for DR//
-  n_elec_yield_tot = n_fluor_yield_tot = 0;     //Counters for electron and fluorescent photon yields
+  n_elec_yield_tot = 0; //Counter for electron yield
+	//  n_fluor_yield_tot = 0;     and fluorescent photon yields
 
   /*This initializes the top_phot array - it is used for all ionization processes so some elements
      are only used in some circumstances
@@ -297,7 +299,7 @@ get_atomic_data (masterfile)
     phot_top[n].uplev = (-1);
     phot_top[n].nion = (-1);    //the ion to which this cross section belongs
     phot_top[n].n_elec_yield = -1;      //pointer to the electron yield array (for inner shell)
-    phot_top[n].n_fluor_yield = -1;     //pointer to the fluorescent photon yield (for inner shell)
+//    phot_top[n].n_fluor_yield = -1;     //pointer to the fluorescent photon yield (for inner shell)
     phot_top[n].n = -1;         //pointer to shell (inner shell)
     phot_top[n].l = -1;         //pointer to l subshell (inner shell only)
     phot_top[n].z = (-1);       //atomic number
@@ -319,7 +321,7 @@ get_atomic_data (masterfile)
     inner_cross[n].uplev = (-1);
     inner_cross[n].nion = inner_elec_yield[n].nion = inner_fluor_yield[n].nion = (-1);
     inner_cross[n].n_elec_yield = -1;
-    inner_cross[n].n_fluor_yield = -1;
+//    inner_cross[n].n_fluor_yield = -1;
     inner_cross[n].n = inner_elec_yield[n].n = inner_fluor_yield[n].n = (-1);
     inner_cross[n].l = inner_elec_yield[n].l = inner_fluor_yield[n].l = (-1);
     inner_cross[n].z = inner_elec_yield[n].z = inner_fluor_yield[n].z = (-1);
@@ -554,8 +556,8 @@ structure does not have this property! */
           choice = 'g';
         else if (strncmp (word, "Kelecyield", 10) == 0) /*Electron yield from inner shell ionization fro Kaastra and Mewe */
           choice = 'K';
-        else if (strncmp (word, "Kphotyield", 10) == 0) /*Floruescent photon yield from IS ionization from Kaastra and Mewe */
-          choice = 'F';
+//        else if (strncmp (word, "Kphotyield", 10) == 0) /*Floruescent photon yield from IS ionization from Kaastra and Mewe */
+//          choice = 'F';
         else if (strncmp (word, "*", 1) == 0);  /* It's a continuation so record type remains same */
 
         else
@@ -2451,7 +2453,7 @@ would like to have simple lines for macro-ions */
  * Kphotyield 5 1 1 0 1.837e+02 6.000e-04
  * Kphotyield 5 1 1 0 1.690e+01 7.129e-01
  * @endverbatim
- */
+ 
         case 'F':
           nparam = sscanf (aline, "%*s %d %d %d %d %le %le ", &z, &istate, &in, &il, &energy, &yield);
           if (nparam != 6)
@@ -2464,9 +2466,9 @@ would like to have simple lines for macro-ions */
           {
             if (inner_cross[n].z == z && inner_cross[n].istate == istate && inner_cross[n].n == in && inner_cross[n].l == il)
             {
-              if (inner_cross[n].n_fluor_yield == -1)   /*This is the first yield data for this vacancy */
+              if (inner_cross[n].n_fluor_yield == -1)   //This is the first yield data for this vacancy 
               {
-                inner_fluor_yield[n_fluor_yield_tot].nion = n;  /*This yield refers to this ion */
+                inner_fluor_yield[n_fluor_yield_tot].nion = n;  //This yield refers to this ion 
                 inner_cross[n].n_fluor_yield = n_fluor_yield_tot;
                 inner_fluor_yield[n_fluor_yield_tot].z = z;
                 inner_fluor_yield[n_fluor_yield_tot].istate = istate;
@@ -2483,7 +2485,7 @@ would like to have simple lines for macro-ions */
             }
           }
           break;
-
+		  */
 
 /**
  * @section Chianti Collision Strengths
@@ -2619,16 +2621,18 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 /* OK now summarize the data that has been read*/
 
   n_elec_yield_tot = 0;         //Reset this numnber, we are now going to use it to check we have yields for all inner shells
-  n_fluor_yield_tot = 0;        //Reset this numnber, we are now going to use it to check we have yields for all inner shells
+//  n_fluor_yield_tot = 0;        //Reset this numnber, we are now going to use it to check we have yields for all inner shells
+  inner_no_e_yield =0;
 
   for (n = 0; n < n_inner_tot; n++)
   {
     if (inner_cross[n].n_elec_yield != -1)
       n_elec_yield_tot++;
     else
-      Error_silent ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
-    if (inner_cross[n].n_fluor_yield != -1)
-      n_fluor_yield_tot++;
+		inner_no_e_yield++;
+//      Error_silent ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
+//    if (inner_cross[n].n_fluor_yield != -1)
+//    n_fluor_yield_tot++;
 
   }
 
@@ -2645,7 +2649,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   Log ("We have read in %5d   Chiantic collision strengths\n", n_coll_stren);   //1701 nsh collision strengths
   Log ("We have read in %3d Inner shell photoionization cross sections\n", n_inner_tot);        //110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("                %3d have matching electron yield data\n", n_elec_yield_tot);
-  Log ("                %3d have matching fluorescent yield data\n", n_fluor_yield_tot);
+//  Log ("                %3d have matching fluorescent yield data\n", n_fluor_yield_tot);
 
   Log ("We have read in %3d Dielectronic recombination coefficients\n", ndrecomb);      //110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("We have read in %3d Badnell totl Radiative rate coefficients\n", n_total_rr);
@@ -2663,7 +2667,10 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   /* report ignored collision strengths */
   if (cstren_no_line > 0) 
     Error ("Ignored %d collision strengths with no matching line transition\n", cstren_no_line);
-
+  if (inner_no_e_yield >0)
+      Error ("Ignoring %d inner shell cross sections because no matching yields\n", inner_no_e_yield);
+	  
+	
 
 /* Now begin a series of calculations with the data that has been read in in order
 to prepare it for use by other programs*/

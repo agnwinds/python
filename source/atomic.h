@@ -314,7 +314,7 @@ typedef struct topbase_phot
                                    for the correct array elements, or whether this process
                                    can be short circuited */
   int n_elec_yield;             /*Index to the electron yield array - only used for inner shell ionizations */
-  int n_fluor_yield;            /*Inder to the fluorescent photon yield array - only used for inner shell ionizations */
+//  int n_fluor_yield;            /*Inder to the fluorescent photon yield array - only used for inner shell ionizations */
   int macro_info;               /* Identifies whether line is to be treated using a Macro Atom approach.
                                    set to -1 initially
                                    set to 0 if not a macro atom line  
