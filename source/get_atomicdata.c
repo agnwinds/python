@@ -90,7 +90,7 @@ int
 get_atomic_data (masterfile)
      char masterfile[];
 {
-	int match;
+  int match;
   FILE *fptr, *mptr;            //, fopen ();
   char aline[LINELENGTH];       //, *fgets ();
   char file[LINELENGTH], atomic_file[LINELENGTH];
@@ -117,7 +117,7 @@ get_atomic_data (masterfile)
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
-  int simple_line_ignore[NIONS];
+  int simple_line_ignore[NIONS], cstren_no_line;
   int nwords;
   int nlte, nmax;
   int mflag;                    //flag to identify reading data for macro atoms
@@ -431,6 +431,7 @@ get_atomic_data (masterfile)
 
 /* The following lines initialise the collision strengths */
   n_coll_stren = 0;             //The number of data sets
+  cstren_no_line = 0;           // counter to track how many times we don't find a matching line 
   for (n = 0; n < NLINES; n++)
   {
     coll_stren[n].n = -1;       //Internal index
@@ -2519,7 +2520,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
           }
-		  match=0;
+          match = 0;
           for (n = 0; n < nlines; n++)  //loop over all the lines we have read in - look for a match
           {
             if (line[n].z == z && line[n].istate == istate
@@ -2530,7 +2531,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
                 Error ("Get_atomic_data More than one collision strength record for line %i\n", n);
                 exit (0);
               }
-			  match=1;
+              match = 1;
               coll_stren[n_coll_stren].n = n_coll_stren;
               coll_stren[n_coll_stren].lower = c_l;
               coll_stren[n_coll_stren].upper = c_u;
@@ -2586,11 +2587,12 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               n_coll_stren++;
             }
           }
-		  if (match==0) 	//Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
-			  {
-				  fgets (aline, LINELENGTH, fptr);
-				  fgets (aline, LINELENGTH, fptr);
-			  }
+          if (match == 0)       //Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
+          {
+            fgets (aline, LINELENGTH, fptr);
+            fgets (aline, LINELENGTH, fptr);
+            cstren_no_line++;
+          }
           break;
 
         case 'c':              /* It was a comment line so do nothing */
@@ -2651,6 +2653,16 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   Log ("We have read in %3d Scaled electron temperature frequency averaged gaunt factors\n", gaunt_n_gsqrd);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
   Log ("The minimum frequency for inner shell ionization is %8.2e\n", inner_freq_min);
+
+  /* report ignored simple lines for macro-ions */
+  for (n = 0; n < NIONS; n++)
+  {
+    if (simple_line_ignore[n] > 0)
+      Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
+  }
+  /* report ignored collision strengths */
+  if (cstren_no_line > 0) 
+    Error ("Ignored %d collision strengths with no matching line transition\n", cstren_no_line);
 
 
 /* Now begin a series of calculations with the data that has been read in in order
@@ -2880,13 +2892,6 @@ or zero so that simple checks of true and false can be used for them */
 
 
   check_xsections ();           // debug routine, only prints if verbosity > 4
-
-  /* report ignored simple lines for macro-ions */
-  for (n = 0; n < NIONS; n++)
-  {
-    if (simple_line_ignore[n] > 0)
-      Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
-  }
 
   return (0);
 }
