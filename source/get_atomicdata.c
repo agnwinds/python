@@ -2434,7 +2434,7 @@ would like to have simple lines for macro-ions */
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
+                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i z=%i istate=%i\n", n,z,istate);
               }
             }
           }
@@ -2478,7 +2478,7 @@ would like to have simple lines for macro-ions */
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
+                Error ("Get_atomic_data: more than one fluorescent yield record for inner_cross %i\n", n);
               }
             }
           }
@@ -2626,7 +2626,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
     if (inner_cross[n].n_elec_yield != -1)
       n_elec_yield_tot++;
     else
-      Error ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
+      Error_silent ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
     if (inner_cross[n].n_fluor_yield != -1)
       n_fluor_yield_tot++;
 
