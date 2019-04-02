@@ -90,7 +90,7 @@ int
 get_atomic_data (masterfile)
      char masterfile[];
 {
-
+	int match;
   FILE *fptr, *mptr;            //, fopen ();
   char aline[LINELENGTH];       //, *fgets ();
   char file[LINELENGTH], atomic_file[LINELENGTH];
@@ -2517,6 +2517,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
           }
+		  match=0;
           for (n = 0; n < nlines; n++)  //loop over all the lines we have read in - look for a match
           {
             if (line[n].z == z && line[n].istate == istate
@@ -2527,7 +2528,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
                 Error ("Get_atomic_data More than one collision strength record for line %i\n", n);
                 exit (0);
               }
-
+			  match=1;
               coll_stren[n_coll_stren].n = n_coll_stren;
               coll_stren[n_coll_stren].lower = c_l;
               coll_stren[n_coll_stren].upper = c_u;
@@ -2583,6 +2584,11 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               n_coll_stren++;
             }
           }
+		  if (match==0) 	//Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
+			  {
+				  fgets (aline, LINELENGTH, fptr);
+				  fgets (aline, LINELENGTH, fptr);
+			  }
           break;
 
         case 'c':              /* It was a comment line so do nothing */
