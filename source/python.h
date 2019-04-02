@@ -1448,6 +1448,7 @@ files;
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
 #define ALPHA_MATOM_NUMAX_LIMIT 30      /* maximum value for h nu / k T to be considered in integrals */
+#define ALPHA_FF 100.           // maximum h nu / kT to create the free free CDF
 
 
 /* non-radiative heat flow mode */

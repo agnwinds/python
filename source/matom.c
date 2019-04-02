@@ -742,7 +742,7 @@ alpha_sp_integrand (freq)
  *	
  *	* 180616  Updated so that one could force kpkt to deactivate via radiation
 ************************************************************/
-#define ALPHA_FF 100.           // maximum h nu / kT to create the free free CDF
+//OLD moved to python.h #define ALPHA_FF 100.           // maximum h nu / kT to create the free free CDF
 
 int
 kpkt (p, nres, escape, mode)
@@ -799,9 +799,17 @@ kpkt (p, nres, escape, mode)
   {
     /* in spectral cycles, so use the boundaries of the photon generation bands */
     freqmin = xband.f1[0];
+
+
     /* JM 1709 -- introduce a maximum frequency based on exp(-h nu / (kT)), 
        see issue #300 */
     freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
+
+    /* ksl This is a Bandaid for when the temperatures are very low */
+    if (freqmax < 1.1 * freqmin)
+    {
+      freqmax = 1.1 * freqmin;
+    }
   }
   else
   {

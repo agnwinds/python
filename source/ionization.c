@@ -240,7 +240,7 @@ convergence (xplasma)
   }
   else                          /* The cell is not converging, which means either that the temperature is consistently moving in one direction
                                    or that the oscillations of the temperature have increased in the past two cycles
-                                   */
+                                 */
   {
     /*
      * EP: allow the gain to increase more for the first cyc_frac * cycles to
