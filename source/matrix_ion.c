@@ -504,7 +504,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (ion[mm].istate != 1)    // we have space for electrons
+    if (mm != ele[ion[nn].nelem].firstion)    // we have space for electrons
     {
       rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
     }
