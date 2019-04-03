@@ -143,7 +143,7 @@ get_atomic_data (masterfile)
   double gstmin, gstmax;        //The range of temperatures for which all ions have GS RR rates
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;    //Temporary storage for gaunt factors
   int n_elec_yield_tot;         //The number of inner shell cross sections with matching electron yield arrays
-  int inner_no_e_yield;        //The number of inner shell cross sections with no yields
+  int inner_no_e_yield;         //The number of inner shell cross sections with no yields
 //  int n_fluor_yield_tot;        //The number of inner shell cross sections with matching fluorescent photon yield arrays
   double I, Ea;                 //The ionization energy and mean electron energy for electron yields
 //  double energy;                //The energy of inner shell fluorescent photons
@@ -288,8 +288,8 @@ get_atomic_data (masterfile)
   }
 
   nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;     //Added counter for DR//
-  n_elec_yield_tot = 0; //Counter for electron yield
-	//  n_fluor_yield_tot = 0;     and fluorescent photon yields
+  n_elec_yield_tot = 0;         //Counter for electron yield
+  //  n_fluor_yield_tot = 0;     and fluorescent photon yields
 
   /*This initializes the top_phot array - it is used for all ionization processes so some elements
      are only used in some circumstances
@@ -2438,7 +2438,7 @@ would like to have simple lines for macro-ions */
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i z=%i istate=%i\n", n,z,istate);
+                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i z=%i istate=%i\n", n, z, istate);
               }
             }
           }
@@ -2624,14 +2624,14 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 
   n_elec_yield_tot = 0;         //Reset this numnber, we are now going to use it to check we have yields for all inner shells
 //  n_fluor_yield_tot = 0;        //Reset this numnber, we are now going to use it to check we have yields for all inner shells
-  inner_no_e_yield =0;
+  inner_no_e_yield = 0;
 
   for (n = 0; n < n_inner_tot; n++)
   {
     if (inner_cross[n].n_elec_yield != -1)
       n_elec_yield_tot++;
     else
-		inner_no_e_yield++;
+      inner_no_e_yield++;
 //      Error_silent ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
 //    if (inner_cross[n].n_fluor_yield != -1)
 //    n_fluor_yield_tot++;
@@ -2667,12 +2667,12 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
       Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
   }
   /* report ignored collision strengths */
-  if (cstren_no_line > 0) 
+  if (cstren_no_line > 0)
     Error ("Ignored %d collision strengths with no matching line transition\n", cstren_no_line);
-  if (inner_no_e_yield >0)
-      Error ("Ignoring %d inner shell cross sections because no matching yields\n", inner_no_e_yield);
-	  
-	
+  if (inner_no_e_yield > 0)
+    Error ("Ignoring %d inner shell cross sections because no matching yields\n", inner_no_e_yield);
+
+
 
 /* Now begin a series of calculations with the data that has been read in in order
 to prepare it for use by other programs*/
@@ -2698,12 +2698,12 @@ exit if there is an element with no ions */
     n = 0;
     while (ion[n].z != ele[nelem].z && n < nions)
       n++;                      /* Find the first ion of that element for which there is data */
-    
+
     ele[nelem].firstion = n;
     ion[n].nelem = nelem;
 
     /* find the highest ion stage and the number of ions */
-    ele[nelem].istate_max = ion[n].istate; 
+    ele[nelem].istate_max = ion[n].istate;
 
     while (ion[n].z == ele[nelem].z && n < nions)
     {

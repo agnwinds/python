@@ -121,7 +121,7 @@ matrix_ion_populations (xplasma, mode)
   {
     newden[mm] = xplasma->density[mm] / elem_dens[ion[mm].z];   // newden is our local fractional density array
     xion[mm] = mm;              // xion is an array we use to track which ion is in which row of the matrix
-    if (mm != ele[ion[mm].nelem].firstion)    // We can recombine since we are not in the first ionization stage
+    if (mm != ele[ion[mm].nelem].firstion)      // We can recombine since we are not in the first ionization stage
     {
       rr_rates[mm] = total_rrate (mm, xplasma->t_e);    // radiative recombination rates          
     }
@@ -455,7 +455,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (mm != ele[ion[mm].nelem].firstion)        // we have electrons
+    if (ion[mm].istate != ele[ion[mm].nelem].istate_max)        // we have electrons
     {
       rate_matrix[mm][mm] -= pi_rates[mm];
     }
@@ -504,7 +504,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (mm != ele[ion[nn].nelem].firstion)    // we have space for electrons
+    if (mm != ele[ion[mm].nelem].firstion)      // we have space for electrons
     {
       rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
     }
@@ -528,7 +528,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (mm != ele[ion[mm].nelem].firstion && ion[mm].drflag > 0)      // we have space for electrons
+    if (mm != ele[ion[mm].nelem].firstion && ion[mm].drflag > 0)        // we have space for electrons
     {
       rate_matrix[mm][mm] -= (xne * dr_coeffs[mm]);
     }
