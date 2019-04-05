@@ -51,6 +51,7 @@
 
 
 long n_lost_to_dfudge = 0;
+long nremoved = 0;  //TODO remove debug
 
 
 
@@ -202,6 +203,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   /* Line to complete watchdog timer */
   Log ("\n");
 
+  Log ("Photons lost due to maxscat: %l\n", nremoved); //TODO remove debug
   print_timer_duration ("!!python: photon transport completed in", timer_t0);
 
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
@@ -611,6 +613,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     {
       istat = pp.istat = P_TOO_MANY_SCATTERS;
       stuff_phot (&pp, p);
+      nremoved++;  //TODO remove debug
       break;
     }
 
