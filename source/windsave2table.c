@@ -74,6 +74,11 @@
  *
  * @details
  *
+ * Parse arguments provided in the command line whilst invoking windsave2table.
+ * This was originally implemented to enable somebody to query which version of
+ * Python windsave2table was compiled with. Works in a similar fashion to how
+ * the version information is stored and viewed in Python.
+ *
  **********************************************************/
 
 void
@@ -120,6 +125,9 @@ parse_arguments (int argc, char *argv[], char root[])
     }
   }
 }
+
+
+
 
 /**********************************************************/
 /** 

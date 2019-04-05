@@ -41,7 +41,6 @@ int Log_flush (void);
 int Log_set_mpi_rank (int rank, int n_mpi);
 int Log_parallel (char *format, ...);
 int Debug (char *format, ...);
+void Exit (int error_code);
 /* synonyms.c */
 int check_synonyms (char new_question[], char old_question[]);
-/* xlog_util.c */
-void Exit (int error_code);

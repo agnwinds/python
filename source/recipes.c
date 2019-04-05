@@ -21,8 +21,6 @@
 #include "recipes.h"
 #include "log.h"
 
-// TODO: we should figure out how/if we want to exit upon a numerical error. Defining Exit here temporarily
-void Exit (int error_code);
 
 #define EPS 1.0e-6
 #define JMAX 100
