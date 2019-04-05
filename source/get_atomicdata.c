@@ -2443,6 +2443,7 @@ would like to have simple lines for macro-ions */
           break;
 /**
  * @section Fluorescent photon yield from inner shell ionization - not currently used but read in.
+		  now not read in - see #499
  * #This is fluorescent yield data from Kaastra & Mewe (1993) -1993A&AS...97..443K
  * #It is processed from data downloaded from http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+AS/97/443
  * #Via the python script kaastra_2_py.py.
