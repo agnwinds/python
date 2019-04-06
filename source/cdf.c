@@ -405,7 +405,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   int nmin, nmax, cdf_n;
   int n;
   double sum;
-  int echeck;
+  int echeck, zcheck = 0;
 
 
 /* Perform various checks on the inputs */
@@ -565,6 +565,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     cdf->norm = 1.0;
     cdf->ncdf = 1;
     Error ("cdf_gen_from_array: all y's were zero or xmin xmax out of range of array x-- returning uniform distribution %d\n", allzero);
+    zcheck = -1;
 
   }
   else
@@ -603,7 +604,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (calc_cdf_gradient (cdf))
   {
     Error ("cdf_gen_from_array: Error returned from calc_cdf_gradient\n");
-  }                             // 57ib
+  }
 
   if ((echeck = cdf_check (cdf)) != 0)
   {
@@ -612,6 +613,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     Exit (0);
   }
 //  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
+
+  if (zcheck)
+  {
+    return (zcheck);            // Trap the case where values were initially all zeros
+  }
+
   return (echeck);
 
 }
