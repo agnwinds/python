@@ -888,14 +888,15 @@ typedef struct plasma
 //OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
   double gain;                  /* The gain being used in interations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
-                                                           The first wo  are the fraction changes in t_r, t_e between this and the last cycle. The third
+                                                           The first two are the fractional changes in t_r, t_e between this and the last cycle. The third
                                                            number is the fraction between heating and cooling divided by the sum of the 2       */
   int trcheck, techeck, hccheck;        /* NSH the individual convergence checks used to calculate converge_whole.  Each of these values
                                            is 0 if the fractional change or in the case of the last check error is less than a value, currently
                                            set to 0.05.  ksl 111126   
                                            NSH 130725 - this number is now also used to say if the cell is over temperature - it is set to 2 in this case   */
   int converge_whole, converging;       /* converge_whole is the sum of the indvidual convergence checks.  It is 0 if all of the
-                                           convergence checks indicated convergence.subroutine convergence feels point is converged, converging is an
+                                           convergence checks indicated convergence. 
+                                           converging is an
                                            indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
 
 
@@ -1019,12 +1020,11 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define TMAX_FACTOR			1.5     /*Factor by which t_e can exceed
                                                    t_r in order for absorbed to 
                                                    match emitted flux */
-//OLD - moved to zeta.c #define TMIN                            2000.
-/* ??? TMIN appears to be used both for the minimum temperature and for 
-   calculating the fraction of recombinations that go to the ground state.  This
-   looks like a problem ksl-98jul???? It is used in py_wind_updates2d, zeta.c, and py_wind_ion.c */
 
-#define TMAX    5e8             /*NSH 130725 - this is the maximum temperature permitted - this was introduced following problems with adaibatically heated cells increasing forever. The value was suggested by DP as a sensible compton teperature for the PK05/P05 Zeus models. */
+#define TMAX    5e8             /*NSH 130725 - this is the maximum temperature permitted - this was 
+                                   introduced following problems with adiabatically heated cells increasing 
+                                   forever. The value was suggested by DP as a sensible compton teperature for the PK05/P05 Zeus models. */
+#define TMIN   100              /* A minimum temperature below which various emission processes are set to 0 */
 
 
 //These constants are used in the various routines which compute ionization state
@@ -1448,6 +1448,7 @@ files;
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
 #define ALPHA_MATOM_NUMAX_LIMIT 30      /* maximum value for h nu / k T to be considered in integrals */
+#define ALPHA_FF 100.           // maximum h nu / kT to create the free free CDF
 
 
 /* non-radiative heat flow mode */
