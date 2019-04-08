@@ -771,7 +771,7 @@ kpkt (p, nres, escape, mode)
   MacroPtr mplasma;
 
   double coll_rate, rad_rate;
-  double freqmin, freqmax;
+  double freqmin, freqmax, global_freqmin;
 
 
   /* Idea is to calculated the cooling
@@ -795,28 +795,15 @@ kpkt (p, nres, escape, mode)
 
   /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
      generation (see call to one_ff below) */
-  if (geo.ioniz_or_extract)
+  freqmin = 0.0;
+  freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
+
+  if (freqmax < 1.1 * freqmin)
   {
-    /* in ionization cycles, so use the boundaries of the photon generation bands */
-    freqmin = xband.f1[0];
-
-    /* JM 1709 -- introduce a maximum frequency based on exp(-h nu / (kT)), 
-       see issue #300 */
-    freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
-
-    /* ksl This is a Bandaid for when the temperatures are very low */
-    if (freqmax < 1.1 * freqmin)
-    {
-      freqmax = 1.1 * freqmin;
-    }
+    freqmax = 1.1 * freqmin;
   }
-  else
-  {
-    /* in spectral cycles, use the frequency range of the final spectrum */
-    freqmin = geo.sfmin;
-    freqmax = geo.sfmax;
-  }
-
+  global_freqmin = xband.f1[0];
+  
 
   /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
    * every time the wind is updated */
@@ -943,7 +930,7 @@ kpkt (p, nres, escape, mode)
        volume.  Recall however that vol is part of the windPtr */
     if (one->vol > 0)
     {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, 0.0, VERY_BIG) / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
+      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
     }
     else
     {
@@ -1191,6 +1178,9 @@ kpkt (p, nres, escape, mode)
     /* used to do one_ff (one, 7.5e12, 2.626e16) here,
        but now use the band boundaries, see #187. */
     p->freq = one_ff (one, freqmin, freqmax);   //get frequency of resulting energy packet
+
+    if (p->freq < global_freqmin)
+      p->istat = P_LOFREQ_FF;
 
     return (0);
   }

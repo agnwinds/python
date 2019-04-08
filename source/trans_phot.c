@@ -616,7 +616,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       break;
     }
 
-    if (pp.istat == P_ADIABATIC)
+    if (pp.istat == P_ADIABATIC || pp.istat == P_LOFREQ_FF)
     {
       istat = pp.istat = p->istat = P_ADIABATIC;
       stuff_phot (&pp, p);
