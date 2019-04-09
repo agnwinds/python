@@ -177,7 +177,7 @@ main (argc, argv)
     if (!fgets_rc)
     {
       Error ("Input rootname is NULL or EOF\n");
-      Exit (1);                 // Exit if NULL returned
+      exit (1);                 // Exit if NULL returned
     }
     get_root (root, input);
   }

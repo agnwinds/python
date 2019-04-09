@@ -63,7 +63,7 @@ parse_command_line (argc, argv)
     if (!fgets_rc)
     {
       Error ("Input rootname is NULL or invalid\n");
-      Exit (1);
+      exit (1);
     }
     get_root (files.root, dummy);
     strcpy (files.diag, files.root);
