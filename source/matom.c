@@ -771,7 +771,7 @@ kpkt (p, nres, escape, mode)
   MacroPtr mplasma;
 
   double coll_rate, rad_rate;
-  double freqmin, freqmax, global_freqmin;
+  double freqmin, freqmax;
 
 
   /* Idea is to calculated the cooling
@@ -795,15 +795,15 @@ kpkt (p, nres, escape, mode)
 
   /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
      generation (see call to one_ff below) */
-  freqmin = 0.0;
+  freqmin = xband.f1[0];
   freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
 
+  /* ksl This is a Bandaid for when the temperatures are very low */
+  /* in this case cooling_ff should be low compared to cooling_ff_lofreq anyway */
   if (freqmax < 1.1 * freqmin)
-  {
-    freqmax = 1.1 * freqmin;
-  }
-  global_freqmin = xband.f1[0];
-  
+    {
+      freqmax = 1.1 * freqmin;
+    }
 
   /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
    * every time the wind is updated */
@@ -931,6 +931,7 @@ kpkt (p, nres, escape, mode)
     if (one->vol > 0)
     {
       cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
+      cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
     }
     else
     {
@@ -945,7 +946,7 @@ kpkt (p, nres, escape, mode)
          removed it? We delete this whole "else" if we're sure
          volumes are never zero. */
 
-      cooling_ff = mplasma->cooling_ff = 0.0;
+      cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
       Error ("kpkt: A scattering event in cell %d with vol = 0???\n", one->nwind);
       //Diagnostic      return(-1);  //57g -- Cannot diagnose with an exit
       *escape = 1;
@@ -1000,9 +1001,6 @@ kpkt (p, nres, escape, mode)
      */
 
     cooling_normalisation += cooling_adiabatic;
-
-
-
 
     mplasma->cooling_bbtot = cooling_bbtot;
     mplasma->cooling_bftot = cooling_bftot;
@@ -1163,31 +1161,29 @@ kpkt (p, nres, escape, mode)
       }
     }
   }
+
+  /* consult issues #187, #492 regarding free-free */
   else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff))
   {                             //this is a ff destruction
-
-    /* The limits for ff emission are hard-wired: 40 microns ->
-       twice energy of He II edge. Shouldn't be a problem unless
-       we're in plasma with temperatures that gives significant ff
-       emission outside this range. */
-
     *escape = 1;                //we are making an r-packet not exciting a macro atom
-
     *nres = -2;
-
-    /* used to do one_ff (one, 7.5e12, 2.626e16) here,
-       but now use the band boundaries, see #187. */
     p->freq = one_ff (one, freqmin, freqmax);   //get frequency of resulting energy packet
-
-    if (p->freq < global_freqmin)
-      p->istat = P_LOFREQ_FF;
-
+    return (0);
+  }
+  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq))
+  {                             //this is ff at low frequency
+    *escape = 1;                
+    *nres = -2;
+    /* we don't bother tracking photons below 1e14 Hz, 
+      so record that this photon was lost to "low frequency free-free" */
+    p->istat = P_LOFREQ_FF;
     return (0);
   }
 
 
+
   /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + cooling_adiabatic))
+  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq + cooling_adiabatic))
   {
 
     if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
@@ -1207,7 +1203,7 @@ kpkt (p, nres, escape, mode)
   else
   {
     /* We want destruction by collisional ionization in a macro atom. */
-    destruction_choice = destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - cooling_adiabatic;
+    destruction_choice = destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_ff_lofreq - cooling_adiabatic;
 
     for (i = 0; i < nphot_total; i++)
     {

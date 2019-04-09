@@ -1002,7 +1002,7 @@ typedef struct macro
      and used to select destruction rates for kpkts */
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-  double cooling_ff;
+  double cooling_ff, cooling_ff_lofreq;
   double cooling_adiabatic;     // this is just cool_adiabatic / vol / ne
 
 
