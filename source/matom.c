@@ -801,9 +801,9 @@ kpkt (p, nres, escape, mode)
   /* ksl This is a Bandaid for when the temperatures are very low */
   /* in this case cooling_ff should be low compared to cooling_ff_lofreq anyway */
   if (freqmax < 1.1 * freqmin)
-    {
-      freqmax = 1.1 * freqmin;
-    }
+  {
+    freqmax = 1.1 * freqmin;
+  }
 
   /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
    * every time the wind is updated */
@@ -930,7 +930,7 @@ kpkt (p, nres, escape, mode)
        volume.  Recall however that vol is part of the windPtr */
     if (one->vol > 0)
     {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
+      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne; // JM 1411 - changed to use filled volume
       cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
     }
     else
@@ -1172,10 +1172,10 @@ kpkt (p, nres, escape, mode)
   }
   else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq))
   {                             //this is ff at low frequency
-    *escape = 1;                
+    *escape = 1;
     *nres = -2;
     /* we don't bother tracking photons below 1e14 Hz, 
-      so record that this photon was lost to "low frequency free-free" */
+       so record that this photon was lost to "low frequency free-free" */
     p->istat = P_LOFREQ_FF;
     return (0);
   }
@@ -1183,7 +1183,8 @@ kpkt (p, nres, escape, mode)
 
 
   /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq + cooling_adiabatic))
+  else if (destruction_choice <
+           (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq + cooling_adiabatic))
   {
 
     if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
@@ -1203,7 +1204,9 @@ kpkt (p, nres, escape, mode)
   else
   {
     /* We want destruction by collisional ionization in a macro atom. */
-    destruction_choice = destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_ff_lofreq - cooling_adiabatic;
+    destruction_choice =
+      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_ff_lofreq -
+      cooling_adiabatic;
 
     for (i = 0; i < nphot_total; i++)
     {
@@ -1241,8 +1244,9 @@ kpkt (p, nres, escape, mode)
 
   Error ("matom.c: Failed to select a destruction process in kpkt. Abort.\n");
   Error
-    ("matom.c: cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_bf_coltot %g cooling_adiabatic %g\n",
-     mplasma->cooling_bftot, mplasma->cooling_bbtot, mplasma->cooling_ff, mplasma->cooling_bf_coltot, mplasma->cooling_adiabatic);
+    ("matom.c: choice %8.4e norm %8.4e cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_ff_lofreq %g, cooling_bf_coltot %g cooling_adiabatic %g\n",
+     destruction_choice, cooling_normalisation, mplasma->cooling_bftot, mplasma->cooling_bbtot, mplasma->cooling_ff,
+     mplasma->cooling_ff_lofreq, mplasma->cooling_bf_coltot, mplasma->cooling_adiabatic);
 
   *escape = 1;
   p->istat = P_ERROR_MATOM;

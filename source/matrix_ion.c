@@ -307,16 +307,16 @@ matrix_ion_populations (xplasma, mode)
       {
         newden[nn] = xplasma->density[nn] / elem_dens[ion[nn].z];
       }
-      
+
       /* if the ion is "simple" then find it's calculated ionization state in populations array */
-      else 
+      else
       {
 
-        for (mm = 0; mm < nrows; mm++)    // inner loop over the elements of the population array
+        for (mm = 0; mm < nrows; mm++)  // inner loop over the elements of the population array
         {
-          if (xion[mm] == nn)     // if this element contains the population of the ion is question
+          if (xion[mm] == nn)   // if this element contains the population of the ion is question
           {
-            newden[nn] = populations[mm]; // get the population
+            newden[nn] = populations[mm];       // get the population
           }
         }
       }

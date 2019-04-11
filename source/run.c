@@ -227,7 +227,7 @@ calculate_ionization (restart_stat)
     trans_phot (w, p, 0);
 
     /*Determine how much energy was absorbed in the wind */
-    zze = zzz = zz_adiab = zz_abs = zz_scat = zz_star = zz_disk = zz_err = zz_else = zz_lofreq= 0.0;
+    zze = zzz = zz_adiab = zz_abs = zz_scat = zz_star = zz_disk = zz_err = zz_else = zz_lofreq = 0.0;
     nn_adiab = nn_lofreq = 0;
     for (nn = 0; nn < NPHOT; nn++)
     {
