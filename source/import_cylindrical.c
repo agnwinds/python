@@ -88,7 +88,7 @@ import_cylindrical (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("import_cylindrical: No such file\n");
-    exit (1);   /* No need to worry about mp at this point */
+    exit (1);                   /* No need to worry about mp at this point */
   }
 
 
@@ -126,25 +126,27 @@ import_cylindrical (ndom, filename)
   }
 
 
-/* Having read in the data define some initial variables concerning the model. We cannot create
- * the wind grid or other things at this point, because we do not at this point know what
- * wind cells correspond to what elements of the grid.
- 
+/* 
  * Now calculate the dimensions of the grid.  This next calculation makes the assumption that
  * The last element of the grid was the last grid cell.  So we now calculate the sizes of
  * the grid.
- 
+ *
+ * Although the initialization of most of zdom should be postponed
+ * one has to give zdom the dimensions of the array; otherwise
+ * the wrong number of elements in wmain for the wind will be allocated
  */
 
-  xx_cyl.ndim = icell + 1;
-  xx_cyl.mdim = jcell + 1;
+  zdom[ndom].ndim = xx_cyl.ndim = icell + 1;
+  zdom[ndom].mdim = xx_cyl.mdim = jcell + 1;
+  zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
   xx_cyl.ncell = ncell;
 
   /* Check that the grid is complete */
 
-  if (ncell != xx_cyl.ndim *xx_cyl.mdim) {
-      Error("The dimensions of the imported grid seem wrong % d x %d != %d\n",xx_cyl.ndim,xx_cyl.mdim,xx_cyl.ncell);
-      exit(1);
+  if (ncell != xx_cyl.ndim * xx_cyl.mdim)
+  {
+    Error ("The dimensions of the imported grid seem wrong % d x %d != %d\n", xx_cyl.ndim, xx_cyl.mdim, xx_cyl.ncell);
+    exit (1);
   }
 
 
@@ -192,16 +194,6 @@ import_cylindrical (ndom, filename)
   xx_cyl.wind_midx[n] = xx_cyl.wind_x[n - 1] + 0.5 * delta;
 
 
-  /* Although the initialization of most of zdom should be postponed
-   * one has to give zdom the dimensions of the array; otherwise
-   * the wrong number of elements in wmains wind will be allocated
-   */
-
-  zdom[ndom].ndim = xx_cyl.ndim;
-  zdom[ndom].mdim = xx_cyl.mdim;
-  zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
-
-
   return (0);
 }
 
@@ -238,8 +230,8 @@ cylindrical_make_grid_import (w, ndom)
 {
   int n;
   int nn;
-  double r, rmin, rmax, rho_min, rho_max, zmin, zmax;
-  double x[3],r_inner,r_outer;
+  double rmin, rmax, rho_min, rho_max, zmin, zmax;
+  double x[3], r_inner, r_outer;
 
   Log ("XX Dimensions of read in model: %d %d\n", zdom[ndom].ndim, zdom[ndom].mdim);
 
@@ -307,25 +299,25 @@ cylindrical_make_grid_import (w, ndom)
   {
     if (xx_cyl.inwind[n] >= 0)
     {
-    x[0] = xx_cyl.x[n];
-    x[1] = 0;
-    x[2] = xx_cyl.z[n];
+      x[0] = xx_cyl.x[n];
+      x[1] = 0;
+      x[2] = xx_cyl.z[n];
 
-    r_inner=length(x);
+      r_inner = length (x);
 
-    x[0] = xx_cyl.x[n+xx_cyl.mdim];
-    x[1] = 0;
-    x[2] = xx_cyl.z[n+1];
+      x[0] = xx_cyl.x[n + xx_cyl.mdim];
+      x[1] = 0;
+      x[2] = xx_cyl.z[n + 1];
 
-    r_outer = length (x);
+      r_outer = length (x);
 
-      if (xx_cyl.x[n+ xx_cyl.mdim] > rho_max)
+      if (xx_cyl.x[n + xx_cyl.mdim] > rho_max)
       {
-        rho_max = xx_cyl.x[n+ xx_cyl.mdim];
+        rho_max = xx_cyl.x[n + xx_cyl.mdim];
       }
-      if (xx_cyl.z[n+1] > zmax)
+      if (xx_cyl.z[n + 1] > zmax)
       {
-        zmax = xx_cyl.z[n+1]; 
+        zmax = xx_cyl.z[n + 1];
       }
       if (xx_cyl.z[n] < zmin)
       {
@@ -335,9 +327,6 @@ cylindrical_make_grid_import (w, ndom)
       {
         rmax = r_outer;
       }
-//OLD    }
-//OLD    else
-//OLD    {
       if (rho_min > xx_cyl.x[n])
       {
         rho_min = xx_cyl.x[n];
@@ -351,9 +340,9 @@ cylindrical_make_grid_import (w, ndom)
 
 
 
-  Log("Imported:    rmin    rmax  %e %e\n",rmin,rmax);
-  Log("Imported:    zmin    zmax  %e %e\n",zmin,zmax);
-  Log("Imported: rho_min rho_max  %e %e\n",rho_min,rho_max);
+  Log ("Imported:    rmin    rmax  %e %e\n", rmin, rmax);
+  Log ("Imported:    zmin    zmax  %e %e\n", zmin, zmax);
+  Log ("Imported: rho_min rho_max  %e %e\n", rho_min, rho_max);
 
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = rho_min;
   zdom[ndom].wind_rho_max = zdom[ndom].rho_max = rho_max;

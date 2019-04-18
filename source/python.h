@@ -1069,7 +1069,7 @@ typedef struct photon
     P_ESCAPE = 2,               //Escaped to reach the universe,
     P_HIT_STAR = 3,             //absorbed by photosphere of star,
     P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
-    P_ERROR = 5,                //Tryint to scatter a photon in a location where it should not scatter
+    P_ERROR = 5,                //Trying to scatter a photon in a location where it should not scatter
     P_ABSORB = 6,               //Photoabsorbed within wind
     P_HIT_DISK = 7,             //Banged into disk
     P_SEC = 8,                  //Photon hit secondary
