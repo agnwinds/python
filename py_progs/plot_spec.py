@@ -134,7 +134,7 @@ def do_all_angles_ev(rootname='sv',smooth=21,emin=1000,emax=9000,fmax=0,fig_no=1
     if rootname.count('.')>0:
         filename=rootname
         rootname=rootname[0:rootname.rindex('.')]
-        print('test',rootname)
+        # print('test',rootname)
     else:
         filename=rootname+'.spec'
 
@@ -174,7 +174,7 @@ def do_all_angles_ev(rootname='sv',smooth=21,emin=1000,emax=9000,fmax=0,fig_no=1
 
     for col in cols:
         flux=data[col]
-        print(flux)
+        # print(flux)
         xlabel=col+'$^{\circ}$'
         q=convolve(flux,boxcar(smooth)/float(smooth),mode='same')
         pylab.semilogx(data['Freq.']*HEV,q*data['Freq.'],'-',label=xlabel)
@@ -257,7 +257,7 @@ def do_all_angles(rootname='sv',smooth=21,wmin=850,wmax=1850,fmax=0,fig_no=1):
 
     for col in cols:
         flux=data[col]
-        print(flux)
+        # print(flux)
         xlabel=col+'$^{\circ}$'
         q=convolve(flux,boxcar(smooth)/float(smooth),mode='same')
         pylab.plot(data['Lambda'],q,'-',label=xlabel)
