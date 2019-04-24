@@ -500,6 +500,15 @@ make_spectra (restart_stat)
 
   kbf_need (freqmin, freqmax);
 
+  /* force recalculation of kpacket rates */
+  if (geo.rt_mode == RT_MODE_MACRO) 
+  {
+    for (n == 0; n < NPLASMA; n++)
+    {
+      macromain[n].kpkt_rates_known = -1;
+    }
+  }
+
   /* BEGIN CYCLES TO CREATE THE DETAILED SPECTRUM */
 
   /* the next section initializes the spectrum array in two cases, for the
