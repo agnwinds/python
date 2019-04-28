@@ -75,7 +75,7 @@ int i_spec_start = 0;
  * Warning - Do not put anything in this routine that does anything but initialize
  * or reinitialize the spectrum structure s. This is important because this routine
  * is not accessed if one is continuing an old calculation of the detailed spectrum.
- * It is still use on a restart where the detailed spectral cycles have not begun
+ * It is still used on a restart where the detailed spectral cycles have not begun
  * because in that case the spectra are not saved.
  *
  **********************************************************/
@@ -680,6 +680,9 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   double x, dd;
 
 
+  Log("spectrum_summary: renorm %d %d %f\n",geo.pcycle,geo.pcycles,renorm);
+
+
 
   /* Open or reopen a file for writing the spectrum */
   if ((fptr = fopen (filename, "w")) == NULL)
@@ -866,7 +869,13 @@ spectrum_restart_renormalise (nangle)
   int n, m, nspec;
 
   nspec = nangle + MSPEC;
-  renorm_factor = ((double) geo.pcycle + 1.0) / ((double) geo.pcycles + 1.0);
+
+//Old  renorm_factor = ((double) geo.pcycle + 1.0) / ((double) geo.pcycles + 1.0);
+  renorm_factor = ((double) geo.pcycle ) / ((double) geo.pcycles);
+
+  renorm_factor= 1.;
+
+  Log("spectrum_restart_renormalise:  %d %d %f\n",geo.pcycle,geo.pcycles,renorm_factor);
 
   /* loop over each spectrum column and each wavelength bin */
   for (n = MSPEC; n < nspec; n++)

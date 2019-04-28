@@ -1200,7 +1200,7 @@ typedef struct spectrum
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 
   double f_wind[NWAVE];         /* The spectrum of photons created in the wind or scattered in the wind. Created for 
-                                   reflection studies but possible useful for other reasons as well. */
+                                   reflection studies but possibly useful for other reasons as well. */
   double lf_wind[NWAVE];        /* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;
