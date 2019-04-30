@@ -1,18 +1,37 @@
 """
-Script for automatically generating documentation from Python *.c files
+This script goes through the (non-blacklisted) input .c files, and identifies
+the input variables, their types and any notes (e.g. units, choices).
+
+It then compares this list to the existing documentation files, and lists
+which existing documentation refers to parameters that are now deprecated,
+and which parameters that are new and yet to be documented.
+
+By default, the script will simply print the new and deprecated files to
+the screen.
+
+Arguments:
+    -p
+        Print the full text of all .yaml files that would be created to the screen.
+
+    -w
+        Move any deprecated parameters to $PYTHON/parameters/old/,
+        then write any new parameters to file.
+
+        Note, this will not over-write any parameters that have changed types
+        but not names e.g. rdflo('thing') to rdint('thing').
 """
 # -*- coding: <utf-8> -*-
 import yaml
 import os
 import sys
-import typing
+from typing import List
 from collections import OrderedDict
 
 
-def parse_param_to_dict(found_parameters: typing.List[dict], text: str, input_file: str, param_type: str) -> bool:
+def parse_param_to_dict(found_parameters: List[dict], text: str, input_file: str, param_type: str) -> bool:
     """
-    Given a string that's the text of a c function call for a parameter, decide
-    if this is a parameter and return so.
+    Given a string that's the text of a c function call for a parameter,
+    decide if this is a parameter and return so.
 
     Arguments:
         found_parameters: Array of found parameter entries so far.
@@ -21,7 +40,7 @@ def parse_param_to_dict(found_parameters: typing.List[dict], text: str, input_fi
         param_type: Parameter type e.g. Integer, Enumerator.
 
     Returns:
-        False: I'm not sure why.
+        bool False: I'm not sure why.
     """
     param_dict = OrderedDict([
         ('name', 'Name'),
@@ -81,7 +100,7 @@ def parse_param_to_dict(found_parameters: typing.List[dict], text: str, input_fi
 
     # Otherwise, we need to parse the remaining descriptive text e.g
     # the (bar,baz) from foo(bar,baz)
-    for key, value in bool_types.items():
+    for key, value in BOOL_TYPES.items():
         # Check to see if this is a de-facto boolean
         if key in text.lower():
             param_dict["type"] = value.strip()
@@ -95,7 +114,7 @@ def parse_param_to_dict(found_parameters: typing.List[dict], text: str, input_fi
     # So: Is this string (blahblahblah) or is it (foo,bar,baz)?
     if ',' not in text:
         # If this is not an enumerated list, it's a unit or description.
-        for key, value in unit_types.items():
+        for key, value in UNIT_TYPES.items():
             # Is the description a unit?
             if key in text.lower():
                 param_dict["unit"] = value.strip()
@@ -115,7 +134,7 @@ def parse_param_to_dict(found_parameters: typing.List[dict], text: str, input_fi
 
 
 # ==============================================================================
-# SETUP
+# CONSTANTS
 # ==============================================================================
 
 # Set up input and output folders. Requires PYTHON environment variable.
@@ -124,11 +143,11 @@ output_folder = os.path.join(os.environ["PYTHON"], "docs", "parameters")
 output_old_folder = os.path.join(os.environ["PYTHON"], "docs", "parameters", "old")
 
 # Do not generate documentation for inputs in files containing these substrings
-blacklist = ["py_wind", "plot_roche", "py_grid", "synonyms", "t_bilinear", "rdpar"]
+BLACKLIST = ["py_wind", "plot_roche", "py_grid", "synonyms", "t_bilinear", "rdpar"]
 
 # Types of parameter read functions and the type they correspond to.
 # Must include 'wrappers' e.g. get_spectype.
-param_types = {"get_spectype": "Int",
+PARAM_TYPES = {"get_spectype": "Int",
                "rdint": "Int",
                "rdflo": "Float",
                "rddoub": "Double",
@@ -138,7 +157,7 @@ param_types = {"get_spectype": "Int",
 
 # Types of unit in the description, and what to write in the output.
 # The first matching entry will be applied (e.g. msol/yr before msol).
-unit_types = OrderedDict([("cm", "cm"),
+UNIT_TYPES = OrderedDict([("cm", "cm"),
                           ("ergs/s", "ergs/s"),
                           ("ev", "eV"),
                           ("deg", 'Degrees'),
@@ -153,149 +172,157 @@ unit_types = OrderedDict([("cm", "cm"),
                           ("vescap", "Escape velocity")])
 
 # Ways boolean variables are shown in the description and their types.
-bool_types = {"1=yes": "Boolean (1/0)",
+BOOL_TYPES = {"1=yes": "Boolean (1/0)",
               "y=1": "Boolean (1/0)",
               'anything_else': "Boolean (1/0)",
               'y/n': 'Boolean (Y/N)',
               'yes,no': 'Boolean (yes/no)'}
 
 
-# Make a list of output files. First, try making output folder
-try:
-    os.makedirs(os.fsencode(output_folder))
-except OSError:
-    pass
-try:
-    os.makedirs(os.fsencode(output_old_folder))
-except OSError:
-    pass
+def list_existing_documentation(directory: str) -> List[str]:
+    """
+    Look through the output folder, and record every .yaml file in it.
+
+    Arguments:
+        directory: The location to look in.
+    Returns:
+        List[str]: Existing .yaml documentation files.
+    """
+    existing_documentation = []
+    for filename in os.listdir(output_folder):
+        parameter = os.path.splitext(filename)
+        if 'yaml' in parameter[1]:
+            existing_documentation.append(parameter[0])
+    return existing_documentation
 
 
-# ==============================================================================
-# FIRST STEP: Read existing documentation and source files.
-# ==============================================================================
+def list_input_files(directory: str) -> List[str]:
+    """
+    Look through the source folder, and track each file that isn't in the blacklist.
 
-# Look through the output folder, and record every .yaml file in it.
-existing_documentation = []
-for filename in os.listdir(output_folder):
-    parameter = os.path.splitext(filename)
-    if 'yaml' in parameter[1]:
-        existing_documentation.append(parameter[0])
-
-# Look through the source folder, and track each file that isn't in the blacklist.
-input_files = []
-for filename in os.listdir(input_folder):
-    # For each file in the input folder
-    if filename.endswith(".c") and not any(black in filename for black in blacklist):
-        # This is a valid input file
-        input_files.append(filename)
-    else:
-        continue
-
-# existing_documentation = []
-# input_files = ['autogen_test.c']
-
-# ==============================================================================
-# SECOND STEP: Process the source files and pull the parameters from them.
-# ==============================================================================
-
-# For each input file, process and add to found parameters list
-# Found parameters is just a list of names. This is for if a parameter is in multiple files.
-found_parameters = []
-# Output dict is the actual structured dict of documentation dicts to output.
-output_dict = OrderedDict()
-
-for input_file in input_files:
-    # For each input file with parameters in
-    file_object = open(os.path.join(input_folder, input_file), "r")
-
-    # file_text = file_object.read()
-    #
-    # # Remove all the block comments
-    # while "/*" in file_text:
-    #     start = file_text.find('/*')
-    #     end = file_text.find('*/', start)
-    #     comment = file_text[start:end+3]
-    #     file_text = file_text.replace(comment, '')
-    #
-    # # Remove all the in-line comments
-    # while '//' in file_text:
-    #     start = file_text.find('//')
-    #     end = file_text.find('\n', start)
-    #     comment = file_text[start:end+2]
-    #     file_text = file_text.replace(comment, '')
-    #
-    # # Remove the linebreaks, then split based on command terminators.
-    # file_text = file_text.replace('\n', '')
-    # file_lines = file_text.split(';')
-
-    while not file_object.closed:
-        # Whilst this file is open, read a line in to find a new parameter.
-        line = file_object.readline()
-        if not line:
-            # If it's "", this is the end of the file. Close it.
-            file_object.close()
-            break
-        elif "//" in line.strip()[:2]:
-            # Comment line, ignore
-            pass
-        elif "/*" in line.strip()[:2]:
-            # Multi-line comment, keep reading extra lines.
-            # Until we get to the other end of the comment block.
-            while "*/" not in line.strip()[-2:]:
-                line = file_object.readline()
+    Arguments:
+        directory: The location to look in.
+    Returns:
+        List[str]: Input .c files.
+    """
+    input_files = []
+    for filename in os.listdir(input_folder):
+        # For each file in the input folder
+        if filename.endswith(".c") and not any(black in filename for black in BLACKLIST):
+            # This is a valid input file
+            input_files.append(filename)
         else:
-            # This is a line of actual c code.
-            # It may be split over multiple lines, contain comments, and be messy.
-            # We need to clean this line up and send it on to be parsed.
+            continue
+    return input_files
 
-            # First, we check the dict of parameter read functions to see if this line
-            # contains one of them.
-            for rd_function, param_type in param_types.items():
-                if rd_function in line.lower():
-                    # We've found a rdpar line with a readable entry,
-                    # now let's build the text to parse
-                    while ";" not in line:
-                        # If this line is spread across multiple lines:
-                        # Staple lines together until we have a full "foo (bar \n baz);"
-                        line += file_object.readline()
 
-                    # The line may be structured as "foo (bar /* blah */ \n baz);"
-                    # Remove any block comments from the line
-                    while '/*' in line:
-                        comment_start = line.find('/*')
-                        comment_finish = line.find('*/')+1
-                        comment = line[comment_start:comment_finish]
-                        line = line.replace(comment, '')
+def read_parameters(input_files: List[str]) -> OrderedDict(), List[str]:
+    """
+    For each input file, process and add to found parameters list.
 
-                    # Remove any single-line comments
-                    while '//' in line:
-                        comment_start = line.find('//')
-                        comment_finish = line.find('\n', comment_start)+1
-                        comment = line[comment_start:comment_finish]
-                        line = line.replace(comment, '')
+    Arguments:
 
-                    # Remove any linebreaks
-                    line = line.replace('\n', '')
+    Returns:
+    """
+    found_parameters = []
+    output_dict = OrderedDict()
 
-                    if '(' not in line or '"' not in line:
-                        # This isn't anything useful
-                        continue
+    for input_file in input_files:
+        # For each input file with parameters in
+        file_object = open(os.path.join(input_folder, input_file), "r")
 
-                    # Now we've got the full line, extract the parameter text
-                    # e.g. rdchoice("var(foo,bar,baz)"", value, choices)
-                    # we want to pass "var(foo,bar,baz)" for analysis.
-                    start = line.find('"')
-                    end = line.find('"', start+1)
-                    text = line[start+1:end]
-                    parse_param_to_dict(found_parameters=found_parameters, text=text,
-                                        input_file=input_file, param_type=param_type)
+        # file_text = file_object.read()
+        #
+        # # Remove all the block comments
+        # while "/*" in file_text:
+        #     start = file_text.find('/*')
+        #     end = file_text.find('*/', start)
+        #     comment = file_text[start:end+3]
+        #     file_text = file_text.replace(comment, '')
+        #
+        # # Remove all the in-line comments
+        # while '//' in file_text:
+        #     start = file_text.find('//')
+        #     end = file_text.find('\n', start)
+        #     comment = file_text[start:end+2]
+        #     file_text = file_text.replace(comment, '')
+        #
+        # # Remove the linebreaks, then split based on command terminators.
+        # file_text = file_text.replace('\n', '')
+        # file_lines = file_text.split(';')
 
-# Intersections of documentation
-deprecated_documentation = sorted(list(set(existing_documentation) - set(found_parameters)),
-                                  key=lambda s: s.lower())
-new_documentation = sorted(list(set(found_parameters) - set(existing_documentation)),
-                           key=lambda s: s.lower())
+        while not file_object.closed:
+            # Whilst this file is open, read a line in to find a new parameter.
+            line = file_object.readline()
+            if not line:
+                # If it's "", this is the end of the file. Close it.
+                file_object.close()
+                break
+            elif "//" in line.strip()[:2]:
+                # Comment line, ignore
+                pass
+            elif "/*" in line.strip()[:2]:
+                # Multi-line comment, keep reading extra lines.
+                # Until we get to the other end of the comment block.
+                while "*/" not in line.strip()[-2:]:
+                    line = file_object.readline()
+            else:
+                # This is a line of actual c code.
+                # It may be split over multiple lines, contain comments, and be messy.
+                # We need to clean this line up and send it on to be parsed.
+
+                # First, we check the dict of parameter read functions to see if this line
+                # contains one of them.
+                for rd_function, param_type in PARAM_TYPES.items():
+                    if rd_function in line.lower():
+                        # We've found a rdpar line with a readable entry,
+                        # now let's build the text to parse
+                        while ";" not in line:
+                            # If this line is spread across multiple lines:
+                            # Staple lines together until we have a full "foo (bar \n baz);"
+                            line += file_object.readline()
+
+                        # The line may be structured as "foo (bar /* blah */ \n baz);"
+                        # Remove any block comments from the line
+                        while '/*' in line:
+                            comment_start = line.find('/*')
+                            comment_finish = line.find('*/')+1
+                            comment = line[comment_start:comment_finish]
+                            line = line.replace(comment, '')
+
+                        # Remove any single-line comments
+                        while '//' in line:
+                            comment_start = line.find('//')
+                            comment_finish = line.find('\n', comment_start)+1
+                            comment = line[comment_start:comment_finish]
+                            line = line.replace(comment, '')
+
+                        # Remove any linebreaks
+                        line = line.replace('\n', '')
+
+                        if '(' not in line or '"' not in line:
+                            # This isn't anything useful
+                            continue
+
+                        # Now we've got the full line, extract the parameter text
+                        # e.g. rdchoice("var(foo,bar,baz)"", value, choices)
+                        # we want to pass "var(foo,bar,baz)" for analysis.
+                        start = line.find('"')
+                        end = line.find('"', start+1)
+                        text = line[start+1:end]
+                        parse_param_to_dict(found_parameters=found_parameters, text=text,
+                                            input_file=input_file, param_type=param_type)
+
+def intersect_documentation(existing_documentation: List[str],
+                            found_parameters: List[str]) -> List[str], List[str]:
+    """
+    Intersections of documentation
+    """
+    deprecated_documentation = sorted(list(set(existing_documentation) - set(found_parameters)),
+                                      key=lambda s: s.lower())
+    new_documentation = sorted(list(set(found_parameters) - set(existing_documentation)),
+                               key=lambda s: s.lower())
+    return deprecated_documentation, new_documentation
 
 # If we're not running in write mode
 if len(sys.argv) is 1:
@@ -313,12 +340,12 @@ if len(sys.argv) is 1:
 
 # From https://stackoverflow.com/questions/8640959/how-can-i-control-what-scalar-form-pyyaml-uses-for-my-data
 # Use literal outputs for multiline
-def should_use_block(value):
+def should_use_block(value: str) -> bool:
     """
     Whether or not this string is multi-line and should use the '|' literal string format
 
     Args:
-        value (string): String to test
+        value: String to test
     Returns:
         bool: Whether or not this is a multi-line string
     """
@@ -351,41 +378,60 @@ def my_represent_scalar(self, tag, value, style=None):
     return node
 
 
-# https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
-# Dump ordered dicts properly
-def dict_representer(dumper, data):
+def yaml_output(output_dict, new_documentation, deprecated_documentation,
+                print:bool = False, write:bool = False):
     """
-    Function for representing ordered dictionaries like regular ones
 
-    Args:
-        dumper (class): Type of object to be dumped
-        data(iterator): Output representation of class
-    Returns:
-        function: Way a dictionary should be represented
+    Arguments:
+
     """
-    return dumper.represent_dict(data.items())
+
+    # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
+    # Dump ordered dicts properly
+    def dict_representer(dumper, data):
+        """
+        Function for representing ordered dictionaries like regular ones
+
+        Args:
+            dumper (class): Type of object to be dumped
+            data(iterator): Output representation of class
+        Returns:
+            function: Way a dictionary should be represented
+        """
+        return dumper.represent_dict(data.items())
 
 
-yaml.representer.BaseRepresenter.represent_scalar = my_represent_scalar
-yaml.add_representer(OrderedDict, dict_representer)
+    yaml.representer.BaseRepresenter.represent_scalar = my_represent_scalar
+    yaml.add_representer(OrderedDict, dict_representer)
 
-# Output to file and print to screen
-if '-p' in sys.argv[1:]:
-    print("Printing new documentation to screen...\n")
-if '-w' in sys.argv[1:]:
-    print("Writing out...")
-    for filename in deprecated_documentation:
-        original_path = os.path.join(output_folder, '{}.yaml'.format(filename))
-        moved_path = os.path.join(output_old_folder, '{}.yaml'.format(filename))
-        os.rename(original_path, moved_path)
+    # Output to file and print to screen
+    if print:
+        print("Printing new documentation to screen...\n")
+    if write:
+        print("Writing out...")
+        for filename in deprecated_documentation:
+            original_path = os.path.join(output_folder, '{}.yaml'.format(filename))
+            moved_path = os.path.join(output_old_folder, '{}.yaml'.format(filename))
+            os.rename(original_path, moved_path)
 
 
-for key, value in output_dict.items():
-    print("File: {}/{}.yaml".format(output_folder, key))
-    if '-p' in sys.argv[1:] and key in new_documentation:
-        print(yaml.dump(value, default_flow_style=False, allow_unicode=True))
+    for key, value in output_dict.items():
+        print("File: {}/{}.yaml".format(output_folder, key))
+        if print and key in new_documentation:
+            print(yaml.dump(value, default_flow_style=False, allow_unicode=True))
 
-    if '-w' in sys.argv[1:] and key in new_documentation:
-        with open(os.path.join(output_folder, "{}.yaml".format(key)), "w") as file_object:
-            # For each key, open a yaml file and write to it.
-            yaml.dump(value, file_object, default_flow_style=False, allow_unicode=True)
+        if write and key in new_documentation:
+            with open(os.path.join(output_folder, "{}.yaml".format(key)), "w") as file_object:
+                # For each key, open a yaml file and write to it.
+                yaml.dump(value, file_object, default_flow_style=False, allow_unicode=True)
+
+
+
+# Next lines permit one to run the routine from the command line
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv)>1:
+        # steer(sys.argv)
+        pass
+    else:
+        print (__doc__)
