@@ -680,7 +680,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   double x, dd;
 
 
-  Log("spectrum_summary: renorm %d %d %f\n",geo.pcycle,geo.pcycles,renorm);
+  Log ("spectrum_summary: renorm %d %d %f\n", geo.pcycle, geo.pcycles, renorm);
 
 
 
@@ -871,11 +871,11 @@ spectrum_restart_renormalise (nangle)
   nspec = nangle + MSPEC;
 
 //Old  renorm_factor = ((double) geo.pcycle + 1.0) / ((double) geo.pcycles + 1.0);
-  renorm_factor = ((double) geo.pcycle ) / ((double) geo.pcycles);
+  renorm_factor = ((double) geo.pcycle) / ((double) geo.pcycles);
 
-  renorm_factor= 1.;
+  renorm_factor = 1.;
 
-  Log("spectrum_restart_renormalise:  %d %d %f\n",geo.pcycle,geo.pcycles,renorm_factor);
+  Log ("spectrum_restart_renormalise:  %d %d %f\n", geo.pcycle, geo.pcycles, renorm_factor);
 
   /* loop over each spectrum column and each wavelength bin */
   for (n = MSPEC; n < nspec; n++)

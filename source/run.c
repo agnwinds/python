@@ -541,7 +541,7 @@ make_spectra (restart_stat)
 
 
     Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle + 1, geo.pcycles);
-    Log_flush ();               
+    Log_flush ();
 
     if (!geo.wind_radiation)
       iwind = -1;               /* Do not generate photons from wind */
@@ -590,7 +590,7 @@ make_spectra (restart_stat)
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
     renorm = ((double) (geo.pcycles)) / (geo.pcycle + 1.0);
-    Log("run: renorm %d %d %f \n",geo.pcycle,geo.pcycles,renorm);
+    Log ("run: renorm %d %d %f \n", geo.pcycle, geo.pcycles, renorm);
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
