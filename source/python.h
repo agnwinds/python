@@ -480,7 +480,7 @@ struct geometry
 
   /* The next set pf variables assign a SPECTYPE (see above) for
      each possible source of radiation in a model.  The value assigned can be different for
-     the ionization and detaled spectrum generation part of the code */
+     the ionization and detailed spectrum generation part of the code */
 
   int star_ion_spectype, star_spectype; /* The type of spectrum used to create the continuum
                                            for the star in the ionization and final spectrum calculation */
