@@ -407,18 +407,15 @@ main (argc, argv)
     geo.run_type = RUN_TYPE_RESTART;    // We are continuing an old run
 
     xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
-	
-	printf ("BLAH the number of model files read in previously is %i\n",geo.model_count);
-	
-	if (geo.model_count>0) //We have previously used models - we need to read them in again
-	{
-		for (n=0;n<geo.model_count;n++)
-		{
-			printf ("BLAH We need to import model %i from %s\n",n,geo.model_list[n]);
-			get_models (geo.model_list[n], 2, &dummy_spectype);
-			printf ("BLAH got spectype %i\n",dummy_spectype);
-		}
-	}
+
+
+    if (geo.model_count > 0)    //We have previously used models - we need to read them in again
+    {
+      for (n = 0; n < geo.model_count; n++)
+      {
+        get_models (geo.model_list[n], 2, &dummy_spectype);
+      }
+    }
     if (geo.pcycle > 0)
     {
       spec_read (files.specsave);
