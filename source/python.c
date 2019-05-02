@@ -294,7 +294,7 @@ main (argc, argv)
   int n;
   char answer[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
-  int *dummy;
+  int dummy_spectype;
 
   FILE *fopen ();
 
@@ -414,7 +414,9 @@ main (argc, argv)
 	{
 		for (n=0;n<geo.model_count;n++)
 		{
-			get_models (geo.model_list[n], 2, *dummy);
+			printf ("BLAH We need to import model %i from %s\n",n,geo.model_list[n]);
+			get_models (geo.model_list[n], 2, &dummy_spectype);
+			printf ("BLAH got spectype %i\n",dummy_spectype);
 		}
 	}
     if (geo.pcycle > 0)
