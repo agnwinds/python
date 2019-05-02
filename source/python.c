@@ -293,7 +293,8 @@ main (argc, argv)
   double freqmin, freqmax;
   int n;
   char answer[LINELENGTH];
-
+  int get_models ();            // Note: Needed because get_models cannot be included in templates.h
+  int *dummy;
 
   FILE *fopen ();
 
@@ -406,7 +407,16 @@ main (argc, argv)
     geo.run_type = RUN_TYPE_RESTART;    // We are continuing an old run
 
     xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
-
+	
+	printf ("BLAH the number of model files read in previously is %i\n",geo.model_count);
+	
+	if (geo.model_count>0) //We have previously used models - we need to read them in again
+	{
+		for (n=0;n<geo.model_count;n++)
+		{
+			get_models (geo.model_list[n], 2, *dummy);
+		}
+	}
     if (geo.pcycle > 0)
     {
       spec_read (files.specsave);
