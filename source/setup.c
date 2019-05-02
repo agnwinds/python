@@ -140,12 +140,14 @@ init_geo ()
   geo.wcycles = geo.pcycles = 1;
   geo.wcycle = geo.pcycle = 0;
 
+  geo.model_count = 0;          //The number of models read in
+
   return (0);
 }
 
 /// This is to assure that we read model lists in the same order everytime
 char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";
-int get_spectype_count = 0;
+//int model_count = 0;
 
 
 /**********************************************************/
@@ -221,18 +223,29 @@ get_spectype (yesno, question, spectype)
     {
       if (geo.run_type == RUN_TYPE_PREVIOUS)
       {                         // Continuing an old model
-        strcpy (model_list, geo.model_list[get_spectype_count]);
+        strcpy (model_list, geo.model_list[geo.model_count]);
       }
       else
       {                         // Starting a new model
         strcpy (model_list, get_spectype_oldname);
       }
-      rdstr ("Input_spectra.model_file", model_list);
-      get_models (model_list, 2, spectype);
 
-      strcpy (geo.model_list[get_spectype_count], model_list);  // Copy it to geo
+      rdstr ("Input_spectra.model_file", model_list);
+
+      for (i = 0; i < geo.model_count; i++)     //See if we have already read in this model
+      {
+        if (strcmp (model_list, geo.model_list[i]) == 0)
+        {
+          *spectype = i;
+          return (*spectype);
+        }
+      }
+
+      get_models (model_list, 2, spectype);
+      strcpy (geo.model_list[geo.model_count], model_list);     // Copy it to geo
       strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
-      get_spectype_count++;
+
+      geo.model_count++;
     }
   }
   else
