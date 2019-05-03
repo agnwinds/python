@@ -342,7 +342,10 @@ struct geometry
    * in the calculation */
 
   int wcycle, pcycle;           /* The number of completed ionization and spectrum cycles */
-  int wcycles, pcycles;         /* The number of ionization and spectrum cycles desired */
+  int wcycles, pcycles,pcycles_renorm;    /* The number of ionization and spectrum cycles desired, pcycles_renorm 
+                                           * is only used on restarts.  See spectrum_restart_renormalize
+                                           */
+
 
   /* This section stores information whihc specifies the spectra to be extracted.  Some of the parameters
    * are used only in advanced modes.  

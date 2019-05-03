@@ -529,6 +529,8 @@ make_spectra (restart_stat)
     if (restart_stat == 0)
       Error ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n", geo.pcycle);
 
+    Log("Test make_spectra: %d\n",geo.run_type);
+
     spectrum_restart_renormalise (geo.nangles);
   }
 

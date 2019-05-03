@@ -539,10 +539,12 @@ init_photons ()
   rdint ("Ionization_cycles", &geo.wcycles);
   rdint ("Spectrum_cycles", &geo.pcycles);
 
+  Log("Test:  run_type %d\n",geo.run_type);
+
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    Exit (1);                   //There is really nothing to do!
+    exit (1);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */

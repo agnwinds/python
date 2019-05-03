@@ -855,9 +855,12 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
  * to reduce the fluxes for the spectral cycles that are read
  * in, so we can continue.
  * 	renorm_factor = (cycles in old pf file) / (cycles in new pf file)
- *
+ * 
+ * Restarts can also occur when one is just completing a previous
+ * run, without increasing the number of cycles, and in this case
+ * no renormalization is required.
  * ### Notes ###
- * see Issue #134
+ * see Issue #134 and more importantly #503
  *
  **********************************************************/
 
@@ -868,10 +871,25 @@ spectrum_restart_renormalise (nangle)
   double renorm_factor;
   int n, m, nspec;
 
+  if (geo.pcycles==geo.pcycles_renorm) {
+      return(0);
+  }
+
   nspec = nangle + MSPEC;
 
+  /* If we have gooten to this point, then the number of pcycles to which the
+   * spectrum has been renormalized has changed, and so we must renormalize
+   * the spectrum.  The original spectrum current is normalized to g
+   * geo.pcycle/geo.pcycles_renorm of the final value.  We want the psectrum
+   * to be geo.pcycles/geo.pcycles of the final value, so the renormlization
+   * factor is geo.pcycles_renorm/geo.pcycles.
+   */
+
+
 //Old  renorm_factor = ((double) geo.pcycle + 1.0) / ((double) geo.pcycles + 1.0);
-  renorm_factor = ((double) geo.pcycle) / ((double) geo.pcycles);
+//  renorm_factor = ((double) geo.pcycle) / ((double) geo.pcycles);
+
+  renorm_factor = ((double) geo.pcycles_renorm) / ((double) geo.pcycles);
 
   renorm_factor = 1.;
 
