@@ -537,9 +537,17 @@ init_photons ()
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
+
+  /* On restarts, the spectra that are read in have to be renormalized if
+   * the number of spectral cycles has been increased before a restart, and
+   * so we need to record this number. If this is not a restart, then 
+   * geo.pcycles_renorm will not be used.
+   */
+
+  geo.pcycles_renorm = geo.pcycles;
+
   rdint ("Spectrum_cycles", &geo.pcycles);
 
-  Log("Test:  run_type %d\n",geo.run_type);
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {

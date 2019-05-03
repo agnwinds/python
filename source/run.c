@@ -524,12 +524,10 @@ make_spectra (restart_stat)
        have already completed some. The memory for the spectral arrays
        should already have been allocated, and the spectrum was initialised
        on the original run, so we just need to renormalise the saved spectrum */
-    /* See issue #134 (JM) */
+    /* See issue #134 and #503  */
 
     if (restart_stat == 0)
       Error ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n", geo.pcycle);
-
-    Log("Test make_spectra: %d\n",geo.run_type);
 
     spectrum_restart_renormalise (geo.nangles);
   }
@@ -592,7 +590,6 @@ make_spectra (restart_stat)
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
     renorm = ((double) (geo.pcycles)) / (geo.pcycle + 1.0);
-    Log ("run: renorm %d %d %f \n", geo.pcycle, geo.pcycles, renorm);
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
