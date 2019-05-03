@@ -480,7 +480,7 @@ struct geometry
 
   /* The next set pf variables assign a SPECTYPE (see above) for
      each possible source of radiation in a model.  The value assigned can be different for
-     the ionization and detaled spectrum generation part of the code */
+     the ionization and detailed spectrum generation part of the code */
 
   int star_ion_spectype, star_spectype; /* The type of spectrum used to create the continuum
                                            for the star in the ionization and final spectrum calculation */
@@ -490,6 +490,7 @@ struct geometry
   int search_light_ion_spectype, search_light_spectype; /* Same as above but for the search_light. Created for 1d test */
 
   char model_list[NCOMPS][LINELENGTH];  /* The file which contains the model names and the associated values for the model */
+  int model_count;              /*The number of distinct models that have been read in */
 
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
   int adiabatic;                /*0-> Do not include adiabatic heating in calculating the cooling of the wind
