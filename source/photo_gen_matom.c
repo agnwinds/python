@@ -555,7 +555,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   double fmin, fmax;
 
   photstop = photstart + nphot;
-  Log ("photo_gen_kpkt creates nphot %5d photons from %5d to %5d, weight %8.4e \n", nphot, photstart, photstop, weight);
+  Log ("photo_gen_kpkt  creates nphot %5d photons from %5d to %5d, weight %8.4e \n", nphot, photstart, photstop, weight);
 
   if (geo.ioniz_or_extract)
   {

@@ -651,7 +651,7 @@ main (argc, argv)
  * radiation and then value given to return a spectrum type. The output is not the same
  * number as one inputs. It' s not obvious that this is a good idea. */
 
-  if (geo.pcycles > 0)
+  if (geo.pcycles > 0 && geo.run_type!=RUN_TYPE_RESTART)
   {
 
     rdpar_comment ("Parameters defining the spectra seen by observers\n");
