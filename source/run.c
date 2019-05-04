@@ -524,7 +524,7 @@ make_spectra (restart_stat)
        have already completed some. The memory for the spectral arrays
        should already have been allocated, and the spectrum was initialised
        on the original run, so we just need to renormalise the saved spectrum */
-    /* See issue #134 (JM) */
+    /* See issue #134 and #503  */
 
     if (restart_stat == 0)
       Error ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n", geo.pcycle);
@@ -541,7 +541,8 @@ make_spectra (restart_stat)
 
 
     Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle + 1, geo.pcycles);
-    Log_flush ();               /*NSH June 13 Added call to flush logfile */
+    Log_flush ();
+
     if (!geo.wind_radiation)
       iwind = -1;               /* Do not generate photons from wind */
     else if (geo.pcycle == 0)

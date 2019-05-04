@@ -342,7 +342,10 @@ struct geometry
    * in the calculation */
 
   int wcycle, pcycle;           /* The number of completed ionization and spectrum cycles */
-  int wcycles, pcycles;         /* The number of ionization and spectrum cycles desired */
+  int wcycles, pcycles, pcycles_renorm; /* The number of ionization and spectrum cycles desired, pcycles_renorm 
+                                         * is only used on restarts.  See spectrum_restart_renormalize
+                                         */
+
 
   /* This section stores information whihc specifies the spectra to be extracted.  Some of the parameters
    * are used only in advanced modes.  
@@ -1201,7 +1204,7 @@ typedef struct spectrum
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 
   double f_wind[NWAVE];         /* The spectrum of photons created in the wind or scattered in the wind. Created for 
-                                   reflection studies but possible useful for other reasons as well. */
+                                   reflection studies but possibly useful for other reasons as well. */
   double lf_wind[NWAVE];        /* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;

@@ -537,12 +537,22 @@ init_photons ()
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
+
+  /* On restarts, the spectra that are read in have to be renormalized if
+   * the number of spectral cycles has been increased before a restart, and
+   * so we need to record this number. If this is not a restart, then 
+   * geo.pcycles_renorm will not be used.
+   */
+
+  geo.pcycles_renorm = geo.pcycles;
+
   rdint ("Spectrum_cycles", &geo.pcycles);
+
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    Exit (1);                   //There is really nothing to do!
+    exit (1);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
