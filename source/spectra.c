@@ -889,7 +889,7 @@ spectrum_restart_renormalise (nangle)
   Log ("spectrum_restart_renormalise:  %d %d %d %f\n", geo.pcycle, geo.pcycles_renorm, geo.pcycles, renorm_factor);
 
   /* loop over each spectrum column and each wavelength bin */
-  for (n = MSPEC; n < nspec; n++)
+  for (n = 0; n < nspec; n++)
   {
     for (m = 0; m < NWAVE; m++)
     {
