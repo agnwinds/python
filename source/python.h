@@ -154,7 +154,6 @@ enum coord_type_enum
 #define KNIGGE			5
 #define	HOMOLOGOUS 		6
 #define	YSO 			7
-//OLD #define   ELVIS                   8  Deleted option
 #define	SHELL 			9
 #define IMPORT          10      // Model that is read in from a file
 #define	DISK_ATMOS 		11
@@ -347,7 +346,7 @@ struct geometry
                                          */
 
 
-  /* This section stores information whihc specifies the spectra to be extracted.  Some of the parameters
+  /* This section stores information which specifies the spectra to be extracted.  Some of the parameters
    * are used only in advanced modes.  
    */
 
@@ -356,7 +355,7 @@ struct geometry
   double angle[NSPEC], phase[NSPEC];
   int scat_select[NSPEC], top_bot_select[NSPEC];
   double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
-  double swavemin, swavemax;
+  double swavemin, swavemax,sfmin,sfmax;  // The minimum and maximum wavelengths/freqs for detailed spectra
   int select_extract, select_spectype;
 
 /* Begin description of the actual geometery */
@@ -693,9 +692,6 @@ done to make it easier to control the size of the entire structure   06jul-ksl
  */
 #define NIONIZ	5               /*The number of ions (normally H and He) for which one separately tracks ionization 
                                    and recombinations */
-//OLD #define LPDF   3                /*The number of bins into which the line luminosity is divided in the course pdf
-//OLD                                    created by total_line_emission 
-//OLD                                    Reduced from 10 to 3 by SS for testing data with few lines. */
 
 
 /* 061104 -- 58b -- ksl -- Added definitions to characterize whether a cell is in the wind. */
@@ -887,9 +883,6 @@ typedef struct plasma
 
 
 
-//OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
-//OLD  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
-//OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
   double gain;                  /* The gain being used in interations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
                                                            The first two are the fractional changes in t_r, t_e between this and the last cycle. The third
@@ -1275,10 +1268,6 @@ char hubeny_list[132];          //Location of listing of files representing hube
 /* Allow for the transfer of tau info to scattering routine */
 
 
-//180414-ksl-moved to anisowind.c which is the only place they were called.
-//OLD struct Cdf cdf_randwind_store[100];
-//OLD CdfPtr cdf_randwind;
-//OLD struct photon phot_randwind;
 
 /* N.B. cdf_randwind and phot_randwind are used in the routine anisowind for 
 as part of effort to incorporate anisotropic scattering in to python.  
@@ -1339,15 +1328,6 @@ double fb_t[NTEMPS];
 int nfb;                        // Actual number of freqency intervals calculated
 
 
-//This is a new structure to contain the frequency range of the final spectrum
-//During the ionization cycles, the emissivity due to k-packets and macro atom
-//deactivations in this range will be computed and then used in the final spectral
-//synthesis part of the code (SS June04).
-struct emiss_range
-{
-  double fmin, fmax;            // min and max frequency required in the final spectrum
-}
-em_rnge;
 
 
 #include "version.h"            /*54f -- Added so that version can be read directly */
