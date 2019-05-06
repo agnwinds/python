@@ -96,7 +96,7 @@ double PHOT_RANGE;              /* When a variable number of photons are called 
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
-#define NWAVE  			  10000 //Increasing from 4000 to 10000 (SS June 04)
+#define NWAVE  			  10000 //This is the number of wavelength bins in spectra that are produced
 #define MAXSCAT 			500
 
 /* Define the structures */
@@ -355,7 +355,7 @@ struct geometry
   double angle[NSPEC], phase[NSPEC];
   int scat_select[NSPEC], top_bot_select[NSPEC];
   double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
-  double swavemin, swavemax,sfmin,sfmax;  // The minimum and maximum wavelengths/freqs for detailed spectra
+  double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
   int select_extract, select_spectype;
 
 /* Begin description of the actual geometery */
@@ -1226,7 +1226,8 @@ have access to the proper normalization.
 */
 
 
-#define NCDF 30000              //The default size for these arrays
+#define NCDF 30000              //The default size for these arrays.  This needs to be greater than
+                                //the size of any model that is read in, hence larger than NWAVE in models.h
 #define FUNC_CDF  200           //The size for CDFs made from functional form CDFs
 #define ARRAY_PDF 1000          //The size for PDFs to be turned into CDFs from arrays
 
