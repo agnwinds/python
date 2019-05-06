@@ -814,8 +814,8 @@ kpkt (p, nres, escape, mode)
   else
   {
     /* in spectral cycles, use the frequency range of the final spectrum */
-    freqmin = em_rnge.fmin;
-    freqmax = em_rnge.fmax;
+    freqmin = geo.sfmin;
+    freqmax = geo.sfmax;
   }
 
 
@@ -1521,7 +1521,7 @@ emit_matom (w, p, nres, upper)
     line_ptr = &line[config[uplvl].bbd_jump[n]];
     /* Since we are only interested in making an r-packet here we can (a) ignore collisional
        deactivation and (b) ignore lines outside the frequency range of interest. */
-    if ((line_ptr->freq > em_rnge.fmin) && (line_ptr->freq < em_rnge.fmax))     // correct range
+    if ((line_ptr->freq > geo.sfmin) && (line_ptr->freq < geo.sfmax))   // correct range
     {
       bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 
@@ -1545,7 +1545,7 @@ emit_matom (w, p, nres, upper)
 
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
-    if (cont_ptr->freq[0] < em_rnge.fmax)       //means that it may contribute
+    if (cont_ptr->freq[0] < geo.sfmax)  //means that it may contribute
     {
       sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
       eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
@@ -1687,7 +1687,7 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
 
   if (eprbs_line == 0.0)
   {
-    Error ("matom_emit_in_line_prob: Line frequency %g lies outside spectral range %g-%g!\n", line_ptr->freq, em_rnge.fmin, em_rnge.fmax);
+    Error ("matom_emit_in_line_prob: Line frequency %g lies outside spectral range %g-%g!\n", line_ptr->freq, geo.sfmin, geo.sfmax);
     return (-1.0);
   }
 

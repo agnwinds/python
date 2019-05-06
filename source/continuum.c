@@ -139,7 +139,8 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     lambdamax = C * 1e8 / freqmin;
     nwave = 0;
 
-    /* if the first wavelength in the model is below the wavelength range in the simulation,
+    /* Create the first element of the array, precisely at lambdamin if that is possible
+       Specifically, if the first wavelength in the model is below the wavelength range in the simulation,
        interpolate on the model flux to get the flux at lambdamin. copy relevant wavelengths and
        fluxes to w_local and f_local  */
     if (comp[spectype].xmod.w[0] < lambdamin && lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves - 1])
@@ -150,10 +151,14 @@ one_continuum (spectype, t, g, freqmin, freqmax)
       nwave++;
     }
 
-    /* loop over rest of model wavelengths and fluxes and copy to w_local and f_local */
+    /* loop over rest of model wavelengths and fluxes and copy to w_local and f_local.
+       This does not include the end points
+     */
+
     for (n = 0; n < comp[spectype].nwaves; n++)
     {
-      if (comp[spectype].xmod.w[n] > lambdamin && comp[spectype].xmod.w[n] <= lambdamax)
+//OLD      if (comp[spectype].xmod.w[n] > lambdamin && comp[spectype].xmod.w[n] <= lambdamax)
+      if (comp[spectype].xmod.w[n] > lambdamin && comp[spectype].xmod.w[n] < lambdamax)
       {
         w_local[nwave] = comp[spectype].xmod.w[n];
         f_local[nwave] = comp[spectype].xmod.f[n];
@@ -161,8 +166,10 @@ one_continuum (spectype, t, g, freqmin, freqmax)
       }
     }
 
-    /* now check if upper bound is beyond lambdamax, and if so, interpolate to get appropriate flux
+    /* No add a point at lambdamax.  Specicxally  check if upper bound is beyond lambdamax, and if so, 
+       interpolate to get appropriate flux
        at lambda max. copy to w_local and f_local */
+
     if (comp[spectype].xmod.w[0] < lambdamax && lambdamax < comp[spectype].xmod.w[comp[spectype].nwaves - 1])
     {
       w_local[nwave] = lambdamax;
