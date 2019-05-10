@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include "log.h"
 
+// TODO: is there a better way to define Exit in a header...?
+void Exit (int error_code);
 
 #define	LINELEN 256
 

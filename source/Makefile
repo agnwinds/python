@@ -100,7 +100,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 83
+VERSION = 83a
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
@@ -135,7 +135,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		spectral_estimators.o matom_diag.o \
 		xlog.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
-		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
+		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o
 
@@ -220,7 +220,8 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o cooling.o
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		cooling.o
 
 
 

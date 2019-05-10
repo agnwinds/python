@@ -24,7 +24,8 @@
  *
  * @param [in]  int  argc   the number of command line arguments
  * @param [in]  char *  argv[]   The command line arguments
- * @return      restart_stat   1 if restarting a previous model
+ * @return      restart_stat   1 if restarting a previous model,
+ * 0 in all other cases.
  *
  * Python has a fairly rich set of command line options, which
  * are parsed by this routine
@@ -52,14 +53,19 @@ parse_command_line (argc, argv)
   char dummy[LINELENGTH];
   int mkdir ();
   double time_max;
-  char *fgets_result;
+  char *fgets_rc;
 
   restart_stat = 0;
 
   if (argc == 1)
   {
     printf ("Parameter file name (e.g. my_model.pf, or just my_model):");
-    fgets_result = fgets (dummy, LINELENGTH, stdin);
+    fgets_rc = fgets (dummy, LINELENGTH, stdin);
+    if (!fgets_rc)
+    {
+      Error ("Input rootname is NULL or invalid\n");
+      Exit (1);
+    }
     get_root (files.root, dummy);
     strcpy (files.diag, files.root);
     strcat (files.diag, ".diag");
@@ -166,10 +172,9 @@ parse_command_line (argc, argv)
         Log ("Logarithmic photon stepping enabled\n");
         modes.photon_speedup = 1;
 
-        if (sscanf (argv[i + 1], "%i", &PHOT_STEPS) != 1)
+        if (sscanf (argv[i + 1], "%lf", &PHOT_RANGE) != 1)
         {
-          Log ("n_steps not provided, will search .pf for min and max NPHOT\n");
-          PHOT_STEPS = 0;
+          PHOT_RANGE = 1.;
           i++;
         }
         i++;
@@ -288,7 +293,9 @@ These are largely diagnostic or for special cases. These include\n\
  -e_write 	Change the maximum number of errors to print out before recording errors silently\n\
  -f             Invoke a fixed temperature mode, used for runs with Zeus \n\
  -z             Invoke a special mode for that causes Python to start with a run from Zeus\n\
- -p n_steps     Invoke the photon logarithmic stepping algorithm which in some cases can result in a speed up\n\
+ -p range       Invoke the photon logarithmic stepping algorithm which in some cases can result in a speed up\n\
+                Range is in powers of 10, the difference beween the number of photons in the first cycle \n\
+                compared to the last \n\
 \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\
