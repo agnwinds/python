@@ -797,9 +797,8 @@ kpkt (p, nres, escape, mode)
      generation (see call to one_ff below) */
   if (geo.ioniz_or_extract)
   {
-    /* in spectral cycles, so use the boundaries of the photon generation bands */
+    /* in ionization cycles, so use the boundaries of the photon generation bands */
     freqmin = xband.f1[0];
-
 
     /* JM 1709 -- introduce a maximum frequency based on exp(-h nu / (kT)), 
        see issue #300 */
@@ -1027,6 +1026,9 @@ kpkt (p, nres, escape, mode)
 
   }
 
+/* This is the end of the cooling rate calculations, which is done only once for each cell
+   and once for each cycle
+   */
 
   /* only include adiabatic cooling if we're in the right mode. First set a default 
      where adiabatic cooling is zero. This will be true if the mode isn't KPKT_MODE_ALL,
@@ -1065,6 +1067,14 @@ kpkt (p, nres, escape, mode)
      Choose which process destroys the k-packet with a random number. */
 
   destruction_choice = random_number (0.0, 1.0) * cooling_normalisation;
+
+  /* ksl - This logic of what follows may not be obvious.  For choosing the basic
+   * process, we just look to see if the destruction choice is less than bf, bf+bb, bf+bb+ff
+   * etc, but inside the bhe "basic_choices", we iteratively reduce! the destruction
+   * choice until we get to one that is less than the cooling associated with a specific
+   * tranistion. If we do not find such a transition, within for example the bf if statement
+   * we drop all the way down to the Error at the end.
+   */
 
 
   if (destruction_choice < mplasma->cooling_bftot)
