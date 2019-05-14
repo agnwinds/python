@@ -2302,7 +2302,7 @@ would like to have simple lines for macro-ions */
  * from the data on the website, just with the top few lines commented out,
  * and a label prepended to each line
  * The data is a spline fit to the gaunt factor as a function of g - the reduced
- * temperature.
+ * temperature.  The file format is shown below; there are 45 lines
  * @verbatim
  * # log(g^2) <gff(g^2)>       s1           s2            s3
  * # ------------------------------------------------------------
