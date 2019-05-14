@@ -768,7 +768,8 @@ one_ff (one, f1, f2)
  *
  * @details
  * It interpolates simply interpolates between the tabulated
- * factors from Table 3 of Sutherland.
+ * factors from Table 3 of Sutherland (which is a spline fit
+ * to the calculated gaunt factors at various values of gsquared)
  *
  * ### Notes ###
  * The reference for this is Sutherland, R.~S. 1998, MNRAS, 300, 321
@@ -786,6 +787,7 @@ gaunt_ff (gsquared)
   double gaunt;
   double log_g2;
   double delta;                 //The log difference between our G2 and the one in the table
+
   delta = 0.0;                  /* NSH 130605 to remove o3 compile error */
   index = 0;                    /* NSH 130605 to remove o3 compile error */
   log_g2 = log10 (gsquared);    //The data is in log format
@@ -793,14 +795,25 @@ gaunt_ff (gsquared)
   {
     return (1.0);
   }
-  for (i = 0; i < gaunt_n_gsqrd; i++)   /*first find the pair of parameter arrays that bracket our temperature */
-  {
-    if (gaunt_total[i].log_gsqrd <= log_g2 && gaunt_total[i + 1].log_gsqrd > log_g2)
-    {
-      index = i;                /* the array to use */
-      delta = log_g2 - gaunt_total[index].log_gsqrd;
-    }
+
+//OLD  for (i = 0; i < gaunt_n_gsqrd; i++)   /*first find the pair of parameter arrays that bracket our temperature */
+//OLD  {
+//OLD    if (gaunt_total[i].log_gsqrd <= log_g2 && gaunt_total[i + 1].log_gsqrd > log_g2)
+//OLD    {
+//OLD      index = i;                /* the array to use */
+//OLD      delta = log_g2 - gaunt_total[index].log_gsqrd;
+//OLD    }
+//OLD  }
+
+  i=0;
+  while (gaunt_total[i].log_gsqrd < log_g2) {
+      i++;
   }
+
+  index=i-1;
+  delta = log_g2 - gaunt_total[index].log_gsqrd;
+
+  /* The outherland interpolation data is a spline fit to the gaunt function. */
 
   gaunt = gaunt_total[index].gff + delta * (gaunt_total[index].s1 + delta * (gaunt_total[index].s2 + gaunt_total[index].s3));
   return (gaunt);
