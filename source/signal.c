@@ -265,7 +265,8 @@ check_time (char *root)
   {
     error_summary ("Time allowed has expired expired\n");
     xsignal (root, "COMMENT max_time %.1f exceeded\n", max_time);
-    Exit (0);
+    exit (1);  // At present this allows the code to exit completely, but produces MPI warninngs see #518
+    //OLD Exit (1);
   };
 
   return (0);
