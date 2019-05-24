@@ -673,7 +673,7 @@ string_process_from_file (question, dummy)
     if (!fgets_rc)
     {
       Error ("Input value is NULL or invalid\n");
-      Exit (1);
+      exit (1);
     }
 
     if (strcmp (dummy, "\n") == 0)
