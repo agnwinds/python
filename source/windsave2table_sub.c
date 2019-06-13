@@ -778,7 +778,7 @@ get_ion (ndom, element, istate, iswitch)
       else if (iswitch == 2)
       {
 //OLD        sprintf (name, "Element %d (%s) ion %d  #scatters\n", element, ele[nelem].name, istate);
-        x[n] = (double) plasmamain[nplasma].scatters[nion];
+        x[n] = (double) plasmamain[nplasma].scatters[nion] / plasmamain[nplasma].vol;
       }
       else if (iswitch == 3)
       {

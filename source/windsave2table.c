@@ -81,7 +81,7 @@
  *  --version    Print out information about the version number
  *
  *  -d   Write out ion densisties, rather than ion fractions in the cell
- *  -s   Write out the number of scatters by an ion in a cell, instead of the 
+ *  -s   Write out the number of scatters per unit volume  by an ion in a cell, instead of the 
  *       ion fraction
  *
  * The switches only affect the ion tables not the master table
@@ -95,7 +95,7 @@
 
 char windsave2table_help[] = "Usage: windsave2table [-r or -s] [-h] [--version] rootname \n\
 -d return denisities instead of ion fraction in ion tables \n\
--s return number of scatters of an ion instead if ion fracions \n\
+-s return number of scatters per unit volume of an ion instead if ion fracions \n\
 --version return version info and quit \n\
 -h get this help message and quit\n\
 ";
