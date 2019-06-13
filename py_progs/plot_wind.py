@@ -170,8 +170,22 @@ def get_data(filename='fiducial_agn_master.txt', var='t_r',grid='ij',inwind='',s
     elif grid=='log':
         x=numpy.array(data['x']) 
         y=numpy.array(data['z'])
-        x=numpy.log10(x)
-        y=numpy.log10(y)
+        # find the minimum value in x and y that is greater than 0
+        xmin=1e50
+        ymin=1e50
+        i=0
+        while i<len(x):
+            if x[i]>1 and x[i]<xmin:
+                xmin= x[i]
+            if y[i]>1 and y[i]<ymin:
+                ymin= y[i]
+            i+=1
+        xlogmin=numpy.log10(xmin/10)
+        ylogmin=numpy.log10(xmin/10)
+        x=numpy.select([x>1],[numpy.log10(x)],default=xlogmin)
+        y=numpy.select([y>1],[numpy.log10(y)],default=ylogmin)
+        # x=numpy.log10(x)
+        # y=numpy.log10(y)
         xlabel='log(x)'
         ylabel='log(z)'
     else:
