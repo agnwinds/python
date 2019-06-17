@@ -42,9 +42,11 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-bb. Multi-line description, must keep indentation.
+  ``bb``
+    Multi-line description, must keep indentation.
 
-models. Multi-line description, must keep indentation.
+  ``models``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
@@ -96,11 +98,14 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-bb. Multi-line description, must keep indentation.
+  ``bb``
+    Multi-line description, must keep indentation.
 
-models. Multi-line description, must keep indentation.
+  ``models``
+    Multi-line description, must keep indentation.
 
-uniform. Multi-line description, must keep indentation.
+  ``uniform``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**

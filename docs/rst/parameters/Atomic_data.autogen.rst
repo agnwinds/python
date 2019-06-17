@@ -10,7 +10,7 @@ This is the relative path to the Atomic Data header file
 **Type:** String
 
 **Parent(s):**
-  parameter_: none
+  System_type_: AGN, binary, star
 
 
 **File:** setup_domains.c

@@ -3,23 +3,6 @@
 SV
 ==
 
-SV.v_zero
-=========
-multiple_of_sound_speed
-
-**Type:** Double
-
-**Unit:** None
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** sv.c
-
-
 SV.thetamax
 ===========
 The angle at which the wind rises from the outermost launching radius in a Shlossman-Vitello type disk wind.
@@ -33,7 +16,7 @@ See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
 **Value:** Greater than sv.thetamin
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -42,7 +25,7 @@ See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
 SV.acceleration_exponent
 ========================
 Power-law acceleration exponent (i.e. alpha) of a line driven wind in a Shlosman & Vitello (SV) CV disk wind model.
-Sets the length scale over which the accleration to v_inf is accomplished. 
+Sets the length scale over which the accleration to v_inf is accomplished.
 This value is a constant; when equal to 1 the results resemble those of a linear velocity law.
 Typically for an SV type wind this power law exponent is 1.5.
 See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
@@ -52,7 +35,7 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 **Value:** Greater than 0
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -72,7 +55,7 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 **Value:** Greater than or equal to the radius of the central object (white dwarf)
 
 **Parent(s):**
-  wind_type_: 0.0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -92,7 +75,7 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 **Value:** Greater than or equal to sv.diskmin (inner radius disk wind)
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -101,7 +84,7 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 SV.acceleration_length
 ======================
 The size of the acceleration length scale for a disk wind described by the
-Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372 
+Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372
 
 **Type:** Double
 
@@ -110,7 +93,7 @@ Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372
 **Value:** Greater than 0
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -127,7 +110,7 @@ A value of 0 sets a uniform mass loss rate.
 **Value:** Greater than=0
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -141,13 +124,34 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-fixed. Multi-line description, must keep indentation.
+  ``fixed``
+    Multi-line description, must keep indentation.
 
-sound_speed. Multi-line description, must keep indentation.
+  ``sound_speed``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: SV
+
+
+**File:** sv.c
+
+
+----------------------------------------
+
+SV.v_zero
+---------
+The velocity at the wind base.
+
+**Type:** Double
+
+**Unit:** ['Speed of sound in the wind', 'cm/s']
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  SV.v_zero_mode_: sound_speed, fixed
 
 
 **File:** sv.c
@@ -166,7 +170,7 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 **Value:** Greater than 0
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c
@@ -185,7 +189,7 @@ See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 **Value:** Greater than 0
 
 **Parent(s):**
-  wind_type_: 0
+  wind_type_: SV
 
 
 **File:** sv.c

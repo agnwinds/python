@@ -154,13 +154,17 @@ where the photons was created or where it last scattered
 
 **Values:**
 
--1. Select only photons generated from below (-z) the disk
+  ``-1``
+    Select only photons generated from below (-z) the disk
 
-0. Select photons regardless of where they are generated.
+  ``0``
+    Select photons regardless of where they are generated.
 
-1. Select only photons orginating above the disk
+  ``1``
+    Select only photons orginating above the disk
 
-2. Select photons by defining a spherical region
+  ``2``
+    Select photons by defining a spherical region
 
 
 **Parent(s):**
@@ -218,11 +222,14 @@ frequency bin..
 
 **Values:**
 
-1. flambda
+  ``1``
+    flambda
 
-2. fnu
+  ``2``
+    fnu
 
-other. basic
+  ``other``
+    basic
 
 
 **Parent(s):**

@@ -60,13 +60,17 @@ The coordinate system used for a describing a component of the wind.
 
 **Values:**
 
-spherical. Spherical
+  ``spherical``
+    Spherical
 
-cylindrical. Cylindrical
+  ``cylindrical``
+    Cylindrical
 
-polar. Spherical polar
+  ``polar``
+    Spherical polar
 
-cyl_var. Cylindrical varying z
+  ``cyl_var``
+    Cylindrical varying z
 
 
 **Parent(s):**
@@ -84,19 +88,26 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-LTE_te. Multi-line description, must keep indentation.
+  ``LTE_te``
+    Multi-line description, must keep indentation.
 
-LTE_tr. Multi-line description, must keep indentation.
+  ``LTE_tr``
+    Multi-line description, must keep indentation.
 
-ML93. Multi-line description, must keep indentation.
+  ``ML93``
+    Multi-line description, must keep indentation.
 
-fixed. Multi-line description, must keep indentation.
+  ``fixed``
+    Multi-line description, must keep indentation.
 
-matrix_bb. Multi-line description, must keep indentation.
+  ``matrix_bb``
+    Multi-line description, must keep indentation.
 
-matrix_pow. Multi-line description, must keep indentation.
+  ``matrix_pow``
+    Multi-line description, must keep indentation.
 
-on.the.spot. Multi-line description, must keep indentation.
+  ``on.the.spot``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
@@ -146,9 +157,11 @@ Matthews et al. (2016), 2016MNRAS.458..293M. Asked once per domain.
 
 **Values:**
 
-1. smooth
+  ``1``
+    smooth
 
-<1. clumped
+  ``<1``
+    clumped
 
 
 **Parent(s):**
@@ -186,54 +199,14 @@ Wind.number_of_components
 While most simple description of a wind consist of a single region of space, Python can calculate
 radiative transfer through more complicated structres, where one region of space is described with one
 prescription and another region of space with a second prescription. For example, one might want to place
-a disk atomospher between the disk and a wind.  This parameter describes the number of components (aka domains)
+a disk atmoosphere between the disk and a wind.  This parameter describes the number of components (aka domains)
 of the wind.
 
 **Type:** Int
 
-**Unit:** None
-
-**Value:** greater than 0
-
-**Parent(s):**
-  parameter_: This question is always asked.
-
+**Value:** Greater than 0
 
 **File:** python.c
-
-
-Wind.type
-=========
-Multi-line description, must keep indentation.
-
-**Type:** Enumerator
-
-**Values:**
-
-SV. Multi-line description, must keep indentation.
-
-corona. Multi-line description, must keep indentation.
-
-homologous. Multi-line description, must keep indentation.
-
-hydro. Multi-line description, must keep indentation.
-
-imported. Multi-line description, must keep indentation.
-
-kwd. Multi-line description, must keep indentation.
-
-shell. Multi-line description, must keep indentation.
-
-star. Multi-line description, must keep indentation.
-
-yso. Multi-line description, must keep indentation.
-
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_domains.c
 
 
 Wind.model2import

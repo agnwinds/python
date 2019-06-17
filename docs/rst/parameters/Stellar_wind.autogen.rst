@@ -15,7 +15,7 @@ Caster and Lamemers prescription for a stellar wind.
 **Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Required when the wind_type is set to 1, a stellar wind
+  Wind.type_: SV
 
 
 **File:** stellar_wind.c
@@ -33,7 +33,7 @@ radius of the star.
 **Value:** Greater than or equal to radius of the central object
 
 **Parent(s):**
-  parameter_: Required when the wind_type is set to 1, a stellar wind
+  Wind.type_: SV
 
 
 **File:** stellar_wind.c
@@ -50,7 +50,7 @@ Multi-line description, must keep indentation.
 **Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind.type_: SV
 
 
 **File:** stellar_wind.c
@@ -66,7 +66,7 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 **Value:** Greater than or equal to 0
 
 **Parent(s):**
-  parameter_: Required when the wind_type is set to 1, a stellar wind
+  Wind.type_: SV
 
 
 **File:** stellar_wind.c
@@ -85,7 +85,7 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 **Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Required when the wind_type is set to 1, a stellar wind
+  Wind.type_: SV
 
 
 **File:** stellar_wind.c
@@ -102,7 +102,7 @@ Multi-line description, must keep indentation.
 **Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind.type_: SV
 
 
 **File:** stellar_wind.c

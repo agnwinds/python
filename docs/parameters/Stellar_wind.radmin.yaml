@@ -6,5 +6,5 @@ type: Double
 unit: cm
 values: Greater than or equal to radius of the central object
 parent:
-  parameter: Required when the wind_type is set to 1, a stellar wind
+  Wind.type: SV
 file: stellar_wind.c

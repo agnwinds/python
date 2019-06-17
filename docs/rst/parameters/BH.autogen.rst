@@ -14,7 +14,7 @@ Multi-line description, must keep indentation.
 **Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  bh.rad_type_to_make_wind_: Not ``bb``
 
 
 **File:** setup_star_bh.c
@@ -35,23 +35,6 @@ Multi-line description, must keep indentation.
 **File:** setup_star_bh.c
 
 
-BH.blackbody_temp
-=================
-Multi-line description, must keep indentation.
-
-**Type:** Double
-
-**Unit:** Kelvin
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_star_bh.c
-
-
 BH.rad_type_to_make_wind
 ========================
 Multi-line description, must keep indentation.
@@ -60,19 +43,43 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-bb. Multi-line description, must keep indentation.
+  ``bb``
+    Multi-line description, must keep indentation.
 
-brems. Multi-line description, must keep indentation.
+  ``brems``
+    Multi-line description, must keep indentation.
 
-cloudy. Multi-line description, must keep indentation.
+  ``cloudy``
+    Multi-line description, must keep indentation.
 
-models. Multi-line description, must keep indentation.
+  ``models``
+    Multi-line description, must keep indentation.
 
-power. Multi-line description, must keep indentation.
+  ``power``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup_star_bh.c
+
+
+----------------------------------------
+
+BH.blackbody_temp
+-----------------
+Multi-line description, must keep indentation.
+
+**Type:** Double
+
+**Unit:** Kelvin
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  BH.rad_type_to_make_wind_: bb
 
 
 **File:** setup_star_bh.c
@@ -86,11 +93,14 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-brems. Multi-line description, must keep indentation.
+  ``brems``
+    Multi-line description, must keep indentation.
 
-cloudy. Multi-line description, must keep indentation.
+  ``cloudy``
+    Multi-line description, must keep indentation.
 
-power. Multi-line description, must keep indentation.
+  ``power``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
@@ -120,26 +130,6 @@ BH.radiation
 Multi-line description, must keep indentation.
 
 **Type:** Boolean (yes/no)
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_star_bh.c
-
-
-BH.geometry_for_pl_source
-=========================
-Multi-line description, must keep indentation.
-
-**Type:** Enumerator
-
-**Values:**
-
-lamp_post. Multi-line description, must keep indentation.
-
-sphere. Multi-line description, must keep indentation.
-
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]

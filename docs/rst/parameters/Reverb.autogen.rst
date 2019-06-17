@@ -31,22 +31,25 @@ file sizes down, and avoid them overwhelming the user.
 
 **Values:**
 
-0. **No filtering**
-   
-   Include *all* photons that contribute to the spectra in the output
-   file. Not recommended as it leads to gargantuan file sizes.
+  ``0``
+    **No filtering**
+    
+    Include *all* photons that contribute to the spectra in the output
+    file. Not recommended as it leads to gargantuan file sizes.
 
--1. **Filter continuum**
-   
-   Include all photons whose last interaction was scatter
-   or emission in a line. Recommended setting for exploratory runs where you'd
-   like to identify which lines are the easiest to process.
+  ``-1``
+    **Filter continuum**
+    
+    Include all photons whose last interaction was scatter
+    or emission in a line. Recommended setting for exploratory runs where you'd
+    like to identify which lines are the easiest to process.
 
-N. **Filter lines**
-   
-   Include N reverb.filter_line entries, each specifying one
-   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
-   lines of interest are automatically included in the filter list.
+  ``N``
+    **Filter lines**
+    
+    Include N reverb.filter_line entries, each specifying one
+    line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+    lines of interest are automatically included in the filter list.
 
 
 **Parent(s):**
@@ -109,36 +112,34 @@ are due to light travel time. For each final spectrum, all contributing
 photons are output to a '.delay_dump' file that can then be processed using
 our 'tfpy' Python (no relation) library.
 
-**Type:** Enum (Int)
+**Type:** Enumerator
 
 **Values:**
 
-none. **Off**
+  ``none``
+    **Off**
 
-photon. **Simple 'photon' mode**
-   
-   Each photon is assigned an initial path based on its distance from the
-   central source (assuming emission in the disk and wind is correlated with
-   emission from the CO).
+  ``photon``
+    Each photon is assigned an initial path based on its distance from the
+    central source (assuming emission in the disk and wind is correlated with
+    emission from the CO).
 
-wind. **Wind mode**
-   
-   CO photons are assigned paths as in Photon mode, disk photons are assigned
-   paths as set by the reverb.disk_type parameter. Photons generated in the
-   wind are assigned a path based on the *distribution* of paths of photons
-   that have contributed to continuum absorption in that cell.
+  ``wind``
+    CO photons are assigned paths as in Photon mode, disk photons are assigned
+    paths as set by the reverb.disk_type parameter. Photons generated in the
+    wind are assigned a path based on the *distribution* of paths of photons
+    that have contributed to continuum absorption in that cell.
 
-matom. **Macro-atom mode**
-   
-   This works as wind mode, but for a number of specified macro-atom lines
-   paths are tracked for those photons who cause a deexcitation into a given
-   line. When a photon is emitted in one of those lines, the path is drawn from
-   that specific distribution. This distribution is build up not just from the
-   last cycle of the simulation, but from all cycles after the wind achieves
-   >90% convergence. This is necessary as some lines are poorly-sampled.
-   
-   This mode gives pretty much identical results to wind mode, but at least we
-   made it to check rather than just assuming it would be fine.
+  ``matom``
+    This works as wind mode, but for a number of specified macro-atom lines
+    paths are tracked for those photons who cause a deexcitation into a given
+    line. When a photon is emitted in one of those lines, the path is drawn from
+    that specific distribution. This distribution is build up not just from the
+    last cycle of the simulation, but from all cycles after the wind achieves
+    >90% convergence. This is necessary as some lines are poorly-sampled.
+    
+    This mode gives pretty much identical results to wind mode, but at least we
+    made it to check rather than just assuming it would be fine.
 
 
 **File:** setup_reverb.c
@@ -209,24 +210,24 @@ of photon paths per cell can output them either as averages in a 3d model, or
 as a selection of flat text files with full bin-by-bin breakdowns. Useful for
 diagnostics.
 
-**Type:** Enum (Int)
+**Type:** Enumerator
 
 **Values:**
 
-none. None
+  ``none``
+    No visualisation.
 
-vtk. **Mesh visualisation**
-   
-   Outputs mean incident path per cell, photon count per cell, and mean
-   observed delay to '.vtk' format, readable using a range of programs including
-   (my preferred option) VisIt, available at https://visit.llnl.gov/.
+  ``vtk``
+    Mesh visualisation. Outputs mean incident path per cell, photon count per cell, and mean
+    observed delay to '.vtk' format, readable using a range of programs including
+    (my preferred option) VisIt, available at https://visit.llnl.gov/.
 
-dump. **Dump cells**
-   
-   Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
-   specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
+  ``dump``
+    Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
+    specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
 
-both. **Both**
+  ``both``
+    Outputs both vtk and dump.
 
 
 **Parent(s):**
@@ -241,37 +242,34 @@ Reverb.disk_type
 Setting for how photons generated in the disk are treated when generating path
 distributions for wind cells.
 
-**Type:** Enum (Int)
+**Type:** Enumerator
 
 **Values:**
 
-correlated. **Correlated**
-   
-   This mode assumes that disk emission is correlated with the
-   central source. Photons generated in the disk start with a delay equal to
-   the direct distance to the central source. This assumes that the ionisation
-   state and luminosity of the disk surface layer is mostly determined by
-   unscattered photons from the central source.
+  ``correlated``
+    This mode assumes that disk emission is correlated with the
+    central source. Photons generated in the disk start with a delay equal to
+    the direct distance to the central source. This assumes that the ionisation
+    state and luminosity of the disk surface layer is mostly determined by
+    unscattered photons from the central source.
 
-uncorrelated. **Uncorrelated**
-   
-   This mode generates photons with a delay of 0 wherever in the
-   disk they come from. This mode is of slightly questionable use and should be
-   ignored in preference to 0 or 2. It will, in practise, generally work out
-   similar to type 0 as most of the UV photons are generated close-in to the CO.
+  ``uncorrelated``
+    This mode generates photons with a delay of 0 wherever in the
+    disk they come from. This mode is of slightly questionable use and should be
+    ignored in preference to 0 or 2. It will, in practise, generally work out
+    similar to type 0 as most of the UV photons are generated close-in to the CO.
 
-ignore. **Ignored**
-   
-   This mode assumes that disk photons do *not* correlate
-   with the central source (i.e. disk surface  ionisation state and emissivity is
-   driven not by irradiation from the CO but by the mass inflow). This means that
-   whilst they contribute to heating the wind, they do not strongly contribute to
-   the lags for a given line. Photons generated by the disk do not contribute to
-   the path distributions in the wind in this mode.
-   
-   By removing the (generally) short-delay disk photons from the wind path
-   distributions, this will slightly bias them towards the longer delays
-   associated with wind self-heating/excitation.
+  ``ignore``
+    This mode assumes that disk photons do *not* correlate
+    with the central source (i.e. disk surface  ionisation state and emissivity is
+    driven not by irradiation from the CO but by the mass inflow). This means that
+    whilst they contribute to heating the wind, they do not strongly contribute to
+    the lags for a given line. Photons generated by the disk do not contribute to
+    the path distributions in the wind in this mode.
+    
+    By removing the (generally) short-delay disk photons from the wind path
+    distributions, this will slightly bias them towards the longer delays
+    associated with wind self-heating/excitation.
 
 
 **Parent(s):**

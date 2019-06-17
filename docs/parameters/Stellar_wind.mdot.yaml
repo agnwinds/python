@@ -4,7 +4,7 @@ description: |
   Caster and Lamemers prescription for a stellar wind.
 type: Double
 unit: M_sol/year
-values: Greater than 0 
+values: Greater than 0
 parent:
-  parameter: Required when the wind_type is set to 1, a stellar wind
+  Wind.type: SV
 file: stellar_wind.c

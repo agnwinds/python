@@ -45,13 +45,17 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-adiabatic. Multi-line description, must keep indentation.
+  ``adiabatic``
+    Multi-line description, must keep indentation.
 
-both. Multi-line description, must keep indentation.
+  ``both``
+    Multi-line description, must keep indentation.
 
-none. Multi-line description, must keep indentation.
+  ``none``
+    Multi-line description, must keep indentation.
 
-nonthermal. Multi-line description, must keep indentation.
+  ``nonthermal``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
