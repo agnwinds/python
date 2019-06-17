@@ -386,7 +386,7 @@ calculate_ionization (restart_stat)
       {
         strcpy (dummy, "");
         sprintf (dummy, "diag_%s/%s%02d", files.root, files.root, geo.wcycle);
-        do_windsave2table (dummy);
+        do_windsave2table (dummy, 0);
       }
 
 #ifdef MPI_ON
