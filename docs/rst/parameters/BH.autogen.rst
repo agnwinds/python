@@ -138,3 +138,25 @@ Multi-line description, must keep indentation.
 **File:** setup_star_bh.c
 
 
+BH.geometry_for_pl_source
+=========================
+Multi-line description, must keep indentation.
+
+**Type:** Enumerator
+
+**Values:**
+
+  ``lamp_post``
+    Multi-line description, must keep indentation.
+
+  ``sphere``
+    Multi-line description, must keep indentation.
+
+
+**Parent(s):**
+  bh.radiation_: True
+
+
+**File:** setup_star_bh.c
+
+

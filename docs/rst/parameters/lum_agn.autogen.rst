@@ -6,7 +6,7 @@ lum_agn
 lum_agn
 =======
 The luminosity of an AGN component. This is defined as the luminosity
-from 2-10keV. 
+from 2-10keV.
 
 **Type:** Double
 
@@ -15,9 +15,11 @@ from 2-10keV.
 **Value:** Greater than 0
 
 **Parent(s):**
-  QSO_BH_radiation_: 1
+  System_type_: agn
+
+  BH.radiation_: True
 
 
-**File:** setup.c
+**File:** setup_star_bh.c
 
 

@@ -103,11 +103,10 @@ SV.mdot_r_exponent
 ==================
 The exponent for the mass loss rate as defined in the Shlosman Vitelo model,
 See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
-A value of 0 sets a uniform mass loss rate.
 
 **Type:** Double
 
-**Value:** Greater than=0
+**Value:** Greater than or equal to 0. 0 sets a uniform mass loss rate.
 
 **Parent(s):**
   wind_type_: SV

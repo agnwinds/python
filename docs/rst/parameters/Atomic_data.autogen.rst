@@ -13,6 +13,6 @@ This is the relative path to the Atomic Data header file
   System_type_: AGN, binary, star
 
 
-**File:** setup_domains.c
+**File:** setup_line_transfer.c
 
 

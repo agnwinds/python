@@ -4,8 +4,8 @@ description: |
   of the Casters and Larmers equation
   v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 type: Double
-unit: cm
+unit: cm/s
 values: Greater than 0
 parent:
-  Wind.type: SV
+  Wind.type: star
 file: stellar_wind.c

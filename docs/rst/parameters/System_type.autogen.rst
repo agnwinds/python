@@ -24,7 +24,8 @@ are asked for later.
     AGN or BH binary (currently)
 
   ``previous``
-    In this case, one is starting from a previous run with python, and one want to either continue the run or change some parameters associated with radiations sources
+    In this case, one is starting from a previous run with python, and one want to either continue the
+    run or change some parameters associated with radiation sources
 
 
 **File:** python.c

@@ -7,6 +7,6 @@ type: Double
 unit: Hz
 values: Greater than 0
 parent:
-  BH.radiation: ``True``
+  BH.radiation: true
 file: setup_star_bh.c
 advanced: true

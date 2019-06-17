@@ -5,5 +5,5 @@ description: |
 type: Double
 values: Greater than or equal to 0
 parent:
-  Wind.type: SV
+  Wind.type: star
 file: stellar_wind.c

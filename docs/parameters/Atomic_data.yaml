@@ -4,4 +4,4 @@ description: |
 type: String
 parent:
   System_type: [AGN, binary, star]
-file: setup_domains.c
+file: setup_line_transfer.c

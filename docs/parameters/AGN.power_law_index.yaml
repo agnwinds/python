@@ -5,5 +5,5 @@ description: |
 type: Double
 values: Any - but sign is not assumed, so for negative index use a negative value
 parent:
-  BH.radiation: ``True``
+  BH.radiation: true
 file: setup_star_bh.c

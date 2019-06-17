@@ -65,10 +65,6 @@ while mode 7 is recommended for macro-atom runs.
     when an r-packet deactivation or scatter occurs.
 
 
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_domains.c
+**File:** setup_line_transfer.c
 
 

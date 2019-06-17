@@ -3,7 +3,8 @@ description: |
   Multi-line description, must keep indentation.
 type: Double
 unit: cm
-values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+values:
+  Wind.radmin: Greater than or equal to
 parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind.number_of_components: Greater than 0. Once per domain.
 file: setup_domains.c

@@ -1,4 +1,4 @@
-  name: Wind.type
+name: Wind.type
 description: |
   Multi-line description, must keep indentation.
 type: Enumerator

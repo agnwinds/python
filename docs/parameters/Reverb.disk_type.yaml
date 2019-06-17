@@ -30,5 +30,5 @@ values:
     associated with wind self-heating/excitation.
 default: 2
 parent:
-  reverb.type: [2, 3]
+  Reverb.type: [2, 3]
 file: setup_reverb.c

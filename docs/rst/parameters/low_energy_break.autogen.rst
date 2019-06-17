@@ -5,10 +5,10 @@ low_energy_break
 
 low_energy_break
 ================
-This is a command to define a cloudy type broken power 
-law SED - mainly used for testing the code against cloudy. 
+This is a command to define a cloudy type broken power
+law SED - mainly used for testing the code against cloudy.
 This SED has hardwired frequency exponents of 2.5 below the
-low energy break and -2.0 abov e the high energy break. This
+low energy break and -2.0 above the high energy break. This
 parameter defines the energy of the low energy break.
 
 **Type:** Double
@@ -18,11 +18,11 @@ parameter defines the energy of the low energy break.
 **Value:** Greater than zero
 
 **Parent(s):**
-  QSO_BH_radiation_: 1
+  BH.radiation_: True
 
-  Rad_type_for_agn_: 4
+  BH.rad_type_to_make_wind_: cloudy_table
 
 
-**File:** setup.c
+**File:** setup_star_bh.c
 
 
