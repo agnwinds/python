@@ -3,7 +3,8 @@ description: |
   Multi-line description, must keep indentation.
 type: Double
 unit: cm
-values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+values:
+  Shell.wind.ramin: Greater than
 parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind.type: shell
 file: shell_wind.c

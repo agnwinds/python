@@ -11,9 +11,11 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-bb. Multi-line description, must keep indentation.
+  ``bb``
+    Multi-line description, must keep indentation.
 
-models. Multi-line description, must keep indentation.
+  ``models``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**
@@ -65,13 +67,17 @@ The choice of disk temperature profile
 
 **Values:**
 
-standard. A Shakura - Sunyaev  disk, with a hard inner boundar
+  ``standard``
+    A Shakura - Sunyaev  disk, with a hard inner boundar
 
-readin. Read the profile in from a file; the user will be queried for the name of the file
+  ``readin``
+    Read the profile in from a file; the user will be queried for the name of the file
 
-yso. YSO???
+  ``yso``
+    YSO???
 
-analytic. DEPRECATED??? A profile designed for the situation where the disk is being illuminated by star
+  ``analytic``
+    DEPRECATED??? A profile designed for the situation where the disk is being illuminated by star
 
 
 **Parent(s):**
@@ -106,11 +112,14 @@ Parameter defining whether there is a disk in the system
 
 **Values:**
 
-none. no.disk
+  ``none``
+    no.disk
 
-flat. standard.flat.disk
+  ``flat``
+    standard.flat.disk
 
-vertically.extended. vertically.extended.disk
+  ``vertically.extended``
+    vertically.extended.disk
 
 
 **Parent(s):**
@@ -178,11 +187,14 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-bb. Multi-line description, must keep indentation.
+  ``bb``
+    Multi-line description, must keep indentation.
 
-models. Multi-line description, must keep indentation.
+  ``models``
+    Multi-line description, must keep indentation.
 
-uniform. Multi-line description, must keep indentation.
+  ``uniform``
+    Multi-line description, must keep indentation.
 
 
 **Parent(s):**

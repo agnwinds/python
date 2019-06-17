@@ -8,5 +8,6 @@ description: |
 type: Int
 values: 0 or N
 parent:
-  reverb.type: 3
+  Reverb.type: 3
+  Line_transfer: [macro_atoms, macro_atoms_thermal_trapping]
 file: setup_reverb.c
