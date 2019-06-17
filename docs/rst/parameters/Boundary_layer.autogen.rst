@@ -3,6 +3,8 @@
 Boundary_layer
 ==============
 
+----------------------------------------
+
 Boundary_layer.radiation
 ========================
 Says whether the boundary layer will radiate 0=no, 1=yes
@@ -10,11 +12,13 @@ Says whether the boundary layer will radiate 0=no, 1=yes
 **Type:** Boolean (yes/no)
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 Boundary_layer.rad_type_to_make_wind
 ====================================
@@ -35,11 +39,13 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 Boundary_layer.luminosity
 =========================
@@ -49,14 +55,16 @@ The luminosity of the boundary layer
 
 **Unit:** ergs/s
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Boundary_layer.temp
 ===================
@@ -67,14 +75,16 @@ is meaningful in generating the spectrum
 
 **Unit:** Degrees Kelvin
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Boundary_layer.rad_type_in_final_spectrum
 =========================================
@@ -95,7 +105,7 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** python.c

@@ -1,7 +1,7 @@
 name: Disk.z1
 description: |
   For a vertically extended the disk, the height of the disk is
-  set to be Disk.rad_mask*(r/Disk.rad_max)**Disk.z1 where Disk.z1
+  set to be Disk.rad_max*(r/Disk.rad_max)**Disk.z1 where Disk.z1
   is the power law index
 type: rddoub
 unit: None

@@ -18,5 +18,5 @@ values:
   both: |
     Outputs both vtk and dump.
 parent:
-  Reverb.type: [2, 3]
+  Reverb.type: [wind, matom]
 file: setup_reverb.c

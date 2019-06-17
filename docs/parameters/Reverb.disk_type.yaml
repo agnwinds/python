@@ -28,7 +28,7 @@ values:
     By removing the (generally) short-delay disk photons from the wind path
     distributions, this will slightly bias them towards the longer delays
     associated with wind self-heating/excitation.
-default: 2
+default: ignore
 parent:
-  Reverb.type: [2, 3]
+  Reverb.type: [wind, matom]
 file: setup_reverb.c

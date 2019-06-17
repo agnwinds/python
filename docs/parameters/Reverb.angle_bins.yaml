@@ -7,5 +7,5 @@ type: Int
 values: Greater than 0
 default: 100
 parent:
-  Reverb.visualisation: [1, 3]
+  Reverb.visualisation: [vtk, both]
 file: setup_reverb.c

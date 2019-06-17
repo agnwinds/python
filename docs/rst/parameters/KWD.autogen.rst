@@ -3,6 +3,8 @@
 KWD
 ===
 
+----------------------------------------
+
 KWD.mdot_r_exponent
 ===================
 The exponent for the mass loss rate as defined in the KWD model,
@@ -14,14 +16,16 @@ value of 0 sets a uniform mass loss rate.
 
 **Unit:** None
 
-**Value:** Greater than=0
+**Values:** Greater than=0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.v_zero
 ==========
@@ -33,14 +37,16 @@ local sound speed.
 
 **Unit:** None
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.acceleration_length
 =======================
@@ -51,14 +57,16 @@ KWD model.
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.rmax
 ========
@@ -69,14 +77,16 @@ radii. This has to be greater than rmin.
 
 **Unit:** co.radius
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.acceleration_exponent
 =========================
@@ -87,14 +97,16 @@ v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 
 **Type:** Double
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.rmin
 ========
@@ -105,14 +117,16 @@ This has to be less than rmax.
 
 **Unit:** co.radius
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.d
 =====
@@ -124,14 +138,16 @@ central object radii) is used as this provides a more natural parameter.
 
 **Unit:** co.radius
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c
 
+
+----------------------------------------
 
 KWD.v_infinity
 ==============
@@ -143,10 +159,10 @@ v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 
 **Unit:** Escape velocity
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** knigge.c

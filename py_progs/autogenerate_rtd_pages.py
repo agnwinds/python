@@ -70,7 +70,7 @@ def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
         level: The level of the parameter, e.g. heading, subheading
     """
     # Suppress transition line at top level
-    if level:
+    if not level:
         output_file.write("----------------------------------------\n\n")
     write_header_by_level(output_file, parameter['name'], level)
     output_file.write("{}\n".format(parameter['description']))
@@ -102,7 +102,7 @@ def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
                 write_str_indent(output_file, "* {}".format(value), indent="  ")
 
         else:
-            output_file.write("**Value:** {}\n".format(parameter['values']))
+            output_file.write("**Values:** {}\n".format(parameter['values']))
         output_file.write("\n")
 
     if parameter.get('parent'):
@@ -110,12 +110,12 @@ def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
             output_file.write("**Parent(s):**\n")
             for key, value in parameter['parent'].items():
                 if isinstance(value, str):
-                    write_str_indent(output_file, "  {}_: {}".format(key, value), indent="    ")
+                    write_str_indent(output_file, "  :ref:`{}`: {}".format(key, value), indent="    ")
                 elif isinstance(value, list):
                     list_text = ', '.join([str(x) for x in value])
-                    write_str_indent(output_file, "  {}_: {}".format(key, list_text, indent="    "))
+                    write_str_indent(output_file, "  :ref:`{}`: {}".format(key, list_text, indent="    "))
                 else:
-                    output_file.write("  {}_: {}\n\n".format(key, value))
+                    output_file.write("  :ref:`{}`: {}\n\n".format(key, value))
             output_file.write("\n")
 
         elif isinstance(parameter['parent'], list):

@@ -3,6 +3,8 @@
 Wind
 ====
 
+----------------------------------------
+
 Wind.old_windfile
 =================
 The rootname of a previously saved model in a calculation one wishes to
@@ -12,11 +14,13 @@ the radiation sources, or to extract spectra from different inclinations)
 **Type:** String
 
 **Parent(s):**
-  System_type_: previous
+  :ref:`System_type`: previous
 
 
 **File:** python.c
 
+
+----------------------------------------
 
 Wind.ionization
 ===============
@@ -51,6 +55,8 @@ Multi-line description, must keep indentation.
 **File:** setup.c
 
 
+----------------------------------------
+
 Wind.radiation
 ==============
 Whether or not the wind should radiate.
@@ -59,6 +65,8 @@ Whether or not the wind should radiate.
 
 **File:** python.c
 
+
+----------------------------------------
 
 Wind.number_of_components
 =========================
@@ -70,16 +78,14 @@ of the wind.
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  System_type_: new
+  :ref:`System_type`: new
 
 
 **File:** python.c
 
-
-----------------------------------------
 
 Wind.t.init
 -----------
@@ -89,16 +95,14 @@ Starting temperature of the wind.
 
 **Unit:** Kelvin
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per domain.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.coord_system
 -----------------
@@ -122,13 +126,11 @@ The coordinate system used for a describing a component of the wind.
 
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per wind.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.radmax
 -----------
@@ -138,20 +140,14 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm
 
-**Values:**
-
-  ``Wind.radmin``
-    Greater than or equal to
-
+**Values:** Greater than :ref:`Wind.radmin`
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per domain.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.filling_factor
 -------------------
@@ -161,16 +157,14 @@ Matthews et al. (2016), 2016MNRAS.458..293M. Asked once per domain.
 
 **Type:** Double
 
-**Value:** 0 < f <= 1, where 1 is a fully smooth wind.
+**Values:** 0 < f <= 1, where 1 is a fully smooth wind.
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per domain.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.dim.in.z_or_theta.direction
 --------------------------------
@@ -186,18 +180,16 @@ will be queried for this value mulitple times, one for each domain
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per wind.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
-  Wind.type_: Not imported
+  :ref:`Wind.type`: Not imported
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.type
 ---------
@@ -236,13 +228,11 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per domain.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.mdot
 ^^^^^^^^^
@@ -252,16 +242,14 @@ Multi-line description, must keep indentation.
 
 **Unit:** M☉/year
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: knigge, SV
+  :ref:`Wind.type`: knigge, SV
 
 
 **File:** ['knigge.c', 'sv.c']
 
-
-----------------------------------------
 
 Wind.dim.in.z_or_theta.direction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -277,18 +265,16 @@ will be queried for this value mulitple times, one for each domain
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than 0. Once per wind.
+  :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
-  Wind.type_: Not imported
+  :ref:`Wind.type`: Not imported
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.model2import
 ^^^^^^^^^^^^^^^^^
@@ -300,13 +286,11 @@ required).
 **Type:** String
 
 **Parent(s):**
-  Wind.type_: imported
+  :ref:`Wind.type`: imported
 
 
 **File:** import.c
 
-
-----------------------------------------
 
 Wind.dim.in.x_or_r.direction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -322,18 +306,16 @@ will be queried for this value mulitple times, one for each domain
 
 **Type:** Int
 
-**Value:** Greater than or equal to 4, to allow for boundaries.
+**Values:** Greater than or equal to 4, to allow for boundaries.
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than or equal to 0. Once per wind.
+  :ref:`Wind.number_of_components`: Greater than or equal to 0. Once per wind.
 
-  Wind.type_: Not imported
+  :ref:`Wind.type`: Not imported
 
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Wind.dim.in.x_or_r.direction
 ----------------------------
@@ -349,12 +331,12 @@ will be queried for this value mulitple times, one for each domain
 
 **Type:** Int
 
-**Value:** Greater than or equal to 4, to allow for boundaries.
+**Values:** Greater than or equal to 4, to allow for boundaries.
 
 **Parent(s):**
-  Wind.number_of_components_: Greater than or equal to 0. Once per wind.
+  :ref:`Wind.number_of_components`: Greater than or equal to 0. Once per wind.
 
-  Wind.type_: Not imported
+  :ref:`Wind.type`: Not imported
 
 
 **File:** setup_domains.c

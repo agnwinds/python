@@ -3,6 +3,8 @@
 Spectrum
 ========
 
+----------------------------------------
+
 Spectrum.orbit_phase
 ====================
 For binary systems, the orbital phase at which the spectrum
@@ -14,16 +16,18 @@ primary
 
 **Type:** Double
 
-**Value:** Normally between 0 and 1
+**Values:** Between 0 and 1
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
-  System_type_: binary
+  :ref:`System_type`: binary
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.select_scatters
 ========================
@@ -36,14 +40,16 @@ n is < 0 then photons with n or greater scattters will be extracted.
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Select_no_of_scatters_in_spectra_: True
+  :ref:`Select_no_of_scatters_in_spectra`: True
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.no_observers
 =====================
@@ -52,16 +58,14 @@ will be extracted.
 
 **Type:** Integer
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.angle
 --------------
@@ -73,14 +77,16 @@ for each desired incliniation
 
 **Unit:** Degrees
 
-**Value:** 0 and 90 degrees, where 0 is normal to the disk and 90 is on the disk plane
+**Values:** 0 to 90 degrees, where 0 is normal to the disk and 90 is on the disk plane
 
 **Parent(s):**
-  Spectrum.no_observers_: Greater than 0. Once per observer.
+  :ref:`Spectrum.no_observers`: Greater than 0. Once per observer.
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.wavemin
 ================
@@ -90,14 +96,16 @@ The minimum wavelength of the final spectra in Angstroms
 
 **Unit:** Angstroms
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.select_photons_by_position
 ===================================
@@ -110,13 +118,11 @@ its cylindrical coordinates.
 **Type:** Boolean (Y/N)
 
 **Parent(s):**
-  geo.pcycles_: Greater than or equal to 0
+  :ref:`geo.pcycles`: Greater than or equal to 0
 
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_location
 ------------------------
@@ -143,13 +149,11 @@ where the photons was created or where it last scattered
 
 
 **Parent(s):**
-  Spectrum.select_photons_by_position_: True
+  :ref:`Spectrum.select_photons_by_position`: True
 
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_r
 ^^^^^^^^^^^^^^^^^
@@ -160,16 +164,14 @@ photons are to be extracted. select_r defines the radius of the spherical region
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Spectrum.select_location_: spherical_region
+  :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_rho
 ^^^^^^^^^^^^^^^^^^^
@@ -183,16 +185,14 @@ of the region.
 
 **Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  Spectrum.select_location_: spherical_region
+  :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_azimuth
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -206,16 +206,14 @@ just from photons that originate or scatter int he region
 
 **Unit:** Degrees
 
-**Value:** Normally a number between 0, and 360 or -180 to 180
+**Values:** Between 0, and 360 or -180 to 180
 
 **Parent(s):**
-  Spectrum.select_location_: spherical_region
+  :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_z
 ^^^^^^^^^^^^^^^^^
@@ -229,14 +227,16 @@ of the region.
 
 **Unit:** cm
 
-**Value:** Within the z range of the model
+**Values:** Within the z range of the model
 
 **Parent(s):**
-  Spectrum.select_location_: spherical_region
+  :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.type
 =============
@@ -259,11 +259,13 @@ frequency bin.
 
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.live_or_die
 ====================
@@ -286,11 +288,13 @@ diagnostic mode.
 
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.select_specific_no_of_scatters_in_spectra
 ==================================================
@@ -302,11 +306,13 @@ disk, only photons which have scttered, etc.
 **Type:** Boolean (Y/N)
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
 
+
+----------------------------------------
 
 Spectrum.wavemax
 ================
@@ -323,7 +329,7 @@ The maximum wavelength of the detailed spectra that are to be produced
 
 
 **Parent(s):**
-  Spectrum_cycles_: Greater than or equal to 0
+  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c

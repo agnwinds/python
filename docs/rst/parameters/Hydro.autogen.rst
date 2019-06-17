@@ -3,6 +3,8 @@
 Hydro
 =====
 
+----------------------------------------
+
 Hydro.thetamax
 ==============
 The maximum theta value to be read in from a hydrodynamic snapshot.
@@ -24,11 +26,13 @@ the data.
 
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** hydro_import.c
 
+
+----------------------------------------
 
 Hydro.file
 ==========
@@ -37,7 +41,7 @@ Relative path to a hydrodynamic snapshot file to be imported.
 **Type:** String
 
 **Parent(s):**
-  parameter_: None
+  :ref:`parameter`: None
 
 
 **File:** hydro_import.c

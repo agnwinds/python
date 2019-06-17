@@ -9,7 +9,7 @@ description: |
   Mode 5 is recommended for non-macro atom runs,
   while mode 7 is recommended for macro-atom runs.
 
-type: Enum (Int)
+type: Enumerator
 values:
   pure_abs: |
     *Pure absorption*

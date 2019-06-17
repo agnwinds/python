@@ -3,6 +3,8 @@
 lum_agn
 =======
 
+----------------------------------------
+
 lum_agn
 =======
 The luminosity of an AGN component. This is defined as the luminosity
@@ -12,12 +14,12 @@ from 2-10keV.
 
 **Unit:** ergs/s
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  System_type_: agn
+  :ref:`System_type`: agn
 
-  BH.radiation_: True
+  :ref:`BH.radiation`: True
 
 
 **File:** setup_star_bh.c

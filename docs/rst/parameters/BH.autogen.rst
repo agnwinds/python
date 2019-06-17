@@ -3,6 +3,8 @@
 BH
 ==
 
+----------------------------------------
+
 BH.lum
 ======
 Multi-line description, must keep indentation.
@@ -11,14 +13,16 @@ Multi-line description, must keep indentation.
 
 **Unit:** ergs/s
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  bh.rad_type_to_make_wind_: Not ``bb``
+  :ref:`bh.rad_type_to_make_wind`: Not ``bb``
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 BH.power_law_index
 ==================
@@ -26,14 +30,16 @@ Multi-line description, must keep indentation.
 
 **Type:** Double
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 BH.rad_type_to_make_wind
 ========================
@@ -60,13 +66,11 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 BH.blackbody_temp
 -----------------
@@ -76,14 +80,16 @@ Multi-line description, must keep indentation.
 
 **Unit:** Kelvin
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  BH.rad_type_to_make_wind_: bb
+  :ref:`BH.rad_type_to_make_wind`: bb
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 BH.rad_type_in_final_spectrum
 =============================
@@ -104,11 +110,13 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** python.c
 
+
+----------------------------------------
 
 BH.power_law_cutoff
 ===================
@@ -116,14 +124,16 @@ Multi-line description, must keep indentation.
 
 **Type:** Double
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 BH.radiation
 ============
@@ -132,11 +142,13 @@ Multi-line description, must keep indentation.
 **Type:** Boolean (yes/no)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 BH.geometry_for_pl_source
 =========================
@@ -154,7 +166,7 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  bh.radiation_: True
+  :ref:`bh.radiation`: True
 
 
 **File:** setup_star_bh.c

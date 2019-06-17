@@ -9,6 +9,5 @@ type: |
 values: |
   >0:>0:>1:>0
 parent:
-  Reverb.matom_lines: Greater than 0
-  Line_transfer: [macro_atoms, macro_atoms_thermal_trapping]
+  Reverb.matom_lines: Greater than 0, once per matom line.
 file: setup_reverb.c

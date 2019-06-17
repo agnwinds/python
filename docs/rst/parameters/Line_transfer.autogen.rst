@@ -3,6 +3,8 @@
 Line_transfer
 =============
 
+----------------------------------------
+
 Line_transfer
 =============
 The way in which line transfer and scattering is dealt with
@@ -14,7 +16,7 @@ anisotropic scattering.
 Mode 5 is recommended for non-macro atom runs,
 while mode 7 is recommended for macro-atom runs.
 
-**Type:** Enum (Int)
+**Type:** Enumerator
 
 **Values:**
 

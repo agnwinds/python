@@ -3,6 +3,8 @@
 Diag
 ====
 
+----------------------------------------
+
 Diag.save_cell_statistics
 =========================
 Choose whether to save the statistics for a selection of save_cell_statistics.
@@ -14,14 +16,16 @@ the cell. Useful for checking the detailed MC radiation field in a cell.
 
 **Unit:** None
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.lowest_ion_density_for_photoabs
 ====================================
@@ -33,14 +37,16 @@ this density limit
 
 **Unit:** None
 
-**Value:** greater than 0
+**Values:** greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.make_ioncycle_tables
 =========================
@@ -50,14 +56,16 @@ Multi-line description, must keep indentation.
 
 **Unit:** None
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.print_dvds_info
 ====================
@@ -68,14 +76,16 @@ cells to a file root.dvds.diag.
 
 **Unit:** None
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Extra_diagnostics
+  :ref:`parameter`: Extra_diagnostics
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.write_atomicdata
 =====================
@@ -85,11 +95,13 @@ an output file.
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Asked whenever advanced commands are enaabled
+  :ref:`parameter`: Asked whenever advanced commands are enaabled
 
 
 **File:** setup_domains.c
 
+
+----------------------------------------
 
 Diag.adjust_grid
 ================
@@ -99,11 +111,13 @@ for the logarithmic grid. Advanced command.
 **Type:** Boolean (yes/no)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_domains.c
 
+
+----------------------------------------
 
 Diag.keep_photoabs_in_final_spectra
 ===================================
@@ -114,11 +128,13 @@ default is)
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.extra
 ==========
@@ -130,11 +146,13 @@ the resonant scatters in the wind
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** python.c
 
+
+----------------------------------------
 
 Diag.save_photons
 =================
@@ -143,11 +161,13 @@ Multi-line description, must keep indentation.
 **Type:** Boolean (yes/no)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.fractional_distance_photon_may_travel
 ==========================================
@@ -161,14 +181,16 @@ distance in a cell.
 
 **Unit:** None
 
-**Value:** 0 to 1
+**Values:** 0 to 1
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.save_extract_photons
 =========================
@@ -178,14 +200,16 @@ Multi-line description, must keep indentation.
 
 **Unit:** None
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.keep_ioncycle_windsaves
 ============================
@@ -198,14 +222,16 @@ on (02,03...) for subsequent cycles.
 
 **Unit:** None
 
-**Value:** 0,1
+**Values:** 0,1
 
 **Parent(s):**
-  parameter_: Extra_diagnostics
+  :ref:`parameter`: Extra_diagnostics
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.use_standard_care_factors
 ==============================
@@ -217,11 +243,13 @@ in a cell that a photon can travel
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: 0 or 1
+  :ref:`parameter`: 0 or 1
 
 
 **File:** diag.c
 
+
+----------------------------------------
 
 Diag.track_resonant_scatters
 ============================
@@ -231,10 +259,10 @@ Multi-line description, must keep indentation.
 
 **Unit:** None
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c

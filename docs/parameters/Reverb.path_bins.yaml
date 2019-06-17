@@ -11,5 +11,5 @@ type: Int
 values: Greater than 0
 default: 1000
 parent:
-  Reverb.type: [2, 3]
+  Reverb.type: [wind, matom]
 file: setup_reverb.c

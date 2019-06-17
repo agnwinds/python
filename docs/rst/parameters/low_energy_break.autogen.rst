@@ -3,6 +3,8 @@
 low_energy_break
 ================
 
+----------------------------------------
+
 low_energy_break
 ================
 This is a command to define a cloudy type broken power
@@ -15,12 +17,12 @@ parameter defines the energy of the low energy break.
 
 **Unit:** eV
 
-**Value:** Greater than zero
+**Values:** Greater than 0
 
 **Parent(s):**
-  BH.radiation_: True
+  :ref:`BH.radiation`: True
 
-  BH.rad_type_to_make_wind_: cloudy_table
+  :ref:`BH.rad_type_to_make_wind`: cloudy_table
 
 
 **File:** setup_star_bh.c

@@ -3,6 +3,8 @@
 Surface
 =======
 
+----------------------------------------
+
 Surface.reflection.or.absorption
 ================================
 When photons hit the disk, there are several options

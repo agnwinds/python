@@ -3,6 +3,8 @@
 Binary
 ======
 
+----------------------------------------
+
 Binary.mass_sec
 ===============
 In binary systems the mass of the secondary. This is used along
@@ -13,14 +15,16 @@ see the effects of eclipses on the system
 
 **Unit:** msol
 
-**Value:** greater than 0
+**Values:** greater than 0
 
 **Parent(s):**
-  parameter_: Required whenever the system is a binary
+  :ref:`parameter`: Required whenever the system is a binary
 
 
 **File:** setup_star_bh.c
 
+
+----------------------------------------
 
 Binary.period
 =============
@@ -33,10 +37,10 @@ a secondary also initializes the outer radius of the disk.
 
 **Unit:** Hours
 
-**Value:** greater than 0
+**Values:** greater than 0
 
 **Parent(s):**
-  parameter_: Required whenever the system is defined to be a binary system
+  :ref:`parameter`: Required whenever the system is defined to be a binary system
 
 
 **File:** setup_star_bh.c

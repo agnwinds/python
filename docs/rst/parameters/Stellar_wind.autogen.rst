@@ -3,6 +3,8 @@
 Stellar_wind
 ============
 
+----------------------------------------
+
 Stellar_wind.mdot
 =================
 Mass loss rate for a wind modelled in terms of the
@@ -12,14 +14,16 @@ Caster and Lamemers prescription for a stellar wind.
 
 **Unit:** M☉/year
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: star
+  :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
 
+
+----------------------------------------
 
 Stellar_wind.radmin
 ===================
@@ -30,14 +34,16 @@ radius of the star.
 
 **Unit:** cm
 
-**Value:** Greater than or equal to radius of the central object
+**Values:** Greater than or equal to radius of the central object
 
 **Parent(s):**
-  Wind.type_: star
+  :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
 
+
+----------------------------------------
 
 Stellar_wind.radmax
 ===================
@@ -54,11 +60,13 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  Wind.type_: star
+  :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
 
+
+----------------------------------------
 
 Stellar_wind.acceleration_exponent
 ==================================
@@ -67,14 +75,16 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 
 **Type:** Double
 
-**Value:** Greater than or equal to 0
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Wind.type_: star
+  :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
 
+
+----------------------------------------
 
 Stellar_wind.v_infinity
 =======================
@@ -86,14 +96,16 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 
 **Unit:** cm/s
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: star
+  :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
 
+
+----------------------------------------
 
 Stellar_wind.vbase
 ==================
@@ -103,10 +115,10 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm/s
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  Wind.type_: star
+  :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c

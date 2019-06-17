@@ -3,6 +3,8 @@
 Corona
 ======
 
+----------------------------------------
+
 Corona.radmax
 =============
 The corona is a box-shaped region which sits immediately
@@ -12,14 +14,16 @@ above the disk.  radmax defines the outer edge of the box.
 
 **Unit:** cm
 
-**Value:** Greater than the radius of the central object
+**Values:** Greater than the radius of the central object
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+  :ref:`Wind.type`: Selected as one of the choces for this variable
 
 
 **File:** corona.c
 
+
+----------------------------------------
 
 Corona.base_den
 ===============
@@ -30,14 +34,16 @@ and a scale height
 
 **Unit:** number/cm**3
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+  :ref:`Wind.type`: Selected as one of the choces for this variable
 
 
 **File:** corona.c
 
+
+----------------------------------------
 
 Corona.radmin
 =============
@@ -48,14 +54,16 @@ above the disk.  radmin defines the inner edge of the box.
 
 **Unit:** cm
 
-**Value:** Greater than that the radius of the central object
+**Values:** Greater than that the radius of the central object
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+  :ref:`Wind.type`: Selected as one of the choces for this variable
 
 
 **File:** corona.c
 
+
+----------------------------------------
 
 Corona.zmax
 ===========
@@ -66,14 +74,16 @@ above the disk.  zmax defines the height of the box.
 
 **Unit:** cm
 
-**Value:** Greater than that the radius of the central object
+**Values:** Greater than that the radius of the central object
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+  :ref:`Wind.type`: Selected as one of the choces for this variable
 
 
 **File:** corona.c
 
+
+----------------------------------------
 
 Corona.scale_height
 ===================
@@ -84,14 +94,16 @@ and a scale height
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+  :ref:`Wind.type`: Selected as one of the choces for this variable
 
 
 **File:** corona.c
 
+
+----------------------------------------
 
 Corona.vel_frac
 ===============
@@ -106,10 +118,10 @@ toward the central object).
 
 **Unit:** None
 
-**Value:** Any, 0 implies no radial velocity.
+**Values:** Any, 0 implies no radial velocity.
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+  :ref:`Wind.type`: Selected as one of the choces for this variable
 
 
 **File:** corona.c

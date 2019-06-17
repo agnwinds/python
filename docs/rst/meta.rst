@@ -29,6 +29,24 @@ possible choices:
    :language: yaml
    :lines: 14-25
 
+The ``parent`` key is used to link between parameters, so you can see which options depend on others
+(for example, :ref:`Reverb.matom_lines` depends on :ref:`Line_transfer` being a macro-atom mode).
+Parent should be a list of parameters, followed by one (or a list of) values of the parent that result
+in this parameter being used, for example:
+
+.. literalinclude:: reference_yaml.txt
+   :language: yaml
+   :lines: 27-28
+
+Parent will automatically link to the page for each parent. Parent is also used when figuring out the structure
+within each file, so put any local parents at the top of the list. 
+If you'd like to reference one parameter elsewhere within another, you can use the following format
+
+.. literalinclude:: reference_yaml.txt
+   :language: yaml
+   :lines: 30-30
+
+
 TODO: Make structure of parent explicit.
 
 autogenerate_parameter_docs.py

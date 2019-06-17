@@ -725,7 +725,7 @@ def explore(modellist='py_ixvel/models.ls',spectrum='ixvel_stis2',obs='hst',ions
 					n=n+1
 				except IndexError:
 					print 'choice %d out of range' % (i)
-			except ValueError:
+			except ValuesError:
 				print 'Could not parse choice, try again!'
 				continue
 

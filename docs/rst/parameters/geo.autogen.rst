@@ -3,6 +3,8 @@
 geo
 ===
 
+----------------------------------------
+
 geo.xlog_scale
 ==============
 Choose the logarithmic scale length for the grid in the x-direction.
@@ -12,11 +14,13 @@ Choose the logarithmic scale length for the grid in the x-direction.
 **Unit:** cm
 
 **Parent(s):**
-  parameter_: adjust_grid
+  :ref:`parameter`: adjust_grid
 
 
 **File:** setup_domains.c
 
+
+----------------------------------------
 
 geo.zlog_scale
 ==============
@@ -27,7 +31,7 @@ Choose the logarithmic scale length for the grid in the z-direction.
 **Unit:** cm
 
 **Parent(s):**
-  parameter_: adjust_grid
+  :ref:`parameter`: adjust_grid
 
 
 **File:** setup_domains.c

@@ -29,4 +29,7 @@ values:
 
     This mode gives pretty much identical results to wind mode, but at least we
     made it to check rather than just assuming it would be fine.
+
+    This requires that :ref:`Line_transfer` is either ``macro_atoms`` or 
+    ``macro_atoms_thermal_trapping``
 file: setup_reverb.c

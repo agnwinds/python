@@ -3,6 +3,8 @@
 wind
 ====
 
+----------------------------------------
+
 wind.fixed_concentrations_file
 ==============================
 The filename for the fixed ion concentrations if you have
@@ -12,7 +14,7 @@ set Wind_ionization to 2 (fixed). This file has format
 **Type:** String
 
 **Parent(s):**
-  Wind.ionization_: fixed
+  :ref:`Wind.ionization`: fixed
 
 
 **File:** setup.c

@@ -3,6 +3,8 @@
 Reverb
 ======
 
+----------------------------------------
+
 Reverb.type
 ===========
 Whether to perform reverberation mapping. Reverberation mapping tracks the
@@ -40,12 +42,13 @@ our 'tfpy' Python (no relation) library.
     
     This mode gives pretty much identical results to wind mode, but at least we
     made it to check rather than just assuming it would be fine.
+    
+    This requires that :ref:`Line_transfer` is either ``macro_atoms`` or 
+    ``macro_atoms_thermal_trapping``
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.matom_lines
 ------------------
@@ -55,20 +58,18 @@ the path of photons deexciting into it recorded in its own array. Note: This
 doesn't give rise to any noticable differences to the pure wind mode in most
 simulations.
 
-**Type:** Int
+**Type:** Integer
 
-**Value:** 0 or N
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Reverb.type_: 3
+  :ref:`Reverb.type`: matom
 
-  Line_transfer_: macro_atoms, macro_atoms_thermal_trapping
+  :ref:`Line_transfer`: macro_atoms, macro_atoms_thermal_trapping
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.matom_line
 ^^^^^^^^^^^^^^^^^
@@ -80,19 +81,15 @@ line is specified as Element:Ion:Upper level:Lower level.
 **Type:** Int:Int:Int:Int
 
 
-**Value:** >0:>0:>1:>0
+**Values:** >0:>0:>1:>0
 
 
 **Parent(s):**
-  Reverb.matom_lines_: Greater than 0
-
-  Line_transfer_: macro_atoms, macro_atoms_thermal_trapping
+  :ref:`Reverb.matom_lines`: Greater than 0, once per matom line.
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.filter_lines
 -------------------
@@ -119,42 +116,38 @@ file sizes down, and avoid them overwhelming the user.
   ``N``
     **Filter lines**
     
-    Include N reverb.filter_line entries, each specifying one
-    line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+    Include N :ref:`reverb.filter_line` entries, each specifying one
+    line to keep in the output file. If :ref:`reverb.matom_lines` is >0, all macro-atom
     lines of interest are automatically included in the filter list.
 
 
 **Parent(s):**
-  Reverb.type_: Greater than 0
+  :ref:`Reverb.type`: wind, matom
 
 
 **File:** setup_reverb.c
 
 
-----------------------------------------
-
 Reverb.filter_line
 ^^^^^^^^^^^^^^^^^^
-Line number of one line to include in the output .delay_dump file. This is
+Line number of one line to include in the output ``.delay_dump`` file. This is
 the python internal line number. It can be found using either the macro-atom
 mode (which prints out the line number once it's found one) or by doing an
-exploratory run with reverb.filter_lines = -1, then looking through the delay
+exploratory run with :ref:`reverb.filter_lines` = -1, then looking through the delay
 dump file for photons of the right wavelength to see what their line is. This
 should almost certainly be changed to be specified using a species and
 wavelength!
 
-**Type:** Int
+**Type:** Integer
 
-**Value:** Any valid line index
+**Values:** Any valid line index
 
 **Parent(s):**
-  Reverb.filter_lines_: Greater than 0
+  :ref:`Reverb.filter_lines`: Greater than 0, once per filer line.
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.path_bins
 ----------------
@@ -168,16 +161,14 @@ bin boundaries show up in the TF.
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Reverb.type_: 2, 3
+  :ref:`Reverb.type`: wind, matom
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.visualisation
 --------------------
@@ -207,32 +198,28 @@ diagnostics.
 
 
 **Parent(s):**
-  Reverb.type_: 2, 3
+  :ref:`Reverb.type`: wind, matom
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.dump_cells
 ^^^^^^^^^^^^^^^^^
 Number of cells to dump. When dumping the path distribution info for a range
-of cells, this specifies the number of lines of reverb.dump_cell that will be
+of cells, this specifies the number of lines of :ref:`reverb.dump_cell` that will be
 provided.
 
-**Type:** Int
+**Type:** Integer
 
-**Value:** 0 or N
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Reverb.visualisation_: 2, 3
+  :ref:`Reverb.visualisation`: wind, matom
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 **Reverb.dump_cell**
 """"""""""""""""""""
@@ -247,17 +234,15 @@ idenfity where wind locations are.
 **Unit:** cm:cm
 
 
-**Value:** >0:>0
+**Values:** >0:>0
 
 
 **Parent(s):**
-  Reverb.dump_cells_: Greater than 0
+  :ref:`Reverb.dump_cells`: Greater than 0
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.angle_bins
 ^^^^^^^^^^^^^^^^^
@@ -267,16 +252,14 @@ with larger filesizes.
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Reverb.visualisation_: 1, 3
+  :ref:`Reverb.visualisation`: vtk, both
 
 
 **File:** setup_reverb.c
 
-
-----------------------------------------
 
 Reverb.disk_type
 ----------------
@@ -314,7 +297,7 @@ distributions for wind cells.
 
 
 **Parent(s):**
-  Reverb.type_: 2, 3
+  :ref:`Reverb.type`: wind, matom
 
 
 **File:** setup_reverb.c

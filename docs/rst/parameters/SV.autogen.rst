@@ -3,6 +3,8 @@
 SV
 ==
 
+----------------------------------------
+
 SV.thetamax
 ===========
 The angle at which the wind rises from the outermost launching radius in a Shlossman-Vitello type disk wind.
@@ -13,14 +15,16 @@ See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
 
 **Unit:** Degrees
 
-**Value:** Greater than sv.thetamin
+**Values:** Greater than sv.thetamin
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.acceleration_exponent
 ========================
@@ -32,14 +36,16 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
 **Type:** Double
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.diskmin
 ==========
@@ -52,14 +58,16 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Unit:** cm
 
-**Value:** Greater than or equal to the radius of the central object (white dwarf)
+**Values:** Greater than or equal to the radius of the central object (white dwarf)
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.diskmax
 ==========
@@ -72,14 +80,16 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Unit:** cm
 
-**Value:** Greater than or equal to sv.diskmin (inner radius disk wind)
+**Values:** Greater than or equal to sv.diskmin (inner radius disk wind)
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.acceleration_length
 ======================
@@ -90,14 +100,16 @@ Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.mdot_r_exponent
 ==================
@@ -106,14 +118,16 @@ See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
 
 **Type:** Double
 
-**Value:** Greater than or equal to 0. 0 sets a uniform mass loss rate.
+**Values:** Greater than or equal to 0. 0 sets a uniform mass loss rate.
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.v_zero_mode
 ==============
@@ -131,13 +145,11 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.v_zero
 ---------
@@ -147,14 +159,16 @@ The velocity at the wind base.
 
 **Unit:** ['Speed of sound in the wind', 'cm/s']
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  SV.v_zero_mode_: sound_speed, fixed
+  :ref:`SV.v_zero_mode`: sound_speed, fixed
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.v_infinity
 =============
@@ -166,14 +180,16 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
 **Unit:** Escape velocity
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
 
+
+----------------------------------------
 
 SV.thetamin
 ===========
@@ -185,10 +201,10 @@ See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 
 **Unit:** Degrees
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  wind_type_: SV
+  :ref:`wind_type`: SV
 
 
 **File:** sv.c
