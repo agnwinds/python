@@ -270,10 +270,11 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1):
     ax=pylab.gca()
     cmap=pylab.cm.jet
     cmap.set_bad(color='white')
+    ax.tick_params(labelsize=14)
     im=ax.pcolormesh(x,y,xvar,cmap=cmap)
-    pylab.title(title)
-    pylab.xlabel(xlabel)
-    pylab.ylabel(ylabel)
+    pylab.title(title,size=16)
+    pylab.xlabel(xlabel,size=16)
+    pylab.ylabel(ylabel,size=16)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     pylab.colorbar(im, cax=cax)
@@ -290,7 +291,8 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1):
 
 
 
-def doit(filename='fiducial_agn.master.txt', var='t_r',grid='ij',inwind='',scale='guess',zmin=-1e50,zmax=1e50,plot_dir=''):
+def doit(filename='fiducial_agn.master.txt', var='t_r',grid='ij',inwind='',scale='guess',zmin=-1e50,zmax=1e50,
+        plot_dir='',root=''):
     '''
     Plot a single variable from an astropy table (normally created with windsave2table, with various
     options
@@ -306,8 +308,9 @@ def doit(filename='fiducial_agn.master.txt', var='t_r',grid='ij',inwind='',scale
 
     '''
 
-    root=filename.split('.')
-    root=root[0]
+    if root=='':
+        root=filename.split('.')
+        root=root[0]
 
     x,y,xvar,title,xlabel,ylabel=get_data(filename,var,grid,inwind,scale,zmin,zmax)
     if plot_dir!='':
