@@ -14,12 +14,12 @@ file: file_it_is_found_in.c
 name: example.enumerator
 description: |
   Enumerator description
-type: Enum (Int)
+type: Enumerator
 values:
-  0: Inline text
-  1: |
+  one: Inline text
+  two: |
     Multi-line text
-  2: Inline text again
+  three: Inline text again
 parent:
   example.parameter: Required for values of >2.
 file: file_it_is_found_in.c

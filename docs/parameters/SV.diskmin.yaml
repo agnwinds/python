@@ -8,5 +8,5 @@ type: Double
 unit: cm
 values: Greater than or equal to the radius of the central object (white dwarf)
 parent:
-  wind_type: 0.
+  wind_type: SV
 file: sv.c

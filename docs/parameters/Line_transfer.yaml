@@ -57,6 +57,4 @@ values:
     as macro_atoms, but we use the 'thermal trapping method' to choose an anistropic direction
     when an r-packet deactivation or scatter occurs.
 
-parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-file: setup_domains.c
+file: setup_line_transfer.c

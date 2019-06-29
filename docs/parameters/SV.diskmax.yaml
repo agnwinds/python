@@ -8,5 +8,5 @@ type: Double
 unit: cm
 values: Greater than or equal to sv.diskmin (inner radius disk wind)
 parent:
-  wind_type: 0
+  wind_type: SV
 file: sv.c

@@ -7,8 +7,8 @@ description: |
   at the point a photon has undergone this number of scatters.  If
   n is < 0 then photons with n or greater scattters will be extracted.
 type: Int
-values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  Select_no_of_scatters_in_spectra: If 'y' then ask how many scatters
-file: setup2.c
+  Select_no_of_scatters_in_spectra: true
+file: setup.c
 advanced: true

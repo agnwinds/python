@@ -10,5 +10,5 @@ description: |
 type: Int
 values: Any valid line index
 parent:
-  reverb.filter_lines: Greater than 0
+  Reverb.filter_lines: Greater than 0
 file: setup_reverb.c

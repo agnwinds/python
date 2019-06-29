@@ -23,6 +23,7 @@ Arguments:
     -h / --help
         Prints this documentation.
 """
+#!/usr/bin/env python
 # -*- coding: <utf-8> -*-
 import os
 import sys
@@ -257,13 +258,13 @@ def read_parameters(input_folder: str, input_files: List[str],
         while "/*" in file_text:
             start = file_text.find('/*')
             end = file_text.find('*/', start)
-            file_text = file_text.replace(file_text[start:end+3], ' ')
+            file_text = file_text.replace(file_text[start:end+2], ' ')
 
         # Remove all the in-line comments
         while '//' in file_text:
             start = file_text.find('//')
             end = file_text.find('\n', start)
-            file_text = file_text.replace(file_text[start:end+2], ' ')
+            file_text = file_text.replace(file_text[start:end], ' ')
 
         # Remove the linebreaks, then split based on command terminators.
         file_text = file_text.replace('\n', ' ')
@@ -294,6 +295,7 @@ def read_parameters(input_folder: str, input_files: List[str],
                                         existing_documentation=existing_documentation,
                                         text=line[start+1:end], input_file=input_file,
                                         param_type=param_type)
+
     return found_parameters, output_dict
 
 
