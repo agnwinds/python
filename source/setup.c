@@ -621,7 +621,7 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
-    rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
+    rdstr ("Wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
   }
 
 
