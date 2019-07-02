@@ -1,9 +1,6 @@
-
 ========
 Spectrum
 ========
-
-----------------------------------------
 
 Spectrum.orbit_phase
 ====================
@@ -27,8 +24,6 @@ primary
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.no_observers
 =====================
@@ -67,8 +62,6 @@ for each desired incliniation
 **File:** setup.c
 
 
-----------------------------------------
-
 Spectrum.wavemin
 ================
 The minimum wavelength of the final spectra in Angstroms
@@ -86,8 +79,6 @@ The minimum wavelength of the final spectra in Angstroms
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_photons_by_position
 ===================================
@@ -224,8 +215,6 @@ of the region.
 **File:** setup.c
 
 
-----------------------------------------
-
 Spectrum.type
 =============
 The type of spectra that are produced in the final spectra. The current choices are flambda, fnu, or basic,
@@ -254,8 +243,6 @@ basic
 **File:** setup.c
 
 
-----------------------------------------
-
 Spectrum.live_or_die
 ====================
 Normally in creating detailed spectrum Python "extracts" photons in a certain
@@ -283,8 +270,6 @@ extract
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.select_specific_no_of_scatters_in_spectra
 ==================================================
@@ -323,8 +308,6 @@ n is < 0 then photons with n or greater scattters will be extracted.
 
 **File:** setup.c
 
-
-----------------------------------------
 
 Spectrum.wavemax
 ================

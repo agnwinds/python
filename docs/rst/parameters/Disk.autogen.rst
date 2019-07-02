@@ -1,9 +1,6 @@
-
 ====
 Disk
 ====
-
-----------------------------------------
 
 Disk.radmax
 ===========
@@ -24,8 +21,6 @@ pass through the disk plane.
 
 **File:** setup_disk.c
 
-
-----------------------------------------
 
 Disk.type
 =========
@@ -149,7 +144,7 @@ contains the desired profile.
 Disk.z1
 -------
 For a vertically extended the disk, the height of the disk is
-set to be :ref:`Disk.z0`*:ref:`Disk.radmax`*(r/:ref:`Disk.radmax`)**Disk.z1 where Disk.z1
+set to be :ref:`Disk.z0` * :ref:`Disk.radmax` * (r/:ref:`Disk.radmax`)**Disk.z1 where Disk.z1
 is the power law index
 
 **Type:** Double
@@ -180,8 +175,6 @@ outer disk will be this * :ref:`Disk.radmax`.
 
 **File:** setup_disk.c
 
-
-----------------------------------------
 
 Disk.rad_type_in_final_spectrum
 ===============================

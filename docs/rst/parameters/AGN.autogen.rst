@@ -1,9 +1,6 @@
-
 ===
 AGN
 ===
-
-----------------------------------------
 
 AGN.power_law_cutoff
 ====================
@@ -25,8 +22,6 @@ applied to low frequencies and giving an odd SED.
 **File:** setup_star_bh.c
 
 
-----------------------------------------
-
 AGN.power_law_index
 ===================
 The exponent alpha in a power law SED applied to an AGN
@@ -44,8 +39,6 @@ central source of the form L_nu=K nu**alpha
 **File:** setup_star_bh.c
 
 
-----------------------------------------
-
 AGN.bremsstrahlung_alpha
 ========================
 The frequency exponent alpha in bremstrahlung SED of the form
@@ -62,8 +55,6 @@ L_nu=nu**alpha exp(-hnu/kT)
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 AGN.bremsstrahlung_temp
 =======================
@@ -83,8 +74,6 @@ L_nu=nu**alpha exp(-hnu/kT)
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 AGN.lamp_post_height
 ====================

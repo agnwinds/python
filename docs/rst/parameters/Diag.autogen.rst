@@ -1,9 +1,6 @@
-
 ====
 Diag
 ====
-
-----------------------------------------
 
 Diag.write_atomicdata
 =====================
@@ -14,8 +11,6 @@ an output file.
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Diag.adjust_grid
 ================
@@ -31,8 +26,6 @@ for the logarithmic grid. Advanced command.
 
 **File:** setup_domains.c
 
-
-----------------------------------------
 
 Diag.extra
 ==========
@@ -150,8 +143,6 @@ Multi-line description, must keep indentation.
 
 **File:** diag.c
 
-
-----------------------------------------
 
 Diag.use_standard_care_factors
 ==============================

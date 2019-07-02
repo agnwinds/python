@@ -1,9 +1,6 @@
-
 ======
 Corona
 ======
-
-----------------------------------------
 
 Corona.radmax
 =============
@@ -24,8 +21,6 @@ above the disk.  radmax defines the outer edge of the box.
 **File:** corona.c
 
 
-----------------------------------------
-
 Corona.base_den
 ===============
 The coronal model is defined in terms of a base density
@@ -44,8 +39,6 @@ and a scale height
 
 **File:** corona.c
 
-
-----------------------------------------
 
 Corona.radmin
 =============
@@ -66,8 +59,6 @@ above the disk. radmin defines the inner edge of the box.
 **File:** corona.c
 
 
-----------------------------------------
-
 Corona.zmax
 ===========
 The corona is a box-shaped region which sits immediately
@@ -87,8 +78,6 @@ above the disk.  zmax defines the height of the box.
 **File:** corona.c
 
 
-----------------------------------------
-
 Corona.scale_height
 ===================
 The coronal model is defined in terms of a base density
@@ -107,8 +96,6 @@ and a scale height
 
 **File:** corona.c
 
-
-----------------------------------------
 
 Corona.vel_frac
 ===============

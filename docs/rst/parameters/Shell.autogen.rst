@@ -1,9 +1,6 @@
-
 =====
 Shell
 =====
-
-----------------------------------------
 
 Shell.wind_v_at_rmin
 ====================
@@ -26,8 +23,6 @@ to be enforced.
 **File:** shell_wind.c
 
 
-----------------------------------------
-
 Shell.wind.radmax
 =================
 Multi-line description, must keep indentation.
@@ -45,8 +40,6 @@ Multi-line description, must keep indentation.
 
 **File:** shell_wind.c
 
-
-----------------------------------------
 
 Shell.wind_mdot
 ===============
@@ -67,8 +60,6 @@ the shell
 
 **File:** shell_wind.c
 
-
-----------------------------------------
 
 Shell.wind.v_at_rmax
 ====================
@@ -91,8 +82,6 @@ to be enforced.
 **File:** shell_wind.c
 
 
-----------------------------------------
-
 Shell.wind.radmin
 =================
 The innermost edge of a diagnostic type of wind made up of a single
@@ -111,8 +100,6 @@ The innermost edge of a diagnostic type of wind made up of a single
 
 **File:** shell_wind.c
 
-
-----------------------------------------
 
 Shell.wind.acceleration_exponent
 ================================

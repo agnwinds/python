@@ -1,9 +1,6 @@
-
 ====
 Wind
 ====
-
-----------------------------------------
 
 Wind.old_windfile
 =================
@@ -20,8 +17,6 @@ the radiation sources, or to extract spectra from different inclinations)
 
 **File:** python.c
 
-
-----------------------------------------
 
 Wind.ionization
 ===============
@@ -72,8 +67,6 @@ set Wind_ionization to 2 (fixed). This file has format
 **File:** setup.c
 
 
-----------------------------------------
-
 Wind.radiation
 ==============
 Whether or not the wind should radiate.
@@ -82,8 +75,6 @@ Whether or not the wind should radiate.
 
 **File:** python.c
 
-
-----------------------------------------
 
 Wind.number_of_components
 =========================
@@ -276,32 +267,6 @@ Multi-line description, must keep indentation.
 **File:** ['knigge.c', 'sv.c']
 
 
-Wind.dim.in.z_or_theta.direction
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Winds are calulated on spherical, cylindrical, or polar grids.
-This input variable gives the size of the grid in the z or theta
-direction.  Because some grid cells are used as a buffer, the
-actual wind cells are contained in a slightly smaller grid than
-the number given.
-
-Note that in some situations there may be more than one wind
-component, known technically as a domain.  In that case the user
-will be queried for this value mulitple times, one for each domain
-
-**Type:** Integer
-
-**Values:** Greater than 0
-
-**Parent(s):**
-
-* :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
-
-* :ref:`Wind.type`: Not imported
-
-
-**File:** setup_domains.c
-
-
 Wind.model2import
 ^^^^^^^^^^^^^^^^^
 The name of a file to containing a generic model to read in to python from an ascii file.  (Note
@@ -317,5 +282,31 @@ required).
 
 
 **File:** import.c
+
+
+Wind.dim.in.x_or_r.direction
+----------------------------
+Winds are calulated on spherical, cylindrical, or polar grids.
+This input variable gives the size of the grid in the x or r
+direction.  Because some grid cells are used as a buffer, the
+actual wind cells are contained in a slightly smaller grid than
+the number given.
+
+Note that in some situations there may be more than one wind
+component, known technically as a domain.  In that case the user
+will be queried for this value mulitple times, one for each domain
+
+**Type:** Integer
+
+**Values:** Greater than or equal to 4, to allow for boundaries.
+
+**Parent(s):**
+
+* :ref:`Wind.number_of_components`: Greater than or equal to 0. Once per wind.
+
+* :ref:`Wind.type`: Not imported
+
+
+**File:** setup_domains.c
 
 

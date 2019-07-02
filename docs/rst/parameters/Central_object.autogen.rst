@@ -1,9 +1,6 @@
-
 ==============
 Central_object
 ==============
-
-----------------------------------------
 
 Central_object.radiation
 ========================
@@ -19,8 +16,6 @@ survace as a star would.
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 Central_object.temp
 ===================
@@ -39,8 +34,6 @@ Multi-line description, must keep indentation.
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 Central_object.rad_type_to_make_wind
 ====================================
@@ -65,8 +58,6 @@ models
 **File:** setup_star_bh.c
 
 
-----------------------------------------
-
 Central_object.mass
 ===================
 Mass of the central object
@@ -80,8 +71,6 @@ Mass of the central object
 **File:** setup_star_bh.c
 
 
-----------------------------------------
-
 Central_object.radius
 =====================
 Radius of the central object in the system, e.g the white dwarf or black hole
@@ -94,8 +83,6 @@ Radius of the central object in the system, e.g the white dwarf or black hole
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 Central_object.rad_type_in_final_spectrum
 =========================================

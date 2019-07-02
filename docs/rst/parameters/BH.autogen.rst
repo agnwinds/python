@@ -1,9 +1,6 @@
-
 ==
 BH
 ==
-
-----------------------------------------
 
 BH.lum
 ======
@@ -22,8 +19,6 @@ Multi-line description, must keep indentation.
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 BH.rad_type_to_make_wind
 ========================
@@ -104,8 +99,6 @@ Adds a low-frequency cutoff to the power law spectrum.
 **File:** setup_star_bh.c
 
 
-----------------------------------------
-
 BH.rad_type_in_final_spectrum
 =============================
 Multi-line description, must keep indentation.
@@ -132,8 +125,6 @@ power
 **File:** python.c
 
 
-----------------------------------------
-
 BH.radiation
 ============
 Whether or not the BH/AGN should radiate.
@@ -147,8 +138,6 @@ Whether or not the BH/AGN should radiate.
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 BH.geometry_for_pl_source
 =========================

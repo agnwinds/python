@@ -1,9 +1,6 @@
-
 ==
 SV
 ==
-
-----------------------------------------
 
 SV.thetamax
 ===========
@@ -19,13 +16,11 @@ See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.acceleration_exponent
 ========================
@@ -41,13 +36,11 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.diskmin
 ==========
@@ -64,13 +57,11 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.diskmax
 ==========
@@ -87,13 +78,11 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.acceleration_length
 ======================
@@ -108,13 +97,11 @@ Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.mdot_r_exponent
 ==================
@@ -127,13 +114,11 @@ See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.v_zero_mode
 ==============
@@ -152,7 +137,7 @@ sound_speed
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
@@ -176,8 +161,6 @@ The velocity at the wind base.
 **File:** sv.c
 
 
-----------------------------------------
-
 SV.v_infinity
 =============
 Asymptotic (i.e. final) velocity of a line driven wind in a Shlosman & Vitello CV disk wind model.
@@ -192,13 +175,11 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c
 
-
-----------------------------------------
 
 SV.thetamin
 ===========
@@ -214,7 +195,7 @@ See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 
 **Parent(s):**
 
-* :ref:`Wind_type`: SV
+* :ref:`Wind.type`: SV
 
 
 **File:** sv.c

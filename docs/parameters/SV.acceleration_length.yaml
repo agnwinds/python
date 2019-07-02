@@ -6,5 +6,5 @@ type: Double
 unit: cm
 values: Greater than 0
 parent:
-  Wind_type: SV
+  Wind.type: SV
 file: sv.c

@@ -1,9 +1,6 @@
-
 ============
 Stellar_wind
 ============
-
-----------------------------------------
 
 Stellar_wind.mdot
 =================
@@ -24,8 +21,6 @@ Caster and Lamemers prescription for a stellar wind.
 **File:** stellar_wind.c
 
 
-----------------------------------------
-
 Stellar_wind.radmin
 ===================
 Inner edge in cm for a stellar wind, normally the
@@ -45,8 +40,6 @@ radius of the star.
 **File:** stellar_wind.c
 
 
-----------------------------------------
-
 Stellar_wind.radmax
 ===================
 Multi-line description, must keep indentation.
@@ -65,8 +58,6 @@ Multi-line description, must keep indentation.
 **File:** stellar_wind.c
 
 
-----------------------------------------
-
 Stellar_wind.acceleration_exponent
 ==================================
 Exponent beta for the Caster and Lamers description of a stellar wind
@@ -83,8 +74,6 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 
 **File:** stellar_wind.c
 
-
-----------------------------------------
 
 Stellar_wind.v_infinity
 =======================
@@ -105,8 +94,6 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 
 **File:** stellar_wind.c
 
-
-----------------------------------------
 
 Stellar_wind.vbase
 ==================

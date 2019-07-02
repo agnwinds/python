@@ -1,9 +1,6 @@
-
 ======
 Binary
 ======
-
-----------------------------------------
 
 Binary.mass_sec
 ===============
@@ -24,8 +21,6 @@ see the effects of eclipses on the system
 
 **File:** setup_star_bh.c
 
-
-----------------------------------------
 
 Binary.period
 =============

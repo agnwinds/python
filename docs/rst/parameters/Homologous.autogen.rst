@@ -1,9 +1,6 @@
-
 ==========
 Homologous
 ==========
-
-----------------------------------------
 
 Homologous.radmin
 =================
@@ -24,8 +21,6 @@ which the velocity at any radius is proportional to the radius
 **File:** homologous.c
 
 
-----------------------------------------
-
 Homologous.radmax
 =================
 Maximum extent of the homologous wind.
@@ -44,8 +39,6 @@ Maximum extent of the homologous wind.
 **File:** homologous.c
 
 
-----------------------------------------
-
 Homologous.density_exponent
 ===========================
 The power law exponent which defines the decline in density of
@@ -62,8 +55,6 @@ a homologous flow as a function of radious.
 
 **File:** homologous.c
 
-
-----------------------------------------
 
 Homologous.vbase
 ================
@@ -82,8 +73,6 @@ Velocity at the base of the wind
 
 **File:** homologous.c
 
-
-----------------------------------------
 
 Homologous.boundary_mdot
 ========================

@@ -1,9 +1,6 @@
-
 ======
 Reverb
 ======
-
-----------------------------------------
 
 Reverb.type
 ===========
@@ -196,7 +193,7 @@ vtk
 
 dump
   Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
-  specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
+  specified by X & Z position.
 
 both
   Outputs both vtk and dump.
@@ -213,7 +210,7 @@ both
 Reverb.dump_cells
 ^^^^^^^^^^^^^^^^^
 Number of cells to dump. When dumping the path distribution info for a range
-of cells, this specifies the number of lines of :ref:`reverb.dump_cell` that will be
+of cells, this specifies the number of lines of :ref:`Reverb.dump_cell` that will be
 provided.
 
 **Type:** Integer

@@ -60,7 +60,7 @@ def write_str_indent(output_file: TextIO, string: str, indent: str = "  ", all: 
     return
 
 
-def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
+def output_parameter(output_file: TextIO, parameter: dict, level: int = 0, no_separator: bool = False):
     """
     Output a parameter to file
 
@@ -70,7 +70,7 @@ def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
         level: The level of the parameter, e.g. heading, subheading
     """
     # Suppress transition line at top level
-    if not level:
+    if not level and not no_separator:
         output_file.write("----------------------------------------\n\n")
     write_header_by_level(output_file, parameter['name'], level)
     output_file.write("{}\n".format(parameter['description']))
@@ -181,9 +181,11 @@ def write_rst(output_folder: str, dox_structured: dict):
     for parameter_type, type_parameters in dox_structured.items():
         with open(os.path.join(output_folder, "{}.autogen.rst".format(parameter_type)), 'w') as type_file:
             header_line = ''.join('=' for i in range(len(parameter_type)))
-            type_file.write("\n{}\n{}\n{}\n\n".format(header_line, parameter_type, header_line))
+            type_file.write("{}\n{}\n{}\n\n".format(header_line, parameter_type, header_line))
+            no_separator=True
             for parameter in type_parameters.values():
-                output_parameter(type_file, parameter, level=0)
+                output_parameter(type_file, parameter, level=0, no_separator=True)
+                no_separator=False
 
 
 def autogenerate_rtd_pages():
@@ -248,7 +250,7 @@ def autogenerate_rtd_pages():
                             dox_all[parent_name]["children"][parameter_name] = parameter
                             # And then 'continue' on, skipping other parents
                             found_parent = True
-                            continue
+                            break
 
             if not found_parent:
                 # If we didn't find the parameter's parent elsewhere,

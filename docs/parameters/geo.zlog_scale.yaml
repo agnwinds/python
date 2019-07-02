@@ -4,6 +4,6 @@ description: |
 type: Double
 unit: cm
 parent:
-  dig.adjust_grid: true
+  Diag.adjust_grid: true
 file: setup_domains.c
 advanced: true

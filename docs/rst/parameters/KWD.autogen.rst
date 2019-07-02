@@ -1,9 +1,6 @@
-
 ===
 KWD
 ===
-
-----------------------------------------
 
 KWD.mdot_r_exponent
 ===================
@@ -23,8 +20,6 @@ value of 0 sets a uniform mass loss rate.
 
 **File:** knigge.c
 
-
-----------------------------------------
 
 KWD.v_zero
 ==========
@@ -46,8 +41,6 @@ local sound speed.
 **File:** knigge.c
 
 
-----------------------------------------
-
 KWD.acceleration_length
 =======================
 The size of the acceleration length scale for a disk wind described by the
@@ -66,8 +59,6 @@ KWD model.
 
 **File:** knigge.c
 
-
-----------------------------------------
 
 KWD.rmax
 ========
@@ -88,8 +79,6 @@ radii. This has to be greater than rmin.
 **File:** knigge.c
 
 
-----------------------------------------
-
 KWD.acceleration_exponent
 =========================
 Sets the length scale over which the accleration to v_inf is accomplished.
@@ -109,8 +98,6 @@ v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 **File:** knigge.c
 
 
-----------------------------------------
-
 KWD.rmin
 ========
 The radius at which the disk wind begins, in units of central object radii.
@@ -128,8 +115,6 @@ The radius at which the disk wind begins, in units of central object radii.
 
 **File:** knigge.c
 
-
-----------------------------------------
 
 KWD.d
 =====
@@ -150,8 +135,6 @@ central object radii) is used as this provides a more natural parameter.
 
 **File:** knigge.c
 
-
-----------------------------------------
 
 KWD.v_infinity
 ==============
