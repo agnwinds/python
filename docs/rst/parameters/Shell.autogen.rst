@@ -19,7 +19,8 @@ to be enforced.
 **Values:** Greater than or equal to 0
 
 **Parent(s):**
-  :ref:`Wind.type`: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -38,7 +39,8 @@ Multi-line description, must keep indentation.
 **Values:** Greater than :ref:`Shell.wind.radmin`
 
 **Parent(s):**
-  :ref:`Wind.type`: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -59,7 +61,8 @@ the shell
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -81,7 +84,8 @@ to be enforced.
 **Values:** Greater than or equal to 0
 
 **Parent(s):**
-  :ref:`Wind.type`: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -101,7 +105,8 @@ The innermost edge of a diagnostic type of wind made up of a single
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -119,7 +124,8 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta for a shell wind.
 **Values:** Greater than or equal to 0
 
 **Parent(s):**
-  :ref:`Wind.type`: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c

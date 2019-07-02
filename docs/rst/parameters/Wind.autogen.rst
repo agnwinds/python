@@ -14,7 +14,8 @@ the radiation sources, or to extract spectra from different inclinations)
 **Type:** String
 
 **Parent(s):**
-  :ref:`System_type`: previous
+
+* :ref:`System_type`: previous
 
 
 **File:** python.c
@@ -30,26 +31,42 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-  ``LTE_te``
-    Multi-line description, must keep indentation.
+LTE_te
+  Multi-line description, must keep indentation.
 
-  ``LTE_tr``
-    Multi-line description, must keep indentation.
+LTE_tr
+  Multi-line description, must keep indentation.
 
-  ``ML93``
-    Multi-line description, must keep indentation.
+ML93
+  Multi-line description, must keep indentation.
 
-  ``fixed``
-    Multi-line description, must keep indentation.
+fixed
+  Multi-line description, must keep indentation.
 
-  ``matrix_bb``
-    Multi-line description, must keep indentation.
+matrix_bb
+  Multi-line description, must keep indentation.
 
-  ``matrix_pow``
-    Multi-line description, must keep indentation.
+matrix_pow
+  Multi-line description, must keep indentation.
 
-  ``on.the.spot``
-    Multi-line description, must keep indentation.
+on.the.spot
+  Multi-line description, must keep indentation.
+
+
+**File:** setup.c
+
+
+Wind.fixed_concentrations_file
+------------------------------
+The filename for the fixed ion concentrations if you have
+set Wind_ionization to 2 (fixed). This file has format
+[atomic_number  ionizationstage   ion fraction].
+
+**Type:** String
+
+**Parent(s):**
+
+* :ref:`Wind.ionization`: fixed
 
 
 **File:** setup.c
@@ -76,12 +93,13 @@ prescription and another region of space with a second prescription. For example
 a disk atmoosphere between the disk and a wind.  This parameter describes the number of components (aka domains)
 of the wind.
 
-**Type:** Int
+**Type:** Integer
 
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`System_type`: new
+
+* :ref:`System_type`: ``star``, ``binary``, ``agn``
 
 
 **File:** python.c
@@ -98,7 +116,8 @@ Starting temperature of the wind.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
+
+* :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
@@ -112,21 +131,22 @@ The coordinate system used for a describing a component of the wind.
 
 **Values:**
 
-  ``spherical``
-    Spherical
+spherical
+  Spherical
 
-  ``cylindrical``
-    Cylindrical
+cylindrical
+  Cylindrical
 
-  ``polar``
-    Spherical polar
+polar
+  Spherical polar
 
-  ``cyl_var``
-    Cylindrical varying z
+cyl_var
+  Cylindrical varying z
 
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
+
+* :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
 
 **File:** setup_domains.c
@@ -140,10 +160,11 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm
 
-**Values:** Greater than :ref:`Wind.radmin`
+**Values:** Greater than :ref:`Central_object.radius` and any minimum wind radii in the system.
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
+
+* :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
@@ -160,7 +181,8 @@ Matthews et al. (2016), 2016MNRAS.458..293M. Asked once per domain.
 **Values:** 0 < f <= 1, where 1 is a fully smooth wind.
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
+
+* :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
@@ -178,14 +200,15 @@ Note that in some situations there may be more than one wind
 component, known technically as a domain.  In that case the user
 will be queried for this value mulitple times, one for each domain
 
-**Type:** Int
+**Type:** Integer
 
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
-  :ref:`Wind.type`: Not imported
+* :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
+
+* :ref:`Wind.type`: Not imported
 
 
 **File:** setup_domains.c
@@ -199,36 +222,37 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-  ``SV``
-    Multi-line description, must keep indentation.
+SV
+  Multi-line description, must keep indentation.
 
-  ``corona``
-    Multi-line description, must keep indentation.
+corona
+  Multi-line description, must keep indentation.
 
-  ``homologous``
-    Multi-line description, must keep indentation.
+homologous
+  Multi-line description, must keep indentation.
 
-  ``hydro``
-    Multi-line description, must keep indentation.
+hydro
+  Multi-line description, must keep indentation.
 
-  ``imported``
-    Multi-line description, must keep indentation.
+imported
+  Multi-line description, must keep indentation.
 
-  ``kwd``
-    Multi-line description, must keep indentation.
+kwd
+  Multi-line description, must keep indentation.
 
-  ``shell``
-    Multi-line description, must keep indentation.
+shell
+  Multi-line description, must keep indentation.
 
-  ``star``
-    Multi-line description, must keep indentation.
+star
+  Multi-line description, must keep indentation.
 
-  ``yso``
-    Multi-line description, must keep indentation.
+yso
+  Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
+
+* :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
 **File:** setup_domains.c
@@ -245,7 +269,8 @@ Multi-line description, must keep indentation.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: knigge, SV
+
+* :ref:`Wind.type`: ``knigge``, ``SV``
 
 
 **File:** ['knigge.c', 'sv.c']
@@ -263,14 +288,15 @@ Note that in some situations there may be more than one wind
 component, known technically as a domain.  In that case the user
 will be queried for this value mulitple times, one for each domain
 
-**Type:** Int
+**Type:** Integer
 
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
-  :ref:`Wind.type`: Not imported
+* :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
+
+* :ref:`Wind.type`: Not imported
 
 
 **File:** setup_domains.c
@@ -286,59 +312,10 @@ required).
 **Type:** String
 
 **Parent(s):**
-  :ref:`Wind.type`: imported
+
+* :ref:`Wind.type`: imported
 
 
 **File:** import.c
-
-
-Wind.dim.in.x_or_r.direction
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Winds are calulated on spherical, cylindrical, or polar grids.
-This input variable gives the size of the grid in the x or r
-direction.  Because some grid cells are used as a buffer, the
-actual wind cells are contained in a slightly smaller grid than
-the number given.
-
-Note that in some situations there may be more than one wind
-component, known technically as a domain.  In that case the user
-will be queried for this value mulitple times, one for each domain
-
-**Type:** Int
-
-**Values:** Greater than or equal to 4, to allow for boundaries.
-
-**Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than or equal to 0. Once per wind.
-
-  :ref:`Wind.type`: Not imported
-
-
-**File:** setup_domains.c
-
-
-Wind.dim.in.x_or_r.direction
-----------------------------
-Winds are calulated on spherical, cylindrical, or polar grids.
-This input variable gives the size of the grid in the x or r
-direction.  Because some grid cells are used as a buffer, the
-actual wind cells are contained in a slightly smaller grid than
-the number given.
-
-Note that in some situations there may be more than one wind
-component, known technically as a domain.  In that case the user
-will be queried for this value mulitple times, one for each domain
-
-**Type:** Int
-
-**Values:** Greater than or equal to 4, to allow for boundaries.
-
-**Parent(s):**
-  :ref:`Wind.number_of_components`: Greater than or equal to 0. Once per wind.
-
-  :ref:`Wind.type`: Not imported
-
-
-**File:** setup_domains.c
 
 

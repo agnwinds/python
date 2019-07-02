@@ -17,7 +17,8 @@ Caster and Lamemers prescription for a stellar wind.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -34,10 +35,11 @@ radius of the star.
 
 **Unit:** cm
 
-**Values:** Greater than or equal to radius of the central object
+**Values:** Greater than or equal to :ref:`Central_object.radius`
 
 **Parent(s):**
-  :ref:`Wind.type`: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -53,14 +55,11 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm
 
-**Values:**
-
-  ``Stellar_wind.radmin``
-    Greater than or equal to
-
+**Values:** Greater than or equal to :ref:`Stellar_wind.radmin`
 
 **Parent(s):**
-  :ref:`Wind.type`: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -78,7 +77,8 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 **Values:** Greater than or equal to 0
 
 **Parent(s):**
-  :ref:`Wind.type`: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -99,7 +99,8 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -118,7 +119,8 @@ Multi-line description, must keep indentation.
 **Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  :ref:`Wind.type`: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c

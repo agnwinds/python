@@ -14,10 +14,6 @@ these are cycles to determine the ionization and thermal state of the wind
 
 **Values:** Greater than 0
 
-**Parent(s):**
-  :ref:`parameter`: none
-
-
 **File:** setup.c
 
 

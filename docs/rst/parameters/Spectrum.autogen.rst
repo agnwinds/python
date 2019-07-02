@@ -19,31 +19,10 @@ primary
 **Values:** Between 0 and 1
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
 
-  :ref:`System_type`: binary
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
-
-**File:** setup.c
-
-
-----------------------------------------
-
-Spectrum.select_scatters
-========================
-Advaned command that allows one to extract photons that
-have undergone a certain number of scatters.  If n > MAXSCAT,
-that is to say a very large number then all scatters are slected.
-If lies between 0 and MAXSCAT then photons will be extracted only
-at the point a photon has undergone this number of scatters.  If
-n is < 0 then photons with n or greater scattters will be extracted.
-
-**Type:** Int
-
-**Values:** Greater than 0
-
-**Parent(s):**
-  :ref:`Select_no_of_scatters_in_spectra`: True
+* :ref:`System_type`: binary
 
 
 **File:** setup.c
@@ -61,7 +40,8 @@ will be extracted.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
@@ -80,7 +60,8 @@ for each desired incliniation
 **Values:** 0 to 90 degrees, where 0 is normal to the disk and 90 is on the disk plane
 
 **Parent(s):**
-  :ref:`Spectrum.no_observers`: Greater than 0. Once per observer.
+
+* :ref:`Spectrum.no_observers`: Greater than 0. Once per observer.
 
 
 **File:** setup.c
@@ -99,7 +80,8 @@ The minimum wavelength of the final spectra in Angstroms
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
@@ -115,10 +97,11 @@ asks whether one would like to select photons by position.  If
 so one will be asked to define a spheical region in interms of
 its cylindrical coordinates.
 
-**Type:** Boolean (Y/N)
+**Type:** Boolean (yes/no)
 
 **Parent(s):**
-  :ref:`geo.pcycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
@@ -135,21 +118,22 @@ where the photons was created or where it last scattered
 
 **Values:**
 
-  ``all``
-    Select photons regardless of where they are generated
+all
+  Select photons regardless of where they are generated
 
-  ``below_disk``
-    Select only photons generated from below (-z) the disk
+below_disk
+  Select only photons generated from below (-z) the disk
 
-  ``above_disk``
-    Select only photons orginating above the disk
+above_disk
+  Select only photons orginating above the disk
 
-  ``spherical_region``
-    Select photons by defining a spherical region
+spherical_region
+  Select photons by defining a spherical region
 
 
 **Parent(s):**
-  :ref:`Spectrum.select_photons_by_position`: True
+
+* :ref:`Spectrum.select_photons_by_position`: ``True``
 
 
 **File:** setup.c
@@ -167,7 +151,8 @@ photons are to be extracted. select_r defines the radius of the spherical region
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Spectrum.select_location`: spherical_region
+
+* :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
@@ -188,7 +173,8 @@ of the region.
 **Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  :ref:`Spectrum.select_location`: spherical_region
+
+* :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
@@ -209,7 +195,8 @@ just from photons that originate or scatter int he region
 **Values:** Between 0, and 360 or -180 to 180
 
 **Parent(s):**
-  :ref:`Spectrum.select_location`: spherical_region
+
+* :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
@@ -230,7 +217,8 @@ of the region.
 **Values:** Within the z range of the model
 
 **Parent(s):**
-  :ref:`Spectrum.select_location`: spherical_region
+
+* :ref:`Spectrum.select_location`: spherical_region
 
 
 **File:** setup.c
@@ -248,18 +236,19 @@ frequency bin.
 
 **Values:**
 
-  ``flambda``
-    λF(λ)
+flambda
+  λF(λ)
 
-  ``fnu``
-    νF(ν)
+fnu
+  νF(ν)
 
-  ``basic``
-    F(λ)
+basic
+  F(λ)
 
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
@@ -280,15 +269,16 @@ diagnostic mode.
 
 **Values:**
 
-  ``live.or.die``
-    Count only those photons that escape within a small angle range towards the observer
+live.or.die
+  Count only those photons that escape within a small angle range towards the observer
 
-  ``extract``
-    Extract a component of all photons that scatter towards the observer
+extract
+  Extract a component of all photons that scatter towards the observer
 
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c
@@ -303,10 +293,32 @@ constraints on the detailed spectra which are extract.
 This includes selectiong photons from above or below the
 disk, only photons which have scttered, etc.
 
-**Type:** Boolean (Y/N)
+**Type:** Boolean (yes/no)
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+
+**File:** setup.c
+
+
+Spectrum.select_scatters
+------------------------
+Advaned command that allows one to extract photons that
+have undergone a certain number of scatters.  If n > MAXSCAT,
+that is to say a very large number then all scatters are slected.
+If lies between 0 and MAXSCAT then photons will be extracted only
+at the point a photon has undergone this number of scatters.  If
+n is < 0 then photons with n or greater scattters will be extracted.
+
+**Type:** Integer
+
+**Values:** Greater than 0
+
+**Parent(s):**
+
+* :ref:`Spectrum.select_specific_no_of_scatters_in_spectra`: ``True``
 
 
 **File:** setup.c
@@ -324,12 +336,13 @@ The maximum wavelength of the detailed spectra that are to be produced
 
 **Values:**
 
-  ``Spectrum.wavemin``
-    Greater than
+Spectrum.wavemin
+  Greater than
 
 
 **Parent(s):**
-  :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** setup.c

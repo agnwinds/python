@@ -13,10 +13,11 @@ survace as a star would.
 **Type:** Boolean (yes/no)
 
 **Parent(s):**
-  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+* :ref:`System_type`: ``star``, ``binary``, ``previous``
 
 
-**File:** setup.c
+**File:** setup_star_bh.c
 
 
 ----------------------------------------
@@ -25,14 +26,15 @@ Central_object.temp
 ===================
 Multi-line description, must keep indentation.
 
-**Type:** rddoub
+**Type:** Double
 
-**Unit:** None
+**Unit:** Kelvin
 
-**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Greater than zero
 
 **Parent(s):**
-  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+* :ref:`System_type`: ``star``, ``binary``, ``previous``
 
 
 **File:** setup_star_bh.c
@@ -48,15 +50,16 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-  ``bb``
-    Multi-line description, must keep indentation.
+bb
+  Multi-line description, must keep indentation.
 
-  ``models``
-    Multi-line description, must keep indentation.
+models
+  Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+* :ref:`System_type`: ``star``, ``binary``, ``previous``
 
 
 **File:** setup_star_bh.c
@@ -70,15 +73,11 @@ Mass of the central object
 
 **Type:** Double
 
-**Unit:** Solar masses
+**Unit:** M☉
 
 **Values:** Greater than 0
 
-**Parent(s):**
-  :ref:`parameter`: None
-
-
-**File:** setup.c
+**File:** setup_star_bh.c
 
 
 ----------------------------------------
@@ -93,11 +92,7 @@ Radius of the central object in the system, e.g the white dwarf or black hole
 
 **Values:** Greater than 0
 
-**Parent(s):**
-  :ref:`parameter`: None
-
-
-**File:** setup.c
+**File:** setup_star_bh.c
 
 
 ----------------------------------------
@@ -110,18 +105,19 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-  ``bb``
-    Multi-line description, must keep indentation.
+bb
+  Multi-line description, must keep indentation.
 
-  ``models``
-    Multi-line description, must keep indentation.
+models
+  Multi-line description, must keep indentation.
 
-  ``uniform``
-    Multi-line description, must keep indentation.
+uniform
+  Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  :ref:`parameter`: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+* :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 
 **File:** python.c

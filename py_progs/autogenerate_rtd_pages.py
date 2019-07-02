@@ -84,20 +84,20 @@ def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
         if isinstance(parameter['values'], dict):
             output_file.write("**Values:**\n\n")
             for key, value in parameter['values'].items():
-                output_file.write("  ``{}``\n".format(key))
+                output_file.write("{}\n".format(key))
                 if isinstance(value, str):
-                    write_str_indent(output_file, value.strip(), indent="    ", all=True)
+                    write_str_indent(output_file, value.strip(), indent="  ", all=True)
                 elif isinstance(value, list):
                     write_str_indent(
                         output_file,
-                        ', '.join([str(x) for x in value]), indent="    ", all=True
+                        ', '.join([str(x) for x in value]), indent="  ", all=True
                     )
                 else:
                     output_file.write("    "+str(value))
 
         elif isinstance(parameter['values'], list):
             # If this is a list of values, write each out as a bullet-point
-            output_file.write("**Values:**\n\n")
+            output_file.write("**Values:**\n")
             for value in parameter['values'].items():
                 write_str_indent(output_file, "* {}".format(value), indent="  ")
 
@@ -107,15 +107,15 @@ def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
 
     if parameter.get('parent'):
         if isinstance(parameter['parent'], dict):
-            output_file.write("**Parent(s):**\n")
+            output_file.write("**Parent(s):**\n\n")
             for key, value in parameter['parent'].items():
                 if isinstance(value, str):
-                    write_str_indent(output_file, "  :ref:`{}`: {}".format(key, value), indent="    ")
+                    write_str_indent(output_file, "* :ref:`{}`: {}".format(key, value), indent="  ")
                 elif isinstance(value, list):
-                    list_text = ', '.join([str(x) for x in value])
-                    write_str_indent(output_file, "  :ref:`{}`: {}".format(key, list_text, indent="    "))
+                    list_text = ', '.join(['``'+str(x)+'``' for x in value])
+                    write_str_indent(output_file, "* :ref:`{}`: {}".format(key, list_text, indent="  "))
                 else:
-                    output_file.write("  :ref:`{}`: {}\n\n".format(key, value))
+                    output_file.write("* :ref:`{}`: ``{}``\n\n".format(key, value))
             output_file.write("\n")
 
         elif isinstance(parameter['parent'], list):

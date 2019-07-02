@@ -8,5 +8,5 @@ type: Double
 unit: cm
 values: Greater than or equal to :ref:`Central_object.radius`
 parent:
-  wind_type: SV
+  Wind_type: SV
 file: sv.c

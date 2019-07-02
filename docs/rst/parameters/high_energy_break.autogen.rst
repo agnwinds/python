@@ -20,9 +20,10 @@ parameter defines the energy of the high energy break.
 **Values:** Greater than :ref:`low_energy_break`
 
 **Parent(s):**
-  :ref:`BH.radiation`: True
 
-  :ref:`BH.rad_type_to_make_wind`: cloudy_table
+* :ref:`BH.radiation`: ``True``
+
+* :ref:`BH.rad_type_to_make_wind`: cloudy_table
 
 
 **File:** setup_star_bh.c

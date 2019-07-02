@@ -540,7 +540,7 @@ init_photons ()
 
   /* On restarts, the spectra that are read in have to be renormalized if
    * the number of spectral cycles has been increased before a restart, and
-   * so we need to record this number. If this is not a restart, then 
+   * so we need to record this number. If this is not a restart, then
    * geo.pcycles_renorm will not be used.
    */
 
@@ -558,8 +558,8 @@ init_photons ()
   /* Allocate the memory for the photon structure now that NPHOT is established */
 
   photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
-  /* If the number of photons per cycle is changed, NPHOT can be less, so we define NPHOT_MAX 
-   * to the maximum number of photons that one can create.  NPHOT is used extensively with 
+  /* If the number of photons per cycle is changed, NPHOT can be less, so we define NPHOT_MAX
+   * to the maximum number of photons that one can create.  NPHOT is used extensively with
    * Python.  It is the NPHOT in a particular cycle, in a given thread.
    */
 
@@ -621,7 +621,7 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
-    rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
+    rdstr ("Wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
   }
 
 

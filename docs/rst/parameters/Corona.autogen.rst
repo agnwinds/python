@@ -14,10 +14,11 @@ above the disk.  radmax defines the outer edge of the box.
 
 **Unit:** cm
 
-**Values:** Greater than the radius of the central object
+**Values:** Greater than :ref:`Central_object.radius`
 
 **Parent(s):**
-  :ref:`Wind.type`: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -37,7 +38,8 @@ and a scale height
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -48,16 +50,17 @@ and a scale height
 Corona.radmin
 =============
 The corona is a box-shaped region which sits immediately
-above the disk.  radmin defines the inner edge of the box.
+above the disk. radmin defines the inner edge of the box.
 
 **Type:** Double
 
 **Unit:** cm
 
-**Values:** Greater than that the radius of the central object
+**Values:** Greater than :ref:`Central_object.radius`
 
 **Parent(s):**
-  :ref:`Wind.type`: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -77,7 +80,8 @@ above the disk.  zmax defines the height of the box.
 **Values:** Greater than that the radius of the central object
 
 **Parent(s):**
-  :ref:`Wind.type`: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -97,7 +101,8 @@ and a scale height
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`Wind.type`: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -116,12 +121,13 @@ toward the central object).
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** Disk velocity
 
 **Values:** Any, 0 implies no radial velocity.
 
 **Parent(s):**
-  :ref:`Wind.type`: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c

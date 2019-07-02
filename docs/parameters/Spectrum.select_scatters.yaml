@@ -6,9 +6,9 @@ description: |
   If lies between 0 and MAXSCAT then photons will be extracted only
   at the point a photon has undergone this number of scatters.  If
   n is < 0 then photons with n or greater scattters will be extracted.
-type: Int
+type: Integer
 values: Greater than 0
 parent:
-  Select_no_of_scatters_in_spectra: true
+  Spectrum.select_specific_no_of_scatters_in_spectra: true
 file: setup.c
 advanced: true

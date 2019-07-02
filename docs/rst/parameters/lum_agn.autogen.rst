@@ -17,9 +17,10 @@ from 2-10keV.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`System_type`: agn
 
-  :ref:`BH.radiation`: True
+* :ref:`System_type`: agn
+
+* :ref:`BH.radiation`: ``True``
 
 
 **File:** setup_star_bh.c

@@ -18,7 +18,8 @@ See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
 **Values:** Greater than sv.thetamin
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -39,7 +40,8 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -58,10 +60,11 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Unit:** cm
 
-**Values:** Greater than or equal to the radius of the central object (white dwarf)
+**Values:** Greater than or equal to :ref:`Central_object.radius`
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -80,10 +83,11 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Unit:** cm
 
-**Values:** Greater than or equal to sv.diskmin (inner radius disk wind)
+**Values:** Greater than or equal to :ref:`sv.diskmin` (inner radius disk wind)
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -103,7 +107,8 @@ Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -121,7 +126,8 @@ See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
 **Values:** Greater than or equal to 0. 0 sets a uniform mass loss rate.
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -137,15 +143,16 @@ Multi-line description, must keep indentation.
 
 **Values:**
 
-  ``fixed``
-    Multi-line description, must keep indentation.
+fixed
+  Multi-line description, must keep indentation.
 
-  ``sound_speed``
-    Multi-line description, must keep indentation.
+sound_speed
+  Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -162,7 +169,8 @@ The velocity at the wind base.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`SV.v_zero_mode`: sound_speed, fixed
+
+* :ref:`SV.v_zero_mode`: ``sound_speed``, ``fixed``
 
 
 **File:** sv.c
@@ -183,7 +191,8 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c
@@ -204,7 +213,8 @@ See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 **Values:** Greater than 0
 
 **Parent(s):**
-  :ref:`wind_type`: SV
+
+* :ref:`Wind_type`: SV
 
 
 **File:** sv.c

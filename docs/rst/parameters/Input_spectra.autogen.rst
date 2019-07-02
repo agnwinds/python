@@ -18,7 +18,22 @@ Python actually only reads in the data the first time.
 **Type:** String
 
 **Parent(s):**
-  :ref:`parameter`: One is asked this question whenever one chooses this option, regardless of the radiation source.
+
+* :ref:`Central_object.rad_type_to_make_wind`: models
+
+* :ref:`Central_object.rad_type_in_final_spectrum`: models
+
+* :ref:`Disk.rad_type_to_make_wind`: models
+
+* :ref:`Disk.rad_type_in_final_spectrum`: models
+
+* :ref:`Boundary_layer.rad_type_to_make_wind`: models
+
+* :ref:`Boundary_layer.rad_type_in_final_spectrum`: models
+
+* :ref:`BH.rad_type_to_make_wind`: models
+
+* :ref:`BH.rad_type_in_final_spectrum`: models
 
 
 **File:** setup.c

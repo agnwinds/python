@@ -8,6 +8,6 @@ values:
   sound_speed: |
     Multi-line description, must keep indentation.
 parent:
-  wind_type: SV
+  Wind_type: SV
 file: sv.c
 advanced: true

@@ -14,7 +14,8 @@ Choose the logarithmic scale length for the grid in the x-direction.
 **Unit:** cm
 
 **Parent(s):**
-  :ref:`parameter`: adjust_grid
+
+* :ref:`dig.adjust_grid`: ``True``
 
 
 **File:** setup_domains.c
@@ -31,7 +32,8 @@ Choose the logarithmic scale length for the grid in the z-direction.
 **Unit:** cm
 
 **Parent(s):**
-  :ref:`parameter`: adjust_grid
+
+* :ref:`dig.adjust_grid`: ``True``
 
 
 **File:** setup_domains.c
