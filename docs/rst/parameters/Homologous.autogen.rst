@@ -1,21 +1,21 @@
-
 ==========
 Homologous
 ==========
 
 Homologous.radmin
 =================
-The starting point of for madel of a homoloous flow, a model in
+The starting point of for madel of a homologous flow, a model in
 which the velocity at any radius is proportional to the radius
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** greater than 0
+**Values:** Greater than or equal to :ref:`Central_object.radius`
 
 **Parent(s):**
-  parameter_: A required parameter for defining a homologous flow
+
+* :ref:`Wind.type`: homologous
 
 
 **File:** homologous.c
@@ -23,16 +23,17 @@ which the velocity at any radius is proportional to the radius
 
 Homologous.radmax
 =================
-Multi-line description, must keep indentation.
+Maximum extent of the homologous wind.
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Greater than :ref:`Homologous.radmin`
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+* :ref:`Wind.type`: homologous
 
 
 **File:** homologous.c
@@ -45,10 +46,11 @@ a homologous flow as a function of radious.
 
 **Type:** Double
 
-**Value:** greater than 0 for a density that declines with radius
+**Values:** Greater than 0 for a density that declines with radius
 
 **Parent(s):**
-  parameter_: A basic paameter needed to define a homlogous flow
+
+* :ref:`Wind.type`: homologous
 
 
 **File:** homologous.c
@@ -56,16 +58,17 @@ a homologous flow as a function of radious.
 
 Homologous.vbase
 ================
-Multi-line description, must keep indentation.
+Velocity at the base of the wind
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+* :ref:`Wind.type`: homologous
 
 
 **File:** homologous.c
@@ -80,12 +83,13 @@ the trend in density.
 
 **Type:** Double
 
-**Unit:** Msol/yr
+**Unit:** M☉/yr
 
-**Value:** greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: One of the basic parameters for defining a hologous flow in Python
+
+* :ref:`Wind.type`: homologous
 
 
 **File:** homologous.c

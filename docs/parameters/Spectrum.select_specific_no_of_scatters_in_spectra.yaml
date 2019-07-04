@@ -4,7 +4,7 @@ description: |
   constraints on the detailed spectra which are extract.
   This includes selectiong photons from above or below the
   disk, only photons which have scttered, etc.
-type: Boolean (Y/N)
+type: Boolean (yes/no)
 parent:
   Spectrum_cycles: Greater than or equal to 0
 file: setup.c

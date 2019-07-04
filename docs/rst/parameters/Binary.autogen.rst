@@ -1,4 +1,3 @@
-
 ======
 Binary
 ======
@@ -11,12 +10,13 @@ see the effects of eclipses on the system
 
 **Type:** Double
 
-**Unit:** msol
+**Unit:** M☉/year
 
-**Value:** greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: Required whenever the system is a binary
+
+* :ref:`System_type`: binary
 
 
 **File:** setup_star_bh.c
@@ -24,7 +24,7 @@ see the effects of eclipses on the system
 
 Binary.period
 =============
-The perids of a binary system. Along with a mass, the binary period is 
+The perids of a binary system. Along with a mass, the binary period is
 used to define the Roche lobe of the system, which in turn can be used
 to see the effect of eclipses on the spectrum.  Defining the system as
 a secondary also initializes the outer radius of the disk.
@@ -33,10 +33,11 @@ a secondary also initializes the outer radius of the disk.
 
 **Unit:** Hours
 
-**Value:** greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: Required whenever the system is defined to be a binary system
+
+* :ref:`System_type`: binary
 
 
 **File:** setup_star_bh.c

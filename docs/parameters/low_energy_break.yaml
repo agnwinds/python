@@ -7,7 +7,7 @@ description: |
   parameter defines the energy of the low energy break.
 type: Double
 unit: eV
-values: Greater than zero
+values: Greater than 0
 parent:
   BH.radiation: true
   BH.rad_type_to_make_wind: cloudy_table

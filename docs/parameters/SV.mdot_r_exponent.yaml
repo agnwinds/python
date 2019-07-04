@@ -5,5 +5,5 @@ description: |
 type: Double
 values: Greater than or equal to 0. 0 sets a uniform mass loss rate.
 parent:
-  wind_type: SV
+  Wind.type: SV
 file: sv.c

@@ -3,8 +3,7 @@ description: |
   Multi-line description, must keep indentation.
 type: Double
 unit: cm
-values:
-  Shell.wind.ramin: Greater than
+values: Greater than :ref:`Shell.wind.radmin`
 parent:
   Wind.type: shell
 file: shell_wind.c

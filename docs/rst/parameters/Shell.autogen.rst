@@ -1,4 +1,3 @@
-
 =====
 Shell
 =====
@@ -14,10 +13,11 @@ to be enforced.
 
 **Unit:** cm/s
 
-**Value:** Greater than or equal to 0
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Wind.type_: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -31,14 +31,11 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm
 
-**Values:**
-
-  ``Shell.wind.ramin``
-    Greater than
-
+**Values:** Greater than :ref:`Shell.wind.radmin`
 
 **Parent(s):**
-  Wind.type_: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -54,10 +51,11 @@ the shell
 
 **Unit:** M☉/year
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -74,10 +72,11 @@ to be enforced.
 
 **Unit:** cm/s
 
-**Value:** Greater than or equal to 0
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Wind.type_: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -92,10 +91,11 @@ The innermost edge of a diagnostic type of wind made up of a single
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c
@@ -108,10 +108,11 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta for a shell wind.
 
 **Type:** Double
 
-**Value:** Greater than or equal to 0
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Wind.type_: shell
+
+* :ref:`Wind.type`: shell
 
 
 **File:** shell_wind.c

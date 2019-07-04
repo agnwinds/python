@@ -1,4 +1,3 @@
-
 ======
 Corona
 ======
@@ -12,10 +11,11 @@ above the disk.  radmax defines the outer edge of the box.
 
 **Unit:** cm
 
-**Value:** Greater than the radius of the central object
+**Values:** Greater than :ref:`Central_object.radius`
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -30,10 +30,11 @@ and a scale height
 
 **Unit:** number/cm**3
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -42,16 +43,17 @@ and a scale height
 Corona.radmin
 =============
 The corona is a box-shaped region which sits immediately
-above the disk.  radmin defines the inner edge of the box.
+above the disk. radmin defines the inner edge of the box.
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Greater than that the radius of the central object
+**Values:** Greater than :ref:`Central_object.radius`
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -66,10 +68,11 @@ above the disk.  zmax defines the height of the box.
 
 **Unit:** cm
 
-**Value:** Greater than that the radius of the central object
+**Values:** Greater than that the radius of the central object
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -84,10 +87,11 @@ and a scale height
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c
@@ -104,12 +108,13 @@ toward the central object).
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** Disk velocity
 
-**Value:** Any, 0 implies no radial velocity.
+**Values:** Any, 0 implies no radial velocity.
 
 **Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
+
+* :ref:`Wind.type`: corona
 
 
 **File:** corona.c

@@ -1,4 +1,3 @@
-
 ===
 KWD
 ===
@@ -12,12 +11,11 @@ value of 0 sets a uniform mass loss rate.
 
 **Type:** Double
 
-**Unit:** None
-
-**Value:** Greater than=0
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -25,18 +23,19 @@ value of 0 sets a uniform mass loss rate.
 
 KWD.v_zero
 ==========
-Multiple of the local sound speed at the base of the wind, this results in 
+Multiple of the local sound speed at the base of the wind, this results in
 the initial velocity of the wind being able to be greater or less than the
 local sound speed.
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** Sound speed at wind base
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -51,10 +50,11 @@ KWD model.
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -67,12 +67,13 @@ radii. This has to be greater than rmin.
 
 **Type:** Double
 
-**Unit:** co.radius
+**Unit:** :ref:`Central_object.radius`
 
-**Value:** Greater than 0
+**Values:** Greater than :ref:`KWD.rmin`
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -80,17 +81,18 @@ radii. This has to be greater than rmin.
 
 KWD.acceleration_exponent
 =========================
-Sets the length scale over which the accleration to v_inf is accomplished. 
+Sets the length scale over which the accleration to v_inf is accomplished.
 It is the value of the exponent beta for the Caster & Lamers equation of a
-stellar wind, 
-v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta. 
+stellar wind,
+v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 
 **Type:** Double
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -98,17 +100,17 @@ v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 
 KWD.rmin
 ========
-The radius at which the disk wind begins, in units of central object radii. 
-This has to be less than rmax.
+The radius at which the disk wind begins, in units of central object radii.
 
 **Type:** Double
 
-**Unit:** co.radius
+**Unit:** :ref:`Central_object.radius`
 
-**Value:** Greater than 0
+**Values:** Greater than 1
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -116,18 +118,19 @@ This has to be less than rmax.
 
 KWD.d
 =====
-The ratio d/d_min is used to describe the degree of geometric collimation of 
+The ratio d/d_min is used to describe the degree of geometric collimation of
 the disk wind in the KWD model. However, d (the distance to the focal point in
 central object radii) is used as this provides a more natural parameter.
 
 **Type:** Double
 
-**Unit:** co.radius
+**Unit:** :ref:`Central_object.radius`
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c
@@ -135,7 +138,7 @@ central object radii) is used as this provides a more natural parameter.
 
 KWD.v_infinity
 ==============
-The velocity at large distances of a steller wind described by the KWD model, 
+The velocity at large distances of a steller wind described by the KWD model,
 in units of escape velocity. Described in terms of Castor & Lamers equation,
 v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 
@@ -143,10 +146,11 @@ v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
 
 **Unit:** Escape velocity
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: kwd
 
 
 **File:** knigge.c

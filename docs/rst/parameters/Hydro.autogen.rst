@@ -1,4 +1,3 @@
-
 =====
 Hydro
 =====
@@ -16,15 +15,16 @@ the data.
 
 **Values:**
 
-  ``-1``
-    use all data
+-1
+  use all data
 
-  ``X``
-    use up to that angle (typically less than 90)
+X
+  use up to that angle (typically less than 90)
 
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: hydro
 
 
 **File:** hydro_import.c
@@ -37,7 +37,8 @@ Relative path to a hydrodynamic snapshot file to be imported.
 **Type:** String
 
 **Parent(s):**
-  parameter_: None
+
+* :ref:`Wind.type`: hydro
 
 
 **File:** hydro_import.c

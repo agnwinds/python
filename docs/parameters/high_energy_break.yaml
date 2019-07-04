@@ -7,8 +7,7 @@ description: |
   parameter defines the energy of the high energy break.
 type: Double
 unit: eV
-value:
-  low_energy_break: Greater than
+values: Greater than :ref:`low_energy_break`
 parent:
   BH.radiation: true
   BH.rad_type_to_make_wind: cloudy_table

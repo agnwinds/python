@@ -28,7 +28,7 @@ Arguments:
 import os
 import sys
 from typing import List, Union
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import yaml
 
 
@@ -46,7 +46,7 @@ BLACKLIST = [
 # Must include 'wrappers' e.g. get_spectype.
 PARAM_TYPES = {
     "get_spectype": "Enumerator",
-    "rdint": "Int",
+    "rdint": "Integer",
     "rdflo": "Float",
     "rddoub": "Double",
     "rdstr": "String",
@@ -433,6 +433,27 @@ def autogenerate_parameter_docs():
     existing_documentation = list_existing_documentation(output_folder)
     found_parameters, output_dict = read_parameters(input_folder, input_files, existing_documentation)
     deprecated_documentation, new_documentation = intersect_documentation(existing_documentation, found_parameters)
+
+    duplicate_roots: List[str] = []
+    parameter_roots: defaultdict = defaultdict(list)
+    for parameter in found_parameters:
+        parameter_roots[parameter.split('.')[0]].append(parameter)
+
+
+    for index, root in enumerate(list(parameter_roots.keys())[:-1]):
+        for root2 in list(parameter_roots.keys())[index+1:]:
+            if root != root2 and root.casefold() == root2.casefold():
+                if len(parameter_roots[root]) < len(parameter_roots[root2]):
+                    duplicate_roots.append('- {} and {}: {}'.format(root, root2, ', '.join(parameter_roots[root])))
+                else:
+                    duplicate_roots.append('- {} and {}: {}'.format(root, root2, ', '.join(parameter_roots[root2])))
+
+
+    if duplicate_roots:
+        print("ERROR: There are parameter roots that only differ by case!")
+        print('\n'.join(duplicate_roots))
+        print("Cannot write documentation as it will not work in case-insensitive OSes (e.g. Mac, Windows)")
+        return
 
     if len(sys.argv) is 1:
         # If we're not running in write mode

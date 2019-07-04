@@ -1,4 +1,3 @@
-
 ===============
 Photon_sampling
 ===============
@@ -12,39 +11,37 @@ ionization stage of the calculation.
 
 **Values:**
 
-  ``T_star``
-    Sets a single band based on the temperature given
+T_star
+  Sets a single band based on the temperature given
 
-  ``cv``
-    Traditional cv setup
+cv
+  Traditional cv setup
 
-  ``yso``
-    YSO setup
+yso
+  YSO setup
 
-  ``AGN``
-    Test for balance matching the bands we have been using for AGN runs
+AGN
+  Test for balance matching the bands we have been using for AGN runs
 
-  ``min_max_freq``
-    Mode 1 sets a single wide band defined by f1 and f2
+min_max_freq
+  Mode 1 sets a single wide band defined by f1 and f2
 
-  ``user_bands``
-    User-defined bands
+user_bands
+  User-defined bands
 
-  ``cloudy_test``
-    Set up to compare with cloudy power law table command note
-    that this also sets up the weight and photon index for the PL, to ensure a continuous distribution
+cloudy_test
+  Set up to compare with cloudy power law table command note
+  that this also sets up the weight and photon index for the PL, to ensure a continuous distribution
 
-  ``wide``
-    Test for balance to have a really wide frequency range
+wide
+  Test for balance to have a really wide frequency range
 
-  ``logarithmic``
-    Generalized method to set up logarithmic bands
+logarithmic
+  Generalized method to set up logarithmic bands
 
 
 **File:** bands.c
 
-
-----------------------------------------
 
 Photon_sampling.nbands
 ----------------------
@@ -54,16 +51,15 @@ wants to customize the bands used for the generation of photons
 
 **Type:** Integer
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Photon_sampling.approach_: user_bands
+
+* :ref:`Photon_sampling.approach`: user_bands
 
 
 **File:** bands.c
 
-
-----------------------------------------
 
 Photon_sampling.band_min_frac
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,16 +71,15 @@ to the luminosity in the energy bands
 
 **Type:** Double
 
-**Value:** Greater than 0 and should sum to less than 1 over all bands
+**Values:** Greater than 0 and should sum to less than 1 over all bands
 
 **Parent(s):**
-  Photon_sampling.nbands_: Greater than 0, once per band
+
+* :ref:`Photon_sampling.nbands`: Greater than 0, once per band
 
 
 **File:** bands.c
 
-
-----------------------------------------
 
 Photon_sampling.band_boundary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -96,16 +91,15 @@ parameter is request depends upon the number of energies bands being used.
 
 **Unit:** eV
 
-**Value:** Greater than 0, monotonically increasing
+**Values:** Greater than 0, monotonically increasing
 
 **Parent(s):**
-  Photon_sampling.nbands_: Greater than 0, once per band
+
+* :ref:`Photon_sampling.nbands`: Greater than 0, once per band
 
 
 **File:** bands.c
 
-
-----------------------------------------
 
 Photon_sampling.high_energy_limit
 ---------------------------------
@@ -116,20 +110,15 @@ specifies the high energy limit for the frequencies of photons to be generated.
 
 **Unit:** eV
 
-**Values:**
-
-  ``Photon_sampling.high_energy_limit``
-    Greater than
-
+**Values:** Greater than :ref:`Photon_sampling.low_energy_limit`
 
 **Parent(s):**
-  Photon_sampling.approach_: user_bands
+
+* :ref:`Photon_sampling.approach`: user_bands
 
 
 **File:** bands.c
 
-
-----------------------------------------
 
 Photon_sampling.low_energy_limit
 --------------------------------
@@ -141,10 +130,11 @@ bands.
 
 **Unit:** eV
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Photon_sampling.approach_: user_bands
+
+* :ref:`Photon_sampling.approach`: user_bands
 
 
 **File:** bands.c

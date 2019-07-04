@@ -5,8 +5,8 @@ description: |
   prescription and another region of space with a second prescription. For example, one might want to place
   a disk atmoosphere between the disk and a wind.  This parameter describes the number of components (aka domains)
   of the wind.
-type: Int
+type: Integer
 values: Greater than 0
 parent:
-  System_type: new
+  System_type: [star, binary, agn]
 file: python.c

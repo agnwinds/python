@@ -1,4 +1,3 @@
-
 ===
 AGN
 ===
@@ -13,10 +12,11 @@ applied to low frequencies and giving an odd SED.
 
 **Unit:** Hz
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  BH.radiation_: True
+
+* :ref:`BH.radiation`: ``True``
 
 
 **File:** setup_star_bh.c
@@ -29,10 +29,11 @@ central source of the form L_nu=K nu**alpha
 
 **Type:** Double
 
-**Value:** Any - but sign is not assumed, so for negative index use a negative value
+**Values:** Any - but sign is not assumed, so for negative index use a negative value
 
 **Parent(s):**
-  BH.radiation_: True
+
+* :ref:`BH.radiation`: ``True``
 
 
 **File:** setup_star_bh.c
@@ -45,10 +46,11 @@ L_nu=nu**alpha exp(-hnu/kT)
 
 **Type:** Double
 
-**Value:** Any - sign is not assumed so use negative if you want negative
+**Values:** Any - sign is not assumed so use negative if you want negative
 
 **Parent(s):**
-  BH.rad_type_to_make_wind_: brems
+
+* :ref:`BH.rad_type_to_make_wind`: brems
 
 
 **File:** setup_star_bh.c
@@ -63,10 +65,11 @@ L_nu=nu**alpha exp(-hnu/kT)
 
 **Unit:** K
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  BH.rad_type_to_make_wind_: brems
+
+* :ref:`BH.rad_type_to_make_wind`: brems
 
 
 **File:** setup_star_bh.c
@@ -78,12 +81,13 @@ Multi-line description, must keep indentation.
 
 **Type:** Double
 
-**Unit:** co.gravitational_radius
+**Unit:** :ref:`Central_object.radius`
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  BH.geometry_for_pl_source_: lamp_post
+
+* :ref:`BH.geometry_for_pl_source`: lamp_post
 
 
 **File:** setup_star_bh.c

@@ -7,7 +7,7 @@ description: |
   depending on inclination angle, partially in front of) the
   primary
 type: Double
-values: Normally between 0 and 1
+values: Between 0 and 1
 parent:
   Spectrum_cycles: Greater than or equal to 0
   System_type: binary

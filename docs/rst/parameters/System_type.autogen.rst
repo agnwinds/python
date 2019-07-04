@@ -1,4 +1,3 @@
-
 ===========
 System_type
 ===========
@@ -14,18 +13,18 @@ are asked for later.
 
 **Values:**
 
-  ``star``
-    System in which the central object is a star or WD
+star
+  System in which the central object is a star or WD
 
-  ``binary``
-    System with a secondary star, which can occult the central object and disk depending on phase
+binary
+  System with a secondary star, which can occult the central object and disk depending on phase
 
-  ``agn``
-    AGN or BH binary (currently)
+agn
+  AGN or BH binary (currently)
 
-  ``previous``
-    In this case, one is starting from a previous run with python, and one want to either continue the
-    run or change some parameters associated with radiation sources
+previous
+  In this case, one is starting from a previous run with python, and one want to either continue the
+  run or change some parameters associated with radiation sources
 
 
 **File:** python.c

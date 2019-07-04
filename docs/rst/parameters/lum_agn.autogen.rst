@@ -1,4 +1,3 @@
-
 =======
 lum_agn
 =======
@@ -12,12 +11,13 @@ from 2-10keV.
 
 **Unit:** ergs/s
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  System_type_: agn
 
-  BH.radiation_: True
+* :ref:`System_type`: agn
+
+* :ref:`BH.radiation`: ``True``
 
 
 **File:** setup_star_bh.c

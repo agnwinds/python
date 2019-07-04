@@ -1,4 +1,3 @@
-
 ============
 Stellar_wind
 ============
@@ -12,10 +11,11 @@ Caster and Lamemers prescription for a stellar wind.
 
 **Unit:** M☉/year
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -30,10 +30,11 @@ radius of the star.
 
 **Unit:** cm
 
-**Value:** Greater than or equal to radius of the central object
+**Values:** Greater than or equal to :ref:`Central_object.radius`
 
 **Parent(s):**
-  Wind.type_: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -47,14 +48,11 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm
 
-**Values:**
-
-  ``Stellar_wind.radmin``
-    Greater than or equal to
-
+**Values:** Greater than or equal to :ref:`Stellar_wind.radmin`
 
 **Parent(s):**
-  Wind.type_: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -67,10 +65,11 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 
 **Type:** Double
 
-**Value:** Greater than or equal to 0
+**Values:** Greater than or equal to 0
 
 **Parent(s):**
-  Wind.type_: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -86,10 +85,11 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 
 **Unit:** cm/s
 
-**Value:** Greater than 0
+**Values:** Greater than 0
 
 **Parent(s):**
-  Wind.type_: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
@@ -103,10 +103,11 @@ Multi-line description, must keep indentation.
 
 **Unit:** cm/s
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  Wind.type_: star
+
+* :ref:`Wind.type`: star
 
 
 **File:** stellar_wind.c
