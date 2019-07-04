@@ -9,7 +9,7 @@
 # for manual install.
 
 CMAKE = mpicc
-GSL = $(PYTHON)/software/gsl-1.15
+GSL = $(PYTHON)/software/gsl-2.5
 GIT = True
 LIBS = True
 

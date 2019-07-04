@@ -100,7 +100,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 83a
+VERSION = 83b
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
@@ -178,7 +178,7 @@ prototypes:
 
 python: startup  python.o $(python_objects)
 	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-	cp $@ $(BIN)/py
+	# cp $@ $(BIN)/py
 	mv $@ $(BIN)/py$(VERSION)
 
 #This line is jsut so you can use make D python for debugging
