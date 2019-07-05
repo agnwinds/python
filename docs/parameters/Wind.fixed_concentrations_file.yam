@@ -1,4 +1,4 @@
-name: wind.fixed_concentrations_file
+name: Wind.fixed_concentrations_file
 description: |
   The filename for the fixed ion concentrations if you have
   set Wind_ionization to 2 (fixed). This file has format
