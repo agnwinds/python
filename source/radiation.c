@@ -556,9 +556,10 @@ radiation (p, ds)
       xplasma->heat_auger += z * frac_auger;
       xplasma->heat_tot += z * frac_auger;      //All the inner shell opacities
 
-      /* Calculate the number of photoionizations per unit volume for H and He 
-       */
-      xplasma->nioniz++;
+      /* Calculate the number of H ionizing photons, see #255 */
+      if (freq > (RYD2ERGS / H))
+        xplasma->nioniz++;
+
       q = (z) / (H * freq * xplasma->vol);
       /* So xplasma->ioniz for each species is just 
          (energy_abs)*kappa_h/kappa_tot / H*freq / volume
