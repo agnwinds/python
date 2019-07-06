@@ -168,7 +168,6 @@ calculate_ionization (restart_stat)
       {
         NPHOT = NPHOT_MAX;
       }
-      //OLD NPHOT = ((geo.wcycle + 1.0) / geo.wcycles) * NPHOT_MAX;
     }
 
     Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle);

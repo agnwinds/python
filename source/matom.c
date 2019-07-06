@@ -239,7 +239,6 @@ matom (p, nres, escape)
           *escape = 1;
           p->istat = P_ERROR_MATOM;
           return (0);
-          //OLD Exit (0);
         }
         if (eprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
@@ -247,7 +246,6 @@ matom (p, nres, escape)
           *escape = 1;
           p->istat = P_ERROR_MATOM;
           return (0);
-          //OLD Exit (0);
         }
 
         pjnorm += jprbs[m];
@@ -278,12 +276,10 @@ matom (p, nres, escape)
           *escape = 1;
           p->istat = P_ERROR_MATOM;
           return (0);
-          //OLD Exit (0);
         }
         if (eprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 4). Abort.");
-          //OLD Exit (0);
         }
         pjnorm += jprbs[m];
         penorm += eprbs[m];
@@ -322,7 +318,6 @@ matom (p, nres, escape)
           *escape = 1;
           p->istat = P_ERROR_MATOM;
           return (0);
-          //OLD Exit (0);
         }
         pjnorm += jprbs[m];
         m++;
@@ -382,7 +377,6 @@ matom (p, nres, escape)
       *escape = 1;
       p->istat = P_ERROR_MATOM;
       return (0);
-      //OLD Exit (0);
     }
 
     if (((pjnorm_known[uplvl] / (pjnorm_known[uplvl] + penorm_known[uplvl])) < threshold) || (pjnorm_known[uplvl] == 0))
@@ -434,7 +428,6 @@ matom (p, nres, escape)
       *escape = 1;
       p->istat = P_ERROR_MATOM;
       return (0);
-      //OLD Exit (0);
     }
 
 /* ksl: Check added to verify that the level actually changed */
@@ -455,7 +448,6 @@ matom (p, nres, escape)
     *escape = 1;
     p->istat = P_ERROR_MATOM;
     return (0);
-    //OLD Exit (0);
   }
 
 
@@ -548,7 +540,6 @@ matom (p, nres, escape)
     *escape = 1;
     p->istat = P_ERROR_MATOM;
     return (0);
-    //OLD Exit (0);
   }
 
   return (0);
@@ -742,7 +733,6 @@ alpha_sp_integrand (freq)
  *	
  *	* 180616  Updated so that one could force kpkt to deactivate via radiation
 ************************************************************/
-//OLD moved to python.h #define ALPHA_FF 100.           // maximum h nu / kT to create the free free CDF
 
 int
 kpkt (p, nres, escape, mode)
@@ -952,7 +942,6 @@ kpkt (p, nres, escape, mode)
       *escape = 1;
       p->istat = P_ERROR_MATOM;
       return (0);
-      //OLD Exit (0);
     }
 
 
@@ -962,7 +951,6 @@ kpkt (p, nres, escape, mode)
       *escape = 1;
       p->istat = P_ERROR_MATOM;
       return (0);
-      //OLD Exit (0);
     }
     else
     {
@@ -1081,7 +1069,6 @@ kpkt (p, nres, escape, mode)
           *escape = 1;
           p->istat = P_ERROR_MATOM;
           return (0);
-          //OLD Exit (0);
         }
 
         /* If it gets here, all seems fine. Now set nres for the destruction process. */
@@ -1221,7 +1208,6 @@ kpkt (p, nres, escape, mode)
           *escape = 1;
           p->istat = P_ERROR_MATOM;
           return (0);
-          //OLD Exit (0);
         }
 
         /* Now set nres for the destruction process. */
@@ -1251,7 +1237,6 @@ kpkt (p, nres, escape, mode)
   *escape = 1;
   p->istat = P_ERROR_MATOM;
   return (0);
-  //OLD Exit (0);
 
   return (0);
 }

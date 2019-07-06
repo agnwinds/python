@@ -407,7 +407,6 @@ init_observers ()
 
   strcpy (answer, "extract");
   geo.select_extract = rdchoice ("Spectrum.live_or_die(live.or.die,extract)", "0,1", answer);
-  //OLD rdint ("Spectrum.live_or_die(0=live.or.die,extract=anything_else)", &geo.select_extract);
   if (geo.select_extract != 0)
   {
     geo.select_extract = 1;
@@ -425,9 +424,6 @@ init_observers ()
     strcpy (answer, "no");
     ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
 
-    //OLD strcpy (yesno, "n");
-    //OLD rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
-    //OLD if (yesno[0] == 'y')
     if (ichoice)
 
     {
@@ -439,19 +435,14 @@ init_observers ()
     }
     strcpy (answer, "no");
     ichoice = rdchoice ("@Spectrum.select_photons_by_position(yes,no)", "1,0", answer);
-    //OLD strcpy (yesno, "n");
-    //OLD rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
-    //OLD if (yesno[0] == 'y')
     if (ichoice)
     {
-      //OLD Log ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
       for (n = 0; n < geo.nangles; n++)
       {
         strcpy (answer, "all");
         geo.top_bot_select[n] = rdchoice ("@Spectrum.select_location(all,below_disk,above_disk,spherical_region)", "0,-1,1,2", answer);
 
 
-        //OLD rdint ("@Spectrum.select_location", &geo.top_bot_select[n]);
         if (geo.top_bot_select[n] == 2)
         {
           Log ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
@@ -473,7 +464,6 @@ init_observers ()
 
   strcpy (answer, "flambda");
   geo.select_spectype = rdchoice ("Spectrum.type(flambda,fnu,basic)", "1,2,3", answer);
-  //OLD rdint ("Spectrum.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
 
   if (geo.select_spectype == 1)
   {
@@ -651,8 +641,6 @@ init_ionization ()
 
   strcpy (answer, "adiabatic");
 
-//OLD  thermal_opt = rdchoice ("Thermal_balance_options(adiabatic_only,all_off,nonthermal_only,all_on)", "0,1,2,3", answer);
-//  thermal_opt = rdchoice ("Thermal_balance_options(off,adiabatic_only,nonthermal_only,all_on)", "1,0,2,3", answer);
   thermal_opt = rdchoice ("Wind_heating.extra_processes(none,adiabatic,nonthermal,both)", "1,0,2,3", answer);
 
   if (thermal_opt == 0)
@@ -698,7 +686,6 @@ init_ionization ()
       ("Warning: Non-thermal heating has been selected.  This is a very special option put in place for modelling FU Ori stars, and should be used with extreme caution\n");
 
     geo.shock_factor = 0.001 * 4 * PI * pow (geo.rstar, 2) * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
-    //OLD rddoub ("Thermal_balance_options.extra_heating", &geo.shock_factor);
     rddoub ("Wind_heating.extra_luminosity", &geo.shock_factor);
     geo.shock_factor /= (4 * PI * pow (geo.rstar, 3));
     Log ("The non_thermal emissivity at the base is %.2e\n", geo.shock_factor);
@@ -706,7 +693,6 @@ init_ionization ()
     if (geo.rt_mode == RT_MODE_MACRO)
     {
       geo.frac_extra_kpkts = 0.1;
-      // OLD rddoub ("Thermal_balance_options.extra_kpacket_frac", &geo.frac_extra_kpkts);
       rddoub ("Wind_heating.kpacket_frac", &geo.frac_extra_kpkts);
 
     }
