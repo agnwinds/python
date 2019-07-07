@@ -500,8 +500,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           track_scatters (&pp, wmain[n].nplasma, "Resonant");
 
 
-        //OLD scatters is an integer so next line has to be wrong - ksl
-        //OLD plasmamain[wmain[n].nplasma].scatters[line[nres].nion] += pp.w;
         plasmamain[wmain[n].nplasma].scatters[line[nres].nion] += 1;
 
         if (geo.rt_mode == RT_MODE_2LEVEL)      // only do next line for non-macro atom case
