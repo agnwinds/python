@@ -11,7 +11,25 @@
 #include "my_linalg.h"
 
 
-/*******/
+/**********************************************************/
+/** 
+ * @brief calculate the matrix of probabilities for the accelerated macro-atom scheme 
+ *
+ * @param [in] PlasmaPtr  xplasma  
+ * @param [in,out] double **matom_matrix 
+ *        the 2D matrix array we will populate with normalised probabilities 
+ *
+ * @details
+ * given an activation state, this routine calculates the probability that a packet
+ * will deactivate from a given state. Let's suppose that the \f$(i,j)\f$-th element of matrix 
+ * \f$Q\f$ contains the **jumping** probability from state i to state j, and the diagonals 
+ * \f$(i,i)\f$ of matrix \f$R\f$ contain the emission probabilities from each state, then it 
+ * can be shown that (see short notes from Vogl, or 
+ * <a href="Ergon et al. 2018">https://ui.adsabs.harvard.edu/abs/2018A%26A...620A.156E</a>)
+ * the quantity we want is then \f$B = N R\f$, where \f$N = (I - Q)^{-1}\f$, where \f$I\f$
+ * is the identity matrix. This routine does this calculation.
+ *
+ **********************************************************/
 
 void
 calc_matom_matrix (xplasma, matom_matrix)
@@ -61,6 +79,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
   }
 
+  /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
     nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
@@ -69,7 +88,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
 
 
-    /* bb */
+    /* bound-bound */
     for (n = 0; n < nbbd; n++)
     {
 
@@ -99,7 +118,7 @@ calc_matom_matrix (xplasma, matom_matrix)
       Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
     }
 
-    /* bf */
+    /* bound-free */
     for (n = 0; n < nbfd; n++)
     {
 
@@ -135,7 +154,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* Now upwards jumps. */
 
-    /* bb */
+    /* bound-bound */
     for (n = 0; n < nbbu; n++)
     {
       line_ptr = &line[config[uplvl].bbu_jump[n]];
@@ -154,7 +173,7 @@ calc_matom_matrix (xplasma, matom_matrix)
       Q_norm[uplvl] += Qcont;
     }
 
-    /* bf */
+    /* bound-free */
     for (n = 0; n < nbfu; n++)
     {
       /* For bf ionization the jump probability is just gamma * energy
@@ -189,9 +208,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
   }
 
-  /*
-     Now need to do k-packet processes
-   */
+  /* Now need to do k-packet processes */
 
   int escape_dummy = 0;
   int istat_dummy = 0;
@@ -208,7 +225,9 @@ calc_matom_matrix (xplasma, matom_matrix)
       Q_norm[nlevels_macro] += Qcont;
     }
     else
-    {
+    { 
+      /* XXX - ask stuart about this! */
+      /* the idea here is that if it is a simple line then it *must* create an r-packet originally?? */
       kpacket_to_rpacket_rate += mplasma->cooling_bb[i];
     }
   }
@@ -218,12 +237,13 @@ calc_matom_matrix (xplasma, matom_matrix)
     if (phot_top[i].macro_info == 1 && geo.macro_simple == 0)   //part of macro atom
     {
       target_level = phot_top[i].uplev;
-      Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bb[i];
+      Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bf[i];
       Q_norm[nlevels_macro] += Qcont;
 
     }
     else
     {
+      /* XXX - ask stuart about this! */
       kpacket_to_rpacket_rate += mplasma->cooling_bf_col[i];
     }
   }
@@ -238,7 +258,10 @@ calc_matom_matrix (xplasma, matom_matrix)
 
   /* end kpacket */
 
-  /* now in one step, we multiply by the identity matrix and normalise the probabilities */
+  /* now in one step, we multiply by the identity matrix and normalise the probabilities
+     this means that what is now stored in Q_matrix is no longer Q, but N=(I - Q) using Vogl 
+     notation. We check that Q_norm is 0, because some states (ground states) can have 0 
+     jumping probabilities and so zero normalisation to */
   for (uplvl = 0; uplvl < nrows; uplvl++)
   {
     for (target_level = 0; target_level < nrows; target_level++)
@@ -257,10 +280,8 @@ calc_matom_matrix (xplasma, matom_matrix)
   }
 
 
-  /*
-     Check normalisation
-   */
-
+  /* Check normalisation of the matrix. the diagonals of R, minus N which is now stored in 
+     Q_matrix, should be zero */
   for (uplvl = 0; uplvl < nrows; uplvl++)
   {
     norm = R_matrix[uplvl][uplvl];
@@ -268,7 +289,12 @@ calc_matom_matrix (xplasma, matom_matrix)
     {
       norm -= Q_matrix[uplvl][target_level];
     }
-    printf ("norm for lvl %d was %g (should be 0)\n", uplvl, norm);
+
+    /* throw an error if this normalisation is not zero */
+    /* note that the ground state is a special case here (improve error check) */
+    if ( (abs(norm) > 1e-15 && uplvl > 0) || sane_check(norm))
+      Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", 
+              norm, uplvl);
   }
 
   /* This next line produces an array of the correct size to hold the rate matrix */
@@ -290,7 +316,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_permutation *p, *pp;
   int ierr, s;
   
-
+  /* create a view into the array we just created */
   N = gsl_matrix_view_array (a_data, nrows, nrows);
 
   /* permuations are special structures that contain integers 0 to nrows-1, which can
@@ -309,23 +335,36 @@ calc_matom_matrix (xplasma, matom_matrix)
   {
     for (nn = 0; nn < nrows; nn++)
     {
-      //printf( "mm nn %d %d\n", mm, nn);
+      /* copy the matrix from the gsl object to the array we return to user */
+      /* in Christian Vogl's notation this is doing his equation 3: B = (N * R)
+         where N is the inverse matrix we have just calculated. */
+      /* the reason this matrix multiplication is so simple here is because R is a diagonal matrix */
       matom_matrix[mm][nn] = gsl_matrix_get (inverse_matrix, mm, nn) * R_matrix[nn][nn];
-      printf ("%8.4e ", matom_matrix[mm][nn]);
     }
-    printf ("\n");
   }
  
   /* free memory */
+  gsl_permutation_free (p);
   gsl_matrix_free (inverse_matrix);
   free (a_data);
   free (R_matrix);
   free (Q_matrix);
-  gsl_permutation_free (p);
 }
 
 
-
+/**********************************************************/
+/** 
+ * @brief calculate the cooling rates for the conversion of k-packets.
+ *
+ * @param [in] PlasmaPtr  xplasma  
+ * @param [in,out] double **matom_matrix 
+ *        the 2D matrix array we will populate with normalised probabilities 
+ *
+ *
+ * @details
+ * 
+ *
+ **********************************************************/
 
 int
 fill_kpkt_rates (xplasma, escape, istat)
