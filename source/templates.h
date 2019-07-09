@@ -560,6 +560,9 @@ double wdrad (double m);
 double diskrad (double m1, double m2, double period);
 double roche2 (double q, double a);
 double logg (double mass, double rwd);
+/* macro_accelerate.c */
+void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
+int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, int *istat);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);

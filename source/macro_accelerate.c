@@ -14,32 +14,50 @@
 /*******/
 
 void
-calc_matom_matrix (xplasma, matom_matix)
+calc_matom_matrix (xplasma, matom_matrix)
      PlasmaPtr xplasma;
-     double *matom_matrox;
+     double **matom_matrix;
 {
   MacroPtr mplasma;
   double t_e, ne;
   int nbbd, nbbu, nbfd, nbfu;
   int uplvl, target_level;
-  double Qcont, Qcont2;
-
+  double Qcont;
+  struct lines *line_ptr;
+  struct topbase_phot *cont_ptr;
+  double rad_rate, coll_rate;
+  int n, i, nn, mm;
+  double Qcont_kpkt, bb_cont, sp_rec_rate, bf_cont, lower_density, density_ratio;
+  double kpacket_to_rpacket_rate, norm, Rcont;
+  double *a_data;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
 
+  /* allocate arrays for matrices and normalsiations
+     we want to include all macro-atom levels + 1 kpacket levels */
+  int nrows = nlevels_macro + 1;
+  double **R_matrix = (double **) calloc (sizeof (double *), nrows);
+  double **Q_matrix = (double **) calloc (sizeof (double *), nrows);
+  double *Q_norm = (double *) calloc (sizeof (double), nrows);
 
-  double Q_matrix[nlevels_macro][nlevels_macro];
-  double Q_norm[nlevels_macro];
-
-
-  for (uplvl = 0; uplvl < nlevels_macro + 1; uplvl++)
+  for (i = 0; i < nrows; i++)
   {
-    Q_norm[nlevel_macro] = 0.0;
-    for (target_level = 0; target_level < nlevels_macro + 1; target_level++)
+    R_matrix[i] = (double *) calloc (sizeof (double), nrows);
+    Q_matrix[i] = (double *) calloc (sizeof (double), nrows);
+  }
+
+  /* initialise everything to zero */
+  norm = 0.0;
+  for (uplvl = 0; uplvl < nrows; uplvl++)
+  {
+    Q_norm[uplvl] = 0.0;
+    for (target_level = 0; target_level < nrows; target_level++)
     {
-      Q_matrix[nlevels_macro][target_level] = 0.0;
+      Q_matrix[uplvl][target_level] = 0.0;
+      R_matrix[uplvl][target_level] = 0.0;
+      matom_matrix[uplvl][target_level] = 0.0;
     }
   }
 
@@ -97,7 +115,7 @@ calc_matom_matrix (xplasma, matom_matix)
       }
 
 
-      target_level = config[phot_top[config[uplvl].bfd_jump[n]]].nlev;
+      target_level = phot_top[config[uplvl].bfd_jump[n]].nlev;
 
       if (bf_cont > 0.0)
       {
@@ -106,10 +124,10 @@ calc_matom_matrix (xplasma, matom_matix)
         Q_matrix[uplvl][target_level] += Qcont = bf_cont * config[target_level].ex;     //energy of lower state
 
         //jump to the k-packet pool (we used to call this "deactivation")
-        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (config[uplvl].ex - config[target_lvl].ex); //energy difference
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (config[uplvl].ex - config[target_level].ex);       //energy difference
 
         //deactivation back to r-packet
-        R_matrix[uplvl][uplvl] += Rcont = sp_rec_rate * (config[uplvl].ex - config[target_lvl].ex);     //energy difference
+        R_matrix[uplvl][uplvl] += Rcont = sp_rec_rate * (config[uplvl].ex - config[target_level].ex);   //energy difference
 
         Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
       }
@@ -175,7 +193,9 @@ calc_matom_matrix (xplasma, matom_matix)
      Now need to do k-packet processes
    */
 
-  fill_kpkt_rates (xplasma);
+  int escape_dummy = 0;
+  int istat_dummy = 0;
+  fill_kpkt_rates (xplasma, escape_dummy, istat_dummy);
   /* Cooling due to collisional transitions in lines and collision ionization [for macro atoms] constitute internal transitions from the k-packet pool to macro atom states. */
   kpacket_to_rpacket_rate = 0.0;        // keep track of rate for kpacket_to_rpacket channel
 
@@ -213,37 +233,27 @@ calc_matom_matrix (xplasma, matom_matix)
   kpacket_to_rpacket_rate += mplasma->cooling_bftot;
   kpacket_to_rpacket_rate += mplasma->cooling_adiabatic;
   kpacket_to_rpacket_rate += mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
-  Q_matrix[nlevels_macro][nlevel_macro] += Qcont = kpacket_to_rpacket_rate;
-  Q_norm[nlevels_macro] += Qcont;
-
-
-
-
+  R_matrix[nlevels_macro][nlevels_macro] += Rcont = kpacket_to_rpacket_rate;
+  Q_norm[nlevels_macro] += Rcont;
 
   /* end kpacket */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  for (uplvl = 0; uplvl < nlevels_macro + 1; uplvl++)
+  /* now in one step, we multiply by the identity matrix and normalise the probabilities */
+  for (uplvl = 0; uplvl < nrows; uplvl++)
   {
-    for (target_level = 0; target_level < nlevels_macro + 1; target_level++)
+    for (target_level = 0; target_level < nrows; target_level++)
     {
-      Q_matrix[uplvl][target_level] = -1. * Q_matrix[uplvl][target_level] / Q_norm[uplvl];
+      if (Q_norm[uplvl] > 0.0)
+      {
+        Q_matrix[uplvl][target_level] = -1. * Q_matrix[uplvl][target_level] / Q_norm[uplvl];
+      }
     }
     Q_matrix[uplvl][uplvl] = 1.0;
-    R_matrix[uplvl][uplvl] = R_matrix[uplvl][uplvl] / Q_norm[uplvl];
+
+    if (Q_norm[uplvl] > 0.0)
+    {
+      R_matrix[uplvl][uplvl] = R_matrix[uplvl][uplvl] / Q_norm[uplvl];
+    }
   }
 
 
@@ -251,27 +261,77 @@ calc_matom_matrix (xplasma, matom_matix)
      Check normalisation
    */
 
-
-  for (uplvl = 0; uplvl < nlevels_macro + 1; uplvl++)
+  for (uplvl = 0; uplvl < nrows; uplvl++)
   {
     norm = R_matrix[uplvl][uplvl];
     for (target_level = 0; target_level < nlevels_macro + 1; target_level++)
     {
-    norm += Q_matrix[uplvl][target_level]}
-    printf ("norm for lvl %d was %g\n", uplvl, norm);
+      norm -= Q_matrix[uplvl][target_level];
+    }
+    printf ("norm for lvl %d was %g (should be 0)\n", uplvl, norm);
   }
 
+  /* This next line produces an array of the correct size to hold the rate matrix */
+  a_data = (double *) calloc (sizeof (double), nrows * nrows);
 
+  /* We now copy our rate matrix into the prepared matrix */
+  for (mm = 0; mm < nrows; mm++)
+  {
+    for (nn = 0; nn < nrows; nn++)
+    {
+      a_data[mm * nrows + nn] = Q_matrix[mm][nn];
+    }
+  }
 
+  /* now get ready for the matrix operations. first let's assign variables for use with GSL */
+  gsl_matrix_view N;
+  gsl_matrix *inverse_matrix;
+  gsl_matrix *output;
+  gsl_permutation *p, *pp;
+  int ierr, s;
+  
 
+  N = gsl_matrix_view_array (a_data, nrows, nrows);
+
+  /* permuations are special structures that contain integers 0 to nrows-1, which can
+   * be manipulated */
+  p = gsl_permutation_alloc (nrows);
+  inverse_matrix = gsl_matrix_alloc (nrows, nrows);
+
+  /* first we do the LU decomposition */
+  ierr = gsl_linalg_LU_decomp (&N.matrix, p, &s);
+
+  /* from the decomposition, get the inverse of the Q matrix */
+  ierr = gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+
+  /* We now copy our rate matrix into the prepared matrix */
+  for (mm = 0; mm < nrows; mm++)
+  {
+    for (nn = 0; nn < nrows; nn++)
+    {
+      //printf( "mm nn %d %d\n", mm, nn);
+      matom_matrix[mm][nn] = gsl_matrix_get (inverse_matrix, mm, nn) * R_matrix[nn][nn];
+      printf ("%8.4e ", matom_matrix[mm][nn]);
+    }
+    printf ("\n");
+  }
+ 
+  /* free memory */
+  gsl_matrix_free (inverse_matrix);
+  free (a_data);
+  free (R_matrix);
+  free (Q_matrix);
+  gsl_permutation_free (p);
 }
 
 
 
 
 int
-fill_kpkt_rates (xplasma)
+fill_kpkt_rates (xplasma, escape, istat)
      PlasmaPtr xplasma;
+     int *escape;
+     int *istat;
 {
 
   int i;
@@ -294,6 +354,8 @@ fill_kpkt_rates (xplasma)
 
   double coll_rate, rad_rate;
   double freqmin, freqmax;
+
+  one = &wmain[xplasma->nwind];
 
 
   /* Idea is to calculated the cooling
@@ -468,7 +530,7 @@ fill_kpkt_rates (xplasma)
       Error ("kpkt: A scattering event in cell %d with vol = 0???\n", one->nwind);
       //Diagnostic      return(-1);  //57g -- Cannot diagnose with an exit
       *escape = 1;
-      p->istat = P_ERROR_MATOM;
+      *istat = P_ERROR_MATOM;
       return (0);
     }
 
@@ -477,7 +539,7 @@ fill_kpkt_rates (xplasma)
     {
       Error ("kpkt: ff cooling rate negative. Abort.");
       *escape = 1;
-      p->istat = P_ERROR_MATOM;
+      *istat = P_ERROR_MATOM;
       return (0);
     }
     else

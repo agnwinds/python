@@ -20,6 +20,8 @@
 #include <gsl/gsl_matrix.h>
 #include "my_linalg.h"
 
+#define ACCELERATED_MACRO 1
+
 /**********************************************************/
 /** 
  * @brief      returns the specific luminosity in the band needed for the computation of the
@@ -137,6 +139,7 @@ get_matom_f (mode)
   struct photon ppp;
   double contribution, norm;
   int nres, which_out;
+  int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
 
 
@@ -189,6 +192,21 @@ get_matom_f (mode)
 
     Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
     Log ("Number of macro-atom levels: %d\n", nlevels_macro);
+    
+
+    /* if we are using the accelerated macro-atom scheme then we want to allocate an array 
+       for the macro-atom probabilities */
+#if (ACCELERATED_MACRO == 1)
+    PlasmaPtr xplasma;
+    int nrows = nlevels_macro + 1;
+    double **matom_matrix = (double **) calloc (sizeof (double *), nrows);
+
+    for (i = 0; i < nrows; i++)
+    {
+      matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
+    }
+#endif
+
 
     /* For MPI parallelisation, the following loop will be distributed over multiple tasks. 
        Note that the mynmim and mynmax variables are still used even without MPI on */
@@ -236,6 +254,26 @@ get_matom_f (mode)
         Log ("Calculating macro atom emissivity for macro atom %7d of %7d or %6.3f per cent\n", n, my_nmax, n * 100. / my_nmax);
 #endif
 
+#if (ACCELERATED_MACRO == 1)
+      xplasma = &plasmamain[n];      
+      calc_matom_matrix (xplasma, matom_matrix);
+
+      /* calculate the fraction of the absorbed energy that comes out in a given level */
+      for (i = 0; i < nlevels_macro; i++)
+      {
+        for (j = 0; j < nlevels_macro; j++)
+        {
+          macromain[n].matom_emiss[j] += macromain[n].matom_abs[i] * matom_matrix[i][j];
+        }
+      }
+      /* do the same for the thermal pool */
+      for (j = 0; j < nlevels_macro; j++)
+      {
+        macromain[n].matom_emiss[j] += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][j];
+      }
+      plasmamain[n].kpkt_emiss += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][nlevels_macro];
+    }
+#else
       for (m = 0; m < nlevels_macro + 1; m++)
       {
         if ((m == nlevels_macro && plasmamain[n].kpkt_abs > 0) || (m < nlevels_macro && macromain[n].matom_abs[m] > 0))
@@ -428,6 +466,7 @@ get_matom_f (mode)
       }
     }
 
+#endif
 
     /*This is the end of the update loop that is parallelised. We now need to exchange data between the tasks.
        This is done much the same way as in wind_update */
