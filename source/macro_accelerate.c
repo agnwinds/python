@@ -14,7 +14,7 @@
 /*******/
 
 void
-calc_matom_matrix(xplasma, matom_matix)
+calc_matom_matrix (xplasma, matom_matix)
      PlasmaPtr xplasma;
      double *matom_matrox;
 {
@@ -24,7 +24,7 @@ calc_matom_matrix(xplasma, matom_matix)
   int uplvl, target_level;
   double Qcont, Qcont2;
 
-  mplasma = &macromain[xplasma->nplasma]; //telling us where in the matom structure we are
+  mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
@@ -34,239 +34,238 @@ calc_matom_matrix(xplasma, matom_matix)
   double Q_norm[nlevels_macro];
 
 
-  for (uplvl = 0; uplvl < nlevels_macro+1; uplvl++)
+  for (uplvl = 0; uplvl < nlevels_macro + 1; uplvl++)
+  {
+    Q_norm[nlevel_macro] = 0.0;
+    for (target_level = 0; target_level < nlevels_macro + 1; target_level++)
     {
-      Q_norm[nlevel_macro] = 0.0;
-      for (target_level = 0; target_level < nlevels_macro+1; target_level++)
-	{
-	  Q_matrix[nlevels_macro][target_level] = 0.0;
-	}     
+      Q_matrix[nlevels_macro][target_level] = 0.0;
     }
+  }
 
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
+  {
+    nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
+    nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
+    nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
+    nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
+
+
+    /* bb */
+    for (n = 0; n < nbbd; n++)
     {
-      nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
-      nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
-      nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
-      nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
 
+      line_ptr = &line[config[uplvl].bbd_jump[n]];
 
-      /* bb*/
-      for (n = 0; n < nbbd; n++)
-	{
-   
-	  line_ptr = &line[config[uplvl].bbd_jump[n]];
+      rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
+      coll_rate = q21 (line_ptr, t_e);  // this is multiplied by ne below
 
-	  rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
-	  coll_rate = q21 (line_ptr, t_e);        // this is multiplied by ne below
-	  
-	  if (coll_rate < 0)
-	    {
-	      coll_rate = 0;
-	    }
-
-	  bb_cont = rad_rate + (coll_rate * ne);
-      
-	  target_level = line_ptr->nconfigl;
-
-	  //internal jump to another macro atom level
-	  Q_matrix[uplvl][target_level] += Qcont = bb_cont * config[target_level].ex;     //energy of lower state
-
-	  //jump to the k-packet pool (we used to call this "deactivation")
-	  Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = (coll_rate * ne) * (config[uplvl].ex - config[target_level].ex);     //energy of lower state
-
-	  //deactivation back to r-packet
-	  R_matrix[uplvl][uplvl] += Rcont = rad_rate * (config[uplvl].ex - config[target_level].ex);  //energy difference
-	  
-	  Q_norm[uplvl] += Qcont+Qcont_kpkt+Rcont;
-	}
-
-      /* bf */
-      for (n = 0; n < nbfd; n++)
-	{
-	  
-	  cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];        //pointer to continuum
-	  if (n < 25) //?
-	    {
-	      sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];   //need this twice so store it
-	      bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
-	    }
-	  else
-	    {
-	      bf_cont = sp_rec_rate = 0.0;
-	    }
-	  
-	  
-	  target_level = config[phot_top[config[uplvl].bfd_jump[n]]].nlev;
-
-	  if (bf_cont > 0.0)
-	    {
-	      
-	      //internal jump to another macro atom level
-	      Q_matrix[uplvl][target_level] += Qcont = bf_cont * config[target_level].ex;       //energy of lower state
-
-	      //jump to the k-packet pool (we used to call this "deactivation")
-	      Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne *  (config[uplvl].ex - config[target_lvl].ex);  //energy difference
-	      
-	      //deactivation back to r-packet
-	      R_matrix[uplvl][uplvl] += Rcont =  sp_rec_rate * (config[uplvl].ex - config[target_lvl].ex);  //energy difference
-	      
-	      Q_norm[uplvl] += Qcont+Qcont_kpkt+Rcont;
-	    }
-	}
-      
-      /* Now upwards jumps. */
-      
-      /* bb */
-      for (n = 0; n < nbbu; n++)
-	{
-	  line_ptr = &line[config[uplvl].bbu_jump[n]];
-	  rad_rate = (b12 (line_ptr) * mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
-	  
-	  coll_rate = q12 (line_ptr, t_e);        // this is multiplied by ne below
-	  
-	  if (coll_rate < 0)
-	    {
-	      coll_rate = 0;
-	    }
-	  target_level = line[config[uplvl].bbu_jump[n]].nconfigu;
-	  Q_matrix[uplvl][target_level] += Qcont = ((rad_rate) + (coll_rate * ne)) * config[uplvl].ex;  //energy of lower state
-	  
-	  
-	  Q_norm[uplvl] += Qcont;	
-	}
-
-      /* bf */
-      for (n = 0; n < nbfu; n++)
+      if (coll_rate < 0)
       {
-        /* For bf ionization the jump probability is just gamma * energy
-           gamma is the photoionisation rate. Stimulated recombination also included. */
-        cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];        //pointer to continuum
-
-        /* first let us take care of the situation where the lower level is zero or close to zero */
-        lower_density = den_config (xplasma, cont_ptr->nlev);
-        if (lower_density >= DENSITY_PHOT_MIN)
-        {
-          density_ratio = den_config (xplasma, cont_ptr->uplev) / lower_density;
-        }
-        else
-          density_ratio = 0.0;
-
-	target_level = phot_top[config[uplvl].bfu_jump[n]].uplev;
-        Qcont =  (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;        //energy of lower state
-
-        /* this error condition can happen in unconverged hot cells where T_R >> T_E.
-           for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
-        /* note that we check and report this in check_stimulated_recomb() in estimators.c once a cycle */
-        if (Qcont < 0.)      //test (can be deleted eventually SS)
-        {
-          //Error ("Negative probability (matom, 6). Abort?\n");
-          Qcont = 0.0;
-
-        }
-	Q_matrix[uplvl][target_level] += Qcont;
-	Q_norm[uplvl] += Qcont;	
+        coll_rate = 0;
       }
 
-      
+      bb_cont = rad_rate + (coll_rate * ne);
+
+      target_level = line_ptr->nconfigl;
+
+      //internal jump to another macro atom level
+      Q_matrix[uplvl][target_level] += Qcont = bb_cont * config[target_level].ex;       //energy of lower state
+
+      //jump to the k-packet pool (we used to call this "deactivation")
+      Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = (coll_rate * ne) * (config[uplvl].ex - config[target_level].ex);   //energy of lower state
+
+      //deactivation back to r-packet
+      R_matrix[uplvl][uplvl] += Rcont = rad_rate * (config[uplvl].ex - config[target_level].ex);        //energy difference
+
+      Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
     }
 
+    /* bf */
+    for (n = 0; n < nbfd; n++)
+    {
+
+      cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];  //pointer to continuum
+      if (n < 25)               //?
+      {
+        sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];     //need this twice so store it
+        bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
+      }
+      else
+      {
+        bf_cont = sp_rec_rate = 0.0;
+      }
+
+
+      target_level = config[phot_top[config[uplvl].bfd_jump[n]]].nlev;
+
+      if (bf_cont > 0.0)
+      {
+
+        //internal jump to another macro atom level
+        Q_matrix[uplvl][target_level] += Qcont = bf_cont * config[target_level].ex;     //energy of lower state
+
+        //jump to the k-packet pool (we used to call this "deactivation")
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (config[uplvl].ex - config[target_lvl].ex); //energy difference
+
+        //deactivation back to r-packet
+        R_matrix[uplvl][uplvl] += Rcont = sp_rec_rate * (config[uplvl].ex - config[target_lvl].ex);     //energy difference
+
+        Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
+      }
+    }
+
+    /* Now upwards jumps. */
+
+    /* bb */
+    for (n = 0; n < nbbu; n++)
+    {
+      line_ptr = &line[config[uplvl].bbu_jump[n]];
+      rad_rate = (b12 (line_ptr) * mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
+
+      coll_rate = q12 (line_ptr, t_e);  // this is multiplied by ne below
+
+      if (coll_rate < 0)
+      {
+        coll_rate = 0;
+      }
+      target_level = line[config[uplvl].bbu_jump[n]].nconfigu;
+      Q_matrix[uplvl][target_level] += Qcont = ((rad_rate) + (coll_rate * ne)) * config[uplvl].ex;      //energy of lower state
+
+
+      Q_norm[uplvl] += Qcont;
+    }
+
+    /* bf */
+    for (n = 0; n < nbfu; n++)
+    {
+      /* For bf ionization the jump probability is just gamma * energy
+         gamma is the photoionisation rate. Stimulated recombination also included. */
+      cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];  //pointer to continuum
+
+      /* first let us take care of the situation where the lower level is zero or close to zero */
+      lower_density = den_config (xplasma, cont_ptr->nlev);
+      if (lower_density >= DENSITY_PHOT_MIN)
+      {
+        density_ratio = den_config (xplasma, cont_ptr->uplev) / lower_density;
+      }
+      else
+        density_ratio = 0.0;
+
+      target_level = phot_top[config[uplvl].bfu_jump[n]].uplev;
+      Qcont = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;     //energy of lower state
+
+      /* this error condition can happen in unconverged hot cells where T_R >> T_E.
+         for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
+      /* note that we check and report this in check_stimulated_recomb() in estimators.c once a cycle */
+      if (Qcont < 0.)           //test (can be deleted eventually SS)
+      {
+        //Error ("Negative probability (matom, 6). Abort?\n");
+        Qcont = 0.0;
+
+      }
+      Q_matrix[uplvl][target_level] += Qcont;
+      Q_norm[uplvl] += Qcont;
+    }
+
+
+  }
+
   /*
-    Now need to do k-packet processes
-  */
+     Now need to do k-packet processes
+   */
 
   fill_kpkt_rates (xplasma);
   /* Cooling due to collisional transitions in lines and collision ionization [for macro atoms] constitute internal transitions from the k-packet pool to macro atom states. */
-  kpacket_to_rpacket_rate = 0.0; // keep track of rate for kpacket_to_rpacket channel
+  kpacket_to_rpacket_rate = 0.0;        // keep track of rate for kpacket_to_rpacket channel
 
-   for (i = 0; i < nlines; i++)
+  for (i = 0; i < nlines; i++)
+  {
+    if (line[i].macro_info == 1 && geo.macro_simple == 0)       //line is for a macro atom
     {
-      if (line[i].macro_info == 1 && geo.macro_simple == 0)   //line is for a macro atom
-	{
-	  target_level = line[i].nconfigu;
-	  Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bb[i];
-	  Q_norm[nlevels_macro] += Qcont;	
-	}
-      else
-	{
-	  kpacket_to_rpacket_rate += mplasma->cooling_bb[i];
-	}
+      target_level = line[i].nconfigu;
+      Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bb[i];
+      Q_norm[nlevels_macro] += Qcont;
     }
-
-   for (i = 0; i < nphot_total; i++)
+    else
     {
-      if (phot_top[i].macro_info == 1 && geo.macro_simple == 0) //part of macro atom
-	{
-	  target_level = phot_top[i].uplev;
-	  Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bb[i];
-	  Q_norm[nlevels_macro] += Qcont;	
-
-	}
-      else
-	{
-	  kpacket_to_rpacket_rate += mplasma->cooling_bf_col[i];
-	}
+      kpacket_to_rpacket_rate += mplasma->cooling_bb[i];
     }
+  }
 
-   /* Cooling due to other processes will always contribute to k-packet -> r-packet channel */
-
-   kpacket_to_rpacket_rate +=mplasma->cooling_bftot;
-   kpacket_to_rpacket_rate +=mplasma->cooling_adiabatic;
-   kpacket_to_rpacket_rate +=mplasma->cooling_ff+mplasma->cooling_ff_lofreq;
-   Q_matrix[nlevels_macro][nlevel_macro] += Qcont = kpacket_to_rpacket_rate;
-   Q_norm[nlevels_macro] += Qcont;	
-
-
-     
-     
-      
-  /* end kpacket*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  for (uplvl = 0; uplvl < nlevels_macro+1; uplvl++)
+  for (i = 0; i < nphot_total; i++)
+  {
+    if (phot_top[i].macro_info == 1 && geo.macro_simple == 0)   //part of macro atom
     {
-      for (target_level = 0; target_level < nlevels_macro+1; target_level++)
-	{
-	  Q_matrix[uplvl][target_level] = -1.*Q_matrix[uplvl][target_level] / Q_norm[uplvl];
-	}
-      Q_matrix[uplvl][uplvl] = 1.0;
-      R_matrix[uplvl][uplvl] = R_matrix[uplvl][uplvl] / Q_norm[uplvl];
+      target_level = phot_top[i].uplev;
+      Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bb[i];
+      Q_norm[nlevels_macro] += Qcont;
+
     }
+    else
+    {
+      kpacket_to_rpacket_rate += mplasma->cooling_bf_col[i];
+    }
+  }
+
+  /* Cooling due to other processes will always contribute to k-packet -> r-packet channel */
+
+  kpacket_to_rpacket_rate += mplasma->cooling_bftot;
+  kpacket_to_rpacket_rate += mplasma->cooling_adiabatic;
+  kpacket_to_rpacket_rate += mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
+  Q_matrix[nlevels_macro][nlevel_macro] += Qcont = kpacket_to_rpacket_rate;
+  Q_norm[nlevels_macro] += Qcont;
+
+
+
+
+
+  /* end kpacket */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  for (uplvl = 0; uplvl < nlevels_macro + 1; uplvl++)
+  {
+    for (target_level = 0; target_level < nlevels_macro + 1; target_level++)
+    {
+      Q_matrix[uplvl][target_level] = -1. * Q_matrix[uplvl][target_level] / Q_norm[uplvl];
+    }
+    Q_matrix[uplvl][uplvl] = 1.0;
+    R_matrix[uplvl][uplvl] = R_matrix[uplvl][uplvl] / Q_norm[uplvl];
+  }
 
 
   /*
-Check normalisation
+     Check normalisation
    */
 
 
-  for (uplvl = 0; uplvl < nlevels_macro+1; uplvl++)
+  for (uplvl = 0; uplvl < nlevels_macro + 1; uplvl++)
+  {
+    norm = R_matrix[uplvl][uplvl];
+    for (target_level = 0; target_level < nlevels_macro + 1; target_level++)
     {
-      norm = R_matrix[uplvl][uplvl];
-      for (target_level = 0; target_level < nlevels_macro+1; target_level++)
-	{
-	  norm += Q_matrix[uplvl][target_level]
-	}
-      printf("norm for lvl %d was %g\n", uplvl, norm);
-    }
+    norm += Q_matrix[uplvl][target_level]}
+    printf ("norm for lvl %d was %g\n", uplvl, norm);
+  }
 
 
-  
-  
+
+
 }
-  
+
 
 
 
@@ -290,7 +289,7 @@ fill_kpkt_rates (xplasma)
   double lower_density, upper_density;
   double cooling_ff, upweight_factor;
   WindPtr one;
-  
+
   MacroPtr mplasma;
 
   double coll_rate, rad_rate;
@@ -528,5 +527,5 @@ fill_kpkt_rates (xplasma)
 
   }
 
-  return(0);
+  return (0);
 }
