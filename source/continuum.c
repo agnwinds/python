@@ -228,8 +228,8 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
      int spectype;
      double freqmin, freqmax, t, g;
 {
-  int nwav;
-  double x, lambdamin, lambdamax;
+  int nwav,n;
+  double x, lambdamin, lambdamax,w,dlambda;
 
   double par[2];
   int model ();
@@ -260,36 +260,40 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
 
   }
 
-  //The following lines are the original integration scheme - this is very wrong if only a bit of a model is in a band. 
-  //Using Qromb is more transparent..
-  /*
+
+
+
+  if (comp[spectype].xmod.w[0]<lambdamin && lambdamax<comp[spectype].xmod.w[nwav-1])
+  {
      x = 0;
      for (n = 0; n < nwav; n++)
      {
-     w = comp[spectype].xmod.w[n];
-     if (n == 0)
-     {
-     dlambda = comp[spectype].xmod.w[1] - comp[spectype].xmod.w[0];
+       w = comp[spectype].xmod.w[n];
+       if (n == 0)
+       {
+         dlambda = comp[spectype].xmod.w[1] - comp[spectype].xmod.w[0];
+       }
+       else if (n == nwav - 1)
+       {
+         dlambda = comp[spectype].xmod.w[n] - comp[spectype].xmod.w[n - 1];
+       }
+       else
+       {
+         dlambda = 0.5 * (comp[spectype].xmod.w[n + 1] - comp[spectype].xmod.w[n - 1]);
+       }
+       if (lambdamin < w && w < lambdamax)
+       {
+         x += comp[spectype].xmod.f[n] * dlambda;
+       }
      }
-     else if (n == nwav - 1)
-     {
-     dlambda = comp[spectype].xmod.w[n] - comp[spectype].xmod.w[n - 1];
-     }
-     else
-     {
-     dlambda = 0.5 * (comp[spectype].xmod.w[n + 1] - comp[spectype].xmod.w[n - 1]);
-     }
-     if (lambdamin < w && w < lambdamax)
-     {
-     x += comp[spectype].xmod.f[n] * dlambda;
-     }
-     }
-   */
+ }
+ else
+ {
   integ_spectype = spectype;
 //  x = qromb (model_int, lambdamin, lambdamax, 1e-4);
-//  printf ("Calling num_int %i %e %e %e %e\n",spectype, freqmin, freqmax, t, g);
-  x = num_int (model_int, lambdamin, lambdamax, 1e-4);
-//  printf ("Back from num_int\n");
+    x = num_int (model_int, lambdamin, lambdamax, 1e-6);
+}
+
 
   x *= 4. * PI;
 
