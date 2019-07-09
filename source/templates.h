@@ -280,7 +280,7 @@ double sv_velocity(double x[], double v[], int ndom);
 double sv_rho(int ndom, double x[]);
 double sv_find_wind_rzero(int ndom, double p[]);
 int sv_zero_init(double p[]);
-double sv_zero_r(double r);
+double sv_zero_r(double r, void *params);
 double sv_theta_wind(int ndom, double r);
 double sv_wind_mdot_integral(double r, void *params);
 /* ionization.c */
@@ -289,6 +289,7 @@ int convergence(PlasmaPtr xplasma);
 int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
+double zero_emit2(double t, void *params);
 double zero_emit(double t);
 /* levels.c */
 int levels(PlasmaPtr xplasma, int mode);
@@ -419,7 +420,7 @@ double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 int compton_dir(PhotPtr p, PlasmaPtr xplasma);
-double compton_func(double f);
+double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double alpha(double nu);
 double beta(double nu);
@@ -432,10 +433,12 @@ double total_dr(WindPtr one, double t_e);
 /* spectral_estimators.c */
 int spectral_estimators(PlasmaPtr xplasma);
 double pl_alpha_func_log(double alpha);
+double pl_alpha_func_log2(double alpha, void *params);
 double pl_logmean(double alpha, double lnumin, double lnumax);
 double pl_log_w(double j, double alpha, double lnumin, double lnumax);
 double pl_log_stddev(double alpha, double lnumin, double lnumax);
 double exp_temp_func(double exp_temp);
+double exp_temp_func2(double exp_temp, void *params);
 double exp_mean(double exp_temp, double numin, double numax);
 double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);

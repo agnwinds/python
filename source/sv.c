@@ -390,7 +390,10 @@ sv_find_wind_rzero (ndom, p)
 
   /* change the global variable sv_zero_r_ndom before we call zbrent */
   sv_zero_r_ndom = ndom;
-  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+//  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+
+
   return (x);
 
 }
@@ -454,8 +457,7 @@ sv_zero_init (p)
  **********************************************************/
 
 double
-sv_zero_r (r)
-     double r;
+sv_zero_r (double r,void * params)
 {
   double theta;
   double rho, rho_guess;

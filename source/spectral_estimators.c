@@ -202,7 +202,8 @@ spectral_estimators (xplasma)
 
       else                      //We have bracketed alpha
       {
-        pl_alpha_temp = zbrent (pl_alpha_func_log, pl_alpha_min, pl_alpha_max, 0.00001);        //find the actual value of alpha that matches our mean frequency
+//        pl_alpha_temp = zbrent (pl_alpha_func_log, pl_alpha_min, pl_alpha_max, 0.00001);        //find the actual value of alpha that matches our mean frequency
+        pl_alpha_temp = zero_find (pl_alpha_func_log2, pl_alpha_min, pl_alpha_max, 0.00001);        //find the actual value of alpha that matches our mean frequency
 
         /* This next line computes the PL weight using an external function. */
 
@@ -263,7 +264,9 @@ spectral_estimators (xplasma)
           exp_temp_max = -1.0 * exp_temp_max;
         }
         /* Solve for the effective temperature */
-        exp_temp_temp = zbrent (exp_temp_func, exp_temp_min, exp_temp_max, 0.00001);
+//        exp_temp_temp = zbrent (exp_temp_func, exp_temp_min, exp_temp_max, 0.00001);
+        exp_temp_temp = zero_find (exp_temp_func2, exp_temp_min, exp_temp_max, 0.00001);
+		
         /* Calculate the weight */
         exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);
 
@@ -362,14 +365,18 @@ spectral_estimators (xplasma)
  **********************************************************/
 
 double
-pl_alpha_func_log (alpha)
-     double alpha;
+pl_alpha_func_log (double alpha)
 {
   double answer;
   answer = pl_logmean (alpha, lspec_numin, lspec_numax) - spec_numean;
   return (answer);
 }
 
+double
+pl_alpha_func_log2 (double alpha,void * params)
+{
+  return (pl_alpha_func_log(alpha));
+}
 
 /**********************************************************/
 /**
@@ -524,15 +531,18 @@ pl_log_stddev (alpha, lnumin, lnumax)
  **********************************************************/
 
 double
-exp_temp_func (exp_temp)
-     double exp_temp;
+exp_temp_func (double exp_temp)
 {
   double answer;
-
   answer = exp_mean (exp_temp, spec_numin, spec_numax) - spec_numean;
   return (answer);
 }
 
+double
+exp_temp_func2 (double exp_temp,void * params)
+{
+  return (exp_temp_func (exp_temp));
+}
 
 /**********************************************************/
 /**

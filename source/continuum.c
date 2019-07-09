@@ -261,8 +261,6 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
   }
 
 
-
-
   if (comp[spectype].xmod.w[0]<lambdamin && lambdamax<comp[spectype].xmod.w[nwav-1])
   {
      x = 0;
@@ -291,6 +289,7 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
  {
   integ_spectype = spectype;
 //  x = qromb (model_int, lambdamin, lambdamax, 1e-4);
+//  printf ("Calling num_int %i %e %e %e %e\n",spectype, freqmin, freqmax, t, g);
     x = num_int (model_int, lambdamin, lambdamax, 1e-6);
 }
 

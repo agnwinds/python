@@ -403,11 +403,9 @@ double num_int(func, a, b, eps)
 	}
 	if (zflag==1)
 		{	
-//		printf ("INTEGRATING %e (%e) %e (%e)\n",a,func(a,test),b,func(b,test));
-    	gsl_integration_romberg_workspace * w  = gsl_integration_romberg_alloc (1000);
+    	gsl_integration_romberg_workspace * w  = gsl_integration_romberg_alloc (30);
     	gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval,w);
     	gsl_integration_romberg_free (w);
-//		printf ("DONE %e %zu\n",result,neval);
 	}
 	else
 	{
@@ -419,8 +417,7 @@ double num_int(func, a, b, eps)
 	return(result);
 	}
 
-	
-/*	
+		
 	
 double zero_find(func, x_lo, x_hi, tol)
     double (*func) (double,void*);	
@@ -429,15 +426,11 @@ double zero_find(func, x_lo, x_hi, tol)
 	{
 	double result;
 	double alpha=0.0;
-	void *test=NULL;
-	double delta;
-	int zflag,i;
-    int status;
-	 double r = 0;
-	size_t  neval;
+	double r = 0;
 	const gsl_root_fsolver_type *T;
 	gsl_root_fsolver *s;
 	int iter = 0, max_iter = 100;
+	int status;
 	
 
     gsl_function F;
@@ -460,7 +453,7 @@ double zero_find(func, x_lo, x_hi, tol)
 	      x_lo = gsl_root_fsolver_x_lower (s);
 	      x_hi = gsl_root_fsolver_x_upper (s);
 	      status = gsl_root_test_interval (x_lo, x_hi,
-	                                       0, tol);
+	                                        tol,0);
 
 	      if (status == GSL_SUCCESS)
 	        printf ("Converged:\n");
@@ -474,7 +467,7 @@ double zero_find(func, x_lo, x_hi, tol)
 	return(result);
 	}	
 	
-	*/
+
 
 
 
