@@ -183,7 +183,9 @@ total_comp (one, t_e)
           f1 = xplasma->fmin_mod[j];    //NSH 131114 - Set the low frequency limit to the lowest frequency that the model applies to
           f2 = xplasma->fmax_mod[j];    //NSH 131114 - Set the high frequency limit to the highest frequency that the model applies to
           if (f1 > 1e18)        //If all the frequencies are lower than 1e18, then the cross section is constant at sigmaT
-            x += qromb (comp_cool_integrand, f1, f2, 1e-6);
+//            x += qromb (comp_cool_integrand, f1, f2, 1e-6);
+          x += num_int (comp_cool_integrand, f1, f2, 1e-6);
+		  
           else
             x += THOMPSON * xplasma->xj[j];     //In the case where we are in the thompson limit, we just multiply the band limited frequency integrated mean intensity by the Thompson cross section
         }
@@ -487,6 +489,7 @@ beta (nu)
  * @brief      The integrand in the integral to obtain the total cooling rate due to inverse compton scattering.
  *
  * @param [in] double  nu   - frequency
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return     frequwncy dependant cross section multiplied by the mean intensity at frequency nu
  *
  * @details
@@ -505,8 +508,7 @@ beta (nu)
  **********************************************************/
 
 double
-comp_cool_integrand (nu)
-     double nu;
+comp_cool_integrand (double nu,void * params)
 {
   double value;
   value = THOMPSON * beta (nu) * mean_intensity (xplasma, nu, 2);

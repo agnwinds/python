@@ -286,7 +286,10 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
      }
    */
   integ_spectype = spectype;
-  x = qromb (model_int, lambdamin, lambdamax, 1e-4);
+//  x = qromb (model_int, lambdamin, lambdamax, 1e-4);
+//  printf ("Calling num_int %i %e %e %e %e\n",spectype, freqmin, freqmax, t, g);
+  x = num_int (model_int, lambdamin, lambdamax, 1e-4);
+//  printf ("Back from num_int\n");
 
   x *= 4. * PI;
 
@@ -300,6 +303,7 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
  * @brief      Compute f_lambda from a model for a given wavelength
  *
  * @param [in] double  ;ambda - the wavelength of interest
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return     The flux for a model for a given wavelength
  *
  * @details
@@ -317,8 +321,7 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
 
 
 double
-model_int (lambda)
-     double lambda;
+model_int (double lambda,void * params)
 {
   double answer;                //The interpolated answer
   if (lambda < comp[integ_spectype].xmod.w[0])  //Our wavelength is below where we have a model

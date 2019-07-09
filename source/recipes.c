@@ -20,175 +20,14 @@
 #include <math.h>
 #include "recipes.h"
 #include "log.h"
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_roots.h>
 
 
-#define EPS 1.0e-6
-#define JMAX 100
-#define JMAXP JMAX+1
-#define K 5
 
 
-/**********************************************************/
-/**
- * @brief      Integrate a function between a and b
- *
- *
- * @param [in] func  The function which one wishes a root for
- * @param [in] a  one end of the interval
- * @param [in] b  the other end of the interval
- * @param [in] eps   A tolerence
- * @return   The root of the function f                           .
- *
- * @details
- * A Numerical Recipes routine to integrates the double precision function func from a to b.
- *
- * ### Notes ###
- * JMAX limits the total number number of times the
- * trapezoidal rule can be called, and K determines the order of polint
- *
- *
- * This routine has been modified from that that appears
- * in Numberical recipes so that the tolerance could be specified.
- * Additioanlly, the convergence criterion for exiting the
- * exiting trapzd loop
- * to include = sign.  This change was in the ansi version
- * of qromb routine, and was needed to integrate functions
- * which were in some cases zero throughout the range. Not
- * only did this seem to eliminate a number of error
- * returns, it sped up some portions of the program.
- *
- *
- **********************************************************/
-
-
-double
-qromb (func, a, b, eps)
-     double a, b;
-     double (*func) (double);
-     double eps;
-{
-  double ss, dss, trapzd ();
-  double s[JMAXP + 1], h[JMAXP + 1];
-  int j;
-  void polint ();
-
-  ss = 0.0;
-  if (a >= b)
-  {
-    Error ("Error qromb: a %e>=b %e\n", a, b);
-  }
-
-  h[1] = 1.0;
-  for (j = 1; j <= JMAX; j++)
-  {
-    s[j] = trapzd (func, a, b, j);
-    if (j >= K)
-    {
-      polint (&h[j - K], &s[j - K], K, 0.0, &ss, &dss);
-      // ksl --56g --05Oct -- Changed to include = sign
-      if (fabs (dss) <= eps * fabs (ss))
-      {
-        recipes_error = 0;
-        return ss;
-      }
-    }
-    s[j + 1] = s[j];
-    h[j + 1] = 0.25 * h[j];
-  }
-  Error ("Too many steps in routine QROMB\n");
-  recipes_error = -1;
-  return ss;                    /* I set this to the best value but the user should beware */
-}
-
-#undef EPS
-#undef JMAX
-#undef JMAXP
-#undef K
-
-#define FUNC(x) ((*func)(x))
-
-double
-trapzd (func, a, b, n)
-     double a, b;
-     double (*func) (double);   /* ANSI: double (*func)(double); */
-     int n;
-{
-  double x, tnm, sum, del;
-  static double s;
-  static int it;
-  double ssss;
-  int j;
-
-  if (n == 1)
-  {
-    it = 1;
-    return (s = 0.5 * (b - a) * (FUNC (a) + FUNC (b)));
-  }
-  else
-  {
-    tnm = it;
-    del = (b - a) / tnm;
-    x = a + 0.5 * del;
-    for (sum = 0.0, j = 1; j <= it; j++, x += del)
-      sum += ssss = FUNC (x);
-    it *= 2;
-    s = 0.5 * (s + (b - a) * sum / tnm);
-    return s;
-  }
-}
-
-
-/*******************************************
- * Given arrays xa[] and y[a] defined from elements 1 to n and
-   given x, polint returns a value y and an error estimate dy.  If
-   P(x) is an polynomial of degree n-1, the results will be exact. Note
-   that polint will return a value outside the specified range without
-   bothering to warn you
-**************************************************/
-
-void
-polint (xa, ya, n, x, y, dy)
-     double xa[], ya[], x, *y, *dy;
-     int n;
-{
-  int i, m, ns = 1;
-  double den, dif, dift, ho, hp, w;
-  double *c, *d, *vector ();
-  void free_vector ();
-
-
-  dif = fabs (x - xa[1]);
-  c = vector (1, n);
-  d = vector (1, n);
-  for (i = 1; i <= n; i++)
-  {
-    if ((dift = fabs (x - xa[i])) < dif)
-    {
-      ns = i;
-      dif = dift;
-    }
-    c[i] = ya[i];
-    d[i] = ya[i];
-  }
-  *y = ya[ns--];
-  for (m = 1; m < n; m++)
-  {
-    for (i = 1; i <= n - m; i++)
-    {
-      ho = xa[i] - x;
-      hp = xa[i + m] - x;
-      w = c[i + 1] - d[i];
-      if ((den = ho - hp) == 0.0)
-        Error ("Error in routine POLINT\n");
-      den = w / den;
-      d[i] = hp * den;
-      c[i] = ho * den;
-    }
-    *y += (*dy = (2 * ns < (n - m) ? c[ns + 1] : d[ns--]));
-  }
-  free_vector (d, 1, n);
-  free_vector (c, 1, n);
-}
 
 
 
@@ -512,3 +351,131 @@ golden (ax, bx, cx, f, tol, xmin)
 
 #undef CC
 #undef R
+
+
+/**********************************************************/
+/**
+ * @brief      A wrapper function that carries out numerical integration on a supplied function between limits
+ *
+ *
+ * @param [in] func - a function to integrate, needs to be of the form (double (double,void*))
+ * @param [in] a - lower bound
+ * @param [in] b - upper bound
+ * @param [in] eps - the relative accuracy desired.
+ * @return   The integral                          .
+ *
+ * @details
+ * This routine carries out numerical integration of the function func from a to b. It currently
+ * uses the gsl implementation of the ROMBERG integration scheme. Initial tests using QAG showed that
+ * the type of integrals we do - often with exponential tails - is not well treated. There is an 
+ * internal test to ensure that the user isnt asking for an integral where the function is zero everywhere.
+ * The gsl routine doesnt handle this well, and takes ages to (sometimes) return zero.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+
+double num_int(func, a, b, eps)
+    double (*func) (double,void*);	
+    double a, b;
+    double eps;
+	{
+	double result;
+	double alpha=0.0;
+	void *test=NULL;
+	double delta;
+	int zflag,i;
+	size_t  neval;
+	
+    gsl_function F;
+    F.function = func;
+    F.params = &alpha;
+	zflag=1;
+	if (func(a,test)==0.0 && func(b,test)==0.0)
+	{
+		zflag=0;
+		delta=(b-a)/101;
+		for (i=0;i<100;i++)
+		{
+			if (func(a+delta*i,test)!=0) zflag=1;			
+		}
+	}
+	if (zflag==1)
+		{	
+//		printf ("INTEGRATING %e (%e) %e (%e)\n",a,func(a,test),b,func(b,test));
+    	gsl_integration_romberg_workspace * w  = gsl_integration_romberg_alloc (1000);
+    	gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval,w);
+    	gsl_integration_romberg_free (w);
+//		printf ("DONE %e %zu\n",result,neval);
+	}
+	else
+	{
+		result=0.0;
+	}
+	
+
+	
+	return(result);
+	}
+
+	
+/*	
+	
+double zero_find(func, x_lo, x_hi, tol)
+    double (*func) (double,void*);	
+    double x_lo, x_hi;
+    double tol;
+	{
+	double result;
+	double alpha=0.0;
+	void *test=NULL;
+	double delta;
+	int zflag,i;
+    int status;
+	 double r = 0;
+	size_t  neval;
+	const gsl_root_fsolver_type *T;
+	gsl_root_fsolver *s;
+	int iter = 0, max_iter = 100;
+	
+
+    gsl_function F;
+    F.function = func;
+    F.params = &alpha;
+	
+	
+	
+	T = gsl_root_fsolver_brent;
+	  s = gsl_root_fsolver_alloc (T);
+	  gsl_root_fsolver_set (s, &F, x_lo, x_hi);
+	
+	
+	
+	  do
+	    {
+	      iter++;
+	      status = gsl_root_fsolver_iterate (s);
+	      r = gsl_root_fsolver_root (s);
+	      x_lo = gsl_root_fsolver_x_lower (s);
+	      x_hi = gsl_root_fsolver_x_upper (s);
+	      status = gsl_root_test_interval (x_lo, x_hi,
+	                                       0, tol);
+
+	      if (status == GSL_SUCCESS)
+	        printf ("Converged:\n");
+
+
+	    }
+	  while (status == GSL_CONTINUE && iter < max_iter);
+
+	  result=(x_lo+x_hi)/2.0;
+
+	return(result);
+	}	
+	
+	*/
+
+
+
+

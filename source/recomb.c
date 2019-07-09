@@ -88,9 +88,8 @@ int fbfr;
  *
  * ### Notes ###
  *
- * Generally speaiking this routine is integrated over frequency using a NR reciepes
- * routine for that purpsoe.  For that reason, much of the information has to be
- * passed externally
+ * This routine used to be used for integrations, the wrapper routine fb_topbase_partial2 is
+ * now used for that purpose - this is only used directly now.
  *
  *
  *
@@ -143,6 +142,48 @@ fb_topbase_partial (freq)
 
   return (partial);
 }
+
+
+/**********************************************************/
+/**
+ * @brief      This is a wrapper for fb_topbase_partial to allow it to be used for integrationbs
+ *
+ * @param [in] double  freq   The freqeuncy of interest
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
+
+ * @return     An emissivity or a recombination rate
+ *
+ * What the routine returns depends on the external variable fbfr. The
+ * choices are:
+ *
+ * * FB_FULL         Calculate fb emissivity including energy associated with the threshold
+ * * FB_REDUCED      Calculate the fb emissivity without the threshold energy
+ * * FB_RATE         Calulate the fb recombinarion rate
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ * This routine is integrated over frequency using a gsl routine wrapped in the num_int
+ * routine for that purpsoe.  Much of the information is passed externally for historical reasons
+ * In Princible the extranl information could be contrained in the parameters.
+ *
+ *
+ *
+ **********************************************************/
+
+
+double
+fb_topbase_partial2 (double freq,void * params)
+{
+	double partial;
+
+	partial=fb_topbase_partial(freq);
+
+  return (partial);
+}
+
 
 
 
@@ -1165,7 +1206,9 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
         {
           fmax = fthresh + dnu;
         }
-        fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+//        fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+        fnu += num_int (fb_topbase_partial2, fthresh, fmax, 1.e-4);
+
       }
     }
   }
@@ -1273,7 +1316,8 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
           {
             fmax = fthresh + dnu;
           }
-          fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+//          fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+          fnu += num_int (fb_topbase_partial, fthresh, fmax, 1.e-4);
         }
 
       }
@@ -1498,7 +1542,9 @@ gs_rrate (nion, T)
       fmax = fthresh + dnu;
     }
 
-    rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
+ //   rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);	
+    rate = num_int (fb_topbase_partial, fthresh, fmax, 1e-5);
+	
   }
 
   return (rate);
