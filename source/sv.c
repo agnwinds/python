@@ -84,15 +84,14 @@ get_sv_wind_params (ndom)
   rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
   rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
 
-  if (modes.iadvanced)
-  {
-    strcpy (answer, "fixed");
-    zdom[ndom].sv_v_zero_mode = rdchoice ("@SV.v_zero_mode(fixed,sound_speed)", "0,1", answer);
-    if (zdom[ndom].sv_v_zero_mode == FIXED)
-      rddoub ("@SV.v_zero(cm/s)", &zdom[ndom].sv_v_zero);
-    else if (zdom[ndom].sv_v_zero_mode == SOUND_SPEED)
-      rddoub ("@SV.v_zero(multiple_of_sound_speed)", &zdom[ndom].sv_v_zero);
-  }
+  /* allow the user to pick whether they set v0 by a fixed value or by the sound speed */
+  strcpy (answer, "fixed");
+  zdom[ndom].sv_v_zero_mode = rdchoice ("SV.v_zero_mode(fixed,sound_speed)", "0,1", answer);
+  if (zdom[ndom].sv_v_zero_mode == FIXED)
+    rddoub ("SV.v_zero(cm/s)", &zdom[ndom].sv_v_zero);
+  else if (zdom[ndom].sv_v_zero_mode == SOUND_SPEED)
+    rddoub ("SV.v_zero(multiple_of_sound_speed)", &zdom[ndom].sv_v_zero);
+
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   zdom[ndom].rmin = geo.rstar;
