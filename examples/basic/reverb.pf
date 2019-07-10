@@ -39,14 +39,16 @@ Thermal_balance_options(everything.on,no.adiabatic)   everything.on
 wind.radmax(cm)                            1e19
 wind.t.init                                1e5
 wind.mdot(msol/yr)                         5
-sv.diskmin(units_of_rstar)                 50
-sv.diskmax(units_of_rstar)                 100
-sv.thetamin(deg)                           70
-sv.thetamax(deg)                           82
-sv.mdot_r_exponent                         0
-sv.v_infinity(in_units_of_vescape          1
-sv.acceleration_length(cm)                 1e18
-sv.acceleration_exponent                   1.0
+SV.diskmin(units_of_rstar)                 50
+SV.diskmax(units_of_rstar)                 100
+SV.thetamin(deg)                           70
+SV.thetamax(deg)                           82
+SV.mdot_r_exponent                         0
+SV.v_infinity(in_units_of_vescape          1
+SV.acceleration_length(cm)                 1e18
+SV.acceleration_exponent                   1.0
+SV.v_zero_mode(fixed,sound_speed)		   fixed 
+SV.v_zero(cm/s)						       6e5
 Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
