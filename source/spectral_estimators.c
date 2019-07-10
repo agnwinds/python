@@ -53,7 +53,7 @@ spectral_estimators (xplasma)
      PlasmaPtr xplasma;
 {
   double pl_alpha_min, pl_alpha_max, pl_alpha_temp, pl_w_temp, j;
-  double exp_temp_min, exp_temp_max;    /* The 'temperature' range we are going to search for an effective temperature for the exponential model */
+  double exp_temp_min, exp_temp_max,exp_temp_store;    /* The 'temperature' range we are going to search for an effective temperature for the exponential model */
   double exp_temp_temp, exp_w_temp;     /* The temporary values for temperature and weight of the exponential model */
   int n, n1;
   double pl_sd, exp_sd;         /* Computed standard deviations for two models for comparison with true value */
@@ -232,9 +232,8 @@ spectral_estimators (xplasma)
 
       /* Bracket the temperature of an exponential model */
 
-      while ((exp_temp_func (exp_temp_min) * exp_temp_func (exp_temp_max) > 0.0) &&
-             ((exp_temp_func (-1.0 * exp_temp_min) * exp_temp_func (-1.0 * exp_temp_max) > 0.0)))
-      {
+      while ((exp_temp_func (exp_temp_min) * exp_temp_func (exp_temp_max) > 0.0) && ((exp_temp_func (-1.0 * exp_temp_min) * exp_temp_func (-1.0 * exp_temp_max) > 0.0)))
+      {		  
         /* In this case we are going to get errors since the temperature is too low
            give a result in the exponential, and we will divide by zero */
         if ((H * spec_numax) < (100.0 * BOLTZMANN * exp_temp_min * 0.9))
@@ -243,6 +242,7 @@ spectral_estimators (xplasma)
         }
         exp_temp_max = exp_temp_max * 1.1;      // The maximum temperature can go up forever with no fear of numerical problems
       }
+
 
 
       if (isfinite (exp_temp_func (exp_temp_min)) == 0 || isfinite (exp_temp_func (exp_temp_max)) == 0)
@@ -257,14 +257,15 @@ spectral_estimators (xplasma)
       else
       {
         /* But first see if we have a positive or negative solution. The temperatures are positive at the moment,
-           if it was the negatives that worked, change the sign of the temperatures. */
-        if (exp_temp_func (-1.0 * exp_temp_min) * exp_temp_func (-1.0 * exp_temp_max) < 0.0)
-        {
-          exp_temp_min = -1.0 * exp_temp_min;
-          exp_temp_max = -1.0 * exp_temp_max;
-        }
+           if it was the negatives that worked, change the sign of the temperatures - we also need to swap min and max */
+		  if (exp_temp_func (-1.0 * exp_temp_min) * exp_temp_func (-1.0 * exp_temp_max) < 0.0)
+		      {
+		      exp_temp_store = -1.0 * exp_temp_min;
+			  exp_temp_min   = -1.0 * exp_temp_max;
+			  exp_temp_max   = exp_temp_store;		  
+	          }
         /* Solve for the effective temperature */
-//        exp_temp_temp = zbrent (exp_temp_func, exp_temp_min, exp_temp_max, 0.00001);
+  
         exp_temp_temp = zero_find (exp_temp_func2, exp_temp_min, exp_temp_max, 0.00001);
 		
         /* Calculate the weight */

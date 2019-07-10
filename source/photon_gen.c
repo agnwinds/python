@@ -1081,7 +1081,6 @@ q_test_count=0;
     disk.w[nrings] = 0;
     disk.t_hit[nrings] = 0;
   }
-  printf ("TEST %i\n",q_test_count);
   geo.lum_disk = ltot;
   return (ltot);
 }

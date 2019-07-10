@@ -455,8 +455,6 @@ double zero_find(func, x_lo, x_hi, tol)
 	      status = gsl_root_test_interval (x_lo, x_hi,
 	                                        tol,0);
 
-	      if (status == GSL_SUCCESS)
-	        printf ("Converged:\n");
 
 
 	    }
