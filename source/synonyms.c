@@ -59,7 +59,7 @@ char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.typ
   "kn.rmax", "kn.rmin", "kn.v_infinity", "kn.v_zero", "QSO_BH_radiation", "lum_agn", "AGN.power_law_index",
   "AGN.blackbody_temp", "@AGN.power_law_cutoff", "AGN.geometry_for_pl_source", "Rad_type_for_agn", "Rad_type_for_agn",
   "wind.mdot", "Wind_ionization", "Wind_radiation", "Wind_type", "Thermal_balance_options",
-  "wind.fixed_concentrations_file",
+  "wind.fixed_concentrations_file", "Disk-radiation",
   NULL
 };
 
@@ -97,13 +97,13 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
   "BH.blackbody_temp", "@Bh.power_law_cutoff", "BH.geometry_for_pl_source",
   "BH.rad_type_in_final_spectrum", "BH.rad_type_to_make_wind",
   "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type", "Wind_heating.extra_processes",
-  "Wind.fixed_concentrations_file",
+  "Wind.fixed_concentrations_file", "Disk.radiation",
   NULL
 };
 
 
 
-int number_of_names = 103;
+int number_of_names = 104;
 
 #define MIN(a,b) ((a)<b ? a:b)
 
@@ -216,9 +216,7 @@ check_synonyms (new_question, old_question)
   {
     if (strncmp (new_names[n], firstword, wordlength) == 0)
     {
-//OLD     Log
-//OLD       ("Matched keyword %s in .pf file to %s in current python version\n",
-//OLD     new_question, old_names[n]);
+      Log("Matched keyword %s in .pf file to %s in current python version\n", new_question, old_names[n]);
       strcpy (old_question, old_names[n]);
       return (1);
     }
