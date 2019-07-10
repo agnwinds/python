@@ -163,6 +163,12 @@ setup_created_files ()
   strcpy (files.spec, files.root);
   strcpy (files.lspec, files.root);
 
+  strcpy (files.Q_polarize, files.root);
+  strcpy (files.lQ_polarize, files.root);
+
+  strcpy (files.U_polarize, files.root);
+  strcpy (files.lU_polarize, files.root);
+
   strcpy (files.spec_wind, files.root);
   strcpy (files.lspec_wind, files.root);
 
@@ -189,6 +195,12 @@ setup_created_files ()
 
   strcat (files.spec, ".spec");
   strcat (files.lspec, ".log_spec");
+
+  strcat (files.Q_polarize, ".Q_polarize");
+  strcat (files.lQ_polarize, ".log_Q_polarize");
+
+  strcat (files.U_polarize, ".U_polarize");
+  strcat (files.lU_polarize, ".log_U_polarize");
 
   strcat (files.spec_wind, ".spec_wind");
   strcat (files.lspec_wind, ".log_spec_wind");

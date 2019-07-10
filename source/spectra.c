@@ -144,6 +144,10 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
     {
       xxspec[n].f[i] = 0;
       xxspec[n].lf[i] = 0;      /* NSH 1302 zero the logarithmic spectra */
+      xxspec[n].Q[i] = 0;
+      xxspec[n].lQ[i] = 0;
+      xxspec[n].U[i] = 0;
+      xxspec[n].lU[i] = 0;
     }
   }
 
@@ -755,8 +759,6 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
         {
           x = xxspec[n].f_wind[i] * xxspec[n].renorm;
         }
-
-
         if (select_spectype == SPECTYPE_FLAMBDA)
         {                       /* flambda */
           x *= (freq * freq * 1e-8) / (dfreq * dd * VLIGHT);
@@ -771,8 +773,6 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
         }
         fprintf (fptr, " %10.5g", x * renorm);
       }
-
-
       fprintf (fptr, "\n");
     }
   }
@@ -795,7 +795,6 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
         {
           x = xxspec[n].lf_wind[i] * xxspec[n].renorm;
         }
-
         if (select_spectype == SPECTYPE_FLAMBDA)
         {                       /* flambda */
           x *= (freq * freq * 1e-8) / (dfreq * dd * VLIGHT);
@@ -810,16 +809,133 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
         }
         fprintf (fptr, " %10.5g", x * renorm);
       }
+      fprintf (fptr, "\n");
+      freq1 = freq;
+    }
+  }
+  else if (loglin == 2)              /* Then were are writing out the linear version of the spectra */
+    {
+    freqmin = xxspec[nspecmin].freqmin;
+    dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
+    for (i = 1; i < NWAVE - 1; i++)
+    {
+        freq = freqmin + i * dfreq;
+        fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+        for (n = nspecmin; n <= nspecmax; n++)
+        {
+            x = xxspec[n].Q[i] * xxspec[n].renorm;
+            if (select_spectype == SPECTYPE_FLAMBDA)
+            {                       /* flambda */
+                x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+            }
+            else if (select_spectype == SPECTYPE_FNU)
+            {                       /*fnu */
+                x /= (dfreq * dd);
+            }
+            else if (select_spectype == SPECTYPE_RAW)
+            {                       /*generated spectrum */
+                x /= (dfreq);         //With log spectra implemented, we should divide by nu, so log and lin spectra agree
+            }
+            fprintf (fptr, " %10.5g", x * renorm);
+        }
+    fprintf (fptr, "\n");
+    }
+  }
+  else if (loglin == 3)
+    {
+      lfreqmin = log10 (xxspec[nspecmin].freqmin);
+      freq1 = lfreqmin;
+      lfreqmax = log10 (xxspec[nspecmin].freqmax);
+      ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
-
+      for (i = 1; i < NWAVE - 1; i++)
+      {
+        freq = pow (10., (lfreqmin + i * ldfreq));
+        dfreq = freq - freq1;
+        fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+        for (n = nspecmin; n <= nspecmax; n++)
+        {
+            x = xxspec[n].lQ[i] * xxspec[n].renorm;
+            if (select_spectype == SPECTYPE_FLAMBDA)
+            {                       /* flambda */
+                x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+            }
+            else if (select_spectype == SPECTYPE_FNU)
+            {                       /*fnu */
+                x /= (dfreq * dd);
+            }
+            else if (select_spectype == SPECTYPE_RAW)
+            {                       /*generated spectrum */
+                x /= (dfreq);
+            }
+            fprintf (fptr, " %10.5g", x * renorm);
+        }
+    fprintf (fptr, "\n");
+    freq1 = freq;
+    }
+  }
+  else if (loglin == 4)              /* Then were are writing out Stokes Q polarized linear version spectra */
+  {
+    freqmin = xxspec[nspecmin].freqmin;
+    dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
+    for (i = 1; i < NWAVE - 1; i++)
+    {
+      freq = freqmin + i * dfreq;
+      fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+      for (n = nspecmin; n <= nspecmax; n++)
+      {
+        x = xxspec[n].U[i] * xxspec[n].renorm;
+        if (select_spectype == SPECTYPE_FLAMBDA)
+        {                       /* flambda */
+          x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+        }
+        else if (select_spectype == SPECTYPE_FNU)
+        {                       /*fnu */
+          x /= (dfreq * dd);
+        }
+        else if (select_spectype == SPECTYPE_RAW)
+        {                       /*generated spectrum */
+          x /= (dfreq);         /*With log spectra implemented, we should divide by nu, so log and lin spectra agree */
+        }
+        fprintf (fptr, " %10.5g", x * renorm);
+      }
+    fprintf (fptr, "\n");
+    }
+  }
+  else if (loglin == 5)               /* Polarized stokes Q log version of the spectra */
+  {
+    lfreqmin = log10 (xxspec[nspecmin].freqmin);
+    freq1 = lfreqmin;
+    lfreqmax = log10 (xxspec[nspecmin].freqmax);
+    ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+    for (i = 1; i < NWAVE - 1; i++)
+    {
+      freq = pow (10., (lfreqmin + i * ldfreq));
+      dfreq = freq - freq1;
+      fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+      for (n = nspecmin; n <= nspecmax; n++)
+      {
+        x = xxspec[n].lU[i] * xxspec[n].renorm;
+        if (select_spectype == SPECTYPE_FLAMBDA)
+        {                       /* flambda */
+          x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+        }
+        else if (select_spectype == SPECTYPE_FNU)
+        {                       /*fnu */
+          x /= (dfreq * dd);
+        }
+        else if (select_spectype == SPECTYPE_RAW)
+        {                       /*generated spectrum */
+          x /= (dfreq);
+        }
+        fprintf (fptr, " %10.5g", x * renorm);
+      }
       fprintf (fptr, "\n");
       freq1 = freq;
     }
   }
   fclose (fptr);
-
   return (0);
-
 }
 
 

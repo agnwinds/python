@@ -182,8 +182,23 @@ one is odd. We do frequency here but weighting is carried out in  extract */
         phot_hist_on = 1;       // Start recording the history of the photon
       }
 
-      /* Now extract the photon */
 
+      /* Now collect polarization information for electron scattered photons only */
+//      printf("extract: nres for this photon is %d \n", p->nres);
+
+      if (p->nres == -1 && p->nscat > 0)
+      {
+//        Log("extract: entering poltest now... type is %d \n p nres is %d and pp nres is %d \n p ncat is %d and pp nscat is %d \n",
+//            itype, p->nres, pp.nres, p->nscat, pp.nscat);
+        poltest(p, &pp);
+      } else {
+        /* Zero the stokes q and u for this photon as its not electron scattered */
+        pp.q = 0;
+        pp.u = 0;
+//        Log("extract: not electron scattered. stokes q is %f and u is %f \n",pp.q, pp.u);
+      }
+
+      /* Now extract the photon */
       extract_one (w, &pp, itype, n);
 
       /* Make sure phot_hist is on, for just one extraction */
@@ -391,12 +406,25 @@ the same resonance again */
       }
 
       /* Increment the spectrum.  Note that the photon weight has not been diminished
-       * by its passage through th wind, even though it may have encounterd a number
+       * by its passage through the wind, even though it may have encountered a number
        * of resonance, and so the weight must be reduced by tau
        */
 
       xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
       xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
+
+      /* For polarization we need to update the stokes parameters Q and U.
+       * Q[k] represents the total amount of polarization. It is calculated as a degree of polarization q
+       * (a fraction between -1 and +1) multiplied by the intensity.
+       * Here the intensity is represented by total flux, which is represented here as
+       * the photon weight (w) multiplied by exp (-tau).
+       * The same calculations are applied to log Q (lQ) and U and lU */
+
+      xxspec[nspec].Q[k] += pp->q * pp->w * exp (-(tau));        //Increment the stokes Q parameter
+      xxspec[nspec].lQ[k1] += pp->q * pp->w * exp (-(tau));      //and increment the log spectrum
+      xxspec[nspec].U[k] += pp->u * pp->w * exp (-(tau));        //Increment the stokes U spectrum in question
+      xxspec[nspec].lU[k1] += pp->u * pp->w * exp (-(tau));      //and increment the log spectrum
+
 
 
       /* If this photon was a wind photon, then also increment the "reflected" spectrum */
@@ -447,3 +475,9 @@ the same resonance again */
 
   return (istat);
 }
+
+
+
+
+
+
