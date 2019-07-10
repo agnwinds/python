@@ -1,6 +1,6 @@
 name: AGN.lamp_post_height
 description: |
-  Multi-line description, must keep indentation.
+  The distance above and below the disk plane of the two point sources used in the lamp-post model.
 type: Double
 unit: :ref:`Central_object.radius`
 values: Greater than 0

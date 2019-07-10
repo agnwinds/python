@@ -1,6 +1,9 @@
 name: BH.power_law_index
 description: |
-  Multi-line description, must keep indentation.
+  The exponent 𝛼 in a power law SED applied to an AGN power law source for a non-AGN system.
+  central source of the form $L_\nu=K \nu^\alpha$.
+
+  See :ref:`Radiation_types` and :ref:`AGN.power_law_index`.
 type: Double
 values: Greater than 0
 parent:

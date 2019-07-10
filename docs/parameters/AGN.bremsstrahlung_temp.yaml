@@ -1,7 +1,7 @@
 name: AGN.bremsstrahlung_temp
 description: |
   The temperature T in bremstrahlung SED of the form
-  L_nu=nu**alpha exp(-hnu/kT)
+  $L_\nu=\nu^{\alpha} e^{-h\nu/kT}$
 type: Double
 unit: K
 values: Greater than 0

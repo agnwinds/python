@@ -77,7 +77,7 @@ L_nu=nu**alpha exp(-hnu/kT)
 
 AGN.lamp_post_height
 ====================
-Multi-line description, must keep indentation.
+Generates the AGN/BH source from two points, located symmetrically above the axes of the central object.
 
 **Type:** Double
 

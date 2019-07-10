@@ -60,6 +60,11 @@ char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.typ
   "AGN.blackbody_temp", "@AGN.power_law_cutoff", "AGN.geometry_for_pl_source", "Rad_type_for_agn", "Rad_type_for_agn",
   "wind.mdot", "Wind_ionization", "Wind_radiation", "Wind_type", "Thermal_balance_options",
   "wind.fixed_concentrations_file",
+  "AGN.bremsstrahlung_temp", "AGN.bremsstrahlung_alpha", "BH.blackbody_temp", "@BH.power_law_cutoff",
+  "BH.geometry_for_pl_source", "BH.lamp_post_height", "BH.radiation",
+  "BH.rad_type_to_make_wind", "BH.rad_type_in_final_spectrum",
+  "low_energy_break", "high_energy_break",
+  "lum_agn", "AGN.power_law_index", "@AGN.power_law_cutoff",
   NULL
 };
 
@@ -76,12 +81,12 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
   "Central_object.rad_type_in_final_spectrum",
   "Disk.rad_type_in_final_spectrum", "Boundary_layer.rad_type_in_final_spectrum",
   "Boundary_layer.radiation", "Boundary_layer.rad_type_to_make_wind", "Boundary_layer.temp",
-  "Boundary_layer.luminosity", "Homologous.boundary_mdot", "Binary.mass_sec",
+  "Boundary_layer.lum", "Homologous.boundary_mdot", "Binary.mass_sec",
   "Binary.period", "Shell.wind_mdot", "Photon_sampling.approach", "Photon_sampling.nbands",
   "Photon_sampling.low_energy_limit", "Photon_sampling.high_energy_limit", "Photon_sampling.band_boundary",
   "Photon_sampling.band_min_frac",
-  "AGN.bremsstrahlung_temp", "AGN.bremsstrahlung_alpha", "AGN.blackbody_temp",
-  "AGN.power_law_cutoff", "AGN.geometry_for_pl_source", "AGN.lamp_post_height",
+  "Central_object.bremsstrahlung_temp", "Central_object.bremsstrahlung_alpha", "Central_object.blackbody_temp",
+  "Central_object.power_law_cutoff", "Central_object.geometry_for_source", "Central_object.lamp_post_height",
   "@Spectrum.select_specific_no_of_scatters_in_spectra", "@Spectrum.select_scatters", "@Spectrum.select_photons_by_position",
   "@Spectrum.select_location", "@Spectrum.select_rho", "@Spectrum.select_z", "@Spectrum.select_azimuth", "@Spectrum.select_r",
   "@Diag.save_cell_statistics", "@Diag.ispymode", "@Diag.keep_ioncycle_windsaves", "@Diag.make_ioncycle_tables",
@@ -93,17 +98,22 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
   "@Diag.extra", "Wind.model2import", "Wind.number_of_components", "Wind.old_windfile",
   "Input_spectra.model_file", "AGN.power_law_index", "Hydro.file", "Hydro.thetamax",
   "KWD.acceleration_exponent", "KWD.acceleration_length", "KWD.d", "KWD.mdot_r_exponent",
-  "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero", "BH.radiation", "BH.lum", "BH.power_law_index",
-  "BH.blackbody_temp", "@Bh.power_law_cutoff", "BH.geometry_for_pl_source",
-  "BH.rad_type_in_final_spectrum", "BH.rad_type_to_make_wind",
+  "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero", "Central_object.radiation", "Central_object.lum", "Central_object.power_law_index",
+  "Central_object.blackbody_temp", "@Central_object.power_law_cutoff", "Central_object.geometry_for_pl_source",
+  "Central_object.rad_type_in_final_spectrum", "Central_object.rad_type_to_make_wind",
   "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type", "Wind_heating.extra_processes",
   "Wind.fixed_concentrations_file",
+  "Central_object.bremsstrahlung_temp", "Central_object.bremsstrahlung_alpha", "Central_object.blackbody_temp", "@Central_object.power_law_cutoff",
+  "Central_object.geometry_for_source", "Central_object.lamp_post_height", "Central_object.radiation",
+  "Central_object.rad_type_to_make_wind", "Central_object.rad_type_in_final_spectrum",
+  "Central_object.cloudy.low_energy_break", "Central_object.cloudy.high_energy_break",
+  "Boundary_layer.lum", "Boundary_layer.power_law_index", "@Boundary_layer.power_law_cutoff",
   NULL
 };
 
 
 
-int number_of_names = 103;
+int number_of_names = 117;
 
 #define MIN(a,b) ((a)<b ? a:b)
 
@@ -216,9 +226,9 @@ check_synonyms (new_question, old_question)
   {
     if (strncmp (new_names[n], firstword, wordlength) == 0)
     {
-//OLD     Log
-//OLD       ("Matched keyword %s in .pf file to %s in current python version\n",
-//OLD     new_question, old_names[n]);
+      Log
+        ("Matched keyword %s in .pf file to %s in current python version\n",
+         new_question, old_names[n]);
       strcpy (old_question, old_names[n]);
       return (1);
     }
