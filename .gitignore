@@ -69,3 +69,13 @@ data/
 
 # we shouldn't be tracking version.h either 
 source/version.h
+
+# python output files
+*.diag
+*.spec
+*.log_spec
+*.spec_tot
+*.log_spec_tot
+*.rdpar
+*.sig
+logfile
