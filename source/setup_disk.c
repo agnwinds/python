@@ -56,8 +56,9 @@ History:
  * The parameters fill variables defined in the geo
  * data structure.
  *
+ * The routine itself simple returns 0
+ *
  * ###Notes###
- * 1712 - Refactored into a separate routine by ksl
 ***********************************************************/
 
 
@@ -69,6 +70,11 @@ get_disk_params ()
   rdpar_comment ("Parameters for the Disk (if there is one)");
 
   strcpy (answer, "flat");
+
+  if (geo.system_type == SYSTEM_TYPE_STAR)
+  {
+    strcpy (answer, "none");
+  }
   sprintf (values, "%d,%d,%d", DISK_NONE, DISK_FLAT, DISK_VERTICALLY_EXTENDED);
   geo.disk_type = rdchoice ("Disk.type(none,flat,vertically.extended)", values, answer);
 
@@ -112,13 +118,13 @@ get_disk_params ()
   }
 
   /* Set a default for diskrad for an AGN */
-  if (geo.system_type == SYSTEM_TYPE_BINARY)
+  if (geo.system_type == SYSTEM_TYPE_CV)
   {
     geo.diskrad = diskrad (geo.mstar, geo.m_sec, geo.period);
   }
-  else if (geo.system_type == SYSTEM_TYPE_AGN)
+  else if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
   {
-    geo.diskrad = 100. * geo.r_agn;
+    geo.diskrad = 100. * geo.rstar;
   }
 
   rddoub ("Disk.radmax(cm)", &geo.diskrad);
