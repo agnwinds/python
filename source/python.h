@@ -153,7 +153,7 @@ enum coord_type_enum
 #define	CORONA 			4
 #define KNIGGE			5
 #define	HOMOLOGOUS 		6
-//OLD #define	YSO 			7
+//OLD #define   YSO                     7
 #define	SHELL 			9
 #define IMPORT          10      // Model that is read in from a file
 #define	DISK_ATMOS 		11
