@@ -232,7 +232,7 @@ is_input_line_synonym_for_question(question, input_line)
     if(!strncmp(new_names[synonym_index], question, question_name_length)) {
 
       // Does the 'old name' match the question on the input line?
-      if(!strncmp(old_names[synonym_index], input_line, question_name_length)) {
+      if(!strncmp(old_names[synonym_index], input_line, get_question_name_length(old_names[synonym_index]))) {
         // If the question on the input line matches the 'old name' for this question (i.e. the difference is 0)
         return(1);
       }
