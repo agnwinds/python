@@ -239,24 +239,12 @@ is_input_line_synonym_for_question(question, input_line)
 
     // For each synonym, if the 'new name' refers to the question we're trying to ask...
     if(!strncmp(new_names[synonym_index], question, question_name_length)) {
-
-<<<<<<< HEAD
-  for (n = 0; n < number_of_names; n++)
-  {
-    if (strncmp (new_names[n], firstword, wordlength) == 0)
-    {
-      Log
-        ("Matched keyword %s in .pf file to %s in current python version\n",
-         new_question, old_names[n]);
-      strcpy (old_question, old_names[n]);
-      return (1);
-=======
       // Does the 'old name' match the question on the input line?
       if(!strncmp(old_names[synonym_index], input_line, question_name_length)) {
         // If the question on the input line matches the 'old name' for this question (i.e. the difference is 0)
         return(1);
       }
->>>>>>> upstream/dev
+      
     }
   }
   // If we've not found a match, then this line *isn't* a synonym
