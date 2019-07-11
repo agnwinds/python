@@ -58,7 +58,7 @@ get_domain_params (ndom)
 
 
   strcpy (answer, "SV");
-  zdom[ndom].wind_type = rdchoice ("Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)", "0,1,3,4,5,6,7,9,10", answer);
+  zdom[ndom].wind_type = rdchoice ("Wind.type(SV,star,hydro,corona,kwd,homologous,shell,imported)", "0,1,3,4,5,6,9,10", answer);
 
 
   strcat (zdom[ndom].name, "Wind");
