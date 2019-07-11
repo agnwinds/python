@@ -62,12 +62,11 @@ tdisk (m, mdot, r)
  * which is measured in terms of the ratio of the actual distance to the inner
  * edge of the disk (rmin).
  *
- * A number of modifications to a simple steady state disk are possible, depending
+ * Modifications to a simple steady state disk are possible, depending
  * on the variable geo.disk_tprofile:
  *
  *  - DISK_TPROFILE_READIN  the returned temperature is interpolated from values that
  *    been read in
- *  - DISK_TPROFILE_YSO an analytic profile implemented for YSOs
  *
  *  In addition for a standard profile, this is where disk heading can optionally
  *  be taken into account
@@ -77,6 +76,9 @@ tdisk (m, mdot, r)
  *
  * A reference for the standard steady state disk is Wade, 1984 MNRAS 208, 381
  *
+ * An analytic profile used for Sim+05 to model certain YSO winds was removed in
+ * 1907
+ * 
  **********************************************************/
 
 double
@@ -86,7 +88,7 @@ teff (t, x)
   double q = 0;
   double theat, r;
   double pow ();
-  double disk_heating_factor;
+//OLD  double disk_heating_factor;
   int kkk;
   int n;
 
@@ -141,18 +143,18 @@ teff (t, x)
       q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
 
     }
-    else if (geo.disk_tprofile == DISK_TPROFILE_YSO)    // Analytic approximation for disk heating by star; implemented for YSOs
-    {
-      disk_heating_factor = pow (geo.tstar / t, 4.0);
-      disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
-      disk_heating_factor /= PI;
-      disk_heating_factor *= x * x * x;
-      disk_heating_factor /= (1 - sqrt (1. / x));
-      disk_heating_factor += 1;
+//OLD    else if (geo.disk_tprofile == DISK_TPROFILE_YSO)    // Analytic approximation for disk heating by star; implemented for YSOs
+//OLD    {
+//OLD      disk_heating_factor = pow (geo.tstar / t, 4.0);
+//OLD      disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
+//OLD      disk_heating_factor /= PI;
+//OLD      disk_heating_factor *= x * x * x;
+//OLD      disk_heating_factor /= (1 - sqrt (1. / x));
+//OLD      disk_heating_factor += 1;
 
-      q *= pow (disk_heating_factor, (1. / 4.));
+//OLD      q *= pow (disk_heating_factor, (1. / 4.));
 
-    }
+//OLD    }
   }
   return (q);
 }
