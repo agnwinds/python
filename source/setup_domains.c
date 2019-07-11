@@ -182,10 +182,10 @@ get_wind_params (ndom)
   {
     get_homologous_params (ndom);
   }
-  else if (zdom[ndom].wind_type == YSO)
-  {
-    get_yso_wind_params (ndom);
-  }
+//OLD  else if (zdom[ndom].wind_type == YSO)
+//OLD  {
+//OLD    get_yso_wind_params (ndom);
+//OLD  }
   else if (zdom[ndom].wind_type == SHELL)       //NSH 18/2/11 This is a new wind type to produce a thin shell.
   {
     get_shell_wind_params (ndom);
