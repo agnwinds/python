@@ -146,7 +146,7 @@ calc_matom_matrix (xplasma, matom_matrix)
         Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (config[uplvl].ex - config[target_level].ex);       //energy difference
 
         //deactivation back to r-packet
-        R_matrix[uplvl][uplvl] += Rcont = sp_rec_rate * (config[uplvl].ex - config[target_level].ex);   //energy difference
+        R_matrix[uplvl][uplvl] += Rcont = ne * sp_rec_rate * (config[uplvl].ex - config[target_level].ex);   //energy difference
 
         Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
       }

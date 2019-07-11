@@ -1441,16 +1441,16 @@ fake_matom_bf (p, nres, escape)
 ***********************************************************/
 
 int
-emit_matom (w, p, nres, upper)
+emit_matom (w, p, nres, upper, fmin, fmax)
      WindPtr w;
      PhotPtr p;
      int *nres;
      int upper;
+     double fmin, fmax;
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
   int uplvl;
-  double alpha_sp ();
   double eprbs[NBBJUMPS + NBFJUMPS];
   double penorm;
   double threshold, run_tot;
@@ -1506,7 +1506,7 @@ emit_matom (w, p, nres, upper)
     line_ptr = &line[config[uplvl].bbd_jump[n]];
     /* Since we are only interested in making an r-packet here we can (a) ignore collisional
        deactivation and (b) ignore lines outside the frequency range of interest. */
-    if ((line_ptr->freq > geo.sfmin) && (line_ptr->freq < geo.sfmax))   // correct range
+    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))   // correct range
     {
       bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 
@@ -1530,7 +1530,7 @@ emit_matom (w, p, nres, upper)
 
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
-    if (cont_ptr->freq[0] < geo.sfmax)  //means that it may contribute
+    if (cont_ptr->freq[0] < fmax)  //means that it may contribute
     {
       sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
       eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference

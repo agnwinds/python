@@ -323,7 +323,7 @@ double alpha_sp_integrand (double freq);
 int kpkt (PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb (PhotPtr p, int *nres, int *escape);
 int fake_matom_bf (PhotPtr p, int *nres, int *escape);
-int emit_matom (WindPtr w, PhotPtr p, int *nres, int upper);
+int emit_matom (WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
 double matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit);
 /* estimators.c */
 int bf_estimators_increment (WindPtr one, PhotPtr p, double ds);

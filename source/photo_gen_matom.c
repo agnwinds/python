@@ -134,6 +134,7 @@ get_matom_f (mode)
   int n, m;
   int mm, ss;
   double lum;
+  int *level_emit2;
   int level_emit[NLEVELS_MACRO], kpkt_emit;
   int n_tries, n_tries_local;
   struct photon ppp;
@@ -166,7 +167,7 @@ get_matom_f (mode)
     get_kpkt_heating_f ();
 
     which_out = 0;
-    n_tries = 5000000;
+    n_tries = 5000;
     geo.matom_radiation = 0;
     n_tries_local = 0;
 
@@ -198,8 +199,11 @@ get_matom_f (mode)
        for the macro-atom probabilities */
 #if (ACCELERATED_MACRO == 1)
     PlasmaPtr xplasma;
+    struct photon pp;       // dummy photon pointer
+    int nres, escape;
     int nrows = nlevels_macro + 1;
     double **matom_matrix = (double **) calloc (sizeof (double *), nrows);
+    int level_emit2 = (int *) calloc (sizeof (int), nlevels_macro);
 
     for (i = 0; i < nrows; i++)
     {
@@ -237,8 +241,6 @@ get_matom_f (mode)
 #endif
 
 
-
-
     for (n = my_nmin; n < my_nmax; n++)
     {
 
@@ -257,8 +259,41 @@ get_matom_f (mode)
 #if (ACCELERATED_MACRO == 1)
       xplasma = &plasmamain[n];      
       calc_matom_matrix (xplasma, matom_matrix);
+      /* before we calculate the emissivities we need to know what fraction of the energy 
+         from each level comes out in the frequency band we care about */
+      for (i = 0; i < nlevels_macro; i++)
+      {
+        level_emit[i] = 0;
 
-      /* calculate the fraction of the absorbed energy that comes out in a given level */
+        for (ss = 0; ss < n_tries; ss++)
+        {
+          emit_matom (wmain, &pp, &nres, i, xband.f1[0], 1e18);
+
+          if (pp.freq < geo.sfmax && pp.freq > geo.sfmin)
+            level_emit[i]++;
+        }
+      }
+
+
+
+      /* do the same for k-packets */
+      kpkt_emit = 0;
+      for (ss = 0; ss < n_tries; ss++)
+      {
+        pp.istat = P_INWIND;
+
+        escape = 0;
+
+        while (escape == 0)
+        {
+          kpkt (&pp, &nres, &escape, KPKT_MODE_ALL);
+        }
+        
+        if (pp.freq < geo.sfmax && pp.freq > geo.sfmin && pp.istat != P_ADIABATIC)
+          kpkt_emit++;
+      }
+
+      /* Now use the matrix to calculate the fraction of the absorbed energy that comes out in a given level */
       for (i = 0; i < nlevels_macro; i++)
       {
         for (j = 0; j < nlevels_macro; j++)
@@ -266,12 +301,15 @@ get_matom_f (mode)
           macromain[n].matom_emiss[j] += macromain[n].matom_abs[i] * matom_matrix[i][j];
         }
       }
-      /* do the same for the thermal pool */
+
+      /* do the same for the thermal pool. we also normalise by banded_emiss_frac here */
       for (j = 0; j < nlevels_macro; j++)
       {
         macromain[n].matom_emiss[j] += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][j];
+        macromain[n].matom_emiss[j] *= (1.0*level_emit[j]) / n_tries;
       }
       plasmamain[n].kpkt_emiss += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][nlevels_macro];
+      plasmamain[n].kpkt_emiss *= (1.0*kpkt_emit) / n_tries;
     }
 #else
       for (m = 0; m < nlevels_macro + 1; m++)
@@ -764,11 +802,9 @@ photo_gen_matom (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int emit_matom ();
   double test;
   int upper;
   int nnscat;
-  double dvwind_ds (), sobolev ();
   int nplasma;
   int ndom;
 
@@ -834,10 +870,10 @@ photo_gen_matom (p, weight, photstart, nphot)
     {
 
       /* Call routine that will select an emission process for the
-         deactivating macro atom. If is deactivates outside the frequency
+         deactivating macro atom. If it deactivates outside the frequency
          range of interest then ignore it and try again. SS June 04. */
 
-      emit_matom (wmain, &pp, &nres, upper);
+      emit_matom (wmain, &pp, &nres, upper, geo.sfmin, geo.sfmax);
 
       test = pp.freq;
     }
