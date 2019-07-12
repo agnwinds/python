@@ -630,3 +630,141 @@ fill_kpkt_rates (xplasma, escape, istat)
 
   return (0);
 }
+
+
+
+
+/**********************************************************/
+/** 
+ * @brief a scaled down version of matom which deals with deactivation only for spectral cycles.
+ *
+ * @param [in]     WindPtr w   the ptr to the structure defining the wind
+ * @param [in]     int upper   the upper level that we deactivate from
+ * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [in,out]  int nres    the process by which deactivation occurs
+ * @return 0
+ *
+ * emit_matom is a scaled down version of matom which deals with the emission due
+ * to deactivating macro atoms in the detailed spectrum part of the calculation.
+ * 
+ *
+ * ###Notes###
+***********************************************************/
+
+double
+f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
+     WindPtr w;
+     PhotPtr p;
+     int *nres;
+     int upper;
+     double fmin, fmax;
+{
+  struct lines *line_ptr;
+  struct topbase_phot *cont_ptr;
+  int uplvl;
+  double eprbs[NBBJUMPS + NBFJUMPS], eprbs_band[NBBJUMPS + NBFJUMPS];
+  double penorm, penorm_band;
+  double threshold, run_tot;
+  double sp_rec_rate;
+  int n, m;
+  int nbbd, nbfd;
+  double t_e, ne;
+  double bb_cont;
+  WindPtr one;
+  PlasmaPtr xplasma;
+
+
+  one = &w[p->grid];            //This is to identify the grip cell in which we are
+  xplasma = &plasmamain[one->nplasma];
+
+  t_e = xplasma->t_e;           //electron temperature 
+  ne = xplasma->ne;             //electron number density
+
+
+  /* The first step is to identify the configuration that has been excited. */
+
+  uplvl = upper;
+
+  /* Unlike the proper matom routine, we don't want any jumps, only deactivations here. */
+
+
+  /*  The excited configuration is now known. Now compute all the probabilities of deactivation
+     /jumping from this configuration. Then choose one. */
+
+
+  nbbd = config[uplvl].n_bbd_jump;      //store these for easy access -- number of bb downward jumps
+  nbfd = config[uplvl].n_bfd_jump;      // number of bf downared jumps from this transition
+
+
+  // Start by setting everything to 0
+
+  m = 0;                        //m counts the total number of possible ways to leave the level
+  penorm = 0.0;                 //stores the total emission probability
+  penorm_band = 0.0;
+
+  for (n = 0; n < nbbd + nbfd; n++)
+  {
+    eprbs[n] = 0;               //stores the individual emission probabilities SS
+    eprbs_band[n] = 0;
+  }
+  /* Finished zeroing. */
+
+
+  /* bb */
+
+  /* First downward jumps. */
+
+  for (n = 0; n < nbbd; n++)
+  {
+    line_ptr = &line[config[uplvl].bbd_jump[n]];
+    /* Since we are only interested in making an r-packet here we can (a) ignore collisional
+       deactivation and (b) ignore lines outside the frequency range of interest. */
+    bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
+    
+    eprbs[n] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);    //energy difference
+    
+    if (eprbs[n] < 0.)        //test (can be deleted eventually SS)
+      {
+        Error ("Negative probability (matom, 2). Abort.");
+        Exit (0);
+      }
+
+    penorm += eprbs[n];
+    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))   // correct range
+      {
+	eprbs_band[m] = eprbs[n];
+	penorm_band += eprbs_band[m];
+	m++;
+      }
+  }
+
+  /* bf */
+  for (n = 0; n < nbfd; n++)
+  {
+    cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];    //pointer to continuum
+
+    /* If the edge is above the frequency range we are interested in then we need not consider this
+       bf process. */
+    sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
+    eprbs[n] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
+    if (eprbs[n] < 0.)        //test (can be deleted eventually SS)
+      {
+        Error ("Negative probability (matom, 4). Abort.");
+        Exit (0);
+      }
+    penorm += eprbs[n];
+    if (cont_ptr->freq[0] < fmax)  //means that it may contribute
+      {
+	eprbs_band[m] = eprbs[n];
+	penorm_band += eprbs_band[m];	
+	m++;
+      }
+  }
+
+
+  
+  return (penorm_band / penorm);
+}
+
+/* The frequency and the value of nres have been set correctly. All done. */
+

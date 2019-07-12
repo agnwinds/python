@@ -261,6 +261,7 @@ get_matom_f (mode)
       calc_matom_matrix (xplasma, matom_matrix);
       /* before we calculate the emissivities we need to know what fraction of the energy 
          from each level comes out in the frequency band we care about */
+      /*
       for (i = 0; i < nlevels_macro; i++)
       {
         level_emit[i] = 0;
@@ -273,7 +274,21 @@ get_matom_f (mode)
             level_emit[i]++;
         }
       }
+      */
 
+      for (i = 0; i < nlevels_macro; i++)
+      {
+        level_emit[i] = f_matom_emit_accelerate (wmain, &pp, &nres, i, xband.f1[0], 1e18);
+	/*
+        for (ss = 0; ss < n_tries; ss++)
+        {
+          emit_matom (wmain, &pp, &nres, i, xband.f1[0], 1e18);
+
+          if (pp.freq < geo.sfmax && pp.freq > geo.sfmin)
+            level_emit[i]++;
+        }
+	*/
+      }
 
 
       /* do the same for k-packets */
@@ -306,7 +321,7 @@ get_matom_f (mode)
       for (j = 0; j < nlevels_macro; j++)
       {
         macromain[n].matom_emiss[j] += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][j];
-        macromain[n].matom_emiss[j] *= (1.0*level_emit[j]) / n_tries;
+        macromain[n].matom_emiss[j] *= (1.0*level_emit[j]);// / n_tries;
       }
       plasmamain[n].kpkt_emiss += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][nlevels_macro];
       plasmamain[n].kpkt_emiss *= (1.0*kpkt_emit) / n_tries;
