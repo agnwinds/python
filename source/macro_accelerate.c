@@ -747,16 +747,16 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
     sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
-    eprbs[n] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
-    if (eprbs[n] < 0.)        //test (can be deleted eventually SS)
+    eprbs[n+nbbd] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
+    if (eprbs[n+nbbd] < 0.)        //test (can be deleted eventually SS)
       {
         Error ("Negative probability (matom, 4). Abort.");
         Exit (0);
       }
-    penorm += eprbs[n];
+    penorm += eprbs[n+nbbd];
     if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)  //means that it may contribute
       {
-	eprbs_band[m] = eprbs[n];
+	eprbs_band[m] = eprbs[n+nbbd];
 	fthresh = cont_ptr->freq[0];  //first frequency in list
 	flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
 	bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
