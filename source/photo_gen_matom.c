@@ -196,7 +196,7 @@ get_matom_f (mode)
     
 
     /* if we are using the accelerated macro-atom scheme then we want to allocate an array 
-       for the macro-atom probabilities */
+       for the macro-atom probabilities and various other quantities */
 #if (ACCELERATED_MACRO == 1)
     PlasmaPtr xplasma;
     struct photon pp;       // dummy photon pointer
@@ -268,7 +268,7 @@ get_matom_f (mode)
 
         for (ss = 0; ss < n_tries; ss++)
         {
-          emit_matom (wmain, &pp, &nres, i, xband.f1[0], 1e18);
+          emit_matom (wmain, &pp, &nres, i, xband.f1[0], VERY_BIG);
 
           if (pp.freq < geo.sfmax && pp.freq > geo.sfmin)
             level_emit[i]++;
