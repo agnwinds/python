@@ -661,6 +661,57 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   return (alpha_sp_value);
 }
 
+/**********************************************************/
+/**  
+ *  @brief the matom estimator for the spontaneous recombination rate.
+ * 
+ * The rate is given by 
+ * 
+ *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
+ * times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
+ * 
+ * ###Notes###
+ * 04jul30	ksl	Modified so that one does not need to have multiple versions
+ * 		of the code depending on how whether the integrand is 
+ * 		multiplied by 1, f/fthresh, or f/fthresh-1.  This was
+ * 		done eliminate alpha_sp_e as a separate set of routines
+ * 		and to assure that bf rates are positive 
+ * 			ichoice = 0   --> spontanous recombination
+ * 			ichoice = 1   --> energy weighted recombination 
+ * 			ichoice = 2   --> the difference between energy_weighted
+ * 					and spontaneous
+ * 
+ * 	06may	ksl	57+ -- Modified to use plasma structure
+***********************************************************/
+#define ALPHA_SP_CONSTANT 5.79618e-36
+
+double
+scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, fmin, fmax)
+     struct topbase_phot *cont_ptr;
+     PlasmaPtr xplasma;
+     int ichoice;
+     double fmin, fmax;
+{
+  double alpha_sp_value;
+  double fthresh, flast;
+  double qromb ();
+  double alpha_sp_integrand ();
+
+  temp_choice = ichoice;
+  temp_ext = xplasma->t_e;      //external for use in alph_sp_integrand
+  cont_ext_ptr = cont_ptr;      //"
+  fthresh = cont_ptr->freq[0];  //first frequency in list
+  flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+  if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
+  alpha_sp_value = qromb (alpha_sp_integrand, fmin, fmax, 1e-4);
+
+  return (alpha_sp_value);
+}
+
 
 
 /**********************************************************/

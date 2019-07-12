@@ -754,27 +754,27 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
         Exit (0);
       }
     penorm += eprbs[n];
-    if (cont_ptr->freq[0] < fmax)  //means that it may contribute
+    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)  //means that it may contribute
       {
 	eprbs_band[m] = eprbs[n];
 	fthresh = cont_ptr->freq[0];  //first frequency in list
 	flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-	bf_int_full = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
+	bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
 	if (fthresh < fmin && flast > fmax)
 	  {
-	  bf_int_inrange = qromb (alpha_sp_integrand, fmin, fmax, 1e-4);
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
 	  }
 	else if (fthresh < fmin && flast < fmax)
 	  {
-	  bf_int_inrange = qromb (alpha_sp_integrand, fmin, flast, 1e-4);
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
 	  }
 	else if (fthresh > fmin && flast > fmax)
 	  {
-	    bf_int_inrange = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
 	  }
 	else if (fthresh > fmin && flast < fmax)
 	  {
-	    bf_int_inrange = qromb (alpha_sp_integrand, fthresh, fmax, 1e-4);
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
 	  }
 	else
 	  {
