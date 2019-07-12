@@ -641,13 +641,17 @@ disk, qdisk;                    /* disk defines zones in the disk which in a spe
                                    is changed.  qdisk stores the amount of heating of the disk as a result of
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
-#define NBLMODEL 100
+/* the next structure is intended to store a non standard temperature
+   profile for the disk
+   */
+
+#define NBLMODEL 5000
 
 struct blmodel
 {
   int n_blpts;
-  float r[NBLMODEL];
-  float t[NBLMODEL];
+  double r[NBLMODEL];
+  double t[NBLMODEL];
 }
 blmod;
 

@@ -55,7 +55,7 @@ tdisk (m, mdot, r)
  * @brief      Calculate the temperature of the disk at a normalised distance x
  *
  * @param [in] double  t   reference temperature of the disk in degrees
- * @param [in] double  x   distance from center of disk in units of r/rmin
+ * @param [in] double  x   distance from center of disk in units of r/rstar
  * @return     The temperature
  *
  * The routine returns the effective temperature for the disk as a distance
@@ -87,8 +87,8 @@ teff (t, x)
 {
   double q = 0;
   double theat, r;
+  double temp;
   double pow ();
-//OLD  double disk_heating_factor;
   int kkk;
   int n;
 
@@ -110,14 +110,16 @@ teff (t, x)
     }
     else
     {
-      for (n = 1; n < blmod.n_blpts; n++)
-      {
-        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
-        {
-          return (blmod.t[n]);
-        }
-      }
-      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
+//HOLD        linterp(r,&blmod.r[0],&blmod.t[0],blmod.n_blpts,&temp,0);
+//HOLD        return(t);
+for (n = 1; n < blmod.n_blpts; n++)
+{
+if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
+{
+return (blmod.t[n]);
+}
+}
+Error ("tdisk: inside BL profile region but failed to identify temp.\n");
     }
   }
   else
@@ -803,9 +805,11 @@ read_non_standard_disk_profile (tprofile)
 {
 
   FILE *fopen (), *fptr;
-  int n, result;
+  int n;
   float dumflt1, dumflt2;
-  int dumint;
+
+  char *line;
+  size_t buffsize = LINELENGTH;
 
   if ((fptr = fopen (tprofile, "r")) == NULL)
   {
@@ -813,14 +817,50 @@ read_non_standard_disk_profile (tprofile)
     Exit (0);
   }
 
-  result = fscanf (fptr, "%d\n", &dumint);
-  blmod.n_blpts = dumint;
-  for (n = 0; n < blmod.n_blpts; n++)
+  line = (char *) malloc (buffsize * sizeof (char));
+  blmod.n_blpts = 0;
+
+
+  while (getline (&line, &buffsize, fptr) > 0)
   {
-    result = fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
-    blmod.r[n] = dumflt1 * 1.e11;
-    blmod.t[n] = dumflt2 * 1.e3;
+    n = sscanf (line, "%g %g", &dumflt1, &dumflt2);
+    if (n == 2)
+    {
+      blmod.r[blmod.n_blpts] = dumflt1;
+      blmod.t[blmod.n_blpts] = dumflt2;
+      blmod.n_blpts += 1;
+    }
+    else
+    {
+      Error ("read_non_standard_disk_file: could not convert a line in %s, OK if comment\n", tprofile);
+    }
+
+    if (blmod.n_blpts == NBLMODEL)
+    {
+      Error ("read_non_standard_disk_file: More than %d points in %s; increase NBLMODEL\n", NBLMODEL, tprofile);
+      Exit (1);
+
+    }
   }
+
+
+  if(geo.diskrad> blmod.r[blmod.n_blpts-1]) {
+      Error("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n",geo.diskrad,blmod.r[blmod.n_blpts-1]);
+      Log("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
+  }
+
+
+
+//OLD  result = fscanf (fptr, "%d\n", &dumint);
+//OLD  blmod.n_blpts = dumint;
+
+
+//OLD  for (n = 0; n < blmod.n_blpts; n++)
+//OLD  {
+//OLD    result = fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+//OLD    blmod.r[n] = dumflt1 * 1.e11;
+//OLD    blmod.t[n] = dumflt2 * 1.e3;
+//OLD  }
 
   fclose (fptr);
 
