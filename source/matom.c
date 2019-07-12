@@ -707,6 +707,10 @@ scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, fmin, fmax)
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
     flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
+  if (flast < fmax)
+  {
+    fmax = flast;
+  }
   alpha_sp_value = qromb (alpha_sp_integrand, fmin, fmax, 1e-4);
 
   return (alpha_sp_value);

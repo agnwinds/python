@@ -168,7 +168,7 @@ get_matom_f (mode)
     get_kpkt_heating_f ();
 
     which_out = 0;
-    n_tries = 5000;
+    n_tries = 5000000;
     geo.matom_radiation = 0;
     n_tries_local = 0;
 
