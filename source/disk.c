@@ -110,16 +110,18 @@ teff (t, x)
     }
     else
     {
-//HOLD        linterp(r,&blmod.r[0],&blmod.t[0],blmod.n_blpts,&temp,0);
-//HOLD        return(t);
-for (n = 1; n < blmod.n_blpts; n++)
-{
-if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
-{
-return (blmod.t[n]);
-}
-}
-Error ("tdisk: inside BL profile region but failed to identify temp.\n");
+              linterp(r,&blmod.r[0],&blmod.t[0],blmod.n_blpts,&temp,0);
+              return(temp);
+
+//OLD      for (n = 1; n < blmod.n_blpts; n++)
+//OLD      {
+//OLD        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
+//OLD        {
+//OLD          return (blmod.t[n]);
+//OLD        }
+//OLD      }
+//OLD      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
+
     }
   }
   else
@@ -844,9 +846,11 @@ read_non_standard_disk_profile (tprofile)
   }
 
 
-  if(geo.diskrad> blmod.r[blmod.n_blpts-1]) {
-      Error("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n",geo.diskrad,blmod.r[blmod.n_blpts-1]);
-      Log("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
+  if (geo.diskrad > blmod.r[blmod.n_blpts - 1])
+  {
+    Error ("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n", geo.diskrad,
+           blmod.r[blmod.n_blpts - 1]);
+    Log ("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
   }
 
 
