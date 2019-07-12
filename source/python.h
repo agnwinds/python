@@ -292,7 +292,8 @@ int current_domain;             // This integer is used by py_wind only
  */
 
 #define SYSTEM_TYPE_STAR   0
-#define SYSTEM_TYPE_BINARY 1
+#define SYSTEM_TYPE_CV     1
+#define SYSTEM_TYPE_BH     4
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
 
@@ -573,8 +574,8 @@ struct geometry
                                    of the agn is elsewhere in the structure
                                  */
   double const_agn;             /*The constant for the Power law, there are lots of ways of defining the PL which is best? */
-  double r_agn;                 /* radius of the "photosphere" of the BH in the AGN.  */
-  double d_agn;                 /* the distance to the agn - only used in balance to calculate the ioinsation fraction */
+//OLD  double r_agn;                 /* radius of the "photosphere" of the BH in the AGN.  */
+  double d_agn;                 /* the distance to the agn - only used in balance to calculate the ionization fraction */
 
 
   int pl_geometry;              /* geometry of X-ray point source */

@@ -58,7 +58,15 @@ get_domain_params (ndom)
 
 
   strcpy (answer, "SV");
+
+  if (geo.system_type == SYSTEM_TYPE_STAR)
+  {
+    strcpy (answer, "star");
+  }
+
+
   zdom[ndom].wind_type = rdchoice ("Wind.type(SV,star,hydro,corona,kwd,homologous,shell,imported)", "0,1,3,4,5,6,9,10", answer);
+
 
 
   strcat (zdom[ndom].name, "Wind");
@@ -69,6 +77,10 @@ get_domain_params (ndom)
 
   /* Define the coordinate system for the grid and allocate memory for the wind structure */
   strcpy (answer, "cylindrical");
+  if (geo.system_type == SYSTEM_TYPE_STAR)
+  {
+    strcpy (answer, "spherical");
+  }
   zdom[ndom].coord_type = rdchoice ("Wind.coord_system(spherical,cylindrical,polar,cyl_var)", "0,1,2,3", answer);
 
   if (zdom[ndom].wind_type == IMPORT)
@@ -224,9 +236,9 @@ get_wind_params (ndom)
 
     zdom[ndom].rmax = 1e12;
 
-    if (geo.system_type == SYSTEM_TYPE_AGN)
+    if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
     {
-      zdom[ndom].rmax = 50. * geo.r_agn;
+      zdom[ndom].rmax = 50. * geo.rstar;
     }
 
 
