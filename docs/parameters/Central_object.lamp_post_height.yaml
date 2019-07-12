@@ -5,5 +5,5 @@ type: Double
 unit: :ref:`Central_object.radius`
 values: Greater than 0
 parent:
-  BH.geometry_for_pl_source: [lamp_post]
+  Central_object.geometry_for_source: [lamp_post]
 file: setup_star_bh.c
