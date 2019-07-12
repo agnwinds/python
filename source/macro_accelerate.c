@@ -797,3 +797,198 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
 
 /* The frequency and the value of nres have been set correctly. All done. */
 
+
+
+
+
+
+/**********************************************************/
+/** 
+ * @brief deals with the elimination of k-packets.
+ *
+ * Whenever a k-packet is created it is
+ * immediately destroyed insitu by this routine. At output "nres" identified the process
+ * that destroys the k-packet and the packet information has been updated in the same
+ * way as at the end of matom
+ *
+ * @param [in]     WindPtr w   the ptr to the structure defining the wind
+ * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
+ * @param [in,out]  int escape  to tell us whether the matom de-activation
+ *                             is via an r-packet (1) or a k-packet (0)
+ * @param [in] int mode         switch which allows photon to be deactivated by a non-radiative
+ * term.  (non_zero is true)
+ * @return 0
+ *
+ * ###Notes###
+ *          Mar 04  SS   Coding began.
+ *          Apr 04  SS   Various improvements including the addition of ff and collisions.
+ *          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
+ *                       and fb cooling for simple continua.
+ *          May 04  SS   Modified to work for case with all "simple" ions.
+ *          May 04  SS   Modified to use "scattering probability" formalism for 
+ *                       simple ion cooling rates.
+ *          Jun 04  SS   Modified to include the "escape" variable to identify excitation of
+ *                       macro atoms. This removes the need to call matom from within this routine.
+ *          Jun 04  SS   Modified to include collisional ionization as a cooling term.
+ *          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
+ *	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
+ *			entire w array
+ *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice 
+ *	
+ *	* 180616  Updated so that one could force kpkt to deactivate via radiation
+************************************************************/
+
+double
+f_kpkt_emit_accelerate  (p, nres, escape, mode, fmin, fmax)
+     PhotPtr p;
+     int *nres;
+     int *escape;
+     int mode;
+     double fmin, fmax;
+{
+
+  int i;
+  int ulvl;
+  double cooling_bf[nphot_total];
+  double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
+  double cooling_bb[NLINES];
+  double cooling_adiabatic;
+  struct topbase_phot *cont_ptr;
+  struct lines *line_ptr;
+  double cooling_normalisation;
+  double destruction_choice;
+  double electron_temperature;
+  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
+  double lower_density, upper_density;
+  double cooling_ff, upweight_factor;
+  WindPtr one;
+  PlasmaPtr xplasma;
+  MacroPtr mplasma;
+
+  double coll_rate, rad_rate;
+  double freqmin, freqmax;
+  double eprbs, eprbs_band, penorm, penorm_band;
+  double flast, fthresh, bf_int_full, bf_int_inrange;
+
+
+
+  penorm = 0.0;
+  penorm_band = 0.0;
+  
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+  check_plasma (xplasma, "kpkt");
+  mplasma = &macromain[xplasma->nplasma];
+
+  electron_temperature = xplasma->t_e;
+
+  /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
+     generation (see call to one_ff below) */
+  freqmin = xband.f1[0];
+  freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
+
+  /* ksl This is a Bandaid for when the temperatures are very low */
+  /* in this case cooling_ff should be low compared to cooling_ff_lofreq anyway */
+  if (freqmax < 1.1 * freqmin)
+  {
+    freqmax = 1.1 * freqmin;
+  }
+
+
+  /* Now need to do k-packet processes */
+
+  int escape_dummy = 0;
+  int istat_dummy = 0;
+  fill_kpkt_rates (xplasma, escape_dummy, istat_dummy);
+
+  for (i = 0; i < nphot_total; i++)
+    {
+    cont_ptr = &phot_top[i];    //pointer to continuum
+
+    /* If the edge is above the frequency range we are interested in then we need not consider this
+       bf process. */
+    
+    eprbs = mplasma->cooling_bf[i];
+    penorm += eprbs;
+    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)  //means that it may contribute
+      {
+	eprbs_band = mplasma->cooling_bf[i];
+	fthresh = cont_ptr->freq[0];  //first frequency in list
+	flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+	bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+	if (fthresh < fmin && flast > fmax)
+	  {
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
+	  }
+	else if (fthresh < fmin && flast < fmax)
+	  {
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
+	  }
+	else if (fthresh > fmin && flast > fmax)
+	  {
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
+	  }
+	else if (fthresh > fmin && flast < fmax)
+	  {
+	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+	  }
+	else
+	  {
+	    Error("Something wrong here: f_matom_emit_accelerate broke the law!");
+	  }
+	penorm_band += eprbs_band * bf_int_inrange  / bf_int_full;	
+      }
+
+    for (i = 0; i < nlines; i++)
+    {
+      if (line[i].macro_info == 1 && geo.macro_simple == 0)   //line is for a macro atom
+        {
+	  eprbs=0.0; //these are not deactivations in this approach any more but jumps to macro atom levels
+        }
+      else                    //line is not for a macro atom - use simple method
+        {
+	  penorm += eprbs = mplasma->cooling_bb[i];
+	  if ((line[i].freq > fmin) && (line[i].freq < fmax))   // correct range
+	    {
+	      penorm_band += eprbs_band =eprbs;
+	    }
+	}
+    }
+
+
+  /* consult issues #187, #492 regarding free-free */
+    penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
+    if (fmin > freqmin)
+      {
+	penorm_band += total_free (one, xplasma->t_e, fmin, fmax)/total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
+      }
+    else if (fmax > freqmin)
+      {
+	penorm_band += total_free (one, xplasma->t_e, freqmin, fmax)/total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
+	penorm_band += total_free (one, xplasma->t_e, fmin, freqmin) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+      }
+    else
+      {
+	penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+      }
+
+	
+    penorm += eprbs =  mplasma->cooling_adiabatic;
+    
+    for (i = 0; i < nphot_total; i++)
+    {
+      penorm += eprbs = mplasma->cooling_bf_col[i];
+    }
+  }
+
+  if (penorm > 0)
+    {
+      return (penorm_band / penorm);
+    }
+  else
+    {
+      return(0.0);
+    }
+
+}
