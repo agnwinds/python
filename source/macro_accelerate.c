@@ -7,7 +7,6 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-//#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
 
@@ -635,19 +634,21 @@ fill_kpkt_rates (xplasma, escape, istat)
 
 /**********************************************************/
 /** 
- * @brief a scaled down version of matom which deals with deactivation only for spectral cycles.
+ * @brief a routine which calculates what fraction of a level 
+ *         emissivity comes out in a given frequency range
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
  * @param [in]     int upper   the upper level that we deactivate from
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in,out]  int nres    the process by which deactivation occurs
+ * @param [in]     fmin   minimum frequency of the band
+ * @param [in]     fmax   maximum frequency of the band
  * @return 0
  *
- * emit_matom is a scaled down version of matom which deals with the emission due
- * to deactivating macro atoms in the detailed spectrum part of the calculation.
+ * @details similar to routines like emit_matom, except that we calculate the fraction
+ * of emission in a band rather than calculating frequencies for photons. Used to be 
+ * done via a less efficient rejection method.
  * 
- *
- * ###Notes###
 ***********************************************************/
 
 double
@@ -710,9 +711,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   /* Finished zeroing. */
 
 
-  /* bb */
-
-  /* First downward jumps. */
+  /* bb downwards jumps */
 
   for (n = 0; n < nbbd; n++)
   {
@@ -738,7 +737,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     }
   }
 
-  /* bf */
+  /* bf downwards jumps */
   for (n = 0; n < nbfd; n++)
   {
     cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];    //pointer to continuum
@@ -759,6 +758,9 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
       fthresh = cont_ptr->freq[0];      //first frequency in list
       flast = cont_ptr->freq[cont_ptr->np - 1]; //last frequency in list
       bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+
+      /* the limits differ depending on whether the band covers all or part of the cross-section. 
+         four possibilities */
       if (fthresh < fmin && flast > fmax)
       {
         bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
@@ -784,6 +786,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     }
   }
 
+  /* catch the case where penorm == 0 for e.g. ground states with zero emission probability */
   if (penorm > 0)
   {
     return (penorm_band / penorm);
