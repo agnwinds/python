@@ -136,6 +136,7 @@ get_matom_f (mode)
   double lum;
   int *level_emit2;
   int level_emit[NLEVELS_MACRO], kpkt_emit;
+  double level_emit_doub[NLEVELS_MACRO];
   int n_tries, n_tries_local;
   struct photon ppp;
   double contribution, norm;
@@ -203,7 +204,6 @@ get_matom_f (mode)
     int nres, escape;
     int nrows = nlevels_macro + 1;
     double **matom_matrix = (double **) calloc (sizeof (double *), nrows);
-    int level_emit2 = (int *) calloc (sizeof (int), nlevels_macro);
 
     for (i = 0; i < nrows; i++)
     {
@@ -278,7 +278,7 @@ get_matom_f (mode)
 
       for (i = 0; i < nlevels_macro; i++)
       {
-        level_emit[i] = f_matom_emit_accelerate (wmain, &pp, &nres, i, xband.f1[0], 1e18);
+        level_emit_doub[i] = f_matom_emit_accelerate (wmain, &pp, &nres, i, geo.sfmin, geo.sfmax);
 	/*
         for (ss = 0; ss < n_tries; ss++)
         {
@@ -321,7 +321,7 @@ get_matom_f (mode)
       for (j = 0; j < nlevels_macro; j++)
       {
         macromain[n].matom_emiss[j] += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][j];
-        macromain[n].matom_emiss[j] *= (1.0*level_emit[j]);// / n_tries;
+        macromain[n].matom_emiss[j] *= (1.0*level_emit_doub[j]);// / n_tries;
       }
       plasmamain[n].kpkt_emiss += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][nlevels_macro];
       plasmamain[n].kpkt_emiss *= (1.0*kpkt_emit) / n_tries;
