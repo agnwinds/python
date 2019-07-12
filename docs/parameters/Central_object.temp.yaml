@@ -1,6 +1,7 @@
 name: Central_object.temp
 description: |
-  Multi-line description, must keep indentation.
+  Temperature of the central star. Physically, this is used in blackbody radiation, shock heating and disk heating in
+  YSO models. It is also used to help determine the frequency bands in which photons are emitted.
 type: Double
 unit: Kelvin
 values: Greater than zero

@@ -1,7 +1,7 @@
-name: BH.geometry_for_pl_source
+name: Central_object.geometry_for_source
 description: |
   If the central source in an AGN/BH system is radiating, what geometry should it radiate from?
-  Note: This is applicable even for *non*-power-law sources!
+   This is applicable even for black-body sources, where the *luminosity* depends on :ref:`Central_object.radius`.
 type: Enumerator
 values:
   lamp_post: |
@@ -14,5 +14,6 @@ values:
     Photons that would be spawned in an extended disk (if :ref:`Disk.type` is `vertically.extended`)
     are re-generated.
 parent:
-  bh.radiation: true
+  System_type: [agn]
+  Central_object.radiation: true
 file: setup_star_bh.c

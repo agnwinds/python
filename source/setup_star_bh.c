@@ -245,7 +245,7 @@ get_bl_and_agn_params (lstar)
        once the AGN blackbody temp is read in, otherwise set by user */
     if (geo.agn_ion_spectype != SPECTYPE_BB)
     {
-      rddoub ("Central_object.lum(ergs/s)", &geo.lum_agn);
+      rddoub ("Central_object.luminosity(ergs/s)", &geo.lum_agn);
       Log ("OK, the black hole luminosity will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
@@ -334,7 +334,7 @@ get_bl_and_agn_params (lstar)
     // set the default for the radius of the BH to be 6 R_Schwartschild.
     // rddoub("R_agn(cm)",&geo.r_agn);
 
-    rddoub ("Boundary_layer.lum(ergs/s)", &geo.lum_agn);
+    rddoub ("Boundary_layer.luminosity(ergs/s)", &geo.lum_agn);
     Log ("OK, the boundary layer lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     geo.alpha_agn = (-1.5);
     rddoub ("Boundary_layer.power_law_index", &geo.alpha_agn);

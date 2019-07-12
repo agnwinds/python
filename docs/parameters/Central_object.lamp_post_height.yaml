@@ -1,9 +1,9 @@
-name: AGN.lamp_post_height
+name: Central_object.lamp_post_height
 description: |
   The distance above and below the disk plane of the two point sources used in the lamp-post model.
 type: Double
 unit: :ref:`Central_object.radius`
 values: Greater than 0
 parent:
-  BH.geometry_for_pl_source: lamp_post
+  BH.geometry_for_pl_source: [lamp_post]
 file: setup_star_bh.c
