@@ -6,5 +6,5 @@ type: Double
 unit: Kelvin
 values: Greater than zero
 parent:
-  System_type: [star, binary, previous]
+  System_type: [star, cv]
 file: setup_star_bh.c

@@ -9,6 +9,5 @@ unit: Hz
 values: Greater than 0
 parent:
   Boundary_layer.radiation: true
-  System_type: [star, binary]
 file: setup_star_bh.c
 advanced: true

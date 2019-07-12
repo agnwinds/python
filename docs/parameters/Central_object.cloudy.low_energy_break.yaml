@@ -9,6 +9,5 @@ type: Double
 unit: eV
 values: Greater than 0
 parent:
-  Central_object.radiation: true
   Central_object.rad_type_to_make_wind: [cloudy]
 file: setup_star_bh.c

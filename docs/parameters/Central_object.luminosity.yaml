@@ -6,7 +6,6 @@ type: Double
 unit: ergs/s
 values: Greater than 0.
 parent:
-  System_type: [agn]
-  Central_object.radiation: true
+  System_type: [agn, bh]
   Central_object.rad_type_to_make_wind: [brems, cloudy, model, power]
 file: setup_star_bh.c

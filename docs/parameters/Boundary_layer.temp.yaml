@@ -5,6 +5,5 @@ type: Double
 unit: Kelvin
 values: Greater than 0
 parent:
-  Boundary_layer.radiation: true
   Boundary_layer.rad_type_to_make_wind: [bb]
 file: setup.c

@@ -18,5 +18,5 @@ values:
     Radiate following a power-law model as $L_\nu=K\nu^\alpha$.
     The total luminosity will be set by :ref:`Boundary_layer.luminosity`.
 parent:
-  System_type: [star, binary]
+  System_type: [star, cv]
 file: setup_star_bh.c
