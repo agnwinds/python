@@ -319,6 +319,7 @@ void print_timer_duration (char *msg, struct timeval timer_t0);
 int matom (PhotPtr p, int *nres, int *escape);
 double b12 (struct lines *line_ptr);
 double alpha_sp (struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
+double scaled_alpha_sp_integral_band_limited (struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double fmin, double fmax);
 double alpha_sp_integrand (double freq);
 int kpkt (PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb (PhotPtr p, int *nres, int *escape);
@@ -561,8 +562,10 @@ double diskrad (double m1, double m2, double period);
 double roche2 (double q, double a);
 double logg (double mass, double rwd);
 /* macro_accelerate.c */
-void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
-int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, int *istat);
+void calc_matom_matrix (PlasmaPtr xplasma, double **matom_matrix);
+int fill_kpkt_rates (PlasmaPtr xplasma, int *escape, int *istat);
+double f_matom_emit_accelerate (WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
+double f_kpkt_emit_accelerate (PhotPtr p, int *nres, int *escape, int mode, double fmin, double fmax);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);

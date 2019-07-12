@@ -146,7 +146,7 @@ calc_matom_matrix (xplasma, matom_matrix)
         Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (config[uplvl].ex - config[target_level].ex);       //energy difference
 
         //deactivation back to r-packet
-        R_matrix[uplvl][uplvl] += Rcont = ne * sp_rec_rate * (config[uplvl].ex - config[target_level].ex);   //energy difference
+        R_matrix[uplvl][uplvl] += Rcont = ne * sp_rec_rate * (config[uplvl].ex - config[target_level].ex);      //energy difference
 
         Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
       }
@@ -225,7 +225,7 @@ calc_matom_matrix (xplasma, matom_matrix)
       Q_norm[nlevels_macro] += Qcont;
     }
     else
-    { 
+    {
       /* XXX - ask stuart about this! */
       /* the idea here is that if it is a simple line then it *must* create an r-packet originally?? */
       kpacket_to_rpacket_rate += mplasma->cooling_bb[i];
@@ -292,9 +292,8 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* throw an error if this normalisation is not zero */
     /* note that the ground state is a special case here (improve error check) */
-    if ( (abs(norm) > 1e-15 && uplvl > 0) || sane_check(norm))
-      Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", 
-              norm, uplvl);
+    if ((abs (norm) > 1e-15 && uplvl > 0) || sane_check (norm))
+      Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", norm, uplvl);
   }
 
   /* This next line produces an array of the correct size to hold the rate matrix */
@@ -315,7 +314,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_matrix *output;
   gsl_permutation *p, *pp;
   int ierr, s;
-  
+
   /* create a view into the array we just created */
   N = gsl_matrix_view_array (a_data, nrows, nrows);
 
@@ -342,7 +341,7 @@ calc_matom_matrix (xplasma, matom_matrix)
       matom_matrix[mm][nn] = gsl_matrix_get (inverse_matrix, mm, nn) * R_matrix[nn][nn];
     }
   }
- 
+
   /* free memory */
   gsl_permutation_free (p);
   gsl_matrix_free (inverse_matrix);
@@ -721,22 +720,22 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     /* Since we are only interested in making an r-packet here we can (a) ignore collisional
        deactivation and (b) ignore lines outside the frequency range of interest. */
     bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
-    
-    eprbs[n] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);    //energy difference
-    
-    if (eprbs[n] < 0.)        //test (can be deleted eventually SS)
-      {
-        Error ("Negative probability (matom, 2). Abort.");
-        Exit (0);
-      }
+
+    eprbs[n] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);      //energy difference
+
+    if (eprbs[n] < 0.)          //test (can be deleted eventually SS)
+    {
+      Error ("Negative probability (matom, 2). Abort.");
+      Exit (0);
+    }
 
     penorm += eprbs[n];
-    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))   // correct range
-      {
-	eprbs_band[m] = eprbs[n];
-	penorm_band += eprbs_band[m];
-	m++;
-      }
+    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))     // correct range
+    {
+      eprbs_band[m] = eprbs[n];
+      penorm_band += eprbs_band[m];
+      m++;
+    }
   }
 
   /* bf */
@@ -747,52 +746,52 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
     sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
-    eprbs[n+nbbd] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
-    if (eprbs[n+nbbd] < 0.)        //test (can be deleted eventually SS)
+    eprbs[n + nbbd] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);      //energy difference
+    if (eprbs[n + nbbd] < 0.)   //test (can be deleted eventually SS)
+    {
+      Error ("Negative probability (matom, 4). Abort.");
+      Exit (0);
+    }
+    penorm += eprbs[n + nbbd];
+    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)    //means that it may contribute
+    {
+      eprbs_band[m] = eprbs[n + nbbd];
+      fthresh = cont_ptr->freq[0];      //first frequency in list
+      flast = cont_ptr->freq[cont_ptr->np - 1]; //last frequency in list
+      bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+      if (fthresh < fmin && flast > fmax)
       {
-        Error ("Negative probability (matom, 4). Abort.");
-        Exit (0);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
       }
-    penorm += eprbs[n+nbbd];
-    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)  //means that it may contribute
+      else if (fthresh < fmin && flast < fmax)
       {
-	eprbs_band[m] = eprbs[n+nbbd];
-	fthresh = cont_ptr->freq[0];  //first frequency in list
-	flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-	bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
-	if (fthresh < fmin && flast > fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
-	  }
-	else if (fthresh < fmin && flast < fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
-	  }
-	else if (fthresh > fmin && flast > fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
-	  }
-	else if (fthresh > fmin && flast < fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
-	  }
-	else
-	  {
-	    Error("Something wrong here: f_matom_emit_accelerate broke the law!");
-	  }
-	penorm_band += eprbs_band[m] * bf_int_inrange  / bf_int_full;	
-	m++;
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
       }
+      else if (fthresh > fmin && flast > fmax)
+      {
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
+      }
+      else if (fthresh > fmin && flast < fmax)
+      {
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+      }
+      else
+      {
+        Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+      }
+      penorm_band += eprbs_band[m] * bf_int_inrange / bf_int_full;
+      m++;
+    }
   }
 
   if (penorm > 0)
-    {
-      return (penorm_band / penorm);
-    }
+  {
+    return (penorm_band / penorm);
+  }
   else
-    {
-      return(0.0);
-    }
+  {
+    return (0.0);
+  }
 }
 
 /* The frequency and the value of nres have been set correctly. All done. */
@@ -840,7 +839,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
 ************************************************************/
 
 double
-f_kpkt_emit_accelerate  (p, nres, escape, mode, fmin, fmax)
+f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
      PhotPtr p;
      int *nres;
      int *escape;
@@ -875,7 +874,7 @@ f_kpkt_emit_accelerate  (p, nres, escape, mode, fmin, fmax)
 
   penorm = 0.0;
   penorm_band = 0.0;
-  
+
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "kpkt");
@@ -903,79 +902,80 @@ f_kpkt_emit_accelerate  (p, nres, escape, mode, fmin, fmax)
   fill_kpkt_rates (xplasma, escape_dummy, istat_dummy);
 
   for (i = 0; i < nphot_total; i++)
-    {
+  {
     cont_ptr = &phot_top[i];    //pointer to continuum
 
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
-    
+
     eprbs = mplasma->cooling_bf[i];
     penorm += eprbs;
-    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)  //means that it may contribute
+    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)    //means that it may contribute
+    {
+      eprbs_band = mplasma->cooling_bf[i];
+      fthresh = cont_ptr->freq[0];      //first frequency in list
+      flast = cont_ptr->freq[cont_ptr->np - 1]; //last frequency in list
+      bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+      if (fthresh < fmin && flast > fmax)
       {
-	eprbs_band = mplasma->cooling_bf[i];
-	fthresh = cont_ptr->freq[0];  //first frequency in list
-	flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-	bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
-	if (fthresh < fmin && flast > fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
-	  }
-	else if (fthresh < fmin && flast < fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
-	  }
-	else if (fthresh > fmin && flast > fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
-	  }
-	else if (fthresh > fmin && flast < fmax)
-	  {
-	    bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
-	  }
-	else
-	  {
-	    Error("Something wrong here: f_matom_emit_accelerate broke the law!");
-	  }
-	penorm_band += eprbs_band * bf_int_inrange  / bf_int_full;	
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
       }
+      else if (fthresh < fmin && flast < fmax)
+      {
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
+      }
+      else if (fthresh > fmin && flast > fmax)
+      {
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
+      }
+      else if (fthresh > fmin && flast < fmax)
+      {
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
+      }
+      else
+      {
+        Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+      }
+      penorm_band += eprbs_band * bf_int_inrange / bf_int_full;
+    }
 
     for (i = 0; i < nlines; i++)
     {
-      if (line[i].macro_info == 1 && geo.macro_simple == 0)   //line is for a macro atom
+      if (line[i].macro_info == 1 && geo.macro_simple == 0)     //line is for a macro atom
+      {
+        eprbs = 0.0;            //these are not deactivations in this approach any more but jumps to macro atom levels
+      }
+      else                      //line is not for a macro atom - use simple method
+      {
+        penorm += eprbs = mplasma->cooling_bb[i];
+        if ((line[i].freq > fmin) && (line[i].freq < fmax))     // correct range
         {
-	  eprbs=0.0; //these are not deactivations in this approach any more but jumps to macro atom levels
+          penorm_band += eprbs_band = eprbs;
         }
-      else                    //line is not for a macro atom - use simple method
-        {
-	  penorm += eprbs = mplasma->cooling_bb[i];
-	  if ((line[i].freq > fmin) && (line[i].freq < fmax))   // correct range
-	    {
-	      penorm_band += eprbs_band =eprbs;
-	    }
-	}
+      }
     }
 
 
-  /* consult issues #187, #492 regarding free-free */
+    /* consult issues #187, #492 regarding free-free */
     penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
     if (fmin > freqmin)
-      {
-	penorm_band += total_free (one, xplasma->t_e, fmin, fmax)/total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
-      }
+    {
+      penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
+    }
     else if (fmax > freqmin)
-      {
-	penorm_band += total_free (one, xplasma->t_e, freqmin, fmax)/total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
-	penorm_band += total_free (one, xplasma->t_e, fmin, freqmin) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
-      }
+    {
+      penorm_band += total_free (one, xplasma->t_e, freqmin, fmax) / total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
+      penorm_band +=
+        total_free (one, xplasma->t_e, fmin, freqmin) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+    }
     else
-      {
-	penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
-      }
+    {
+      penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+    }
 
-	
-    penorm += eprbs =  mplasma->cooling_adiabatic;
-    
+
+    penorm += eprbs = mplasma->cooling_adiabatic;
+
     for (i = 0; i < nphot_total; i++)
     {
       penorm += eprbs = mplasma->cooling_bf_col[i];
@@ -983,12 +983,12 @@ f_kpkt_emit_accelerate  (p, nres, escape, mode, fmin, fmax)
   }
 
   if (penorm > 0)
-    {
-      return (penorm_band / penorm);
-    }
+  {
+    return (penorm_band / penorm);
+  }
   else
-    {
-      return(0.0);
-    }
+  {
+    return (0.0);
+  }
 
 }
