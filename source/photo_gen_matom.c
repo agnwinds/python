@@ -136,7 +136,7 @@ get_matom_f (mode)
   double lum;
   int *level_emit2;
   int level_emit[NLEVELS_MACRO], kpkt_emit;
-  double level_emit_doub[NLEVELS_MACRO];
+  double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
   int n_tries, n_tries_local;
   struct photon ppp;
   double contribution, norm;
@@ -292,7 +292,8 @@ get_matom_f (mode)
 
 
       /* do the same for k-packets */
-      kpkt_emit = 0;
+      kpkt_emit_doub = f_kpkt_emit_accelerate  (&pp, &nres, &escape, KPKT_MODE_ALL, geo.sfmin, geo.sfmax);
+      /*
       for (ss = 0; ss < n_tries; ss++)
       {
         pp.istat = P_INWIND;
@@ -307,7 +308,7 @@ get_matom_f (mode)
         if (pp.freq < geo.sfmax && pp.freq > geo.sfmin && pp.istat != P_ADIABATIC)
           kpkt_emit++;
       }
-
+      */
       /* Now use the matrix to calculate the fraction of the absorbed energy that comes out in a given level */
       for (i = 0; i < nlevels_macro; i++)
       {
@@ -324,7 +325,7 @@ get_matom_f (mode)
         macromain[n].matom_emiss[j] *= (1.0*level_emit_doub[j]);// / n_tries;
       }
       plasmamain[n].kpkt_emiss += plasmamain[n].kpkt_abs * matom_matrix[nlevels_macro][nlevels_macro];
-      plasmamain[n].kpkt_emiss *= (1.0*kpkt_emit) / n_tries;
+      plasmamain[n].kpkt_emiss *= (1.0*kpkt_emit_doub); // / n_tries;
     }
 #else
       for (m = 0; m < nlevels_macro + 1; m++)
