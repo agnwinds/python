@@ -58,7 +58,7 @@ get_domain_params (ndom)
 
 
   strcpy (answer, "SV");
-  zdom[ndom].wind_type = rdchoice ("Wind.type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)", "0,1,3,4,5,6,7,9,10", answer);
+  zdom[ndom].wind_type = rdchoice ("Wind.type(SV,star,hydro,corona,kwd,homologous,shell,imported)", "0,1,3,4,5,6,9,10", answer);
 
 
   strcat (zdom[ndom].name, "Wind");
@@ -182,10 +182,10 @@ get_wind_params (ndom)
   {
     get_homologous_params (ndom);
   }
-  else if (zdom[ndom].wind_type == YSO)
-  {
-    get_yso_wind_params (ndom);
-  }
+//OLD  else if (zdom[ndom].wind_type == YSO)
+//OLD  {
+//OLD    get_yso_wind_params (ndom);
+//OLD  }
   else if (zdom[ndom].wind_type == SHELL)       //NSH 18/2/11 This is a new wind type to produce a thin shell.
   {
     get_shell_wind_params (ndom);

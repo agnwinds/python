@@ -92,8 +92,10 @@ get_disk_params ()
   geo.disk_tprofile = DISK_TPROFILE_STANDARD;
 
   strcpy (answer, "standard");
-  sprintf (values, "%d,%d,%d", DISK_TPROFILE_STANDARD, DISK_TPROFILE_READIN, DISK_TPROFILE_YSO);
-  geo.disk_tprofile = rdchoice ("Disk.temperature.profile(standard,readin,yso)", values, answer);
+//OLD  sprintf (values, "%d,%d,%d", DISK_TPROFILE_STANDARD, DISK_TPROFILE_READIN, DISK_TPROFILE_YSO);
+//OLD  geo.disk_tprofile = rdchoice ("Disk.temperature.profile(standard,readin,yso)", values, answer);
+  sprintf (values, "%d,%d", DISK_TPROFILE_STANDARD, DISK_TPROFILE_READIN);
+  geo.disk_tprofile = rdchoice ("Disk.temperature.profile(standard,readin)", values, answer);
 
   if (geo.disk_tprofile == DISK_TPROFILE_STANDARD)
   {
