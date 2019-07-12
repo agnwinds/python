@@ -785,9 +785,14 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
       }
   }
 
-
-  
-  return (penorm_band / penorm);
+  if (penorm > 0)
+    {
+      return (penorm_band / penorm);
+    }
+  else
+    {
+      return(0.0);
+    }
 }
 
 /* The frequency and the value of nres have been set correctly. All done. */
