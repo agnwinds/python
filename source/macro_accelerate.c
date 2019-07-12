@@ -672,6 +672,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   double bb_cont;
   WindPtr one;
   PlasmaPtr xplasma;
+  double flast, fthresh, bf_int_full, bf_int_inrange;
 
 
   one = &w[p->grid];            //This is to identify the grip cell in which we are
@@ -756,7 +757,30 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     if (cont_ptr->freq[0] < fmax)  //means that it may contribute
       {
 	eprbs_band[m] = eprbs[n];
-	penorm_band += eprbs_band[m];	
+	fthresh = cont_ptr->freq[0];  //first frequency in list
+	flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+	bf_int_full = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
+	if (fthresh < fmin && flast > fmax)
+	  {
+	  bf_int_inrange = qromb (alpha_sp_integrand, fmin, fmax, 1e-4);
+	  }
+	else if (fthresh < fmin && flast < fmax)
+	  {
+	  bf_int_inrange = qromb (alpha_sp_integrand, fmin, flast, 1e-4);
+	  }
+	else if (fthresh > fmin && flast > fmax)
+	  {
+	    bf_int_inrange = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
+	  }
+	else if (fthresh > fmin && flast < fmax)
+	  {
+	    bf_int_inrange = qromb (alpha_sp_integrand, fthresh, fmax, 1e-4);
+	  }
+	else
+	  {
+	    Error("Something wrong here: f_matom_emit_accelerate broke the law!");
+	  }
+	penorm_band += eprbs_band[m] * bf_int_inrange  / bf_int_full;	
 	m++;
       }
   }
