@@ -79,7 +79,7 @@ binary_basics ()
 
   void find_l1 ();
   double roche2_width_max ();
-  void *dummy_par=NULL;
+  void *dummy_par = NULL;
   double pow ();
 
 
@@ -113,7 +113,7 @@ binary_basics ()
   p_roche.lmn[1] = p_roche.lmn[2] = 0;
 
   geo.l1 = x = zero_find (dphi_ds, 0.01 * geo.a, 0.99 * geo.a, geo.a / 1000.);
-   
+
   geo.l1_from_m2 = geo.a - geo.l1;
 
   plane_l1.x[0] = geo.l1 + 10000.;
@@ -123,17 +123,17 @@ binary_basics ()
 
   /* Similarly, find l2, the Lagrangian point behind the secondary */
 
-    geo.l2 = x = zero_find (dphi_ds, 1.01 * geo.a, 2.0 * geo.a, geo.a / 1000.);	
+  geo.l2 = x = zero_find (dphi_ds, 1.01 * geo.a, 2.0 * geo.a, geo.a / 1000.);
 
   /* Now find the position of the far side of the star */
 
-    geo.phi = phi (geo.l1,dummy_par);       /* Set geo.phi so phi will be zero on Roche lobes */
+  geo.phi = phi (geo.l1, dummy_par);    /* Set geo.phi so phi will be zero on Roche lobes */
 
 
   /* Set geo.r2_far to be the radius of the secondary on the backside of the secondary */
 
-    x = zero_find (phi, 1.01 * geo.a, geo.l2, geo.a / 1000.) - geo.a;
-   
+  x = zero_find (phi, 1.01 * geo.a, geo.l2, geo.a / 1000.) - geo.a;
+
   /* Define a plane on the backside of the secondary */
 
   plane_m2_far.x[0] = geo.r2_far + geo.a;
@@ -145,7 +145,7 @@ binary_basics ()
   Log_silent ("binary_basics: l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n", geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
 
   /* Calculate the maximum half width of the secondary in the plane of the orbit */
-  
+
   geo.r2_width = roche2_width_max ();
   Log_silent ("binary_basics: r2_width=%6.2e\n", geo.r2_width);
   return (0);
@@ -182,58 +182,58 @@ int
 hit_secondary (p)
      PhotPtr p;
 {
-  double smin, smax, smid,s;
+  double smin, smax, smid, s;
   double potential;
-  double idelt=1e-2;
+  double idelt = 1e-2;
   double pillbox ();
-  void *dummy_par=NULL;  //A variable required (but not set) for calls to phi
-  
+  void *dummy_par = NULL;       //A variable required (but not set) for calls to phi
+
 
   if (pillbox (p, &smin, &smax) == VERY_BIG)
     return (0);                 /* Missed secondary */
   stuff_phot (p, &p_roche);
-  
-   
-  smid=0.5 * (smin + smax);
-if (phi(smid,dummy_par)>phi(smin,dummy_par) || phi(smid,dummy_par)>phi(smax,dummy_par))  //value of the function at the midpoint is greater than the end(s) problem
-{
-	if (phi(smin+idelt*(smax-smin),dummy_par)>phi(smin,dummy_par) && phi(smax-idelt*(smax-smin),dummy_par)<phi(smax,dummy_par)) //monotonically rising? - no minimum
-	{
-		potential=fmin(phi(smin,dummy_par),phi(smax,dummy_par));
-	}
-	
-	else if (phi(smin+idelt*(smax-smin),dummy_par)<phi(smin,dummy_par) && phi(smax-idelt*(smax-smin),dummy_par)>phi(smax,dummy_par)) //monotonically rising? - no minimum
-	{
-		potential=fmin(phi(smin,dummy_par),phi(smax,dummy_par));
-	}
-	else if (phi(smin+idelt*(smax-smin),dummy_par)>phi(smin,dummy_par) && phi(smax-idelt*(smax-smin),dummy_par)>phi(smax,dummy_par)) //hump - probably no minimum
-	{
-		potential=fmin(phi(smin,dummy_par),phi(smax,dummy_par));
-	}
-	else if (phi(smin+idelt*(smax-smin),dummy_par)<phi(smin,dummy_par) && phi(smax-idelt*(smax-smin),dummy_par)<phi(smax,dummy_par))  //there most likely is a minimum - need to find a sensibly midpoint 
-	{
-		if (phi(smin,dummy_par)<phi(smax,dummy_par))
-		{
-			smid=smin+idelt*(smax-smin); //the function at this point, just inside smin should be lower than the function at smin
-		}
-		else
-		{
-			smid=smax-idelt*(smax-smin);//the function at this point, just inside smax should be lower than the function at smax
-		}
-		potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);	//call the minimuser		
-	}
-	else 
-	{
-		potential=1.;  //goodness only knows, lets say the photon missed
-	}
-}	
-else 
-{
-	potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s); //All is well behaved, call the minimiser
-}
 
- 
-  
+
+  smid = 0.5 * (smin + smax);
+  if (phi (smid, dummy_par) > phi (smin, dummy_par) || phi (smid, dummy_par) > phi (smax, dummy_par))   //value of the function at the midpoint is greater than the end(s) problem
+  {
+    if (phi (smin + idelt * (smax - smin), dummy_par) > phi (smin, dummy_par) && phi (smax - idelt * (smax - smin), dummy_par) < phi (smax, dummy_par)) //monotonically rising? - no minimum
+    {
+      potential = fmin (phi (smin, dummy_par), phi (smax, dummy_par));
+    }
+
+    else if (phi (smin + idelt * (smax - smin), dummy_par) < phi (smin, dummy_par) && phi (smax - idelt * (smax - smin), dummy_par) > phi (smax, dummy_par))    //monotonically rising? - no minimum
+    {
+      potential = fmin (phi (smin, dummy_par), phi (smax, dummy_par));
+    }
+    else if (phi (smin + idelt * (smax - smin), dummy_par) > phi (smin, dummy_par) && phi (smax - idelt * (smax - smin), dummy_par) > phi (smax, dummy_par))    //hump - probably no minimum
+    {
+      potential = fmin (phi (smin, dummy_par), phi (smax, dummy_par));
+    }
+    else if (phi (smin + idelt * (smax - smin), dummy_par) < phi (smin, dummy_par) && phi (smax - idelt * (smax - smin), dummy_par) < phi (smax, dummy_par))    //there most likely is a minimum - need to find a sensibly midpoint 
+    {
+      if (phi (smin, dummy_par) < phi (smax, dummy_par))
+      {
+        smid = smin + idelt * (smax - smin);    //the function at this point, just inside smin should be lower than the function at smin
+      }
+      else
+      {
+        smid = smax - idelt * (smax - smin);    //the function at this point, just inside smax should be lower than the function at smax
+      }
+      potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);   //call the minimuser            
+    }
+    else
+    {
+      potential = 1.;           //goodness only knows, lets say the photon missed
+    }
+  }
+  else
+  {
+    potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);     //All is well behaved, call the minimiser
+  }
+
+
+
   if (potential > 0.0)
     return (0);                 /*Missed secondary) */
 
@@ -416,7 +416,7 @@ double phi_gm1, phi_gm2, phi_3, phi_4;
  **********************************************************/
 
 double
-phi (double s,void * params)
+phi (double s, void *params)
 {
   struct photon pp;
   double x1, x2, z, z1, z2, z3;
@@ -476,16 +476,16 @@ phi (double s,void * params)
  **********************************************************/
 
 double
-dphi_ds (double s,void * params)
+dphi_ds (double s, void *params)
 {
   double phi (), x1, x2;
-  void *dummy_par=NULL;
+  void *dummy_par = NULL;
   double dx, z;
   if ((dx = 0.001 * geo.a) < EPS)
     dx = EPS;
 
-  x2 = phi (s + dx,dummy_par);
-  x1 = phi (s,dummy_par);
+  x2 = phi (s + dx, dummy_par);
+  x1 = phi (s, dummy_par);
   z = (x2 - x1) / dx;
   return (z);
 
@@ -514,29 +514,29 @@ dphi_ds (double s,void * params)
 
 
 double
-	roche_width (double x,void * params)
-   {
-     double rho, smax;
+roche_width (double x, void *params)
+{
+  double rho, smax;
 
-     if (x < geo.l1)
-       smax = geo.l1;
-     else
-       smax = geo.l1_from_m2;
+  if (x < geo.l1)
+    smax = geo.l1;
+  else
+    smax = geo.l1_from_m2;
 
-     p_roche.x[0] = x;
-     p_roche.x[1] = p_roche.x[2] = 0.0;
-     p_roche.lmn[0] = 0;
-     p_roche.lmn[1] = 1;
-     p_roche.lmn[2] = 0;
+  p_roche.x[0] = x;
+  p_roche.x[1] = p_roche.x[2] = 0.0;
+  p_roche.lmn[0] = 0;
+  p_roche.lmn[1] = 1;
+  p_roche.lmn[2] = 0;
 
-     rho =zero_find(phi, 1000., smax, geo.a / 1000.);
-     if (rho < 0)
-     {
-       Error ("roche_with : zero_find failure x=%6.2e\n", x);
-     }
-     return (-rho);                /* This is because we are going to search for a minimun not a maximum */
+  rho = zero_find (phi, 1000., smax, geo.a / 1000.);
+  if (rho < 0)
+  {
+    Error ("roche_with : zero_find failure x=%6.2e\n", x);
+  }
+  return (-rho);                /* This is because we are going to search for a minimun not a maximum */
 
-   }
+}
 
 
 
@@ -571,14 +571,11 @@ roche2_width_max ()
   Log_silent ("roche2_width_max: Search from %6.2e %6.2e %6.2e\n", xmin, xmid, xmax);
 
   /* func_minimiser returns the miniumum value of the function it is evaluating; xbest is the position of the minimum */
-    
-   rmin = func_minimiser (xmin, xmid, xmax, roche_width, 0.0001, &xbest);
-  
+
+  rmin = func_minimiser (xmin, xmid, xmax, roche_width, 0.0001, &xbest);
+
 
   Log_silent ("roche2_width_max: Max width at %6.2e of %6.2e\n", xbest, -rmin);
 
   return (-rmin);               /* Because "func_minimiser" is designed to find a minimum rather than a maximum! */
 }
-
-
-

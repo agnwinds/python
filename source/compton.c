@@ -184,8 +184,8 @@ total_comp (one, t_e)
           f2 = xplasma->fmax_mod[j];    //NSH 131114 - Set the high frequency limit to the highest frequency that the model applies to
           if (f1 > 1e18)        //If all the frequencies are lower than 1e18, then the cross section is constant at sigmaT
 //            x += qromb (comp_cool_integrand, f1, f2, 1e-6);
-          x += num_int (comp_cool_integrand, f1, f2, 1e-6);
-		  
+            x += num_int (comp_cool_integrand, f1, f2, 1e-6);
+
           else
             x += THOMPSON * xplasma->xj[j];     //In the case where we are in the thompson limit, we just multiply the band limited frequency integrated mean intensity by the Thompson cross section
         }
@@ -318,7 +318,7 @@ compton_dir (p, xplasma)
     f_max = 1. + (2. * x1);     //The maximum energy change - this occurs if the scattering angle is 180 degrees (i.e. the photon bounces straight back.) f=e_old/e_new
     sigma_max = sigma_compton_partial (f_max, x1);      //Communicated externally to the integrand function in the zbrent call below, this is the maximum cross section, used to scale the K_N function to lie between 0 and 1. This is essentually the chance of a photon scattering through 180 degrees - or the angle giving the maximum energy loss
 //    f = zbrent (compton_func, f_min, f_max, 1e-8);      //Find the zero point of the function compton_func - this finds the point in the KN function that represents our randomised fractional energy loss z_rand.
-    f = zero_find (compton_func, f_min, f_max, 1e-8);      //Find the zero point of the function compton_func - this finds the point in the KN function that represents our randomised fractional energy loss z_rand.
+    f = zero_find (compton_func, f_min, f_max, 1e-8);   //Find the zero point of the function compton_func - this finds the point in the KN function that represents our randomised fractional energy loss z_rand.
 
 /*We now have the fractional energy change f - we use the 'normal' equation for compton scattering to obtain the angle cosine n=cos(\theta)	for the scattering direction*/
 
@@ -373,7 +373,7 @@ compton_dir (p, xplasma)
  **********************************************************/
 
 double
-compton_func (double f,void * params)
+compton_func (double f, void *params)
 {
   double ans;
   ans = (sigma_compton_partial (f, x1) / sigma_max) - sigma_rand;
@@ -508,7 +508,7 @@ beta (nu)
  **********************************************************/
 
 double
-comp_cool_integrand (double nu,void * params)
+comp_cool_integrand (double nu, void *params)
 {
   double value;
   value = THOMPSON * beta (nu) * mean_intensity (xplasma, nu, 2);

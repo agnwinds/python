@@ -110,7 +110,7 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   {
 //    emit = qromb (integ_brem, freqmin, freqmax, 1e-4);
     emit = num_int (integ_brem, freqmin, freqmax, 1e-4);
-	
+
     *f = emit;
   }
 

@@ -116,7 +116,7 @@ get_sv_wind_params (ndom)
 
 //  zdom[ndom].mdot_norm = qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
   zdom[ndom].mdot_norm = num_int (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
-  
+
   return (0);
 }
 
@@ -457,7 +457,7 @@ sv_zero_init (p)
  **********************************************************/
 
 double
-sv_zero_r (double r,void * params)
+sv_zero_r (double r, void *params)
 {
   double theta;
   double rho, rho_guess;
@@ -537,7 +537,7 @@ sv_theta_wind (ndom, r)
  **********************************************************/
 
 double
-sv_wind_mdot_integral (double r,void * params)
+sv_wind_mdot_integral (double r, void *params)
 {
   double x;
 

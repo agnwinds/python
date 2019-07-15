@@ -77,45 +77,47 @@ free_vector (a, i, j)
  **********************************************************/
 
 
-double num_int(func, a, b, eps)
-    double (*func) (double,void*);	
-    double a, b;
-    double eps;
-	{
-	double result;
-	double alpha=0.0;
-	void *test=NULL;
-	double delta;
-	int zflag,i;
-	size_t  neval;
-	
-    gsl_function F;
-    F.function = func;
-    F.params = &alpha;
-	zflag=1;
-	if (func(a,test)==0.0 && func(b,test)==0.0)
-	{
-		zflag=0;
-		delta=(b-a)/101;
-		for (i=0;i<100;i++)
-		{
-			if (func(a+delta*i,test)!=0) zflag=1;			
-		}
-	}
-	if (zflag==1)
-		{	
-    	gsl_integration_romberg_workspace * w  = gsl_integration_romberg_alloc (30);
-    	gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval,w);
-    	gsl_integration_romberg_free (w);
-	}
-	else
-	{
-		result=0.0;
-	}
-	
-	
-	return(result);
-	}
+double
+num_int (func, a, b, eps)
+     double (*func) (double, void *);
+     double a, b;
+     double eps;
+{
+  double result;
+  double alpha = 0.0;
+  void *test = NULL;
+  double delta;
+  int zflag, i;
+  size_t neval;
+
+  gsl_function F;
+  F.function = func;
+  F.params = &alpha;
+  zflag = 1;
+  if (func (a, test) == 0.0 && func (b, test) == 0.0)
+  {
+    zflag = 0;
+    delta = (b - a) / 101;
+    for (i = 0; i < 100; i++)
+    {
+      if (func (a + delta * i, test) != 0)
+        zflag = 1;
+    }
+  }
+  if (zflag == 1)
+  {
+    gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30);
+    gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval, w);
+    gsl_integration_romberg_free (w);
+  }
+  else
+  {
+    result = 0.0;
+  }
+
+
+  return (result);
+}
 
 /**********************************************************/
 /**
@@ -135,56 +137,56 @@ double num_int(func, a, b, eps)
 *
 * ### Notes ###
 *
-**********************************************************/		
-		
-	
-double zero_find(func, x_lo, x_hi, tol)
-    double (*func) (double,void*);	
-    double x_lo, x_hi;
-    double tol;
-	{
-	double result;
-	double alpha=0.0;
-	double r = 0;
-	const gsl_root_fsolver_type *T;
-	gsl_root_fsolver *s;
-	int iter = 0, max_iter = 100;
-	int status;
-	
+**********************************************************/
 
-    gsl_function F;
-    F.function = func;
-    F.params = &alpha;
-	
-	
-	
-	T = gsl_root_fsolver_brent;
-	  s = gsl_root_fsolver_alloc (T);
-	  gsl_root_fsolver_set (s, &F, x_lo, x_hi);
-	
-	
-	
-	  do
-	    {
-	      iter++;
-	      status = gsl_root_fsolver_iterate (s);
-	      r = gsl_root_fsolver_root (s);
-	      x_lo = gsl_root_fsolver_x_lower (s);
-	      x_hi = gsl_root_fsolver_x_upper (s);
-	      status = gsl_root_test_interval (x_lo, x_hi,
-	                                        tol,0);
+
+double
+zero_find (func, x_lo, x_hi, tol)
+     double (*func) (double, void *);
+     double x_lo, x_hi;
+     double tol;
+{
+  double result;
+  double alpha = 0.0;
+  double r = 0;
+  const gsl_root_fsolver_type *T;
+  gsl_root_fsolver *s;
+  int iter = 0, max_iter = 100;
+  int status;
+
+
+  gsl_function F;
+  F.function = func;
+  F.params = &alpha;
 
 
 
-	    }
-	  while (status == GSL_CONTINUE && iter < max_iter);
+  T = gsl_root_fsolver_brent;
+  s = gsl_root_fsolver_alloc (T);
+  gsl_root_fsolver_set (s, &F, x_lo, x_hi);
 
-	  result=(x_lo+x_hi)/2.0;
 
-	return(result);
-	}	
-	
-	
+
+  do
+  {
+    iter++;
+    status = gsl_root_fsolver_iterate (s);
+    r = gsl_root_fsolver_root (s);
+    x_lo = gsl_root_fsolver_x_lower (s);
+    x_hi = gsl_root_fsolver_x_upper (s);
+    status = gsl_root_test_interval (x_lo, x_hi, tol, 0);
+
+
+
+  }
+  while (status == GSL_CONTINUE && iter < max_iter);
+
+  result = (x_lo + x_hi) / 2.0;
+
+  return (result);
+}
+
+
 /**********************************************************/
 /**
 * @brief      A routine that mimimizes a function f
@@ -205,59 +207,56 @@ double zero_find(func, x_lo, x_hi, tol)
 * added in 2019 to replace the function 'golden' which is a numerical recipie
 * 
 **********************************************************/
-	
-	
 
-double func_minimiser ( a, m, b, func, tol,xmin)
-    double (*func) (double,void*);	
-    double a,m,b;
-    double tol,*xmin;
+
+
+double
+func_minimiser (a, m, b, func, tol, xmin)
+     double (*func) (double, void *);
+     double a, m, b;
+     double tol, *xmin;
 
 {
-  int status=0;
-  void *test=NULL;
+  int status = 0;
+  void *test = NULL;
 
-  
+
   int iter = 0, max_iter = 100;
   const gsl_min_fminimizer_type *T;
   gsl_min_fminimizer *s;
-  
+
 
   gsl_function F;
   F.function = func;
   F.params = 0;
-  
+
 
 
   T = gsl_min_fminimizer_brent;
-  
+
   s = gsl_min_fminimizer_alloc (T);
-  gsl_set_error_handler_off();
-  status=gsl_min_fminimizer_set (s, &F, m, a, b);
+  gsl_set_error_handler_off ();
+  status = gsl_min_fminimizer_set (s, &F, m, a, b);
   if (status)
   {
-	  if (status==GSL_EINVAL)     //THere is no minimum 
-	  {
-		  return fmin(func(a,test),func(b,test));   //keep old behaviour
-	  }
+    if (status == GSL_EINVAL)   //THere is no minimum 
+    {
+      return fmin (func (a, test), func (b, test));     //keep old behaviour
+    }
   }
 
 
   do
-    {
-      iter++;
-      status = gsl_min_fminimizer_iterate (s);
-      m = gsl_min_fminimizer_x_minimum (s);
-      a = gsl_min_fminimizer_x_lower (s);
-      b = gsl_min_fminimizer_x_upper (s);
-      status = gsl_min_test_interval (a, b, 0.0, tol);
-    }
+  {
+    iter++;
+    status = gsl_min_fminimizer_iterate (s);
+    m = gsl_min_fminimizer_x_minimum (s);
+    a = gsl_min_fminimizer_x_lower (s);
+    b = gsl_min_fminimizer_x_upper (s);
+    status = gsl_min_test_interval (a, b, 0.0, tol);
+  }
   while (status == GSL_CONTINUE && iter < max_iter);
-  *xmin=m;
+  *xmin = m;
 
-  return func(m,test);
+  return func (m, test);
 }
-
-
-
-

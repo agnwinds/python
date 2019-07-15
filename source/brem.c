@@ -43,7 +43,7 @@
  **********************************************************/
 
 double
-integ_brem (double freq,void * params)
+integ_brem (double freq, void *params)
 {
   double answer;
   answer = geo.const_agn * pow (freq, geo.brem_alpha) * exp ((-1.0 * H * freq) / (BOLTZMANN * geo.brem_temp));
@@ -180,8 +180,8 @@ get_rand_brem (freqmin, freqmax)
 //    cdf_brem_hi = 1. - qromb (brem_d, BREM_ALPHAMAX, BREM_ALPHABIG, 1e-8) / cdf_brem_tot;       //postion in fhe full hi frequcny boundary
 
     cdf_brem_tot = num_int (brem_d, brem_alpha_tiny, BREM_ALPHABIG, 1e-8);
-    cdf_brem_lo = num_int (brem_d, brem_alpha_tiny, BREM_ALPHAMIN, 1e-8) / cdf_brem_tot;  //position in the full cdf of low frequcny boundary
-    cdf_brem_hi = 1. - num_int (brem_d, BREM_ALPHAMAX, BREM_ALPHABIG, 1e-8) / cdf_brem_tot;       //postion in fhe full hi frequcny boundary
+    cdf_brem_lo = num_int (brem_d, brem_alpha_tiny, BREM_ALPHAMIN, 1e-8) / cdf_brem_tot;        //position in the full cdf of low frequcny boundary
+    cdf_brem_hi = 1. - num_int (brem_d, BREM_ALPHAMAX, BREM_ALPHABIG, 1e-8) / cdf_brem_tot;     //postion in fhe full hi frequcny boundary
 
 
 
@@ -212,17 +212,17 @@ get_rand_brem (freqmin, freqmax)
     cdf_brem_ylo = cdf_brem_yhi = 1.0;
     if (brem_alphamin < BREM_ALPHABIG)  //There is *some* emission
     {
- //     cdf_brem_ylo = qromb (brem_d, brem_alpha_tiny, brem_alphamin, 1e-8) / cdf_brem_tot;       //The position in full CDF of the upper frequency bound
-      cdf_brem_ylo = num_int (brem_d, brem_alpha_tiny, brem_alphamin, 1e-8) / cdf_brem_tot;       //The position in full CDF of the upper frequency bound
-	  
+      //     cdf_brem_ylo = qromb (brem_d, brem_alpha_tiny, brem_alphamin, 1e-8) / cdf_brem_tot;       //The position in full CDF of the upper frequency bound
+      cdf_brem_ylo = num_int (brem_d, brem_alpha_tiny, brem_alphamin, 1e-8) / cdf_brem_tot;     //The position in full CDF of the upper frequency bound
+
       if (cdf_brem_ylo > 1.0)
         cdf_brem_ylo = 1.0;
     }
     if (brem_alphamax < BREM_ALPHABIG)
     {
 //      cdf_brem_yhi = qromb (brem_d, brem_alpha_tiny, brem_alphamax, 1e-8) / cdf_brem_tot;       //position in the full cdf of currnt hi frequcny boundary
-      cdf_brem_yhi = num_int (brem_d, brem_alpha_tiny, brem_alphamax, 1e-8) / cdf_brem_tot;       //position in the full cdf of currnt hi frequcny boundary
-	  
+      cdf_brem_yhi = num_int (brem_d, brem_alpha_tiny, brem_alphamax, 1e-8) / cdf_brem_tot;     //position in the full cdf of currnt hi frequcny boundary
+
       if (cdf_brem_yhi > 1.0)
         cdf_brem_yhi = 1.0;
     }

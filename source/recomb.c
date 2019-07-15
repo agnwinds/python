@@ -175,11 +175,11 @@ fb_topbase_partial (freq)
 
 
 double
-fb_topbase_partial2 (double freq,void * params)
+fb_topbase_partial2 (double freq, void *params)
 {
-	double partial;
+  double partial;
 
-	partial=fb_topbase_partial(freq);
+  partial = fb_topbase_partial (freq);
 
   return (partial);
 }
@@ -1541,7 +1541,7 @@ gs_rrate (nion, T)
     }
 
     rate = num_int (fb_topbase_partial2, fthresh, fmax, 1e-5);
-	
+
   }
 
   return (rate);

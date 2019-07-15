@@ -505,7 +505,7 @@ calc_te (xplasma, tmin, tmax)
   if ((z1 * z2 < 0.0))
   {                             // Then the interval is bracketed
     xplasma->t_e = zero_find (zero_emit2, tmin, tmax, 50.);
-	
+
   }
   else if (fabs (z1) < fabs (z2))
   {
@@ -583,9 +583,9 @@ calc_te (xplasma, tmin, tmax)
  **********************************************************/
 
 double
-zero_emit2 (double t,void * params)
+zero_emit2 (double t, void *params)
 {
-  return (zero_emit(t));
+  return (zero_emit (t));
 }
 
 double

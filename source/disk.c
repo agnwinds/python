@@ -373,8 +373,8 @@ ds_to_disk (p, allow_negative)
   double r, r_top, r_bottom;
   double smin, smax;
   struct photon phit;
-  
-  
+
+
 
 
   if (geo.disk_type == DISK_NONE)
@@ -607,13 +607,13 @@ ds_to_disk (p, allow_negative)
   stuff_phot (p, &ds_to_disk_photon);
   move_phot (&ds_to_disk_photon, smin);
 
-  if ((smax-smin)>0.)
-  	s_disk= zero_find (disk_height, 0.0, smax - smin, 1e-8);
+  if ((smax - smin) > 0.)
+    s_disk = zero_find (disk_height, 0.0, smax - smin, 1e-8);
   else
-  	s_disk= zero_find (disk_height, smax - smin, 0.0, 1e-8);
-	  
-	  
-  
+    s_disk = zero_find (disk_height, smax - smin, 0.0, 1e-8);
+
+
+
   s_disk += smin;
 
   /* Note that s_disk can still be negative */
@@ -648,19 +648,19 @@ ds_to_disk (p, allow_negative)
 
 
 double
-disk_height (double s,void * params)
-   {
-	   struct photon phit;
-	   double z1, r1;
+disk_height (double s, void *params)
+{
+  struct photon phit;
+  double z1, r1;
 
-	   stuff_phot (&ds_to_disk_photon, &phit);
-	   move_phot (&phit, s);
-	   r1 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-	   z1 = zdisk (r1) - fabs (phit.x[2]);   // this is the function
+  stuff_phot (&ds_to_disk_photon, &phit);
+  move_phot (&phit, s);
+  r1 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+  z1 = zdisk (r1) - fabs (phit.x[2]);   // this is the function
 
-	   return(z1);
+  return (z1);
 
-   }
+}
 
 
 

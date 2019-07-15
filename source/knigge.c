@@ -461,7 +461,7 @@ kn_vzero (r)
  **********************************************************/
 
 double
-kn_wind_mdot_integral (double r,void * params)
+kn_wind_mdot_integral (double r, void *params)
 {
   double t;
   double x, ratio;

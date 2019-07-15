@@ -170,7 +170,7 @@ calc_pi_rate (nion, xplasma, mode, type)
           }
           else
           {
-			pi_rate += num_int (tb_exp, fthresh, f2, exp_qromb);
+            pi_rate += num_int (tb_exp, fthresh, f2, exp_qromb);
           }
         }
         else if (f1 > fthresh && f1 < fmax && fmax < f2)        //case 3
@@ -245,7 +245,7 @@ calc_pi_rate (nion, xplasma, mode, type)
  **********************************************************/
 
 double
-tb_planck (double freq,void * params)
+tb_planck (double freq, void *params)
 {
   double answer, bbe;
   bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
@@ -277,7 +277,7 @@ tb_planck (double freq,void * params)
  **********************************************************/
 
 double
-tb_logpow (double freq,void * params)
+tb_logpow (double freq, void *params)
 {
   double answer;
   answer = pow (10, xpl_logw + (xpl_alpha - 1.0) * log10 (freq));       //NB - the alpha-1.0 appears because we divide by nu
@@ -304,7 +304,7 @@ tb_logpow (double freq,void * params)
  **********************************************************/
 
 double
-tb_exp (double freq,void * params)
+tb_exp (double freq, void *params)
 {
   double answer;
 

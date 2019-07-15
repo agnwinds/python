@@ -1029,7 +1029,7 @@ get_gamma (cont_ptr, xplasma)
   }
 
 
- // gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
+  // gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
   gamma_value = num_int (gamma_integrand, fthresh, flast, 1e-4);
 
   gamma_value *= 8 * PI / C / C * xplasma->w;
@@ -1054,7 +1054,7 @@ get_gamma (cont_ptr, xplasma)
  **********************************************************/
 
 double
-gamma_integrand (double freq,void * params)
+gamma_integrand (double freq, void *params)
 {
   double fthresh;
   double x;
@@ -1133,7 +1133,7 @@ get_gamma_e (cont_ptr, xplasma)
  **********************************************************/
 
 double
-gamma_e_integrand (double freq,void * params)
+gamma_e_integrand (double freq, void *params)
 {
   double fthresh;
   double x;
@@ -1226,7 +1226,7 @@ get_alpha_st (cont_ptr, xplasma)
  **********************************************************/
 
 double
-alpha_st_integrand (double freq,void * params)
+alpha_st_integrand (double freq, void *params)
 {
   double fthresh;
   double x;
@@ -1323,7 +1323,7 @@ get_alpha_st_e (cont_ptr, xplasma)
  **********************************************************/
 
 double
-alpha_st_e_integrand (double freq,void * params)
+alpha_st_e_integrand (double freq, void *params)
 {
   double fthresh;
   double x;

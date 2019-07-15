@@ -166,7 +166,7 @@ planck (t, freqmin, freqmax)
     if (alphamin < ALPHABIG)    //check to make sure we get a sensible number - planck_d(ALPHAMAX is too small to sensibly integrate)
     {
 //      cdf_bb_ylo = qromb (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;    //position in the full cdf of current low frequency boundary
-      cdf_bb_ylo = num_int (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;    //position in the full cdf of current low frequency boundary
+      cdf_bb_ylo = num_int (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;  //position in the full cdf of current low frequency boundary
 
       if (cdf_bb_ylo > 1.0)
         cdf_bb_ylo = 1.0;
@@ -174,7 +174,7 @@ planck (t, freqmin, freqmax)
     if (alphamax < ALPHABIG)    //again, check to see that the integral will be sensible
     {
 //      cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;    //position in the full cdf of currnet hi frequency boundary
-      cdf_bb_yhi = num_int (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;    //position in the full cdf of currnet hi frequency boundary
+      cdf_bb_yhi = num_int (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;  //position in the full cdf of currnet hi frequency boundary
 
       if (cdf_bb_yhi > 1.0)
         cdf_bb_yhi = 1.0;
@@ -505,7 +505,7 @@ init_integ_planck_d ()
   for (n = 0; n < NMAX + 1; n++)
   {
     x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
-	 integ_planck[n] = num_int (planck_d, 0.0, x, 1e-7);
+    integ_planck[n] = num_int (planck_d, 0.0, x, 1e-7);
   }
 
   return (0);
@@ -538,9 +538,9 @@ init_integ_planck_d ()
  **********************************************************/
 
 double
-planck_d (double alpha,void * params)
+planck_d (double alpha, void *params)
 {
-  return (planck_d_2(alpha));
+  return (planck_d_2 (alpha));
 }
 
 
@@ -594,14 +594,14 @@ emittance_bb (freqmin, freqmax, t)
       return (0);
     else                        //only the upper part of the band is above ALPHABIG
 //      return (q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHABIG, 1e-7));
-    return (q1 * t * t * t * t * num_int (planck_d, alphamin, ALPHABIG, 1e-7));
+      return (q1 * t * t * t * t * num_int (planck_d, alphamin, ALPHABIG, 1e-7));
 
   }
   else                          //We are outside the tabulated range and must integrate
   {
 //    return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
     return (q1 * t * t * t * t * num_int (planck_d, alphamin, alphamax, 1e-7));
-	
+
   }
 }
 
