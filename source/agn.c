@@ -108,7 +108,9 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   }
   else if (spectype == SPECTYPE_BREM)   //Bremstrahlung - uses T and alpha which are stored in geo. 
   {
-    emit = qromb (integ_brem, freqmin, freqmax, 1e-4);
+//    emit = qromb (integ_brem, freqmin, freqmax, 1e-4);
+    emit = num_int (integ_brem, freqmin, freqmax, 1e-4);
+
     *f = emit;
   }
 

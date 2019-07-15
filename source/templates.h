@@ -4,7 +4,8 @@ double get_rand_pow(double x1, double x2, double alpha);
 double get_rand_exp(double alpha_min, double alpha_max);
 double integ_planck_d(double alphamin, double alphamax);
 int init_integ_planck_d(void);
-double planck_d(double alpha);
+double planck_d(double alpha, void *params);
+double planck_d_2(double alpha);
 double emittance_bb(double freqmin, double freqmax, double t);
 double check_fmax(double fmax, double temp);
 /* get_atomicdata.c */
@@ -92,14 +93,11 @@ int project_from(struct basis *basis_from, double v_in[], double v_out[]);
 int project_to(struct basis *basis_from, double v_in[], double v_out[]);
 int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], double v_to[]);
 /* recipes.c */
-double qromb(double (*func)(double), double a, double b, double eps);
-double trapzd(double (*func)(double), double a, double b, int n);
-void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
-double zbrent(double (*func)(double), double x1, double x2, double tol);
 double *vector(int i, int j);
 void free_vector(double *a, int i, int j);
-double rtsafe(void (*funcd)(double, double *, double *), double x1, double x2, double xacc);
-double golden(double ax, double bx, double cx, double (*f)(double), double tol, double *xmin);
+double num_int(double (*func)(double, void *), double a, double b, double eps);
+double zero_find(double (*func)(double, void *), double x_lo, double x_hi, double tol);
+double func_minimiser(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
@@ -162,16 +160,12 @@ int calc_cdf_gradient(CdfPtr cdf);
 int cdf_array_fixup(double *x, double *y, int n_xy);
 /* roche.c */
 int binary_basics(void);
-double ds_to_roche_2(PhotPtr p);
 int hit_secondary(PhotPtr p);
 double pillbox(PhotPtr p, double *smin, double *smax);
-double phi(double s);
-double dphi_ds(double s);
-double d2phi_ds2(double s);
-double roche_width(double x);
+double phi(double s, void *params);
+double dphi_ds(double s, void *params);
+double roche_width(double x, void *params);
 double roche2_width_max(void);
-void roche(double s, double *value, double *derivative);
-void roche_deriv(double s, double *value, double *derivative);
 /* random.c */
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
@@ -206,7 +200,7 @@ int get_knigge_wind_params(int ndom);
 double kn_velocity(int ndom, double x[], double v[]);
 double kn_rho(int ndom, double x[]);
 double kn_vzero(double r);
-double kn_wind_mdot_integral(double r);
+double kn_wind_mdot_integral(double r, void *params);
 double kn_rho_zero(int ndom, double r);
 /* disk.c */
 double tdisk(double m, double mdot, double r);
@@ -216,7 +210,7 @@ double geff(double g0, double x);
 double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative);
-void disk_deriv(double s, double *value, double *derivative);
+double disk_height(double s, void *params);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
@@ -232,7 +226,7 @@ int line_heat(PlasmaPtr xplasma, PhotPtr pp, int nres);
 /* continuum.c */
 double one_continuum(int spectype, double t, double g, double freqmin, double freqmax);
 double emittance_continuum(int spectype, double freqmin, double freqmax, double t, double g);
-double model_int(double lambda);
+double model_int(double lambda, void *params);
 /* emission.c */
 double wind_luminosity(double f1, double f2);
 double total_emission(WindPtr one, double f1, double f2);
@@ -250,6 +244,7 @@ double shock_heating(WindPtr one);
 double wind_cooling(void);
 /* recomb.c */
 double fb_topbase_partial(double freq);
+double fb_topbase_partial2(double freq, void *params);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
 double total_fb(WindPtr one, double t, double f1, double f2, int fb_choice, int mode);
 double one_fb(WindPtr one, double f1, double f2);
@@ -279,15 +274,16 @@ double sv_velocity(double x[], double v[], int ndom);
 double sv_rho(int ndom, double x[]);
 double sv_find_wind_rzero(int ndom, double p[]);
 int sv_zero_init(double p[]);
-double sv_zero_r(double r);
+double sv_zero_r(double r, void *params);
 double sv_theta_wind(int ndom, double r);
-double sv_wind_mdot_integral(double r);
+double sv_wind_mdot_integral(double r, void *params);
 /* ionization.c */
 int ion_abundances(PlasmaPtr xplasma, int mode);
 int convergence(PlasmaPtr xplasma);
 int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
+double zero_emit2(double t, void *params);
 double zero_emit(double t);
 /* levels.c */
 int levels(PlasmaPtr xplasma, int mode);
@@ -318,7 +314,7 @@ void print_timer_duration(char *msg, struct timeval timer_t0);
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
-double alpha_sp_integrand(double freq);
+double alpha_sp_integrand(double freq, void *params);
 int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
@@ -336,19 +332,15 @@ int bb_simple_heat(PlasmaPtr xplasma, PhotPtr p, double tau_sobolev, double dvds
 int check_stimulated_recomb(PlasmaPtr xplasma);
 int get_dilute_estimators(PlasmaPtr xplasma);
 double get_gamma(struct topbase_phot *cont_ptr, PlasmaPtr xplasma);
-double gamma_integrand(double freq);
+double gamma_integrand(double freq, void *params);
 double get_gamma_e(struct topbase_phot *cont_ptr, PlasmaPtr xplasma);
-double gamma_e_integrand(double freq);
+double gamma_e_integrand(double freq, void *params);
 double get_alpha_st(struct topbase_phot *cont_ptr, PlasmaPtr xplasma);
-double alpha_st_integrand(double freq);
+double alpha_st_integrand(double freq, void *params);
 double get_alpha_st_e(struct topbase_phot *cont_ptr, PlasmaPtr xplasma);
-double alpha_st_e_integrand(double freq);
+double alpha_st_e_integrand(double freq, void *params);
 /* wind_sum.c */
 int xtemp_rad(WindPtr w);
-/* yso.c */
-int get_yso_wind_params(int ndom);
-double yso_velocity(int ndom, double x[], double v[]);
-double yso_rho(int ndom, double x[]);
 /* cylindrical.c */
 double cylind_ds_in_cell(int ndom, PhotPtr p);
 int cylind_make_grid(int ndom, WindPtr w);
@@ -418,11 +410,11 @@ double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 int compton_dir(PhotPtr p, PlasmaPtr xplasma);
-double compton_func(double f);
+double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double alpha(double nu);
 double beta(double nu);
-double comp_cool_integrand(double nu);
+double comp_cool_integrand(double nu, void *params);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int mode);
 /* dielectronic.c */
@@ -431,10 +423,12 @@ double total_dr(WindPtr one, double t_e);
 /* spectral_estimators.c */
 int spectral_estimators(PlasmaPtr xplasma);
 double pl_alpha_func_log(double alpha);
+double pl_alpha_func_log2(double alpha, void *params);
 double pl_logmean(double alpha, double lnumin, double lnumax);
 double pl_log_w(double j, double alpha, double lnumin, double lnumax);
 double pl_log_stddev(double alpha, double lnumin, double lnumax);
 double exp_temp_func(double exp_temp);
+double exp_temp_func2(double exp_temp, void *params);
 double exp_mean(double exp_temp, double numin, double numax);
 double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
@@ -450,9 +444,9 @@ double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
 double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode, int type);
-double tb_planck1(double freq);
-double tb_logpow1(double freq);
-double tb_exp1(double freq);
+double tb_planck(double freq, void *params);
+double tb_logpow(double freq, void *params);
+double tb_exp(double freq, void *params);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne);
@@ -543,7 +537,7 @@ double setup_dfudge(void);
 int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
 /* brem.c */
-double integ_brem(double freq);
+double integ_brem(double freq, void *params);
 double brem_d(double alpha);
 double get_rand_brem(double freqmin, double freqmax);
 /* synonyms.c */

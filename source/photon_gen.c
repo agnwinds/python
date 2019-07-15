@@ -918,7 +918,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   gref = gdisk (m, mdot, rmin);
 
-
+  q_test_count = 0;
   /* Now compute the apparent luminosity of the disk.  This is not actually used
      to determine how annulae are set up.  It is just used to populate geo.ltot.
      It can change if photons hitting the disk are allowed to raise the temperature
@@ -1081,7 +1081,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     disk.w[nrings] = 0;
     disk.t_hit[nrings] = 0;
   }
-
   geo.lum_disk = ltot;
   return (ltot);
 }

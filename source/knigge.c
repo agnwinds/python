@@ -169,7 +169,8 @@ in units of WD radii */
   }
 
   kn_lambda = zdom[ndom].kn_lambda;
-  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+//  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+  zdom[ndom].mdot_norm = num_int (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
 
   return (0);
 }
@@ -442,6 +443,7 @@ kn_vzero (r)
  * 	for mdot as a function of radius
  *
  * @param [in] double  r   A position (radius) in the disk
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return     The value of the integrand
  *
  * The mass loss rate is proportional to T(r)**(4*kn_lambda)
@@ -459,8 +461,7 @@ kn_vzero (r)
  **********************************************************/
 
 double
-kn_wind_mdot_integral (r)
-     double r;
+kn_wind_mdot_integral (double r, void *params)
 {
   double t;
   double x, ratio;
