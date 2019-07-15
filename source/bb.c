@@ -540,11 +540,7 @@ init_integ_planck_d ()
 double
 planck_d (double alpha,void * params)
 {
-  double x;
-  if (alpha < EPSILON || alpha > ALPHABIG)
-    return (0);
-  x = (alpha * alpha * alpha) / (exp (alpha) - 1);
-  return (x);
+  return (planck_d_2(alpha));
 }
 
 

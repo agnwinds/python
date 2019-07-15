@@ -504,8 +504,6 @@ calc_te (xplasma, tmin, tmax)
 
   if ((z1 * z2 < 0.0))
   {                             // Then the interval is bracketed
-//	  printf ("BLAH %e %e\n",zbrent (zero_emit, tmin, tmax, 50.),zero_find (zero_emit2, tmin, tmax, 50.));
-//    xplasma->t_e = zbrent (zero_emit, tmin, tmax, 50.);
     xplasma->t_e = zero_find (zero_emit2, tmin, tmax, 50.);
 	
   }

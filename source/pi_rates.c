@@ -154,53 +154,45 @@ calc_pi_rate (nion, xplasma, mode, type)
         {
           if (xplasma->spec_mod_type[j] == SPEC_MOD_PL)
           {
-//            pi_rate += qromb (tb_logpow1, fthresh, fmax, pl_qromb);
-            pi_rate += num_int (tb_logpow1, fthresh, fmax, pl_qromb);
+            pi_rate += num_int (tb_logpow, fthresh, fmax, pl_qromb);
 
           }
           else
           {
-//            pi_rate += qromb (tb_exp1, fthresh, fmax, exp_qromb);
-            pi_rate += num_int (tb_exp1, fthresh, fmax, exp_qromb);
+            pi_rate += num_int (tb_exp, fthresh, fmax, exp_qromb);
           }
         }
         else if (f1 < fthresh && fthresh < f2 && f2 < fmax)     //case 2
         {
           if (xplasma->spec_mod_type[j] == SPEC_MOD_PL)
           {
-//            pi_rate += qromb (tb_logpow1, fthresh, f2, pl_qromb);
-            pi_rate += num_int (tb_logpow1, fthresh, f2, pl_qromb);
+            pi_rate += num_int (tb_logpow, fthresh, f2, pl_qromb);
           }
           else
           {
-//            pi_rate += qromb (tb_exp1, fthresh, f2, exp_qromb);
-			pi_rate += num_int (tb_exp1, fthresh, f2, exp_qromb);
+			pi_rate += num_int (tb_exp, fthresh, f2, exp_qromb);
           }
         }
         else if (f1 > fthresh && f1 < fmax && fmax < f2)        //case 3
         {
           if (xplasma->spec_mod_type[j] == SPEC_MOD_PL)
           {
-//            pi_rate += qromb (tb_logpow1, f1, fmax, pl_qromb);
-            pi_rate += num_int (tb_logpow1, f1, fmax, pl_qromb);
+            pi_rate += num_int (tb_logpow, f1, fmax, pl_qromb);
           }
           else
           {
-//            pi_rate += qromb (tb_exp1, f1, fmax, exp_qromb);
-            pi_rate += num_int (tb_exp1, f1, fmax, exp_qromb);
+            pi_rate += num_int (tb_exp, f1, fmax, exp_qromb);
           }
         }
         else if (f1 > fthresh && f2 < fmax)     // case 4
         {
           if (xplasma->spec_mod_type[j] == SPEC_MOD_PL)
           {
-//            pi_rate += qromb (tb_logpow1, f1, f2, pl_qromb);
-            pi_rate += num_int (tb_logpow1, f1, f2, pl_qromb);
+            pi_rate += num_int (tb_logpow, f1, f2, pl_qromb);
           }
           else
           {
-//            pi_rate += qromb (tb_exp1, f1, f2, exp_qromb);
-            pi_rate += num_int (tb_exp1, f1, f2, exp_qromb);
+            pi_rate += num_int (tb_exp, f1, f2, exp_qromb);
           }
         }
         else                    //case 5 - should only be the case where the band is outside the range for the integral.
@@ -223,8 +215,7 @@ calc_pi_rate (nion, xplasma, mode, type)
     else                        //We are OK - do the integral
     {
       qromb_temp = xplasma->t_r;
-//      pi_rate = xplasma->w * qromb (tb_planck1, fthresh, fmax, 1.e-4);
-      pi_rate = xplasma->w * num_int (tb_planck1, fthresh, fmax, 1.e-4);
+      pi_rate = xplasma->w * num_int (tb_planck, fthresh, fmax, 1.e-4);
     }
   }
 
@@ -254,7 +245,7 @@ calc_pi_rate (nion, xplasma, mode, type)
  **********************************************************/
 
 double
-tb_planck1 (double freq,void * params)
+tb_planck (double freq,void * params)
 {
   double answer, bbe;
   bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
@@ -286,7 +277,7 @@ tb_planck1 (double freq,void * params)
  **********************************************************/
 
 double
-tb_logpow1 (double freq,void * params)
+tb_logpow (double freq,void * params)
 {
   double answer;
   answer = pow (10, xpl_logw + (xpl_alpha - 1.0) * log10 (freq));       //NB - the alpha-1.0 appears because we divide by nu
@@ -313,7 +304,7 @@ tb_logpow1 (double freq,void * params)
  **********************************************************/
 
 double
-tb_exp1 (double freq,void * params)
+tb_exp (double freq,void * params)
 {
   double answer;
 

@@ -146,7 +146,7 @@ fb_topbase_partial (freq)
 
 /**********************************************************/
 /**
- * @brief      This is a wrapper for fb_topbase_partial to allow it to be used for integrationbs
+ * @brief      This is a wrapper for fb_topbase_partial to allow it to be used for integrations
  *
  * @param [in] double  freq   The freqeuncy of interest
  * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
@@ -1266,7 +1266,6 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
   double dnu;                   // a parameter to allow one to restrict the integration limits.
   double fthresh, fmax;
   double den_config ();
-  double qromb ();
 
 
   dnu = 0.0;                    //Avoid compilation errors.
@@ -1316,8 +1315,7 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
           {
             fmax = fthresh + dnu;
           }
-//          fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
-          fnu += num_int (fb_topbase_partial, fthresh, fmax, 1.e-4);
+          fnu += num_int (fb_topbase_partial2, fthresh, fmax, 1.e-4);
         }
 
       }
@@ -1542,8 +1540,7 @@ gs_rrate (nion, T)
       fmax = fthresh + dnu;
     }
 
- //   rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);	
-    rate = num_int (fb_topbase_partial, fthresh, fmax, 1e-5);
+    rate = num_int (fb_topbase_partial2, fthresh, fmax, 1e-5);
 	
   }
 

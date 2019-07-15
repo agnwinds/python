@@ -93,13 +93,11 @@ int project_from(struct basis *basis_from, double v_in[], double v_out[]);
 int project_to(struct basis *basis_from, double v_in[], double v_out[]);
 int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], double v_to[]);
 /* recipes.c */
-double zbrent(double (*func)(double), double x1, double x2, double tol);
 double *vector(int i, int j);
 void free_vector(double *a, int i, int j);
-double rtsafe(void (*funcd)(double, double *, double *), double x1, double x2, double xacc);
-double golden(double ax, double bx, double cx, double (*f)(double), double tol, double *xmin);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
 double zero_find(double (*func)(double, void *), double x_lo, double x_hi, double tol);
+double func_minimiser(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
@@ -162,16 +160,12 @@ int calc_cdf_gradient(CdfPtr cdf);
 int cdf_array_fixup(double *x, double *y, int n_xy);
 /* roche.c */
 int binary_basics(void);
-double ds_to_roche_2(PhotPtr p);
 int hit_secondary(PhotPtr p);
 double pillbox(PhotPtr p, double *smin, double *smax);
-double phi(double s);
-double dphi_ds(double s);
-double d2phi_ds2(double s);
-double roche_width(double x);
+double phi(double s, void *params);
+double dphi_ds(double s, void *params);
+double roche_width(double x, void *params);
 double roche2_width_max(void);
-void roche(double s, double *value, double *derivative);
-void roche_deriv(double s, double *value, double *derivative);
 /* random.c */
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
@@ -216,7 +210,7 @@ double geff(double g0, double x);
 double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative);
-void disk_deriv(double s, double *value, double *derivative);
+double disk_height(double s, void *params);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
@@ -454,9 +448,9 @@ double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
 double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode, int type);
-double tb_planck1(double freq, void *params);
-double tb_logpow1(double freq, void *params);
-double tb_exp1(double freq, void *params);
+double tb_planck(double freq, void *params);
+double tb_logpow(double freq, void *params);
+double tb_exp(double freq, void *params);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne);
