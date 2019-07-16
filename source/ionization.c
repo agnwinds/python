@@ -23,7 +23,7 @@
  * @brief      ionization routines for the wind one cell at a time
  *
  * @param [in,out] PlasmaPtr  xplasma   The cell in which the ioniztion is to be calculated
- * @param [in] int  mode   A parameter descibing how to calculate the ioniztion
+ * @param [in] int  mode   A parameter describing how to calculate the ionization
  * @return     The routine returns status messages dereived from the individual routines
  * used to calculate the abundances.
  *

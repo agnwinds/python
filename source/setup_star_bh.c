@@ -141,29 +141,28 @@ get_stellar_params ()
 
 /**********************************************************/
 /** 
- * @brief      sets up the boundary layer and agn power law parameters
+ * @brief      sets up the boundary layer and compact object 
+ *   power law parameters
  *   based on user input and system type
  *
- * @param [in] double  lstar   A luminosity used to intialize the luminosity
+ * @param [in] double  lstar   A luminosity used to initialize the luminosity
  * of the agn in the event that there is no disk
  * @return    Always returns 0
  *
  * @details
  * The routine reads a number of parameters that have to do
- * with defining the boundary layer or and AGN.  
+ * with defining the boundary layer or the BH/NS in an 
+ * X-ray binary or an AGN.  
  *
  *
  * ### Notes ###
- * @bug Our long term goal is to make our inputs for radiation
- * sources more generic, but there is still more work to do on
- * this routine.  The problems are really to first define what
- * we want.  Implementation should be straighforwad if we 
- * can figure out what we want. A first step might be to 
- * break this into two routines, one for a BL and one for an
- * AGN.  Note that the AGN also is used for a BH binary.
- * This routine was clipped out of python at one pooint
- * so it is not surprising it does not make logical sense to 
- * have grouped these itimes together
+ * 
+ * Although the routine was orignally written for CVs and AGN
+ * it now is used for any system where either a boundary layer
+ * or a compact object is involved.  The common element here
+ * is that luminosity is not derived from a temperature and 
+ * size, but rather is something that the user gives as an
+ * input variable (e.g as a fraction of the accretion luminosity).
  *
  **********************************************************/
 
@@ -175,7 +174,7 @@ get_bl_and_agn_params (lstar)
   double temp_const_agn;
   char answer[LINELENGTH];
 
-  rdpar_comment ("Parameters for BL or AGN");
+  rdpar_comment ("Parameters for Boundary Layer or the compact object in an X-ray Binary or AGN");
 
   if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)  /* If it is an AGN */
   {
@@ -192,12 +191,8 @@ get_bl_and_agn_params (lstar)
   }
 
 
-  get_spectype (geo.bl_radiation,
-                //"Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)", &geo.bl_ion_spectype);
-                "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
-  get_spectype (geo.agn_radiation,
-                //"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
-                "BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
+  get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
+  get_spectype (geo.agn_radiation, "BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
 
   if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
   {
@@ -356,16 +351,16 @@ get_bl_and_agn_params (lstar)
     // set the default for the radius of the BH to be 6 R_Schwartschild.
     // rddoub("R_agn(cm)",&geo.rstar);
 
-    rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+    rddoub ("Boundary_layer.lum(ergs/s)", &geo.lum_agn);
     Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     geo.alpha_agn = (-1.5);
-    rddoub ("AGN.power_law_index", &geo.alpha_agn);
+    rddoub ("Boundary_layer.power_law_index", &geo.alpha_agn);
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
        only in advanced mode. default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced)
-      rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub ("@Boundary_layer.power_law_cutoff", &geo.pl_low_cutoff);
 
 
     /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
@@ -383,7 +378,7 @@ get_bl_and_agn_params (lstar)
     }
 
 
-    Log ("AGN Input parameters give a power law constant of %e\n", geo.const_agn);
+    Log ("Input parameters give a power law constant of %e\n", geo.const_agn);
 
     if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)        /*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
     {
