@@ -296,7 +296,7 @@ main (argc, argv)
        */
 
 
-      rdpar_comment ("Parameters descibing the various winds or coronae in the system");
+      rdpar_comment ("Parameters describing the various winds or coronae in the system");
 
       strcpy (answer, "yes");
       geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
