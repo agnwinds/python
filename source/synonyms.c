@@ -1,4 +1,3 @@
-
 /***********************************************************/
 /** @file  synonyms.c
  * @author ksl
@@ -15,19 +14,13 @@
  * It is important to note that this process cannot continue indefinitely because , one may want
  * to change keyword/parameters so that they are not simple rplacements.
  ***********************************************************/
-
-
 #include <stdio.h>
 #include <strings.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include "log.h"
-
-
 #define	LINELEN 256
-
-
 char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.type",
   "Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file",
   "disk.radmax",
@@ -57,7 +50,7 @@ char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.typ
   "kn.rmax", "kn.rmin", "kn.v_infinity", "kn.v_zero", "QSO_BH_radiation", "lum_agn", "AGN.power_law_index",
   "AGN.blackbody_temp", "@AGN.power_law_cutoff", "AGN.geometry_for_pl_source", "Rad_type_for_agn", "Rad_type_for_agn",
   "wind.mdot", "Wind_ionization", "Wind_radiation", "Wind_type", "Thermal_balance_options",
-  "wind.fixed_concentrations_file", "Disk-radiation",
+  "wind.fixed_concentrations_file", "Disk-radiation", "AGN.power_law_index", "lum_agn",
   NULL
 };
 
@@ -95,12 +88,12 @@ char *new_names[] = { "Central_object.mass", "Central_object.radius",
   "BH.blackbody_temp", "@Bh.power_law_cutoff", "BH.geometry_for_pl_source",
   "BH.rad_type_in_final_spectrum", "BH.rad_type_to_make_wind",
   "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type", "Wind_heating.extra_processes",
-  "Wind.fixed_concentrations_file", "Disk.radiation",
+  "Wind.fixed_concentrations_file", "Disk.radiation", "Boundary_layer.power_law_index", "Boundary_layer.lum", 
   NULL
 };
 
 
-int number_of_names = 104;
+int number_of_names = 106;
 int synonyms_validated = 0;
 
 #define MIN(a,b) ((a)<b ? a:b)
