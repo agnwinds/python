@@ -88,7 +88,7 @@ char *new_names[] = { "Central_object.mass", "Central_object.radius",
   "BH.blackbody_temp", "@Bh.power_law_cutoff", "BH.geometry_for_pl_source",
   "BH.rad_type_in_final_spectrum", "BH.rad_type_to_make_wind",
   "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type", "Wind_heating.extra_processes",
-  "Wind.fixed_concentrations_file", "Disk.radiation", "Boundary_layer.power_law_index", "Boundary_layer.lum", 
+  "Wind.fixed_concentrations_file", "Disk.radiation", "Boundary_layer.power_law_index", "Boundary_layer.lum",
   NULL
 };
 
