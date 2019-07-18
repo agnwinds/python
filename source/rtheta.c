@@ -159,7 +159,8 @@ rtheta_make_grid (w, ndom)
      to propagate. */
 
 /* Next two lines for linear intervals */
-  dtheta = 90. / (mdim - 3);
+//OLD  dtheta = 90. / (mdim - 3);
+  dtheta = 90. / (mdim - 2);
 
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
@@ -773,6 +774,7 @@ rtheta_is_cell_in_wind (n)
   mdim = zdom[ndom].mdim;
 
 //OLD  if (i >= (ndim - 2) && j >= (mdim - 2))
+//OLD  if (i >= (ndim - 2) || j >= (mdim - 3))
   if (i >= (ndim - 2) || j >= (mdim - 2))
   {
     return (W_NOT_INWIND);
