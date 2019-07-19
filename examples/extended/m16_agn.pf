@@ -47,6 +47,8 @@ SV.mdot_r_exponent                         0.0
 SV.v_infinity(in_units_of_vescape          1.0
 SV.acceleration_length(cm)                 1e19
 SV.acceleration_exponent                   0.5
+SV.v_zero_mode(fixed,sound_speed)		   fixed 
+SV.v_zero(cm/s)						       6e5
 Wind.radmax(cm)                            1e+20
 Wind.t.init                                100000.0
 Wind.filling_factor(1=smooth,<1=clumped)   0.01
