@@ -14,7 +14,7 @@
  * is for the velocity to be given in spherical
  * polar coordinates.
 
- * However, internally, python uses xyz coordianes
+ * However, internally, python uses xyz coordinates
  * for velocites (as measured in the xz plane),
  * and that is the model followed, here.  This also
  * makes these routines similar to those used
@@ -83,10 +83,9 @@ struct
  * * inwind defines whether or not a particular cell is actually
  * in the wind
  *
- * We assume that all of the variables are centered, that is
- * we are not assuming that we are giving rho at the center of
- * a cell, but that r and v_r are at the edges of a cell.
- * This is somehing that would presumable be easy to change
+ * This routine assumes the same conventions as used else where
+ * in Python, that is that the positions and velocities are given
+ * at the edges of a cell, but that rho is given at the center.
  *
  **********************************************************/
 
@@ -161,7 +160,7 @@ import_rtheta (ndom, filename)
 
   if (ncell != xx_rtheta.ndim * xx_rtheta.mdim)
   {
-    Error ("The dimensions of the imported grid seem wrong % d x %d != %d\n", xx_rtheta.ndim, xx_rtheta.mdim, xx_rtheta.ncell);
+    Error ("import_rtheta: The dimensions of the imported grid seem wrong % d x %d != %d\n", xx_rtheta.ndim, xx_rtheta.mdim, xx_rtheta.ncell);
     exit (1);
   }
 
@@ -216,11 +215,11 @@ import_rtheta (ndom, filename)
  *
  * @details
  * This routine initializes the portions of the wind structure
- * using the imported model, specirically those portions having
+ * using the imported model, specifically those portions having
  * to do with positions, and velocities.
  *
  * ### Notes ###
- * The routine also initials wind_x and wind_z in the domain
+ * The routine also initializes wind_x and wind_z in the domain
  * structure, ans sets up wind_cones and other boundaries
  * intended to bound the wind.
  *
@@ -267,7 +266,7 @@ rtheta_make_grid_import (w, ndom)
     w[nn].xcen[1] = 0;
     w[nn].xcen[2] = w[nn].rcen * cos (theta);
 
-    /* JM 1711 -- copy across the inwind variable to the wind pointer */
+    /* Copy across the inwind variable to the wind pointer */
     w[nn].inwind = xx_rtheta.inwind[n];
 
 
@@ -380,12 +379,15 @@ rtheta_make_grid_import (w, ndom)
  *
  * @details
  * This routine interpolates on the values read in for the
- * inported model to give one a velocity
+ * imported model to give one a velocity
  *
  *
  * ### Notes ###
- *  In practice this routine is only used to initallize v in
- *  wind structure.  This is consistent with the way velocities
+ *  In practice this routine is only used to initialize v in
+ *  wind structure, and interpolation is only a convenient 
+ *  way to do this.  
+ *  
+ *  This is consistent with the way velocities
  *  are treated throughout Python.
  *
  **********************************************************/
@@ -443,9 +445,11 @@ velocity_rtheta (ndom, x, v)
  * ### Notes ###
  * This routine is really only used to intialize rho in the
  * Plasma structure.  In reality, once the Plasma structure is
- * initialized we always interpolate within the plasma structure
+ * initialized, we always interpolate within the plasma structure
  * and do not access the original data
  *
+ * This routine is dependent on the assumption that x is in 
+ * the center of a cell.
  *
  **********************************************************/
 
@@ -466,15 +470,18 @@ rho_rtheta (ndom, x)
   angle = acos (ctheta) * RADIAN;
 
   i = 0;
-  while (angle > xx_rtheta.wind_z[i] && i < xx_rtheta.mdim - 1)
+  while (angle > xx_rtheta.wind_z[i] && i < xx_rtheta.mdim)
   {
     i++;
   }
+  i--;
+
   j = 0;
-  while (r > xx_rtheta.wind_x[j] && j < xx_rtheta.ndim - 1)
+  while (r > xx_rtheta.wind_x[j] && j < xx_rtheta.ndim)
   {
     j++;
   }
+  j--;
 
   n = j * xx_rtheta.mdim + i;
 

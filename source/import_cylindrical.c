@@ -51,7 +51,7 @@ struct
  * ### Notes ###
  * The basic data we need to read in are
  *
- * * i, j, inwind, r z  v_x v_y v_z rho (and optionally T)
+ * * i, j, inwind, x z  v_x v_y v_z rho (and optionally T)
  *
  * where v_x,_v_y,v_z are the velocities in the x,z plane
  * and where
@@ -60,14 +60,16 @@ struct
  * * j is the row number     (and z coresponds to mdim)
  * * inwind indicates whether this cell is in the wind
  *
- * We assume that all of the variables are centered, that is
- * we are not assuming that we are giving rho at the center of
- * a cell, but that r and v_r are at the edges of a cell.
- * This is someghing that would presumable be easy to change
+ * We assume that all of the variables are defined as they
+ * are in the python structues, that is that positions and
+ * velocities are defined at the corners of cells but that
+ * rho refers to the cell center.
  *
  * Note that we assume that the data are being read in in the
  * same order as printed out by windsave2table, that is that
  * the first "column" is read in, and then the second "column".
+ * The grid must also be complete. Missing i or j elements are
+ * not allowed.
  *
  **********************************************************/
 
@@ -149,7 +151,7 @@ import_cylindrical (ndom, filename)
     exit (1);
   }
 
-
+/* Fill 1-d arrays in x and z */
 
   jz = jx = 0;
   for (n = 0; n < xx_cyl.ncell; n++)
@@ -373,7 +375,7 @@ cylindrical_make_grid_import (w, ndom)
 }
 
 
-/* The next section calculates velocites.  We follow the hydro approach of
+/* The next section calculates velocities.  We follow the hydro approach of
  * getting those velocities from the original grid.  This is really only
  * used for setting up the grid
  */
@@ -405,7 +407,7 @@ cylindrical_make_grid_import (w, ndom)
  * imported model to give one a velocity
  *
  * ### Notes ###
- * In practice this routine is only used to initallize v in
+ * In practice this routine is only used to initalize v in
  * wind structure.  This is consistent with the way velocities
  * are treated throughout Python.
  *
@@ -463,6 +465,9 @@ velocity_cylindrical (ndom, x, v)
  * initialized we always interpolate within the plasma structure
  * and do not access the original data.
  *
+ * This routine depends on the assumpition that x corresponds
+ * to the mid-point of a cell.
+ *
  **********************************************************/
 
 double
@@ -478,15 +483,18 @@ rho_cylindrical (ndom, x)
   z = fabs (x[2]);
 
   i = 0;
-  while (z > xx_cyl.wind_z[i] && i < xx_cyl.mdim - 1)
+  while (z > xx_cyl.wind_z[i] && i < xx_cyl.mdim)
   {
     i++;
   }
+  i--;
+
   j = 0;
-  while (r > xx_cyl.wind_x[j] && j < xx_cyl.ndim - 1)
+  while (r > xx_cyl.wind_x[j] && j < xx_cyl.ndim)
   {
     j++;
   }
+  j--;
 
   n = j * xx_cyl.mdim + i;
 
