@@ -305,7 +305,6 @@ rho_1d (ndom, x)
   int n;
   r = length (x);
 
-  delta_min = VERY_BIG;
 
 
   n = 0;

@@ -160,7 +160,8 @@ import_rtheta (ndom, filename)
 
   if (ncell != xx_rtheta.ndim * xx_rtheta.mdim)
   {
-    Error ("import_rtheta: The dimensions of the imported grid seem wrong % d x %d != %d\n", xx_rtheta.ndim, xx_rtheta.mdim, xx_rtheta.ncell);
+    Error ("import_rtheta: The dimensions of the imported grid seem wrong % d x %d != %d\n", xx_rtheta.ndim, xx_rtheta.mdim,
+           xx_rtheta.ncell);
     exit (1);
   }
 
@@ -230,7 +231,7 @@ rtheta_make_grid_import (w, ndom)
      WindPtr w;
      int ndom;
 {
-  int n, nn;
+  int n, nn, nn_outer;
   double theta;
   double rho_max, rho_min, r_inner, r_outer, rmin, rmax;
   double zmin, zmax;
@@ -303,16 +304,24 @@ rtheta_make_grid_import (w, ndom)
   {
     wind_ij_to_n (ndom, xx_rtheta.i[n], xx_rtheta.j[n], &nn);
 
+
     r_inner = length (w[nn].x);
 
-    r_outer = length (w[nn + xx_rtheta.mdim].x);
+    nn_outer = nn + xx_rtheta.mdim;
+
+    if (nn_outer < zdom[ndom].ndim2)
+    {
+
+      r_outer = length (w[nn_outer].x);
+    }
+
 
 
     if (w[nn].inwind >= 0)
     {
-      if (w[nn + xx_rtheta.mdim].x[0] > rho_max)
+      if (w[nn_outer].x[0] > rho_max)
       {
-        rho_max = w[nn + xx_rtheta.mdim].x[0];
+        rho_max = w[nn_outer].x[0];
       }
       if (w[nn - 1].x[2] > zmax)
       {
