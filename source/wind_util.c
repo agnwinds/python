@@ -63,12 +63,12 @@ int ierr_coord_fraction = 0;
  *
  * ### Notes ###
  * There are numerous times when one wants the value
- * 	of an interpoalted  variable in the wind.  There
+ * 	of an interpolated  variable in the wind.  There
  * 	is no easy way to interpolate the variable easily.
  * 	What this routine does is calculate the fractional
  * 	contributions of elements in the array to that
- * 	position.  Then one must sum up the actual variable
- * 	else where
+ * 	position.  Then one must sum up the actual values  
+ * 	elsewhere
  *
  * 	If positions are outside the grid, coord_fraction
  * 	attempts to give you the value at the edge of the

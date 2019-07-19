@@ -624,7 +624,7 @@ rtheta_make_hydro_grid (w, ndom)
     }
   }
 
-  /* Now set up the wind cones that are needed for calclating ds in a cell */
+  /* Now set up the wind cones that are needed for calculating ds in a cell */
 
   rtheta_make_cones (ndom, w);
 
