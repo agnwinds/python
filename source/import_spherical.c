@@ -301,20 +301,11 @@ rho_1d (ndom, x)
      double *x;
 {
   double rho = 0;
-  double delta_min, delta;
   double r;
   int n;
   r = length (x);
 
   delta_min = VERY_BIG;
-
-//HOLD  n=0;
-//HOLD  while ((delta=fabs(xx_1d.r[n]-r))<delta_min && n < xx_1d.ndim) 
-//HOLD  {
-//HOLD      delta_min=delta;
-//HOLD      n++;
-//HOLD  }
-//HOLD  n--;
 
 
   n = 0;
