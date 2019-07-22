@@ -643,7 +643,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
     flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
-  alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
+  // alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
+  alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
@@ -669,8 +670,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 ***********************************************************/
 
 double
-alpha_sp_integrand (freq)
-     double freq;               //frequency 
+alpha_sp_integrand (double freq, void *params)
 {
   double fthresh;
   double x;

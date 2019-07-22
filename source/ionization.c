@@ -23,7 +23,7 @@
  * @brief      ionization routines for the wind one cell at a time
  *
  * @param [in,out] PlasmaPtr  xplasma   The cell in which the ioniztion is to be calculated
- * @param [in] int  mode   A parameter descibing how to calculate the ioniztion
+ * @param [in] int  mode   A parameter describing how to calculate the ionization
  * @return     The routine returns status messages dereived from the individual routines
  * used to calculate the abundances.
  *
@@ -504,7 +504,8 @@ calc_te (xplasma, tmin, tmax)
 
   if ((z1 * z2 < 0.0))
   {                             // Then the interval is bracketed
-    xplasma->t_e = zbrent (zero_emit, tmin, tmax, 50.);
+    xplasma->t_e = zero_find (zero_emit2, tmin, tmax, 50.);
+
   }
   else if (fabs (z1) < fabs (z2))
   {
@@ -580,6 +581,12 @@ calc_te (xplasma, tmin, tmax)
  * 1806 - ksl - The equation now includes a term for non-radiave heating (heat_shock)
  *
  **********************************************************/
+
+double
+zero_emit2 (double t, void *params)
+{
+  return (zero_emit (t));
+}
 
 double
 zero_emit (t)

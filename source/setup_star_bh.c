@@ -141,29 +141,28 @@ get_stellar_params ()
 
 /**********************************************************/
 /** 
- * @brief      sets up the boundary layer and agn power law parameters
+ * @brief      sets up the boundary layer and compact object 
+ *   power law parameters
  *   based on user input and system type
  *
- * @param [in] double  lstar   A luminosity used to intialize the luminosity
+ * @param [in] double  lstar   A luminosity used to initialize the luminosity
  * of the agn in the event that there is no disk
  * @return    Always returns 0
  *
  * @details
  * The routine reads a number of parameters that have to do
- * with defining the boundary layer or and AGN.  
+ * with defining the boundary layer or the BH/NS in an 
+ * X-ray binary or an AGN.  
  *
  *
  * ### Notes ###
- * @bug Our long term goal is to make our inputs for radiation
- * sources more generic, but there is still more work to do on
- * this routine.  The problems are really to first define what
- * we want.  Implementation should be straighforwad if we 
- * can figure out what we want. A first step might be to 
- * break this into two routines, one for a BL and one for an
- * AGN.  Note that the AGN also is used for a BH binary.
- * This routine was clipped out of python at one pooint
- * so it is not surprising it does not make logical sense to 
- * have grouped these itimes together
+ * 
+ * Although the routine was orignally written for CVs and AGN
+ * it now is used for any system where either a boundary layer
+ * or a compact object is involved.  The common element here
+ * is that luminosity is not derived from a temperature and 
+ * size, but rather is something that the user gives as an
+ * input variable (e.g as a fraction of the accretion luminosity).
  *
  **********************************************************/
 
@@ -175,7 +174,8 @@ get_bl_and_agn_params (lstar)
   double temp_const_agn;
   char answer[LINELENGTH];
 
-  rdpar_comment ("Parameters for boundary layer or AGN");
+
+  rdpar_comment ("Parameters for Boundary Layer or the compact object in an X-ray Binary or AGN");
 
   if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)  /* If it is an AGN */
   {
@@ -292,7 +292,7 @@ get_bl_and_agn_params (lstar)
       geo.const_agn = 1.0;
       rddoub ("Central_object.bremsstrahlung_temp(K)", &geo.brem_temp);
       rddoub ("Central_object.bremsstrahlung_alpha", &geo.brem_alpha);
-      temp_const_agn = geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
+      temp_const_agn = geo.lum_agn / num_int (integ_brem, 4.84e17, 2.42e18, 1e-4);
       geo.const_agn = temp_const_agn;
       Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
 
@@ -379,7 +379,6 @@ get_bl_and_agn_params (lstar)
     {
       geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
     }
-
 
     Log ("Boundary layer input parameters give a power law constant of %e\n", geo.const_agn);
   }

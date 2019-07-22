@@ -84,15 +84,14 @@ get_sv_wind_params (ndom)
   rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
   rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
 
-  if (modes.iadvanced)
-  {
-    strcpy (answer, "fixed");
-    zdom[ndom].sv_v_zero_mode = rdchoice ("@SV.v_zero_mode(fixed,sound_speed)", "0,1", answer);
-    if (zdom[ndom].sv_v_zero_mode == FIXED)
-      rddoub ("@SV.v_zero(cm/s)", &zdom[ndom].sv_v_zero);
-    else if (zdom[ndom].sv_v_zero_mode == SOUND_SPEED)
-      rddoub ("@SV.v_zero(multiple_of_sound_speed)", &zdom[ndom].sv_v_zero);
-  }
+  /* allow the user to pick whether they set v0 by a fixed value or by the sound speed */
+  strcpy (answer, "fixed");
+  zdom[ndom].sv_v_zero_mode = rdchoice ("SV.v_zero_mode(fixed,sound_speed)", "0,1", answer);
+  if (zdom[ndom].sv_v_zero_mode == FIXED)
+    rddoub ("SV.v_zero(cm/s)", &zdom[ndom].sv_v_zero);
+  else if (zdom[ndom].sv_v_zero_mode == SOUND_SPEED)
+    rddoub ("SV.v_zero(multiple_of_sound_speed)", &zdom[ndom].sv_v_zero);
+
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   zdom[ndom].rmin = geo.rstar;
@@ -114,7 +113,9 @@ get_sv_wind_params (ndom)
 
   sdom = ndom;
 
-  zdom[ndom].mdot_norm = qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
+//  zdom[ndom].mdot_norm = qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
+  zdom[ndom].mdot_norm = num_int (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
+
   return (0);
 }
 
@@ -388,7 +389,10 @@ sv_find_wind_rzero (ndom, p)
 
   /* change the global variable sv_zero_r_ndom before we call zbrent */
   sv_zero_r_ndom = ndom;
-  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+//  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+
+
   return (x);
 
 }
@@ -452,8 +456,7 @@ sv_zero_init (p)
  **********************************************************/
 
 double
-sv_zero_r (r)
-     double r;
+sv_zero_r (double r, void *params)
 {
   double theta;
   double rho, rho_guess;
@@ -520,6 +523,7 @@ sv_theta_wind (ndom, r)
  * @brief      The integrand required to calculate the normalization factor between the global mass loss rate and the mass loss per unit area at a particular place on the disk
  *
  * @param [in] double  r   A position (radius) on the disk
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return     The value of the integrand 
  *
  * The SV model is defined in terms of a mass loss rate per unit area.  mdot is the total mass loss rate from the disk.  In order to connect the local and global rates one
@@ -532,8 +536,7 @@ sv_theta_wind (ndom, r)
  **********************************************************/
 
 double
-sv_wind_mdot_integral (r)
-     double r;
+sv_wind_mdot_integral (double r, void *params)
 {
   double x;
 

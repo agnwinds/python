@@ -290,6 +290,8 @@ velocity_1d (ndom, x, v)
  * initialized we always interpolate within the plasma structure
  * and do not access the original data.
  *
+ * This routine is peculiar because it depends on the assumption
+ * that x is the center of the cell.
  *
  **********************************************************/
 
@@ -302,11 +304,15 @@ rho_1d (ndom, x)
   double r;
   int n;
   r = length (x);
+
+
+
   n = 0;
-  while (r > xx_1d.r[n] && n < xx_1d.ndim)
+  while (r >= xx_1d.r[n] && n < xx_1d.ndim)
   {
     n++;
   }
+  n--;
 
   if (n < xx_1d.ndim)
   {
@@ -318,6 +324,6 @@ rho_1d (ndom, x)
   }
 
 
-  Log ("rho %e \n", rho);
+  Log ("ZZZZ %d %.3e %.3e rho %e \n", n, r, xx_1d.r[n], rho);
   return (rho);
 }
