@@ -246,13 +246,8 @@ is_input_line_synonym_for_question (question, input_line)
   {
 
     // For each synonym, if the 'new name' refers to the question we're trying to ask...
-<<<<<<< HEAD
-    if(!strncmp(new_names[synonym_index], question, question_name_length)) {
-=======
     if (!strncmp (new_names[synonym_index], question, question_name_length))
     {
-
->>>>>>> upstream/dev
       // Does the 'old name' match the question on the input line?
       if (!strncmp (old_names[synonym_index], input_line, get_question_name_length (old_names[synonym_index])))
       {
