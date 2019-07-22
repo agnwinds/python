@@ -301,7 +301,7 @@ get_bl_and_agn_params (lstar)
     {
       /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
       rddoub ("Central_object.blackbody_temp(K)", &geo.alpha_agn);
-      geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
+      geo.lum_agn = 4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
       Log ("OK, the black hole/AGN lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
