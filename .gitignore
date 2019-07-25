@@ -55,6 +55,9 @@ docs/doxygen/latex/
 py_progs/venv/
 py_progs/*.html
 
+# For when the wiki is cloned locally
+wiki/
+
 # python and system files
 *.pyc
 *~

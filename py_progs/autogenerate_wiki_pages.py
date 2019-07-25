@@ -8,7 +8,7 @@ Arguments:
     Any
         Prints this documentation
 """
-#!/usr/bin/env python
+#! /usr/bin/env python
 from typing import TextIO
 import os
 import sys
@@ -17,15 +17,53 @@ from subprocess import call
 import yaml
 
 
-def image_from_latex(equation: str) -> str:
+def sanitise(text: str) -> str:
+    """
+
+    :param text:
+    :return:
+    """
+    while '$' in text:
+        equation_start = text.find('$')
+        equation_end = text.find('$', equation_start + 1)
+        text = text.replace(
+            text[equation_start:equation_end + 1],
+            image_link_from_latex(text[equation_start + 1:equation_end])
+        )
+
+    while ":ref:" in text:
+        ref_start = text.find(":ref:")
+        name_start = text.find('`', ref_start)
+        name_end = text.find('`', name_start+1)
+
+        text = text.replace(
+            text[ref_start:name_end+1],
+            link_from_name(text[name_start+1:name_end])
+        )
+
+    return text
+
+
+def write_definition_list(output_file: TextIO, definitions: dict):
+    """
+    Converts a list of key-value pairs to a definition list
+
+    :param output_file:
+    :param definitions:
+    :return:
+    """
+    for key, value in definitions.items():
+        write_str_indent(
+            output_file, "* `{}`: {}".format(key, value),
+            indent="  "
+        )
+
+def image_link_from_latex(equation: str) -> str:
     """
     Converts a LaTeX equation into an image
 
-    Arguments:
-        equation: The string to convert into an image link
-
-    Returns:
-        A markdown image link to codecogs
+    :param equation: The string to convert into an image link
+    :return: A markdown image link to codecogs
     """
     return '![{}](https://latex.codecogs.com/gif.latex?{})'.format(equation, equation)
 
@@ -34,18 +72,30 @@ def link_from_name(name: str) -> str:
     """
     Converts a name into a mediawiki link
 
-    Arguments:
-        name: The name to link to
-
-    Returns:
-        A mediawiki format link [[display name|link path]]
+    :param name: The name to link to
+    :return: A mediawiki format link [[display name|link path]]
     """
     return '[[{}|{}#{}]]'.format(
         name,
         name.split('.')[0]+' Parameters',
-        name.lower().replace('.', ''
+        name.lower().replace('.', '')
     )
-                                 )
+
+
+def link_from_file(name: str) -> str:
+    """
+    Converts a filename to a github link
+
+    :param name:
+    :return:
+    """
+    if isinstance(name, list):
+        return ', '.join(['[{}]({})'.format(
+            name, 'https://github.com/agnwinds/python/blob/master/source/' + one_name) for one_name in name])
+    else:
+        return '[{}]({})'.format(
+            name, 'https://github.com/agnwinds/python/blob/master/source/'+name
+        )
 
 
 def write_header_by_level(output_file: TextIO, string: str, level: int = 0):
@@ -53,19 +103,11 @@ def write_header_by_level(output_file: TextIO, string: str, level: int = 0):
     Writes a passed string as a header, with an appropriate type of underscore depending on
     nesting level (e.g. heading -> subheading)
 
-    Arguments:
-        output_file: The file to write to
-        string: The text to write
-        level: The level of heading, 0=heading, 1=subheading, 2=subsubheading, 3=paragraph heading
+    :param output_file: The file to write to
+    :param string: The text to write
+    :param level: The level of heading, 0=heading, 1=subheading, 2=subsubheading, 3=paragraph heading
     """
-    if level == 0:
-        output_file.write("{}\n{}\n".format(string, ''.join('=' for i in range(len(string)))))
-    elif level == 1:
-        output_file.write("{}\n{}\n".format(string, ''.join('-' for i in range(len(string)))))
-    elif level == 2:
-        output_file.write("{}\n{}\n".format(string, ''.join('^' for i in range(len(string)))))
-    else:
-        output_file.write('**{}**\n{}\n'.format(string, ''.join('"' for i in range(len(string)+4))))
+    output_file.write('#{} {}\n'.format('#'*level, string))
 
 
 def write_str_indent(output_file: TextIO, string: str, indent: str = "  ", all: bool = False):
@@ -73,13 +115,12 @@ def write_str_indent(output_file: TextIO, string: str, indent: str = "  ", all: 
     Writes a passed string to the output file. If it's split over multiple lines,
     indent the subsequent lines by the specified amount.
 
-    Arguments:
-        output_file: The file to write to
-        string: The text to write
-        indent: The indent to apply if the text splits over multiple lines
-        all: Whether or not all lines should be indented
+    :param output_file: The file to write to
+    :param string: The text to write
+    :param indent: The indent to apply if the text splits over multiple lines
+    :param all: Whether or not all lines should be indented
     """
-    lines = string.splitlines()
+    lines = sanitise(string).splitlines()
     if all:
         output_file.write("{}{}\n".format(indent, lines[0]))
     else:
@@ -91,73 +132,63 @@ def write_str_indent(output_file: TextIO, string: str, indent: str = "  ", all: 
     return
 
 
-def output_parameter(output_file: TextIO, parameter: dict, level: int = 0, no_separator: bool = False):
+def output_parameter(output_file: TextIO, parameter: dict, level: int = 0):
     """
     Output a parameter to file
 
-    Arguments:
-        output_file: The file to write to
-        parameter: The parameter to write to file
-        level: The level of the parameter, e.g. heading, subheading
+    :param output_file: The file to write to
+    :param parameter: The parameter to write to file
+    :param level: The level of the parameter, e.g. heading, subheading
     """
-    # Suppress transition line at top level
-    if not level and not no_separator:
-        output_file.write("----------------------------------------\n\n")
     write_header_by_level(output_file, parameter['name'], level)
-    output_file.write("{}\n".format(parameter['description']))
+    output_file.write("{}\n".format(sanitise(parameter['description'])))
 
     if parameter.get('type'):
-        output_file.write("**Type:** {}\n\n".format(parameter['type']))
+        output_file.write("##### Type\n {}\n\n".format(sanitise(parameter['type'])))
     if parameter.get('unit'):
-        output_file.write("**Unit:** {}\n\n".format(parameter['unit']))
+        output_file.write("##### Unit\n {}\n\n".format(sanitise(parameter['unit'])))
 
     if parameter.get('values'):
+        output_file.write("##### Values\n\n")
         if isinstance(parameter['values'], dict):
-            output_file.write("**Values:**\n\n")
-            for key, value in parameter['values'].items():
-                output_file.write("{}\n".format(key))
-                if isinstance(value, str):
-                    write_str_indent(output_file, value.strip(), indent="  ", all=True)
-                elif isinstance(value, list):
-                    write_str_indent(
-                        output_file,
-                        ', '.join([str(x) for x in value]), indent="  ", all=True
-                    )
-                else:
-                    output_file.write("    "+str(value))
-
+            write_definition_list(output_file, parameter['values'])
         elif isinstance(parameter['values'], list):
             # If this is a list of values, write each out as a bullet-point
-            output_file.write("**Values:**\n")
             for value in parameter['values'].items():
                 write_str_indent(output_file, "* {}".format(value), indent="  ")
-
         else:
-            output_file.write("**Values:** {}\n".format(parameter['values']))
+            output_file.write("{}\n".format(sanitise(parameter['values'])))
+
         output_file.write("\n")
 
     if parameter.get('parent'):
         if isinstance(parameter['parent'], dict):
-            output_file.write("**Parent(s):**\n\n")
+            output_file.write("##### Parent(s)\n\n")
             for key, value in parameter['parent'].items():
                 if isinstance(value, str):
-                    write_str_indent(output_file, "* :ref:`{}`: {}".format(key, value), indent="  ")
+                    if ' ' not in value:
+                        output_file.write("* {}: ``{}``\n".format(link_from_name(key), value))
+                    else:
+                        write_str_indent(
+                            output_file, "* {}: {}".format(link_from_name(key), value),
+                            indent="  "
+                        )
                 elif isinstance(value, list):
                     list_text = ', '.join(['``'+str(x)+'``' for x in value])
-                    write_str_indent(output_file, "* :ref:`{}`: {}".format(key, list_text, indent="  "))
+                    write_str_indent(output_file, "* {}: {}".format(link_from_name(key), list_text, indent="  "))
                 else:
-                    output_file.write("* :ref:`{}`: ``{}``\n\n".format(key, value))
+                    output_file.write("* {}: ``{}``\n\n".format(link_from_name(key), value))
             output_file.write("\n")
 
         elif isinstance(parameter['parent'], list):
             # If this is a list of parents, write each out as a bullet-point
-            output_file.write("**Parent(s):**\n")
+            output_file.write("##### Parent(s)\n")
             for value in parameter['parent'].items():
                 write_str_indent(output_file, "* {}".format(value), indent="  ")
         else:
-            output_file.write("**Parent(s):** {}\n\n".format(parameter['parent']))
+            output_file.write("##### Parent(s) {}\n\n".format(sanitise(parameter['parent'])))
 
-    output_file.write("**File:** {}\n\n\n".format(parameter['file']))
+    output_file.write("**File:** {}\n\n\n".format(link_from_file(parameter['file'])))
 
     # Go through all the children and output them
     if parameter.get('children'):
@@ -170,11 +201,8 @@ def read_yaml(input_folder: str) -> dict:
     """
     Read all the .yaml files in to dicts. Categorise by type, e.g. 'reverb.mode' is type 'reverb'
 
-    Arguments:
-        input_folder: Path to the folder of input yaml files.
-
-    Returns:
-        dict: Dictionary of parameter dicts
+    :param input_folder: Path to the folder of input yaml files.
+    :return: Dictionary of parameter dicts
     """
     dox_all = {}
 
@@ -200,45 +228,41 @@ def read_yaml(input_folder: str) -> dict:
     return dox_all
 
 
-def write_rst(output_folder: str, dox_structured: dict):
+def write_md(output_folder: str, dox_structured: dict):
     """
-    Write the structured documentation out to rst files
+    Write the structured documentation out to md files
 
-    Arguments:
-        output_folder: The folder to write to
-        dox_structured: The tree structured documentation
+    :param output_folder: The folder to write to
+    :param dox_structured: The tree structured documentation
     """
     # Go through the parameter tree and write it out
     for parameter_type, type_parameters in dox_structured.items():
-        with open(os.path.join(output_folder, "{}.autogen.rst".format(parameter_type)), 'w') as type_file:
-            header_line = ''.join('=' for i in range(len(parameter_type)))
-            type_file.write("{}\n{}\n{}\n\n".format(header_line, parameter_type, header_line))
-            no_separator=True
+        with open(os.path.join(output_folder, "{} Parameters.md".format(parameter_type)), 'w') as type_file:
             for parameter in type_parameters.values():
-                output_parameter(type_file, parameter, level=0, no_separator=True)
-                no_separator=False
+                output_parameter(type_file, parameter, level=0)
 
 
-def autogenerate_rtd_pages():
+def autogenerate_wiki_pages():
     """
-    Write the RTD files to disk and add them to git, then run sphinx-build to generate the docs.
+    Write the wiki files to disk and add them to git.
     """
-    output_folder = os.path.join(os.environ["PYTHON"], "docs", "rst", "parameters")
-    html_folder = os.path.join(os.environ["PYTHON"], "docs", "html")
-    docs_folder = os.path.join(os.environ["PYTHON"], "docs")
-    dox_all = {}
+    output_folder = os.path.join(os.environ["PYTHON"], "wiki", "params")
+
+    # If we can't create the folder, clear out the old autogenerated files
+    try:
+        for filename in os.listdir(output_folder):
+            if " Parameters.md" in filename:
+                os.remove(os.path.join(output_folder, filename))
+    except:
+        os.mkdir(output_folder)
+
+    call(["git", "rm", "-f", os.path.join(output_folder, "* Parameters.md")],
+         cwd=os.path.join(os.environ["PYTHON"], "wiki"))
 
     try:
-        # Try making output folder
-        os.makedirs(output_folder)
-
-    except OSError:
-        # If we can't create the folder, clear out the old autogenerated files
-        for filename in os.listdir(output_folder):
-            if "autogen" in filename:
-                os.remove(os.path.join(output_folder, filename))
-
-        call(["git", "rm", "-f", os.path.join(output_folder, "*.autogen.rst")])
+        os.mkdir(output_folder)
+    except:
+        pass
 
     dox_all = read_yaml(
         os.path.join(os.environ["PYTHON"], "docs", "parameters")
@@ -292,11 +316,10 @@ def autogenerate_rtd_pages():
             # If it has no parents, add it to the top layer
             dox_structured[parameter_type][parameter_name] = parameter
 
-    write_rst(output_folder, dox_structured)
+    write_md(output_folder, dox_structured)
 
-    call(["sphinx-build", "-b", "html", docs_folder, html_folder])
-    call(["git", "add", os.path.join(output_folder, "*.autogen.rst")])
-    webbrowser.open(os.path.join(html_folder, "index.html"))
+    call(["git", "add", os.path.join(output_folder, "* Parameters.md")],
+         cwd=os.path.join(os.environ["PYTHON"], "wiki"))
 
 
 # Next lines permit one to run the routine from the command line
@@ -304,4 +327,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         print(__doc__)
     else:
-        autogenerate_rtd_pages()
+        autogenerate_wiki_pages()
