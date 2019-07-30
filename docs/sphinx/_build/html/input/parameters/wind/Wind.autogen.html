@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Wind &mdash; python 81a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Radiative Transfer &amp; Ionisation" href="../rt_ion.html" />
+    <link rel="prev" title="Stellar_wind" href="Stellar_wind.autogen.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                81
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../input.html">Inputs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../system_description.html">System Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../wind_models.html">Wind Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../importing_models.html">Importing Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../parameters.html">Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../System_type.autogen.html">System_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Input_spectra.autogen.html">Input_spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../central_object.html">Central object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../disk.html">Disk</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../wind.html">Wind</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="Corona.autogen.html">Corona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Homologous.autogen.html">Homologous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Hydro.autogen.html">Hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="KWD.autogen.html">KWD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SV.autogen.html">SV</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Shell.autogen.html">Shell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Stellar_wind.autogen.html">Stellar_wind</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Wind</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spectra.html">Spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reverb.html">Reverberation Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../other.html">Other</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dummy.html">Dummy Equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evaluation.html">Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../meta.html">Meta-documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../input.html">Inputs</a> &raquo;</li>
+        
+          <li><a href="../../parameters.html">Parameters</a> &raquo;</li>
+        
+          <li><a href="../wind.html">Wind</a> &raquo;</li>
+        
+      <li>Wind</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../_sources/input/parameters/wind/Wind.autogen.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="wind">
+<h1>Wind<a class="headerlink" href="#wind" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="wind-old-windfile">
+<h2>Wind.old_windfile<a class="headerlink" href="#wind-old-windfile" title="Permalink to this headline">¶</a></h2>
+<p>The rootname of a previously saved model in a calculation one wishes to
+continue (with the possiblity of making changes to some of the details of
+the radiation sources, or to extract spectra from different inclinations)</p>
+<p><strong>Type:</strong> String</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../System_type.autogen.html#id1"><span class="std std-ref">System_type</span></a>: previous</p></li>
+</ul>
+<p><strong>File:</strong> python.c</p>
+</div>
+<div class="section" id="wind-ionization">
+<h2>Wind.ionization<a class="headerlink" href="#wind-ionization" title="Permalink to this headline">¶</a></h2>
+<p>Multi-line description, must keep indentation.</p>
+<p><strong>Type:</strong> Enumerator</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>LTE_te</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>LTE_tr</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>ML93</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>fixed</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>matrix_bb</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>matrix_pow</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>on.the.spot</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+</dl>
+<p><strong>File:</strong> setup.c</p>
+<div class="section" id="wind-fixed-concentrations-file">
+<h3>Wind.fixed_concentrations_file<a class="headerlink" href="#wind-fixed-concentrations-file" title="Permalink to this headline">¶</a></h3>
+<p>The filename for the fixed ion concentrations if you have
+set Wind_ionization to 2 (fixed). This file has format
+[atomic_number  ionizationstage   ion fraction].</p>
+<p><strong>Type:</strong> String</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-ionization"><span class="std std-ref">Wind.ionization</span></a>: fixed</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+</div>
+<div class="section" id="wind-radiation">
+<h2>Wind.radiation<a class="headerlink" href="#wind-radiation" title="Permalink to this headline">¶</a></h2>
+<p>Whether or not the wind should radiate.</p>
+<p><strong>Type:</strong> Boolean (yes/no)</p>
+<p><strong>File:</strong> python.c</p>
+</div>
+<div class="section" id="wind-number-of-components">
+<h2>Wind.number_of_components<a class="headerlink" href="#wind-number-of-components" title="Permalink to this headline">¶</a></h2>
+<p>While most simple description of a wind consist of a single region of space, Python can calculate
+radiative transfer through more complicated structres, where one region of space is described with one
+prescription and another region of space with a second prescription. For example, one might want to place
+a disk atmoosphere between the disk and a wind.  This parameter describes the number of components (aka domains)
+of the wind.</p>
+<p><strong>Type:</strong> Integer</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../System_type.autogen.html#id1"><span class="std std-ref">System_type</span></a>: <code class="docutils literal notranslate"><span class="pre">star</span></code>, <code class="docutils literal notranslate"><span class="pre">binary</span></code>, <code class="docutils literal notranslate"><span class="pre">agn</span></code></p></li>
+</ul>
+<p><strong>File:</strong> python.c</p>
+<div class="section" id="wind-t-init">
+<h3>Wind.t.init<a class="headerlink" href="#wind-t-init" title="Permalink to this headline">¶</a></h3>
+<p>Starting temperature of the wind.</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> Kelvin</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than 0. Once per domain.</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+</div>
+<div class="section" id="wind-coord-system">
+<h3>Wind.coord_system<a class="headerlink" href="#wind-coord-system" title="Permalink to this headline">¶</a></h3>
+<p>The coordinate system used for a describing a component of the wind.</p>
+<p><strong>Type:</strong> Enumerator</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>spherical</dt><dd><p>Spherical</p>
+</dd>
+<dt>cylindrical</dt><dd><p>Cylindrical</p>
+</dd>
+<dt>polar</dt><dd><p>Spherical polar</p>
+</dd>
+<dt>cyl_var</dt><dd><p>Cylindrical varying z</p>
+</dd>
+</dl>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than 0. Once per wind.</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+</div>
+<div class="section" id="wind-radmax">
+<h3>Wind.radmax<a class="headerlink" href="#wind-radmax" title="Permalink to this headline">¶</a></h3>
+<p>Multi-line description, must keep indentation.</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> cm</p>
+<p><strong>Values:</strong> Greater than <a class="reference internal" href="../central_object/Central_object.autogen.html#central-object-radius"><span class="std std-ref">Central_object.radius</span></a> and any minimum wind radii in the system.</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than 0. Once per domain.</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+</div>
+<div class="section" id="wind-filling-factor">
+<h3>Wind.filling_factor<a class="headerlink" href="#wind-filling-factor" title="Permalink to this headline">¶</a></h3>
+<p>The volume filling factor of the outflow. The implementation
+of clumping (microclumping) is described in
+Matthews et al. (2016), 2016MNRAS.458..293M. Asked once per domain.</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Values:</strong> 0 &lt; f &lt;= 1, where 1 is a fully smooth wind.</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than 0. Once per domain.</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+</div>
+<div class="section" id="wind-dim-in-z-or-theta-direction">
+<h3>Wind.dim.in.z_or_theta.direction<a class="headerlink" href="#wind-dim-in-z-or-theta-direction" title="Permalink to this headline">¶</a></h3>
+<p>Winds are calulated on spherical, cylindrical, or polar grids.
+This input variable gives the size of the grid in the z or theta
+direction.  Because some grid cells are used as a buffer, the
+actual wind cells are contained in a slightly smaller grid than
+the number given.</p>
+<p>Note that in some situations there may be more than one wind
+component, known technically as a domain.  In that case the user
+will be queried for this value mulitple times, one for each domain</p>
+<p><strong>Type:</strong> Integer</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than 0. Once per wind.</p></li>
+<li><p><a class="reference internal" href="#wind-type"><span class="std std-ref">Wind.type</span></a>: Not imported</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+</div>
+<div class="section" id="wind-type">
+<h3>Wind.type<a class="headerlink" href="#wind-type" title="Permalink to this headline">¶</a></h3>
+<p>Multi-line description, must keep indentation.</p>
+<p><strong>Type:</strong> Enumerator</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>SV</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>corona</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>homologous</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>hydro</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>imported</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>kwd</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>shell</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>star</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+<dt>yso</dt><dd><p>Multi-line description, must keep indentation.</p>
+</dd>
+</dl>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than 0. Once per domain.</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+<div class="section" id="wind-mdot">
+<h4>Wind.mdot<a class="headerlink" href="#wind-mdot" title="Permalink to this headline">¶</a></h4>
+<p>Multi-line description, must keep indentation.</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> M☉/year</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-type"><span class="std std-ref">Wind.type</span></a>: <code class="docutils literal notranslate"><span class="pre">knigge</span></code>, <code class="docutils literal notranslate"><span class="pre">SV</span></code></p></li>
+</ul>
+<p><strong>File:</strong> [‘knigge.c’, ‘sv.c’]</p>
+</div>
+<div class="section" id="wind-model2import">
+<h4>Wind.model2import<a class="headerlink" href="#wind-model2import" title="Permalink to this headline">¶</a></h4>
+<p>The name of a file to containing a generic model to read in to python from an ascii file.  (Note
+that this is not the same as reading in a model generated by python, but is intended to allow
+one to read in a generic model in a variety of formats with only a limited amount of information
+required).</p>
+<p><strong>Type:</strong> String</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-type"><span class="std std-ref">Wind.type</span></a>: imported</p></li>
+</ul>
+<p><strong>File:</strong> import.c</p>
+</div>
+</div>
+<div class="section" id="wind-dim-in-x-or-r-direction">
+<h3>Wind.dim.in.x_or_r.direction<a class="headerlink" href="#wind-dim-in-x-or-r-direction" title="Permalink to this headline">¶</a></h3>
+<p>Winds are calulated on spherical, cylindrical, or polar grids.
+This input variable gives the size of the grid in the x or r
+direction.  Because some grid cells are used as a buffer, the
+actual wind cells are contained in a slightly smaller grid than
+the number given.</p>
+<p>Note that in some situations there may be more than one wind
+component, known technically as a domain.  In that case the user
+will be queried for this value mulitple times, one for each domain</p>
+<p><strong>Type:</strong> Integer</p>
+<p><strong>Values:</strong> Greater than or equal to 4, to allow for boundaries.</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#wind-number-of-components"><span class="std std-ref">Wind.number_of_components</span></a>: Greater than or equal to 0. Once per wind.</p></li>
+<li><p><a class="reference internal" href="#wind-type"><span class="std std-ref">Wind.type</span></a>: Not imported</p></li>
+</ul>
+<p><strong>File:</strong> setup_domains.c</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../rt_ion.html" class="btn btn-neutral float-right" title="Radiative Transfer &amp; Ionisation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Stellar_wind.autogen.html" class="btn btn-neutral float-left" title="Stellar_wind" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -174,25 +174,31 @@ get_bl_and_agn_params (lstar)
   double temp_const_agn;
   char answer[LINELENGTH];
 
+
   rdpar_comment ("Parameters for Boundary Layer or the compact object in an X-ray Binary or AGN");
 
   if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)  /* If it is an AGN */
   {
+    strcpy (answer, "yes");
+    geo.agn_radiation = rdchoice ("Central_object.radiation(yes,no)", "1,0", answer);
     geo.star_radiation = 0;     // 70b - AGN do not have a star at the center */
     geo.bl_radiation = 0;
-    strcpy (answer, "yes");
-    geo.agn_radiation = rdchoice ("BH.radiation(yes,no)", "1,0", answer);
+    if(geo.agn_radiation)
+      get_spectype (geo.agn_radiation,
+                    "Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
+
   }
   else
   {
     strcpy (answer, "no");
     geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no)", "1,0", answer);
     geo.agn_radiation = 0;      // So far at least, our star systems don't have a BH
+
+    if(geo.bl_radiation)
+      get_spectype (geo.bl_radiation,
+                    "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
   }
 
-
-  get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
-  get_spectype (geo.agn_radiation, "BH.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
 
   if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
   {
@@ -200,7 +206,6 @@ get_bl_and_agn_params (lstar)
            comp[geo.agn_ion_spectype].nmods);
     exit (0);
   }
-
 
 
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What is done
@@ -216,11 +221,11 @@ get_bl_and_agn_params (lstar)
     geo.agn_radiation = 1;
     geo.agn_ion_spectype = SPECTYPE_POW;
     geo.bl_radiation = 0;
-    Log ("Trying to make a start with a power law boundary layer\n");
+    Log ("Trying to make a star with a power law boundary layer\n");
   }
   else
   {
-    Log ("Not trying to make a start with a power law boundary layer %d\n", geo.bl_ion_spectype);
+    Log ("Not trying to make a star with a power law boundary layer %d\n", geo.bl_ion_spectype);
   }
 
 
@@ -231,7 +236,7 @@ get_bl_and_agn_params (lstar)
     xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
     rddoub ("Boundary_layer.luminosity(ergs/s)", &geo.lum_bl);
-    Log ("OK, the bl lum will be about %.2e the disk lum\n", geo.lum_bl / xbl);
+    Log ("OK, the boundary layer lum will be about %.2e the disk lum\n", geo.lum_bl / xbl);
     rddoub ("Boundary_layer.temp(K)", &geo.t_bl);
   }
   else
@@ -242,7 +247,7 @@ get_bl_and_agn_params (lstar)
 
   /* Describe the agn */
 
-  if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)  /* This peculiar line is to enamble us to add a star with a power law component */
+  if (geo.agn_radiation && (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH))  /* This peculiar line is to enamble us to add a star with a power law component */
   {
     xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
@@ -260,14 +265,14 @@ get_bl_and_agn_params (lstar)
        once the AGN blackbody temp is read in, otherwise set by user */
     if (geo.agn_ion_spectype != SPECTYPE_BB)
     {
-      rddoub ("BH.lum(ergs/s)", &geo.lum_agn);
-      Log ("OK, the BH lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+      rddoub ("Central_object.luminosity(ergs/s)", &geo.lum_agn);
+      Log ("OK, the black hole luminosity will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
     if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
     {
       geo.alpha_agn = (-1.5);
-      rddoub ("BH.power_law_index", &geo.alpha_agn);
+      rddoub ("Central_object.power_law_index", &geo.alpha_agn);
 
       if (geo.alpha_agn == -1.0)        //deal with the pathological case
       {
@@ -285,11 +290,9 @@ get_bl_and_agn_params (lstar)
       geo.brem_temp = 1.16e8;   //10kev
       geo.brem_alpha = -0.2;    //This is the cloudy form of bremstrahlung
       geo.const_agn = 1.0;
-      rddoub ("AGN.bremsstrahlung_temp(K)", &geo.brem_temp);
-      rddoub ("AGN.bremsstrahlung_alpha", &geo.brem_alpha);
-//      temp_const_agn = geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
+      rddoub ("Central_object.bremsstrahlung_temp(K)", &geo.brem_temp);
+      rddoub ("Central_object.bremsstrahlung_alpha", &geo.brem_alpha);
       temp_const_agn = geo.lum_agn / num_int (integ_brem, 4.84e17, 2.42e18, 1e-4);
-
       geo.const_agn = temp_const_agn;
       Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
 
@@ -297,9 +300,9 @@ get_bl_and_agn_params (lstar)
     else if (geo.agn_ion_spectype == SPECTYPE_BB)
     {
       /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
-      rddoub ("BH.blackbody_temp(K)", &geo.alpha_agn);
+      rddoub ("Central_object.blackbody_temp(K)", &geo.alpha_agn);
       geo.lum_agn = 4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
-      Log ("OK, the BH/agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+      Log ("OK, the black hole/AGN lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
@@ -307,17 +310,17 @@ get_bl_and_agn_params (lstar)
        default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-      rddoub ("@BH.power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub ("@Central_object.power_law_cutoff", &geo.pl_low_cutoff);
 
     strcpy (answer, "sphere");
-    geo.pl_geometry = rdchoice ("BH.geometry_for_pl_source(sphere,lamp_post)", "0,1", answer);
+    geo.pl_geometry = rdchoice ("Central_object.geometry_for_source(sphere,lamp_post)", "0,1", answer);
 
 
     if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
     {
-      rddoub ("AGN.lamp_post_height(r_g)", &geo.lamp_post_height);
+      rddoub ("Central_object.lamp_post_height(r_g)", &geo.lamp_post_height);
       geo.lamp_post_height *= G * geo.mstar / C / C;    //get it in CGS units
-      Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
+      Log ("lamp_post_height in cm is %g\n", geo.lamp_post_height);
     }
     else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only two options at the moment
     {
@@ -337,8 +340,8 @@ get_bl_and_agn_params (lstar)
     {
       geo.agn_cltab_low = 1.0;
       geo.agn_cltab_hi = 10000;
-      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);      /*lo frequency break - in ev */
-      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
+      rddoub ("Central_object.cloudy.low_energy_break(ev)", &geo.agn_cltab_low);      /*lo frequency break - in ev */
+      rddoub ("Central_object.cloudy.high_energy_break(ev)", &geo.agn_cltab_hi);
       geo.agn_cltab_low_alpha = 2.5;    //this is the default value in cloudy
       geo.agn_cltab_hi_alpha = -2.0;    //this is the default value in cloudy
     }
@@ -351,8 +354,8 @@ get_bl_and_agn_params (lstar)
     // set the default for the radius of the BH to be 6 R_Schwartschild.
     // rddoub("R_agn(cm)",&geo.rstar);
 
-    rddoub ("Boundary_layer.lum(ergs/s)", &geo.lum_agn);
-    Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+    rddoub ("Boundary_layer.luminosity(ergs/s)", &geo.lum_agn);
+    Log ("OK, the boundary layer lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     geo.alpha_agn = (-1.5);
     rddoub ("Boundary_layer.power_law_index", &geo.alpha_agn);
 
@@ -377,18 +380,7 @@ get_bl_and_agn_params (lstar)
       geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
     }
 
-
-    Log ("Input parameters give a power law constant of %e\n", geo.const_agn);
-
-    if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)        /*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-    {
-      geo.agn_cltab_low = 1.0;
-      geo.agn_cltab_hi = 10000;
-      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);      /*lo frequency break - in ev */
-      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-      geo.agn_cltab_low_alpha = 2.5;    //this is the default value in cloudy
-      geo.agn_cltab_hi_alpha = -2.0;    //this is the default value in cloudy
-    }
+    Log ("Boundary layer input parameters give a power law constant of %e\n", geo.const_agn);
   }
 
   else

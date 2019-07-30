@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Spectra Files &mdash; python 81a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spectra Files" href="spectrum_files.html" />
+    <link rel="prev" title="Model" href="model.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                81
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../output.html">Outputs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostic files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Spectra Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_files.html">Spectra Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_generation_large_optical_depth.html">Spectrum Generation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dummy.html">Dummy Equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../output.html">Outputs</a> &raquo;</li>
+        
+      <li>Spectra Files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/output/spectra_files.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="spectra-files">
+<h1>Spectra Files<a class="headerlink" href="#spectra-files" title="Permalink to this headline">¶</a></h1>
+<p>Python is intended to produce simulated spectra.  These spectra are all ascii tables intended to be accessible with software packages such as astropy.</p>
+<p>All of the ascii begin with commented headers that contain all of the parameters of associated with a run,
+along with the date of the run and the specific version of Python used to make the run.
+In principle, if one still has access to any of the spectra, one can reproduce the entire run again.</p>
+<p>Broad band spectra are created from the last ionization cycle.  Detailed are calculated from all of the spectral cycles.</p>
+<p>For a model with root name <em>cv</em>, the following broadband spectra will be created:</p>
+<ul class="simple">
+<li><p><strong>cv.spec_tot</strong> - various spectra</p></li>
+<li><p><strong>cv.log_spec_tot</strong></p></li>
+<li><p><strong>cv.spec_tot_wind</strong></p></li>
+<li><p><strong>cv.log_spec_tot_wind</strong></p></li>
+</ul>
+<div class="section" id="file-types">
+<h2>File types<a class="headerlink" href="#file-types" title="Permalink to this headline">¶</a></h2>
+<dl>
+<dt>.spec_tot</dt><dd><p>An ascii file that contains various spectra from the ionization-calculation phase of the program on a linear frequency scale.
+The first few lines of the file (omitting the header) are as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Freq.        Lambda  Emitted  Star+BL  Disk     Wind     HitSurf  Scattered</span>
+<span class="mf">3.023938e+14</span> <span class="mf">9913.975</span> <span class="mf">1.07e+33</span> <span class="mf">2.03e+31</span> <span class="mf">1.05e+33</span> <span class="mf">1.05e+30</span> <span class="mf">4.11e+31</span>        <span class="mi">0</span>
+<span class="mf">3.049952e+14</span> <span class="mf">9829.418</span>  <span class="mf">1.1e+33</span> <span class="mf">2.24e+31</span> <span class="mf">1.07e+33</span> <span class="mf">3.97e+30</span> <span class="mf">4.42e+31</span>        <span class="mi">0</span>
+<span class="mf">3.075965e+14</span> <span class="mf">9746.292</span> <span class="mf">1.09e+33</span>  <span class="mf">2.1e+31</span> <span class="mf">1.07e+33</span> <span class="mf">1.22e+30</span> <span class="mf">3.63e+31</span>        <span class="mi">0</span>
+<span class="mf">3.101978e+14</span> <span class="mf">9664.559</span> <span class="mf">1.11e+33</span> <span class="mf">1.97e+31</span> <span class="mf">1.09e+33</span> <span class="mf">1.33e+30</span> <span class="mf">4.34e+31</span>        <span class="mi">0</span>
+<span class="mf">3.127991e+14</span> <span class="mf">9584.186</span> <span class="mf">1.08e+33</span> <span class="mf">2.03e+31</span> <span class="mf">1.06e+33</span> <span class="mf">1.27e+30</span> <span class="mf">4.75e+31</span>        <span class="mi">0</span>
+</pre></div>
+</div>
+<p>The first two columns are fairly obvious. Lambda is in Angstroms. The remainder indicate the luminosity of the system in specific bands. Emitted is the total emergent spectrum, Star+BL is the emergent spectrum from photons bundles originating on the Star or BL, Disk and Wind are the same for photons originating in the disk and wind respectively. HitSurf represents photons that did not escape the system but ran into a boundary, and Scattered are photons that somewhere along their path out of the system were actually scattered.</p>
+</dd>
+<dt>.log_spec_tot</dt><dd><p>An ascii file which contains the same information as <em>.spec_tot</em>, but with a logarithmically space frequency intervals.
+This gives better sampling of the SED in a lot of cases and is much better for plotting things such as the input spectrum.</p>
+</dd>
+<dt>.spec_tot_wind</dt><dd><p>Identical to <em>.spec_tot</em> but just including photons that were generated in the wind or scattered by the wind</p>
+</dd>
+<dt>.log_spec_tot_wind</dt><dd><p>A logarithmic version of <em>.spec_tot_wind</em></p>
+</dd>
+<dt>.spec</dt><dd><p>an ascii file that contains the final detailed spectra for the wavelengths of interest at a distance of <strong>100 pc</strong>.</p>
+<p>Photons bundles are generated in cycles in python and the <em>.spec</em> file is actually written out at the end of each cycle
+as the program is running in the spectrum-generation phase of the program. So one can inspect the spectrum as it is building up.</p>
+<p>The beginning of the file (omitting the header) is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Freq</span><span class="o">.</span>        <span class="n">Lambda</span>    <span class="n">Created</span>  <span class="n">Emitted</span>   <span class="n">CenSrc</span>     <span class="n">Disk</span>     <span class="n">Wind</span>  <span class="n">HitSurf</span> <span class="n">Scattered</span> <span class="n">A10P0</span><span class="o">.</span><span class="mi">50</span> <span class="n">A28P0</span><span class="o">.</span><span class="mi">50</span> <span class="n">A45P0</span><span class="o">.</span><span class="mi">50</span> <span class="n">A62P0</span><span class="o">.</span><span class="mi">50</span> <span class="n">A80P0</span><span class="o">.</span><span class="mi">50</span>
+<span class="mf">1.620713e+15</span> <span class="mf">1849.757</span>  <span class="mf">3.8401e-12</span> <span class="mf">3.6348e-12</span> <span class="mf">9.1429e-14</span> <span class="mf">3.5434e-12</span>          <span class="mi">0</span> <span class="mf">8.8693e-14</span> <span class="mf">1.7753e-13</span> <span class="mf">9.2741e-12</span> <span class="mf">7.6342e-12</span> <span class="mf">6.3434e-12</span> <span class="mf">2.3932e-12</span>  <span class="mf">9.382e-13</span>
+<span class="mf">1.620925e+15</span> <span class="mf">1849.514</span>  <span class="mf">4.8471e-12</span> <span class="mf">4.7931e-12</span> <span class="mf">2.7382e-13</span> <span class="mf">4.4306e-12</span> <span class="mf">8.8704e-14</span> <span class="mf">1.8213e-13</span> <span class="mf">2.4885e-13</span> <span class="mf">1.0177e-11</span> <span class="mf">7.7666e-12</span> <span class="mf">3.2906e-12</span> <span class="mf">3.4296e-12</span> <span class="mf">1.3389e-12</span>
+<span class="mf">1.621138e+15</span> <span class="mf">1849.272</span>  <span class="mf">5.3058e-12</span>  <span class="mf">5.182e-12</span> <span class="mf">9.1477e-14</span> <span class="mf">4.9992e-12</span> <span class="mf">9.1404e-14</span>  <span class="mf">2.674e-13</span> <span class="mf">3.5847e-13</span> <span class="mf">1.2354e-11</span> <span class="mf">6.9236e-12</span> <span class="mf">5.9863e-12</span> <span class="mf">3.3748e-12</span> <span class="mf">1.7905e-12</span>
+<span class="mf">1.621351e+15</span> <span class="mf">1849.029</span>  <span class="mf">3.9346e-12</span> <span class="mf">3.9028e-12</span>          <span class="mi">0</span> <span class="mf">3.8127e-12</span> <span class="mf">9.0124e-14</span> <span class="mf">8.9142e-14</span> <span class="mf">2.6728e-13</span> <span class="mf">1.1158e-11</span> <span class="mf">6.4932e-12</span> <span class="mf">5.1452e-12</span> <span class="mf">3.9074e-12</span> <span class="mf">8.1597e-13</span>
+</pre></div>
+</div>
+<p>where the first line indicates the version of python used to generate the spectrum,
+the second gives a brief description of each column, and the remainder of the file is the spectrum.
+The most important columns are 1 and 2, which are respectively the frequency and wavelength and the columns that begin with,
+which give the spectrum that would be observed from the object at various inclination angles and orbital phases
+(The number of columns is therefore variable depending on how many inclinations one asked for in the input files).
+The other columns Emitted, Star+BL, Disk, Wind, HitSurf and Scattered have approximately the same meaning as in the <em>.spec_tot</em> file.</p>
+</dd>
+</dl>
+<p>The remaining files parallel those generated for the broadband spectra.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="spectrum_files.html" class="btn btn-neutral float-right" title="Spectra Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="model.html" class="btn btn-neutral float-left" title="Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
