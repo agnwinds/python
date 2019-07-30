@@ -28,13 +28,13 @@ def write_header_by_level(output_file: TextIO, string: str, level: int = 0):
         level: The level of heading, 0=heading, 1=subheading, 2=subsubheading, 3=paragraph heading
     """
     if level == 0:
-        output_file.write("{}\n{}\n".format(string, ''.join('=' for i in range(len(string)))))
+        output_file.write("{}\n{}\n".format(string, ''.join('#' for i in range(len(string)))))
     elif level == 1:
-        output_file.write("{}\n{}\n".format(string, ''.join('-' for i in range(len(string)))))
+        output_file.write("{}\n{}\n".format(string, ''.join('=' for i in range(len(string)))))
     elif level == 2:
-        output_file.write("{}\n{}\n".format(string, ''.join('^' for i in range(len(string)))))
+        output_file.write("{}\n{}\n".format(string, ''.join('-' for i in range(len(string)))))
     else:
-        output_file.write('**{}**\n{}\n'.format(string, ''.join('"' for i in range(len(string)+4))))
+        output_file.write('{}\n{}\n'.format(string, ''.join('^' for i in range(len(string)))))
 
 
 def write_str_indent(output_file: TextIO, string: str, indent: str = "  ", all: bool = False):

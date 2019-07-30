@@ -27,7 +27,7 @@ The first set of parameters which Python needs are information about the overall
    Boundary_layer.lum(ergs/s)              4.72063e+39
    Boundary_layer.power_law_index                 -1.5
 
-System type is starting point, a basic classification of the type of object one is trying to model.
+:ref:`System_type` is starting point, a basic classification of the type of object one is trying to model.
 This is used to guide further questions about the object and to set defaults.
 
-Most of the other parameters are fairly self-explanatory
+Most of the other parameters are fairly self-explanatory, and are documented fully in the various Parameters entries.

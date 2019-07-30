@@ -1,5 +1,5 @@
 Model
-=====
+#####
 
 As Python is run, it repeatedly writes out two binary files that contain essentially all information about the wind as calculated in the ionization phase of the program,
 along with status of the program at the last point where the file was written.

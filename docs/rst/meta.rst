@@ -1,14 +1,13 @@
-==================
 Meta-documentation
-==================
+##################
 How to use the auto-documentation tools
----------------------------------------
+=======================================
 
 *python* has two documentation tools, stored in the *py_progs* directory, and a common file
 format for documenting the python functions.
 
 YAML documentation
-------------------
+==================
 
 The documentation for *python* variables takes the form of *YAML* input files stored in
 *docs/parameters*. These are functionally more or less just *Python* dictionaries, and have a very
@@ -39,7 +38,7 @@ in this parameter being used, for example:
    :lines: 27-28
 
 Parent will automatically link to the page for each parent. Parent is also used when figuring out the structure
-within each file, so put any local parents at the top of the list. 
+within each file, so put any local parents at the top of the list.
 If you'd like to reference one parameter elsewhere within another, you can use the following format
 
 .. literalinclude:: reference_yaml.txt
@@ -50,7 +49,7 @@ If you'd like to reference one parameter elsewhere within another, you can use t
 TODO: Make structure of parent explicit.
 
 autogenerate_parameter_docs.py
-------------------------------
+==============================
 
 This tool takes the *python* .c input files, and scans them for calls to input parameters from file.
 It is run from the command line as::
@@ -74,7 +73,7 @@ in the documentation skeletons produced by the utility.
 ----------------------------------------
 
 autogenerate_rtd_pages.py
--------------------------
+=========================
 
 This tool takes the `YAML documentation`_ input files, and converts them into *RST* files and from there a *HTML*
 documentation page using *Sphinx*. You don't need to know anything about the formats in order to use

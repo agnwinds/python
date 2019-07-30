@@ -1,5 +1,5 @@
 Spectrum Generation
-===================
+###################
 
 With the current machinery to create spectra, it is possible to come across the
 situation where models with large optical depths or wind velocities generate
@@ -28,7 +28,7 @@ that there are two reasons why the flux differs between these two wavelength ran
 
 
 Doppler Shifting out of the Spectrum Wavelength Range
------------------------------------------------------
+=====================================================
 
 At the edges of the restricted spectrum above, the flux is reduced. This is
 due to photon frequencies being shifted outside of the wavelength range of the
@@ -50,7 +50,7 @@ does not produce a noticeable effect on the flux normalisation of the spectra.
 
 
 Removing Photons due to Too Many Scatters
------------------------------------------
+=========================================
 
 As well as edge effects, flux can be lost due to photons being removed from the
 photon sample due to scattering too many times. In Python, when a photon has undergone
@@ -100,6 +100,6 @@ number of photons were terminated due to too many scatters.
    Link to wiki entry on information about the spectral files when created
 
 Issue
------
+=====
 
 The original GitHub issue discussing this problem can be found here; :issue:`471`.
