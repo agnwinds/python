@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-========
+########
 *python*
-========
+########
 --------------------------------------
 Radiative transfer and ionisation code
 --------------------------------------
@@ -67,8 +67,9 @@ Mandy Hewitt
 .. toctree::
    :titlesonly:
    :caption: Documentation
-   :maxdepth: 4
+   :maxdepth: 2
    :glob:
+   :hidden:
 
    rst/*
 
@@ -76,8 +77,9 @@ Mandy Hewitt
 .. toctree::
    :titlesonly:
    :caption: Outputs
-   :maxdepth: 4
+   :maxdepth: 2
    :glob:
+   :hidden:
 
    rst/outputs/*
 
@@ -85,7 +87,12 @@ Mandy Hewitt
 .. toctree::
    :titlesonly:
    :caption: Parameter types
-   :maxdepth: 4
+   :maxdepth: 2
    :glob:
+   :hidden:
 
+   rst/parameters/sources
+   rst/parameters/winds
+   rst/parameters/rt
+   rst/parameters/ionisation
    rst/parameters/*
