@@ -71,17 +71,10 @@ Mandy Hewitt
    :glob:
    :hidden:
 
+   rst/installation
+   rst/inputs
+   rst/outputs
    rst/*
-
-
-.. toctree::
-   :titlesonly:
-   :caption: Outputs
-   :maxdepth: 2
-   :glob:
-   :hidden:
-
-   rst/outputs/*
 
 
 .. toctree::
