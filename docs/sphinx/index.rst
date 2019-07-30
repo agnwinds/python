@@ -9,7 +9,6 @@
 --------------------------------------
 Radiative transfer and ionisation code
 --------------------------------------
-TODO: Describe python, link to papers as `Link name <http://www.python.org/>`_.
 
 Python is a Monte-Carlo radiative transfer code designed to simulate the spectrum of biconical (or spherical)
 winds in disk systems.  It was origianally written by 
@@ -23,21 +22,15 @@ The program is written in C and can be compiled on systems runining various flav
 
 The code is is available on `github <https://github.com/agnwinds/python>`_
 
------------
-Input files
------------
-*python* uses a unique ``.pf`` input file format. An input file consists of a system type,
-definition of the central object, disk and winds within it, and descriptions of the radiation
-sources involved.
-
-TODO: EXPAND
-
-TODO: WRITE A LIST OF WHAT THE MANDATORY ENTRIES ARE (once all the names have settled down...)
-
 
 -------------
 Documentation
 -------------
+
+Various documentation exists:
+
+* A :doc:`Quick Guide <quick>` describing how to install and run Python (in a fairly mechanistic fashion).
+
 For more information on how this page was generated and how to create documentation for *python*,
 look at the page for :doc:`documentation on the documentation <meta>`.
 
