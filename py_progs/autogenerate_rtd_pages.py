@@ -263,7 +263,7 @@ def autogenerate_rtd_pages():
 
     write_rst(output_folder, dox_structured)
 
-    call(["sphinx-build", "-b", "html", docs_folder, html_folder])
+    call(["make html"])
     call(["git", "add", os.path.join(output_folder, "*.autogen.rst")])
     webbrowser.open(os.path.join(html_folder, "index.html"))
 
