@@ -72,6 +72,16 @@ Mandy Hewitt
 
    rst/*
 
+
+.. toctree::
+   :titlesonly:
+   :caption: Outputs
+   :maxdepth: 4
+   :glob:
+
+   rst/outputs/*
+
+
 .. toctree::
    :titlesonly:
    :caption: Parameter types

@@ -34,7 +34,17 @@
 extensions = ['sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel']
+    'sphinx.ext.todo',
+    'sphinx.ext.autosectionlabel',
+    'sphinx_issues',
+]
+
+
+# == Options for the varous plugins =======================================
+# -- Whether or not to include ToDo notes ---------------------------------
+todo_include_todos = True
+# -- GitHub repo for issues -----------------------------------------------
+issues_github_path = "agnwinds/python"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -76,9 +86,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -149,7 +156,6 @@ latex_documents = [
     (master_doc, 'python.tex', 'python Documentation',
      'Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt', 'manual'),
 ]
-
 
 # -- Options for manual page output ---------------------------------------
 
