@@ -433,46 +433,49 @@ main (argc, argv)
  * radiation and then value given to return a spectrum type. The output is not the same
  * number as one inputs. It' s not obvious that this is a good idea. */
 
-  if (geo.pcycles > 0 && geo.pcycle == 0) {
+  if (geo.pcycles > 0 && geo.pcycle == 0)
+  {
     // This should only evaluate true for when no spectrum cycles have run (I hope)
 
-    rdpar_comment("Parameters defining the spectra seen by observers\n");
+    rdpar_comment ("Parameters defining the spectra seen by observers\n");
 
-    if(geo.star_radiation) {
-      get_spectype(geo.star_radiation,
-                   "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
+    if (geo.star_radiation)
+    {
+      get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
     }
 
-    if(geo.disk_radiation) {
-      get_spectype(geo.disk_radiation,
-                   "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
+    if (geo.disk_radiation)
+    {
+      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
     }
 
-    if (geo.bl_radiation) {
-      get_spectype(geo.bl_radiation,
-                   "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
+    if (geo.bl_radiation)
+    {
+      get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
     }
 
-    if(geo.agn_radiation) {
+    if (geo.agn_radiation)
+    {
       // This block will run for both AGN, *and* some versions of a boundary layer.
       // Even though we're setting the same params, we need to change the wording based on the system, unfortunately.
       geo.agn_spectype = SPECTYPE_POW;
 
       // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
-      if(geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH) {
-        get_spectype(geo.agn_radiation,
-                     "Central_object.rad_type_in_final_spectrum(power,cloudy,brems)", &geo.agn_spectype);
-      } else {
-        get_spectype(geo.agn_radiation,
-                     "Boundary_layer.rad_type_in_final_spectrum(power)", &geo.agn_spectype);
+      if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
+      {
+        get_spectype (geo.agn_radiation, "Central_object.rad_type_in_final_spectrum(power,cloudy,brems)", &geo.agn_spectype);
+      }
+      else
+      {
+        get_spectype (geo.agn_radiation, "Boundary_layer.rad_type_in_final_spectrum(power)", &geo.agn_spectype);
       }
 
 
-      if (geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1) {
-        Error(
-            "python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",
-            comp[geo.agn_ion_spectype].nmods);
-        exit(0);
+      if (geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
+      {
+        Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",
+               comp[geo.agn_ion_spectype].nmods);
+        exit (0);
       }
     }
     init_observers ();

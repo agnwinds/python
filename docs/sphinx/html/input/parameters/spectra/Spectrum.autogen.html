@@ -1,0 +1,482 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Spectrum &mdash; python 81a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Reverberation Mapping" href="../reverb.html" />
+    <link rel="prev" title="Spectra" href="../spectra.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                81
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../input.html">Inputs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../system_description.html">System Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../wind_models.html">Wind Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../importing_models.html">Importing Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../parameters.html">Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../System_type.autogen.html">System_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Input_spectra.autogen.html">Input_spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../central_object.html">Central object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../disk.html">Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../wind.html">Wind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../spectra.html">Spectra</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reverb.html">Reverberation Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../other.html">Other</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dummy.html">Dummy Equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evaluation.html">Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../meta.html">Meta-documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../input.html">Inputs</a> &raquo;</li>
+        
+          <li><a href="../../parameters.html">Parameters</a> &raquo;</li>
+        
+          <li><a href="../spectra.html">Spectra</a> &raquo;</li>
+        
+      <li>Spectrum</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../_sources/input/parameters/spectra/Spectrum.autogen.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="spectrum">
+<h1>Spectrum<a class="headerlink" href="#spectrum" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="spectrum-orbit-phase">
+<h2>Spectrum.orbit_phase<a class="headerlink" href="#spectrum-orbit-phase" title="Permalink to this headline">¶</a></h2>
+<p>For binary systems, the orbital phase at which the spectrum
+is to be extracted (so the effects of an eclipse can be taken
+into account in creating the spectrum). Phase 0 corresponds to
+inferior conjunciton, that is with the secondary in front (or
+depending on inclination angle, partially in front of) the
+primary</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Values:</strong> Between 0 and 1</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+<li><p><a class="reference internal" href="../System_type.autogen.html#id1"><span class="std std-ref">System_type</span></a>: binary</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-no-observers">
+<h2>Spectrum.no_observers<a class="headerlink" href="#spectrum-no-observers" title="Permalink to this headline">¶</a></h2>
+<p>The number of different inclination angles for which spectra
+will be extracted.</p>
+<p><strong>Type:</strong> Integer</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+<div class="section" id="spectrum-angle">
+<h3>Spectrum.angle<a class="headerlink" href="#spectrum-angle" title="Permalink to this headline">¶</a></h3>
+<p>The inclination angle with respect to the polar axis for
+obtaining a spectrum.  This question will be repeated once
+for each desired incliniation</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> Degrees</p>
+<p><strong>Values:</strong> 0 to 90 degrees, where 0 is normal to the disk and 90 is on the disk plane</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-no-observers"><span class="std std-ref">Spectrum.no_observers</span></a>: Greater than 0. Once per observer.</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+</div>
+<div class="section" id="spectrum-wavemin">
+<h2>Spectrum.wavemin<a class="headerlink" href="#spectrum-wavemin" title="Permalink to this headline">¶</a></h2>
+<p>The minimum wavelength of the final spectra in Angstroms</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> Angstroms</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-select-photons-by-position">
+<h2>Spectrum.select_photons_by_position<a class="headerlink" href="#spectrum-select-photons-by-position" title="Permalink to this headline">¶</a></h2>
+<p>Advanced command associated with adding conditions for
+the detailed spectra that are extracted.  This command simply
+asks whether one would like to select photons by position.  If
+so one will be asked to define a spheical region in interms of
+its cylindrical coordinates.</p>
+<p><strong>Type:</strong> Boolean (yes/no)</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+<div class="section" id="spectrum-select-location">
+<h3>Spectrum.select_location<a class="headerlink" href="#spectrum-select-location" title="Permalink to this headline">¶</a></h3>
+<p>One of several related parameters that permit one to apply
+additional conditions on the location of photons extracted in
+the detailed spectrum. The location refers here to the either
+where the photons was created or where it last scattered</p>
+<p><strong>Type:</strong> Enumerator</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>all</dt><dd><p>Select photons regardless of where they are generated</p>
+</dd>
+<dt>below_disk</dt><dd><p>Select only photons generated from below (-z) the disk</p>
+</dd>
+<dt>above_disk</dt><dd><p>Select only photons orginating above the disk</p>
+</dd>
+<dt>spherical_region</dt><dd><p>Select photons by defining a spherical region</p>
+</dd>
+</dl>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-select-photons-by-position"><span class="std std-ref">Spectrum.select_photons_by_position</span></a>: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+<div class="section" id="spectrum-select-r">
+<h4>Spectrum.select_r<a class="headerlink" href="#spectrum-select-r" title="Permalink to this headline">¶</a></h4>
+<p>Part of a set of parameters which define a spherical region of space from which
+photons are to be extracted. select_r defines the radius of the spherical region</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> cm</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-select-location"><span class="std std-ref">Spectrum.select_location</span></a>: spherical_region</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-select-rho">
+<h4>Spectrum.select_rho<a class="headerlink" href="#spectrum-select-rho" title="Permalink to this headline">¶</a></h4>
+<p>Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the rho coordiante
+of the region.</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> cm</p>
+<p><strong>Values:</strong> Condition e.g. greater than 0 or list e.g. [1, 2, 5]</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-select-location"><span class="std std-ref">Spectrum.select_location</span></a>: spherical_region</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-select-azimuth">
+<h4>Spectrum.select_azimuth<a class="headerlink" href="#spectrum-select-azimuth" title="Permalink to this headline">¶</a></h4>
+<p>Advance command which along with several other parameters
+specifies a spherical region of space in cylindrical coordinates.
+This parameter desribes the azimuth of the region.  When
+this general option is used, a detailed spectrum is constructed
+just from photons that originate or scatter int he region</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> Degrees</p>
+<p><strong>Values:</strong> Between 0, and 360 or -180 to 180</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-select-location"><span class="std std-ref">Spectrum.select_location</span></a>: spherical_region</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-select-z">
+<h4>Spectrum.select_z<a class="headerlink" href="#spectrum-select-z" title="Permalink to this headline">¶</a></h4>
+<p>Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the z coordiante
+of the region.</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> cm</p>
+<p><strong>Values:</strong> Within the z range of the model</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-select-location"><span class="std std-ref">Spectrum.select_location</span></a>: spherical_region</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+</div>
+</div>
+<div class="section" id="spectrum-type">
+<h2>Spectrum.type<a class="headerlink" href="#spectrum-type" title="Permalink to this headline">¶</a></h2>
+<p>The type of spectra that are produced in the final spectra. The current choices are flambda, fnu, or basic,
+where basic implies simply summing up the energy packets that escape within a particularly wavelength/
+frequency bin.</p>
+<p><strong>Type:</strong> Enumerator</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>flambda</dt><dd><p>λF(λ)</p>
+</dd>
+<dt>fnu</dt><dd><p>νF(ν)</p>
+</dd>
+<dt>basic</dt><dd><p>F(λ)</p>
+</dd>
+</dl>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-live-or-die">
+<h2>Spectrum.live_or_die<a class="headerlink" href="#spectrum-live-or-die" title="Permalink to this headline">¶</a></h2>
+<p>Normally in creating detailed spectrum Python “extracts” photons in a certain
+direction reweighting them to account for the fact that they have been extracted
+in a certain direction.  It is possible to just count the photons that are emitted
+in a single angle range. The two methods should yield the same or very similar results
+but the extraction method is much more efficient and live or die is basically a
+diagnostic mode.</p>
+<p><strong>Type:</strong> Enumerator</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>live.or.die</dt><dd><p>Count only those photons that escape within a small angle range towards the observer</p>
+</dd>
+<dt>extract</dt><dd><p>Extract a component of all photons that scatter towards the observer</p>
+</dd>
+</dl>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+<div class="section" id="spectrum-select-specific-no-of-scatters-in-spectra">
+<h2>Spectrum.select_specific_no_of_scatters_in_spectra<a class="headerlink" href="#spectrum-select-specific-no-of-scatters-in-spectra" title="Permalink to this headline">¶</a></h2>
+<p>Advanced command which allows one to place additional
+constraints on the detailed spectra which are extract.
+This includes selectiong photons from above or below the
+disk, only photons which have scttered, etc.</p>
+<p><strong>Type:</strong> Boolean (yes/no)</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+<div class="section" id="spectrum-select-scatters">
+<h3>Spectrum.select_scatters<a class="headerlink" href="#spectrum-select-scatters" title="Permalink to this headline">¶</a></h3>
+<p>Advaned command that allows one to extract photons that
+have undergone a certain number of scatters.  If n &gt; MAXSCAT,
+that is to say a very large number then all scatters are slected.
+If lies between 0 and MAXSCAT then photons will be extracted only
+at the point a photon has undergone this number of scatters.  If
+n is &lt; 0 then photons with n or greater scattters will be extracted.</p>
+<p><strong>Type:</strong> Integer</p>
+<p><strong>Values:</strong> Greater than 0</p>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spectrum-select-specific-no-of-scatters-in-spectra"><span class="std std-ref">Spectrum.select_specific_no_of_scatters_in_spectra</span></a>: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+</div>
+<div class="section" id="spectrum-wavemax">
+<h2>Spectrum.wavemax<a class="headerlink" href="#spectrum-wavemax" title="Permalink to this headline">¶</a></h2>
+<p>The maximum wavelength of the detailed spectra that are to be produced</p>
+<p><strong>Type:</strong> Double</p>
+<p><strong>Unit:</strong> Angstroms</p>
+<p><strong>Values:</strong></p>
+<dl class="simple">
+<dt>Spectrum.wavemin</dt><dd><p>Greater than</p>
+</dd>
+</dl>
+<p><strong>Parent(s):</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.autogen.html#id1"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+<p><strong>File:</strong> setup.c</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../reverb.html" class="btn btn-neutral float-right" title="Reverberation Mapping" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../spectra.html" class="btn btn-neutral float-left" title="Spectra" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

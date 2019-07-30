@@ -90,12 +90,14 @@ char *new_names[] = { "Central_object.mass", "Central_object.radius",
   "@Diag.extra", "Wind.model2import", "Wind.number_of_components", "Wind.old_windfile",
   "Input_spectra.model_file", "AGN.power_law_index", "Hydro.file", "Hydro.thetamax",
   "KWD.acceleration_exponent", "KWD.acceleration_length", "KWD.d", "KWD.mdot_r_exponent",
-  "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero", "Central_object.radiation", "Central_object.luminosity", "Central_object.power_law_index",
+  "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero", "Central_object.radiation", "Central_object.luminosity",
+    "Central_object.power_law_index",
   "Central_object.blackbody_temp", "@Central_object.power_law_cutoff", "Central_object.geometry_for_pl_source",
   "Central_object.rad_type_in_final_spectrum", "Central_object.rad_type_to_make_wind",
   "Wind.mdot", "Wind.ionization", "Wind.radiation", "Wind.type", "Wind_heating.extra_processes",
   "Wind.fixed_concentrations_file", "Disk.radiation",
-  "Central_object.bremsstrahlung_temp", "Central_object.bremsstrahlung_alpha", "Central_object.blackbody_temp", "@Central_object.power_law_cutoff",
+  "Central_object.bremsstrahlung_temp", "Central_object.bremsstrahlung_alpha", "Central_object.blackbody_temp",
+    "@Central_object.power_law_cutoff",
   "Central_object.geometry_for_source", "Central_object.lamp_post_height", "Central_object.radiation", "Central_object.luminosity",
   "Central_object.rad_type_to_make_wind", "Central_object.rad_type_in_final_spectrum", "Central_object.power_law_index",
   "Central_object.cloudy.low_energy_break", "Central_object.cloudy.high_energy_break",
@@ -254,7 +256,7 @@ is_input_line_synonym_for_question (question, input_line)
         // If the question on the input line matches the 'old name' for this question (i.e. the difference is 0)
         return (1);
       }
-      
+
     }
   }
   // If we've not found a match, then this line *isn't* a synonym

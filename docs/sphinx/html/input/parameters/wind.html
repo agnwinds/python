@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Wind &mdash; python 81a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Corona" href="wind/Corona.autogen.html" />
+    <link rel="prev" title="Disk" href="disk/Disk.autogen.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> python
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                81
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../input.html">Inputs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../system_description.html">System Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../importing_models.html">Importing Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../parameters.html">Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="System_type.autogen.html">System_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Input_spectra.autogen.html">Input_spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="central_object.html">Central object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="disk.html">Disk</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Wind</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="wind/Corona.autogen.html">Corona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/Homologous.autogen.html">Homologous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/Hydro.autogen.html">Hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/KWD.autogen.html">KWD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/SV.autogen.html">SV</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/Shell.autogen.html">Shell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/Stellar_wind.autogen.html">Stellar_wind</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/Wind.autogen.html">Wind</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectra.html">Spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reverb.html">Reverberation Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="other.html">Other</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../output.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dummy.html">Dummy Equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../evaluation.html">Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../meta.html">Meta-documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../input.html">Inputs</a> &raquo;</li>
+        
+          <li><a href="../parameters.html">Parameters</a> &raquo;</li>
+        
+      <li>Wind</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/input/parameters/wind.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="wind">
+<h1>Wind<a class="headerlink" href="#wind" title="Permalink to this headline">¶</a></h1>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Fill in</p>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wind/Corona.autogen.html">Corona</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/Corona.autogen.html#corona-radmax">Corona.radmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Corona.autogen.html#corona-base-den">Corona.base_den</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Corona.autogen.html#corona-radmin">Corona.radmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Corona.autogen.html#corona-zmax">Corona.zmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Corona.autogen.html#corona-scale-height">Corona.scale_height</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Corona.autogen.html#corona-vel-frac">Corona.vel_frac</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/Homologous.autogen.html">Homologous</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/Homologous.autogen.html#homologous-radmin">Homologous.radmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Homologous.autogen.html#homologous-radmax">Homologous.radmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Homologous.autogen.html#homologous-density-exponent">Homologous.density_exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Homologous.autogen.html#homologous-vbase">Homologous.vbase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Homologous.autogen.html#homologous-boundary-mdot">Homologous.boundary_mdot</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/Hydro.autogen.html">Hydro</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/Hydro.autogen.html#hydro-thetamax">Hydro.thetamax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Hydro.autogen.html#hydro-file">Hydro.file</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/KWD.autogen.html">KWD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-mdot-r-exponent">KWD.mdot_r_exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-v-zero">KWD.v_zero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-acceleration-length">KWD.acceleration_length</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-rmax">KWD.rmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-acceleration-exponent">KWD.acceleration_exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-rmin">KWD.rmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-d">KWD.d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/KWD.autogen.html#kwd-v-infinity">KWD.v_infinity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/SV.autogen.html">SV</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-thetamax">SV.thetamax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-acceleration-exponent">SV.acceleration_exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-diskmin">SV.diskmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-diskmax">SV.diskmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-acceleration-length">SV.acceleration_length</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-mdot-r-exponent">SV.mdot_r_exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-v-zero-mode">SV.v_zero_mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="wind/SV.autogen.html#sv-v-zero">SV.v_zero</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-v-infinity">SV.v_infinity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/SV.autogen.html#sv-thetamin">SV.thetamin</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/Shell.autogen.html">Shell</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/Shell.autogen.html#shell-wind-v-at-rmin">Shell.wind_v_at_rmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Shell.autogen.html#shell-wind-radmax">Shell.wind.radmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Shell.autogen.html#shell-wind-mdot">Shell.wind_mdot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Shell.autogen.html#shell-wind-v-at-rmax">Shell.wind.v_at_rmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Shell.autogen.html#shell-wind-radmin">Shell.wind.radmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Shell.autogen.html#shell-wind-acceleration-exponent">Shell.wind.acceleration_exponent</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/Stellar_wind.autogen.html">Stellar_wind</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/Stellar_wind.autogen.html#stellar-wind-mdot">Stellar_wind.mdot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Stellar_wind.autogen.html#stellar-wind-radmin">Stellar_wind.radmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Stellar_wind.autogen.html#stellar-wind-radmax">Stellar_wind.radmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Stellar_wind.autogen.html#stellar-wind-acceleration-exponent">Stellar_wind.acceleration_exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Stellar_wind.autogen.html#stellar-wind-v-infinity">Stellar_wind.v_infinity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Stellar_wind.autogen.html#stellar-wind-vbase">Stellar_wind.vbase</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="wind/Wind.autogen.html">Wind</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind/Wind.autogen.html#wind-old-windfile">Wind.old_windfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Wind.autogen.html#wind-ionization">Wind.ionization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-fixed-concentrations-file">Wind.fixed_concentrations_file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Wind.autogen.html#wind-radiation">Wind.radiation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind/Wind.autogen.html#wind-number-of-components">Wind.number_of_components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-t-init">Wind.t.init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-coord-system">Wind.coord_system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-radmax">Wind.radmax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-filling-factor">Wind.filling_factor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-dim-in-z-or-theta-direction">Wind.dim.in.z_or_theta.direction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-type">Wind.type</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="wind/Wind.autogen.html#wind-mdot">Wind.mdot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wind/Wind.autogen.html#wind-model2import">Wind.model2import</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="wind/Wind.autogen.html#wind-dim-in-x-or-r-direction">Wind.dim.in.x_or_r.direction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="wind/Corona.autogen.html" class="btn btn-neutral float-right" title="Corona" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="disk/Disk.autogen.html" class="btn btn-neutral float-left" title="Disk" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

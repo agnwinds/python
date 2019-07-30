@@ -36,7 +36,7 @@ extensions = ['sphinx.ext.mathjax',
     'sphinx.ext.githubpages',
     'sphinx.ext.todo',
     'sphinx.ext.autosectionlabel',
-    'sphinx_issues',
+#     'sphinx_issues',
 ]
 
 
