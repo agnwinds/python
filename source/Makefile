@@ -231,7 +231,7 @@ windsave2table: $(table_objects)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 
 run_indent:
-	../py_progs/run_indent.py -all
+	../py_progs/run_indent.py -all_no_headers
 
 
 # The next line runs recompiles all of the routines after first cleaning the directory
