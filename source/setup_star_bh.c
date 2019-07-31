@@ -183,9 +183,8 @@ get_bl_and_agn_params (lstar)
     geo.agn_radiation = rdchoice ("Central_object.radiation(yes,no)", "1,0", answer);
     geo.star_radiation = 0;     // 70b - AGN do not have a star at the center */
     geo.bl_radiation = 0;
-    if(geo.agn_radiation)
-      get_spectype (geo.agn_radiation,
-                    "Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
+    if (geo.agn_radiation)
+      get_spectype (geo.agn_radiation, "Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
 
   }
   else
@@ -194,9 +193,8 @@ get_bl_and_agn_params (lstar)
     geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no)", "1,0", answer);
     geo.agn_radiation = 0;      // So far at least, our star systems don't have a BH
 
-    if(geo.bl_radiation)
-      get_spectype (geo.bl_radiation,
-                    "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
+    if (geo.bl_radiation)
+      get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
   }
 
 
@@ -247,7 +245,7 @@ get_bl_and_agn_params (lstar)
 
   /* Describe the agn */
 
-  if (geo.agn_radiation && (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH))  /* This peculiar line is to enamble us to add a star with a power law component */
+  if (geo.agn_radiation && (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH))   /* This peculiar line is to enamble us to add a star with a power law component */
   {
     xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
@@ -340,7 +338,7 @@ get_bl_and_agn_params (lstar)
     {
       geo.agn_cltab_low = 1.0;
       geo.agn_cltab_hi = 10000;
-      rddoub ("Central_object.cloudy.low_energy_break(ev)", &geo.agn_cltab_low);      /*lo frequency break - in ev */
+      rddoub ("Central_object.cloudy.low_energy_break(ev)", &geo.agn_cltab_low);        /*lo frequency break - in ev */
       rddoub ("Central_object.cloudy.high_energy_break(ev)", &geo.agn_cltab_hi);
       geo.agn_cltab_low_alpha = 2.5;    //this is the default value in cloudy
       geo.agn_cltab_hi_alpha = -2.0;    //this is the default value in cloudy
