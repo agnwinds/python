@@ -83,13 +83,13 @@ get_knigge_wind_params (ndom)
                                    can use to muliply the initial velocity of wind so that it
                                    is greater or less than the sound speed. This is not part of the standard KWD model */
   zdom[ndom].wind_rho_min = 1;  /* Innner and outer edges of the wind in stellar radii. These
-                                   parameters were added to allow one to duplicate the YSO
-                                   paper */
+                                   parameters were added to allow one to create models similar to those 
+                                   used in the YSO paper (Sim+05)  */
   zdom[ndom].wind_rho_max = geo.diskrad / geo.rstar;
 
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
-used but in later papers, e.g KD97 d in WD radii was used.   is more natural and is used here.
+used but in later papers, e.g KD97 d in WD radii was used.   This is more natural and is used here.
 but one should remember that this differs from KWD95.
 
 To repeat, kn_dratio is the distance to the focus point in stellar radii!
@@ -169,7 +169,8 @@ in units of WD radii */
   }
 
   kn_lambda = zdom[ndom].kn_lambda;
-  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+//  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+  zdom[ndom].mdot_norm = num_int (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
 
   return (0);
 }
@@ -442,6 +443,7 @@ kn_vzero (r)
  * 	for mdot as a function of radius
  *
  * @param [in] double  r   A position (radius) in the disk
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return     The value of the integrand
  *
  * The mass loss rate is proportional to T(r)**(4*kn_lambda)
@@ -459,8 +461,7 @@ kn_vzero (r)
  **********************************************************/
 
 double
-kn_wind_mdot_integral (r)
-     double r;
+kn_wind_mdot_integral (double r, void *params)
 {
   double t;
   double x, ratio;

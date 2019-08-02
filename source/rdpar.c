@@ -512,8 +512,6 @@ string_process_from_command_line (question, dummy)
     rdpar_store_record (question, dummy);
     return (NORMAL);
   }
-
-  return (REISSUE);
 }
 
 
@@ -563,7 +561,7 @@ string_process_from_file (question, dummy)
   char *ccc, *index (), *fgets ();
   int nwords = 0;               // Initialise to avoid warning
   int wordlength;
-  char old_question[LINELEN];
+//OLD  char old_question[LINELEN];
   char xfirstword[LINELEN], xquestion[LINELEN];
   int i;
 
@@ -612,7 +610,7 @@ string_process_from_file (question, dummy)
      * that have been replaced by a new keyword
      */
 
-    if (check_synonyms (question, old_question) == 1 && strncmp (old_question, firstword, wordlength) == 0)
+    if (is_input_line_synonym_for_question (question, line))
     {
       strict = 1;
       Error ("Had to parse a synonym. Program will stop after writing out a new parameter file\n");

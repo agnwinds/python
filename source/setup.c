@@ -69,7 +69,7 @@ init_geo ()
                                    run */
   geo.hydro_domain_number = -1;
 
-  if (geo.system_type == SYSTEM_TYPE_BINARY)
+  if (geo.system_type == SYSTEM_TYPE_CV || geo.system_type == SYSTEM_TYPE_BH)
   {
     geo.binary = TRUE;
   }
@@ -379,6 +379,13 @@ init_observers ()
 
 
   rdpar_comment ("The observers and their location relative to the system");
+
+  if (geo.system_type == SYSTEM_TYPE_STAR)
+  {
+    geo.nangles = 1;
+    geo.angle[0] = 45;
+  }
+
   rdint ("Spectrum.no_observers", &geo.nangles);
 
   if (geo.nangles < 1 || geo.nangles > NSPEC)
@@ -395,7 +402,7 @@ init_observers ()
    * an extraction direction which is in the xz plane
    */
 
-  if (geo.system_type == SYSTEM_TYPE_BINARY)
+  if (geo.system_type == SYSTEM_TYPE_CV || geo.system_type == SYSTEM_TYPE_BH)
   {
 
     for (n = 0; n < geo.nangles; n++)

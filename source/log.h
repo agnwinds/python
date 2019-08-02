@@ -43,4 +43,6 @@ int Log_parallel(char *format, ...);
 int Debug(char *format, ...);
 void Exit(int error_code);
 /* synonyms.c */
-int check_synonyms(char new_question[], char old_question[]);
+int get_question_name_length(char question[]);
+int are_synonym_lists_valid(void);
+int is_input_line_synonym_for_question(char question[], char input_line[]);

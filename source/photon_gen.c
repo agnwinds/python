@@ -363,7 +363,7 @@ calculates the boundaries of the various disk annulae depending on f1 and f2 */
   }
   if (geo.agn_radiation)
   {
-    agn_init (geo.r_agn, geo.lum_agn, geo.alpha_agn, f1, f2, ioniz_or_final, &geo.f_agn);
+    agn_init (geo.rstar, geo.lum_agn, geo.alpha_agn, f1, f2, ioniz_or_final, &geo.f_agn);
   }
 
 /* The choices associated with iwind are
@@ -630,9 +630,9 @@ stellar photons */
 
 
       if (ioniz_or_final == 1)
-        photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2, geo.agn_spectype, iphot_start, nphot);
+        photo_gen_agn (p, geo.rstar, geo.alpha_agn, weight, agn_f1, f2, geo.agn_spectype, iphot_start, nphot);
       else
-        photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2, geo.agn_ion_spectype, iphot_start, nphot);
+        photo_gen_agn (p, geo.rstar, geo.alpha_agn, weight, agn_f1, f2, geo.agn_ion_spectype, iphot_start, nphot);
     }
     iphot_start += nphot;
   }
@@ -918,7 +918,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   gref = gdisk (m, mdot, rmin);
 
-
+  q_test_count = 0;
   /* Now compute the apparent luminosity of the disk.  This is not actually used
      to determine how annulae are set up.  It is just used to populate geo.ltot.
      It can change if photons hitting the disk are allowed to raise the temperature
@@ -1081,7 +1081,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     disk.w[nrings] = 0;
     disk.t_hit[nrings] = 0;
   }
-
   geo.lum_disk = ltot;
   return (ltot);
 }

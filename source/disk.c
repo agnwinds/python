@@ -55,19 +55,18 @@ tdisk (m, mdot, r)
  * @brief      Calculate the temperature of the disk at a normalised distance x
  *
  * @param [in] double  t   reference temperature of the disk in degrees
- * @param [in] double  x   distance from center of disk in units of r/rmin
+ * @param [in] double  x   distance from center of disk in units of r/rstar
  * @return     The temperature
  *
  * The routine returns the effective temperature for the disk as a distance
  * which is measured in terms of the ratio of the actual distance to the inner
  * edge of the disk (rmin).
  *
- * A number of modifications to a simple steady state disk are possible, depending
+ * Modifications to a simple steady state disk are possible, depending
  * on the variable geo.disk_tprofile:
  *
  *  - DISK_TPROFILE_READIN  the returned temperature is interpolated from values that
  *    been read in
- *  - DISK_TPROFILE_YSO an analytic profile implemented for YSOs
  *
  *  In addition for a standard profile, this is where disk heading can optionally
  *  be taken into account
@@ -77,6 +76,9 @@ tdisk (m, mdot, r)
  *
  * A reference for the standard steady state disk is Wade, 1984 MNRAS 208, 381
  *
+ * An analytic profile used for Sim+05 to model certain YSO winds was removed in
+ * 1907
+ * 
  **********************************************************/
 
 double
@@ -85,10 +87,9 @@ teff (t, x)
 {
   double q = 0;
   double theat, r;
+  double temp;
   double pow ();
-  double disk_heating_factor;
   int kkk;
-  int n;
 
 
 
@@ -108,14 +109,18 @@ teff (t, x)
     }
     else
     {
-      for (n = 1; n < blmod.n_blpts; n++)
-      {
-        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
-        {
-          return (blmod.t[n]);
-        }
-      }
-      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
+      linterp (r, &blmod.r[0], &blmod.t[0], blmod.n_blpts, &temp, 0);
+      return (temp);
+
+//OLD      for (n = 1; n < blmod.n_blpts; n++)
+//OLD      {
+//OLD        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
+//OLD        {
+//OLD          return (blmod.t[n]);
+//OLD        }
+//OLD      }
+//OLD      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
+
     }
   }
   else
@@ -141,18 +146,18 @@ teff (t, x)
       q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
 
     }
-    else if (geo.disk_tprofile == DISK_TPROFILE_YSO)    // Analytic approximation for disk heating by star; implemented for YSOs
-    {
-      disk_heating_factor = pow (geo.tstar / t, 4.0);
-      disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
-      disk_heating_factor /= PI;
-      disk_heating_factor *= x * x * x;
-      disk_heating_factor /= (1 - sqrt (1. / x));
-      disk_heating_factor += 1;
+//OLD    else if (geo.disk_tprofile == DISK_TPROFILE_YSO)    // Analytic approximation for disk heating by star; implemented for YSOs
+//OLD    {
+//OLD      disk_heating_factor = pow (geo.tstar / t, 4.0);
+//OLD      disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
+//OLD      disk_heating_factor /= PI;
+//OLD      disk_heating_factor *= x * x * x;
+//OLD      disk_heating_factor /= (1 - sqrt (1. / x));
+//OLD      disk_heating_factor += 1;
 
-      q *= pow (disk_heating_factor, (1. / 4.));
+//OLD      q *= pow (disk_heating_factor, (1. / 4.));
 
-    }
+//OLD    }
   }
   return (q);
 }
@@ -373,7 +378,8 @@ ds_to_disk (p, allow_negative)
   double r, r_top, r_bottom;
   double smin, smax;
   struct photon phit;
-  void disk_deriv ();
+
+
 
 
   if (geo.disk_type == DISK_NONE)
@@ -606,7 +612,13 @@ ds_to_disk (p, allow_negative)
   stuff_phot (p, &ds_to_disk_photon);
   move_phot (&ds_to_disk_photon, smin);
 
-  s_disk = rtsafe (disk_deriv, 0.0, smax - smin, fabs (smax - smin) / 1000.);
+  if ((smax - smin) > 0.)
+    s_disk = zero_find (disk_height, 0.0, smax - smin, 1e-8);
+  else
+    s_disk = zero_find (disk_height, smax - smin, 0.0, 1e-8);
+
+
+
   s_disk += smin;
 
   /* Note that s_disk can still be negative */
@@ -622,11 +634,12 @@ ds_to_disk (p, allow_negative)
  * @brief      Calculate the change in disk height as s function of s
  *
  * @param [in] double  s  A distance along the path of a photon
+ *           void params  unused variable required to present the correct function to gsl
+
  * @param [out] double *  value   the disk height at s
- * @param [out] double *  derivative   the derivative of the disk heith at s
  * @return     N/A
  *
- * Used in ds_to_disk by rtsafe as part of the procedure to locate
+ * Used in ds_to_disk by zero_find
  * the place a photon hits a vertically extended disk
  *
  * ###Notes###
@@ -634,38 +647,25 @@ ds_to_disk (p, allow_negative)
  *
  *  The function we are trying to zero is the
  *  difference between the height of the disk and the z height of the photon.
+ *  Modified 2019 to allow use of gsl rather than old numerical recipies
  *
  **********************************************************/
 
-void
-disk_deriv (s, value, derivative)
-     double s, *value, *derivative;
+
+double
+disk_height (double s, void *params)
 {
   struct photon phit;
-  double z1, z2, r1, r2;
-  double ds;
+  double z1, r1;
 
   stuff_phot (&ds_to_disk_photon, &phit);
   move_phot (&phit, s);
   r1 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
   z1 = zdisk (r1) - fabs (phit.x[2]);   // this is the function
 
-  /* OK now calculate the derivative */
-
-  ds = (z1) / 100.;
-  ds += 1;                      // We must move it a little bit (in case z1 = 0) SS Aug 2004
-  move_phot (&phit, ds);        // Move the photon a bit more
-  r2 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-  z2 = zdisk (r2) - fabs (phit.x[2]);   // this is the function
-
-  *value = z1;
-  *derivative = (z2 - z1) / ds;
+  return (z1);
 
 }
-
-
-
-
 
 
 
@@ -801,9 +801,11 @@ read_non_standard_disk_profile (tprofile)
 {
 
   FILE *fopen (), *fptr;
-  int n, result;
+  int n;
   float dumflt1, dumflt2;
-  int dumint;
+
+  char *line;
+  size_t buffsize = LINELENGTH;
 
   if ((fptr = fopen (tprofile, "r")) == NULL)
   {
@@ -811,14 +813,52 @@ read_non_standard_disk_profile (tprofile)
     Exit (0);
   }
 
-  result = fscanf (fptr, "%d\n", &dumint);
-  blmod.n_blpts = dumint;
-  for (n = 0; n < blmod.n_blpts; n++)
+  line = (char *) malloc (buffsize * sizeof (char));
+  blmod.n_blpts = 0;
+
+
+  while (getline (&line, &buffsize, fptr) > 0)
   {
-    result = fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
-    blmod.r[n] = dumflt1 * 1.e11;
-    blmod.t[n] = dumflt2 * 1.e3;
+    n = sscanf (line, "%g %g", &dumflt1, &dumflt2);
+    if (n == 2)
+    {
+      blmod.r[blmod.n_blpts] = dumflt1;
+      blmod.t[blmod.n_blpts] = dumflt2;
+      blmod.n_blpts += 1;
+    }
+    else
+    {
+      Error ("read_non_standard_disk_file: could not convert a line in %s, OK if comment\n", tprofile);
+    }
+
+    if (blmod.n_blpts == NBLMODEL)
+    {
+      Error ("read_non_standard_disk_file: More than %d points in %s; increase NBLMODEL\n", NBLMODEL, tprofile);
+      Exit (1);
+
+    }
   }
+
+
+  if (geo.diskrad > blmod.r[blmod.n_blpts - 1])
+  {
+    Error ("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n", geo.diskrad,
+           blmod.r[blmod.n_blpts - 1]);
+    Log ("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
+  }
+
+
+
+//OLD  result = fscanf (fptr, "%d\n", &dumint);
+//OLD  blmod.n_blpts = dumint;
+
+
+//OLD  for (n = 0; n < blmod.n_blpts; n++)
+//OLD  {
+//OLD    result = fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+//OLD    blmod.r[n] = dumflt1 * 1.e11;
+//OLD    blmod.t[n] = dumflt2 * 1.e3;
+//OLD  }
 
   fclose (fptr);
 

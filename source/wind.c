@@ -271,10 +271,10 @@ model_velocity (ndom, x, v)
   {
     speed = homologous_velocity (ndom, x, v);
   }
-  else if (zdom[ndom].wind_type == YSO)
-  {
-    speed = yso_velocity (ndom, x, v);
-  }
+//OLD  else if (zdom[ndom].wind_type == YSO)
+//OLD  {
+//OLD    speed = yso_velocity (ndom, x, v);
+//OLD  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     speed = stellar_velocity (ndom, x, v);
@@ -366,19 +366,19 @@ model_vgrad (ndom, x, v_grad)
 /**********************************************************/
 /** 
  * @brief      calculate the density of the wind in from the flow based on the
- * analytic wind models.
+ * analytic or imported wind models.
  *
  * @param [in] int  ndom   The domain of interest
  * @param [in] double  x[]   A position in the domain
  * @return     rho at the position
  *
  * @details
- * The checks the wind type for this domain, e.g SV, and then calls the
+ * This routine simple checks the wind type, e. g. SV, for the domain, and then calls the
  * appropriate routine to that model, e.g sv_rho, to get the density
  *
  * ### Notes ###
- * This routine is normally only used during the initialization
- * of the wind
+ * This routine is used during the initialization
+ * of the wind.
  *
  **********************************************************/
 
@@ -413,10 +413,10 @@ model_rho (ndom, x)
   {
     rho = homologous_rho (ndom, x);
   }
-  else if (zdom[ndom].wind_type == YSO)
-  {
-    rho = yso_rho (ndom, x);
-  }
+//OLD  else if (zdom[ndom].wind_type == YSO)
+//OLD  {
+//OLD    rho = yso_rho (ndom, x);
+//OLD  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     rho = stellar_rho (ndom, x);

@@ -1,4 +1,4 @@
-System_type(star,binary,agn,previous)               binary
+System_type(star,binary,agn,previous)               cv     
 
 ### Parameters for the Central Object
 Central_object.mass(msol)                  0.8
@@ -48,6 +48,8 @@ SV.mdot_r_exponent                         0
 SV.v_infinity(in_units_of_vescape          3
 SV.acceleration_length(cm)                 7e10
 SV.acceleration_exponent                   1.5
+SV.v_zero_mode(fixed,sound_speed)		   fixed 
+SV.v_zero(cm/s)						       6e5
 Wind.radmax(cm)                            1e+12
 Wind.t.init                                40000
 Wind.filling_factor(1=smooth,<1=clumped)   1

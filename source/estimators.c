@@ -1029,7 +1029,8 @@ get_gamma (cont_ptr, xplasma)
   }
 
 
-  gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
+  // gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
+  gamma_value = num_int (gamma_integrand, fthresh, flast, 1e-4);
 
   gamma_value *= 8 * PI / C / C * xplasma->w;
 
@@ -1042,6 +1043,7 @@ get_gamma (cont_ptr, xplasma)
  * @brief integrand for the dilute photoionization rate estimator
  *
  * @param [in] double freq
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return integrand
  *
  * @details
@@ -1052,8 +1054,7 @@ get_gamma (cont_ptr, xplasma)
  **********************************************************/
 
 double
-gamma_integrand (freq)
-     double freq;
+gamma_integrand (double freq, void *params)
 {
   double fthresh;
   double x;
@@ -1108,7 +1109,8 @@ get_gamma_e (cont_ptr, xplasma)
   }
 
 
-  gamma_e_value = qromb (gamma_e_integrand, fthresh, flast, 1e-4);
+//  gamma_e_value = qromb (gamma_e_integrand, fthresh, flast, 1e-4);
+  gamma_e_value = num_int (gamma_e_integrand, fthresh, flast, 1e-4);
 
   gamma_e_value *= 8 * PI / C / C * xplasma->w;
 
@@ -1121,6 +1123,7 @@ get_gamma_e (cont_ptr, xplasma)
  * @brief the integrand for the energy-weighted photoionization rate estimator, 
  *
  * @param [in] double  freq 
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return integrand 
  *
  * @details
@@ -1130,8 +1133,7 @@ get_gamma_e (cont_ptr, xplasma)
  **********************************************************/
 
 double
-gamma_e_integrand (freq)
-     double freq;
+gamma_e_integrand (double freq, void *params)
 {
   double fthresh;
   double x;
@@ -1189,7 +1191,8 @@ get_alpha_st (cont_ptr, xplasma)
   }
 
 
-  alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
+//  alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
+  alpha_st_value = num_int (alpha_st_integrand, fthresh, flast, 1e-4);
 
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
@@ -1213,6 +1216,7 @@ get_alpha_st (cont_ptr, xplasma)
  * @brief returns the integrand for alpha_st at a chosen frequency
  *
  * @param [in] double  freq 
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return integrand 
  *
  * @details
@@ -1222,8 +1226,7 @@ get_alpha_st (cont_ptr, xplasma)
  **********************************************************/
 
 double
-alpha_st_integrand (freq)
-     double freq;               //frequency 
+alpha_st_integrand (double freq, void *params)
 {
   double fthresh;
   double x;
@@ -1285,7 +1288,8 @@ get_alpha_st_e (cont_ptr, xplasma)
   }
 
 
-  alpha_st_e_value = qromb (alpha_st_e_integrand, fthresh, flast, 1e-4);
+//  alpha_st_e_value = qromb (alpha_st_e_integrand, fthresh, flast, 1e-4);
+  alpha_st_e_value = num_int (alpha_st_e_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
@@ -1309,6 +1313,7 @@ get_alpha_st_e (cont_ptr, xplasma)
  * @brief the integrand for alpha_st_e at a chosen frequency
  *
  * @param [in, out] double freq 
+ * @param [in] void  params   An extra (unused) variable to make it paletable for the gsl integrator
  * @return integrand 
  *
  * @details
@@ -1318,8 +1323,7 @@ get_alpha_st_e (cont_ptr, xplasma)
  **********************************************************/
 
 double
-alpha_st_e_integrand (freq)
-     double freq;               //frequency 
+alpha_st_e_integrand (double freq, void *params)
 {
   double fthresh;
   double x;

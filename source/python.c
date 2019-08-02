@@ -74,7 +74,7 @@ main (argc, argv)
 
   double freqmin, freqmax;
   int n;
-  char answer[LINELENGTH];
+  char values[LINELENGTH], answer[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
   int dummy_spectype;
 
@@ -217,7 +217,9 @@ main (argc, argv)
     geo.run_type = RUN_TYPE_NEW;
 
     strcpy (answer, "star");
-    geo.system_type = rdchoice ("System_type(star,binary,agn,previous)", "0,1,2,3", answer);
+    sprintf (values, "%d,%d,%d,%d,%d", SYSTEM_TYPE_STAR, SYSTEM_TYPE_CV, SYSTEM_TYPE_BH, SYSTEM_TYPE_AGN, SYSTEM_TYPE_PREVIOUS);
+    geo.system_type = rdchoice ("System_type(star,cv,bh,agn,previous)", values, answer);
+//OLD    geo.system_type = rdchoice ("System_type(star,cv,bh,agn,previous)", "0,1,2,3", answer);
 
 
     if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
@@ -294,7 +296,7 @@ main (argc, argv)
        */
 
 
-      rdpar_comment ("Parameters descibing the various winds or coronae in the system");
+      rdpar_comment ("Parameters describing the various winds or coronae in the system");
 
       strcpy (answer, "yes");
       geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
@@ -373,7 +375,7 @@ main (argc, argv)
 
   /* Calculate additional parameters associated with the binary star system */
 
-  if (geo.system_type == SYSTEM_TYPE_BINARY)
+  if (geo.system_type == SYSTEM_TYPE_CV)
     binary_basics ();
 
   /* Check that the parameters which have been supplied for the star, disk and boundary layer will
@@ -406,7 +408,7 @@ main (argc, argv)
   else
     Log ("There is a disk which radiates and absorbs\n");
 
-  if (geo.bl_radiation)
+  if (geo.bl_radiation || (geo.agn_radiation && geo.system_type != SYSTEM_TYPE_AGN))
     Log ("There is a boundary layer which radiates\n");
   else
     Log ("There is no boundary layer\n");
@@ -437,27 +439,44 @@ main (argc, argv)
 
     rdpar_comment ("Parameters defining the spectra seen by observers\n");
 
-    get_spectype (geo.star_radiation,
-                  //"Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  //"Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.star_spectype);
-                  "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
-    get_spectype (geo.disk_radiation,
-                  //"Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  //"Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.disk_spectype);
-                  "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
-    get_spectype (geo.bl_radiation,
-                  //"Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
-                  //"Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
-                  "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
-    geo.agn_spectype = SPECTYPE_POW;
-    get_spectype (geo.agn_radiation,
-                  //"Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
-                  "BH.rad_type_in_final_spectrum(power,cloudy,brems)", &geo.agn_spectype);
-    if (geo.agn_radiation && geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
+    if (geo.star_radiation)
     {
-      Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",
-             comp[geo.agn_ion_spectype].nmods);
-      exit (0);
+      get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
+    }
+
+    if (geo.disk_radiation)
+    {
+      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
+    }
+
+    if (geo.bl_radiation)
+    {
+      get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
+    }
+
+    if (geo.agn_radiation)
+    {
+      // This block will run for both AGN, *and* some versions of a boundary layer.
+      // Even though we're setting the same params, we need to change the wording based on the system, unfortunately.
+      geo.agn_spectype = SPECTYPE_POW;
+
+      // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
+      if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
+      {
+        get_spectype (geo.agn_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems)", &geo.agn_spectype);
+      }
+      else
+      {
+        get_spectype (geo.agn_radiation, "Boundary_layer.rad_type_in_final_spectrum(power)", &geo.agn_spectype);
+      }
+
+
+      if (geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
+      {
+        Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",
+               comp[geo.agn_ion_spectype].nmods);
+        exit (0);
+      }
     }
     init_observers ();
   }
