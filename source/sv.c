@@ -81,8 +81,9 @@ get_sv_wind_params (ndom)
   rddoub ("SV.mdot_r_exponent", &zdom[ndom].sv_lambda); /* Mass loss rate exponent */
   rddoub ("SV.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);      /* Final speed of wind in units of escape velocity */
 
-  rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
-  rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
+  rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Acceleration length scale for wind */
+  rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Acceleration scale exponent */
+  rddoub ("SV.gamma(1=uniform_massloss_per_unit_area)", &zdom[ndom].sv_gamma);  /* Parameter controlling mdot as a function of r */
 
   /* allow the user to pick whether they set v0 by a fixed value or by the sound speed */
   strcpy (answer, "fixed");
