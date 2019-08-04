@@ -50,7 +50,7 @@ SV.mdot_r_exponent                         0
 SV.v_infinity(in_units_of_vescape          3
 SV.acceleration_length(cm)                 7e10
 SV.acceleration_exponent                   1.5
-SV.gamma(1=uniform_massloss_per_unit_area)   1
+SV.gamma(streamline_skew;1=usually)        1
 SV.v_zero_mode(fixed,sound_speed)                fixed
 SV.v_zero(cm/s)                            6e5
 Wind.radmax(cm)                            1e+12

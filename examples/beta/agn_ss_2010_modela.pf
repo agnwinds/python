@@ -54,7 +54,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 ### Parameters defining the spectra seen by observers
 
 Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
-Central_object.rad_type_in_final_spectrum(power,cloudy,brems)                power
+Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                0.01
