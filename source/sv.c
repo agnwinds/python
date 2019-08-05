@@ -83,12 +83,13 @@ get_sv_wind_params (ndom)
 
   rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Acceleration length scale for wind */
   rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Acceleration scale exponent */
-  rddoub ("SV.gamma(streamline_skew;1=usually)", &zdom[ndom].sv_gamma);  /* Parameter controlling how concentrated the streamlines
-                                                                            are toward theta_min.  Large values concentrate toward
-                                                                            the polls, must be greater than 0*/
-  if (zdom[ndom].sv_gamma<=0) {
-      Error("SV.gamma must be greater than 0. Large values skew streamlines to poles, small values to equator\n");
-      exit(0);
+  rddoub ("SV.gamma(streamline_skew;1=usually)", &zdom[ndom].sv_gamma); /* Parameter controlling how concentrated the streamlines
+                                                                           are toward theta_min.  Large values concentrate toward
+                                                                           the polls, must be greater than 0 */
+  if (zdom[ndom].sv_gamma <= 0)
+  {
+    Error ("SV.gamma must be greater than 0. Large values skew streamlines to poles, small values to equator\n");
+    exit (0);
   }
 
   /* allow the user to pick whether they set v0 by a fixed value or by the sound speed */
