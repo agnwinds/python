@@ -709,7 +709,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     eprbs_band[n] = 0;
   }
   /* Finished zeroing. */
-
+  
 
   /* bb downwards jumps */
 
