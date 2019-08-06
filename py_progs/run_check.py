@@ -79,7 +79,7 @@ def read_diag(root):
         print(stderr.decode())
         return [],[]
     else:
-        print(stdout.decode())
+        # print(stdout.decode())
         x=stdout.decode()
         # print(len(x))
         lines=x.split('\n')
@@ -137,9 +137,58 @@ def plot_converged(root,converged,converging):
 
     return
 
+def check_completion(root):
+    '''
+    Verify that the run actually completed and
+    provide information about the timeing, from
+    the .sig file
+    '''
+
+    try:
+        x=open(root+'.sig')
+        lines=x.readlines()
+    except:
+        print('Error: %s.sig does not appear to exist' % root)
+        return []
+
+    ion_string=[]
+    spec_string=[]
+
+    for line in lines:
+        if line.count('Finished'):
+            if line.count('ionization'):
+                ion_string=line
+            elif line.count('spectrum'):
+                spec_string=line
+
+    complete_string=lines[len(lines)-1]
+
+    complete_message=[]
+
+    if line.count('COMPLETE'):
+        word=complete_string.split()
+        message='%s ran to completion in %s s' % (root,word[5])
+        complete_message.append(message)
+        word=ion_string.split()
+        message='%s ionization cycles were completed in %s s' % (word[8],word[5])
+        ion_time=eval(word[5])
+        complete_message.append(message)
+        word=spec_string.split()
+        spec_time=eval(word[5])
+        message='%s   spectrum cycles were completed in %s s' % (word[8],spec_time-ion_time)
+        complete_message.append(message)
+
+    else:
+        message='WARNING: RUN %s HAS NOT COMPLETED SUCCESSFULLY' % root
+        complete_message.append(message)
+        word=complete_string.split()
+        message='If not running, it stopped after about %s s in  %s of %s %s cycles' % (word[5],word[8],word[10],word[11])
+        complete_message.append(message)
+    return complete_message
+
 
     
-def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot):
+def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complete_message=['test']):
     '''
     Make an html file that collates all the results
     '''
@@ -147,6 +196,8 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot):
     string=xhtml.begin('Evaluation of how well the python run of %s succeeded' % root)
 
     string+=xhtml.paragraph('Provide an overview of whether the run of %s has succeeded' % root)
+
+    string+=xhtml.add_list(complete_message)
 
     string+=xhtml.hline()
     string+=xhtml.h2('Did the run converge?')
@@ -205,9 +256,18 @@ def doit(root='ixvel',outputfile='out.txt'):
 
 
     '''
+
+    print('\nEvaluating %s\n' % root)
     if windsave2table(root):
         print('Exiting becase windsave2table failed')
         return
+
+    complete_message=check_completion(root)
+    if len(complete_message)==0:
+        print('Exiting because could not parse %s.sig file' % root)
+
+    for one in complete_message:
+        print(one)
 
     converge_plot=plot_wind.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
     te_plot=plot_wind.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
@@ -225,7 +285,7 @@ def doit(root='ixvel',outputfile='out.txt'):
     plot_spec.do_all_angles(root,wmin=0,wmax=0)
     spec_plot=root+'.png'
 
-    make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot)
+    make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complete_message)
 
 
     return
