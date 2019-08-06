@@ -669,6 +669,7 @@ macro_pops (xplasma, xne)
           }
         }
 
+        free (populations);
       }                         // end of while sane loop
 
 
