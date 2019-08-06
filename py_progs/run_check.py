@@ -11,23 +11,47 @@ an html file with various plots, etc.
 
 Command line usage (if any):
 
-    usage: run_check.py root
+    usage:  run_check.py root1 [root2 ...]
+            run_check.py root1.pf [root2.pf ...]
+            run_check -all
+            run_check -h
+            
 
 Description:  
 
+    This routine performs basic checks on one or more python runs
+    and creates an html file for each that is intended to provide
+    a quick summary of a run.  
+
+    The user can enter the runs to be tested from the command line,
+    either in the form of a set of root names or .pf names. Wildcarding,
+    e.g *.pf can be used.  *.out.pf files will be ignored.  
+
+    Alternatively to process all of the files in a directory, one can use
+    the switch -all (which supercedes anything else).  
+
+    In all cases the routine checks to see if the appropriate wind_save file
+    exists before attempting to run.
+
+    -h delievers this documentation
+
 Primary routines:
 
-    doit
+    doit - processes a single file
+    steer  - processes the command line and calls doit for each file.
 
 Notes:
                                        
 History:
 
 190312 ksl Coding begun
+190806 ksl Added a steering routine so that multiple files could be processed
 
 '''
 
 import sys
+from glob import glob
+import os
 from astropy.io import ascii
 import numpy
 import subprocess
@@ -204,21 +228,57 @@ def doit(root='ixvel',outputfile='out.txt'):
     make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot)
 
 
-    
-    
+    return
+
+def steer(argv):
+    '''
+    Process the command line
+    '''
+
+    xall=False
+    files=[]
+    i=1
+    while i<len(argv):
+        if argv[i]=='-h':
+            print(__doc__)
+        elif argv[i]=='-all':
+            xall=True
+            break
+        elif argv[i].count('.out.pf'):
+            pass
+        elif argv[i].count('.pf'):
+            string=argv[i]
+            string=string.replace('.pf','')
+            files.append(string)
+        elif argv[i][0]=='-':
+            print('Unknown switch: %s' % argv[i])
+            return
+        else:
+            files.append(argv[i])
+        i+=1
+
+    if xall==True:
+        files=glob('*.wind_save')
+        for one in files:
+            doit(one.replace('.wind_save',''))
+    else:
+        for one in files:
+            if os.path.isfile(one+'.wind_save'):
+                    doit(one)
+            else:
+                print('Error: No windsave file for %s' % one)
+
 
 
 
     return
 
 
-
-
-
 # Next lines permit one to run the routine from the command line
 if __name__ == "__main__":
     import sys
     if len(sys.argv)>1:
-        doit(sys.argv[1])
+        # doit(sys.argv[1])
+        steer(sys.argv)
     else:
         print (__doc__)
