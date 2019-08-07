@@ -414,7 +414,7 @@ radiation (p, ds)
      which also updates the ionization parameters and scattered and direct contributions */
 
 
-  //Floowing bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
+  //Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
   freq_store = p->freq;         //Store the packets 'intrinsic' frequency
   p->freq = freq;               //Temporarily set the photon frequency to the mean doppler shifter frequency
   update_banded_estimators (xplasma, p, ds, w_ave);     //Update estimators

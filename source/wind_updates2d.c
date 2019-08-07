@@ -200,6 +200,7 @@ WindPtr (w);
       plasmamain[n].j_direct /= (4. * PI * volume);
       plasmamain[n].j_scatt /= (4. * PI * volume);
 
+      plasmamain[n].t_r_old = plasmamain[n].t_r;        // Store the previous t_r in t_r_old immediately before recalculating
       trad = plasmamain[n].t_r = H * plasmamain[n].ave_freq / (BOLTZMANN * 3.832);
       plasmamain[n].w = PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad * trad);
 
