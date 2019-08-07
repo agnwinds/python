@@ -69,7 +69,7 @@ def read_diag(root):
 
     filename='diag_%s/%s_0.diag' % (root,root)
 
-    command="grep 'Summary  convergence' %s" % filename
+    command="grep 'Check_convergence' %s" % filename
 
     proc=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     stdout,stderr=proc.communicate()
@@ -79,20 +79,39 @@ def read_diag(root):
         print(stderr.decode())
         return [],[]
     else:
-        print(stdout.decode())
+        # print(stdout.decode())
         x=stdout.decode()
         # print(len(x))
         lines=x.split('\n')
         # print(len(lines))
         converging=[]
         converged=[]
+        t_r=[]
+        t_e=[]
+        hc=[]
         for line in lines:
-            words=line.split()
-            # print(words)
-            if len(words)>5:
-                converged.append(eval(words[3]))
-                converging.append(eval(words[5]))
-        return converged,converging
+            if line.count('converged'):
+                xline=line.replace('(',' ')
+                xline=xline.replace(')',' ')
+                words=xline.split()
+                converged.append(eval(words[2]))
+                converging.append(eval(words[6]))
+                ncells=eval(words[9])
+            elif line.count('hc(real'):
+                words=line.split()
+                t_r.append(eval(words[2]))
+                t_e.append(eval(words[4]))
+                hc.append(eval(words[8]))
+        t_r=numpy.array(t_r)
+        t_e=numpy.array(t_e)
+        hc=numpy.array(hc)
+
+
+        t_r=t_r/ncells
+        t_e=t_e/ncells
+        hc=hc/ncells
+
+        return converged,converging,t_r,t_e,hc
 
 
 def windsave2table(root):
@@ -119,17 +138,46 @@ def windsave2table(root):
     else:
         return False
 
+def py_error(root):
+    '''
+    Run py_error.py and capture the output to the 
+    screen
+
+    Note:
+        py_error could be refactored so that it did not
+        need to be run from the command line, but this
+        is the simplest way to capture the outputs at
+        present
+    '''
+
+    command='py_error.py %s' % root
+
+    proc=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    stdout,stderr=proc.communicate()
+    if len(stderr):
+        print("Error - py_error.py")
+        print(stderr.decode())
+        return []
+    else:
+        # print(stdout.decode())
+        x=stdout.decode()
+        # print(len(x))
+        lines=x.split('\n')
+        return(lines)
 
 
-def plot_converged(root,converged,converging):
+def plot_converged(root,converged,converging,t_r,t_e,hc):
     '''
     Make a plot of the convergence statistics in the diag directroy
     '''
 
     pylab.figure(1,(6,6))
     pylab.clf()
-    pylab.plot(converged,label='Converged')
-    pylab.plot(converging,label='Converging')
+    pylab.plot(t_r,'--',label='t_r')
+    pylab.plot(t_e,'--',label='t_e')
+    pylab.plot(hc,'--',label='heating:cooling')
+    pylab.plot(converged,lw=2,label='Converged')
+    pylab.plot(converging,lw=2,label='Converging')
     pylab.legend(loc='best')
     pylab.xlabel('Ionization Cycle')
     pylab.ylabel('Fraction of Cells in Wind')
@@ -137,9 +185,78 @@ def plot_converged(root,converged,converging):
 
     return
 
+def check_completion(root):
+    '''
+    Verify that the run actually completed and
+    provide information about the timeing, from
+    the .sig file
+    '''
 
+    try:
+        x=open(root+'.sig')
+        lines=x.readlines()
+    except:
+        print('Error: %s.sig does not appear to exist' % root)
+        return []
+
+    ion_string=[]
+    spec_string=[]
+
+    for line in lines:
+        if line.count('Finished'):
+            if line.count('ionization'):
+                ion_string=line
+            elif line.count('spectrum'):
+                spec_string=line
+
+    complete_string=lines[len(lines)-1]
+
+    complete_message=[]
+
+    if line.count('COMPLETE'):
+        word=complete_string.split()
+        message='%s ran to completion in %s s' % (root,word[5])
+        complete_message.append(message)
+        word=ion_string.split()
+        message='%s ionization cycles were completed in %s s' % (word[8],word[5])
+        ion_time=eval(word[5])
+        complete_message.append(message)
+        word=spec_string.split()
+        spec_time=eval(word[5])
+        message='%s   spectrum cycles were completed in %s s' % (word[8],spec_time-ion_time)
+        complete_message.append(message)
+
+    else:
+        message='WARNING: RUN %s HAS NOT COMPLETED SUCCESSFULLY' % root
+        complete_message.append(message)
+        word=complete_string.split()
+        message='If not running, it stopped after about %s s in  %s of %s %s cycles' % (word[5],word[8],word[10],word[11])
+        complete_message.append(message)
+    return complete_message
+
+convergence_message='''
+The plot shows the fraction of cells which satisfy various convergence criteria, comparing the radiation tempererature, t_r, 
+the electron temperature, t_e between cycles, or the balance between heating and cooling in a given cycle.  If the fractional
+variation in, for example, the electron temperature has changed by less than 5%, then the electron temperature criterion has been passed.
+If a cell passes all three tests, it is said to have "converged".  The plot also indicates the number of cells for which the electron 
+temperature is evolving to a higher or lower value, rather than oscillating up and down in electron temperature. Such cells are said to be
+"converging".
+'''
+
+convergence2='''
+The plot below indicates which cells have converged.  The values given for each cell indicate  the number of convergence tests 
+which have failed, so a value of 0 indicates that a cell is "converged".
+'''
+
+error_description='''
+Python accumulates a fairly large number of errors and warnings.  Most are benign, especially if they only occur a few
+times, but one should beware if an error message occurs many times, or if messages that look unusual start to appear.
+A summary of the errors for this run of the program is shown below.  More information about where the errors occured
+can be found in the diag files directory.  This summary presents the total number of times an error message of a particularly 
+type was generated; many times the same error message will will occur in each of the threads.  
+'''
     
-def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot):
+def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complete_message=['test'],errors=['test','test2']):
     '''
     Make an html file that collates all the results
     '''
@@ -148,12 +265,16 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot):
 
     string+=xhtml.paragraph('Provide an overview of whether the run of %s has succeeded' % root)
 
+    string+=xhtml.add_list(complete_message)
+
     string+=xhtml.hline()
     string+=xhtml.h2('Did the run converge?')
     # print(xhtml.image('file:./diag_%s/convergence.png' % root))
     string+=xhtml.image('file:./diag_%s/convergence.png' % root)
 
-    string+=xhtml.paragraph('Which cells converged? (0 indicates success)')
+    string+=xhtml.paragraph(convergence_message)
+
+    string+=xhtml.paragraph(convergence2)
     # print('Test ',converge_plot)
     string+=xhtml.image('file:%s' % (converge_plot))
     string+=xhtml.hline()
@@ -169,6 +290,14 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot):
     string+=xhtml.hline()
     string+=xhtml.h2('What do the final spectra look like (somewhat smoothed)?')
     string+=xhtml.image('file:%s' % (spec_plot))
+    string+=xhtml.hline()
+
+    string+=xhtml.h2('Errors and Warnings')
+
+    string+=xhtml.paragraph(error_description)
+
+    string+=xhtml.preformat(errors)
+
     string+=xhtml.hline()
 
     # Now add the parameter file so we can see what we have
@@ -205,19 +334,28 @@ def doit(root='ixvel',outputfile='out.txt'):
 
 
     '''
+
+    print('\nEvaluating %s\n' % root)
     if windsave2table(root):
         print('Exiting becase windsave2table failed')
         return
+
+    complete_message=check_completion(root)
+    if len(complete_message)==0:
+        print('Exiting because could not parse %s.sig file' % root)
+
+    for one in complete_message:
+        print(one)
 
     converge_plot=plot_wind.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
     te_plot=plot_wind.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
     tr_plot=plot_wind.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
 
 
-    converged,converging=read_diag(root)
+    converged,converging,t_r,t_e,hc=read_diag(root)
 
     if len(converged):
-        plot_converged(root,converged,converging)
+        plot_converged(root,converged,converging,t_r,t_e,hc)
 
     plot_tot.doit(root)
     spec_tot_plot=root+'.spec_tot.png'
@@ -225,7 +363,10 @@ def doit(root='ixvel',outputfile='out.txt'):
     plot_spec.do_all_angles(root,wmin=0,wmax=0)
     spec_plot=root+'.png'
 
-    make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot)
+    errors=py_error(root)
+     
+
+    make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complete_message,errors)
 
 
     return

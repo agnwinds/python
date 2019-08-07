@@ -510,7 +510,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * photonionization is passed remotely via the PlasmaPtr.
  *
  * In a program running in the two level approxiamtion, electron scattering
- * and ff emsision are treated as scattering processes, but photionionization
+ * and ff emission are treated as scattering processes, but photionionization
  * is not.  In macro-atom mode, photoionization is treated as a scattering 
  * process.
  *
