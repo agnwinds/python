@@ -802,7 +802,8 @@ typedef struct plasma
                                                    and heat_photo. SS June 04. */
   double heat_photo, heat_z;    /*photoionization heating total and of metals */
   double heat_auger;            /* photoionization heating due to inner shell ionizations */
-  double abs_photo, abs_auger;  /* this is the energy absorbed from the photon filed by these processes - different to the heating rate because of the binding energy */
+  double abs_photo, abs_auger;  /* this is the energy absorbed from the photon due to these processes - different from 
+                                   the heating rate because of the binding energy */
   double w;                     /*The dilution factor of the wind */
 
   int ntot;                     /*Total number of photon passages */
@@ -819,10 +820,10 @@ typedef struct plasma
   int nscat_es;                 /* The number of electrons scatters in the cell */
   int nscat_res;                /* The number of resonant line scatters in the cell */
 
-  double mean_ds;               /* NSH 6/9/12 Added to allow a check that a thin shell is really optcially thin */
+  double mean_ds;               /* NSH 6/9/12 Added to allow a check that a thin shell is really optically thin */
   int n_ds;                     /* NSH 6/9/12 Added to allow the mean dsto be computed */
   int nrad;                     /* Total number of photons created within the cell */
-  int nioniz;                   /* Total number of photons capable of ionizing H */
+  int nioniz;                   /* Total number of photon passages by photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 
                                    to each ion[n] . 78 - changed to dynamic allocation */
@@ -849,7 +850,7 @@ typedef struct plasma
 
   double j_direct, j_scatt;     /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double ip_direct, ip_scatt;   /* 1309 NSH mean intensity due to direct photons and scattered photons */
-  double xsd_freq[NXBANDS];     /*1208 NSH the standard deviation of the frequency in the band */
+  double xsd_freq[NXBANDS];     /* 1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;              /*1208 NSH The maximum frequency photon seen in this cell */
   double cool_tot;              /*The total cooling in a cell */
@@ -881,7 +882,7 @@ typedef struct plasma
      ionization pool */
   double bf_simple_ionpool_in, bf_simple_ionpool_out;
 
-  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
+  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to compute compton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
   double rad_force_es[3];       /*Radiative force of wind */
@@ -919,7 +920,7 @@ typedef struct plasma
 
 
   double exp_temp[NXBANDS];     /*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
-  double exp_w[NXBANDS];        /*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell */
+  double exp_w[NXBANDS];        /*NSH 120817 - The prefactor of an exponential representation of the radiation field in a cell */
   double ip;                    /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   double xi;                    /*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;

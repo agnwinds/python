@@ -77,8 +77,9 @@ to match heating and cooling in the wind element! */
     xplasma->dt_e_old = xplasma->dt_e;
     xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
     xplasma->t_e_old = xplasma->t_e;
-    xplasma->t_r_old = xplasma->t_r;
+    //OLD xplasma->t_r_old = xplasma->t_r;
     xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->heat_tot_old = xplasma->heat_tot;
 
     ireturn = one_shot (xplasma, mode);
 
@@ -95,8 +96,9 @@ to match heating and cooling in the wind element! */
     xplasma->dt_e_old = xplasma->dt_e;
     xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
     xplasma->t_e_old = xplasma->t_e;
-    xplasma->t_r_old = xplasma->t_r;
+    //OLD xplasma->t_r_old = xplasma->t_r;
     xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->heat_tot_old = xplasma->heat_tot;
 
     ireturn = one_shot (xplasma, mode);
 
@@ -113,8 +115,9 @@ to match heating and cooling in the wind element! */
     xplasma->dt_e_old = xplasma->dt_e;
     xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
     xplasma->t_e_old = xplasma->t_e;
-    xplasma->t_r_old = xplasma->t_r;
+    //OLD xplasma->t_r_old = xplasma->t_r;
     xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->heat_tot_old = xplasma->heat_tot;
 
 
     ireturn = one_shot (xplasma, mode);
@@ -327,12 +330,13 @@ check_convergence ()
   xconverging = ((double) nconverging) / ntot;
   geo.fraction_converged = xconverge;
   Log
-    ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
+    ("!!Check_convergence: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
-  Log ("!!Check_convergence_breakdown: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d\n", ntr, nte, nmax, nhc);
-  Log
-    ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
-     nconverge, xconverge, nconverging, xconverging, ntot);
+  Log ("!!Check_convergence: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d\n", ntr, nte, nmax, nhc);
+  // The information in the next statement is identical to that two lines above so ksl has eliminated it
+  //Old Log
+  //Old   ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
+  //Old    nconverge, xconverge, nconverging, xconverging, ntot);
   Log_flush ();
   return (0);
 }
