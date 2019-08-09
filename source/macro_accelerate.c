@@ -225,8 +225,8 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
     else
     {
-      /* XXX - ask stuart about this! */
-      /* the idea here is that if it is a simple line then it *must* create an r-packet originally?? */
+      /* the idea here is that if it is a simple line then it *must* create an r-packet eventually, so this is essentially
+         a k->r transition */
       kpacket_to_rpacket_rate += mplasma->cooling_bb[i];
     }
   }
@@ -260,7 +260,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* now in one step, we multiply by the identity matrix and normalise the probabilities
      this means that what is now stored in Q_matrix is no longer Q, but N=(I - Q) using Vogl 
      notation. We check that Q_norm is 0, because some states (ground states) can have 0 
-     jumping probabilities and so zero normalisation to */
+     jumping probabilities and so zero normalisation too */
   for (uplvl = 0; uplvl < nrows; uplvl++)
   {
     for (target_level = 0; target_level < nrows; target_level++)
@@ -310,7 +310,6 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* now get ready for the matrix operations. first let's assign variables for use with GSL */
   gsl_matrix_view N;
   gsl_matrix *inverse_matrix;
-  gsl_matrix *output;
   gsl_permutation *p, *pp;
   int ierr, s;
 
@@ -344,9 +343,11 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* free memory */
   gsl_permutation_free (p);
   gsl_matrix_free (inverse_matrix);
+  gsl_matrix_free (inverse_matrix);
   free (a_data);
   free (R_matrix);
   free (Q_matrix);
+  free (Q_norm);
 }
 
 
