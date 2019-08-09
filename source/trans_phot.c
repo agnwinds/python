@@ -111,10 +111,10 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
     if (nphot % nreport == 0)
     {
       if (geo.ioniz_or_extract)
-        Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle+1, geo.wcycles, basename, nphot, NPHOT,
+        Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle + 1, geo.wcycles, basename, nphot, NPHOT,
              nphot * 100. / NPHOT);
       else
-        Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.pcycle+1, geo.pcycles, basename, nphot, NPHOT,
+        Log ("Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.pcycle + 1, geo.pcycles, basename, nphot, NPHOT,
              nphot * 100. / NPHOT);
     }
 
