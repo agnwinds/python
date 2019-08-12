@@ -858,6 +858,9 @@ update_banded_estimators (xplasma, p, ds, w_ave)
      double w_ave;
 {
   int i;
+  double flux[3];
+  double p_dir_cos[3];
+  struct photon phot_mid;
 
   /*photon weight times distance in the shell is proportional to the mean intensity */
   xplasma->j += w_ave * ds;
