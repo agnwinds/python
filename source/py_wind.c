@@ -415,6 +415,9 @@ one_choice (choice, root, ochoice)
   case 'B':
     plasma_cell (wmain, root, ochoice);
     break;
+	case 'c':
+	flux_summary (wmain,root,ochoice);
+	break;
   case 'C':                    /*the ratio cooling to heating */
     coolheat_summary (wmain, root, ochoice);
     break;

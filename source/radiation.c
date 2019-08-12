@@ -878,6 +878,15 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   xplasma->n_ds++;
   xplasma->ave_freq += p->freq * w_ave * ds;
 
+  
+  stuff_phot (p, &phot_mid);    // copy photon ptr
+  move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
+  stuff_v (p->lmn, p_dir_cos); 
+  renorm (p_dir_cos, w_ave * ds );
+  project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);
+
+  if (p->x[2] < 0) //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+    flux[2] *= (-1);
 
 
   /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
@@ -887,6 +896,8 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
   /* note that here we can use the photon weight and don't need to calculate anm attenuated average weight
      as energy packets are indisivible in macro atom mode */
+
+  printf ("BLAH1 cell %i np %i freq %e ds %e weight %e %e %e %e\n",xplasma->nplasma,p->np,p->freq,ds,w_ave,phot_mid.x[0],phot_mid.x[1],phot_mid.x[2]);
 
 
   for (i = 0; i < geo.nxfreq; i++)
@@ -898,7 +909,9 @@ update_banded_estimators (xplasma, p, ds, w_ave)
       xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;   /* input to allow standard deviation to be calculated */
       xplasma->xj[i] += w_ave * ds;     /* photon weight times distance travelled */
       xplasma->nxtot[i]++;      /* increment the frequency banded photon counter */
-
+	  xplasma->F_x[i]+=flux[0];
+	  xplasma->F_y[i]+=flux[1];
+	  xplasma->F_z[i]+=flux[2];
       /* work out the range of frequencies within a band where photons have been seen */
       if (p->freq < xplasma->fmin[i])
       {
