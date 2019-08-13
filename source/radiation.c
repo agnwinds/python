@@ -907,7 +907,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   {
     if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
     {
-
+		printf ("edding to bin %i\n",i);
       xplasma->xave_freq[i] += p->freq * w_ave * ds;    /* frequency weighted by weight and distance */
       xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;   /* input to allow standard deviation to be calculated */
       xplasma->xj[i] += w_ave * ds;     /* photon weight times distance travelled */
