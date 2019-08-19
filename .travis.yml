@@ -47,6 +47,14 @@ install:
     - export PYTHONPATH=$PYTHONPATH:$PYTHON/py_progs
     - ./configure
 
+    # Then install GSL
+    - wget http://mirrors.syringanetworks.net/gnu/gsl/gsl-2.5.tar.gz
+    - tar xvzf gsl-2.5.tar.gz
+    - cd gsl-2.5/
+    - ./configure
+    - make install
+    - cd ..
+
     # do installation
     - make travis_install
 

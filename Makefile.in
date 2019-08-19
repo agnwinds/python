@@ -30,14 +30,6 @@ travis_install:
 	@echo 'Installing Python. the radiative transfer code'
 	@echo 'Installing in directory '$(PYTHON)
 
-	# Install GSL
-	wget http://mirrors.syringanetworks.net/gnu/gsl/gsl-2.5.tar.gz
-	tar xvzf gsl-2.5.tar.gz
-	cd gsl-2.5/
-	./configure
-	make install
-	cd ..
-
 	#finally, make the latest release
 	@echo 'Making source code...'
 	$(MAKE_SOURCE)
