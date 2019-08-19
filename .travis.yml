@@ -13,6 +13,9 @@
 #
 #####################################################################################
 
+os:
+    - osx
+
 language: c
 
 compiler:
@@ -46,15 +49,11 @@ install:
     - export PATH=$PATH:$PYTHON/bin:$PYTHON/py_progs
     - export PYTHONPATH=$PYTHONPATH:$PYTHON/py_progs
     - export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include
+    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - ./configure
 
     # Then install GSL
-    - wget http://mirrors.syringanetworks.net/gnu/gsl/gsl-2.5.tar.gz
-    - tar xvzf gsl-2.5.tar.gz
-    - cd gsl-2.5/
-    - ./configure
-    - sudo make install
-    - cd ..
+    - brew install gsl
 
     # do installation
     - make travis_install
