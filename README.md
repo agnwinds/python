@@ -2,11 +2,11 @@
 
 Python is a (confusingly named) Monte Carlo radiative transfer code which uses the Sobolev approximation.
 It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham and Edward Parkinson.
-The code has been used for a variety of research projects invovling the winds of cataclysmic variables, of young stellar 
+The code has been used for a variety of research projects invovling the winds of cataclysmic variables, of young stellar
 objects, and of AGN.
 
-The code is under active development, but we are looking for beta users to test the code, and potentially use it 
-for their own research. If you are interested in using Python please email the collaboration at agn-winds[at]googlegroups[dot]com or contact Knox Long via long[at]stsci[dot]edu. 
+The code is under active development, but we are looking for beta users to test the code, and potentially use it
+for their own research. If you are interested in using Python please email the collaboration at agn-winds[at]googlegroups[dot]com or contact Knox Long via long[at]stsci[dot]edu.
 
 Documentation of input parameters is hosted on [ReadTheDocs](http://agnwinds.readthedocs.io/en/dev/).
 
@@ -14,30 +14,40 @@ Documentation of input parameters is hosted on [ReadTheDocs](http://agnwinds.rea
 
 [![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
 
+## Requirements
+
+Python requires GSL v2.5 or higher.
+
+* **Linux:** `apt install libgsl-dev` may provide GSL v2.5, but this cannot be guaranteed.
+  Manual installation instructions for GSL v2.5 on Linux can be found [here](https://astrointro.wordpress.com/2017/05/17/installing-gnu-scientific-library-gsl-in-ubuntu-16-04-and-compiling-codes/)
+
+* **Mac:** Homebrew provides GSL v2.5. It can be installed via `brew install gsl`.
+
+
 ## Installation
 
-Python and the various routines associated are set up in a self-contained directory structure. The basic directory structure and the data files that one needs to run Python need to be retrieved and compiled. 
+Python and the various routines associated are set up in a self-contained directory structure. The basic directory structure and the data files that one needs to run Python need to be retrieved and compiled.
 
 If you want to obtain a stable (!) release, go to the [Releases](https://github.com/agnwinds/python/releases) page.
 
-If you want to download the latest dev version, you can zip up the git repository by clicking on the zip icon to the right of the GitHub page. Aternatively, you can clone the repository using 
+If you want to download the latest dev version, you can zip up the git repository by clicking on the zip icon to the right of the GitHub page. Aternatively, you can clone the repository using
 
-    $ git clone https://github.com/agnwinds/python.git 
+    $ git clone https://github.com/agnwinds/python.git
 
 If you anticipate contributing to development we suggest Forking the repository and submitting pull requests with any proposed changes.
 
-Once you have the files, you need to cd to the new directory and set your environment variables
-    
+Once you have the files, you need to navigate to the new directory and set your environment variables
+
     $ export PYTHON = /path/to/python/
-    $ cd $PYTHON 
+    $ cd $PYTHON
     $ ./configure
     $ make install  (or better make install 2>&1 | tee today.txt)
     $ make clean
 
 If you have any difficulties with the installation, please submit an issue, along with the file today.txt
 
-Note that the export syntax is for bash- for csh use 
-  
+Note that the export syntax is for bash- for csh use
+
     $ setenv PYTHON /path/to/python/
 
 Atomic data is stored in our [data repository](https://github.com/agnwinds/data) with its own releases page. one should unzip these files and place them in a $PYTHON/data folder.
@@ -52,7 +62,7 @@ To run python you need to add the following to your $PATH variable:
 
     $PYTHON/bin
 
-You can then setup your symbolic links by running 
+You can then setup your symbolic links by running
 
     $ Setup_Py_Dir
 

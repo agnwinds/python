@@ -1,3 +1,0 @@
-Include directory for GSL and CFITSIO header files
-
-linked using INCLUDE variable in Makefile
