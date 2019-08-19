@@ -38,10 +38,9 @@ notifications:
 
 # install numpy for test scripts
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq python3-numpy
-  - sudo apt-get install -qq python3-astropy
-  - sudo apt-get install libgsl-dev
+  - brew install python
+  - pip install numpy astropy
+  - brew install gsl
 
 install:
     # first configure
