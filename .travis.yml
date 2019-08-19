@@ -36,19 +36,20 @@ notifications:
     on_success: never       # default: change
     on_failure: always      # default: always
 
+addons:
+  homebrew:
+    packages:
+    - gsl
+
 # install numpy for test scripts
 before_install:
-  - brew install python
   - pip install numpy astropy
-  - brew install gsl
 
 install:
     # first configure
     - export PYTHON=$TRAVIS_BUILD_DIR
     - export PATH=$PATH:$PYTHON/bin:$PYTHON/py_progs
     - export PYTHONPATH=$PYTHONPATH:$PYTHON/py_progs
-    - export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include
-    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
     - ./configure
 
     # Then install GSL
