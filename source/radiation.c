@@ -900,14 +900,13 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   /* note that here we can use the photon weight and don't need to calculate anm attenuated average weight
      as energy packets are indisivible in macro atom mode */
 
-  printf ("BLAH1 cell %i np %i freq %e ds %e weight %e %e %e %e\n",xplasma->nplasma,p->np,p->freq,ds,w_ave,phot_mid.x[0],phot_mid.x[1],phot_mid.x[2]);
 
 
   for (i = 0; i < geo.nxfreq; i++)
   {
     if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
     {
-		printf ("edding to bin %i\n",i);
+//		printf ("edding to bin %i\n",i);
       xplasma->xave_freq[i] += p->freq * w_ave * ds;    /* frequency weighted by weight and distance */
       xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;   /* input to allow standard deviation to be calculated */
       xplasma->xj[i] += w_ave * ds;     /* photon weight times distance travelled */
@@ -915,6 +914,8 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 	  xplasma->F_x[i]+=flux[0];
 	  xplasma->F_y[i]+=flux[1];
 	  xplasma->F_z[i]+=flux[2];
+	  printf ("BLAH1 cell%i band%i np %i freq %e ds %e weight %e %e %e %e\n",xplasma->nplasma,i,p->np,p->freq,ds,w_ave,phot_mid.x[0],phot_mid.x[1],phot_mid.x[2]);
+
       /* work out the range of frequencies within a band where photons have been seen */
       if (p->freq < xplasma->fmin[i])
       {
