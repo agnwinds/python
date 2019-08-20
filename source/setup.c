@@ -793,7 +793,7 @@ setup_dfudge ()
   {
     dfudge = geo.rmax / 1.e10;
   }
-  dfudge=5e10;
+
   Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
   return (dfudge);
