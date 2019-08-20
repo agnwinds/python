@@ -510,7 +510,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * photonionization is passed remotely via the PlasmaPtr.
  *
  * In a program running in the two level approxiamtion, electron scattering
- * and ff emsision are treated as scattering processes, but photionionization
+ * and ff emission are treated as scattering processes, but photionionization
  * is not.  In macro-atom mode, photoionization is treated as a scattering 
  * process.
  *
@@ -743,8 +743,7 @@ kbf_need (fmin, fmax)
   return (0);
 }
 
-
-
+int sobolev_error_counter = 0;
 /**********************************************************/
 /**
  * @brief      calculates tau in the sobolev approxmation for a resonance, given the
@@ -772,7 +771,6 @@ kbf_need (fmin, fmax)
  * reduces tau
  *
  **********************************************************/
-
 double
 sobolev (one, x, den_ion, lptr, dvds)
      WindPtr one;               // This is a single cell in the wind
@@ -848,9 +846,17 @@ calls to two_level atom
 
   if (xden_ion < 0)
   {
-    Error ("sobolev: VERY BAD den_ion has negative density %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+    sobolev_error_counter++;
+    if (sobolev_error_counter < 100)
+    {
+      Error ("sobolev: VERY BAD den_ion has negative density %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+    }
+    else if (sobolev_error_counter == 100)
+    {
+      Error ("sobolev: suppressing negative density errors\n");
+    }
 
-    /* With the changesabove to limit the denisties the above error should not be happening, and if this does occur then 
+    /* With the changes above to limit the densikies the above error should not be happening, and if this does occur then 
      * we should determine why.  When we become convinced this problem has been dealt with effectively we can simplify this
      * code and just quit if the error occurs
      * ksl 181127
@@ -871,7 +877,7 @@ calls to two_level atom
 
     else
     {
-      Error ("sobolev: continuing by setting tau to zero\n");
+      //  Error ("sobolev: continuing by setting tau to zero\n");
       return (0.0);
     }
   }

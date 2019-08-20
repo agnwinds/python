@@ -44,7 +44,7 @@
  * This routine gets the inputs needed for the shell_wind model and
  * translates them into those needed for the equvalent stellar wind
  * model. Several arrays specific to the shell_wind model are also
- * intialized.
+ * initialized.
  *
  * ### Notes ###
  *
@@ -83,6 +83,7 @@ get_shell_wind_params (ndom)
     Error ("For the shell type wind, we take control of the grid, and need NDIM to be the minimum - 4 - changing\n");
     zdom[ndom].ndim = 4;
     zdom[ndom].mdim = 1;
+    zdom[ndom].ndim2 = 4;
   }
 
 

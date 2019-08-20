@@ -130,7 +130,7 @@ calculate_ionization (restart_stat)
   while (geo.wcycle < geo.wcycles)
   {                             /* This allows you to build up photons in bunches */
 
-    xsignal (files.root, "%-20s Starting %3d of %3d ionization cycle \n", "NOK", geo.wcycle + 1, geo.wcycles);
+    xsignal (files.root, "%-20s Starting %3d of %3d ionization cycles \n", "NOK", geo.wcycle + 1, geo.wcycles);
 
     Log ("!!Python: Beginning cycle %d of %d for defining wind\n", geo.wcycle + 1, geo.wcycles);
     Log_flush ();               /* Flush the log file (so that we know where are if there are problems */
@@ -306,14 +306,14 @@ calculate_ionization (restart_stat)
 
 
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
-    /* We only want one process to write to the file */
+    /* We only want one process to write to the file, and we only do this if there is a disk */
 
 #ifdef MPI_ON
     if (rank_global == 0)
     {
 #endif
-      qdisk_save (files.disk, ztot);
-
+      if (geo.disk_type != DISK_NONE)
+        qdisk_save (files.disk, ztot);
 #ifdef MPI_ON
     }
     MPI_Barrier (MPI_COMM_WORLD);
@@ -366,7 +366,7 @@ calculate_ionization (restart_stat)
     /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
 
-    xsignal (files.root, "%-20s Finished %3d of %3d ionization cycle \n", "OK", geo.wcycle + 1, geo.wcycles);
+    xsignal (files.root, "%-20s Finished %3d of %3d ionization cycles \n", "OK", geo.wcycle + 1, geo.wcycles);
     geo.wcycle++;               //Increment ionisation cycles
 
 
@@ -552,7 +552,7 @@ make_spectra (restart_stat)
   while (geo.pcycle < geo.pcycles)
   {                             /* This allows you to build up photons in bunches */
 
-    xsignal (files.root, "%-20s Starting %3d of %3d spectral cycle \n", "NOK", geo.pcycle + 1, geo.pcycles);
+    xsignal (files.root, "%-20s Starting %3d of %3d spectrum cycles \n", "NOK", geo.pcycle + 1, geo.pcycles);
 
 
 

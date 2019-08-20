@@ -148,17 +148,28 @@ def doit(filename='lines.c'):
 
 
 
-def do_all():
+def do_all(ignore_list=None):
     '''
     Indent all of the .c and .h files in a directory in a standard way
+
+    ignore_list     list of file strings to ignore 
+                    if NoneType or blank array then nothing is ignored
+                    gets converted to numpy array inside function 
     '''
     if get_gnu()=='':
         return
 
     files=glob('*.h')+glob('*.c')
+    ignore_list = numpy.array(ignore_list)
 
     for one in files:
-        doit(one)
+        # test if the file is in the "ignore" list 
+        # np.array() ensures this works even if ignore_list is Nonetype 
+        # or has zero length (prevents TypeError)
+        ignore = (one == ignore_list).any()
+
+        if ignore == False:
+            doit(one)
 
     return
 
@@ -181,8 +192,13 @@ def steer(argv):
         if argv[i]=='-h':
             print(__doc__)
             return
+        # all files including prototypes
         if argv[i]=='-all':
             do_all()
+            return
+        # exclude python prototype files 
+        if argv[i]=='-all_no_headers':
+            do_all(ignore_list=["atomic_proto.h", "templates.h", "log.h"])
             return
         else:
             files.append(argv[i])
