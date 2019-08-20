@@ -52,6 +52,7 @@ lib/pkgconfig/
 
 # sphinx stuff
 docs/sphinx/html/
+docs/sphinx/doctrees/
 
 # doxygen stuff
 docs/doxygen/html/
@@ -87,4 +88,8 @@ source/version.h
 *.log_spec_tot
 *.rdpar
 *.sig
+*.out.pf
 logfile
+
+# IDE files
+.idea/
