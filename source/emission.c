@@ -286,7 +286,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
     nplasma = wmain[icell].nplasma;
     ndom = wmain[icell].ndom;
-    plasmamain[nplasma].nrad += 1;      /* Increment the counter for the number of photons generatd in the cell */
+    plasmamain[nplasma].nrad += 1;      /* Increment the counter for the number of photons generated in the cell */
 
 
 

@@ -232,6 +232,10 @@ define_wind ()
     if (n_inwind == 0)
     {
       Error ("wind2d: There are no wind cells in domain %d.  This seems unreasonble\n", ndom);
+      if (n_part > 0)
+      {
+        Log ("wind2d: partially in wind cells have been found, so consider increasing resolution\n");
+      }
       Exit (1);
     }
 

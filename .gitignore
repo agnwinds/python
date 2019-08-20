@@ -3,6 +3,9 @@
 bin/py*
 bin/windsave2table*
 
+# Run files
+*.spec*
+
 # Object files
 *.o
 *.ko
@@ -45,7 +48,11 @@ include/gsl/
 lib/pkgconfig/
 
 # the configure Makefile should not be tracked
-Makefile
+./Makefile
+
+# sphinx stuff
+docs/sphinx/html/
+docs/sphinx/doctrees/
 
 # doxygen stuff
 docs/doxygen/html/
@@ -81,4 +88,8 @@ source/version.h
 *.log_spec_tot
 *.rdpar
 *.sig
+*.out.pf
 logfile
+
+# IDE files
+.idea/

@@ -6,4 +6,5 @@ unit: ergs/s
 values: Greater than 0
 parent:
   Boundary_layer.rad_type_to_make_wind: [models, power]
+  Boundary_layer.rad_type_in_final_spectrum: [models, uniform]
 file: setup_star_bh.c

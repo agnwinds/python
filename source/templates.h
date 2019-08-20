@@ -476,12 +476,13 @@ int photo_gen_matom (PhotPtr p, double weight, int photstart, int nphot);
 int macro_gov (PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops (PlasmaPtr xplasma, double xne);
 /* windsave2table_sub.c */
-int do_windsave2table (char *root, int ion_switch);
-int create_master_table (int ndom, char rootname[]);
-int create_heat_table (int ndom, char rootname[]);
-int create_ion_table (int ndom, char rootname[], int iz, int ion_switch);
-double *get_ion (int ndom, int element, int istate, int iswitch);
-double *get_one (int ndom, char variable_name[]);
+int do_windsave2table(char *root, int ion_switch);
+int create_master_table(int ndom, char rootname[]);
+int create_heat_table(int ndom, char rootname[]);
+int create_convergence_table(int ndom, char rootname[]);
+int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
+double *get_ion(int ndom, int element, int istate, int iswitch);
+double *get_one(int ndom, char variable_name[]);
 /* import.c */
 int import_wind (int ndom);
 int import_make_grid (WindPtr w, int ndom);
@@ -633,9 +634,10 @@ void py_wind_help (void);
 void parse_arguments (int argc, char *argv[], char root[], int *ion_switch);
 int main (int argc, char *argv[]);
 /* windsave2table_sub.c */
-int do_windsave2table (char *root, int ion_switch);
-int create_master_table (int ndom, char rootname[]);
-int create_heat_table (int ndom, char rootname[]);
-int create_ion_table (int ndom, char rootname[], int iz, int ion_switch);
-double *get_ion (int ndom, int element, int istate, int iswitch);
-double *get_one (int ndom, char variable_name[]);
+int do_windsave2table(char *root, int ion_switch);
+int create_master_table(int ndom, char rootname[]);
+int create_heat_table(int ndom, char rootname[]);
+int create_convergence_table(int ndom, char rootname[]);
+int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
+double *get_ion(int ndom, int element, int istate, int iswitch);
+double *get_one(int ndom, char variable_name[]);

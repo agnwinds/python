@@ -80,12 +80,12 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python"
 # this can be altered to whatever is best
-	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
+	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE) -lgsl $(MPI_FLAG)
 	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
+	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) -lgsl $(MPI_FLAG)
 	FFLAGS =
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
@@ -231,7 +231,7 @@ windsave2table: $(table_objects)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 
 run_indent:
-	../py_progs/run_indent.py -all
+	../py_progs/run_indent.py -all_no_headers
 
 
 # The next line runs recompiles all of the routines after first cleaning the directory

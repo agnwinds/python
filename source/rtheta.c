@@ -184,7 +184,7 @@ rtheta_make_grid (w, ndom)
       else
       {                         //logarithmic intervals
 
-        dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (mdim - 3);
+        dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (ndim - 3);
         w[n].r = geo.rstar * pow (10., dlogr * (i - 1));
         w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (i)) + pow (10., dlogr * (i - 1)));
       }
