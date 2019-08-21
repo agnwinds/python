@@ -53,7 +53,7 @@ rtheta_ds_in_cell (ndom, p)
   int n, ix, iz;
   double s, smax;
 
-
+  printf ("BLAH In rtheta_ds_in_cell %e %e %e %e\n",zdom[ndom].wind_x[0],zdom[ndom].wind_x[1],zdom[ndom].wind_x[2],zdom[ndom].wind_x[3]);
   /* Check that that the photon is in the domain it is supposed to be
    * in.  */
 
@@ -65,13 +65,17 @@ rtheta_ds_in_cell (ndom, p)
 
   wind_n_to_ij (ndom, n, &ix, &iz);     /*Convert the index n to two dimensions */
 
-
+  printf ("BLAH ix=%i iz=%i\n",ix,iz);
   /* Set up the quadratic equations in the radial  direction */
 
   smax = ds_to_sphere (zdom[ndom].wind_x[ix], p);
+  printf ("BLAH rtheta_ds_in_cell ds_to_sphere inner=%e\n",smax);
   s = ds_to_sphere (zdom[ndom].wind_x[ix + 1], p);
+  printf ("BLAH ds to sphere %e\n",s);
   if (s < smax)
   {
+	  printf ("BLAH rtheta_ds_in_cell ds_to_sphere outer=%e\n",s);
+	  
     smax = s;
   }
 
@@ -81,12 +85,16 @@ rtheta_ds_in_cell (ndom, p)
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz], p);
   if (s < smax)
   {
+	  printf ("BLAH rtheta_ds_in_cell ds_to_cone inner=%e\n",s);
+	  
     smax = s;
   }
 
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz + 1], p);
   if (s < smax)
   {
+	  printf ("BLAH rtheta_ds_in_cell ds_to_cone outer=%e\n",s);
+	  
     smax = s;
   }
 
