@@ -194,7 +194,7 @@ def do_all_angles_ev(rootname='sv',smooth=21,emin=1000,emax=9000,fmax=0,fig_no=1
 
 
 
-def do_all_angles(rootname='sv',smooth=21,wmin=850,wmax=1850,fmax=0,fig_no=1):
+def do_all_angles(rootname='sv',smooth=21,wmin=850,wmax=1850,fmax=0,fig_no=1, title=None):
     '''
     Plot each of the spectra where
 
@@ -268,7 +268,9 @@ def do_all_angles(rootname='sv',smooth=21,wmin=850,wmax=1850,fmax=0,fig_no=1):
     else:
         pylab.axis((wmin,wmax,0,fmax))
 
-    pylab.title(root)
+    if title == None:
+        title = root
+    pylab.title(title)
     pylab.legend(loc='best')
     pylab.draw()
     pylab.savefig(root+'.png')
