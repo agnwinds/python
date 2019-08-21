@@ -106,8 +106,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
-	  if (nphot==49)
-		  printf ("STARTHERE\n");
     /* This is just a watchdog method to tell the user the program is still running */
 
     if (nphot % nreport == 0)
@@ -209,7 +207,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   Log ("\n");
 
   print_timer_duration ("!!python: photon transport completed in", timer_t0);
-  exit(0);
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
   if (n_lost_to_dfudge > 0)
     Error
@@ -309,7 +306,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 
     istat = translate (w, &pp, tau_scat, &tau, &nres);
-	printf ("BLAH2 %i %i\n",pp.np,istat);
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
        not yet eliminated it from translate. ?? 02jan ksl */
 

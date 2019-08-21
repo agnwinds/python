@@ -87,22 +87,15 @@ translate (w, pp, tau_scat, tau, nres)
   int ndomain;
   
   
-   printf ("BLAH testing phot %i WIW=%i\n",pp->np,where_in_wind (pp->x, &ndomain));
 
   if (where_in_wind (pp->x, &ndomain) < 0) //If the return is negative, this means we are outside the wind
   {
-	  printf ("BLAH3 %i B4TIS %20.15e\n",pp->np,length(pp->x));
     istat = translate_in_space (pp);  //And so we should translate in space
-  printf ("BLAH3 %i AFTIS %20.15e\n",pp->np,length(pp->x));
 	  
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
   {
-	  printf ("BLAH3 %i B4TIW %20.15e\n",pp->np,length(pp->x));
-	  
     istat = translate_in_wind (w, pp, tau_scat, tau, nres);
-    printf ("BLAH3 %i AFTIW %20.15e\n",pp->np,length(pp->x));
-	
   }
   else
   {
@@ -151,7 +144,6 @@ translate_in_space (pp)
   int ifail;
 
   ds = ds_to_wind (pp, &ndom);
-  printf ("BLAH TIS ds to wind=%20.15e\n",ds);
 
   /* For IMPORT, although we have reached the edge of the wind, we may be in a cell that is
    * not really in the wind, so we have to address this situtation here.  The first problem
@@ -159,10 +151,7 @@ translate_in_space (pp)
 
   if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
   {
-	  printf ("BLAH IN TIS with imported wind type %i\n",ndom);
-    stuff_phot (pp, &ptest);
-	  printf ("BLAH TIS moving photon %i %20.15e\n",pp->np,ds+DFUDGE);
-	  
+    stuff_phot (pp, &ptest);	  
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
                                            From here on we should be in the grid  */
 		ds+=DFUDGE; /* We need to make sure we take account of the little extra path..*/
@@ -186,48 +175,30 @@ translate_in_space (pp)
     {
 
       smax = ds_to_wind (&ptest, &ndom_next);   // This is the maximum distance can go in this domain
-	  printf ("BLAH maxiumum distance we can go is %e\n",smax);
       s = 0;
       while (s < smax && where_in_wind (ptest.x, &ndom_next) < 0)
       {
         if ((delta = ds_in_cell (ndom, &ptest)) > 0)
         {
-			printf ("BLAH moving test photon %e cm %i\n",delta + DFUDGE,where_in_wind (ptest.x, &ndom_next));
-          move_phot (&ptest, delta + DFUDGE);
-		  printf ("BLAH test photon has moved %20.15e (%20.15e of total)\n",s ,s/smax);
-		  
-  		printf ("BLAH moved test photon %e cm %i\n",delta + DFUDGE,where_in_wind (ptest.x, &ndom_next));
-		printf ("BLAH increasing s from %20.15e to ",s);
+          move_phot (&ptest, delta + DFUDGE);		  
           s += delta + DFUDGE;  // The distance the photon has moved
-  		printf ("%20.15e\n",s);
-
         }
         else
         {
           break;
         }
       }
-	  printf ("BLAH broken out of loop - we must have got to the wind s %20.15e smax %20.15e wiw %i\n",s,smax,where_in_wind (ptest.x, &ndom_next));
-	  printf ("BLAH photon is in wind here %e %e %e %20.15e\n",ptest.x[0],ptest.x[1],ptest.x[2],length(ptest.x));
       /* So at this point we have either gotten out of the domain or we have found a cell that
        * is actually in the wind or we encoutered the error above
        */
-	  printf ("BLAH total distance moved is %20.15e\n",ds+s);
-
       if (s > 0)
       {
-		  printf ("BLAH ds=%20.15e\n",ds);
         ds += s - DFUDGE;       /* We are going to add DFUDGE back later */
-		  printf ("BLAH ds=%20.15e\n",ds);
-		  
       }
     }
 
   }
-printf ("BLAH moving real photon %20.15e cm %i\n",ds + DFUDGE,where_in_wind (pp->x, &ndom_next));
   move_phot (pp, ds + DFUDGE);
-  printf ("BLAH moved real photon %20.15e cm %i\n",ds + DFUDGE,where_in_wind (pp->x, &ndom_next));
-  printf ("BLAH photon is now here %e %e %e %20.15e\n",pp->x[0],pp->x[1],pp->x[2],length(pp->x));
 
 
   return (pp->istat);
@@ -306,16 +277,13 @@ ds_to_wind (pp, ndom_current)
       /* Check if the photon hits the inner or outer radius of the wind */
       if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
       {
-		  printf ("BLAH ds to rmax %20.15e\n",x);
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_RMIN;
       }
 
       if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-      {
-		  printf ("BLAH ds to rmin %20.15e\n",x);
-		  
+      {		  
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_RMAX;
@@ -324,17 +292,13 @@ ds_to_wind (pp, ndom_current)
       /* Check if the photon hits the inner or outer windcone */
 
       if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-      {
-		  printf ("BLAH ds to inner cone %20.15e\n",x);
-		  
+      {		  
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_INNER_CONE;
       }
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-      {
-		  printf ("BLAH ds to outer cone %20.15e\n",x);
-		  
+      {		  
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_OUTER_CONE;
@@ -506,8 +470,6 @@ return and record an error */
   ndom = one->ndom;
   inwind = one->inwind;
 
-  printf ("BLAH4 TIW photon %i is in grid %i plasma %i inwind? %i\n",p->np,n,nplasma,inwind);
-  printf ("BLAH4 TIW photon %i is at %e %e %e\n",p->np,p->x[0],p->x[1],p->x[2]);
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
@@ -516,7 +478,6 @@ return and record an error */
   {
     return ((int) smax);
   }
-  printf ("BLAH4 TIW ds in cell=%20.15e\n",smax);
   if (one->inwind == W_PART_INWIND)
   {                             /* The cell is partially in the wind */
     s = ds_to_wind (p, &ndom_current);  /* smax is set to be the distance to edge of the wind */
@@ -528,9 +489,7 @@ return and record an error */
   }
   else if (one->inwind == W_IGNORE)
   {
-    smax += one->dfudge;
-  printf ("BLAH We are ignoring this cell - moving %20.15e\n",smax);
-	
+    smax += one->dfudge;	
     move_phot (p, smax);
     return (p->istat);
 
@@ -676,7 +635,6 @@ return and record an error */
 /* Assign the pointers for the cell containing the photon */
 
   one = &wmain[n];              /* one is the grid cell where the photon is */
-  printf ("BLAH ds_in_cell np %i cell %i\n",p->np,n);
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
@@ -686,7 +644,6 @@ return and record an error */
   }
   else if (zdom[ndom].coord_type == RTHETA)
   {
-	  printf("BLAH going to rtheta_ds_in_cell\n");
     smax = rtheta_ds_in_cell (ndom, p);
   }
   else if (zdom[ndom].coord_type == SPHERICAL)
