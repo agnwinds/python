@@ -2,10 +2,13 @@ Photons_per_cycle
 =================
 Multi-line description, must keep indentation.
 
-**Type:** Double
+Type
+  Double
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 

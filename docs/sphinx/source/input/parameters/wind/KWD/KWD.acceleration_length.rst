@@ -3,17 +3,20 @@ KWD.acceleration_length
 The size of the acceleration length scale for a disk wind described by the
 KWD model.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** cm
+Unit
+  cm
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `knigge.c <https://github.com/agnwinds/python/blob/master/source/knigge.c>`_
+File
+  `knigge.c <https://github.com/agnwinds/python/blob/master/source/knigge.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: kwd
+Parent(s)
+  * :ref:`Wind.type`: kwd
 
 

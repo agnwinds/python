@@ -1,84 +1,68 @@
 Meta-documentation
 ##################
-How to use the auto-documentation tools
-=======================================
 
-*python* has two documentation tools, stored in the *py_progs* directory, and a common file
-format for documenting the python functions.
+How to document Python
+======================
 
-YAML documentation
-==================
+This documentation is written in ReStructured Text, and parsed by Sphinx.
+We're trying to maintain a roughly consistent format for the documentation.
 
-The documentation for *python* variables takes the form of *YAML* input files stored in
-*docs/parameters*. These are functionally more or less just *Python* dictionaries, and have a very
-flexible structure. A full example outline is:
+Parameter documentation
+=======================
 
-.. literalinclude:: reference_yaml.txt
-   :language: yaml
-   :lines: 1-12
+Parameters are documented in a consistent way. They have a set of properties.
+Not every parameter will have all properties but you should fill them all in where possible.
+A full example outline is:
 
+.. literalinclude:: reference_rst.txt
+   :language: rst
 
-The **required** keys that must be present in any file are ``name``, ``description``, ``type``
-and ``file``.
+The sections we expect are entered as a definition list.
+A definition list consists of titles followed by a definition block indented by 2 characters.
+The headings, in the order we expect, are:
 
-For enumerators, a more complex setup can be used for the ``values`` key outlining all the
-possible choices:
+Name
+  The parameter name, as used by Python input files.
 
-.. literalinclude:: reference_yaml.txt
-   :language: yaml
-   :lines: 14-25
+Description
+  A description of the parameter and its function.
+  This can include links to other pages and parameters, using the format
 
-The ``parent`` key is used to link between parameters, so you can see which options depend on others
-(for example, :ref:`Reverb.matom_lines` depends on :ref:`Line_transfer` being a macro-atom mode).
-Parent should be a list of parameters, followed by one (or a list of) values of the parent that result
-in this parameter being used, for example:
+  .. literalinclude:: reference_rst.txt
+     :language: rst
+     :lines: 4-4
 
-.. literalinclude:: reference_yaml.txt
-   :language: yaml
-   :lines: 27-28
+Type
+  This is whether the parameter is an integer, float, or enumerator (a list of choices).
 
-Parent will automatically link to the page for each parent. Parent is also used when figuring out the structure
-within each file, so put any local parents at the top of the list.
-If you'd like to reference one parameter elsewhere within another, you can use the following format
+Unit
+  This is the unit. It can be something like `cm`, `m` or even derived from other parameters
+  (e.g. `Central_object.radius`).
 
-.. literalinclude:: reference_yaml.txt
-   :language: yaml
-   :lines: 30-30
+Values
+  If the parameter is an integer or float, this should describe the range of values it can take.
+  For example, `Greater than 0` or `0-1`.
 
+  If the variable type is `Enumerator`, then instead it should include a nested definition list of
+  the possible choices. Where each choice implies a different set of possible children
+  (e.g. :ref:`Wind.type``) then each choice should have its own Children definition list.
 
-TODO: Make structure of parent explicit.
+File
+  The file the parameter is found in. This is a link to the file on the `master` branch.
 
-autogenerate_parameter_docs.py
-==============================
+Child(ren)
+  If the parameter implies any others.
+  For example, :ref:`Spectrum.no_observers` has child parameters :ref:`Spectrum.angle`.
 
-This tool takes the *python* .c input files, and scans them for calls to input parameters from file.
-It is run from the command line as::
-
-  autogenerate_parameter_docs.py
-
-This mode will tell you which parameters are **new**, and undocumented, and which files are
-**deprecated** and refer to parameters that no longer exist. In many cases, deprecated parameters
-will simply be renamed. You can use this as a reminder to rename the parameter and tweak the *YAML*
-documentation file.
-
-Once this has been done, it can be run using::
-
-  autogenerate_parameter_docs.py -w
-
-This will move any deprecated documentation to *docs/parameters/old*, and generate new *YAML*
-documentation files for the new parameters in *docs/parameters*. You can now proceed to fill
-in the documentation skeletons produced by the utility.
+Parent(s)
+  If the parameter depends on another.
+  For example, :ref:`KWD.rmax` is only required for a specific choice of :ref:`Wind.type`.
 
 
-----------------------------------------
 
-autogenerate_rtd_pages.py
-=========================
 
-This tool takes the `YAML documentation`_ input files, and converts them into *RST* files and from there a *HTML*
-documentation page using *Sphinx*. You don't need to know anything about the formats in order to use
-it- you simply need *Sphinx* installed, and it is available as a MacPorts package or through apt
-on 'nix systems.
+Old bit to update
+=================
 
 It will read the files in the *docs/parameters* directory and build a *HTML* page,
 then automatically open it in your browser. You may see some errors during the creation::

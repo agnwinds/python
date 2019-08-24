@@ -2,15 +2,17 @@ Disk.mdot
 =========
 The mass transfer rate in the disk when considering a standard Shakura-disk.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** M☉/year
+Unit
+  M☉/year
 
-**File:** `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
+File
+  `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Disk.temperature.profile`: standard
+Parent(s)
+  * :ref:`Disk.temperature.profile`: standard
 
 

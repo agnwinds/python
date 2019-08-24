@@ -5,17 +5,20 @@ in which the velocity is proporional to the radius.  In general, mdot will
 decline with radius, depending on the exponent of the power law that describes
 the trend in density.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** M☉/yr
+Unit
+  M☉/yr
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `homologous.c <https://github.com/agnwinds/python/blob/master/source/homologous.c>`_
+File
+  `homologous.c <https://github.com/agnwinds/python/blob/master/source/homologous.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: homologous
+Parent(s)
+  * :ref:`Wind.type`: homologous
 
 

@@ -2,30 +2,30 @@ Disk.type
 =========
 Parameter defining whether there is a disk in the system
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  none
+    No disk
 
-none
-  No disk
+  flat
+    Standard flat disk
 
-flat
-  Standard flat disk
-
-vertically.extended
-  Vertically extended disk
-
-
-**File:** `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
+  vertically.extended
+    Vertically extended disk
 
 
-**Child(ren):**
+File
+  `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
 
-* :ref:`Disk.rad_type_to_make_wind`
 
-* :ref:`Disk.radiation`
+Child(ren)
+  * :ref:`Disk.rad_type_to_make_wind`
 
-* :ref:`Disk.z1`
+  * :ref:`Disk.radiation`
 
-* :ref:`Disk.z0`
+  * :ref:`Disk.z1`
+
+  * :ref:`Disk.z0`
 

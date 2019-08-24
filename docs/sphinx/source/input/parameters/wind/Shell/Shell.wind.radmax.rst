@@ -2,17 +2,20 @@ Shell.wind.radmax
 =================
 Multi-line description, must keep indentation.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** cm
+Unit
+  cm
 
-**Values:** Greater than :ref:`Shell.wind.radmin`
+Values
+  Greater than :ref:`Shell.wind.radmin`
 
-**File:** `shell_wind.c <https://github.com/agnwinds/python/blob/master/source/shell_wind.c>`_
+File
+  `shell_wind.c <https://github.com/agnwinds/python/blob/master/source/shell_wind.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: shell
+Parent(s)
+  * :ref:`Wind.type`: shell
 
 

@@ -6,17 +6,20 @@ This parameter desribes the azimuth of the region.  When
 this general option is used, a detailed spectrum is constructed
 just from photons that originate or scatter int he region
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** Degrees
+Unit
+  Degrees
 
-**Values:** Between 0, and 360 or -180 to 180
+Values
+  Between 0, and 360 or -180 to 180
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Spectrum.select_location`: spherical_region
+Parent(s)
+  * :ref:`Spectrum.select_location`: spherical_region
 
 

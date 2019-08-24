@@ -2,137 +2,136 @@ Wind.type
 =========
 Multi-line description, must keep indentation.
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  SV
+    Multi-line description, must keep indentation.
 
-SV
-  Multi-line description, must keep indentation.
+  corona
+    Multi-line description, must keep indentation.
 
-corona
-  Multi-line description, must keep indentation.
+  homologous
+    Multi-line description, must keep indentation.
 
-homologous
-  Multi-line description, must keep indentation.
+  hydro
+    Multi-line description, must keep indentation.
 
-hydro
-  Multi-line description, must keep indentation.
+  imported
+    Multi-line description, must keep indentation.
 
-imported
-  Multi-line description, must keep indentation.
+  kwd
+    Multi-line description, must keep indentation.
 
-kwd
-  Multi-line description, must keep indentation.
+  shell
+    Multi-line description, must keep indentation.
 
-shell
-  Multi-line description, must keep indentation.
+  star
+    Multi-line description, must keep indentation.
 
-star
-  Multi-line description, must keep indentation.
-
-yso
-  Multi-line description, must keep indentation.
-
-
-**File:** `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
+  yso
+    Multi-line description, must keep indentation.
 
 
-**Parent(s):**
+File
+  `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
 
-* :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
+
+Parent(s)
+  * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
 
 
-**Child(ren):**
+Child(ren)
+  * :ref:`Shell.wind_v_at_rmin`
 
-* :ref:`Shell.wind_v_at_rmin`
+  * :ref:`Corona.radmax`
 
-* :ref:`Corona.radmax`
+  * :ref:`Wind.mdot`
 
-* :ref:`Wind.mdot`
+  * :ref:`KWD.mdot_r_exponent`
 
-* :ref:`KWD.mdot_r_exponent`
+  * :ref:`Corona.base_den`
 
-* :ref:`Corona.base_den`
+  * :ref:`KWD.v_zero`
 
-* :ref:`KWD.v_zero`
+  * :ref:`Stellar_wind.mdot`
 
-* :ref:`Stellar_wind.mdot`
+  * :ref:`Homologous.radmin`
 
-* :ref:`Homologous.radmin`
+  * :ref:`KWD.acceleration_length`
 
-* :ref:`KWD.acceleration_length`
+  * :ref:`Corona.radmin`
 
-* :ref:`Corona.radmin`
+  * :ref:`KWD.rmax`
 
-* :ref:`KWD.rmax`
+  * :ref:`Homologous.radmax`
 
-* :ref:`Homologous.radmax`
+  * :ref:`SV.thetamax`
 
-* :ref:`SV.thetamax`
+  * :ref:`SV.acceleration_exponent`
 
-* :ref:`SV.acceleration_exponent`
+  * :ref:`Corona.zmax`
 
-* :ref:`Corona.zmax`
+  * :ref:`Corona.scale_height`
 
-* :ref:`Corona.scale_height`
+  * :ref:`Homologous.density_exponent`
 
-* :ref:`Homologous.density_exponent`
+  * :ref:`Hydro.thetamax`
 
-* :ref:`Hydro.thetamax`
+  * :ref:`Wind.dim.in.z_or_theta.direction`
 
-* :ref:`Wind.dim.in.z_or_theta.direction`
+  * :ref:`SV.diskmin`
 
-* :ref:`SV.diskmin`
+  * :ref:`SV.diskmax`
 
-* :ref:`SV.diskmax`
+  * :ref:`SV.acceleration_length`
 
-* :ref:`SV.acceleration_length`
+  * :ref:`Hydro.file`
 
-* :ref:`Hydro.file`
+  * :ref:`KWD.acceleration_exponent`
 
-* :ref:`KWD.acceleration_exponent`
+  * :ref:`Corona.vel_frac`
 
-* :ref:`Corona.vel_frac`
+  * :ref:`Stellar_wind.radmin`
 
-* :ref:`Stellar_wind.radmin`
+  * :ref:`Shell.wind.radmax`
 
-* :ref:`Shell.wind.radmax`
+  * :ref:`Stellar_wind.radmax`
 
-* :ref:`Stellar_wind.radmax`
+  * :ref:`Wind.model2import`
 
-* :ref:`Wind.model2import`
+  * :ref:`Homologous.vbase`
 
-* :ref:`Homologous.vbase`
+  * :ref:`Homologous.boundary_mdot`
 
-* :ref:`Homologous.boundary_mdot`
+  * :ref:`KWD.rmin`
 
-* :ref:`KWD.rmin`
+  * :ref:`Shell.wind_mdot`
 
-* :ref:`Shell.wind_mdot`
+  * :ref:`SV.mdot_r_exponent`
 
-* :ref:`SV.mdot_r_exponent`
+  * :ref:`KWD.d`
 
-* :ref:`KWD.d`
+  * :ref:`Shell.wind.v_at_rmax`
 
-* :ref:`Shell.wind.v_at_rmax`
+  * :ref:`Stellar_wind.acceleration_exponent`
 
-* :ref:`Stellar_wind.acceleration_exponent`
+  * :ref:`Stellar_wind.v_infinity`
 
-* :ref:`Stellar_wind.v_infinity`
+  * :ref:`Shell.wind.radmin`
 
-* :ref:`Shell.wind.radmin`
+  * :ref:`Shell.wind.acceleration_exponent`
 
-* :ref:`Shell.wind.acceleration_exponent`
+  * :ref:`SV.v_zero_mode`
 
-* :ref:`SV.v_zero_mode`
+  * :ref:`SV.v_infinity`
 
-* :ref:`SV.v_infinity`
+  * :ref:`Stellar_wind.vbase`
 
-* :ref:`Stellar_wind.vbase`
+  * :ref:`Wind.dim.in.x_or_r.direction`
 
-* :ref:`Wind.dim.in.x_or_r.direction`
+  * :ref:`KWD.v_infinity`
 
-* :ref:`KWD.v_infinity`
-
-* :ref:`SV.thetamin`
+  * :ref:`SV.thetamin`
 

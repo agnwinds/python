@@ -7,22 +7,22 @@ in a single angle range. The two methods should yield the same or very similar r
 but the extraction method is much more efficient and live or die is basically a
 diagnostic mode.
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  live.or.die
+    Count only those photons that escape within a small angle range towards the observer
 
-live.or.die
-  Count only those photons that escape within a small angle range towards the observer
-
-extract
-  Extract a component of all photons that scatter towards the observer
-
-
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+  extract
+    Extract a component of all photons that scatter towards the observer
 
 
-**Parent(s):**
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
-* :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+Parent(s)
+  * :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 

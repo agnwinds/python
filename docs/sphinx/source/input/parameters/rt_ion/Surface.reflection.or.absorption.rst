@@ -2,20 +2,21 @@ Surface.reflection.or.absorption
 ================================
 When photons hit the disk, there are several options
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  reflect
+    The photons are scattered back into the wind
 
-reflect
-  The photons are scattered back into the wind
+  absorb
+    The photons are simply lost from the calculation
 
-absorb
-  The photons are simply lost from the calculation
-
-thermalized.rerad
-  The photons are absorbed, in the next ionization cycle energy lost is treated as extra heat, and the effective temperature of the ring in the disk will be increased accordingly
+  thermalized.rerad
+    The photons are absorbed, in the next ionization cycle energy lost is treated as extra heat, and the effective temperature of the ring in the disk will be increased accordingly
 
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 

@@ -6,17 +6,20 @@ This SED has hardwired frequency exponents of 2.5 below the
 low energy break and -2.0 above the high energy break. This
 parameter defines the energy of the high energy break.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** eV
+Unit
+  eV
 
-**Values:** Greater than :ref:`Central_object.cloudy.low_energy_break`
+Values
+  Greater than :ref:`Central_object.cloudy.low_energy_break`
 
-**File:** `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
+File
+  `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Central_object.rad_type_to_make_wind`: ``cloudy``
+Parent(s)
+  * :ref:`Central_object.rad_type_to_make_wind`: ``cloudy``
 
 

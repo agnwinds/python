@@ -6,15 +6,17 @@ This value is a constant; when equal to 1 the results resemble those of a linear
 Typically for an SV type wind this power law exponent is 1.5.
 See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
-**Type:** Double
+Type
+  Double
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
+File
+  `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: SV
+Parent(s)
+  * :ref:`Wind.type`: SV
 
 

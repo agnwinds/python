@@ -6,17 +6,20 @@ spectrum.  The region is defined by a cylindrical distance, and z height
 and an aximuth, and a radius r.  This parameter defines the z coordiante
 of the region.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** cm
+Unit
+  cm
 
-**Values:** Within the z range of the model
+Values
+  Within the z range of the model
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Spectrum.select_location`: spherical_region
+Parent(s)
+  * :ref:`Spectrum.select_location`: spherical_region
 
 

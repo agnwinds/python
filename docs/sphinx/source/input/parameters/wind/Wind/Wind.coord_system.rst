@@ -2,28 +2,28 @@ Wind.coord_system
 =================
 The coordinate system used for a describing a component of the wind.
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  spherical
+    Spherical
 
-spherical
-  Spherical
+  cylindrical
+    Cylindrical
 
-cylindrical
-  Cylindrical
+  polar
+    Spherical polar
 
-polar
-  Spherical polar
-
-cyl_var
-  Cylindrical varying z
-
-
-**File:** `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
+  cyl_var
+    Cylindrical varying z
 
 
-**Parent(s):**
+File
+  `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
 
-* :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
+
+Parent(s)
+  * :ref:`Wind.number_of_components`: Greater than 0. Once per wind.
 
 

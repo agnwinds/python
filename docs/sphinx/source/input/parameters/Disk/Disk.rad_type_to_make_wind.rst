@@ -2,28 +2,27 @@ Disk.rad_type_to_make_wind
 ==========================
 Multi-line description, must keep indentation.
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  bb
+    Multi-line description, must keep indentation.
 
-bb
-  Multi-line description, must keep indentation.
-
-models
-  Multi-line description, must keep indentation.
-
-
-**File:** `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
+  models
+    Multi-line description, must keep indentation.
 
 
-**Parent(s):**
-
-* :ref:`Disk.radiation`: ``True``
-
-* :ref:`Disk.type`: ``flat``, ``vertically.extended``
+File
+  `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
 
 
-**Child(ren):**
+Parent(s)
+  * :ref:`Disk.radiation`: ``True``
 
-* :ref:`Input_spectra.model_file`
+  * :ref:`Disk.type`: ``flat``, ``vertically.extended``
+
+
+Child(ren)
+  * :ref:`Input_spectra.model_file`
 

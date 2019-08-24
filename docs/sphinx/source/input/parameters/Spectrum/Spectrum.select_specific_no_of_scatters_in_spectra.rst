@@ -5,17 +5,17 @@ constraints on the detailed spectra which are extract.
 This includes selectiong photons from above or below the
 disk, only photons which have scttered, etc.
 
-**Type:** Boolean (yes/no)
+Type
+  Boolean (yes/no)
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
-
-
-**Parent(s):**
-
-* :ref:`Spectrum_cycles`: Greater than or equal to 0
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Child(ren):**
+Parent(s)
+  * :ref:`Spectrum_cycles`: Greater than or equal to 0
 
-* :ref:`Spectrum.select_scatters`
+
+Child(ren)
+  * :ref:`Spectrum.select_scatters`
 

@@ -8,23 +8,24 @@ location of the individual spectra and the temperate and gravity associated
 with each spectrum. (One may wish to use the same files for several radiation sources, viz the disk and the star)
 Python actually only reads in the data the first time.
 
-**Type:** String
+Type
+  String
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
+Parent(s)
+  * :ref:`Central_object.rad_type_to_make_wind`: models
 
-* :ref:`Central_object.rad_type_to_make_wind`: models
+  * :ref:`Central_object.rad_type_in_final_spectrum`: models
 
-* :ref:`Central_object.rad_type_in_final_spectrum`: models
+  * :ref:`Disk.rad_type_to_make_wind`: models
 
-* :ref:`Disk.rad_type_to_make_wind`: models
+  * :ref:`Disk.rad_type_in_final_spectrum`: models
 
-* :ref:`Disk.rad_type_in_final_spectrum`: models
+  * :ref:`Boundary_layer.rad_type_to_make_wind`: models
 
-* :ref:`Boundary_layer.rad_type_to_make_wind`: models
-
-* :ref:`Boundary_layer.rad_type_in_final_spectrum`: models
+  * :ref:`Boundary_layer.rad_type_in_final_spectrum`: models
 
 

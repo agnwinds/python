@@ -3,17 +3,20 @@ Spectrum.select_r
 Part of a set of parameters which define a spherical region of space from which
 photons are to be extracted. select_r defines the radius of the spherical region
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** cm
+Unit
+  cm
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Spectrum.select_location`: spherical_region
+Parent(s)
+  * :ref:`Spectrum.select_location`: spherical_region
 
 

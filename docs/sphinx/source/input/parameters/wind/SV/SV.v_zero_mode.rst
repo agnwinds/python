@@ -2,26 +2,25 @@ SV.v_zero_mode
 ==============
 Multi-line description, must keep indentation.
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  fixed
+    Multi-line description, must keep indentation.
 
-fixed
-  Multi-line description, must keep indentation.
-
-sound_speed
-  Multi-line description, must keep indentation.
-
-
-**File:** `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
+  sound_speed
+    Multi-line description, must keep indentation.
 
 
-**Parent(s):**
+File
+  `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
 
-* :ref:`Wind.type`: SV
+
+Parent(s)
+  * :ref:`Wind.type`: SV
 
 
-**Child(ren):**
-
-* :ref:`SV.v_zero`
+Child(ren)
+  * :ref:`SV.v_zero`
 

@@ -102,67 +102,67 @@ def output_parameter(parameter: dict, output_file: TextIO):
     output_file.write("{}\n".format(parameter['description']))
 
     if parameter.get('type'):
-        output_file.write("**Type:** {}\n\n".format(parameter['type']))
+        output_file.write("Type\n  {}\n\n".format(parameter['type']))
     if parameter.get('unit'):
-        output_file.write("**Unit:** {}\n\n".format(parameter['unit']))
+        output_file.write("Unit\n  {}\n\n".format(parameter['unit']))
 
     if parameter.get('values'):
         if isinstance(parameter['values'], dict):
-            output_file.write("**Values:**\n\n")
+            output_file.write("Values\n")
             for key, value in parameter['values'].items():
-                output_file.write("{}\n".format(key))
+                output_file.write("  {}\n".format(key))
                 if isinstance(value, str):
-                    write_str_indent(output_file, value.strip(), indent="  ", all=True)
+                    write_str_indent(output_file, value.strip(), indent="    ", all=True)
                 elif isinstance(value, list):
                     write_str_indent(
                         output_file,
-                        ', '.join([str(x) for x in value]), indent="  ", all=True
+                        ', '.join([str(x) for x in value]), indent="    ", all=True
                     )
                 else:
-                    output_file.write("    "+str(value))
+                    output_file.write("    {}\n".format(value))
 
         elif isinstance(parameter['values'], list):
             # If this is a list of values, write each out as a bullet-point
-            output_file.write("**Values:**\n")
+            output_file.write("Values\n")
             for value in parameter['values'].items():
-                write_str_indent(output_file, "* {}".format(value), indent="  ")
+                write_str_indent(output_file, "  * {}".format(value), indent="  ")
 
         else:
-            output_file.write("**Values:** {}\n".format(parameter['values']))
+            output_file.write("Values\n  {}\n".format(parameter['values']))
         output_file.write("\n")
 
     output_file.write(
-        "**File:** `{} <https://github.com/agnwinds/python/blob/master/source/{}>`_\n\n\n".format(
+        "File\n  `{} <https://github.com/agnwinds/python/blob/master/source/{}>`_\n\n\n".format(
             parameter['file'], parameter['file']
         )
     )
 
     if parameter.get('parent'):
         if isinstance(parameter['parent'], dict):
-            output_file.write("**Parent(s):**\n\n")
+            output_file.write("Parent(s)\n")
             for key, value in parameter['parent'].items():
                 if isinstance(value, str):
-                    write_str_indent(output_file, "* :ref:`{}`: {}".format(key, value), indent="  ")
+                    write_str_indent(output_file, "  * :ref:`{}`: {}".format(key, value), indent="    ")
                 elif isinstance(value, list):
                     list_text = ', '.join(['``'+str(x)+'``' for x in value])
-                    write_str_indent(output_file, "* :ref:`{}`: {}".format(key, list_text, indent="  "))
+                    write_str_indent(output_file, "  * :ref:`{}`: {}".format(key, list_text, indent="    "))
                 else:
-                    output_file.write("* :ref:`{}`: ``{}``\n\n".format(key, value))
+                    output_file.write("  * :ref:`{}`: ``{}``\n\n".format(key, value))
             output_file.write("\n")
 
         elif isinstance(parameter['parent'], list):
             # If this is a list of parents, write each out as a bullet-point
-            output_file.write("**Parent(s):**\n\n")
+            output_file.write("Parent(s)\n")
             for value in parameter['parent'].items():
-                write_str_indent(output_file, "* {}".format(value), indent="  ")
+                write_str_indent(output_file, "  * {}".format(value), indent="    ")
         else:
-            output_file.write("**Parent(s):** {}\n\n".format(parameter['parent']))
+            output_file.write("Parent(s)\n  {}\n\n".format(parameter['parent']))
 
     # Go through all the children and output them
     if parameter.get('children'):
-        output_file.write("**Child(ren):**\n\n")
+        output_file.write("Child(ren)\n")
         for key in parameter['children'].keys():
-            write_str_indent(output_file, "* :ref:`{}`".format(key), indent="  ")
+            write_str_indent(output_file, "  * :ref:`{}`".format(key), indent="    ")
     return
 
 

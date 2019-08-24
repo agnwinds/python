@@ -7,17 +7,19 @@ inferior conjunciton, that is with the secondary in front (or
 depending on inclination angle, partially in front of) the
 primary
 
-**Type:** Double
+Type
+  Double
 
-**Values:** Between 0 and 1
+Values
+  Between 0 and 1
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
+Parent(s)
+  * :ref:`Spectrum_cycles`: Greater than or equal to 0
 
-* :ref:`Spectrum_cycles`: Greater than or equal to 0
-
-* :ref:`System_type`: binary
+  * :ref:`System_type`: binary
 
 

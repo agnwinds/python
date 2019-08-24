@@ -5,38 +5,37 @@ additional conditions on the location of photons extracted in
 the detailed spectrum. The location refers here to the either
 where the photons was created or where it last scattered
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  all
+    Select photons regardless of where they are generated
 
-all
-  Select photons regardless of where they are generated
+  below_disk
+    Select only photons generated from below (-z) the disk
 
-below_disk
-  Select only photons generated from below (-z) the disk
+  above_disk
+    Select only photons orginating above the disk
 
-above_disk
-  Select only photons orginating above the disk
-
-spherical_region
-  Select photons by defining a spherical region
-
-
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+  spherical_region
+    Select photons by defining a spherical region
 
 
-**Parent(s):**
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
-* :ref:`Spectrum.select_photons_by_position`: ``True``
+
+Parent(s)
+  * :ref:`Spectrum.select_photons_by_position`: ``True``
 
 
-**Child(ren):**
+Child(ren)
+  * :ref:`Spectrum.select_r`
 
-* :ref:`Spectrum.select_r`
+  * :ref:`Spectrum.select_rho`
 
-* :ref:`Spectrum.select_rho`
+  * :ref:`Spectrum.select_azimuth`
 
-* :ref:`Spectrum.select_azimuth`
-
-* :ref:`Spectrum.select_z`
+  * :ref:`Spectrum.select_z`
 

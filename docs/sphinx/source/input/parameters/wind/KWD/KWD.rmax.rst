@@ -3,17 +3,20 @@ KWD.rmax
 The radius at which the disk wind terminates, in units of central object
 radii. This has to be greater than rmin.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** :ref:`Central_object.radius`
+Unit
+  :ref:`Central_object.radius`
 
-**Values:** Greater than :ref:`KWD.rmin`
+Values
+  Greater than :ref:`KWD.rmin`
 
-**File:** `knigge.c <https://github.com/agnwinds/python/blob/master/source/knigge.c>`_
+File
+  `knigge.c <https://github.com/agnwinds/python/blob/master/source/knigge.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: kwd
+Parent(s)
+  * :ref:`Wind.type`: kwd
 
 

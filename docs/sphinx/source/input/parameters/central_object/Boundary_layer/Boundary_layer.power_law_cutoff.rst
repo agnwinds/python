@@ -5,17 +5,20 @@ of a form $L_\nu=K\nu^\alpha$, as applied to the boundary layer of a star.
 It prevents the power-law being applied to low frequencies and giving an odd SED.
 See :ref:`Radiation_types` and :ref:`Boundary_layer.power_law_cutoff`.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** Hz
+Unit
+  Hz
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
+File
+  `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Boundary_layer.rad_type_to_make_wind`: ``power_law``
+Parent(s)
+  * :ref:`Boundary_layer.rad_type_to_make_wind`: ``power_law``
 
 

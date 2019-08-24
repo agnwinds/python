@@ -4,17 +4,20 @@ Adds a low-frequency cutoff to the power law spectrum.
 Whilst this is required for power-law emission modes,
 it's set globally and also used in `cloudy` broken-power-law emission modes!
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** Hz
+Unit
+  Hz
 
-**Values:** Greater than or equal to 0
+Values
+  Greater than or equal to 0
 
-**File:** `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
+File
+  `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Central_object.rad_type_to_make_wind`: ``power``
+Parent(s)
+  * :ref:`Central_object.rad_type_to_make_wind`: ``power``
 
 

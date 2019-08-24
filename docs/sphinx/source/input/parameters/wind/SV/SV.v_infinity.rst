@@ -4,17 +4,20 @@ Asymptotic (i.e. final) velocity of a line driven wind in a Shlosman & Vitello C
 Assumed to scale with the local velocity at the base of the streamline.
 See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** Escape velocity
+Unit
+  Escape velocity
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
+File
+  `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: SV
+Parent(s)
+  * :ref:`Wind.type`: SV
 
 

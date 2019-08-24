@@ -4,25 +4,25 @@ The type of spectra that are produced in the final spectra. The current choices 
 where basic implies simply summing up the energy packets that escape within a particularly wavelength/
 frequency bin.
 
-**Type:** Enumerator
+Type
+  Enumerator
 
-**Values:**
+Values
+  flambda
+    λF(λ)
 
-flambda
-  λF(λ)
+  fnu
+    νF(ν)
 
-fnu
-  νF(ν)
-
-basic
-  F(λ)
-
-
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+  basic
+    F(λ)
 
 
-**Parent(s):**
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
-* :ref:`Spectrum_cycles`: Greater than or equal to 0
+
+Parent(s)
+  * :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 

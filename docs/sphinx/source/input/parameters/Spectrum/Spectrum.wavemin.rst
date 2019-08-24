@@ -2,17 +2,20 @@ Spectrum.wavemin
 ================
 The minimum wavelength of the final spectra in Angstroms
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** Angstroms
+Unit
+  Angstroms
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Spectrum_cycles`: Greater than or equal to 0
+Parent(s)
+  * :ref:`Spectrum_cycles`: Greater than or equal to 0
 
 

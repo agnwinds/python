@@ -6,33 +6,34 @@ prescription and another region of space with a second prescription. For example
 a disk atmoosphere between the disk and a wind.  This parameter describes the number of components (aka domains)
 of the wind.
 
-**Type:** Integer
+Type
+  Integer
 
-**Values:** Greater than 0
+Values
+  Greater than 0
 
-**File:** `python.c <https://github.com/agnwinds/python/blob/master/source/python.c>`_
-
-
-**Parent(s):**
-
-* :ref:`System_type`: ``star``, ``binary``, ``agn``
+File
+  `python.c <https://github.com/agnwinds/python/blob/master/source/python.c>`_
 
 
-**Child(ren):**
+Parent(s)
+  * :ref:`System_type`: ``star``, ``binary``, ``agn``
 
-* :ref:`Wind.t.init`
 
-* :ref:`Wind.coord_system`
+Child(ren)
+  * :ref:`Wind.t.init`
 
-* :ref:`Diag.adjust_grid`
+  * :ref:`Wind.coord_system`
 
-* :ref:`Wind.radmax`
+  * :ref:`Diag.adjust_grid`
 
-* :ref:`Wind.filling_factor`
+  * :ref:`Wind.radmax`
 
-* :ref:`Wind.dim.in.z_or_theta.direction`
+  * :ref:`Wind.filling_factor`
 
-* :ref:`Wind.type`
+  * :ref:`Wind.dim.in.z_or_theta.direction`
 
-* :ref:`Wind.dim.in.x_or_r.direction`
+  * :ref:`Wind.type`
+
+  * :ref:`Wind.dim.in.x_or_r.direction`
 

@@ -5,15 +5,17 @@ m_dot(r) = F(r) ** alpha = T(r) ** (4 * alpha).
 F is the local luminous flux and T is the local temperature at a radius R. A
 value of 0 sets a uniform mass loss rate.
 
-**Type:** Double
+Type
+  Double
 
-**Values:** Greater than or equal to 0
+Values
+  Greater than or equal to 0
 
-**File:** `knigge.c <https://github.com/agnwinds/python/blob/master/source/knigge.c>`_
+File
+  `knigge.c <https://github.com/agnwinds/python/blob/master/source/knigge.c>`_
 
 
-**Parent(s):**
-
-* :ref:`Wind.type`: kwd
+Parent(s)
+  * :ref:`Wind.type`: kwd
 
 
