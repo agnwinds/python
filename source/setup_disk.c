@@ -90,7 +90,7 @@ get_disk_params ()
   strcpy (answer, "yes");
   geo.disk_radiation = rdchoice ("Disk.radiation(yes,no)", "1,0", answer);
 
-  if(geo.disk_radiation)
+  if (geo.disk_radiation)
     get_spectype (geo.disk_radiation,
                   //"Disk.rad_type_to_make_wind(0=bb,1=models)", &geo.disk_ion_spectype);
                   "Disk.rad_type_to_make_wind(bb,models)", &geo.disk_ion_spectype);

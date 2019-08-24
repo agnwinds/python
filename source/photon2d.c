@@ -151,7 +151,7 @@ translate_in_space (pp)
     stuff_phot (pp, &ptest);
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
                                            From here on we should be in the grid  */
-		ds=ds+DFUDGE; //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
+    ds = ds + DFUDGE;           //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
     /* XXX this is a test.  We check at the start whether we are in the grid */
 
     if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
