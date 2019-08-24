@@ -2,19 +2,22 @@ Wind_heating.kpacket_frac
 =========================
 Multi-line description, must keep indentation.
 
-**Type:** Double
+Type
+  Double
 
-**Unit:** None
+Unit
+  None
 
-**Values:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+Values
+  Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
-**File:** `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
+File
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 
-**Parent(s):**
+Parent(s)
+  * :ref:`Wind_heating.extra_processes`: ``nonthermal``, ``both``
 
-* :ref:`Wind_heating.extra_processes`: ``nonthermal``, ``both``
-
-* :ref:`Line_transfer`: ``macro_atoms``, ``macro_atoms_thermal_trapping``
+  * :ref:`Line_transfer`: ``macro_atoms``, ``macro_atoms_thermal_trapping``
 
 
