@@ -298,12 +298,12 @@ main (argc, argv)
 
       rdpar_comment ("Parameters describing the various winds or coronae in the system");
 
-      strcpy (answer, "yes");
-      geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
+      //OLD strcpy (answer, "yes");
+      //OLD geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
 
-      /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom
-         mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in
-         setup_domains.c, see issue #390 */
+      //OLD /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom
+      //OLD    mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in
+      //OLD    setup_domains.c, see issue #390 */
 
       if (geo.run_type == RUN_TYPE_NEW)
       {
