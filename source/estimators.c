@@ -429,7 +429,7 @@ mc_estimator_normalise (n)
 
 {
   double volume;
-  int i, j;
+  int i, j, nlev_upper;
   double stimfac, line_freq, stat_weight_ratio;
   double heat_contribution, lower_density, upper_density;
   WindPtr one;
@@ -523,15 +523,21 @@ mc_estimator_normalise (n)
     {
 
       /* The correction for stimulated emission is (1 - n_lower * g_upper / n_upper / g_lower) */
+      nlev_upper = line[config[i].bbu_jump[j]].nconfigu;
       lower_density = den_config (xplasma, i);
-      upper_density = den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu);
+      upper_density = den_config (xplasma, nlev_upper);
       stimfac = upper_density / lower_density;
       stimfac = stimfac * config[i].g / config[line[config[i].bbu_jump[j]].nconfigu].g;
       if (stimfac < 1.0 && stimfac >= 0.0)
       {
         stimfac = 1. - stimfac; //all's well
       }
-      else if (upper_density > DENSITY_PHOT_MIN && lower_density > DENSITY_PHOT_MIN)
+
+      /* check for population inversions. We don't worry about this if the densities are extremely low or if the
+         upper level has hit the density floor - the lower level is still allowed to hit this floor because it 
+         should never cause an inversion */
+      else if (upper_density > DENSITY_PHOT_MIN && lower_density > DENSITY_PHOT_MIN
+               && xplasma->levden[config[nlev_upper].nden] > DENSITY_MIN)
       {
         Error ("mc_estimator_normalise: bb stimulated correction factor is out of bound. Abort.\n");
         Error ("stimfac %g, i %d, line[config[i].bbu_jump[j]].nconfigu %d\n", stimfac, i, line[config[i].bbu_jump[j]].nconfigu);
