@@ -779,7 +779,7 @@ sobolev (one, x, den_ion, lptr, dvds)
      struct lines *lptr;
      double dvds;
 {
-  double tau, xden_ion, tau_x_dvds;
+  double tau, xden_ion, tau_x_dvds, levden_upper;
   double two_level_atom (), d1, d2;
   int nion;
   double d_hold;
@@ -837,7 +837,8 @@ calls to two_level atom
    * or equal to the minimum too.
    */
 
-  if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (d2 / xplasma->density[nion]) <= DENSITY_MIN)
+  levden_upper = xplasma->levden[config[lptr->nconfigu].nden];
+  if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (levden_upper <= DENSITY_MIN))
   {
     return (0);
   }
@@ -850,9 +851,8 @@ calls to two_level atom
     sobolev_error_counter++;
     if (sobolev_error_counter < 100)
     {
-      Error ("sobolev: VERY BAD population inversion in cell %d: d1 %g d2 %g g1 %g g2  %g freq %g f %g frac_upper %g %g\n",
-             xplasma->nplasma, d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f, d2 / xplasma->density[nion],
-             xplasma->levden[config[lptr->nconfigu].nden]);
+      Error ("sobolev: VERY BAD population inversion in cell %d: d1 %g d2 %g g1 %g g2  %g freq %g f %g frac_upper %g\n",
+             xplasma->nplasma, d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f, levden_upper);
     }
     else if (sobolev_error_counter == 100)
     {
