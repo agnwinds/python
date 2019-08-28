@@ -807,11 +807,18 @@ walls (p, pold, normal)
   else if (geo.disk_type == DISK_FLAT && p->x[2] * pold->x[2] < 0.0)
   {                             /* Then the photon crossed the xy plane and probably hit the disk */
     s = (-(pold->x[2])) / (pold->lmn[2]);
+
+    if (s < 0 && fabs (pold->x[2]) < wmain[pold->grid].dfudge)
+    {
+      return (p->repos = TRUE);
+    }
+
     if (s < 0)
     {
       Error ("walls: distance %g<0. Position %g %g %g \n", s, p->x[0], p->x[1], p->x[2]);
       return (-1);
     }
+
     /* Check whether it hit the disk plane beyond the geo.diskrad**2 */
     vmove (pold->x, pold->lmn, s, xxx);
 

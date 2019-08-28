@@ -41,8 +41,7 @@
  **********************************************************/
 
 int
-reposition (p)
-     PhotPtr p;
+reposition (PhotPtr p)
 {
   int n;
 
@@ -55,11 +54,32 @@ reposition (p)
     return (n);                 /* Photon was not in wind */
   }
 
-  /*
-   * EP 0818: the cell specific dfudge is now used as previously the global
-   * value of DFUDGE was being used
-   */
   move_phot (p, wmain[p->grid].dfudge);
 
   return (0);
+}
+
+/* ************************************************************************* */
+/**
+ * @brief           Reposition a photon which was lost due to dfudge pushing
+ *                  the photon into the disk or central object
+ *
+ * @param[in,out]   PhotPtr   p     The photon to be repositioned
+ *
+ * @return          void
+ *
+ * @details
+ *
+ *
+ * ************************************************************************** */
+
+void
+reposition_lost_disk_photon (PhotPtr p)
+{
+  double smax;
+
+  p->repos = FALSE;
+  smax = -p->x[2] / p->lmn[2] * 0.999;
+  Log ("%s: smax %e\n", __func__, smax);
+  move_phot (p, smax);
 }

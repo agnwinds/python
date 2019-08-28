@@ -282,6 +282,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
 
+  pp.repos = p->repos = FALSE;
   stuff_phot (p, &pp);
   tau_scat = -log (1. - random_number (0.0, 1.0));
 
@@ -579,6 +580,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       istat = pp.istat = P_INWIND;
       tau = 0;
 
+      struct photon pp_reposition;
+      stuff_phot (&pp, &pp_reposition);
+
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
       reposition (&pp);
 
@@ -588,6 +592,27 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          This may not be necessary but I think to account for every eventuality
          it should be done */
       istat = walls (&pp, p, normal);
+
+      if (pp.repos == TRUE)
+      {
+        Log ("Original photon: p->x %e %e %e pp->lmn %e %e %e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+        Log ("Translated photon:  pp->x %e %e %e pp->lmn %e %e %e\n", __func__,
+             pp_reposition.x[0], pp_reposition.x[1], pp_reposition.x[2], pp_reposition.lmn[0], pp_reposition.lmn[1], pp_reposition.lmn[2]);
+        Log ("Photon after reposition: pp->x %e %e %e pp->lmn %e %e %e\n", pp.x[0], pp.x[1], pp.x[2], pp.lmn[0], pp.lmn[1], pp.lmn[2]);
+      }
+
+      if (pp.repos == TRUE)     // (pp.istat == P_HIT_DISK || pp.istat == P_HIT_STAR)
+      {
+        Log ("Repositioning lost photon\n");
+
+        reposition_lost_disk_photon (&pp_reposition);
+        stuff_phot (&pp_reposition, &pp);
+        istat = walls (&pp, p, normal);
+
+        Log ("Photon after lost photon reposition: pp->x %e %e %e pp->lmn %e %e %e\n",
+             pp_reposition.x[0], pp_reposition.x[1], pp_reposition.x[2], pp_reposition.lmn[0], pp_reposition.lmn[1], pp_reposition.lmn[2]);
+        Log ("Reposition istat %i\n\n", istat);
+      }
 
       /* This *does not* update istat if the photon scatters outside of the wind-
          I guess P_IN_WIND is really in wind or empty space but not escaped.
