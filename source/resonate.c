@@ -837,7 +837,7 @@ calls to two_level atom
    * or equal to the minimum too.
    */
 
-  if ( (d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (d2 / xplasma->density[nion]) <= DENSITY_MIN)
+  if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (d2 / xplasma->density[nion]) <= DENSITY_MIN)
   {
     return (0);
   }
@@ -850,11 +850,13 @@ calls to two_level atom
     sobolev_error_counter++;
     if (sobolev_error_counter < 100)
     {
-      Error ("sobolev: VERY BAD den_ion has population inversion %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+      Error ("sobolev: VERY BAD population inversion in cell %d: d1 %g d2 %g g1 %g g2  %g freq %g f %g frac_upper %g %g\n",
+             xplasma->nplasma, d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f, d2 / xplasma->density[nion],
+             xplasma->levden[config[lptr->nconfigu].nden]);
     }
     else if (sobolev_error_counter == 100)
     {
-      Error ("sobolev: suppressing negative density errors\n");
+      Error ("sobolev: suppressing population inversion errors\n");
     }
 
     /* With the changes above to limit the densities the above error should not be happening, and if this does occur then 
@@ -863,7 +865,7 @@ calls to two_level atom
      * ksl 181127
      */
 
-    /*SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should
+    /* SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should
        give exactly zero here but can be negative, numerically.
        So I'm modyfying this to set tau to zero in such cases, when the populations are vanishingly small anyway. */
     tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
