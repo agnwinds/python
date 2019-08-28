@@ -914,7 +914,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 	  xplasma->F_x[i]+=flux[0];
 	  xplasma->F_y[i]+=flux[1];
 	  xplasma->F_z[i]+=flux[2];
-	  printf ("BLAH1 cell%i band%i np %i freq %e ds %e weight %e %e %e %e\n",xplasma->nplasma,i,p->np,p->freq,ds,w_ave,phot_mid.x[0],phot_mid.x[1],phot_mid.x[2]);
+//	  printf ("BLAH1 cell%i band%i np %i freq %e ds %e weight %e %e %e %e\n",xplasma->nplasma,i,p->np,p->freq,ds,w_ave,phot_mid.x[0],phot_mid.x[1],phot_mid.x[2]);
 
       /* work out the range of frequencies within a band where photons have been seen */
       if (p->freq < xplasma->fmin[i])
