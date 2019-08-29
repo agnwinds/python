@@ -784,7 +784,7 @@ sobolev (one, x, den_ion, lptr, dvds)
   int nion;
   double d_hold;
   int nplasma;
-  int ndom;
+  int ndom, nden;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
@@ -837,7 +837,13 @@ calls to two_level atom
    * or equal to the minimum too.
    */
 
-  levden_upper = xplasma->levden[config[lptr->nconfigu].nden];
+  nden = config[lptr->nconfigu].nden;
+  /* sometimes nden is -1 for levels that are not "NLTE", so we have to catch this case*/
+  if (nden >= 0)
+    levden_upper = xplasma->levden[nden];
+  else
+    levden_upper = xplasma->density[nion]; 
+
   if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (levden_upper <= DENSITY_MIN))
   {
     return (0);

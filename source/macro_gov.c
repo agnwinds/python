@@ -627,7 +627,8 @@ macro_pops (xplasma, xne)
            to dilute blackbodies instead and go through the solution again */
         if (insane)
         {
-          Error ("macro_pops: found unreasonable populations in cell %i, so adopting dilute BBody excitation\n", xplasma->nplasma);
+          Error ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n", 
+                 xplasma->nplasma, xplasma->w, xplasma->t_r);
           get_dilute_estimators (xplasma);
         }
         /* if we didn't set insane to 1 then we have a realistic set of populations, so set sane_populations to 1 to break
