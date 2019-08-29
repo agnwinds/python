@@ -273,6 +273,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   int kkk, n;
   double weight_min;
   struct photon pp, pextract;
+  struct photon pp_reposition_test;
   int nnscat;
   int nerr;
   double p_norm, tau_norm;
@@ -578,9 +579,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       istat = pp.istat = P_INWIND;
       tau = 0;
 
-      struct photon pp_reposition;
-      stuff_phot (&pp, &pp_reposition);
-
+      stuff_phot (&pp, &pp_reposition_test);
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
       reposition (&pp);
 
@@ -606,8 +605,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (istat == P_REPOSITION_ERROR)
       {
-        reposition_lost_disk_photon (&pp_reposition);
-        stuff_phot (&pp_reposition, &pp);
+        reposition_lost_disk_photon (&pp_reposition_test);
+        stuff_phot (&pp_reposition_test, &pp);
         istat = walls (&pp, p, normal);
       }
 
