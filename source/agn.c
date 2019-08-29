@@ -491,6 +491,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
+    printf ("BLAH4 %e %e %e\n",p[i].freq,r,p[i].w);
 
   }
 

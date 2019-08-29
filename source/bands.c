@@ -661,6 +661,8 @@ freqs_init (freqmin, freqmax)
 
 
 
+
+
   Log ("freqs_init: Photons will be generated between %8.2f (%8.2e) and %8.2f (%8.2e)\n", freqmin * HEV, freqmin, freqmax * HEV, freqmax);
 
   ngood = 0;
@@ -695,6 +697,10 @@ freqs_init (freqmin, freqmax)
     }
   }
   geo.nxfreq = n;
+  
+  
+
+  
 
   /* OK at this point we know at least some photons will be generated in each interval, but we still don't know
    * that the we are going to have a possibilty of photons throughout the first and last intervals.
@@ -717,6 +723,11 @@ freqs_init (freqmin, freqmax)
     Log_silent ("freqs_init: %8.2f (%8.2e)    %8.2f (%8.2e)  \n", geo.xfreq[n] * HEV, geo.xfreq[n], geo.xfreq[n + 1] * HEV,
                 geo.xfreq[n + 1]);
   }
+  
+  printf ("BLAH1 xbands=[");
+  for (n=0;n<geo.nxfreq+1;n++)
+	  printf ("%e,",xfreq[n]);
+  printf ("]\n");
 
 
   return (0);
