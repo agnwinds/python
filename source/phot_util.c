@@ -72,7 +72,6 @@ stuff_phot (pin, pout)
   pout->np = pin->np;
 
   pout->path = pin->path;
-  pout->repos = pin->repos;
 
   return (0);
 }

@@ -808,10 +808,8 @@ walls (p, pold, normal)
   {                             /* Then the photon crossed the xy plane and probably hit the disk */
     s = (-(pold->x[2])) / (pold->lmn[2]);
 
-    if (s < 0 && fabs (pold->x[2]) < wmain[pold->grid].dfudge)
-    {
-      return (p->repos = TRUE);
-    }
+    if (s < 0 && fabs (pold->x[2]) < wmain[pold->grid].dfudge && pold->lmn[2] * p->lmn[2] < 0.0)
+      return (p->istat = P_REPOSITION_ERROR);
 
     if (s < 0)
     {

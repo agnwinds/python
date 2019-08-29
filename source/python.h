@@ -1080,7 +1080,8 @@ typedef struct photon
     P_SEC = 8,                  //Photon hit secondary
     P_ADIABATIC = 9,            //records that a photon created a kpkt which was destroyed by adiabatic cooling
     P_ERROR_MATOM = 10,         //Some kind of error in processing of a photon which excited a macroattom
-    P_LOFREQ_FF = 11            //records a photon that had too low a frequency  
+    P_LOFREQ_FF = 11,           //records a photon that had too low a frequency
+    P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
   int nscat;                    /*number of scatterings */
@@ -1122,7 +1123,6 @@ typedef struct photon
   int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
                                    so we can write out details of where the photon goes */
   double path;                  /* SWM - Photon path length */
-  int repos;
 }
 p_dummy, *PhotPtr;
 

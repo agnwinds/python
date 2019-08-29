@@ -281,8 +281,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double normal[3];
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
-
-  pp.repos = p->repos = FALSE;
   stuff_phot (p, &pp);
   tau_scat = -log (1. - random_number (0.0, 1.0));
 
@@ -590,34 +588,28 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          can take photon outside of the wind and into the disk or star
          after scattering. Note that walls updates the istat in pp as well.
          This may not be necessary but I think to account for every eventuality
-         it should be done */
+         it should be done. This *does not* update istat if the photon scatters
+         outside of the wind- I guess P_IN_WIND is really in wind or empty space
+         but not escaped. translate_in_space will take care of this next time
+         round. All a bit convoluted but should work. */
+
       istat = walls (&pp, p, normal);
 
-      if (pp.repos == TRUE)
-      {
-        Log ("Original photon: p->x %e %e %e pp->lmn %e %e %e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-        Log ("Translated photon:  pp->x %e %e %e pp->lmn %e %e %e\n", __func__,
-             pp_reposition.x[0], pp_reposition.x[1], pp_reposition.x[2], pp_reposition.lmn[0], pp_reposition.lmn[1], pp_reposition.lmn[2]);
-        Log ("Photon after reposition: pp->x %e %e %e pp->lmn %e %e %e\n", pp.x[0], pp.x[1], pp.x[2], pp.lmn[0], pp.lmn[1], pp.lmn[2]);
-      }
+      /*
+       * EP 1908 -- see issue #584 for a more complete description of the problem.
+       * This additional error checking was added due to reposition () pushing
+       * photons through the disc plane for a geometrically thin accretion disc,
+       * which would sometimes result in a simulation exiting. The purpose of
+       * this is to move a photon a reduced distance to ensure that it does not
+       * get pushed through the disc plane accidentally
+       */
 
-      if (pp.repos == TRUE)     // (pp.istat == P_HIT_DISK || pp.istat == P_HIT_STAR)
+      if (istat == P_REPOSITION_ERROR)
       {
-        Log ("Repositioning lost photon\n");
-
         reposition_lost_disk_photon (&pp_reposition);
         stuff_phot (&pp_reposition, &pp);
         istat = walls (&pp, p, normal);
-
-        Log ("Photon after lost photon reposition: pp->x %e %e %e pp->lmn %e %e %e\n",
-             pp_reposition.x[0], pp_reposition.x[1], pp_reposition.x[2], pp_reposition.lmn[0], pp_reposition.lmn[1], pp_reposition.lmn[2]);
-        Log ("Reposition istat %i\n\n", istat);
       }
-
-      /* This *does not* update istat if the photon scatters outside of the wind-
-         I guess P_IN_WIND is really in wind or empty space but not escaped.
-         translate_in_space will take care of this next time round. All a bit
-         convoluted but should work. */
 
       /* JM 1506 -- we don't throw errors here now, but we do keep a track
          of how many 4 photons were lost due to DFUDGE pushing them

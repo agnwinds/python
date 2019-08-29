@@ -78,8 +78,9 @@ reposition_lost_disk_photon (PhotPtr p)
 {
   double smax;
 
-  p->repos = FALSE;
+  if (p->nres < 0)
+    return;  /* Do nothing for non-resonant scatters */
+
   smax = -p->x[2] / p->lmn[2] * 0.999;
-  Log ("%s: smax %e\n", __func__, smax);
   move_phot (p, smax);
 }
