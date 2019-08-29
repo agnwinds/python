@@ -70,6 +70,14 @@ reposition (PhotPtr p)
  *
  * @details
  *
+ * For resonant scatters, this function will push the photon a distance away
+ * from the location where it previously interacted to assure that the photon
+ * does not interact with the same resonance twice.
+ *
+ * Created in response to issue #584 on the GitHub repository. The purpose of
+ * this function is to calculate the distance to the surface of the accretion
+ * disc and to make it some distance towards the disc instead of dfudge, which
+ * previously pushed the photon through the disc plane accidentally.
  *
  * ************************************************************************** */
 
@@ -79,8 +87,14 @@ reposition_lost_disk_photon (PhotPtr p)
   double smax;
 
   if (p->nres < 0)
-    return;  /* Do nothing for non-resonant scatters */
+    return;                     /* Do nothing for non-resonant scatters */
 
-  smax = -p->x[2] / p->lmn[2] * 0.999;
+  if ((p->grid = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
+  {
+    Error ("%s:%s(%i): Photon not in grid\n", __FILE__, __func__, __LINE__);
+    return;                     /* Photon was not in wind */
+  }
+
+  smax = -p->x[2] / p->lmn[2] * 0.999;  // Move some distance toward the disc
   move_phot (p, smax);
 }
