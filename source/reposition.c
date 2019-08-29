@@ -62,7 +62,7 @@ reposition (PhotPtr p)
 /* ************************************************************************* */
 /**
  * @brief           Reposition a photon which was lost due to dfudge pushing
- *                  the photon into the disk or central object
+ *                  the photon into the disk
  *
  * @param[in,out]   PhotPtr   p     The photon to be repositioned
  *
