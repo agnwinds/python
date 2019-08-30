@@ -1241,10 +1241,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
     vdisk (p[i].x, v);
-    p[i].freq /= (1. - dot (v, p[i].lmn) / C);
-
-    printf ("BLAH2 %e %e %e %e\n",p[i].freq,r,p[i].w,p[i].lmn[2]);
-	
+    p[i].freq /= (1. - dot (v, p[i].lmn) / C);	
 
   }
 
