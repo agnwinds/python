@@ -1242,10 +1242,9 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     vdisk (p[i].x, v);
     p[i].freq /= (1. - dot (v, p[i].lmn) / C);
-    printf ("BLAH2 %e %e %e\n",p[i].freq,r,p[i].w);
-	p[i].lmn[0]=0.0;
-	p[i].lmn[1]=0.0;
-	p[i].lmn[2]=1.0*(p[i].lmn[2]/fabs(p[i].lmn[2]));
+
+    printf ("BLAH2 %e %e %e %e\n",p[i].freq,r,p[i].w,p[i].lmn[2]);
+	
 
   }
 
