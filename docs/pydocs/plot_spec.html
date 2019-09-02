@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module plot_spec</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>plot_spec</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/plot_spec.py">/Users/long/Python/py_progs/plot_spec.py</a></font></td></tr></table>
+    <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Space&nbsp;Telescope&nbsp;Science&nbsp;Institute<br>
+&nbsp;<br>
+Synopsis:&nbsp;&nbsp;<br>
+&nbsp;<br>
+A&nbsp;simple&nbsp;program&nbsp;to&nbsp;plot&nbsp;and&nbsp;smooth&nbsp;models&nbsp;made&nbsp;with&nbsp;Python.<br>
+&nbsp;<br>
+&nbsp;<br>
+Command&nbsp;line&nbsp;usage&nbsp;(if&nbsp;any):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage:&nbsp;plot_spec.py&nbsp;[-wmin&nbsp;850&nbsp;-wmax&nbsp;1850&nbsp;-smooth&nbsp;21]&nbsp;rootname<br>
+&nbsp;<br>
+Description:&nbsp;&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;routine&nbsp;to&nbsp;plot&nbsp;the&nbsp;detailed&nbsp;spectra&nbsp;produced&nbsp;with&nbsp;Python.&nbsp;&nbsp;The&nbsp;rootine&nbsp;reads<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;.spec&nbsp;file&nbsp;and&nbsp;produces&nbsp;a&nbsp;smoothed&nbsp;plot&nbsp;for&nbsp;all&nbsp;of&nbsp;the&nbsp;angles&nbsp;that&nbsp;have&nbsp;been&nbsp;extracted.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Normally,&nbsp;the&nbsp;routine&nbsp;would&nbsp;be&nbsp;invoked&nbsp;from&nbsp;the&nbsp;command&nbsp;line&nbsp;with&nbsp;the&nbsp;rootnmae&nbsp;of&nbsp;the&nbsp;Python&nbsp;run.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;plot&nbsp;rootname.png&nbsp;is&nbsp;produced.&nbsp;With&nbsp;none&nbsp;of&nbsp;the&nbsp;command&nbsp;line&nbsp;options&nbsp;the&nbsp;spectrum&nbsp;will&nbsp;comver&nbsp;the&nbsp;full<br>
+&nbsp;&nbsp;&nbsp;&nbsp;spectral&nbsp;range&nbsp;of&nbsp;the&nbsp;detailed&nbsp;spectra,&nbsp;and&nbsp;will&nbsp;be&nbsp;box-car&nbsp;smmothed&nbsp;by&nbsp;11&nbsp;pixels.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;There&nbsp;are&nbsp;various&nbsp;command&nbsp;line&nbsp;options<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=h&nbsp;&nbsp;prints&nbsp;a&nbsp;help&nbsp;based&nbsp;on&nbsp;__docs__<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-wmin&nbsp;sets&nbsp;the&nbsp;minimum&nbsp;wavelength&nbsp;of&nbsp;the&nbsp;plot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-wmax&nbsp;sets&nbsp;the&nbsp;maximimy&nbsp;wavelength&nbsp;for&nbsp;the&nbsp;plot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-smooth&nbsp;changes&nbsp;the&nbsp;binning&nbsp;in&nbsp;pixels<br>
+&nbsp;<br>
+Primary&nbsp;routines:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;steer&nbsp;&nbsp;Processes&nbsp;the&nbsp;command&nbsp;line&nbsp;options&nbsp;and&nbsp;then&nbsp;calls&nbsp;do_all_angles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;do_all_angles&nbsp;Produces&nbsp;the&nbsp;plot&nbsp;&nbsp;(<a href="#-do_all_angles">do_all_angles</a>(root)&nbsp;is&nbsp;the&nbsp;routine&nbsp;to&nbsp;call&nbsp;from&nbsp;a&nbsp;script<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+History:<br>
+&nbsp;<br>
+140222&nbsp;ksl&nbsp;Coding&nbsp;begun<br>
+1802&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;Modified&nbsp;so&nbsp;that&nbsp;it&nbsp;worked&nbsp;better&nbsp;from&nbsp;the&nbsp;command&nbsp;line,&nbsp;and&nbsp;added&nbsp;steering&nbsp;routine.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="astropy.io.ascii.html">astropy.io.ascii</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="pylab.html">pylab</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-do_all_angles"><strong>do_all_angles</strong></a>(rootname='sv', smooth=21, wmin=850, wmax=1850, fmax=0, fig_no=1, title=None)</dt><dd><tt>Plot&nbsp;each&nbsp;of&nbsp;the&nbsp;spectra&nbsp;where<br>
+&nbsp;<br>
+smooth&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;bins&nbsp;to&nbsp;boxcar&nbsp;smooth<br>
+fmax&nbsp;sets&nbsp;the&nbsp;ylim&nbsp;of&nbsp;the&nbsp;plot,&nbsp;assuming&nbsp;it&nbsp;is&nbsp;not&nbsp;zero<br>
+&nbsp;<br>
+and&nbsp;other&nbsp;values&nbsp;should&nbsp;be&nbsp;obvious.<br>
+&nbsp;<br>
+140907&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;to&nbsp;include&nbsp;fmax<br>
+140912&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;so&nbsp;uses&nbsp;rootname&nbsp;<br>
+141124&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Updated&nbsp;for&nbsp;new&nbsp;formats&nbsp;which&nbsp;use&nbsp;astropy</tt></dd></dl>
+ <dl><dt><a name="-do_all_angles_ev"><strong>do_all_angles_ev</strong></a>(rootname='sv', smooth=21, emin=1000, emax=9000, fmax=0, fig_no=1)</dt><dd><tt>Plot&nbsp;each&nbsp;of&nbsp;the&nbsp;spectra&nbsp;where<br>
+&nbsp;<br>
+smooth&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;bins&nbsp;to&nbsp;boxcar&nbsp;smooth<br>
+fmax&nbsp;sets&nbsp;the&nbsp;ylim&nbsp;of&nbsp;the&nbsp;plot,&nbsp;assuming&nbsp;it&nbsp;is&nbsp;not&nbsp;zero<br>
+&nbsp;<br>
+and&nbsp;other&nbsp;values&nbsp;should&nbsp;be&nbsp;obvious.<br>
+&nbsp;<br>
+160405&nbsp;ksl&nbsp;This&nbsp;version&nbsp;of&nbsp;the&nbsp;routine&nbsp;is&nbsp;intended&nbsp;to&nbsp;plot&nbsp;the&nbsp;X-ray&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;regime</tt></dd></dl>
+ <dl><dt><a name="-get_column_names"><strong>get_column_names</strong></a>(filename='sv.spec')</dt><dd><tt>Silly&nbsp;routine&nbsp;to&nbsp;read&nbsp;a&nbsp;spec&nbsp;file&nbsp;and&nbsp;return&nbsp;the&nbsp;column&nbsp;names.<br>
+It's&nbsp;silly&nbsp;because&nbsp;we&nbsp;need&nbsp;to&nbsp;figure&nbsp;out&nbsp;an&nbsp;easier&nbsp;way&nbsp;to&nbsp;return<br>
+this&nbsp;for&nbsp;all&nbsp;files</tt></dd></dl>
+ <dl><dt><a name="-read_file"><strong>read_file</strong></a>(filename, char='')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;and&nbsp;split&nbsp;it&nbsp;into&nbsp;words,&nbsp;eliminating&nbsp;comments<br>
+&nbsp;<br>
+char&nbsp;is&nbsp;an&nbsp;optional&nbsp;parameter&nbsp;used&nbsp;as&nbsp;the&nbsp;delimiter&nbsp;for<br>
+splitting&nbsp;lines&nbsp;into&nbsp;words.&nbsp;&nbsp;Otherwise&nbsp;white&nbsp;space&nbsp;is<br>
+assumed.<br>
+&nbsp;<br>
+History:<br>
+&nbsp;<br>
+110729&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;optional&nbsp;delimiters</tt></dd></dl>
+ <dl><dt><a name="-steer"><strong>steer</strong></a>(argv)</dt><dd><tt>Parse&nbsp;the&nbsp;command&nbsp;line</tt></dd></dl>
+</td></tr></table>
+</body></html>

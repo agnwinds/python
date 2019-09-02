@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module run_indent</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>run_indent</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/run_indent.py">/Users/long/Python/py_progs/run_indent.py</a></font></td></tr></table>
+    <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Space&nbsp;Telescope&nbsp;Science&nbsp;Institute<br>
+&nbsp;<br>
+Synopsis:&nbsp;&nbsp;<br>
+&nbsp;<br>
+Indent&nbsp;in&nbsp;a&nbsp;controlled&nbsp;manner&nbsp;the&nbsp;.c&nbsp;files&nbsp;used&nbsp;by&nbsp;Python<br>
+&nbsp;<br>
+&nbsp;<br>
+Command&nbsp;line&nbsp;usage&nbsp;(if&nbsp;any):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage:&nbsp;run_indent.py&nbsp;filename&nbsp;to&nbsp;indent&nbsp;a&nbsp;single&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;run_indent.py&nbsp;*.c&nbsp;to&nbsp;indent&nbsp;all&nbsp;of&nbsp;the&nbsp;.c&nbsp;files&nbsp;in&nbsp;a&nbsp;directory<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;run_indent.py&nbsp;*.h&nbsp;to&nbsp;indent&nbsp;all&nbsp;of&nbsp;the&nbsp;.h&nbsp;files<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;run_indent&nbsp;-all&nbsp;to&nbsp;indent&nbsp;all&nbsp;of&nbsp;the&nbsp;c&nbsp;and&nbsp;.h&nbsp;files<br>
+&nbsp;<br>
+Description:&nbsp;&nbsp;<br>
+&nbsp;<br>
+Primary&nbsp;routines:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;doit&nbsp;&nbsp;processes&nbsp;a&nbsp;single&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;steer&nbsp;procesest&nbsp;the&nbsp;command&nbsp;calling&nbsp;either&nbsp;doi&nbsp;or&nbsp;do_all<br>
+&nbsp;&nbsp;&nbsp;&nbsp;do_all&nbsp;processes&nbsp;all&nbsp;the&nbsp;.c&nbsp;and&nbsp;.h&nbsp;files&nbsp;in&nbsp;a&nbsp;directory<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Files&nbsp;are&nbsp;not&nbsp;updated&nbsp;unless&nbsp;indent&nbsp;produces&nbsp;a&nbsp;new&nbsp;result<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;gnuindent&nbsp;is&nbsp;not&nbsp;found&nbsp;the&nbsp;program&nbsp;will&nbsp;do&nbsp;nothing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+History:<br>
+&nbsp;<br>
+180913&nbsp;ksl&nbsp;Coding&nbsp;begun</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="astropy.io.ascii.html">astropy.io.ascii</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="subprocess.html">subprocess</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-do_all"><strong>do_all</strong></a>(ignore_list=None)</dt><dd><tt>Indent&nbsp;all&nbsp;of&nbsp;the&nbsp;.c&nbsp;and&nbsp;.h&nbsp;files&nbsp;in&nbsp;a&nbsp;directory&nbsp;in&nbsp;a&nbsp;standard&nbsp;way<br>
+&nbsp;<br>
+ignore_list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;of&nbsp;file&nbsp;strings&nbsp;to&nbsp;ignore&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;NoneType&nbsp;or&nbsp;blank&nbsp;array&nbsp;then&nbsp;nothing&nbsp;is&nbsp;ignored<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gets&nbsp;converted&nbsp;to&nbsp;numpy&nbsp;array&nbsp;inside&nbsp;function</tt></dd></dl>
+ <dl><dt><a name="-doit"><strong>doit</strong></a>(filename='lines.c')</dt><dd><tt>Properly&nbsp;indent&nbsp;a&nbsp;single&nbsp;file<br>
+&nbsp;<br>
+Description:<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;<br>
+If&nbsp;gnuindent&nbsp;is&nbsp;not&nbsp;found,&nbsp;then&nbsp;this&nbsp;function<br>
+is&nbsp;a&nbsp;NOP.<br>
+&nbsp;<br>
+The&nbsp;indented&nbsp;version&nbsp;is&nbsp;first&nbsp;written&nbsp;to&nbsp;another<br>
+file.&nbsp;&nbsp;Then&nbsp;we&nbsp;check&nbsp;to&nbsp;see&nbsp;if&nbsp;the&nbsp;indented&nbsp;file<br>
+is&nbsp;different&nbsp;from&nbsp;the&nbsp;original.&nbsp;&nbsp;<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;newly&nbsp;indented&nbsp;version&nbsp;is&nbsp;differnt&nbsp;from&nbsp;the<br>
+original,&nbsp;then&nbsp;it&nbsp;is&nbsp;copied&nbsp;back&nbsp;to&nbsp;the&nbsp;original.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;done&nbsp;so&nbsp;that&nbsp;a&nbsp;file&nbsp;that&nbsp;is&nbsp;unchanged&nbsp;is&nbsp;not<br>
+"touched',&nbsp;which&nbsp;would&nbsp;cause&nbsp;a&nbsp;recompilation&nbsp;when<br>
+mske&nbsp;is&nbsp;uesed.<br>
+&nbsp;<br>
+History:</tt></dd></dl>
+ <dl><dt><a name="-get_gnu"><strong>get_gnu</strong></a>()</dt></dl>
+ <dl><dt><a name="-steer"><strong>steer</strong></a>(argv)</dt><dd><tt>Process&nbsp;the&nbsp;command&nbsp;line</tt></dd></dl>
+</td></tr></table>
+</body></html>

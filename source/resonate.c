@@ -837,7 +837,7 @@ calls to two_level atom
    * or equal to the minimum too.
    */
 
-  if (lptr->nconfigu >= 0) // then we have an upper level identified, see #601 
+  if (lptr->nconfigu >= 0)      // then we have an upper level identified, see #601 
     nden = config[lptr->nconfigu].nden;
   else
     nden = -1;

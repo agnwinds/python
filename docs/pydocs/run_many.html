@@ -1,43 +1,49 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module import_cyl</title>
+<html><head><title>Python: module run_many</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>import_cyl</strong></big></big></font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>run_many</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/import_cyl.py">/Users/long/Python/py_progs/import_cyl.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/run_many.py">/Users/long/Python/py_progs/run_many.py</a></font></td></tr></table>
     <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Space&nbsp;Telescope&nbsp;Science&nbsp;Institute<br>
 &nbsp;<br>
 Synopsis:&nbsp;&nbsp;<br>
 &nbsp;<br>
-Read&nbsp;the&nbsp;master&nbsp;file&nbsp;produced&nbsp;by&nbsp;windsave2table&nbsp;for&nbsp;a<br>
-&nbsp;model&nbsp;created&nbsp;in&nbsp;cylindrical&nbsp;coordinates&nbsp;and&nbsp;produce&nbsp;<br>
-&nbsp;a&nbsp;file&nbsp;which&nbsp;can&nbsp;be&nbsp;imported&nbsp;into&nbsp;Python&nbsp;and&nbsp;run<br>
+This&nbsp;routine&nbsp;runs&nbsp;a&nbsp;set&nbsp;of&nbsp;models.&nbsp;&nbsp;Each&nbsp;model&nbsp;is&nbsp;run&nbsp;in<br>
+single&nbsp;processor&nbsp;mode,&nbsp;so&nbsp;the&nbsp;parallelism&nbsp;here&nbsp;is&nbsp;job&nbsp;parallel.&nbsp;<br>
+&nbsp;<br>
 &nbsp;<br>
 &nbsp;<br>
 Command&nbsp;line&nbsp;usage&nbsp;(if&nbsp;any):<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;usage:&nbsp;import_cyl.py&nbsp;rootname<br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage:&nbsp;run_many.py&nbsp;-jobs&nbsp;x&nbsp;-np&nbsp;y&nbsp;filename<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;rootname&nbsp;is&nbsp;the&nbsp;rootname&nbsp;of&nbsp;the&nbsp;mastertable<br>
-&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;windsave&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;-njobs&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;jobs&nbsp;to&nbsp;run&nbsp;simultaneously<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-np&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;processors&nbsp;per&nbsp;job<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;.pf&nbsp;files&nbsp;to&nbsp;run<br>
 &nbsp;<br>
 Description:&nbsp;&nbsp;<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;operates&nbsp;on&nbsp;the&nbsp;mastertable&nbsp;produced&nbsp;by&nbsp;windsavetable<br>
-&nbsp;<br>
 Primary&nbsp;routines:<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;doit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;doit&nbsp;&nbsp;-&nbsp;oversees&nbsp;multiprocesing&nbsp;of&nbsp;the&nbsp;jobs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;run_one&nbsp;-&nbsp;runs&nbsp;each&nbsp;job<br>
+&nbsp;&nbsp;&nbsp;&nbsp;steer&nbsp;-&nbsp;parses&nbsp;the&nbsp;command&nbsp;line<br>
 &nbsp;<br>
 Notes:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;At&nbsp;present,&nbsp;there&nbsp;is&nbsp;no&nbsp;checking&nbsp;that&nbsp;the&nbsp;various&nbsp;.pf&nbsp;files<br>
+&nbsp;&nbsp;&nbsp;&nbsp;do&nbsp;not&nbsp;drop&nbsp;into&nbsp;interactive&nbsp;mode,&nbsp;or&nbsp;that&nbsp;the&nbsp;routine&nbsp;stalls.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;really&nbsp;should&nbsp;be&nbsp;added.&nbsp;&nbsp;&nbsp;Also,&nbsp;we&nbsp;don't&nbsp;currently&nbsp;gather<br>
+&nbsp;&nbsp;&nbsp;&nbsp;information&nbsp;on&nbsp;whether&nbsp;the&nbsp;runs&nbsp;succeeded.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 History:<br>
 &nbsp;<br>
-171106&nbsp;ksl&nbsp;Coding&nbsp;begun</tt></p>
+190319&nbsp;ksl&nbsp;Coding&nbsp;begun</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -46,8 +52,11 @@ History:<br>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="astropy.io.ascii.html">astropy.io.ascii</a><br>
+<a href="multiprocessing.html">multiprocessing</a><br>
 </td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="subprocess.html">subprocess</a><br>
 </td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="time.html">time</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
@@ -55,15 +64,14 @@ History:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-doit"><strong>doit</strong></a>(root='cv', outputfile='')</dt><dd><tt>Read&nbsp;a&nbsp;master.txt&nbsp;file&nbsp;for&nbsp;models&nbsp;in&nbsp;cylindrical&nbsp;coordinates<br>
-and&nbsp;produce&nbsp;a&nbsp;file&nbsp;which&nbsp;can&nbsp;be&nbsp;read&nbsp;in&nbsp;to&nbsp;python<br>
-&nbsp;<br>
+<td width="100%"><dl><dt><a name="-doit"><strong>doit</strong></a>(filename='all.ls', nj=2, np=1, outputfile='out.txt')</dt><dd><tt>Do&nbsp;something&nbsp;magnificent<br>
 &nbsp;<br>
 Description:<br>
 &nbsp;<br>
 Notes:<br>
 &nbsp;<br>
 History:</tt></dd></dl>
+ <dl><dt><a name="-get_no_jobs"><strong>get_no_jobs</strong></a>(jobs)</dt><dd><tt>Check&nbsp;how&nbsp;many&nbsp;jobs&nbsp;are&nbsp;running</tt></dd></dl>
  <dl><dt><a name="-read_file"><strong>read_file</strong></a>(filename, char='')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;and&nbsp;split&nbsp;it&nbsp;into&nbsp;words,&nbsp;eliminating&nbsp;comments<br>
 &nbsp;<br>
 char&nbsp;is&nbsp;an&nbsp;optional&nbsp;parameter&nbsp;used&nbsp;as&nbsp;the&nbsp;delimiter&nbsp;for<br>
@@ -76,13 +84,7 @@ History:<br>
 141209&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Reinstalled&nbsp;in&nbsp;my&nbsp;standard&nbsp;startup<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;script&nbsp;so&nbsp;there&nbsp;was&nbsp;flexibility&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;read&nbsp;any&nbsp;ascii&nbsp;file</tt></dd></dl>
- <dl><dt><a name="-read_table"><strong>read_table</strong></a>(filename='foo.txt', format='')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;using&nbsp;astropy.io.ascii&nbsp;and&nbsp;<br>
-return&nbsp;this&nbsp;<br>
-&nbsp;<br>
-Description:<br>
-&nbsp;<br>
-Notes:<br>
-&nbsp;<br>
-History:</tt></dd></dl>
+ <dl><dt><a name="-run_one"><strong>run_one</strong></a>(filename, command='py')</dt><dd><tt>Run&nbsp;and&nbsp;verify&nbsp;a&nbsp;single&nbsp;model</tt></dd></dl>
+ <dl><dt><a name="-steer"><strong>steer</strong></a>(argv)</dt><dd><tt>Process&nbsp;the&nbsp;command&nbsp;line</tt></dd></dl>
 </td></tr></table>
 </body></html>

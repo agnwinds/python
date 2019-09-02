@@ -138,6 +138,19 @@ def write_docs(dirname='../../py_progs'):
     # that have already been made
     make_toplevel(dirname, roots)
 
+    # Now check that we have the files we expected
+
+    got_all=True
+    for one in roots:
+        if os.path.isfile(one+'.html')==False:
+            print('Failed to create an html file for %s.py' % one)
+            got_all=False
+    if got_all==True:
+        print('html files were created for all of the .py scripts')
+        
+            
+
+
 
 # Next lines permit one to run the routine from the command line
 if __name__ == "__main__":

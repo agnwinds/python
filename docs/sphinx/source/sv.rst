@@ -1,7 +1,8 @@
 The Shlosman & Vitello prescription of a bi-conical wind
 ########################################################
 
-In the SV93 prescription, the wind emerges betwwen :math:`r_{min}` and :math:`r_{rmax}`
+In the SV93 
+prescription, the wind emerges betwwen :math:`r_{min}` and :math:`r_{rmax}`
 along streamlines whose orientation with respect to the system are descbied an angle
 
 .. math::

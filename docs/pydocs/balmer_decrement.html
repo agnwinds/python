@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module balmer_decrement</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>balmer_decrement</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/balmer_decrement.py">/Users/long/Python/py_progs/balmer_decrement.py</a></font></td></tr></table>
+    <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;balmer_decrement.py&nbsp;<br>
+&nbsp;<br>
+runs&nbsp;tests&nbsp;of&nbsp;the&nbsp;Balmer&nbsp;decrement&nbsp;for&nbsp;a&nbsp;one&nbsp;zone&nbsp;<br>
+thin&nbsp;shell&nbsp;Python&nbsp;model.&nbsp;Involves&nbsp;running&nbsp;py_wind&nbsp;on<br>
+a&nbsp;wind_save&nbsp;file&nbsp;and&nbsp;reading&nbsp;some&nbsp;output&nbsp;files.&nbsp;Compares<br>
+to&nbsp;Osterbrock&nbsp;values.<br>
+&nbsp;<br>
+Usage:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;BalmerDecrement.py&nbsp;root_filename<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;BalmerDecrement.py&nbsp;-h&nbsp;for&nbsp;help&nbsp;<br>
+&nbsp;<br>
+Requirements:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py_wind<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numpy&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;matplotlib&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py_plot_util,&nbsp;py_read_output&nbsp;from&nbsp;$PYTHON/py_progs&nbsp;in&nbsp;the&nbsp;python&nbsp;path&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;routine&nbsp;is&nbsp;a&nbsp;routine&nbsp;to&nbsp;check&nbsp;the&nbsp;reulsts&nbsp;of&nbsp;running&nbsp;a&nbsp;one&nbsp;zone<br>
+&nbsp;&nbsp;&nbsp;&nbsp;model&nbsp;intended&nbsp;to&nbsp;produce&nbsp;the&nbsp;Balmer&nbsp;decrements.&nbsp;&nbsp;It&nbsp;does&nbsp;not&nbsp;run&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;model&nbsp;but&nbsp;meery&nbsp;checks&nbsp;it</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="py_read_output.html">py_read_output</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="py_plot_util.html">py_plot_util</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-BalmerTest"><strong>BalmerTest</strong></a>(root, plotit=True)</dt><dd><tt>runs&nbsp;tests&nbsp;of&nbsp;of&nbsp;the&nbsp;Balmer&nbsp;decrement&nbsp;for&nbsp;a&nbsp;one&nbsp;zone&nbsp;<br>
+thin&nbsp;shell&nbsp;Python&nbsp;model.&nbsp;Involves&nbsp;running&nbsp;py_wind&nbsp;on<br>
+a&nbsp;wind_save&nbsp;file&nbsp;and&nbsp;reading&nbsp;some&nbsp;output&nbsp;files.&nbsp;Compares<br>
+to&nbsp;Osterbrock&nbsp;values.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>TOLERANCE</strong> = 0.3<br>
+<strong>osterbrock_intensity</strong> = 8.3e-26<br>
+<strong>osterbrock_ratios</strong> = array([2.86  , 1.    , 0.47  , 0.262 , 0.159 , 0.107 , 0.0748, 0.0544])</td></tr></table>
+</body></html>

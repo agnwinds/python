@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module autogenerate_parameter_docs</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>autogenerate_parameter_docs</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/autogenerate_parameter_docs.py">/Users/long/Python/py_progs/autogenerate_parameter_docs.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;script&nbsp;goes&nbsp;through&nbsp;the&nbsp;(non-blacklisted)&nbsp;input&nbsp;.c&nbsp;files,&nbsp;and&nbsp;identifies<br>
+the&nbsp;input&nbsp;variables,&nbsp;their&nbsp;types&nbsp;and&nbsp;any&nbsp;notes&nbsp;(e.g.&nbsp;units,&nbsp;choices).<br>
+&nbsp;<br>
+It&nbsp;then&nbsp;compares&nbsp;this&nbsp;list&nbsp;to&nbsp;the&nbsp;existing&nbsp;documentation&nbsp;files,&nbsp;and&nbsp;lists<br>
+which&nbsp;existing&nbsp;documentation&nbsp;refers&nbsp;to&nbsp;parameters&nbsp;that&nbsp;are&nbsp;now&nbsp;deprecated,<br>
+and&nbsp;which&nbsp;parameters&nbsp;that&nbsp;are&nbsp;new&nbsp;and&nbsp;yet&nbsp;to&nbsp;be&nbsp;documented.<br>
+&nbsp;<br>
+By&nbsp;default,&nbsp;the&nbsp;script&nbsp;will&nbsp;simply&nbsp;print&nbsp;the&nbsp;new&nbsp;and&nbsp;deprecated&nbsp;files&nbsp;to<br>
+the&nbsp;screen.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-p&nbsp;/&nbsp;--print<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Print&nbsp;the&nbsp;full&nbsp;text&nbsp;of&nbsp;all&nbsp;.yaml&nbsp;files&nbsp;that&nbsp;would&nbsp;be&nbsp;created&nbsp;to&nbsp;the&nbsp;screen.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-w&nbsp;/&nbsp;--write<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Move&nbsp;any&nbsp;deprecated&nbsp;parameters&nbsp;to&nbsp;$PYTHON/parameters/old/,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;write&nbsp;any&nbsp;new&nbsp;parameters&nbsp;to&nbsp;file.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note,&nbsp;this&nbsp;will&nbsp;not&nbsp;over-write&nbsp;any&nbsp;parameters&nbsp;that&nbsp;have&nbsp;changed&nbsp;types<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;not&nbsp;names&nbsp;e.g.&nbsp;rdflo('thing')&nbsp;to&nbsp;rdint('thing').<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-h&nbsp;/&nbsp;--help<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;this&nbsp;documentation.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="yaml.html">yaml</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-autogenerate_parameter_docs"><strong>autogenerate_parameter_docs</strong></a>()</dt><dd><tt>Function&nbsp;to&nbsp;autogenerate&nbsp;parameter&nbsp;documentation.</tt></dd></dl>
+ <dl><dt><a name="-deprecate_documentation"><strong>deprecate_documentation</strong></a>(deprecated_documentation: List[str], output_folder: str, output_old_folder: str)</dt><dd><tt>Moves&nbsp;any&nbsp;deprecated&nbsp;documentation&nbsp;to&nbsp;the&nbsp;archive&nbsp;folder.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deprecated_documentation:&nbsp;The&nbsp;docs&nbsp;that&nbsp;need&nbsp;moving&nbsp;to&nbsp;old&nbsp;storage<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_folder:&nbsp;The&nbsp;folder&nbsp;to&nbsp;write&nbsp;new&nbsp;docs&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_old_folder:&nbsp;The&nbsp;folder&nbsp;to&nbsp;move&nbsp;old&nbsp;docs&nbsp;to</tt></dd></dl>
+ <dl><dt><a name="-intersect_documentation"><strong>intersect_documentation</strong></a>(existing_documentation: List[str], found_parameters: List[str]) -&gt; List[str]</dt><dd><tt>Intersections&nbsp;of&nbsp;documentation<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;existing_documentation:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;found_parameters:<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List[str]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List[str]:</tt></dd></dl>
+ <dl><dt><a name="-list_existing_documentation"><strong>list_existing_documentation</strong></a>(directory: str) -&gt; List[str]</dt><dd><tt>Look&nbsp;through&nbsp;the&nbsp;output&nbsp;folder,&nbsp;and&nbsp;record&nbsp;every&nbsp;.yaml&nbsp;file&nbsp;in&nbsp;it.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;directory:&nbsp;The&nbsp;location&nbsp;to&nbsp;look&nbsp;in.<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List[str]:&nbsp;Existing&nbsp;.yaml&nbsp;documentation&nbsp;files.</tt></dd></dl>
+ <dl><dt><a name="-list_input_files"><strong>list_input_files</strong></a>(directory: str) -&gt; List[str]</dt><dd><tt>Look&nbsp;through&nbsp;the&nbsp;source&nbsp;folder,&nbsp;and&nbsp;track&nbsp;each&nbsp;file&nbsp;that&nbsp;isn't&nbsp;in&nbsp;the&nbsp;blacklist.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;directory:&nbsp;The&nbsp;location&nbsp;to&nbsp;look&nbsp;in.<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List[str]:&nbsp;Input&nbsp;.c&nbsp;files.</tt></dd></dl>
+ <dl><dt><a name="-my_represent_scalar"><strong>my_represent_scalar</strong></a>(self, tag, value, style=None)</dt><dd><tt>Replacement&nbsp;'representer'&nbsp;for&nbsp;strings&nbsp;that&nbsp;intelligently&nbsp;switches&nbsp;between&nbsp;single-&nbsp;and<br>
+multi-line&nbsp;output<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag&nbsp;(string):&nbsp;YAML&nbsp;tag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;(string):&nbsp;YAML&nbsp;value&nbsp;to&nbsp;assess<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;function:&nbsp;The&nbsp;representation&nbsp;function</tt></dd></dl>
+ <dl><dt><a name="-parse_param_to_dict"><strong>parse_param_to_dict</strong></a>(found_parameters: List[dict], output_dict: dict, existing_documentation: List[str], text: str, input_file: str, param_type: str) -&gt; bool</dt><dd><tt>Given&nbsp;a&nbsp;string&nbsp;that's&nbsp;the&nbsp;text&nbsp;of&nbsp;a&nbsp;c&nbsp;function&nbsp;call&nbsp;for&nbsp;a&nbsp;parameter,<br>
+decide&nbsp;if&nbsp;this&nbsp;is&nbsp;a&nbsp;parameter&nbsp;and&nbsp;return&nbsp;so.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;found_parameters:&nbsp;Array&nbsp;of&nbsp;found&nbsp;parameter&nbsp;entries&nbsp;so&nbsp;far.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_dict:&nbsp;The&nbsp;dict&nbsp;of&nbsp;parameter&nbsp;values.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;existing_documentation:&nbsp;List&nbsp;of&nbsp;already-found&nbsp;documentation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text:&nbsp;Parameter&nbsp;text&nbsp;e.g.&nbsp;"foo(bar,&nbsp;baz)".<br>
+&nbsp;&nbsp;&nbsp;&nbsp;input_file:&nbsp;File&nbsp;the&nbsp;parameter&nbsp;is&nbsp;in&nbsp;e.g.&nbsp;"setup.c".<br>
+&nbsp;&nbsp;&nbsp;&nbsp;param_type:&nbsp;Parameter&nbsp;type&nbsp;e.g.&nbsp;Integer,&nbsp;Enumerator.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;False:&nbsp;Probably&nbsp;unnecessary.&nbsp;Doesn't&nbsp;need&nbsp;to&nbsp;return&nbsp;a&nbsp;value.</tt></dd></dl>
+ <dl><dt><a name="-read_parameters"><strong>read_parameters</strong></a>(input_folder: str, input_files: List[str], existing_documentation: List[str]) -&gt; Union[collections.OrderedDict, List[str]]</dt><dd><tt>For&nbsp;each&nbsp;input&nbsp;file,&nbsp;process&nbsp;and&nbsp;add&nbsp;to&nbsp;found&nbsp;parameters&nbsp;list.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;input_files:&nbsp;The&nbsp;.c&nbsp;files&nbsp;that&nbsp;need&nbsp;parsing&nbsp;for&nbsp;parameters.<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;OrderedDict():&nbsp;The&nbsp;parameter&nbsp;dict<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List[str]:&nbsp;The&nbsp;list&nbsp;of&nbsp;parameter&nbsp;names.</tt></dd></dl>
+ <dl><dt><a name="-should_use_block"><strong>should_use_block</strong></a>(value: str) -&gt; bool</dt><dd><tt>Whether&nbsp;or&nbsp;not&nbsp;this&nbsp;string&nbsp;is&nbsp;multi-line&nbsp;and&nbsp;should&nbsp;use&nbsp;the&nbsp;'|'&nbsp;literal&nbsp;string&nbsp;format<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;value:&nbsp;String&nbsp;to&nbsp;test<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;Whether&nbsp;or&nbsp;not&nbsp;this&nbsp;is&nbsp;a&nbsp;multi-line&nbsp;string</tt></dd></dl>
+ <dl><dt><a name="-yaml_output"><strong>yaml_output</strong></a>(output_dict: dict, new_documentation: List[str], output_folder: str, print_docs: bool = False, write_docs: bool = False)</dt><dd><tt>Prints&nbsp;out&nbsp;new&nbsp;documentation&nbsp;to&nbsp;screen&nbsp;or&nbsp;writes&nbsp;it&nbsp;to&nbsp;file.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_dict:&nbsp;The&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;the&nbsp;parameters&nbsp;found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_documentation:&nbsp;The&nbsp;docs&nbsp;that&nbsp;need&nbsp;writing&nbsp;(from&nbsp;intersect_documentation)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_folder:&nbsp;The&nbsp;folder&nbsp;to&nbsp;write&nbsp;new&nbsp;docs&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print_docs:&nbsp;Whether&nbsp;to&nbsp;print&nbsp;new&nbsp;documentation&nbsp;to&nbsp;the&nbsp;screen<br>
+&nbsp;&nbsp;&nbsp;&nbsp;write_docs:&nbsp;Whether&nbsp;to&nbsp;write&nbsp;new&nbsp;documentation&nbsp;to&nbsp;disk/move&nbsp;old&nbsp;doc</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>BLACKLIST</strong> = ['py_wind', 'plot_roche', 'py_grid', 'synonyms', 't_bilinear', 'rdpar', 'parse', 'para_update']<br>
+<strong>BOOL_TYPES</strong> = {'1=yes': 'Boolean (1/0)', 'anything_else': 'Boolean (1/0)', 'y/n': 'Boolean (Y/N)', 'y=1': 'Boolean (1/0)', 'yes,no': 'Boolean (yes/no)'}<br>
+<strong>List</strong> = typing.List<br>
+<strong>PARAM_TYPES</strong> = {'get_spectype': 'Enumerator', 'rdchoice': 'Enumerator', 'rddoub': 'Double', 'rdflo': 'Float', 'rdint': 'Integer', 'rdline': 'Line', 'rdstr': 'String'}<br>
+<strong>UNIT_TYPES</strong> = OrderedDict([('cm', 'cm'), ('ergs/s', 'ergs/s'),...pe velocity'), ('k', 'Kelvin'), ('K', 'Kelvin')])<br>
+<strong>Union</strong> = typing.Union</td></tr></table>
+</body></html>

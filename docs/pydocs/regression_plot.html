@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module regression_plot</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>regression_plot</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/regression_plot.py">/Users/long/Python/py_progs/regression_plot.py</a></font></td></tr></table>
+    <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Space&nbsp;Telescope&nbsp;Science&nbsp;Institute<br>
+&nbsp;<br>
+Synopsis:&nbsp;&nbsp;<br>
+&nbsp;<br>
+Create&nbsp;plots&nbsp;which&nbsp;compare&nbsp;spectra&nbsp;(and&nbsp;possibly&nbsp;other&nbsp;properties<br>
+of&nbsp;two&nbsp;runs&nbsp;of&nbsp;Python.&nbsp;&nbsp;This&nbsp;may&nbsp;become&nbsp;a&nbsp;basis&nbsp;for&nbsp;some&nbsp;kind<br>
+of&nbsp;ipython&nbsp;notebook<br>
+&nbsp;<br>
+&nbsp;<br>
+Command&nbsp;line&nbsp;usage&nbsp;(if&nbsp;any):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage:&nbsp;regression_plot.py&nbsp;run1&nbsp;run2&nbsp;[model]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;run1&nbsp;and&nbsp;run&nbsp;2&nbsp;are&nbsp;in&nbsp;directories&nbsp;containing&nbsp;the&nbsp;runs&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;model&nbsp;is&nbsp;given,&nbsp;then&nbsp;only&nbsp;that&nbsp;model&nbsp;is&nbsp;compared.&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;model&nbsp;is&nbsp;not&nbsp;given&nbsp;all&nbsp;the&nbsp;models&nbsp;in&nbsp;the&nbsp;dirctory&nbsp;Xcompare<br>
+&nbsp;<br>
+Description:&nbsp;&nbsp;<br>
+&nbsp;<br>
+Primary&nbsp;routines:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;doit_two&nbsp;&nbsp;Creates&nbsp;a&nbsp;plot&nbsp;comparing&nbsp;the&nbsp;spectra&nbsp;from&nbsp;one&nbsp;model<br>
+&nbsp;&nbsp;&nbsp;&nbsp;do_all&nbsp;&nbsp;&nbsp;&nbsp;Runs&nbsp;doit_two&nbsp;for&nbsp;all&nbsp;of&nbsp;the&nbsp;models&nbsp;in&nbsp;the&nbsp;named&nbsp;directories<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+History:<br>
+&nbsp;<br>
+181127&nbsp;ksl&nbsp;Coding&nbsp;begun</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="astropy.io.ascii.html">astropy.io.ascii</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="pylab.html">pylab</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-do_all"><strong>do_all</strong></a>(run1='py82i_181127', run2='py82i_181126', outdir='')</dt><dd><tt>Compare&nbsp;all&nbsp;of&nbsp;the&nbsp;files&nbsp;spectrum&nbsp;files&nbsp;in&nbsp;a&nbsp;two&nbsp;different&nbsp;regression&nbsp;<br>
+directorys</tt></dd></dl>
+ <dl><dt><a name="-doit"><strong>doit</strong></a>(run1='py82i_181127', run2='py82i_181126', model='cv_kur', outdir='')</dt><dd><tt>Do&nbsp;something&nbsp;magnificent<br>
+&nbsp;<br>
+Description:<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;<br>
+History:</tt></dd></dl>
+ <dl><dt><a name="-doit_two"><strong>doit_two</strong></a>(run1='py82i_181127', run2='py82i_181126', model='cv_kur', outdir='')</dt><dd><tt>In&nbsp;a&nbsp;single&nbsp;plot&nbsp;summarize&nbsp;it&nbsp;all</tt></dd></dl>
+ <dl><dt><a name="-plot_spec"><strong>plot_spec</strong></a>(spec_name1, spec_name2, out)</dt><dd><tt>Compare&nbsp;two&nbsp;detailed&nbsp;output<br>
+spectra</tt></dd></dl>
+ <dl><dt><a name="-plot_tot"><strong>plot_tot</strong></a>(spec_name1, spec_name2, out)</dt><dd><tt>Compare&nbsp;two&nbsp;detailed&nbsp;output<br>
+spectra</tt></dd></dl>
+ <dl><dt><a name="-read_file"><strong>read_file</strong></a>(filename, char='')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;and&nbsp;split&nbsp;it&nbsp;into&nbsp;words,&nbsp;eliminating&nbsp;comments<br>
+&nbsp;<br>
+char&nbsp;is&nbsp;an&nbsp;optional&nbsp;parameter&nbsp;used&nbsp;as&nbsp;the&nbsp;delimiter&nbsp;for<br>
+splitting&nbsp;lines&nbsp;into&nbsp;words.&nbsp;&nbsp;Otherwise&nbsp;white&nbsp;space&nbsp;is<br>
+assumed.<br>
+&nbsp;<br>
+History:<br>
+&nbsp;<br>
+110729&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;optional&nbsp;delimiters<br>
+141209&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Reinstalled&nbsp;in&nbsp;my&nbsp;standard&nbsp;startup<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;script&nbsp;so&nbsp;there&nbsp;was&nbsp;flexibility&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;read&nbsp;any&nbsp;ascii&nbsp;file</tt></dd></dl>
+ <dl><dt><a name="-read_table"><strong>read_table</strong></a>(filename='foo.txt', format='')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;using&nbsp;astropy.io.ascii&nbsp;and&nbsp;<br>
+return&nbsp;this&nbsp;<br>
+&nbsp;<br>
+Description:<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;<br>
+History:</tt></dd></dl>
+ <dl><dt><a name="-xsmooth"><strong>xsmooth</strong></a>(flux, smooth=21)</dt><dd><tt>boxcar&nbsp;smooth&nbsp;the&nbsp;flux</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>fig_num</strong> = 1</td></tr></table>
+</body></html>
