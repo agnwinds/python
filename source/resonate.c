@@ -838,11 +838,11 @@ calls to two_level atom
    */
 
   nden = config[lptr->nconfigu].nden;
-  /* sometimes nden is -1 for levels that are not "NLTE", so we have to catch this case*/
+  /* sometimes nden is -1 for levels that are not "NLTE", so we have to catch this case */
   if (nden >= 0)
     levden_upper = xplasma->levden[nden];
   else
-    levden_upper = xplasma->density[nion]; 
+    levden_upper = xplasma->density[nion];
 
   if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (levden_upper <= DENSITY_MIN))
   {
