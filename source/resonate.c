@@ -837,7 +837,11 @@ calls to two_level atom
    * or equal to the minimum too.
    */
 
-  nden = config[lptr->nconfigu].nden;
+  if (lptr->nconfigu >= 0) // then we have an upper level identified, see #601 
+    nden = config[lptr->nconfigu].nden;
+  else
+    nden = -1;
+
   /* sometimes nden is -1 for levels that are not "NLTE", so we have to catch this case */
   if (nden >= 0)
     levden_upper = xplasma->levden[nden];
