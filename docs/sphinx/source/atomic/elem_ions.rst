@@ -4,18 +4,20 @@ Elements and Ions
 
 The first file that must be read into \textsc{python} is the file that defines the elements and ions.  The 
 
-**Source:**
-
+Source:
+=======
 This data comes from \cite{1994A&AS..108..287V}
 
 
 
-**Translation to python:**
+Translation to python:
+======================
 
 The original data and the translation can be found in py\_verner.  A simple awkscript converts the downloaded data to Python format.
 
 
-**Datafile - elem_ions_ver.py:**
+Datafile - elem_ions_ver.py:
+============================
 
 
 There are two sections to the file, first elements are defined:
@@ -47,8 +49,8 @@ There are two sections to the file, first elements are defined:
 
 
 
-**Supernova models:**
-
+Supernova models:
+=================
 Supernovae (SNe) do not have solar abundances. SS included an additional
 file, \texttt{elem\_ions\_ver\_sn.py} for use with SN models. This is accessed
 through the \texttt{standard\_sn\_kurucz} masterfile and as far as I know is
