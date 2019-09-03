@@ -66,7 +66,6 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
                                    to this parameter, at the 10% level if raised from 1e-3 to 1.  There is a 
                                    trade-off since lower minima may give better results, especially for macro atoms. */
 
-//#define SMAX_FRAC     0.1  
 #define LDEN_MIN        1e-3    /* The minimum density required for a line to be conidered for scattering
                                    or emission in calculate_ds and lum_lines */
 
@@ -841,10 +840,17 @@ typedef struct plasma
   double j, ave_freq;           /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
-  double fmin[NXBANDS];         /* the minimum freqneucy photon seen in a band - this is incremented during photon flight */
+  double fmin[NXBANDS];         /* the minimum frequency photon seen in a band - this is incremented during photon flight */
   double fmax[NXBANDS];         /* the maximum frequency photon seen in a band - this is incremented during photon flight */
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
+
+
+  /* banded, directional fluxes */
+  double F_x[NXBANDS];
+  double F_y[NXBANDS];
+  double F_z[NXBANDS];
+
 
 
 
