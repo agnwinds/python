@@ -60,8 +60,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'python'
-copyright = '2018, Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
-author = 'Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
+copyright = '2018, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
+author = 'Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -158,7 +158,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'python.tex', 'python Documentation',
-     'Knox Long, Christian Knigge, Stuart Sims, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt', 'manual'),
+     'Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt', 'manual'),
 ]
 
 # -- Options for manual page output ---------------------------------------

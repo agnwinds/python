@@ -28,9 +28,10 @@ The poloidal velocity along the streamlies is defined to be
     v_l - v_o + (v_{\ifty}(r_o)-v_o) \frac {(l/R_v)^{\alpha}}{(l/R_v)^{\alpha}+1}
 
 The scale length :math:`R_v` and the exponent :math:`\alpha` control the
-acceleration of the wind between a fixed  velocity :math:`v_o`, normally
-6 km/s , at the base of the wind and the terminal velocity
-:math:`v_{\infty}(r_o)`. The terminal velocity of each streamline varies
+acceleration of the wind between a velocity :math:`v_o`, at the base of the wind 
+and the terminal velocity :math:`v_{\infty}(r_o)`. The initial velocity :math:`v_o`
+can be set to either a constant, normally 6 km/s, or a multiple of the sound-speed at the 
+streamline base. The terminal velocity of each streamline varies
 depending on the location of the streamline in the inner and outer
 disk, being characterized as a fixed multiple of the escape
 velocity at the footpoint of the streamline. Thus the poloidal
