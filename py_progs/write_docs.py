@@ -94,6 +94,18 @@ def make_toplevel(dirname, names):
 
     page.h1("Documentation for python scripts in the directory  %s" % dirname)
 
+    page.p('''This page lists the scripts that exist.  Some of these scripts will be useful to users, and some 
+    will not. 
+    At present, there is no obvious way to tell, except to look read the documentation associated with
+    each script by following the link, or to have seen a reference to a particular script in some other
+    place in the documentation set.
+    ''')
+
+    page.p('''To use the scripts, one will need to have the py_progs directory, in her/his PYTHONPATH.  Occasionally
+    one will need to be prepared to install modules using conda or pip.''')
+
+    page.h2('The scripts')
+
     items = []
     for name in names:
         item = markup.oneliner.a(name, href="./%s.html" % name)
