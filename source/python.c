@@ -327,8 +327,6 @@ main (argc, argv)
   }
 
 
-
-
 /* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,
    because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in
    the numbers of ionization and spectral cycles and then instatiates PhotPtr.  It is possilbe that this should be moved to else where in

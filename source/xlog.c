@@ -859,6 +859,8 @@ Exit (int error_code)
     error_code = EXIT_FAILURE;
   }
 
+  Log_flush ();
+
 #ifdef MPI_ON
   Log_parallel ("--------------------------------------------------------------------------\n"
                 "Aborting rank %04i: exiting all processes with error %i\n", my_rank, error_code);
