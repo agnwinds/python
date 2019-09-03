@@ -207,7 +207,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   Log ("\n");
 
   print_timer_duration ("!!python: photon transport completed in", timer_t0);
-
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
   if (n_lost_to_dfudge > 0)
     Error

@@ -349,7 +349,6 @@ rtheta_make_grid_import (w, ndom)
       }
     }
   }
-
   Log ("Imported:    rmin    rmax  %e %e\n", rmin, rmax);
   Log ("Imported:    zmin    zmax  %e %e\n", zmin, zmax);
   Log ("Imported: rho_min rho_max  %e %e\n", rho_min, rho_max);

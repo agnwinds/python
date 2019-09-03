@@ -53,7 +53,6 @@ rtheta_ds_in_cell (ndom, p)
   int n, ix, iz;
   double s, smax;
 
-
   /* Check that that the photon is in the domain it is supposed to be
    * in.  */
 
@@ -64,7 +63,6 @@ rtheta_ds_in_cell (ndom, p)
   }
 
   wind_n_to_ij (ndom, n, &ix, &iz);     /*Convert the index n to two dimensions */
-
 
   /* Set up the quadratic equations in the radial  direction */
 
