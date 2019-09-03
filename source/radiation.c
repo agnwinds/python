@@ -876,19 +876,21 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
 
 
-/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
+/* frequency weighted by the weights and distance in the shell .  See eqn 2 ML93 */
   xplasma->mean_ds += ds;
   xplasma->n_ds++;
   xplasma->ave_freq += p->freq * w_ave * ds;
 
-  
+
+/* The lines below compute the flux element of this photon */
+
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
-  stuff_v (p->lmn, p_dir_cos); 
-  renorm (p_dir_cos, w_ave * ds );
-  project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);
+  stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
+  renorm (p_dir_cos, w_ave * ds);       //Renormnalise the direction into a flux element
+  project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
 
-  if (p->x[2] < 0) //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+  if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
 
 
@@ -910,9 +912,9 @@ update_banded_estimators (xplasma, p, ds, w_ave)
       xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;   /* input to allow standard deviation to be calculated */
       xplasma->xj[i] += w_ave * ds;     /* photon weight times distance travelled */
       xplasma->nxtot[i]++;      /* increment the frequency banded photon counter */
-	  xplasma->F_x[i]+=flux[0];
-	  xplasma->F_y[i]+=flux[1];
-	  xplasma->F_z[i]+=flux[2];
+      xplasma->F_x[i] += flux[0];       //Increment the banded cartesian flux vectors
+      xplasma->F_y[i] += flux[1];
+      xplasma->F_z[i] += flux[2];
       /* work out the range of frequencies within a band where photons have been seen */
       if (p->freq < xplasma->fmin[i])
       {

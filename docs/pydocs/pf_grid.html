@@ -1,0 +1,2452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module pf_grid</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>pf_grid</strong></big></big> (version 1.16.4)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/pf_grid.py">/Users/long/Python/py_progs/pf_grid.py</a></font></td></tr></table>
+    <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Space&nbsp;Telescope&nbsp;Science&nbsp;Institute<br>
+&nbsp;<br>
+&nbsp;<br>
+Synopsis:&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;program&nbsp;that&nbsp;is&nbsp;designed&nbsp;to&nbsp;expand&nbsp;a&nbsp;.pf&nbsp;file&nbsp;into&nbsp;a&nbsp;grid&nbsp;of&nbsp;.pf&nbsp;files.<br>
+&nbsp;<br>
+Usage:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pf_grid.py&nbsp;base.pf&nbsp;&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;base.pf&nbsp;is&nbsp;a&nbsp;correctly&nbsp;formatted&nbsp;parameter&nbsp;file,&nbsp;with&nbsp;variables&nbsp;that&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wishes&nbsp;to&nbsp;grid&nbsp;indicated&nbsp;by&nbsp;?<br>
+&nbsp;<br>
+Description:&nbsp;&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;program&nbsp;was&nbsp;written&nbsp;for&nbsp;creating&nbsp;grids&nbsp;of&nbsp;models&nbsp;with&nbsp;&nbsp;Python<br>
+&nbsp;&nbsp;&nbsp;&nbsp;python,&nbsp;although&nbsp;it&nbsp;should&nbsp;work&nbsp;with&nbsp;any&nbsp;.pf&nbsp;file&nbsp;in&nbsp;the&nbsp;case&nbsp;where&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wants&nbsp;to&nbsp;run&nbsp;a&nbsp;grid&nbsp;of&nbsp;models.&nbsp;&nbsp;As&nbsp;an&nbsp;example&nbsp;this&nbsp;should&nbsp;be&nbsp;a&nbsp;reasonable&nbsp;way<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;do&nbsp;much&nbsp;of&nbsp;the&nbsp;setup&nbsp;work&nbsp;for&nbsp;runing&nbsp;a&nbsp;bunch&nbsp;of&nbsp;ISM&nbsp;calculations.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;use&nbsp;the&nbsp;program&nbsp;take&nbsp;a&nbsp;.pf&nbsp;file&nbsp;which&nbsp;is&nbsp;correctly&nbsp;formatted&nbsp;to&nbsp;run&nbsp;with&nbsp;python.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;going&nbsp;to&nbsp;be&nbsp;the&nbsp;basis&nbsp;of&nbsp;all&nbsp;of&nbsp;the&nbsp;.pf&nbsp;files.&nbsp;&nbsp;Replace&nbsp;the&nbsp;values&nbsp;of&nbsp;those<br>
+&nbsp;&nbsp;&nbsp;&nbsp;variables&nbsp;you&nbsp;want&nbsp;to&nbsp;grid&nbsp;with&nbsp;$<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Run&nbsp;the&nbsp;program.&nbsp;It&nbsp;will&nbsp;ask&nbsp;for&nbsp;the&nbsp;.pf&nbsp;file,&nbsp;herafter&nbsp;grid.pf,&nbsp;to&nbsp;use,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;a&nbsp;basename&nbsp;for&nbsp;all&nbsp;of&nbsp;the&nbsp;output&nbsp;files.&nbsp;&nbsp;It&nbsp;will&nbsp;read&nbsp;through&nbsp;grid.pf&nbsp;and&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;ask&nbsp;the&nbsp;user&nbsp;to&nbsp;give&nbsp;the&nbsp;values&nbsp;of&nbsp;each&nbsp;of&nbsp;the&nbsp;variables&nbsp;to&nbsp;grid.&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;format&nbsp;of&nbsp;the&nbsp;inputs&nbsp;is&nbsp;very&nbsp;specific,&nbsp;and&nbsp;not&nbsp;particularly&nbsp;user-friendly!&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(The&nbsp;lines&nbsp;are&nbsp;read&nbsp;with&nbsp;the&nbsp;input&nbsp;or&nbsp;in&nbsp;Python&nbsp;3&nbsp;the&nbsp;raw_input&nbsp;command&nbsp;in&nbsp;python,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;scripting&nbsp;language'.&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;two&nbsp;possibities&nbsp;that&nbsp;are&nbsp;supported&nbsp;by&nbsp;the&nbsp;program&nbsp;are:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;list&nbsp;format&nbsp;which&nbsp;means&nbsp;one&nbsp;must&nbsp;enclose&nbsp;everything&nbsp;in&nbsp;[],&nbsp;e.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[14,27,32]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;would&nbsp;say&nbsp;that&nbsp;for&nbsp;this&nbsp;variable&nbsp;you&nbsp;want&nbsp;values&nbsp;of&nbsp;14,&nbsp;27,&nbsp;and&nbsp;32.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;special&nbsp;format&nbsp;to&nbsp;create&nbsp;a&nbsp;logarithminc&nbsp;grid&nbsp;of&nbsp;variables,&nbsp;e.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-log_ints">log_ints</a>(xmin,xmax,n)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;xmin&nbsp;and&nbsp;xmax&nbsp;are&nbsp;the&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;values&nbsp;of&nbsp;the&nbsp;variable&nbsp;in&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;question&nbsp;and&nbsp;n&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables.&nbsp;&nbsp;Note&nbsp;that&nbsp;you&nbsp;enter&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actual&nbsp;values&nbsp;of&nbsp;xmin&nbsp;and&nbsp;xmax&nbsp;and&nbsp;not&nbsp;the&nbsp;log&nbsp;of&nbsp;this.&nbsp;&nbsp;For&nbsp;example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-log_ints">log_ints</a>(1.e16.,1.e18.,3)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;end&nbsp;up&nbsp;produciing&nbsp;a&nbsp;list&nbsp;with&nbsp;variables&nbsp;[1.e16,1.e17,1.e18]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note&nbsp;also&nbsp;that&nbsp;this&nbsp;input&nbsp;is&nbsp;treated&nbsp;within&nbsp;the&nbsp;routine&nbsp;as&nbsp;a&nbsp;function,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;so&nbsp;here&nbsp;the&nbsp;inputs&nbsp;have&nbsp;to&nbsp;be&nbsp;enclosed&nbsp;in&nbsp;parentheses.<br>
+&nbsp;<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;program&nbsp;produces&nbsp;a&nbsp;lot&nbsp;of&nbsp;files:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;file&nbsp;which&nbsp;lists&nbsp;what&nbsp;was&nbsp;varied&nbsp;and&nbsp;the&nbsp;values&nbsp;for&nbsp;them.&nbsp;&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;basename,&nbsp;with&nbsp;a&nbsp;.ls&nbsp;extensition&nbsp;attached,&nbsp;e.g&nbsp;vwhyi.ls<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;intended&nbsp;for&nbsp;use&nbsp;with&nbsp;a&nbsp;fitting&nbsp;program<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Variable&nbsp;Disk.mdot(msol/yr)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Variable&nbsp;Wind.mdot(msol/yr)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PYGRID/vwhyi_0000.spec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1e-08&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1e-09&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PYGRID/vwhyi_0001.spec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1e-08&nbsp;&nbsp;&nbsp;2.2e-09&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PYGRID/vwhyi_0002.spec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1e-08&nbsp;&nbsp;&nbsp;4.6e-09&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;file&nbsp;which&nbsp;can&nbsp;run&nbsp;python&nbsp;for&nbsp;the&nbsp;grid,&nbsp;one&nbsp;model&nbsp;after&nbsp;another.&nbsp;&nbsp;This&nbsp;has&nbsp;the&nbsp;prefix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Run_&nbsp;and&nbsp;the&nbsp;remainder&nbsp;is&nbsp;the&nbsp;basename,&nbsp;e.g&nbsp;something&nbsp;like,&nbsp;Run_vwhyi.&nbsp;&nbsp;It&nbsp;begins&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;something&nbsp;like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#!/usr/bin/env&nbsp;bash<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py&nbsp;vwhyi_0000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py&nbsp;vwhyi_0001<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py&nbsp;vwhyi_0002<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py&nbsp;vwhyi_0003<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;py&nbsp;vwhyi_0100<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;number&nbsp;of&nbsp;.pf&nbsp;files,&nbsp;that&nbsp;are&nbsp;like&nbsp;the&nbsp;original&nbsp;pf&nbsp;files,&nbsp;but&nbsp;now&nbsp;the&nbsp;$&nbsp;have&nbsp;been<br>
+&nbsp;&nbsp;&nbsp;&nbsp;replaced&nbsp;with&nbsp;the&nbsp;variables&nbsp;associated&nbsp;with&nbsp;the&nbsp;grid.<br>
+&nbsp;<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;program&nbsp;finds&nbsp;.pf&nbsp;files&nbsp;that&nbsp;seems&nbsp;to&nbsp;have&nbsp;been&nbsp;created&nbsp;earlier,&nbsp;it&nbsp;will&nbsp;ask&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;you&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;delete&nbsp;them<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+History:<br>
+0709&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;Coded&nbsp;and&nbsp;debugged<br>
+1701&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;Updated&nbsp;for&nbsp;Python3.&nbsp;&nbsp;It&nbsp;should&nbsp;be&nbsp;backward&nbsp;compatible.&nbsp;&nbsp;I&nbsp;have&nbsp;partially<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;not&nbsp;completely&nbsp;updated&nbsp;the&nbsp;style&nbsp;to&nbsp;the&nbsp;way&nbsp;I&nbsp;would&nbsp;write&nbsp;this&nbsp;program<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;today.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.core.defchararray.html">numpy.core.defchararray</a><br>
+<a href="numpy.ctypeslib.html">numpy.ctypeslib</a><br>
+<a href="numpy.lib.scimath.html">numpy.lib.scimath</a><br>
+</td><td width="25%" valign=top><a href="numpy.fft.html">numpy.fft</a><br>
+<a href="fnmatch.html">fnmatch</a><br>
+<a href="numpy.linalg.html">numpy.linalg</a><br>
+</td><td width="25%" valign=top><a href="numpy.ma.html">numpy.ma</a><br>
+<a href="math.html">math</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="numpy.random.html">numpy.random</a><br>
+<a href="numpy.core.records.html">numpy.core.records</a><br>
+<a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-add_docstring"><strong>add_docstring</strong></a>(...)</dt><dd><tt><a href="#-add_docstring">add_docstring</a>(obj,&nbsp;docstring)<br>
+&nbsp;<br>
+Add&nbsp;a&nbsp;docstring&nbsp;to&nbsp;a&nbsp;built-in&nbsp;obj&nbsp;if&nbsp;possible.<br>
+If&nbsp;the&nbsp;obj&nbsp;already&nbsp;has&nbsp;a&nbsp;docstring&nbsp;raise&nbsp;a&nbsp;RuntimeError<br>
+If&nbsp;this&nbsp;routine&nbsp;does&nbsp;not&nbsp;know&nbsp;how&nbsp;to&nbsp;add&nbsp;a&nbsp;docstring&nbsp;to&nbsp;the&nbsp;object<br>
+raise&nbsp;a&nbsp;TypeError</tt></dd></dl>
+ <dl><dt><a name="-add_newdoc_ufunc"><strong>add_newdoc_ufunc</strong></a> = _add_newdoc_ufunc(...)</dt><dd><tt>add_ufunc_docstring(ufunc,&nbsp;new_docstring)<br>
+&nbsp;<br>
+Replace&nbsp;the&nbsp;docstring&nbsp;for&nbsp;a&nbsp;ufunc&nbsp;with&nbsp;new_docstring.<br>
+This&nbsp;method&nbsp;will&nbsp;only&nbsp;work&nbsp;if&nbsp;the&nbsp;current&nbsp;docstring&nbsp;for<br>
+the&nbsp;ufunc&nbsp;is&nbsp;NULL.&nbsp;(At&nbsp;the&nbsp;C&nbsp;level,&nbsp;i.e.&nbsp;when&nbsp;ufunc-&gt;doc&nbsp;is&nbsp;NULL.)<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+ufunc&nbsp;:&nbsp;numpy.ufunc<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;ufunc&nbsp;whose&nbsp;current&nbsp;doc&nbsp;is&nbsp;NULL.<br>
+new_docstring&nbsp;:&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;new&nbsp;docstring&nbsp;for&nbsp;the&nbsp;ufunc.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+This&nbsp;method&nbsp;allocates&nbsp;memory&nbsp;for&nbsp;new_docstring&nbsp;on<br>
+the&nbsp;heap.&nbsp;Technically&nbsp;this&nbsp;creates&nbsp;a&nbsp;mempory&nbsp;leak,&nbsp;since&nbsp;this<br>
+memory&nbsp;will&nbsp;not&nbsp;be&nbsp;reclaimed&nbsp;until&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;program<br>
+even&nbsp;if&nbsp;the&nbsp;ufunc&nbsp;itself&nbsp;is&nbsp;removed.&nbsp;However&nbsp;this&nbsp;will&nbsp;only<br>
+be&nbsp;a&nbsp;problem&nbsp;if&nbsp;the&nbsp;user&nbsp;is&nbsp;repeatedly&nbsp;creating&nbsp;ufuncs&nbsp;with<br>
+no&nbsp;documentation,&nbsp;adding&nbsp;documentation&nbsp;via&nbsp;add_newdoc_ufunc,<br>
+and&nbsp;then&nbsp;throwing&nbsp;away&nbsp;the&nbsp;ufunc.</tt></dd></dl>
+ <dl><dt><a name="-arange"><strong>arange</strong></a>(...)</dt><dd><tt><a href="#-arange">arange</a>([start,]&nbsp;stop[,&nbsp;step,],&nbsp;dtype=None)<br>
+&nbsp;<br>
+Return&nbsp;evenly&nbsp;spaced&nbsp;values&nbsp;within&nbsp;a&nbsp;given&nbsp;interval.<br>
+&nbsp;<br>
+Values&nbsp;are&nbsp;generated&nbsp;within&nbsp;the&nbsp;half-open&nbsp;interval&nbsp;``[start,&nbsp;stop)``<br>
+(in&nbsp;other&nbsp;words,&nbsp;the&nbsp;interval&nbsp;including&nbsp;`start`&nbsp;but&nbsp;excluding&nbsp;`stop`).<br>
+For&nbsp;integer&nbsp;arguments&nbsp;the&nbsp;function&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;the&nbsp;Python&nbsp;built-in<br>
+`range`&nbsp;function,&nbsp;but&nbsp;returns&nbsp;an&nbsp;ndarray&nbsp;rather&nbsp;than&nbsp;a&nbsp;list.<br>
+&nbsp;<br>
+When&nbsp;using&nbsp;a&nbsp;non-integer&nbsp;step,&nbsp;such&nbsp;as&nbsp;0.1,&nbsp;the&nbsp;results&nbsp;will&nbsp;often&nbsp;not<br>
+be&nbsp;consistent.&nbsp;&nbsp;It&nbsp;is&nbsp;better&nbsp;to&nbsp;use&nbsp;`numpy.linspace`&nbsp;for&nbsp;these&nbsp;cases.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+start&nbsp;:&nbsp;number,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;of&nbsp;interval.&nbsp;&nbsp;The&nbsp;interval&nbsp;includes&nbsp;this&nbsp;value.&nbsp;&nbsp;The&nbsp;default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start&nbsp;value&nbsp;is&nbsp;0.<br>
+stop&nbsp;:&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;End&nbsp;of&nbsp;interval.&nbsp;&nbsp;The&nbsp;interval&nbsp;does&nbsp;not&nbsp;include&nbsp;this&nbsp;value,&nbsp;except<br>
+&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;some&nbsp;cases&nbsp;where&nbsp;`step`&nbsp;is&nbsp;not&nbsp;an&nbsp;integer&nbsp;and&nbsp;floating&nbsp;point<br>
+&nbsp;&nbsp;&nbsp;&nbsp;round-off&nbsp;affects&nbsp;the&nbsp;length&nbsp;of&nbsp;`out`.<br>
+step&nbsp;:&nbsp;number,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Spacing&nbsp;between&nbsp;values.&nbsp;&nbsp;For&nbsp;any&nbsp;output&nbsp;`out`,&nbsp;this&nbsp;is&nbsp;the&nbsp;distance<br>
+&nbsp;&nbsp;&nbsp;&nbsp;between&nbsp;two&nbsp;adjacent&nbsp;values,&nbsp;``out[i+1]&nbsp;-&nbsp;out[i]``.&nbsp;&nbsp;The&nbsp;default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;step&nbsp;size&nbsp;is&nbsp;1.&nbsp;&nbsp;If&nbsp;`step`&nbsp;is&nbsp;specified&nbsp;as&nbsp;a&nbsp;position&nbsp;argument,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`start`&nbsp;must&nbsp;also&nbsp;be&nbsp;given.<br>
+dtype&nbsp;:&nbsp;dtype<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;type&nbsp;of&nbsp;the&nbsp;output&nbsp;array.&nbsp;&nbsp;If&nbsp;`dtype`&nbsp;is&nbsp;not&nbsp;given,&nbsp;infer&nbsp;the&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;from&nbsp;the&nbsp;other&nbsp;input&nbsp;arguments.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+arange&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;evenly&nbsp;spaced&nbsp;values.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;floating&nbsp;point&nbsp;arguments,&nbsp;the&nbsp;length&nbsp;of&nbsp;the&nbsp;result&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``ceil((stop&nbsp;-&nbsp;start)/step)``.&nbsp;&nbsp;Because&nbsp;of&nbsp;floating&nbsp;point&nbsp;overflow,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;rule&nbsp;may&nbsp;result&nbsp;in&nbsp;the&nbsp;last&nbsp;element&nbsp;of&nbsp;`out`&nbsp;being&nbsp;greater<br>
+&nbsp;&nbsp;&nbsp;&nbsp;than&nbsp;`stop`.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+linspace&nbsp;:&nbsp;Evenly&nbsp;spaced&nbsp;numbers&nbsp;with&nbsp;careful&nbsp;handling&nbsp;of&nbsp;endpoints.<br>
+ogrid:&nbsp;Arrays&nbsp;of&nbsp;evenly&nbsp;spaced&nbsp;numbers&nbsp;in&nbsp;N-dimensions.<br>
+mgrid:&nbsp;Grid-shaped&nbsp;arrays&nbsp;of&nbsp;evenly&nbsp;spaced&nbsp;numbers&nbsp;in&nbsp;N-dimensions.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-arange">arange</a>(3)<br>
+<a href="#-array">array</a>([0,&nbsp;1,&nbsp;2])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-arange">arange</a>(3.0)<br>
+<a href="#-array">array</a>([&nbsp;0.,&nbsp;&nbsp;1.,&nbsp;&nbsp;2.])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-arange">arange</a>(3,7)<br>
+<a href="#-array">array</a>([3,&nbsp;4,&nbsp;5,&nbsp;6])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-arange">arange</a>(3,7,2)<br>
+<a href="#-array">array</a>([3,&nbsp;5])</tt></dd></dl>
+ <dl><dt><a name="-array"><strong>array</strong></a>(...)</dt><dd><tt><a href="#-array">array</a>(object,&nbsp;dtype=None,&nbsp;copy=True,&nbsp;order='K',&nbsp;subok=False,&nbsp;ndmin=0)<br>
+&nbsp;<br>
+Create&nbsp;an&nbsp;array.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+object&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array,&nbsp;any&nbsp;object&nbsp;exposing&nbsp;the&nbsp;array&nbsp;interface,&nbsp;an&nbsp;object&nbsp;whose<br>
+&nbsp;&nbsp;&nbsp;&nbsp;__array__&nbsp;method&nbsp;returns&nbsp;an&nbsp;array,&nbsp;or&nbsp;any&nbsp;(nested)&nbsp;sequence.<br>
+dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;desired&nbsp;data-type&nbsp;for&nbsp;the&nbsp;array.&nbsp;&nbsp;If&nbsp;not&nbsp;given,&nbsp;then&nbsp;the&nbsp;type&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;determined&nbsp;as&nbsp;the&nbsp;minimum&nbsp;type&nbsp;required&nbsp;to&nbsp;hold&nbsp;the&nbsp;objects&nbsp;in&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sequence.&nbsp;&nbsp;This&nbsp;argument&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;to&nbsp;'upcast'&nbsp;the&nbsp;array.&nbsp;&nbsp;For<br>
+&nbsp;&nbsp;&nbsp;&nbsp;downcasting,&nbsp;use&nbsp;the&nbsp;.astype(t)&nbsp;method.<br>
+copy&nbsp;:&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;true&nbsp;(default),&nbsp;then&nbsp;the&nbsp;object&nbsp;is&nbsp;copied.&nbsp;&nbsp;Otherwise,&nbsp;a&nbsp;copy&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;only&nbsp;be&nbsp;made&nbsp;if&nbsp;__array__&nbsp;returns&nbsp;a&nbsp;copy,&nbsp;if&nbsp;obj&nbsp;is&nbsp;a&nbsp;nested&nbsp;sequence,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;if&nbsp;a&nbsp;copy&nbsp;is&nbsp;needed&nbsp;to&nbsp;satisfy&nbsp;any&nbsp;of&nbsp;the&nbsp;other&nbsp;requirements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(`dtype`,&nbsp;`order`,&nbsp;etc.).<br>
+order&nbsp;:&nbsp;{'K',&nbsp;'A',&nbsp;'C',&nbsp;'F'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specify&nbsp;the&nbsp;memory&nbsp;layout&nbsp;of&nbsp;the&nbsp;array.&nbsp;If&nbsp;object&nbsp;is&nbsp;not&nbsp;an&nbsp;array,&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;newly&nbsp;created&nbsp;array&nbsp;will&nbsp;be&nbsp;in&nbsp;C&nbsp;order&nbsp;(row&nbsp;major)&nbsp;unless&nbsp;'F'&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;specified,&nbsp;in&nbsp;which&nbsp;case&nbsp;it&nbsp;will&nbsp;be&nbsp;in&nbsp;Fortran&nbsp;order&nbsp;(column&nbsp;major).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;object&nbsp;is&nbsp;an&nbsp;array&nbsp;the&nbsp;following&nbsp;holds.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=====&nbsp;=========&nbsp;===================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;order&nbsp;&nbsp;no&nbsp;copy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;copy=True<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=====&nbsp;=========&nbsp;===================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'K'&nbsp;&nbsp;&nbsp;unchanged&nbsp;F&nbsp;&amp;&nbsp;C&nbsp;order&nbsp;preserved,&nbsp;otherwise&nbsp;most&nbsp;similar&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'A'&nbsp;&nbsp;&nbsp;unchanged&nbsp;F&nbsp;order&nbsp;if&nbsp;input&nbsp;is&nbsp;F&nbsp;and&nbsp;not&nbsp;C,&nbsp;otherwise&nbsp;C&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'C'&nbsp;&nbsp;&nbsp;C&nbsp;order&nbsp;&nbsp;&nbsp;C&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'F'&nbsp;&nbsp;&nbsp;F&nbsp;order&nbsp;&nbsp;&nbsp;F&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=====&nbsp;=========&nbsp;===================================================<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;``copy=False``&nbsp;and&nbsp;a&nbsp;copy&nbsp;is&nbsp;made&nbsp;for&nbsp;other&nbsp;reasons,&nbsp;the&nbsp;result&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;same&nbsp;as&nbsp;if&nbsp;``copy=True``,&nbsp;with&nbsp;some&nbsp;exceptions&nbsp;for&nbsp;`A`,&nbsp;see&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Notes&nbsp;section.&nbsp;The&nbsp;default&nbsp;order&nbsp;is&nbsp;'K'.<br>
+subok&nbsp;:&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;then&nbsp;sub-classes&nbsp;will&nbsp;be&nbsp;passed-through,&nbsp;otherwise<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;returned&nbsp;array&nbsp;will&nbsp;be&nbsp;forced&nbsp;to&nbsp;be&nbsp;a&nbsp;base-class&nbsp;array&nbsp;(default).<br>
+ndmin&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;the&nbsp;minimum&nbsp;number&nbsp;of&nbsp;dimensions&nbsp;that&nbsp;the&nbsp;resulting<br>
+&nbsp;&nbsp;&nbsp;&nbsp;array&nbsp;should&nbsp;have.&nbsp;&nbsp;Ones&nbsp;will&nbsp;be&nbsp;pre-pended&nbsp;to&nbsp;the&nbsp;shape&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;needed&nbsp;to&nbsp;meet&nbsp;this&nbsp;requirement.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;object&nbsp;satisfying&nbsp;the&nbsp;specified&nbsp;requirements.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+empty_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;empty&nbsp;array&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+ones_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;array&nbsp;of&nbsp;ones&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+zeros_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;array&nbsp;of&nbsp;zeros&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+full_like&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;with&nbsp;shape&nbsp;of&nbsp;input&nbsp;filled&nbsp;with&nbsp;value.<br>
+empty&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;uninitialized&nbsp;array.<br>
+ones&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;setting&nbsp;values&nbsp;to&nbsp;one.<br>
+zeros&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;setting&nbsp;values&nbsp;to&nbsp;zero.<br>
+full&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;of&nbsp;given&nbsp;shape&nbsp;filled&nbsp;with&nbsp;value.<br>
+&nbsp;<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+When&nbsp;order&nbsp;is&nbsp;'A'&nbsp;and&nbsp;`object`&nbsp;is&nbsp;an&nbsp;array&nbsp;in&nbsp;neither&nbsp;'C'&nbsp;nor&nbsp;'F'&nbsp;order,<br>
+and&nbsp;a&nbsp;copy&nbsp;is&nbsp;forced&nbsp;by&nbsp;a&nbsp;change&nbsp;in&nbsp;dtype,&nbsp;then&nbsp;the&nbsp;order&nbsp;of&nbsp;the&nbsp;result&nbsp;is<br>
+not&nbsp;necessarily&nbsp;'C'&nbsp;as&nbsp;expected.&nbsp;This&nbsp;is&nbsp;likely&nbsp;a&nbsp;bug.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3])<br>
+<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3])<br>
+&nbsp;<br>
+Upcasting:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3.0])<br>
+<a href="#-array">array</a>([&nbsp;1.,&nbsp;&nbsp;2.,&nbsp;&nbsp;3.])<br>
+&nbsp;<br>
+More&nbsp;than&nbsp;one&nbsp;dimension:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>([[1,&nbsp;2],&nbsp;[3,&nbsp;4]])<br>
+<a href="#-array">array</a>([[1,&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;4]])<br>
+&nbsp;<br>
+Minimum&nbsp;dimensions&nbsp;2:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3],&nbsp;ndmin=2)<br>
+<a href="#-array">array</a>([[1,&nbsp;2,&nbsp;3]])<br>
+&nbsp;<br>
+Type&nbsp;provided:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3],&nbsp;dtype=complex)<br>
+<a href="#-array">array</a>([&nbsp;1.+0.j,&nbsp;&nbsp;2.+0.j,&nbsp;&nbsp;3.+0.j])<br>
+&nbsp;<br>
+Data-type&nbsp;consisting&nbsp;of&nbsp;more&nbsp;than&nbsp;one&nbsp;element:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-array">array</a>([(1,2),(3,4)],dtype=[('a','&lt;i4'),('b','&lt;i4')])<br>
+&gt;&gt;&gt;&nbsp;x['a']<br>
+<a href="#-array">array</a>([1,&nbsp;3])<br>
+&nbsp;<br>
+Creating&nbsp;an&nbsp;array&nbsp;from&nbsp;sub-classes:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>(np.mat('1&nbsp;2;&nbsp;3&nbsp;4'))<br>
+<a href="#-array">array</a>([[1,&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;4]])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>(np.mat('1&nbsp;2;&nbsp;3&nbsp;4'),&nbsp;subok=True)<br>
+matrix([[1,&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;4]])</tt></dd></dl>
+ <dl><dt><a name="-bincount"><strong>bincount</strong></a>(...)</dt><dd><tt><a href="#-bincount">bincount</a>(x,&nbsp;weights=None,&nbsp;minlength=0)<br>
+&nbsp;<br>
+Count&nbsp;number&nbsp;of&nbsp;occurrences&nbsp;of&nbsp;each&nbsp;value&nbsp;in&nbsp;array&nbsp;of&nbsp;non-negative&nbsp;ints.<br>
+&nbsp;<br>
+The&nbsp;number&nbsp;of&nbsp;bins&nbsp;(of&nbsp;size&nbsp;1)&nbsp;is&nbsp;one&nbsp;larger&nbsp;than&nbsp;the&nbsp;largest&nbsp;value&nbsp;in<br>
+`x`.&nbsp;If&nbsp;`minlength`&nbsp;is&nbsp;specified,&nbsp;there&nbsp;will&nbsp;be&nbsp;at&nbsp;least&nbsp;this&nbsp;number<br>
+of&nbsp;bins&nbsp;in&nbsp;the&nbsp;output&nbsp;array&nbsp;(though&nbsp;it&nbsp;will&nbsp;be&nbsp;longer&nbsp;if&nbsp;necessary,<br>
+depending&nbsp;on&nbsp;the&nbsp;contents&nbsp;of&nbsp;`x`).<br>
+Each&nbsp;bin&nbsp;gives&nbsp;the&nbsp;number&nbsp;of&nbsp;occurrences&nbsp;of&nbsp;its&nbsp;index&nbsp;value&nbsp;in&nbsp;`x`.<br>
+If&nbsp;`weights`&nbsp;is&nbsp;specified&nbsp;the&nbsp;input&nbsp;array&nbsp;is&nbsp;weighted&nbsp;by&nbsp;it,&nbsp;i.e.&nbsp;if&nbsp;a<br>
+value&nbsp;``n``&nbsp;is&nbsp;found&nbsp;at&nbsp;position&nbsp;``i``,&nbsp;``out[n]&nbsp;+=&nbsp;weight[i]``&nbsp;instead<br>
+of&nbsp;``out[n]&nbsp;+=&nbsp;1``.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+x&nbsp;:&nbsp;array_like,&nbsp;1&nbsp;dimension,&nbsp;nonnegative&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;array.<br>
+weights&nbsp;:&nbsp;array_like,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Weights,&nbsp;array&nbsp;of&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;`x`.<br>
+minlength&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;minimum&nbsp;number&nbsp;of&nbsp;bins&nbsp;for&nbsp;the&nbsp;output&nbsp;array.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;versionadded::&nbsp;1.6.0<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;result&nbsp;of&nbsp;binning&nbsp;the&nbsp;input&nbsp;array.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;length&nbsp;of&nbsp;`out`&nbsp;is&nbsp;equal&nbsp;to&nbsp;``np.amax(x)+1``.<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+ValueError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;input&nbsp;is&nbsp;not&nbsp;1-dimensional,&nbsp;or&nbsp;contains&nbsp;elements&nbsp;with&nbsp;negative<br>
+&nbsp;&nbsp;&nbsp;&nbsp;values,&nbsp;or&nbsp;if&nbsp;`minlength`&nbsp;is&nbsp;negative.<br>
+TypeError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;type&nbsp;of&nbsp;the&nbsp;input&nbsp;is&nbsp;float&nbsp;or&nbsp;complex.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+histogram,&nbsp;digitize,&nbsp;unique<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-bincount">bincount</a>(np.<a href="#-arange">arange</a>(5))<br>
+<a href="#-array">array</a>([1,&nbsp;1,&nbsp;1,&nbsp;1,&nbsp;1])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-bincount">bincount</a>(np.<a href="#-array">array</a>([0,&nbsp;1,&nbsp;1,&nbsp;3,&nbsp;2,&nbsp;1,&nbsp;7]))<br>
+<a href="#-array">array</a>([1,&nbsp;3,&nbsp;1,&nbsp;1,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;1])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-array">array</a>([0,&nbsp;1,&nbsp;1,&nbsp;3,&nbsp;2,&nbsp;1,&nbsp;7,&nbsp;23])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-bincount">bincount</a>(x).size&nbsp;==&nbsp;np.amax(x)+1<br>
+True<br>
+&nbsp;<br>
+The&nbsp;input&nbsp;array&nbsp;needs&nbsp;to&nbsp;be&nbsp;of&nbsp;integer&nbsp;dtype,&nbsp;otherwise&nbsp;a<br>
+TypeError&nbsp;is&nbsp;raised:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-bincount">bincount</a>(np.<a href="#-arange">arange</a>(5,&nbsp;dtype=float))<br>
+Traceback&nbsp;(most&nbsp;recent&nbsp;call&nbsp;last):<br>
+&nbsp;&nbsp;File&nbsp;"&lt;stdin&gt;",&nbsp;line&nbsp;1,&nbsp;in&nbsp;&lt;module&gt;<br>
+TypeError:&nbsp;array&nbsp;cannot&nbsp;be&nbsp;safely&nbsp;cast&nbsp;to&nbsp;required&nbsp;type<br>
+&nbsp;<br>
+A&nbsp;possible&nbsp;use&nbsp;of&nbsp;``bincount``&nbsp;is&nbsp;to&nbsp;perform&nbsp;sums&nbsp;over<br>
+variable-size&nbsp;chunks&nbsp;of&nbsp;an&nbsp;array,&nbsp;using&nbsp;the&nbsp;``weights``&nbsp;keyword.<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;w&nbsp;=&nbsp;np.<a href="#-array">array</a>([0.3,&nbsp;0.5,&nbsp;0.2,&nbsp;0.7,&nbsp;1.,&nbsp;-0.6])&nbsp;#&nbsp;weights<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-array">array</a>([0,&nbsp;1,&nbsp;1,&nbsp;2,&nbsp;2,&nbsp;2])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-bincount">bincount</a>(x,&nbsp;&nbsp;weights=w)<br>
+<a href="#-array">array</a>([&nbsp;0.3,&nbsp;&nbsp;0.7,&nbsp;&nbsp;1.1])</tt></dd></dl>
+ <dl><dt><a name="-busday_count"><strong>busday_count</strong></a>(...)</dt><dd><tt><a href="#-busday_count">busday_count</a>(begindates,&nbsp;enddates,&nbsp;weekmask='1111100',&nbsp;holidays=[],&nbsp;busdaycal=None,&nbsp;out=None)<br>
+&nbsp;<br>
+Counts&nbsp;the&nbsp;number&nbsp;of&nbsp;valid&nbsp;days&nbsp;between&nbsp;`begindates`&nbsp;and<br>
+`enddates`,&nbsp;not&nbsp;including&nbsp;the&nbsp;day&nbsp;of&nbsp;`enddates`.<br>
+&nbsp;<br>
+If&nbsp;``enddates``&nbsp;specifies&nbsp;a&nbsp;date&nbsp;value&nbsp;that&nbsp;is&nbsp;earlier&nbsp;than&nbsp;the<br>
+corresponding&nbsp;``begindates``&nbsp;date&nbsp;value,&nbsp;the&nbsp;count&nbsp;will&nbsp;be&nbsp;negative.<br>
+&nbsp;<br>
+..&nbsp;versionadded::&nbsp;1.7.0<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+begindates&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;of&nbsp;the&nbsp;first&nbsp;dates&nbsp;for&nbsp;counting.<br>
+enddates&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;of&nbsp;the&nbsp;end&nbsp;dates&nbsp;for&nbsp;counting,&nbsp;which&nbsp;are&nbsp;excluded<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;count&nbsp;themselves.<br>
+weekmask&nbsp;:&nbsp;str&nbsp;or&nbsp;array_like&nbsp;of&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;seven-element&nbsp;array&nbsp;indicating&nbsp;which&nbsp;of&nbsp;Monday&nbsp;through&nbsp;Sunday&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;valid&nbsp;days.&nbsp;May&nbsp;be&nbsp;specified&nbsp;as&nbsp;a&nbsp;length-seven&nbsp;list&nbsp;or&nbsp;array,&nbsp;like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[1,1,1,1,1,0,0];&nbsp;a&nbsp;length-seven&nbsp;string,&nbsp;like&nbsp;'1111100';&nbsp;or&nbsp;a&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;"Mon&nbsp;Tue&nbsp;Wed&nbsp;Thu&nbsp;Fri",&nbsp;made&nbsp;up&nbsp;of&nbsp;3-character&nbsp;abbreviations&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;weekdays,&nbsp;optionally&nbsp;separated&nbsp;by&nbsp;white&nbsp;space.&nbsp;Valid&nbsp;abbreviations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;are:&nbsp;Mon&nbsp;Tue&nbsp;Wed&nbsp;Thu&nbsp;Fri&nbsp;Sat&nbsp;Sun<br>
+holidays&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D],&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;dates&nbsp;to&nbsp;consider&nbsp;as&nbsp;invalid&nbsp;dates.&nbsp;&nbsp;They&nbsp;may&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;specified&nbsp;in&nbsp;any&nbsp;order,&nbsp;and&nbsp;NaT&nbsp;(not-a-time)&nbsp;dates&nbsp;are&nbsp;ignored.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;list&nbsp;is&nbsp;saved&nbsp;in&nbsp;a&nbsp;normalized&nbsp;form&nbsp;that&nbsp;is&nbsp;suited&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fast&nbsp;calculations&nbsp;of&nbsp;valid&nbsp;days.<br>
+busdaycal&nbsp;:&nbsp;busdaycalendar,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;`busdaycalendar`&nbsp;object&nbsp;which&nbsp;specifies&nbsp;the&nbsp;valid&nbsp;days.&nbsp;If&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parameter&nbsp;is&nbsp;provided,&nbsp;neither&nbsp;weekmask&nbsp;nor&nbsp;holidays&nbsp;may&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;provided.<br>
+out&nbsp;:&nbsp;array&nbsp;of&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;this&nbsp;array&nbsp;is&nbsp;filled&nbsp;with&nbsp;the&nbsp;result.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;array&nbsp;of&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;with&nbsp;a&nbsp;shape&nbsp;from&nbsp;broadcasting&nbsp;``begindates``&nbsp;and&nbsp;``enddates``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;together,&nbsp;containing&nbsp;the&nbsp;number&nbsp;of&nbsp;valid&nbsp;days&nbsp;between<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;begin&nbsp;and&nbsp;end&nbsp;dates.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+busdaycalendar:&nbsp;An&nbsp;object&nbsp;that&nbsp;specifies&nbsp;a&nbsp;custom&nbsp;set&nbsp;of&nbsp;valid&nbsp;days.<br>
+is_busday&nbsp;:&nbsp;Returns&nbsp;a&nbsp;boolean&nbsp;array&nbsp;indicating&nbsp;valid&nbsp;days.<br>
+busday_offset&nbsp;:&nbsp;Applies&nbsp;an&nbsp;offset&nbsp;counted&nbsp;in&nbsp;valid&nbsp;days.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;Number&nbsp;of&nbsp;weekdays&nbsp;in&nbsp;January&nbsp;2011<br>
+...&nbsp;np.<a href="#-busday_count">busday_count</a>('2011-01',&nbsp;'2011-02')<br>
+21<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;Number&nbsp;of&nbsp;weekdays&nbsp;in&nbsp;2011<br>
+...&nbsp;&nbsp;np.<a href="#-busday_count">busday_count</a>('2011',&nbsp;'2012')<br>
+260<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;Number&nbsp;of&nbsp;Saturdays&nbsp;in&nbsp;2011<br>
+...&nbsp;np.<a href="#-busday_count">busday_count</a>('2011',&nbsp;'2012',&nbsp;weekmask='Sat')<br>
+53</tt></dd></dl>
+ <dl><dt><a name="-busday_offset"><strong>busday_offset</strong></a>(...)</dt><dd><tt><a href="#-busday_offset">busday_offset</a>(dates,&nbsp;offsets,&nbsp;roll='raise',&nbsp;weekmask='1111100',&nbsp;holidays=None,&nbsp;busdaycal=None,&nbsp;out=None)<br>
+&nbsp;<br>
+First&nbsp;adjusts&nbsp;the&nbsp;date&nbsp;to&nbsp;fall&nbsp;on&nbsp;a&nbsp;valid&nbsp;day&nbsp;according&nbsp;to<br>
+the&nbsp;``roll``&nbsp;rule,&nbsp;then&nbsp;applies&nbsp;offsets&nbsp;to&nbsp;the&nbsp;given&nbsp;dates<br>
+counted&nbsp;in&nbsp;valid&nbsp;days.<br>
+&nbsp;<br>
+..&nbsp;versionadded::&nbsp;1.7.0<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+dates&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;of&nbsp;dates&nbsp;to&nbsp;process.<br>
+offsets&nbsp;:&nbsp;array_like&nbsp;of&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;of&nbsp;offsets,&nbsp;which&nbsp;is&nbsp;broadcast&nbsp;with&nbsp;``dates``.<br>
+roll&nbsp;:&nbsp;{'raise',&nbsp;'nat',&nbsp;'forward',&nbsp;'following',&nbsp;'backward',&nbsp;'preceding',&nbsp;'modifiedfollowing',&nbsp;'modifiedpreceding'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;How&nbsp;to&nbsp;treat&nbsp;dates&nbsp;that&nbsp;do&nbsp;not&nbsp;fall&nbsp;on&nbsp;a&nbsp;valid&nbsp;day.&nbsp;The&nbsp;default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;'raise'.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'raise'&nbsp;means&nbsp;to&nbsp;raise&nbsp;an&nbsp;exception&nbsp;for&nbsp;an&nbsp;invalid&nbsp;day.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'nat'&nbsp;means&nbsp;to&nbsp;return&nbsp;a&nbsp;NaT&nbsp;(not-a-time)&nbsp;for&nbsp;an&nbsp;invalid&nbsp;day.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'forward'&nbsp;and&nbsp;'following'&nbsp;mean&nbsp;to&nbsp;take&nbsp;the&nbsp;first&nbsp;valid&nbsp;day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;later&nbsp;in&nbsp;time.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'backward'&nbsp;and&nbsp;'preceding'&nbsp;mean&nbsp;to&nbsp;take&nbsp;the&nbsp;first&nbsp;valid&nbsp;day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;earlier&nbsp;in&nbsp;time.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'modifiedfollowing'&nbsp;means&nbsp;to&nbsp;take&nbsp;the&nbsp;first&nbsp;valid&nbsp;day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;later&nbsp;in&nbsp;time&nbsp;unless&nbsp;it&nbsp;is&nbsp;across&nbsp;a&nbsp;Month&nbsp;boundary,&nbsp;in&nbsp;which<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;to&nbsp;take&nbsp;the&nbsp;first&nbsp;valid&nbsp;day&nbsp;earlier&nbsp;in&nbsp;time.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'modifiedpreceding'&nbsp;means&nbsp;to&nbsp;take&nbsp;the&nbsp;first&nbsp;valid&nbsp;day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;earlier&nbsp;in&nbsp;time&nbsp;unless&nbsp;it&nbsp;is&nbsp;across&nbsp;a&nbsp;Month&nbsp;boundary,&nbsp;in&nbsp;which<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;to&nbsp;take&nbsp;the&nbsp;first&nbsp;valid&nbsp;day&nbsp;later&nbsp;in&nbsp;time.<br>
+weekmask&nbsp;:&nbsp;str&nbsp;or&nbsp;array_like&nbsp;of&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;seven-element&nbsp;array&nbsp;indicating&nbsp;which&nbsp;of&nbsp;Monday&nbsp;through&nbsp;Sunday&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;valid&nbsp;days.&nbsp;May&nbsp;be&nbsp;specified&nbsp;as&nbsp;a&nbsp;length-seven&nbsp;list&nbsp;or&nbsp;array,&nbsp;like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[1,1,1,1,1,0,0];&nbsp;a&nbsp;length-seven&nbsp;string,&nbsp;like&nbsp;'1111100';&nbsp;or&nbsp;a&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;"Mon&nbsp;Tue&nbsp;Wed&nbsp;Thu&nbsp;Fri",&nbsp;made&nbsp;up&nbsp;of&nbsp;3-character&nbsp;abbreviations&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;weekdays,&nbsp;optionally&nbsp;separated&nbsp;by&nbsp;white&nbsp;space.&nbsp;Valid&nbsp;abbreviations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;are:&nbsp;Mon&nbsp;Tue&nbsp;Wed&nbsp;Thu&nbsp;Fri&nbsp;Sat&nbsp;Sun<br>
+holidays&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D],&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;dates&nbsp;to&nbsp;consider&nbsp;as&nbsp;invalid&nbsp;dates.&nbsp;&nbsp;They&nbsp;may&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;specified&nbsp;in&nbsp;any&nbsp;order,&nbsp;and&nbsp;NaT&nbsp;(not-a-time)&nbsp;dates&nbsp;are&nbsp;ignored.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;list&nbsp;is&nbsp;saved&nbsp;in&nbsp;a&nbsp;normalized&nbsp;form&nbsp;that&nbsp;is&nbsp;suited&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fast&nbsp;calculations&nbsp;of&nbsp;valid&nbsp;days.<br>
+busdaycal&nbsp;:&nbsp;busdaycalendar,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;`busdaycalendar`&nbsp;object&nbsp;which&nbsp;specifies&nbsp;the&nbsp;valid&nbsp;days.&nbsp;If&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parameter&nbsp;is&nbsp;provided,&nbsp;neither&nbsp;weekmask&nbsp;nor&nbsp;holidays&nbsp;may&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;provided.<br>
+out&nbsp;:&nbsp;array&nbsp;of&nbsp;datetime64[D],&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;this&nbsp;array&nbsp;is&nbsp;filled&nbsp;with&nbsp;the&nbsp;result.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;array&nbsp;of&nbsp;datetime64[D]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;with&nbsp;a&nbsp;shape&nbsp;from&nbsp;broadcasting&nbsp;``dates``&nbsp;and&nbsp;``offsets``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;together,&nbsp;containing&nbsp;the&nbsp;dates&nbsp;with&nbsp;offsets&nbsp;applied.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+busdaycalendar:&nbsp;An&nbsp;object&nbsp;that&nbsp;specifies&nbsp;a&nbsp;custom&nbsp;set&nbsp;of&nbsp;valid&nbsp;days.<br>
+is_busday&nbsp;:&nbsp;Returns&nbsp;a&nbsp;boolean&nbsp;array&nbsp;indicating&nbsp;valid&nbsp;days.<br>
+busday_count&nbsp;:&nbsp;Counts&nbsp;how&nbsp;many&nbsp;valid&nbsp;days&nbsp;are&nbsp;in&nbsp;a&nbsp;half-open&nbsp;date&nbsp;range.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;First&nbsp;business&nbsp;day&nbsp;in&nbsp;October&nbsp;2011&nbsp;(not&nbsp;accounting&nbsp;for&nbsp;holidays)<br>
+...&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2011-10',&nbsp;0,&nbsp;roll='forward')<br>
+numpy.datetime64('2011-10-03','D')<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;Last&nbsp;business&nbsp;day&nbsp;in&nbsp;February&nbsp;2012&nbsp;(not&nbsp;accounting&nbsp;for&nbsp;holidays)<br>
+...&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2012-03',&nbsp;-1,&nbsp;roll='forward')<br>
+numpy.datetime64('2012-02-29','D')<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;Third&nbsp;Wednesday&nbsp;in&nbsp;January&nbsp;2011<br>
+...&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2011-01',&nbsp;2,&nbsp;roll='forward',&nbsp;weekmask='Wed')<br>
+numpy.datetime64('2011-01-19','D')<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;2012&nbsp;Mother's&nbsp;Day&nbsp;in&nbsp;Canada&nbsp;and&nbsp;the&nbsp;U.S.<br>
+...&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2012-05',&nbsp;1,&nbsp;roll='forward',&nbsp;weekmask='Sun')<br>
+numpy.datetime64('2012-05-13','D')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;First&nbsp;business&nbsp;day&nbsp;on&nbsp;or&nbsp;after&nbsp;a&nbsp;date<br>
+...&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2011-03-20',&nbsp;0,&nbsp;roll='forward')<br>
+numpy.datetime64('2011-03-21','D')<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2011-03-22',&nbsp;0,&nbsp;roll='forward')<br>
+numpy.datetime64('2011-03-22','D')<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;First&nbsp;business&nbsp;day&nbsp;after&nbsp;a&nbsp;date<br>
+...&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2011-03-20',&nbsp;1,&nbsp;roll='backward')<br>
+numpy.datetime64('2011-03-21','D')<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-busday_offset">busday_offset</a>('2011-03-22',&nbsp;1,&nbsp;roll='backward')<br>
+numpy.datetime64('2011-03-23','D')</tt></dd></dl>
+ <dl><dt><a name="-can_cast"><strong>can_cast</strong></a>(...)</dt><dd><tt><a href="#-can_cast">can_cast</a>(from_,&nbsp;to,&nbsp;casting='safe')<br>
+&nbsp;<br>
+Returns&nbsp;True&nbsp;if&nbsp;cast&nbsp;between&nbsp;data&nbsp;types&nbsp;can&nbsp;occur&nbsp;according&nbsp;to&nbsp;the<br>
+casting&nbsp;rule.&nbsp;&nbsp;If&nbsp;from&nbsp;is&nbsp;a&nbsp;scalar&nbsp;or&nbsp;array&nbsp;scalar,&nbsp;also&nbsp;returns<br>
+True&nbsp;if&nbsp;the&nbsp;scalar&nbsp;value&nbsp;can&nbsp;be&nbsp;cast&nbsp;without&nbsp;overflow&nbsp;or&nbsp;truncation<br>
+to&nbsp;an&nbsp;integer.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+from_&nbsp;:&nbsp;dtype,&nbsp;dtype&nbsp;specifier,&nbsp;scalar,&nbsp;or&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;type,&nbsp;scalar,&nbsp;or&nbsp;array&nbsp;to&nbsp;cast&nbsp;from.<br>
+to&nbsp;:&nbsp;dtype&nbsp;or&nbsp;dtype&nbsp;specifier<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;type&nbsp;to&nbsp;cast&nbsp;to.<br>
+casting&nbsp;:&nbsp;{'no',&nbsp;'equiv',&nbsp;'safe',&nbsp;'same_kind',&nbsp;'unsafe'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Controls&nbsp;what&nbsp;kind&nbsp;of&nbsp;data&nbsp;casting&nbsp;may&nbsp;occur.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'no'&nbsp;means&nbsp;the&nbsp;data&nbsp;types&nbsp;should&nbsp;not&nbsp;be&nbsp;cast&nbsp;at&nbsp;all.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'equiv'&nbsp;means&nbsp;only&nbsp;byte-order&nbsp;changes&nbsp;are&nbsp;allowed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'safe'&nbsp;means&nbsp;only&nbsp;casts&nbsp;which&nbsp;can&nbsp;preserve&nbsp;values&nbsp;are&nbsp;allowed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'same_kind'&nbsp;means&nbsp;only&nbsp;safe&nbsp;casts&nbsp;or&nbsp;casts&nbsp;within&nbsp;a&nbsp;kind,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;float64&nbsp;to&nbsp;float32,&nbsp;are&nbsp;allowed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'unsafe'&nbsp;means&nbsp;any&nbsp;data&nbsp;conversions&nbsp;may&nbsp;be&nbsp;done.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;True&nbsp;if&nbsp;cast&nbsp;can&nbsp;occur&nbsp;according&nbsp;to&nbsp;the&nbsp;casting&nbsp;rule.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+Starting&nbsp;in&nbsp;NumPy&nbsp;1.9,&nbsp;can_cast&nbsp;function&nbsp;now&nbsp;returns&nbsp;False&nbsp;in&nbsp;'safe'<br>
+casting&nbsp;mode&nbsp;for&nbsp;integer/float&nbsp;dtype&nbsp;and&nbsp;string&nbsp;dtype&nbsp;if&nbsp;the&nbsp;string&nbsp;dtype<br>
+length&nbsp;is&nbsp;not&nbsp;long&nbsp;enough&nbsp;to&nbsp;store&nbsp;the&nbsp;max&nbsp;integer/float&nbsp;value&nbsp;converted<br>
+to&nbsp;a&nbsp;string.&nbsp;Previously&nbsp;can_cast&nbsp;in&nbsp;'safe'&nbsp;mode&nbsp;returned&nbsp;True&nbsp;for<br>
+integer/float&nbsp;dtype&nbsp;and&nbsp;a&nbsp;string&nbsp;dtype&nbsp;of&nbsp;any&nbsp;length.<br>
+&nbsp;<br>
+See&nbsp;also<br>
+--------<br>
+dtype,&nbsp;result_type<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+Basic&nbsp;examples<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(np.int32,&nbsp;np.int64)<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(np.float64,&nbsp;complex)<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(complex,&nbsp;float)<br>
+False<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('i8',&nbsp;'f8')<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('i8',&nbsp;'f4')<br>
+False<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('i4',&nbsp;'S4')<br>
+False<br>
+&nbsp;<br>
+Casting&nbsp;scalars<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(100,&nbsp;'i1')<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(150,&nbsp;'i1')<br>
+False<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(150,&nbsp;'u1')<br>
+True<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(3.5e100,&nbsp;np.float32)<br>
+False<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(1000.0,&nbsp;np.float32)<br>
+True<br>
+&nbsp;<br>
+Array&nbsp;scalar&nbsp;checks&nbsp;the&nbsp;value,&nbsp;array&nbsp;does&nbsp;not<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(np.<a href="#-array">array</a>(1000.0),&nbsp;np.float32)<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>(np.<a href="#-array">array</a>([1000.0]),&nbsp;np.float32)<br>
+False<br>
+&nbsp;<br>
+Using&nbsp;the&nbsp;casting&nbsp;rules<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('i8',&nbsp;'i8',&nbsp;'no')<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i8',&nbsp;'&gt;i8',&nbsp;'no')<br>
+False<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i8',&nbsp;'&gt;i8',&nbsp;'equiv')<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i4',&nbsp;'&gt;i8',&nbsp;'equiv')<br>
+False<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i4',&nbsp;'&gt;i8',&nbsp;'safe')<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i8',&nbsp;'&gt;i4',&nbsp;'safe')<br>
+False<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i8',&nbsp;'&gt;i4',&nbsp;'same_kind')<br>
+True<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i8',&nbsp;'&gt;u4',&nbsp;'same_kind')<br>
+False<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-can_cast">can_cast</a>('&lt;i8',&nbsp;'&gt;u4',&nbsp;'unsafe')<br>
+True</tt></dd></dl>
+ <dl><dt><a name="-cleanse"><strong>cleanse</strong></a>(basename)</dt><dd><tt>Remove&nbsp;a&nbsp;preexistigng&nbsp;set&nbsp;of&nbsp;files&nbsp;with&nbsp;the&nbsp;<br>
+same&nbsp;name</tt></dd></dl>
+ <dl><dt><a name="-compare_chararrays"><strong>compare_chararrays</strong></a>(...)</dt><dd><tt><a href="#-compare_chararrays">compare_chararrays</a>(a,&nbsp;b,&nbsp;cmp_op,&nbsp;rstrip)<br>
+&nbsp;<br>
+Performs&nbsp;element-wise&nbsp;comparison&nbsp;of&nbsp;two&nbsp;string&nbsp;arrays&nbsp;using&nbsp;the<br>
+comparison&nbsp;operator&nbsp;specified&nbsp;by&nbsp;`cmp_op`.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a,&nbsp;b&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Arrays&nbsp;to&nbsp;be&nbsp;compared.<br>
+cmp_op&nbsp;:&nbsp;{"&lt;",&nbsp;"&lt;=",&nbsp;"==",&nbsp;"&gt;=",&nbsp;"&gt;",&nbsp;"!="}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;of&nbsp;comparison.<br>
+rstrip&nbsp;:&nbsp;Boolean<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;the&nbsp;spaces&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;Strings&nbsp;are&nbsp;removed&nbsp;before&nbsp;the&nbsp;comparison.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;output&nbsp;array&nbsp;of&nbsp;type&nbsp;Boolean&nbsp;with&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;a&nbsp;and&nbsp;b.<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+ValueError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;`cmp_op`&nbsp;is&nbsp;not&nbsp;valid.<br>
+TypeError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;at&nbsp;least&nbsp;one&nbsp;of&nbsp;`a`&nbsp;or&nbsp;`b`&nbsp;is&nbsp;a&nbsp;non-string&nbsp;array<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>(["a",&nbsp;"b",&nbsp;"cde"])<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-array">array</a>(["a",&nbsp;"a",&nbsp;"dec"])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-compare_chararrays">compare_chararrays</a>(a,&nbsp;b,&nbsp;"&gt;",&nbsp;True)<br>
+<a href="#-array">array</a>([False,&nbsp;&nbsp;True,&nbsp;False])</tt></dd></dl>
+ <dl><dt><a name="-concatenate"><strong>concatenate</strong></a>(...)</dt><dd><tt><a href="#-concatenate">concatenate</a>((a1,&nbsp;a2,&nbsp;...),&nbsp;axis=0,&nbsp;out=None)<br>
+&nbsp;<br>
+Join&nbsp;a&nbsp;sequence&nbsp;of&nbsp;arrays&nbsp;along&nbsp;an&nbsp;existing&nbsp;axis.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a1,&nbsp;a2,&nbsp;...&nbsp;:&nbsp;sequence&nbsp;of&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;arrays&nbsp;must&nbsp;have&nbsp;the&nbsp;same&nbsp;shape,&nbsp;except&nbsp;in&nbsp;the&nbsp;dimension<br>
+&nbsp;&nbsp;&nbsp;&nbsp;corresponding&nbsp;to&nbsp;`axis`&nbsp;(the&nbsp;first,&nbsp;by&nbsp;default).<br>
+axis&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;axis&nbsp;along&nbsp;which&nbsp;the&nbsp;arrays&nbsp;will&nbsp;be&nbsp;joined.&nbsp;&nbsp;If&nbsp;axis&nbsp;is&nbsp;None,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;arrays&nbsp;are&nbsp;flattened&nbsp;before&nbsp;use.&nbsp;&nbsp;Default&nbsp;is&nbsp;0.<br>
+out&nbsp;:&nbsp;ndarray,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;the&nbsp;destination&nbsp;to&nbsp;place&nbsp;the&nbsp;result.&nbsp;The&nbsp;shape&nbsp;must&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;correct,&nbsp;matching&nbsp;that&nbsp;of&nbsp;what&nbsp;concatenate&nbsp;would&nbsp;have&nbsp;returned&nbsp;if&nbsp;no<br>
+&nbsp;&nbsp;&nbsp;&nbsp;out&nbsp;argument&nbsp;were&nbsp;specified.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+res&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;concatenated&nbsp;array.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+ma.concatenate&nbsp;:&nbsp;Concatenate&nbsp;function&nbsp;that&nbsp;preserves&nbsp;input&nbsp;masks.<br>
+array_split&nbsp;:&nbsp;Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;of&nbsp;equal&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;near-equal&nbsp;size.<br>
+split&nbsp;:&nbsp;Split&nbsp;array&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;multiple&nbsp;sub-arrays&nbsp;of&nbsp;equal&nbsp;size.<br>
+hsplit&nbsp;:&nbsp;Split&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;horizontally&nbsp;(column&nbsp;wise)<br>
+vsplit&nbsp;:&nbsp;Split&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;vertically&nbsp;(row&nbsp;wise)<br>
+dsplit&nbsp;:&nbsp;Split&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;along&nbsp;the&nbsp;3rd&nbsp;axis&nbsp;(depth).<br>
+stack&nbsp;:&nbsp;Stack&nbsp;a&nbsp;sequence&nbsp;of&nbsp;arrays&nbsp;along&nbsp;a&nbsp;new&nbsp;axis.<br>
+hstack&nbsp;:&nbsp;Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;horizontally&nbsp;(column&nbsp;wise)<br>
+vstack&nbsp;:&nbsp;Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;vertically&nbsp;(row&nbsp;wise)<br>
+dstack&nbsp;:&nbsp;Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;depth&nbsp;wise&nbsp;(along&nbsp;third&nbsp;dimension)<br>
+block&nbsp;:&nbsp;Assemble&nbsp;arrays&nbsp;from&nbsp;blocks.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+When&nbsp;one&nbsp;or&nbsp;more&nbsp;of&nbsp;the&nbsp;arrays&nbsp;to&nbsp;be&nbsp;concatenated&nbsp;is&nbsp;a&nbsp;MaskedArray,<br>
+this&nbsp;function&nbsp;will&nbsp;return&nbsp;a&nbsp;MaskedArray&nbsp;object&nbsp;instead&nbsp;of&nbsp;an&nbsp;ndarray,<br>
+but&nbsp;the&nbsp;input&nbsp;masks&nbsp;are&nbsp;*not*&nbsp;preserved.&nbsp;In&nbsp;cases&nbsp;where&nbsp;a&nbsp;MaskedArray<br>
+is&nbsp;expected&nbsp;as&nbsp;input,&nbsp;use&nbsp;the&nbsp;ma.concatenate&nbsp;function&nbsp;from&nbsp;the&nbsp;masked<br>
+array&nbsp;module&nbsp;instead.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([[1,&nbsp;2],&nbsp;[3,&nbsp;4]])<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-array">array</a>([[5,&nbsp;6]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-concatenate">concatenate</a>((a,&nbsp;b),&nbsp;axis=0)<br>
+<a href="#-array">array</a>([[1,&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;4],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[5,&nbsp;6]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-concatenate">concatenate</a>((a,&nbsp;b.T),&nbsp;axis=1)<br>
+<a href="#-array">array</a>([[1,&nbsp;2,&nbsp;5],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;4,&nbsp;6]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-concatenate">concatenate</a>((a,&nbsp;b),&nbsp;axis=None)<br>
+<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3,&nbsp;4,&nbsp;5,&nbsp;6])<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;will&nbsp;not&nbsp;preserve&nbsp;masking&nbsp;of&nbsp;MaskedArray&nbsp;inputs.<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.ma.<a href="#-arange">arange</a>(3)<br>
+&gt;&gt;&gt;&nbsp;a[1]&nbsp;=&nbsp;np.ma.masked<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(2,&nbsp;5)<br>
+&gt;&gt;&gt;&nbsp;a<br>
+masked_array(data=[0,&nbsp;--,&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mask=[False,&nbsp;&nbsp;True,&nbsp;False],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fill_value=999999)<br>
+&gt;&gt;&gt;&nbsp;b<br>
+<a href="#-array">array</a>([2,&nbsp;3,&nbsp;4])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-concatenate">concatenate</a>([a,&nbsp;b])<br>
+masked_array(data=[0,&nbsp;1,&nbsp;2,&nbsp;2,&nbsp;3,&nbsp;4],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mask=False,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fill_value=999999)<br>
+&gt;&gt;&gt;&nbsp;np.ma.<a href="#-concatenate">concatenate</a>([a,&nbsp;b])<br>
+masked_array(data=[0,&nbsp;--,&nbsp;2,&nbsp;2,&nbsp;3,&nbsp;4],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mask=[False,&nbsp;&nbsp;True,&nbsp;False,&nbsp;False,&nbsp;False,&nbsp;False],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fill_value=999999)</tt></dd></dl>
+ <dl><dt><a name="-copyto"><strong>copyto</strong></a>(...)</dt><dd><tt><a href="#-copyto">copyto</a>(dst,&nbsp;src,&nbsp;casting='same_kind',&nbsp;where=True)<br>
+&nbsp;<br>
+Copies&nbsp;values&nbsp;from&nbsp;one&nbsp;array&nbsp;to&nbsp;another,&nbsp;broadcasting&nbsp;as&nbsp;necessary.<br>
+&nbsp;<br>
+Raises&nbsp;a&nbsp;TypeError&nbsp;if&nbsp;the&nbsp;`casting`&nbsp;rule&nbsp;is&nbsp;violated,&nbsp;and&nbsp;if<br>
+`where`&nbsp;is&nbsp;provided,&nbsp;it&nbsp;selects&nbsp;which&nbsp;elements&nbsp;to&nbsp;copy.<br>
+&nbsp;<br>
+..&nbsp;versionadded::&nbsp;1.7.0<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+dst&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;into&nbsp;which&nbsp;values&nbsp;are&nbsp;copied.<br>
+src&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;from&nbsp;which&nbsp;values&nbsp;are&nbsp;copied.<br>
+casting&nbsp;:&nbsp;{'no',&nbsp;'equiv',&nbsp;'safe',&nbsp;'same_kind',&nbsp;'unsafe'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Controls&nbsp;what&nbsp;kind&nbsp;of&nbsp;data&nbsp;casting&nbsp;may&nbsp;occur&nbsp;when&nbsp;copying.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'no'&nbsp;means&nbsp;the&nbsp;data&nbsp;types&nbsp;should&nbsp;not&nbsp;be&nbsp;cast&nbsp;at&nbsp;all.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'equiv'&nbsp;means&nbsp;only&nbsp;byte-order&nbsp;changes&nbsp;are&nbsp;allowed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'safe'&nbsp;means&nbsp;only&nbsp;casts&nbsp;which&nbsp;can&nbsp;preserve&nbsp;values&nbsp;are&nbsp;allowed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'same_kind'&nbsp;means&nbsp;only&nbsp;safe&nbsp;casts&nbsp;or&nbsp;casts&nbsp;within&nbsp;a&nbsp;kind,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;float64&nbsp;to&nbsp;float32,&nbsp;are&nbsp;allowed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'unsafe'&nbsp;means&nbsp;any&nbsp;data&nbsp;conversions&nbsp;may&nbsp;be&nbsp;done.<br>
+where&nbsp;:&nbsp;array_like&nbsp;of&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;boolean&nbsp;array&nbsp;which&nbsp;is&nbsp;broadcasted&nbsp;to&nbsp;match&nbsp;the&nbsp;dimensions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;`dst`,&nbsp;and&nbsp;selects&nbsp;elements&nbsp;to&nbsp;copy&nbsp;from&nbsp;`src`&nbsp;to&nbsp;`dst`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wherever&nbsp;it&nbsp;contains&nbsp;the&nbsp;value&nbsp;True.</tt></dd></dl>
+ <dl><dt><a name="-create_parameter_files"><strong>create_parameter_files</strong></a>(basename, names, lines, z)</dt><dd><tt>Actually&nbsp;create&nbsp;the&nbsp;paameter&nbsp;files<br>
+&nbsp;<br>
+where:<br>
+names&nbsp;are&nbsp;the&nbsp;number&nbsp;portions&nbsp;of&nbsp;the&nbsp;names<br>
+lines&nbsp;contains&nbsp;the&nbsp;original&nbsp;parmeter&nbsp;fiels<br>
+z&nbsp;contains&nbsp;the&nbsp;values</tt></dd></dl>
+ <dl><dt><a name="-create_runfile"><strong>create_runfile</strong></a>(basename, names)</dt><dd><tt>Create&nbsp;a&nbsp;file&nbsp;which&nbsp;can&nbsp;be&nbsp;sourced&nbsp;to&nbsp;run&nbsp;all&nbsp;the<br>
+models</tt></dd></dl>
+ <dl><dt><a name="-datetime_as_string"><strong>datetime_as_string</strong></a>(...)</dt><dd><tt><a href="#-datetime_as_string">datetime_as_string</a>(arr,&nbsp;unit=None,&nbsp;timezone='naive',&nbsp;casting='same_kind')<br>
+&nbsp;<br>
+Convert&nbsp;an&nbsp;array&nbsp;of&nbsp;datetimes&nbsp;into&nbsp;an&nbsp;array&nbsp;of&nbsp;strings.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+arr&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;of&nbsp;UTC&nbsp;timestamps&nbsp;to&nbsp;format.<br>
+unit&nbsp;:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;One&nbsp;of&nbsp;None,&nbsp;'auto',&nbsp;or&nbsp;a&nbsp;:ref:`datetime&nbsp;unit&nbsp;&lt;arrays.dtypes.dateunits&gt;`.<br>
+timezone&nbsp;:&nbsp;{'naive',&nbsp;'UTC',&nbsp;'local'}&nbsp;or&nbsp;tzinfo<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Timezone&nbsp;information&nbsp;to&nbsp;use&nbsp;when&nbsp;displaying&nbsp;the&nbsp;datetime.&nbsp;If&nbsp;'UTC',&nbsp;end<br>
+&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;a&nbsp;Z&nbsp;to&nbsp;indicate&nbsp;UTC&nbsp;time.&nbsp;If&nbsp;'local',&nbsp;convert&nbsp;to&nbsp;the&nbsp;local&nbsp;timezone<br>
+&nbsp;&nbsp;&nbsp;&nbsp;first,&nbsp;and&nbsp;suffix&nbsp;with&nbsp;a&nbsp;+-####&nbsp;timezone&nbsp;offset.&nbsp;If&nbsp;a&nbsp;tzinfo&nbsp;object,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;do&nbsp;as&nbsp;with&nbsp;'local',&nbsp;but&nbsp;use&nbsp;the&nbsp;specified&nbsp;timezone.<br>
+casting&nbsp;:&nbsp;{'no',&nbsp;'equiv',&nbsp;'safe',&nbsp;'same_kind',&nbsp;'unsafe'}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Casting&nbsp;to&nbsp;allow&nbsp;when&nbsp;changing&nbsp;between&nbsp;datetime&nbsp;units.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+str_arr&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;strings&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;`arr`.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;d&nbsp;=&nbsp;np.<a href="#-arange">arange</a>('2002-10-27T04:30',&nbsp;4*60,&nbsp;60,&nbsp;dtype='M8[m]')<br>
+&gt;&gt;&gt;&nbsp;d<br>
+<a href="#-array">array</a>(['2002-10-27T04:30',&nbsp;'2002-10-27T05:30',&nbsp;'2002-10-27T06:30',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'2002-10-27T07:30'],&nbsp;dtype='datetime64[m]')<br>
+&nbsp;<br>
+Setting&nbsp;the&nbsp;timezone&nbsp;to&nbsp;UTC&nbsp;shows&nbsp;the&nbsp;same&nbsp;information,&nbsp;but&nbsp;with&nbsp;a&nbsp;Z&nbsp;suffix<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-datetime_as_string">datetime_as_string</a>(d,&nbsp;timezone='UTC')<br>
+<a href="#-array">array</a>(['2002-10-27T04:30Z',&nbsp;'2002-10-27T05:30Z',&nbsp;'2002-10-27T06:30Z',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'2002-10-27T07:30Z'],&nbsp;dtype='&lt;U35')<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;we&nbsp;picked&nbsp;datetimes&nbsp;that&nbsp;cross&nbsp;a&nbsp;DST&nbsp;boundary.&nbsp;Passing&nbsp;in&nbsp;a<br>
+``pytz``&nbsp;timezone&nbsp;object&nbsp;will&nbsp;print&nbsp;the&nbsp;appropriate&nbsp;offset<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-datetime_as_string">datetime_as_string</a>(d,&nbsp;timezone=pytz.timezone('US/Eastern'))<br>
+<a href="#-array">array</a>(['2002-10-27T00:30-0400',&nbsp;'2002-10-27T01:30-0400',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'2002-10-27T01:30-0500',&nbsp;'2002-10-27T02:30-0500'],&nbsp;dtype='&lt;U39')<br>
+&nbsp;<br>
+Passing&nbsp;in&nbsp;a&nbsp;unit&nbsp;will&nbsp;change&nbsp;the&nbsp;precision<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-datetime_as_string">datetime_as_string</a>(d,&nbsp;unit='h')<br>
+<a href="#-array">array</a>(['2002-10-27T04',&nbsp;'2002-10-27T05',&nbsp;'2002-10-27T06',&nbsp;'2002-10-27T07'],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype='&lt;U32')<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-datetime_as_string">datetime_as_string</a>(d,&nbsp;unit='s')<br>
+<a href="#-array">array</a>(['2002-10-27T04:30:00',&nbsp;'2002-10-27T05:30:00',&nbsp;'2002-10-27T06:30:00',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'2002-10-27T07:30:00'],&nbsp;dtype='&lt;U38')<br>
+&nbsp;<br>
+'casting'&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;specify&nbsp;whether&nbsp;precision&nbsp;can&nbsp;be&nbsp;changed<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-datetime_as_string">datetime_as_string</a>(d,&nbsp;unit='h',&nbsp;casting='safe')<br>
+TypeError:&nbsp;Cannot&nbsp;create&nbsp;a&nbsp;datetime&nbsp;string&nbsp;as&nbsp;units&nbsp;'h'&nbsp;from&nbsp;a&nbsp;NumPy<br>
+datetime&nbsp;with&nbsp;units&nbsp;'m'&nbsp;according&nbsp;to&nbsp;the&nbsp;rule&nbsp;'safe'</tt></dd></dl>
+ <dl><dt><a name="-datetime_data"><strong>datetime_data</strong></a>(...)</dt><dd><tt><a href="#-datetime_data">datetime_data</a>(dtype,&nbsp;/)<br>
+&nbsp;<br>
+Get&nbsp;information&nbsp;about&nbsp;the&nbsp;step&nbsp;size&nbsp;of&nbsp;a&nbsp;date&nbsp;or&nbsp;time&nbsp;type.<br>
+&nbsp;<br>
+The&nbsp;returned&nbsp;tuple&nbsp;can&nbsp;be&nbsp;passed&nbsp;as&nbsp;the&nbsp;second&nbsp;argument&nbsp;of&nbsp;`numpy.datetime64`&nbsp;and<br>
+`numpy.timedelta64`.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+dtype&nbsp;:&nbsp;dtype<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;dtype&nbsp;object,&nbsp;which&nbsp;must&nbsp;be&nbsp;a&nbsp;`datetime64`&nbsp;or&nbsp;`timedelta64`&nbsp;type.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+unit&nbsp;:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;:ref:`datetime&nbsp;unit&nbsp;&lt;arrays.dtypes.dateunits&gt;`&nbsp;on&nbsp;which&nbsp;this&nbsp;dtype<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;based.<br>
+count&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;base&nbsp;units&nbsp;in&nbsp;a&nbsp;step.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;dt_25s&nbsp;=&nbsp;np.dtype('timedelta64[25s]')<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-datetime_data">datetime_data</a>(dt_25s)<br>
+('s',&nbsp;25)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>(10,&nbsp;dt_25s).astype('timedelta64[s]')<br>
+<a href="#-array">array</a>(250,&nbsp;dtype='timedelta64[s]')<br>
+&nbsp;<br>
+The&nbsp;result&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;construct&nbsp;a&nbsp;datetime&nbsp;that&nbsp;uses&nbsp;the&nbsp;same&nbsp;units<br>
+as&nbsp;a&nbsp;timedelta<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.datetime64('2010',&nbsp;np.<a href="#-datetime_data">datetime_data</a>(dt_25s))<br>
+numpy.datetime64('2010-01-01T00:00:00',&nbsp;'25s')</tt></dd></dl>
+ <dl><dt><a name="-doit"><strong>doit</strong></a>(parameter_file='')</dt><dd><tt>Generate&nbsp;a&nbsp;set&nbsp;of&nbsp;parameter&nbsp;files&nbsp;from&nbsp;a&nbsp;pre-existing&nbsp;one<br>
+with&nbsp;at&nbsp;least&nbsp;one&nbsp;entry&nbsp;&nbsp;($)&nbsp;for&nbsp;interactive&nbsp;input</tt></dd></dl>
+ <dl><dt><a name="-dot"><strong>dot</strong></a>(...)</dt><dd><tt><a href="#-dot">dot</a>(a,&nbsp;b,&nbsp;out=None)<br>
+&nbsp;<br>
+Dot&nbsp;product&nbsp;of&nbsp;two&nbsp;arrays.&nbsp;Specifically,<br>
+&nbsp;<br>
+-&nbsp;If&nbsp;both&nbsp;`a`&nbsp;and&nbsp;`b`&nbsp;are&nbsp;1-D&nbsp;arrays,&nbsp;it&nbsp;is&nbsp;inner&nbsp;product&nbsp;of&nbsp;vectors<br>
+&nbsp;&nbsp;(without&nbsp;complex&nbsp;conjugation).<br>
+&nbsp;<br>
+-&nbsp;If&nbsp;both&nbsp;`a`&nbsp;and&nbsp;`b`&nbsp;are&nbsp;2-D&nbsp;arrays,&nbsp;it&nbsp;is&nbsp;matrix&nbsp;multiplication,<br>
+&nbsp;&nbsp;but&nbsp;using&nbsp;:func:`matmul`&nbsp;or&nbsp;``a&nbsp;@&nbsp;b``&nbsp;is&nbsp;preferred.<br>
+&nbsp;<br>
+-&nbsp;If&nbsp;either&nbsp;`a`&nbsp;or&nbsp;`b`&nbsp;is&nbsp;0-D&nbsp;(scalar),&nbsp;it&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;:func:`multiply`<br>
+&nbsp;&nbsp;and&nbsp;using&nbsp;``numpy.multiply(a,&nbsp;b)``&nbsp;or&nbsp;``a&nbsp;*&nbsp;b``&nbsp;is&nbsp;preferred.<br>
+&nbsp;<br>
+-&nbsp;If&nbsp;`a`&nbsp;is&nbsp;an&nbsp;N-D&nbsp;array&nbsp;and&nbsp;`b`&nbsp;is&nbsp;a&nbsp;1-D&nbsp;array,&nbsp;it&nbsp;is&nbsp;a&nbsp;sum&nbsp;product&nbsp;over<br>
+&nbsp;&nbsp;the&nbsp;last&nbsp;axis&nbsp;of&nbsp;`a`&nbsp;and&nbsp;`b`.<br>
+&nbsp;<br>
+-&nbsp;If&nbsp;`a`&nbsp;is&nbsp;an&nbsp;N-D&nbsp;array&nbsp;and&nbsp;`b`&nbsp;is&nbsp;an&nbsp;M-D&nbsp;array&nbsp;(where&nbsp;``M&gt;=2``),&nbsp;it&nbsp;is&nbsp;a<br>
+&nbsp;&nbsp;sum&nbsp;product&nbsp;over&nbsp;the&nbsp;last&nbsp;axis&nbsp;of&nbsp;`a`&nbsp;and&nbsp;the&nbsp;second-to-last&nbsp;axis&nbsp;of&nbsp;`b`::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-dot">dot</a>(a,&nbsp;b)[i,j,k,m]&nbsp;=&nbsp;sum(a[i,j,:]&nbsp;*&nbsp;b[k,:,m])<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;First&nbsp;argument.<br>
+b&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Second&nbsp;argument.<br>
+out&nbsp;:&nbsp;ndarray,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;argument.&nbsp;This&nbsp;must&nbsp;have&nbsp;the&nbsp;exact&nbsp;kind&nbsp;that&nbsp;would&nbsp;be&nbsp;returned<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;it&nbsp;was&nbsp;not&nbsp;used.&nbsp;In&nbsp;particular,&nbsp;it&nbsp;must&nbsp;have&nbsp;the&nbsp;right&nbsp;type,&nbsp;must&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;C-contiguous,&nbsp;and&nbsp;its&nbsp;dtype&nbsp;must&nbsp;be&nbsp;the&nbsp;dtype&nbsp;that&nbsp;would&nbsp;be&nbsp;returned<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;`<a href="#-dot">dot</a>(a,b)`.&nbsp;This&nbsp;is&nbsp;a&nbsp;performance&nbsp;feature.&nbsp;Therefore,&nbsp;if&nbsp;these<br>
+&nbsp;&nbsp;&nbsp;&nbsp;conditions&nbsp;are&nbsp;not&nbsp;met,&nbsp;an&nbsp;exception&nbsp;is&nbsp;raised,&nbsp;instead&nbsp;of&nbsp;attempting<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;be&nbsp;flexible.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+output&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;dot&nbsp;product&nbsp;of&nbsp;`a`&nbsp;and&nbsp;`b`.&nbsp;&nbsp;If&nbsp;`a`&nbsp;and&nbsp;`b`&nbsp;are&nbsp;both<br>
+&nbsp;&nbsp;&nbsp;&nbsp;scalars&nbsp;or&nbsp;both&nbsp;1-D&nbsp;arrays&nbsp;then&nbsp;a&nbsp;scalar&nbsp;is&nbsp;returned;&nbsp;otherwise<br>
+&nbsp;&nbsp;&nbsp;&nbsp;an&nbsp;array&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;`out`&nbsp;is&nbsp;given,&nbsp;then&nbsp;it&nbsp;is&nbsp;returned.<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+ValueError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;last&nbsp;dimension&nbsp;of&nbsp;`a`&nbsp;is&nbsp;not&nbsp;the&nbsp;same&nbsp;size&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;second-to-last&nbsp;dimension&nbsp;of&nbsp;`b`.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+vdot&nbsp;:&nbsp;Complex-conjugating&nbsp;dot&nbsp;product.<br>
+tensordot&nbsp;:&nbsp;Sum&nbsp;products&nbsp;over&nbsp;arbitrary&nbsp;axes.<br>
+einsum&nbsp;:&nbsp;Einstein&nbsp;summation&nbsp;convention.<br>
+matmul&nbsp;:&nbsp;'@'&nbsp;operator&nbsp;as&nbsp;method&nbsp;with&nbsp;out&nbsp;parameter.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-dot">dot</a>(3,&nbsp;4)<br>
+12<br>
+&nbsp;<br>
+Neither&nbsp;argument&nbsp;is&nbsp;complex-conjugated:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-dot">dot</a>([2j,&nbsp;3j],&nbsp;[2j,&nbsp;3j])<br>
+(-13+0j)<br>
+&nbsp;<br>
+For&nbsp;2-D&nbsp;arrays&nbsp;it&nbsp;is&nbsp;the&nbsp;matrix&nbsp;product:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;[[1,&nbsp;0],&nbsp;[0,&nbsp;1]]<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;[[4,&nbsp;1],&nbsp;[2,&nbsp;2]]<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-dot">dot</a>(a,&nbsp;b)<br>
+<a href="#-array">array</a>([[4,&nbsp;1],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[2,&nbsp;2]])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(3*4*5*6).reshape((3,4,5,6))<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(3*4*5*6)[::-1].reshape((5,4,6,3))<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-dot">dot</a>(a,&nbsp;b)[2,3,2,1,2,2]<br>
+499128<br>
+&gt;&gt;&gt;&nbsp;sum(a[2,3,2,:]&nbsp;*&nbsp;b[1,2,:,2])<br>
+499128</tt></dd></dl>
+ <dl><dt><a name="-empty"><strong>empty</strong></a>(...)</dt><dd><tt><a href="#-empty">empty</a>(shape,&nbsp;dtype=float,&nbsp;order='C')<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;new&nbsp;array&nbsp;of&nbsp;given&nbsp;shape&nbsp;and&nbsp;type,&nbsp;without&nbsp;initializing&nbsp;entries.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+shape&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;of&nbsp;the&nbsp;empty&nbsp;array,&nbsp;e.g.,&nbsp;``(2,&nbsp;3)``&nbsp;or&nbsp;``2``.<br>
+dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Desired&nbsp;output&nbsp;data-type&nbsp;for&nbsp;the&nbsp;array,&nbsp;e.g,&nbsp;`numpy.int8`.&nbsp;Default&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`numpy.float64`.<br>
+order&nbsp;:&nbsp;{'C',&nbsp;'F'},&nbsp;optional,&nbsp;default:&nbsp;'C'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Whether&nbsp;to&nbsp;store&nbsp;multi-dimensional&nbsp;data&nbsp;in&nbsp;row-major<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(C-style)&nbsp;or&nbsp;column-major&nbsp;(Fortran-style)&nbsp;order&nbsp;in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;memory.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;uninitialized&nbsp;(arbitrary)&nbsp;data&nbsp;of&nbsp;the&nbsp;given&nbsp;shape,&nbsp;dtype,&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;order.&nbsp;&nbsp;Object&nbsp;arrays&nbsp;will&nbsp;be&nbsp;initialized&nbsp;to&nbsp;None.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+empty_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;empty&nbsp;array&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+ones&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;setting&nbsp;values&nbsp;to&nbsp;one.<br>
+zeros&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;setting&nbsp;values&nbsp;to&nbsp;zero.<br>
+full&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;of&nbsp;given&nbsp;shape&nbsp;filled&nbsp;with&nbsp;value.<br>
+&nbsp;<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+`empty`,&nbsp;unlike&nbsp;`zeros`,&nbsp;does&nbsp;not&nbsp;set&nbsp;the&nbsp;array&nbsp;values&nbsp;to&nbsp;zero,<br>
+and&nbsp;may&nbsp;therefore&nbsp;be&nbsp;marginally&nbsp;faster.&nbsp;&nbsp;On&nbsp;the&nbsp;other&nbsp;hand,&nbsp;it&nbsp;requires<br>
+the&nbsp;user&nbsp;to&nbsp;manually&nbsp;set&nbsp;all&nbsp;the&nbsp;values&nbsp;in&nbsp;the&nbsp;array,&nbsp;and&nbsp;should&nbsp;be<br>
+used&nbsp;with&nbsp;caution.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-empty">empty</a>([2,&nbsp;2])<br>
+<a href="#-array">array</a>([[&nbsp;-9.74499359e+001,&nbsp;&nbsp;&nbsp;6.69583040e-309],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;2.13182611e-314,&nbsp;&nbsp;&nbsp;3.06959433e-309]])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#random<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-empty">empty</a>([2,&nbsp;2],&nbsp;dtype=int)<br>
+<a href="#-array">array</a>([[-1073741821,&nbsp;-1067949133],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;496041986,&nbsp;&nbsp;&nbsp;&nbsp;19249760]])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#random</tt></dd></dl>
+ <dl><dt><a name="-empty_like"><strong>empty_like</strong></a>(...)</dt><dd><tt><a href="#-empty_like">empty_like</a>(prototype,&nbsp;dtype=None,&nbsp;order='K',&nbsp;subok=True)<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;new&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;shape&nbsp;and&nbsp;type&nbsp;as&nbsp;a&nbsp;given&nbsp;array.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+prototype&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;shape&nbsp;and&nbsp;data-type&nbsp;of&nbsp;`prototype`&nbsp;define&nbsp;these&nbsp;same&nbsp;attributes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;returned&nbsp;array.<br>
+dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Overrides&nbsp;the&nbsp;data&nbsp;type&nbsp;of&nbsp;the&nbsp;result.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;versionadded::&nbsp;1.6.0<br>
+order&nbsp;:&nbsp;{'C',&nbsp;'F',&nbsp;'A',&nbsp;or&nbsp;'K'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Overrides&nbsp;the&nbsp;memory&nbsp;layout&nbsp;of&nbsp;the&nbsp;result.&nbsp;'C'&nbsp;means&nbsp;C-order,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'F'&nbsp;means&nbsp;F-order,&nbsp;'A'&nbsp;means&nbsp;'F'&nbsp;if&nbsp;``prototype``&nbsp;is&nbsp;Fortran<br>
+&nbsp;&nbsp;&nbsp;&nbsp;contiguous,&nbsp;'C'&nbsp;otherwise.&nbsp;'K'&nbsp;means&nbsp;match&nbsp;the&nbsp;layout&nbsp;of&nbsp;``prototype``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;as&nbsp;closely&nbsp;as&nbsp;possible.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;versionadded::&nbsp;1.6.0<br>
+subok&nbsp;:&nbsp;bool,&nbsp;optional.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;then&nbsp;the&nbsp;newly&nbsp;created&nbsp;array&nbsp;will&nbsp;use&nbsp;the&nbsp;sub-class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;of&nbsp;'a',&nbsp;otherwise&nbsp;it&nbsp;will&nbsp;be&nbsp;a&nbsp;base-class&nbsp;array.&nbsp;Defaults<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;True.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;uninitialized&nbsp;(arbitrary)&nbsp;data&nbsp;with&nbsp;the&nbsp;same<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shape&nbsp;and&nbsp;type&nbsp;as&nbsp;`prototype`.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+ones_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;array&nbsp;of&nbsp;ones&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+zeros_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;array&nbsp;of&nbsp;zeros&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+full_like&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;with&nbsp;shape&nbsp;of&nbsp;input&nbsp;filled&nbsp;with&nbsp;value.<br>
+empty&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;uninitialized&nbsp;array.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+This&nbsp;function&nbsp;does&nbsp;*not*&nbsp;initialize&nbsp;the&nbsp;returned&nbsp;array;&nbsp;to&nbsp;do&nbsp;that&nbsp;use<br>
+`zeros_like`&nbsp;or&nbsp;`ones_like`&nbsp;instead.&nbsp;&nbsp;It&nbsp;may&nbsp;be&nbsp;marginally&nbsp;faster&nbsp;than<br>
+the&nbsp;functions&nbsp;that&nbsp;do&nbsp;set&nbsp;the&nbsp;array&nbsp;values.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;([1,2,3],&nbsp;[4,5,6])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;a&nbsp;is&nbsp;array-like<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-empty_like">empty_like</a>(a)<br>
+<a href="#-array">array</a>([[-1073741821,&nbsp;-1073741821,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3],&nbsp;&nbsp;&nbsp;&nbsp;#random<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0,&nbsp;-1073741821]])<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([[1.,&nbsp;2.,&nbsp;3.],[4.,5.,6.]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-empty_like">empty_like</a>(a)<br>
+<a href="#-array">array</a>([[&nbsp;-2.00000715e+000,&nbsp;&nbsp;&nbsp;1.48219694e-323,&nbsp;&nbsp;-2.00000572e+000],#random<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;4.38791518e-305,&nbsp;&nbsp;-2.00000715e+000,&nbsp;&nbsp;&nbsp;4.17269252e-309]])</tt></dd></dl>
+ <dl><dt><a name="-expand_array"><strong>expand_array</strong></a>(arrayin, newvar, names_old)</dt><dd><tt>Expand&nbsp;the&nbsp;the&nbsp;arrays&nbsp;containing&nbsp;the&nbsp;items&nbsp;to&nbsp;ve<br>
+varied&nbsp;to&nbsp;individual&nbsp;runs</tt></dd></dl>
+ <dl><dt><a name="-export_results"><strong>export_results</strong></a>(lines, basename, names, var_array)</dt><dd><tt>Write&nbsp;out&nbsp;the&nbsp;results</tt></dd></dl>
+ <dl><dt><a name="-fastCopyAndTranspose"><strong>fastCopyAndTranspose</strong></a> = _fastCopyAndTranspose(...)</dt><dd><tt>_fastCopyAndTranspose(a)</tt></dd></dl>
+ <dl><dt><a name="-frombuffer"><strong>frombuffer</strong></a>(...)</dt><dd><tt><a href="#-frombuffer">frombuffer</a>(buffer,&nbsp;dtype=float,&nbsp;count=-1,&nbsp;offset=0)<br>
+&nbsp;<br>
+Interpret&nbsp;a&nbsp;buffer&nbsp;as&nbsp;a&nbsp;1-dimensional&nbsp;array.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+buffer&nbsp;:&nbsp;buffer_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;object&nbsp;that&nbsp;exposes&nbsp;the&nbsp;buffer&nbsp;interface.<br>
+dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data-type&nbsp;of&nbsp;the&nbsp;returned&nbsp;array;&nbsp;default:&nbsp;float.<br>
+count&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;items&nbsp;to&nbsp;read.&nbsp;``-1``&nbsp;means&nbsp;all&nbsp;data&nbsp;in&nbsp;the&nbsp;buffer.<br>
+offset&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;reading&nbsp;the&nbsp;buffer&nbsp;from&nbsp;this&nbsp;offset&nbsp;(in&nbsp;bytes);&nbsp;default:&nbsp;0.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+If&nbsp;the&nbsp;buffer&nbsp;has&nbsp;data&nbsp;that&nbsp;is&nbsp;not&nbsp;in&nbsp;machine&nbsp;byte-order,&nbsp;this&nbsp;should<br>
+be&nbsp;specified&nbsp;as&nbsp;part&nbsp;of&nbsp;the&nbsp;data-type,&nbsp;e.g.::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;dt&nbsp;=&nbsp;np.dtype(int)<br>
+&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;dt&nbsp;=&nbsp;dt.newbyteorder('&gt;')<br>
+&nbsp;&nbsp;&gt;&gt;&gt;&nbsp;np.<a href="#-frombuffer">frombuffer</a>(buf,&nbsp;dtype=dt)<br>
+&nbsp;<br>
+The&nbsp;data&nbsp;of&nbsp;the&nbsp;resulting&nbsp;array&nbsp;will&nbsp;not&nbsp;be&nbsp;byteswapped,&nbsp;but&nbsp;will&nbsp;be<br>
+interpreted&nbsp;correctly.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;s&nbsp;=&nbsp;'hello&nbsp;world'<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-frombuffer">frombuffer</a>(s,&nbsp;dtype='S1',&nbsp;count=5,&nbsp;offset=6)<br>
+<a href="#-array">array</a>(['w',&nbsp;'o',&nbsp;'r',&nbsp;'l',&nbsp;'d'],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype='|S1')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-frombuffer">frombuffer</a>(b'\x01\x02',&nbsp;dtype=np.uint8)<br>
+<a href="#-array">array</a>([1,&nbsp;2],&nbsp;dtype=uint8)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-frombuffer">frombuffer</a>(b'\x01\x02\x03\x04\x05',&nbsp;dtype=np.uint8,&nbsp;count=3)<br>
+<a href="#-array">array</a>([1,&nbsp;2,&nbsp;3],&nbsp;dtype=uint8)</tt></dd></dl>
+ <dl><dt><a name="-fromfile"><strong>fromfile</strong></a>(...)</dt><dd><tt><a href="#-fromfile">fromfile</a>(file,&nbsp;dtype=float,&nbsp;count=-1,&nbsp;sep='')<br>
+&nbsp;<br>
+Construct&nbsp;an&nbsp;array&nbsp;from&nbsp;data&nbsp;in&nbsp;a&nbsp;text&nbsp;or&nbsp;binary&nbsp;file.<br>
+&nbsp;<br>
+A&nbsp;highly&nbsp;efficient&nbsp;way&nbsp;of&nbsp;reading&nbsp;binary&nbsp;data&nbsp;with&nbsp;a&nbsp;known&nbsp;data-type,<br>
+as&nbsp;well&nbsp;as&nbsp;parsing&nbsp;simply&nbsp;formatted&nbsp;text&nbsp;files.&nbsp;&nbsp;Data&nbsp;written&nbsp;using&nbsp;the<br>
+`tofile`&nbsp;method&nbsp;can&nbsp;be&nbsp;read&nbsp;using&nbsp;this&nbsp;function.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+file&nbsp;:&nbsp;file&nbsp;or&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Open&nbsp;file&nbsp;object&nbsp;or&nbsp;filename.<br>
+dtype&nbsp;:&nbsp;data-type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;type&nbsp;of&nbsp;the&nbsp;returned&nbsp;array.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;binary&nbsp;files,&nbsp;it&nbsp;is&nbsp;used&nbsp;to&nbsp;determine&nbsp;the&nbsp;size&nbsp;and&nbsp;byte-order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;items&nbsp;in&nbsp;the&nbsp;file.<br>
+count&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;items&nbsp;to&nbsp;read.&nbsp;``-1``&nbsp;means&nbsp;all&nbsp;items&nbsp;(i.e.,&nbsp;the&nbsp;complete<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file).<br>
+sep&nbsp;:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Separator&nbsp;between&nbsp;items&nbsp;if&nbsp;file&nbsp;is&nbsp;a&nbsp;text&nbsp;file.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Empty&nbsp;("")&nbsp;separator&nbsp;means&nbsp;the&nbsp;file&nbsp;should&nbsp;be&nbsp;treated&nbsp;as&nbsp;binary.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Spaces&nbsp;("&nbsp;")&nbsp;in&nbsp;the&nbsp;separator&nbsp;match&nbsp;zero&nbsp;or&nbsp;more&nbsp;whitespace&nbsp;characters.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;separator&nbsp;consisting&nbsp;only&nbsp;of&nbsp;spaces&nbsp;must&nbsp;match&nbsp;at&nbsp;least&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;whitespace.<br>
+&nbsp;<br>
+See&nbsp;also<br>
+--------<br>
+load,&nbsp;save<br>
+ndarray.tofile<br>
+loadtxt&nbsp;:&nbsp;More&nbsp;flexible&nbsp;way&nbsp;of&nbsp;loading&nbsp;data&nbsp;from&nbsp;a&nbsp;text&nbsp;file.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+Do&nbsp;not&nbsp;rely&nbsp;on&nbsp;the&nbsp;combination&nbsp;of&nbsp;`tofile`&nbsp;and&nbsp;`fromfile`&nbsp;for<br>
+data&nbsp;storage,&nbsp;as&nbsp;the&nbsp;binary&nbsp;files&nbsp;generated&nbsp;are&nbsp;are&nbsp;not&nbsp;platform<br>
+independent.&nbsp;&nbsp;In&nbsp;particular,&nbsp;no&nbsp;byte-order&nbsp;or&nbsp;data-type&nbsp;information&nbsp;is<br>
+saved.&nbsp;&nbsp;Data&nbsp;can&nbsp;be&nbsp;stored&nbsp;in&nbsp;the&nbsp;platform&nbsp;independent&nbsp;``.npy``&nbsp;format<br>
+using&nbsp;`save`&nbsp;and&nbsp;`load`&nbsp;instead.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+Construct&nbsp;an&nbsp;ndarray:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;dt&nbsp;=&nbsp;np.dtype([('time',&nbsp;[('min',&nbsp;int),&nbsp;('sec',&nbsp;int)]),<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;('temp',&nbsp;float)])<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-zeros">zeros</a>((1,),&nbsp;dtype=dt)<br>
+&gt;&gt;&gt;&nbsp;x['time']['min']&nbsp;=&nbsp;10;&nbsp;x['temp']&nbsp;=&nbsp;98.25<br>
+&gt;&gt;&gt;&nbsp;x<br>
+<a href="#-array">array</a>([((10,&nbsp;0),&nbsp;98.25)],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype=[('time',&nbsp;[('min',&nbsp;'&lt;i4'),&nbsp;('sec',&nbsp;'&lt;i4')]),&nbsp;('temp',&nbsp;'&lt;f8')])<br>
+&nbsp;<br>
+Save&nbsp;the&nbsp;raw&nbsp;data&nbsp;to&nbsp;disk:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;import&nbsp;os<br>
+&gt;&gt;&gt;&nbsp;fname&nbsp;=&nbsp;os.tmpnam()<br>
+&gt;&gt;&gt;&nbsp;x.tofile(fname)<br>
+&nbsp;<br>
+Read&nbsp;the&nbsp;raw&nbsp;data&nbsp;from&nbsp;disk:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-fromfile">fromfile</a>(fname,&nbsp;dtype=dt)<br>
+<a href="#-array">array</a>([((10,&nbsp;0),&nbsp;98.25)],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype=[('time',&nbsp;[('min',&nbsp;'&lt;i4'),&nbsp;('sec',&nbsp;'&lt;i4')]),&nbsp;('temp',&nbsp;'&lt;f8')])<br>
+&nbsp;<br>
+The&nbsp;recommended&nbsp;way&nbsp;to&nbsp;store&nbsp;and&nbsp;load&nbsp;data:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.save(fname,&nbsp;x)<br>
+&gt;&gt;&gt;&nbsp;np.load(fname&nbsp;+&nbsp;'.npy')<br>
+<a href="#-array">array</a>([((10,&nbsp;0),&nbsp;98.25)],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype=[('time',&nbsp;[('min',&nbsp;'&lt;i4'),&nbsp;('sec',&nbsp;'&lt;i4')]),&nbsp;('temp',&nbsp;'&lt;f8')])</tt></dd></dl>
+ <dl><dt><a name="-fromiter"><strong>fromiter</strong></a>(...)</dt><dd><tt><a href="#-fromiter">fromiter</a>(iterable,&nbsp;dtype,&nbsp;count=-1)<br>
+&nbsp;<br>
+Create&nbsp;a&nbsp;new&nbsp;1-dimensional&nbsp;array&nbsp;from&nbsp;an&nbsp;iterable&nbsp;object.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+iterable&nbsp;:&nbsp;iterable&nbsp;object<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;iterable&nbsp;object&nbsp;providing&nbsp;data&nbsp;for&nbsp;the&nbsp;array.<br>
+dtype&nbsp;:&nbsp;data-type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;data-type&nbsp;of&nbsp;the&nbsp;returned&nbsp;array.<br>
+count&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;items&nbsp;to&nbsp;read&nbsp;from&nbsp;*iterable*.&nbsp;&nbsp;The&nbsp;default&nbsp;is&nbsp;-1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;means&nbsp;all&nbsp;data&nbsp;is&nbsp;read.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;output&nbsp;array.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+Specify&nbsp;`count`&nbsp;to&nbsp;improve&nbsp;performance.&nbsp;&nbsp;It&nbsp;allows&nbsp;``fromiter``&nbsp;to<br>
+pre-allocate&nbsp;the&nbsp;output&nbsp;array,&nbsp;instead&nbsp;of&nbsp;resizing&nbsp;it&nbsp;on&nbsp;demand.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;iterable&nbsp;=&nbsp;(x*x&nbsp;for&nbsp;x&nbsp;in&nbsp;range(5))<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-fromiter">fromiter</a>(iterable,&nbsp;float)<br>
+<a href="#-array">array</a>([&nbsp;&nbsp;0.,&nbsp;&nbsp;&nbsp;1.,&nbsp;&nbsp;&nbsp;4.,&nbsp;&nbsp;&nbsp;9.,&nbsp;&nbsp;16.])</tt></dd></dl>
+ <dl><dt><a name="-frompyfunc"><strong>frompyfunc</strong></a>(...)</dt><dd><tt><a href="#-frompyfunc">frompyfunc</a>(func,&nbsp;nin,&nbsp;nout)<br>
+&nbsp;<br>
+Takes&nbsp;an&nbsp;arbitrary&nbsp;Python&nbsp;function&nbsp;and&nbsp;returns&nbsp;a&nbsp;NumPy&nbsp;ufunc.<br>
+&nbsp;<br>
+Can&nbsp;be&nbsp;used,&nbsp;for&nbsp;example,&nbsp;to&nbsp;add&nbsp;broadcasting&nbsp;to&nbsp;a&nbsp;built-in&nbsp;Python<br>
+function&nbsp;(see&nbsp;Examples&nbsp;section).<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+func&nbsp;:&nbsp;Python&nbsp;function&nbsp;object<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;arbitrary&nbsp;Python&nbsp;function.<br>
+nin&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;input&nbsp;arguments.<br>
+nout&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;objects&nbsp;returned&nbsp;by&nbsp;`func`.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ufunc<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;NumPy&nbsp;universal&nbsp;function&nbsp;(``ufunc``)&nbsp;object.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+vectorize&nbsp;:&nbsp;evaluates&nbsp;pyfunc&nbsp;over&nbsp;input&nbsp;arrays&nbsp;using&nbsp;broadcasting&nbsp;rules&nbsp;of&nbsp;numpy<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+The&nbsp;returned&nbsp;ufunc&nbsp;always&nbsp;returns&nbsp;PyObject&nbsp;arrays.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+Use&nbsp;frompyfunc&nbsp;to&nbsp;add&nbsp;broadcasting&nbsp;to&nbsp;the&nbsp;Python&nbsp;function&nbsp;``oct``:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;oct_array&nbsp;=&nbsp;np.<a href="#-frompyfunc">frompyfunc</a>(oct,&nbsp;1,&nbsp;1)<br>
+&gt;&gt;&gt;&nbsp;oct_array(np.<a href="#-array">array</a>((10,&nbsp;30,&nbsp;100)))<br>
+<a href="#-array">array</a>([012,&nbsp;036,&nbsp;0144],&nbsp;dtype=object)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-array">array</a>((oct(10),&nbsp;oct(30),&nbsp;oct(100)))&nbsp;#&nbsp;for&nbsp;comparison<br>
+<a href="#-array">array</a>(['012',&nbsp;'036',&nbsp;'0144'],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype='|S4')</tt></dd></dl>
+ <dl><dt><a name="-fromstring"><strong>fromstring</strong></a>(...)</dt><dd><tt><a href="#-fromstring">fromstring</a>(string,&nbsp;dtype=float,&nbsp;count=-1,&nbsp;sep='')<br>
+&nbsp;<br>
+A&nbsp;new&nbsp;1-D&nbsp;array&nbsp;initialized&nbsp;from&nbsp;text&nbsp;data&nbsp;in&nbsp;a&nbsp;string.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+string&nbsp;:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;string&nbsp;containing&nbsp;the&nbsp;data.<br>
+dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;data&nbsp;type&nbsp;of&nbsp;the&nbsp;array;&nbsp;default:&nbsp;float.&nbsp;&nbsp;For&nbsp;binary&nbsp;input&nbsp;data,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;data&nbsp;must&nbsp;be&nbsp;in&nbsp;exactly&nbsp;this&nbsp;format.<br>
+count&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Read&nbsp;this&nbsp;number&nbsp;of&nbsp;`dtype`&nbsp;elements&nbsp;from&nbsp;the&nbsp;data.&nbsp;&nbsp;If&nbsp;this&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;negative&nbsp;(the&nbsp;default),&nbsp;the&nbsp;count&nbsp;will&nbsp;be&nbsp;determined&nbsp;from&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;length&nbsp;of&nbsp;the&nbsp;data.<br>
+sep&nbsp;:&nbsp;str,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;string&nbsp;separating&nbsp;numbers&nbsp;in&nbsp;the&nbsp;data;&nbsp;extra&nbsp;whitespace&nbsp;between<br>
+&nbsp;&nbsp;&nbsp;&nbsp;elements&nbsp;is&nbsp;also&nbsp;ignored.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;deprecated::&nbsp;1.14<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;this&nbsp;argument&nbsp;is&nbsp;not&nbsp;provided,&nbsp;`fromstring`&nbsp;falls&nbsp;back&nbsp;on&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;behaviour&nbsp;of&nbsp;`frombuffer`&nbsp;after&nbsp;encoding&nbsp;unicode&nbsp;string&nbsp;inputs&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;either&nbsp;utf-8&nbsp;(python&nbsp;3),&nbsp;or&nbsp;the&nbsp;default&nbsp;encoding&nbsp;(python&nbsp;2).<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+arr&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;constructed&nbsp;array.<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+ValueError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;string&nbsp;is&nbsp;not&nbsp;the&nbsp;correct&nbsp;size&nbsp;to&nbsp;satisfy&nbsp;the&nbsp;requested<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`dtype`&nbsp;and&nbsp;`count`.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+frombuffer,&nbsp;fromfile,&nbsp;fromiter<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-fromstring">fromstring</a>('1&nbsp;2',&nbsp;dtype=int,&nbsp;sep='&nbsp;')<br>
+<a href="#-array">array</a>([1,&nbsp;2])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-fromstring">fromstring</a>('1,&nbsp;2',&nbsp;dtype=int,&nbsp;sep=',')<br>
+<a href="#-array">array</a>([1,&nbsp;2])</tt></dd></dl>
+ <dl><dt><a name="-get_input"><strong>get_input</strong></a>(question, answer)</dt><dd><tt>normal&nbsp;usage&nbsp;answer=<a href="#-get_input">get_input</a>(question,answer)&nbsp;<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;simple&nbsp;command&nbsp;line&nbsp;io&nbsp;routine</tt></dd></dl>
+ <dl><dt><a name="-geterrobj"><strong>geterrobj</strong></a>(...)</dt><dd><tt><a href="#-geterrobj">geterrobj</a>()<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;current&nbsp;object&nbsp;that&nbsp;defines&nbsp;floating-point&nbsp;error&nbsp;handling.<br>
+&nbsp;<br>
+The&nbsp;error&nbsp;object&nbsp;contains&nbsp;all&nbsp;information&nbsp;that&nbsp;defines&nbsp;the&nbsp;error&nbsp;handling<br>
+behavior&nbsp;in&nbsp;NumPy.&nbsp;`geterrobj`&nbsp;is&nbsp;used&nbsp;internally&nbsp;by&nbsp;the&nbsp;other<br>
+functions&nbsp;that&nbsp;get&nbsp;and&nbsp;set&nbsp;error&nbsp;handling&nbsp;behavior&nbsp;(`geterr`,&nbsp;`seterr`,<br>
+`geterrcall`,&nbsp;`seterrcall`).<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+errobj&nbsp;:&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;error&nbsp;object,&nbsp;a&nbsp;list&nbsp;containing&nbsp;three&nbsp;elements:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[internal&nbsp;numpy&nbsp;buffer&nbsp;size,&nbsp;error&nbsp;mask,&nbsp;error&nbsp;callback&nbsp;function].<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;error&nbsp;mask&nbsp;is&nbsp;a&nbsp;single&nbsp;integer&nbsp;that&nbsp;holds&nbsp;the&nbsp;treatment&nbsp;information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;all&nbsp;four&nbsp;floating&nbsp;point&nbsp;errors.&nbsp;The&nbsp;information&nbsp;for&nbsp;each&nbsp;error&nbsp;type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;contained&nbsp;in&nbsp;three&nbsp;bits&nbsp;of&nbsp;the&nbsp;integer.&nbsp;If&nbsp;we&nbsp;print&nbsp;it&nbsp;in&nbsp;base&nbsp;8,&nbsp;we<br>
+&nbsp;&nbsp;&nbsp;&nbsp;can&nbsp;see&nbsp;what&nbsp;treatment&nbsp;is&nbsp;set&nbsp;for&nbsp;"invalid",&nbsp;"under",&nbsp;"over",&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"divide"&nbsp;(in&nbsp;that&nbsp;order).&nbsp;The&nbsp;printed&nbsp;string&nbsp;can&nbsp;be&nbsp;interpreted&nbsp;with<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;0&nbsp;:&nbsp;'ignore'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;1&nbsp;:&nbsp;'warn'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;2&nbsp;:&nbsp;'raise'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;3&nbsp;:&nbsp;'call'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;4&nbsp;:&nbsp;'print'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;5&nbsp;:&nbsp;'log'<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+seterrobj,&nbsp;seterr,&nbsp;geterr,&nbsp;seterrcall,&nbsp;geterrcall<br>
+getbufsize,&nbsp;setbufsize<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+For&nbsp;complete&nbsp;documentation&nbsp;of&nbsp;the&nbsp;types&nbsp;of&nbsp;floating-point&nbsp;exceptions&nbsp;and<br>
+treatment&nbsp;options,&nbsp;see&nbsp;`seterr`.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-geterrobj">geterrobj</a>()&nbsp;&nbsp;#&nbsp;first&nbsp;get&nbsp;the&nbsp;defaults<br>
+[10000,&nbsp;0,&nbsp;None]<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;def&nbsp;err_handler(type,&nbsp;flag):<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print("Floating&nbsp;point&nbsp;error&nbsp;(%s),&nbsp;with&nbsp;flag&nbsp;%s"&nbsp;%&nbsp;(type,&nbsp;flag))<br>
+...<br>
+&gt;&gt;&gt;&nbsp;old_bufsize&nbsp;=&nbsp;np.setbufsize(20000)<br>
+&gt;&gt;&gt;&nbsp;old_err&nbsp;=&nbsp;np.seterr(divide='raise')<br>
+&gt;&gt;&gt;&nbsp;old_handler&nbsp;=&nbsp;np.seterrcall(err_handler)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-geterrobj">geterrobj</a>()<br>
+[20000,&nbsp;2,&nbsp;&lt;function&nbsp;err_handler&nbsp;at&nbsp;0x91dcaac&gt;]<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;old_err&nbsp;=&nbsp;np.seterr(all='ignore')<br>
+&gt;&gt;&gt;&nbsp;np.base_repr(np.<a href="#-geterrobj">geterrobj</a>()[1],&nbsp;8)<br>
+'0'<br>
+&gt;&gt;&gt;&nbsp;old_err&nbsp;=&nbsp;np.seterr(divide='warn',&nbsp;over='log',&nbsp;under='call',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invalid='print')<br>
+&gt;&gt;&gt;&nbsp;np.base_repr(np.<a href="#-geterrobj">geterrobj</a>()[1],&nbsp;8)<br>
+'4351'</tt></dd></dl>
+ <dl><dt><a name="-inner"><strong>inner</strong></a>(...)</dt><dd><tt><a href="#-inner">inner</a>(a,&nbsp;b)<br>
+&nbsp;<br>
+Inner&nbsp;product&nbsp;of&nbsp;two&nbsp;arrays.<br>
+&nbsp;<br>
+Ordinary&nbsp;inner&nbsp;product&nbsp;of&nbsp;vectors&nbsp;for&nbsp;1-D&nbsp;arrays&nbsp;(without&nbsp;complex<br>
+conjugation),&nbsp;in&nbsp;higher&nbsp;dimensions&nbsp;a&nbsp;sum&nbsp;product&nbsp;over&nbsp;the&nbsp;last&nbsp;axes.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a,&nbsp;b&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;`a`&nbsp;and&nbsp;`b`&nbsp;are&nbsp;nonscalar,&nbsp;their&nbsp;last&nbsp;dimensions&nbsp;must&nbsp;match.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`out.shape&nbsp;=&nbsp;a.shape[:-1]&nbsp;+&nbsp;b.shape[:-1]`<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+ValueError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;last&nbsp;dimension&nbsp;of&nbsp;`a`&nbsp;and&nbsp;`b`&nbsp;has&nbsp;different&nbsp;size.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+tensordot&nbsp;:&nbsp;Sum&nbsp;products&nbsp;over&nbsp;arbitrary&nbsp;axes.<br>
+dot&nbsp;:&nbsp;Generalised&nbsp;matrix&nbsp;product,&nbsp;using&nbsp;second&nbsp;last&nbsp;dimension&nbsp;of&nbsp;`b`.<br>
+einsum&nbsp;:&nbsp;Einstein&nbsp;summation&nbsp;convention.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+For&nbsp;vectors&nbsp;(1-D&nbsp;arrays)&nbsp;it&nbsp;computes&nbsp;the&nbsp;ordinary&nbsp;inner-product::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;np.<a href="#-inner">inner</a>(a,&nbsp;b)&nbsp;=&nbsp;sum(a[:]*b[:])<br>
+&nbsp;<br>
+More&nbsp;generally,&nbsp;if&nbsp;`ndim(a)&nbsp;=&nbsp;r&nbsp;&gt;&nbsp;0`&nbsp;and&nbsp;`ndim(b)&nbsp;=&nbsp;s&nbsp;&gt;&nbsp;0`::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;np.<a href="#-inner">inner</a>(a,&nbsp;b)&nbsp;=&nbsp;np.tensordot(a,&nbsp;b,&nbsp;axes=(-1,-1))<br>
+&nbsp;<br>
+or&nbsp;explicitly::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;np.<a href="#-inner">inner</a>(a,&nbsp;b)[i0,...,ir-1,j0,...,js-1]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;sum(a[i0,...,ir-1,:]*b[j0,...,js-1,:])<br>
+&nbsp;<br>
+In&nbsp;addition&nbsp;`a`&nbsp;or&nbsp;`b`&nbsp;may&nbsp;be&nbsp;scalars,&nbsp;in&nbsp;which&nbsp;case::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;np.<a href="#-inner">inner</a>(a,b)&nbsp;=&nbsp;a*b<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+Ordinary&nbsp;inner&nbsp;product&nbsp;for&nbsp;vectors:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([1,2,3])<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-array">array</a>([0,1,0])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-inner">inner</a>(a,&nbsp;b)<br>
+2<br>
+&nbsp;<br>
+A&nbsp;multidimensional&nbsp;example:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(24).reshape((2,3,4))<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(4)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-inner">inner</a>(a,&nbsp;b)<br>
+<a href="#-array">array</a>([[&nbsp;14,&nbsp;&nbsp;38,&nbsp;&nbsp;62],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;86,&nbsp;110,&nbsp;134]])<br>
+&nbsp;<br>
+An&nbsp;example&nbsp;where&nbsp;`b`&nbsp;is&nbsp;a&nbsp;scalar:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-inner">inner</a>(np.eye(2),&nbsp;7)<br>
+<a href="#-array">array</a>([[&nbsp;7.,&nbsp;&nbsp;0.],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0.,&nbsp;&nbsp;7.]])</tt></dd></dl>
+ <dl><dt><a name="-int_asbuffer"><strong>int_asbuffer</strong></a>(...)</dt></dl>
+ <dl><dt><a name="-is_busday"><strong>is_busday</strong></a>(...)</dt><dd><tt><a href="#-is_busday">is_busday</a>(dates,&nbsp;weekmask='1111100',&nbsp;holidays=None,&nbsp;busdaycal=None,&nbsp;out=None)<br>
+&nbsp;<br>
+Calculates&nbsp;which&nbsp;of&nbsp;the&nbsp;given&nbsp;dates&nbsp;are&nbsp;valid&nbsp;days,&nbsp;and&nbsp;which&nbsp;are&nbsp;not.<br>
+&nbsp;<br>
+..&nbsp;versionadded::&nbsp;1.7.0<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+dates&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;of&nbsp;dates&nbsp;to&nbsp;process.<br>
+weekmask&nbsp;:&nbsp;str&nbsp;or&nbsp;array_like&nbsp;of&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;seven-element&nbsp;array&nbsp;indicating&nbsp;which&nbsp;of&nbsp;Monday&nbsp;through&nbsp;Sunday&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;valid&nbsp;days.&nbsp;May&nbsp;be&nbsp;specified&nbsp;as&nbsp;a&nbsp;length-seven&nbsp;list&nbsp;or&nbsp;array,&nbsp;like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[1,1,1,1,1,0,0];&nbsp;a&nbsp;length-seven&nbsp;string,&nbsp;like&nbsp;'1111100';&nbsp;or&nbsp;a&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;"Mon&nbsp;Tue&nbsp;Wed&nbsp;Thu&nbsp;Fri",&nbsp;made&nbsp;up&nbsp;of&nbsp;3-character&nbsp;abbreviations&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;weekdays,&nbsp;optionally&nbsp;separated&nbsp;by&nbsp;white&nbsp;space.&nbsp;Valid&nbsp;abbreviations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;are:&nbsp;Mon&nbsp;Tue&nbsp;Wed&nbsp;Thu&nbsp;Fri&nbsp;Sat&nbsp;Sun<br>
+holidays&nbsp;:&nbsp;array_like&nbsp;of&nbsp;datetime64[D],&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;dates&nbsp;to&nbsp;consider&nbsp;as&nbsp;invalid&nbsp;dates.&nbsp;&nbsp;They&nbsp;may&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;specified&nbsp;in&nbsp;any&nbsp;order,&nbsp;and&nbsp;NaT&nbsp;(not-a-time)&nbsp;dates&nbsp;are&nbsp;ignored.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;list&nbsp;is&nbsp;saved&nbsp;in&nbsp;a&nbsp;normalized&nbsp;form&nbsp;that&nbsp;is&nbsp;suited&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fast&nbsp;calculations&nbsp;of&nbsp;valid&nbsp;days.<br>
+busdaycal&nbsp;:&nbsp;busdaycalendar,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;`busdaycalendar`&nbsp;object&nbsp;which&nbsp;specifies&nbsp;the&nbsp;valid&nbsp;days.&nbsp;If&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parameter&nbsp;is&nbsp;provided,&nbsp;neither&nbsp;weekmask&nbsp;nor&nbsp;holidays&nbsp;may&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;provided.<br>
+out&nbsp;:&nbsp;array&nbsp;of&nbsp;bool,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;this&nbsp;array&nbsp;is&nbsp;filled&nbsp;with&nbsp;the&nbsp;result.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;array&nbsp;of&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;with&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;``dates``,&nbsp;containing&nbsp;True&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;valid&nbsp;day,&nbsp;and&nbsp;False&nbsp;for&nbsp;each&nbsp;invalid&nbsp;day.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+busdaycalendar:&nbsp;An&nbsp;object&nbsp;that&nbsp;specifies&nbsp;a&nbsp;custom&nbsp;set&nbsp;of&nbsp;valid&nbsp;days.<br>
+busday_offset&nbsp;:&nbsp;Applies&nbsp;an&nbsp;offset&nbsp;counted&nbsp;in&nbsp;valid&nbsp;days.<br>
+busday_count&nbsp;:&nbsp;Counts&nbsp;how&nbsp;many&nbsp;valid&nbsp;days&nbsp;are&nbsp;in&nbsp;a&nbsp;half-open&nbsp;date&nbsp;range.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;#&nbsp;The&nbsp;weekdays&nbsp;are&nbsp;Friday,&nbsp;Saturday,&nbsp;and&nbsp;Monday<br>
+...&nbsp;np.<a href="#-is_busday">is_busday</a>(['2011-07-01',&nbsp;'2011-07-02',&nbsp;'2011-07-18'],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;holidays=['2011-07-01',&nbsp;'2011-07-04',&nbsp;'2011-07-17'])<br>
+<a href="#-array">array</a>([False,&nbsp;False,&nbsp;&nbsp;True],&nbsp;dtype='bool')</tt></dd></dl>
+ <dl><dt><a name="-lexsort"><strong>lexsort</strong></a>(...)</dt><dd><tt><a href="#-lexsort">lexsort</a>(keys,&nbsp;axis=-1)<br>
+&nbsp;<br>
+Perform&nbsp;an&nbsp;indirect&nbsp;stable&nbsp;sort&nbsp;using&nbsp;a&nbsp;sequence&nbsp;of&nbsp;keys.<br>
+&nbsp;<br>
+Given&nbsp;multiple&nbsp;sorting&nbsp;keys,&nbsp;which&nbsp;can&nbsp;be&nbsp;interpreted&nbsp;as&nbsp;columns&nbsp;in&nbsp;a<br>
+spreadsheet,&nbsp;lexsort&nbsp;returns&nbsp;an&nbsp;array&nbsp;of&nbsp;integer&nbsp;indices&nbsp;that&nbsp;describes<br>
+the&nbsp;sort&nbsp;order&nbsp;by&nbsp;multiple&nbsp;columns.&nbsp;The&nbsp;last&nbsp;key&nbsp;in&nbsp;the&nbsp;sequence&nbsp;is&nbsp;used<br>
+for&nbsp;the&nbsp;primary&nbsp;sort&nbsp;order,&nbsp;the&nbsp;second-to-last&nbsp;key&nbsp;for&nbsp;the&nbsp;secondary&nbsp;sort<br>
+order,&nbsp;and&nbsp;so&nbsp;on.&nbsp;The&nbsp;keys&nbsp;argument&nbsp;must&nbsp;be&nbsp;a&nbsp;sequence&nbsp;of&nbsp;objects&nbsp;that<br>
+can&nbsp;be&nbsp;converted&nbsp;to&nbsp;arrays&nbsp;of&nbsp;the&nbsp;same&nbsp;shape.&nbsp;If&nbsp;a&nbsp;2D&nbsp;array&nbsp;is&nbsp;provided<br>
+for&nbsp;the&nbsp;keys&nbsp;argument,&nbsp;it's&nbsp;rows&nbsp;are&nbsp;interpreted&nbsp;as&nbsp;the&nbsp;sorting&nbsp;keys&nbsp;and<br>
+sorting&nbsp;is&nbsp;according&nbsp;to&nbsp;the&nbsp;last&nbsp;row,&nbsp;second&nbsp;last&nbsp;row&nbsp;etc.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+keys&nbsp;:&nbsp;(k,&nbsp;N)&nbsp;array&nbsp;or&nbsp;tuple&nbsp;containing&nbsp;k&nbsp;(N,)-shaped&nbsp;sequences<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`k`&nbsp;different&nbsp;"columns"&nbsp;to&nbsp;be&nbsp;sorted.&nbsp;&nbsp;The&nbsp;last&nbsp;column&nbsp;(or&nbsp;row&nbsp;if<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`keys`&nbsp;is&nbsp;a&nbsp;2D&nbsp;array)&nbsp;is&nbsp;the&nbsp;primary&nbsp;sort&nbsp;key.<br>
+axis&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Axis&nbsp;to&nbsp;be&nbsp;indirectly&nbsp;sorted.&nbsp;&nbsp;By&nbsp;default,&nbsp;sort&nbsp;over&nbsp;the&nbsp;last&nbsp;axis.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+indices&nbsp;:&nbsp;(N,)&nbsp;ndarray&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;indices&nbsp;that&nbsp;sort&nbsp;the&nbsp;keys&nbsp;along&nbsp;the&nbsp;specified&nbsp;axis.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+argsort&nbsp;:&nbsp;Indirect&nbsp;sort.<br>
+ndarray.sort&nbsp;:&nbsp;In-place&nbsp;sort.<br>
+sort&nbsp;:&nbsp;Return&nbsp;a&nbsp;sorted&nbsp;copy&nbsp;of&nbsp;an&nbsp;array.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+Sort&nbsp;names:&nbsp;first&nbsp;by&nbsp;surname,&nbsp;then&nbsp;by&nbsp;name.<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;surnames&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;('Hertz',&nbsp;&nbsp;&nbsp;&nbsp;'Galilei',&nbsp;'Hertz')<br>
+&gt;&gt;&gt;&nbsp;first_names&nbsp;=&nbsp;('Heinrich',&nbsp;'Galileo',&nbsp;'Gustav')<br>
+&gt;&gt;&gt;&nbsp;ind&nbsp;=&nbsp;np.<a href="#-lexsort">lexsort</a>((first_names,&nbsp;surnames))<br>
+&gt;&gt;&gt;&nbsp;ind<br>
+<a href="#-array">array</a>([1,&nbsp;2,&nbsp;0])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;[surnames[i]&nbsp;+&nbsp;",&nbsp;"&nbsp;+&nbsp;first_names[i]&nbsp;for&nbsp;i&nbsp;in&nbsp;ind]<br>
+['Galilei,&nbsp;Galileo',&nbsp;'Hertz,&nbsp;Gustav',&nbsp;'Hertz,&nbsp;Heinrich']<br>
+&nbsp;<br>
+Sort&nbsp;two&nbsp;columns&nbsp;of&nbsp;numbers:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;[1,5,1,4,3,4,4]&nbsp;#&nbsp;First&nbsp;column<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;[9,4,0,4,0,2,1]&nbsp;#&nbsp;Second&nbsp;column<br>
+&gt;&gt;&gt;&nbsp;ind&nbsp;=&nbsp;np.<a href="#-lexsort">lexsort</a>((b,a))&nbsp;#&nbsp;Sort&nbsp;by&nbsp;a,&nbsp;then&nbsp;by&nbsp;b<br>
+&gt;&gt;&gt;&nbsp;print(ind)<br>
+[2&nbsp;0&nbsp;4&nbsp;6&nbsp;5&nbsp;3&nbsp;1]<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;[(a[i],b[i])&nbsp;for&nbsp;i&nbsp;in&nbsp;ind]<br>
+[(1,&nbsp;0),&nbsp;(1,&nbsp;9),&nbsp;(3,&nbsp;0),&nbsp;(4,&nbsp;1),&nbsp;(4,&nbsp;2),&nbsp;(4,&nbsp;4),&nbsp;(5,&nbsp;4)]<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;sorting&nbsp;is&nbsp;first&nbsp;according&nbsp;to&nbsp;the&nbsp;elements&nbsp;of&nbsp;``a``.<br>
+Secondary&nbsp;sorting&nbsp;is&nbsp;according&nbsp;to&nbsp;the&nbsp;elements&nbsp;of&nbsp;``b``.<br>
+&nbsp;<br>
+A&nbsp;normal&nbsp;``argsort``&nbsp;would&nbsp;have&nbsp;yielded:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;[(a[i],b[i])&nbsp;for&nbsp;i&nbsp;in&nbsp;np.argsort(a)]<br>
+[(1,&nbsp;9),&nbsp;(1,&nbsp;0),&nbsp;(3,&nbsp;0),&nbsp;(4,&nbsp;4),&nbsp;(4,&nbsp;2),&nbsp;(4,&nbsp;1),&nbsp;(5,&nbsp;4)]<br>
+&nbsp;<br>
+Structured&nbsp;arrays&nbsp;are&nbsp;sorted&nbsp;lexically&nbsp;by&nbsp;``argsort``:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-array">array</a>([(1,9),&nbsp;(5,4),&nbsp;(1,0),&nbsp;(4,4),&nbsp;(3,0),&nbsp;(4,2),&nbsp;(4,1)],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype=np.dtype([('x',&nbsp;int),&nbsp;('y',&nbsp;int)]))<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.argsort(x)&nbsp;#&nbsp;or&nbsp;np.argsort(x,&nbsp;order=('x',&nbsp;'y'))<br>
+<a href="#-array">array</a>([2,&nbsp;0,&nbsp;4,&nbsp;6,&nbsp;5,&nbsp;3,&nbsp;1])</tt></dd></dl>
+ <dl><dt><a name="-log_ints"><strong>log_ints</strong></a>(xmin, xmax, nints)</dt><dd><tt>This&nbsp;generates&nbsp;a&nbsp;set&nbsp;of&nbsp;logarithmic&nbsp;intervals&nbsp;beween&nbsp;xmin&nbsp;and&nbsp;xmax&nbsp;inclusive</tt></dd></dl>
+ <dl><dt><a name="-may_share_memory"><strong>may_share_memory</strong></a>(...)</dt><dd><tt><a href="#-may_share_memory">may_share_memory</a>(a,&nbsp;b,&nbsp;max_work=None)<br>
+&nbsp;<br>
+Determine&nbsp;if&nbsp;two&nbsp;arrays&nbsp;might&nbsp;share&nbsp;memory<br>
+&nbsp;<br>
+A&nbsp;return&nbsp;of&nbsp;True&nbsp;does&nbsp;not&nbsp;necessarily&nbsp;mean&nbsp;that&nbsp;the&nbsp;two&nbsp;arrays<br>
+share&nbsp;any&nbsp;element.&nbsp;&nbsp;It&nbsp;just&nbsp;means&nbsp;that&nbsp;they&nbsp;*might*.<br>
+&nbsp;<br>
+Only&nbsp;the&nbsp;memory&nbsp;bounds&nbsp;of&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;checked&nbsp;by&nbsp;default.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a,&nbsp;b&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;arrays<br>
+max_work&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Effort&nbsp;to&nbsp;spend&nbsp;on&nbsp;solving&nbsp;the&nbsp;overlap&nbsp;problem.&nbsp;&nbsp;See<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`shares_memory`&nbsp;for&nbsp;details.&nbsp;&nbsp;Default&nbsp;for&nbsp;``may_share_memory``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;to&nbsp;do&nbsp;a&nbsp;bounds&nbsp;check.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;bool<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+shares_memory<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-may_share_memory">may_share_memory</a>(np.<a href="#-array">array</a>([1,2]),&nbsp;np.<a href="#-array">array</a>([5,8,9]))<br>
+False<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-zeros">zeros</a>([3,&nbsp;4])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-may_share_memory">may_share_memory</a>(x[:,0],&nbsp;x[:,1])<br>
+True</tt></dd></dl>
+ <dl><dt><a name="-min_scalar_type"><strong>min_scalar_type</strong></a>(...)</dt><dd><tt><a href="#-min_scalar_type">min_scalar_type</a>(a)<br>
+&nbsp;<br>
+For&nbsp;scalar&nbsp;``a``,&nbsp;returns&nbsp;the&nbsp;data&nbsp;type&nbsp;with&nbsp;the&nbsp;smallest&nbsp;size<br>
+and&nbsp;smallest&nbsp;scalar&nbsp;kind&nbsp;which&nbsp;can&nbsp;hold&nbsp;its&nbsp;value.&nbsp;&nbsp;For&nbsp;non-scalar<br>
+array&nbsp;``a``,&nbsp;returns&nbsp;the&nbsp;vector's&nbsp;dtype&nbsp;unmodified.<br>
+&nbsp;<br>
+Floating&nbsp;point&nbsp;values&nbsp;are&nbsp;not&nbsp;demoted&nbsp;to&nbsp;integers,<br>
+and&nbsp;complex&nbsp;values&nbsp;are&nbsp;not&nbsp;demoted&nbsp;to&nbsp;floats.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a&nbsp;:&nbsp;scalar&nbsp;or&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;value&nbsp;whose&nbsp;minimal&nbsp;data&nbsp;type&nbsp;is&nbsp;to&nbsp;be&nbsp;found.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;dtype<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;minimal&nbsp;data&nbsp;type.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+..&nbsp;versionadded::&nbsp;1.6.0<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+result_type,&nbsp;promote_types,&nbsp;dtype,&nbsp;can_cast<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-min_scalar_type">min_scalar_type</a>(10)<br>
+dtype('uint8')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-min_scalar_type">min_scalar_type</a>(-260)<br>
+dtype('int16')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-min_scalar_type">min_scalar_type</a>(3.1)<br>
+dtype('float16')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-min_scalar_type">min_scalar_type</a>(1e50)<br>
+dtype('float64')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-min_scalar_type">min_scalar_type</a>(np.<a href="#-arange">arange</a>(4,dtype='f8'))<br>
+dtype('float64')</tt></dd></dl>
+ <dl><dt><a name="-nested_iters"><strong>nested_iters</strong></a>(...)</dt><dd><tt>Create&nbsp;nditers&nbsp;for&nbsp;use&nbsp;in&nbsp;nested&nbsp;loops<br>
+&nbsp;<br>
+Create&nbsp;a&nbsp;tuple&nbsp;of&nbsp;`nditer`&nbsp;objects&nbsp;which&nbsp;iterate&nbsp;in&nbsp;nested&nbsp;loops&nbsp;over<br>
+different&nbsp;axes&nbsp;of&nbsp;the&nbsp;op&nbsp;argument.&nbsp;The&nbsp;first&nbsp;iterator&nbsp;is&nbsp;used&nbsp;in&nbsp;the<br>
+outermost&nbsp;loop,&nbsp;the&nbsp;last&nbsp;in&nbsp;the&nbsp;innermost&nbsp;loop.&nbsp;Advancing&nbsp;one&nbsp;will&nbsp;change<br>
+the&nbsp;subsequent&nbsp;iterators&nbsp;to&nbsp;point&nbsp;at&nbsp;its&nbsp;new&nbsp;element.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+op&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;sequence&nbsp;of&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;<a href="#-array">array</a>(s)&nbsp;to&nbsp;iterate&nbsp;over.<br>
+&nbsp;<br>
+axes&nbsp;:&nbsp;list&nbsp;of&nbsp;list&nbsp;of&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Each&nbsp;item&nbsp;is&nbsp;used&nbsp;as&nbsp;an&nbsp;"op_axes"&nbsp;argument&nbsp;to&nbsp;an&nbsp;nditer<br>
+&nbsp;<br>
+flags,&nbsp;op_flags,&nbsp;op_dtypes,&nbsp;order,&nbsp;casting,&nbsp;buffersize&nbsp;(optional)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;`nditer`&nbsp;parameters&nbsp;of&nbsp;the&nbsp;same&nbsp;name<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+iters&nbsp;:&nbsp;tuple&nbsp;of&nbsp;nditer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;nditer&nbsp;for&nbsp;each&nbsp;item&nbsp;in&nbsp;`axes`,&nbsp;outermost&nbsp;first<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+nditer<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&nbsp;<br>
+Basic&nbsp;usage.&nbsp;Note&nbsp;how&nbsp;y&nbsp;is&nbsp;the&nbsp;"flattened"&nbsp;version&nbsp;of<br>
+[a[:,&nbsp;0,&nbsp;:],&nbsp;a[:,&nbsp;1,&nbsp;0],&nbsp;a[:,&nbsp;2,&nbsp;:]]&nbsp;since&nbsp;we&nbsp;specified<br>
+the&nbsp;first&nbsp;iter's&nbsp;axes&nbsp;as&nbsp;[1]<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(12).reshape(2,&nbsp;3,&nbsp;2)<br>
+&gt;&gt;&gt;&nbsp;i,&nbsp;j&nbsp;=&nbsp;np.<a href="#-nested_iters">nested_iters</a>(a,&nbsp;[[1],&nbsp;[0,&nbsp;2]],&nbsp;flags=["multi_index"])<br>
+&gt;&gt;&gt;&nbsp;for&nbsp;x&nbsp;in&nbsp;i:<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(i.multi_index)<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;y&nbsp;in&nbsp;j:<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print('',&nbsp;j.multi_index,&nbsp;y)<br>
+&nbsp;<br>
+(0,)<br>
+&nbsp;(0,&nbsp;0)&nbsp;0<br>
+&nbsp;(0,&nbsp;1)&nbsp;1<br>
+&nbsp;(1,&nbsp;0)&nbsp;6<br>
+&nbsp;(1,&nbsp;1)&nbsp;7<br>
+(1,)<br>
+&nbsp;(0,&nbsp;0)&nbsp;2<br>
+&nbsp;(0,&nbsp;1)&nbsp;3<br>
+&nbsp;(1,&nbsp;0)&nbsp;8<br>
+&nbsp;(1,&nbsp;1)&nbsp;9<br>
+(2,)<br>
+&nbsp;(0,&nbsp;0)&nbsp;4<br>
+&nbsp;(0,&nbsp;1)&nbsp;5<br>
+&nbsp;(1,&nbsp;0)&nbsp;10<br>
+&nbsp;(1,&nbsp;1)&nbsp;11</tt></dd></dl>
+ <dl><dt><a name="-packbits"><strong>packbits</strong></a>(...)</dt><dd><tt><a href="#-packbits">packbits</a>(myarray,&nbsp;axis=None)<br>
+&nbsp;<br>
+Packs&nbsp;the&nbsp;elements&nbsp;of&nbsp;a&nbsp;binary-valued&nbsp;array&nbsp;into&nbsp;bits&nbsp;in&nbsp;a&nbsp;uint8&nbsp;array.<br>
+&nbsp;<br>
+The&nbsp;result&nbsp;is&nbsp;padded&nbsp;to&nbsp;full&nbsp;bytes&nbsp;by&nbsp;inserting&nbsp;zero&nbsp;bits&nbsp;at&nbsp;the&nbsp;end.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+myarray&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;integers&nbsp;or&nbsp;booleans&nbsp;whose&nbsp;elements&nbsp;should&nbsp;be&nbsp;packed&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bits.<br>
+axis&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;dimension&nbsp;over&nbsp;which&nbsp;bit-packing&nbsp;is&nbsp;done.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``None``&nbsp;implies&nbsp;packing&nbsp;the&nbsp;flattened&nbsp;array.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+packed&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;type&nbsp;uint8&nbsp;whose&nbsp;elements&nbsp;represent&nbsp;bits&nbsp;corresponding&nbsp;to&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;logical&nbsp;(0&nbsp;or&nbsp;nonzero)&nbsp;value&nbsp;of&nbsp;the&nbsp;input&nbsp;elements.&nbsp;The&nbsp;shape&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`packed`&nbsp;has&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;dimensions&nbsp;as&nbsp;the&nbsp;input&nbsp;(unless&nbsp;`axis`<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;the&nbsp;output&nbsp;is&nbsp;1-D).<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+unpackbits:&nbsp;Unpacks&nbsp;elements&nbsp;of&nbsp;a&nbsp;uint8&nbsp;array&nbsp;into&nbsp;a&nbsp;binary-valued&nbsp;output<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([[[1,0,1],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,1,0]],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[1,1,0],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,0,1]]])<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-packbits">packbits</a>(a,&nbsp;axis=-1)<br>
+&gt;&gt;&gt;&nbsp;b<br>
+<a href="#-array">array</a>([[[160],[64]],[[192],[32]]],&nbsp;dtype=uint8)<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;in&nbsp;binary&nbsp;160&nbsp;=&nbsp;1010&nbsp;0000,&nbsp;64&nbsp;=&nbsp;0100&nbsp;0000,&nbsp;192&nbsp;=&nbsp;1100&nbsp;0000,<br>
+and&nbsp;32&nbsp;=&nbsp;0010&nbsp;0000.</tt></dd></dl>
+ <dl><dt><a name="-promote_types"><strong>promote_types</strong></a>(...)</dt><dd><tt><a href="#-promote_types">promote_types</a>(type1,&nbsp;type2)<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;data&nbsp;type&nbsp;with&nbsp;the&nbsp;smallest&nbsp;size&nbsp;and&nbsp;smallest&nbsp;scalar<br>
+kind&nbsp;to&nbsp;which&nbsp;both&nbsp;``type1``&nbsp;and&nbsp;``type2``&nbsp;may&nbsp;be&nbsp;safely&nbsp;cast.<br>
+The&nbsp;returned&nbsp;data&nbsp;type&nbsp;is&nbsp;always&nbsp;in&nbsp;native&nbsp;byte&nbsp;order.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;is&nbsp;symmetric,&nbsp;but&nbsp;rarely&nbsp;associative.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+type1&nbsp;:&nbsp;dtype&nbsp;or&nbsp;dtype&nbsp;specifier<br>
+&nbsp;&nbsp;&nbsp;&nbsp;First&nbsp;data&nbsp;type.<br>
+type2&nbsp;:&nbsp;dtype&nbsp;or&nbsp;dtype&nbsp;specifier<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Second&nbsp;data&nbsp;type.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;dtype<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;promoted&nbsp;data&nbsp;type.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+..&nbsp;versionadded::&nbsp;1.6.0<br>
+&nbsp;<br>
+Starting&nbsp;in&nbsp;NumPy&nbsp;1.9,&nbsp;promote_types&nbsp;function&nbsp;now&nbsp;returns&nbsp;a&nbsp;valid&nbsp;string<br>
+length&nbsp;when&nbsp;given&nbsp;an&nbsp;integer&nbsp;or&nbsp;float&nbsp;dtype&nbsp;as&nbsp;one&nbsp;argument&nbsp;and&nbsp;a&nbsp;string<br>
+dtype&nbsp;as&nbsp;another&nbsp;argument.&nbsp;Previously&nbsp;it&nbsp;always&nbsp;returned&nbsp;the&nbsp;input&nbsp;string<br>
+dtype,&nbsp;even&nbsp;if&nbsp;it&nbsp;wasn't&nbsp;long&nbsp;enough&nbsp;to&nbsp;store&nbsp;the&nbsp;max&nbsp;integer/float&nbsp;value<br>
+converted&nbsp;to&nbsp;a&nbsp;string.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+result_type,&nbsp;dtype,&nbsp;can_cast<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-promote_types">promote_types</a>('f4',&nbsp;'f8')<br>
+dtype('float64')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-promote_types">promote_types</a>('i8',&nbsp;'f4')<br>
+dtype('float64')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-promote_types">promote_types</a>('&gt;i8',&nbsp;'&lt;c8')<br>
+dtype('complex128')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-promote_types">promote_types</a>('i4',&nbsp;'S8')<br>
+dtype('S11')<br>
+&nbsp;<br>
+An&nbsp;example&nbsp;of&nbsp;a&nbsp;non-associative&nbsp;case:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;p&nbsp;=&nbsp;np.promote_types<br>
+&gt;&gt;&gt;&nbsp;p('S',&nbsp;p('i1',&nbsp;'u1'))<br>
+dtype('S6')<br>
+&gt;&gt;&gt;&nbsp;p(p('S',&nbsp;'i1'),&nbsp;'u1')<br>
+dtype('S4')</tt></dd></dl>
+ <dl><dt><a name="-putmask"><strong>putmask</strong></a>(...)</dt><dd><tt><a href="#-putmask">putmask</a>(a,&nbsp;mask,&nbsp;values)<br>
+&nbsp;<br>
+Changes&nbsp;elements&nbsp;of&nbsp;an&nbsp;array&nbsp;based&nbsp;on&nbsp;conditional&nbsp;and&nbsp;input&nbsp;values.<br>
+&nbsp;<br>
+Sets&nbsp;``a.flat[n]&nbsp;=&nbsp;values[n]``&nbsp;for&nbsp;each&nbsp;n&nbsp;where&nbsp;``mask.flat[n]==True``.<br>
+&nbsp;<br>
+If&nbsp;`values`&nbsp;is&nbsp;not&nbsp;the&nbsp;same&nbsp;size&nbsp;as&nbsp;`a`&nbsp;and&nbsp;`mask`&nbsp;then&nbsp;it&nbsp;will&nbsp;repeat.<br>
+This&nbsp;gives&nbsp;behavior&nbsp;different&nbsp;from&nbsp;``a[mask]&nbsp;=&nbsp;values``.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Target&nbsp;array.<br>
+mask&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Boolean&nbsp;mask&nbsp;array.&nbsp;It&nbsp;has&nbsp;to&nbsp;be&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;`a`.<br>
+values&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Values&nbsp;to&nbsp;put&nbsp;into&nbsp;`a`&nbsp;where&nbsp;`mask`&nbsp;is&nbsp;True.&nbsp;If&nbsp;`values`&nbsp;is&nbsp;smaller<br>
+&nbsp;&nbsp;&nbsp;&nbsp;than&nbsp;`a`&nbsp;it&nbsp;will&nbsp;be&nbsp;repeated.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+place,&nbsp;put,&nbsp;take,&nbsp;copyto<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(6).reshape(2,&nbsp;3)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-putmask">putmask</a>(x,&nbsp;x&gt;2,&nbsp;x**2)<br>
+&gt;&gt;&gt;&nbsp;x<br>
+<a href="#-array">array</a>([[&nbsp;0,&nbsp;&nbsp;1,&nbsp;&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;9,&nbsp;16,&nbsp;25]])<br>
+&nbsp;<br>
+If&nbsp;`values`&nbsp;is&nbsp;smaller&nbsp;than&nbsp;`a`&nbsp;it&nbsp;is&nbsp;repeated:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(5)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-putmask">putmask</a>(x,&nbsp;x&gt;1,&nbsp;[-33,&nbsp;-44])<br>
+&gt;&gt;&gt;&nbsp;x<br>
+<a href="#-array">array</a>([&nbsp;&nbsp;0,&nbsp;&nbsp;&nbsp;1,&nbsp;-33,&nbsp;-44,&nbsp;-33])</tt></dd></dl>
+ <dl><dt><a name="-ravel_multi_index"><strong>ravel_multi_index</strong></a>(...)</dt><dd><tt><a href="#-ravel_multi_index">ravel_multi_index</a>(multi_index,&nbsp;dims,&nbsp;mode='raise',&nbsp;order='C')<br>
+&nbsp;<br>
+Converts&nbsp;a&nbsp;tuple&nbsp;of&nbsp;index&nbsp;arrays&nbsp;into&nbsp;an&nbsp;array&nbsp;of&nbsp;flat<br>
+indices,&nbsp;applying&nbsp;boundary&nbsp;modes&nbsp;to&nbsp;the&nbsp;multi-index.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+multi_index&nbsp;:&nbsp;tuple&nbsp;of&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;tuple&nbsp;of&nbsp;integer&nbsp;arrays,&nbsp;one&nbsp;array&nbsp;for&nbsp;each&nbsp;dimension.<br>
+dims&nbsp;:&nbsp;tuple&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;shape&nbsp;of&nbsp;array&nbsp;into&nbsp;which&nbsp;the&nbsp;indices&nbsp;from&nbsp;``multi_index``&nbsp;apply.<br>
+mode&nbsp;:&nbsp;{'raise',&nbsp;'wrap',&nbsp;'clip'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;how&nbsp;out-of-bounds&nbsp;indices&nbsp;are&nbsp;handled.&nbsp;&nbsp;Can&nbsp;specify<br>
+&nbsp;&nbsp;&nbsp;&nbsp;either&nbsp;one&nbsp;mode&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;modes,&nbsp;one&nbsp;mode&nbsp;per&nbsp;index.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'raise'&nbsp;--&nbsp;raise&nbsp;an&nbsp;error&nbsp;(default)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'wrap'&nbsp;--&nbsp;wrap&nbsp;around<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'clip'&nbsp;--&nbsp;clip&nbsp;to&nbsp;the&nbsp;range<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;In&nbsp;'clip'&nbsp;mode,&nbsp;a&nbsp;negative&nbsp;index&nbsp;which&nbsp;would&nbsp;normally<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wrap&nbsp;will&nbsp;clip&nbsp;to&nbsp;0&nbsp;instead.<br>
+order&nbsp;:&nbsp;{'C',&nbsp;'F'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Determines&nbsp;whether&nbsp;the&nbsp;multi-index&nbsp;should&nbsp;be&nbsp;viewed&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;indexing&nbsp;in&nbsp;row-major&nbsp;(C-style)&nbsp;or&nbsp;column-major<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(Fortran-style)&nbsp;order.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+raveled_indices&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;indices&nbsp;into&nbsp;the&nbsp;flattened&nbsp;version&nbsp;of&nbsp;an&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;dimensions&nbsp;``dims``.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+unravel_index<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+..&nbsp;versionadded::&nbsp;1.6.0<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;arr&nbsp;=&nbsp;np.<a href="#-array">array</a>([[3,6,6],[4,5,1]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-ravel_multi_index">ravel_multi_index</a>(arr,&nbsp;(7,6))<br>
+<a href="#-array">array</a>([22,&nbsp;41,&nbsp;37])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-ravel_multi_index">ravel_multi_index</a>(arr,&nbsp;(7,6),&nbsp;order='F')<br>
+<a href="#-array">array</a>([31,&nbsp;41,&nbsp;13])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-ravel_multi_index">ravel_multi_index</a>(arr,&nbsp;(4,6),&nbsp;mode='clip')<br>
+<a href="#-array">array</a>([22,&nbsp;23,&nbsp;19])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-ravel_multi_index">ravel_multi_index</a>(arr,&nbsp;(4,4),&nbsp;mode=('clip','wrap'))<br>
+<a href="#-array">array</a>([12,&nbsp;13,&nbsp;13])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-ravel_multi_index">ravel_multi_index</a>((3,1,4,1),&nbsp;(6,7,8,9))<br>
+1621</tt></dd></dl>
+ <dl><dt><a name="-result_type"><strong>result_type</strong></a>(...)</dt><dd><tt><a href="#-result_type">result_type</a>(*arrays_and_dtypes)<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;type&nbsp;that&nbsp;results&nbsp;from&nbsp;applying&nbsp;the&nbsp;NumPy<br>
+type&nbsp;promotion&nbsp;rules&nbsp;to&nbsp;the&nbsp;arguments.<br>
+&nbsp;<br>
+Type&nbsp;promotion&nbsp;in&nbsp;NumPy&nbsp;works&nbsp;similarly&nbsp;to&nbsp;the&nbsp;rules&nbsp;in&nbsp;languages<br>
+like&nbsp;C++,&nbsp;with&nbsp;some&nbsp;slight&nbsp;differences.&nbsp;&nbsp;When&nbsp;both&nbsp;scalars&nbsp;and<br>
+arrays&nbsp;are&nbsp;used,&nbsp;the&nbsp;array's&nbsp;type&nbsp;takes&nbsp;precedence&nbsp;and&nbsp;the&nbsp;actual&nbsp;value<br>
+of&nbsp;the&nbsp;scalar&nbsp;is&nbsp;taken&nbsp;into&nbsp;account.<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;calculating&nbsp;3*a,&nbsp;where&nbsp;a&nbsp;is&nbsp;an&nbsp;array&nbsp;of&nbsp;32-bit&nbsp;floats,<br>
+intuitively&nbsp;should&nbsp;result&nbsp;in&nbsp;a&nbsp;32-bit&nbsp;float&nbsp;output.&nbsp;&nbsp;If&nbsp;the&nbsp;3&nbsp;is&nbsp;a<br>
+32-bit&nbsp;integer,&nbsp;the&nbsp;NumPy&nbsp;rules&nbsp;indicate&nbsp;it&nbsp;can't&nbsp;convert&nbsp;losslessly<br>
+into&nbsp;a&nbsp;32-bit&nbsp;float,&nbsp;so&nbsp;a&nbsp;64-bit&nbsp;float&nbsp;should&nbsp;be&nbsp;the&nbsp;result&nbsp;type.<br>
+By&nbsp;examining&nbsp;the&nbsp;value&nbsp;of&nbsp;the&nbsp;constant,&nbsp;'3',&nbsp;we&nbsp;see&nbsp;that&nbsp;it&nbsp;fits&nbsp;in<br>
+an&nbsp;8-bit&nbsp;integer,&nbsp;which&nbsp;can&nbsp;be&nbsp;cast&nbsp;losslessly&nbsp;into&nbsp;the&nbsp;32-bit&nbsp;float.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+arrays_and_dtypes&nbsp;:&nbsp;list&nbsp;of&nbsp;arrays&nbsp;and&nbsp;dtypes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;operands&nbsp;of&nbsp;some&nbsp;operation&nbsp;whose&nbsp;result&nbsp;type&nbsp;is&nbsp;needed.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;dtype<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;result&nbsp;type.<br>
+&nbsp;<br>
+See&nbsp;also<br>
+--------<br>
+dtype,&nbsp;promote_types,&nbsp;min_scalar_type,&nbsp;can_cast<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+..&nbsp;versionadded::&nbsp;1.6.0<br>
+&nbsp;<br>
+The&nbsp;specific&nbsp;algorithm&nbsp;used&nbsp;is&nbsp;as&nbsp;follows.<br>
+&nbsp;<br>
+Categories&nbsp;are&nbsp;determined&nbsp;by&nbsp;first&nbsp;checking&nbsp;which&nbsp;of&nbsp;boolean,<br>
+integer&nbsp;(int/uint),&nbsp;or&nbsp;floating&nbsp;point&nbsp;(float/complex)&nbsp;the&nbsp;maximum<br>
+kind&nbsp;of&nbsp;all&nbsp;the&nbsp;arrays&nbsp;and&nbsp;the&nbsp;scalars&nbsp;are.<br>
+&nbsp;<br>
+If&nbsp;there&nbsp;are&nbsp;only&nbsp;scalars&nbsp;or&nbsp;the&nbsp;maximum&nbsp;category&nbsp;of&nbsp;the&nbsp;scalars<br>
+is&nbsp;higher&nbsp;than&nbsp;the&nbsp;maximum&nbsp;category&nbsp;of&nbsp;the&nbsp;arrays,<br>
+the&nbsp;data&nbsp;types&nbsp;are&nbsp;combined&nbsp;with&nbsp;:func:`promote_types`<br>
+to&nbsp;produce&nbsp;the&nbsp;return&nbsp;value.<br>
+&nbsp;<br>
+Otherwise,&nbsp;`min_scalar_type`&nbsp;is&nbsp;called&nbsp;on&nbsp;each&nbsp;array,&nbsp;and<br>
+the&nbsp;resulting&nbsp;data&nbsp;types&nbsp;are&nbsp;all&nbsp;combined&nbsp;with&nbsp;:func:`promote_types`<br>
+to&nbsp;produce&nbsp;the&nbsp;return&nbsp;value.<br>
+&nbsp;<br>
+The&nbsp;set&nbsp;of&nbsp;int&nbsp;values&nbsp;is&nbsp;not&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;uint&nbsp;values&nbsp;for&nbsp;types<br>
+with&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;bits,&nbsp;something&nbsp;not&nbsp;reflected&nbsp;in<br>
+:func:`min_scalar_type`,&nbsp;but&nbsp;handled&nbsp;as&nbsp;a&nbsp;special&nbsp;case&nbsp;in&nbsp;`result_type`.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-result_type">result_type</a>(3,&nbsp;np.<a href="#-arange">arange</a>(7,&nbsp;dtype='i1'))<br>
+dtype('int8')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-result_type">result_type</a>('i4',&nbsp;'c8')<br>
+dtype('complex128')<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-result_type">result_type</a>(3.0,&nbsp;-2)<br>
+dtype('float64')</tt></dd></dl>
+ <dl><dt><a name="-set_numeric_ops"><strong>set_numeric_ops</strong></a>(...)</dt><dd><tt><a href="#-set_numeric_ops">set_numeric_ops</a>(op1=func1,&nbsp;op2=func2,&nbsp;...)<br>
+&nbsp;<br>
+Set&nbsp;numerical&nbsp;operators&nbsp;for&nbsp;array&nbsp;objects.<br>
+&nbsp;<br>
+..&nbsp;deprecated::&nbsp;1.16<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;the&nbsp;general&nbsp;case,&nbsp;use&nbsp;:c:func:`PyUFunc_ReplaceLoopBySignature`.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;ndarray&nbsp;subclasses,&nbsp;define&nbsp;the&nbsp;``__array_ufunc__``&nbsp;method&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;override&nbsp;the&nbsp;relevant&nbsp;ufunc.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+op1,&nbsp;op2,&nbsp;...&nbsp;:&nbsp;callable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Each&nbsp;``op&nbsp;=&nbsp;func``&nbsp;pair&nbsp;describes&nbsp;an&nbsp;operator&nbsp;to&nbsp;be&nbsp;replaced.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;For&nbsp;example,&nbsp;``add&nbsp;=&nbsp;lambda&nbsp;x,&nbsp;y:&nbsp;np.add(x,&nbsp;y)&nbsp;%&nbsp;5``&nbsp;would&nbsp;replace<br>
+&nbsp;&nbsp;&nbsp;&nbsp;addition&nbsp;by&nbsp;modulus&nbsp;5&nbsp;addition.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+saved_ops&nbsp;:&nbsp;list&nbsp;of&nbsp;callables<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;list&nbsp;of&nbsp;all&nbsp;operators,&nbsp;stored&nbsp;before&nbsp;making&nbsp;replacements.<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+..&nbsp;WARNING::<br>
+&nbsp;&nbsp;&nbsp;Use&nbsp;with&nbsp;care!&nbsp;&nbsp;Incorrect&nbsp;usage&nbsp;may&nbsp;lead&nbsp;to&nbsp;memory&nbsp;errors.<br>
+&nbsp;<br>
+A&nbsp;function&nbsp;replacing&nbsp;an&nbsp;operator&nbsp;cannot&nbsp;make&nbsp;use&nbsp;of&nbsp;that&nbsp;operator.<br>
+For&nbsp;example,&nbsp;when&nbsp;replacing&nbsp;add,&nbsp;you&nbsp;may&nbsp;not&nbsp;use&nbsp;``+``.&nbsp;&nbsp;Instead,<br>
+directly&nbsp;call&nbsp;ufuncs.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;def&nbsp;add_mod5(x,&nbsp;y):<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;np.add(x,&nbsp;y)&nbsp;%&nbsp;5<br>
+...<br>
+&gt;&gt;&gt;&nbsp;old_funcs&nbsp;=&nbsp;np.<a href="#-set_numeric_ops">set_numeric_ops</a>(add=add_mod5)<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(12).reshape((3,&nbsp;4))<br>
+&gt;&gt;&gt;&nbsp;x&nbsp;+&nbsp;x<br>
+<a href="#-array">array</a>([[0,&nbsp;2,&nbsp;4,&nbsp;1],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;0,&nbsp;2,&nbsp;4],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1,&nbsp;3,&nbsp;0,&nbsp;2]])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;ignore&nbsp;=&nbsp;np.<a href="#-set_numeric_ops">set_numeric_ops</a>(**old_funcs)&nbsp;#&nbsp;restore&nbsp;operators</tt></dd></dl>
+ <dl><dt><a name="-seterrobj"><strong>seterrobj</strong></a>(...)</dt><dd><tt><a href="#-seterrobj">seterrobj</a>(errobj)<br>
+&nbsp;<br>
+Set&nbsp;the&nbsp;object&nbsp;that&nbsp;defines&nbsp;floating-point&nbsp;error&nbsp;handling.<br>
+&nbsp;<br>
+The&nbsp;error&nbsp;object&nbsp;contains&nbsp;all&nbsp;information&nbsp;that&nbsp;defines&nbsp;the&nbsp;error&nbsp;handling<br>
+behavior&nbsp;in&nbsp;NumPy.&nbsp;`seterrobj`&nbsp;is&nbsp;used&nbsp;internally&nbsp;by&nbsp;the&nbsp;other<br>
+functions&nbsp;that&nbsp;set&nbsp;error&nbsp;handling&nbsp;behavior&nbsp;(`seterr`,&nbsp;`seterrcall`).<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+errobj&nbsp;:&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;error&nbsp;object,&nbsp;a&nbsp;list&nbsp;containing&nbsp;three&nbsp;elements:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[internal&nbsp;numpy&nbsp;buffer&nbsp;size,&nbsp;error&nbsp;mask,&nbsp;error&nbsp;callback&nbsp;function].<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;error&nbsp;mask&nbsp;is&nbsp;a&nbsp;single&nbsp;integer&nbsp;that&nbsp;holds&nbsp;the&nbsp;treatment&nbsp;information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;all&nbsp;four&nbsp;floating&nbsp;point&nbsp;errors.&nbsp;The&nbsp;information&nbsp;for&nbsp;each&nbsp;error&nbsp;type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;contained&nbsp;in&nbsp;three&nbsp;bits&nbsp;of&nbsp;the&nbsp;integer.&nbsp;If&nbsp;we&nbsp;print&nbsp;it&nbsp;in&nbsp;base&nbsp;8,&nbsp;we<br>
+&nbsp;&nbsp;&nbsp;&nbsp;can&nbsp;see&nbsp;what&nbsp;treatment&nbsp;is&nbsp;set&nbsp;for&nbsp;"invalid",&nbsp;"under",&nbsp;"over",&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"divide"&nbsp;(in&nbsp;that&nbsp;order).&nbsp;The&nbsp;printed&nbsp;string&nbsp;can&nbsp;be&nbsp;interpreted&nbsp;with<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;0&nbsp;:&nbsp;'ignore'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;1&nbsp;:&nbsp;'warn'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;2&nbsp;:&nbsp;'raise'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;3&nbsp;:&nbsp;'call'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;4&nbsp;:&nbsp;'print'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;5&nbsp;:&nbsp;'log'<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+geterrobj,&nbsp;seterr,&nbsp;geterr,&nbsp;seterrcall,&nbsp;geterrcall<br>
+getbufsize,&nbsp;setbufsize<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+For&nbsp;complete&nbsp;documentation&nbsp;of&nbsp;the&nbsp;types&nbsp;of&nbsp;floating-point&nbsp;exceptions&nbsp;and<br>
+treatment&nbsp;options,&nbsp;see&nbsp;`seterr`.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;old_errobj&nbsp;=&nbsp;np.<a href="#-geterrobj">geterrobj</a>()&nbsp;&nbsp;#&nbsp;first&nbsp;get&nbsp;the&nbsp;defaults<br>
+&gt;&gt;&gt;&nbsp;old_errobj<br>
+[10000,&nbsp;0,&nbsp;None]<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;def&nbsp;err_handler(type,&nbsp;flag):<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print("Floating&nbsp;point&nbsp;error&nbsp;(%s),&nbsp;with&nbsp;flag&nbsp;%s"&nbsp;%&nbsp;(type,&nbsp;flag))<br>
+...<br>
+&gt;&gt;&gt;&nbsp;new_errobj&nbsp;=&nbsp;[20000,&nbsp;12,&nbsp;err_handler]<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-seterrobj">seterrobj</a>(new_errobj)<br>
+&gt;&gt;&gt;&nbsp;np.base_repr(12,&nbsp;8)&nbsp;&nbsp;#&nbsp;int&nbsp;for&nbsp;divide=4&nbsp;('print')&nbsp;and&nbsp;over=1&nbsp;('warn')<br>
+'14'<br>
+&gt;&gt;&gt;&nbsp;np.geterr()<br>
+{'over':&nbsp;'warn',&nbsp;'divide':&nbsp;'print',&nbsp;'invalid':&nbsp;'ignore',&nbsp;'under':&nbsp;'ignore'}<br>
+&gt;&gt;&gt;&nbsp;np.geterrcall()&nbsp;is&nbsp;err_handler<br>
+True</tt></dd></dl>
+ <dl><dt><a name="-shares_memory"><strong>shares_memory</strong></a>(...)</dt><dd><tt><a href="#-shares_memory">shares_memory</a>(a,&nbsp;b,&nbsp;max_work=None)<br>
+&nbsp;<br>
+Determine&nbsp;if&nbsp;two&nbsp;arrays&nbsp;share&nbsp;memory<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a,&nbsp;b&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;arrays<br>
+max_work&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Effort&nbsp;to&nbsp;spend&nbsp;on&nbsp;solving&nbsp;the&nbsp;overlap&nbsp;problem&nbsp;(maximum&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;candidate&nbsp;solutions&nbsp;to&nbsp;consider).&nbsp;The&nbsp;following&nbsp;special<br>
+&nbsp;&nbsp;&nbsp;&nbsp;values&nbsp;are&nbsp;recognized:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_work=MAY_SHARE_EXACT&nbsp;&nbsp;(default)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;problem&nbsp;is&nbsp;solved&nbsp;exactly.&nbsp;In&nbsp;this&nbsp;case,&nbsp;the&nbsp;function&nbsp;returns<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;True&nbsp;only&nbsp;if&nbsp;there&nbsp;is&nbsp;an&nbsp;element&nbsp;shared&nbsp;between&nbsp;the&nbsp;arrays.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_work=MAY_SHARE_BOUNDS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Only&nbsp;the&nbsp;memory&nbsp;bounds&nbsp;of&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;checked.<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+numpy.TooHardError<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Exceeded&nbsp;max_work.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;bool<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+may_share_memory<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-may_share_memory">may_share_memory</a>(np.<a href="#-array">array</a>([1,2]),&nbsp;np.<a href="#-array">array</a>([5,8,9]))<br>
+False</tt></dd></dl>
+ <dl><dt><a name="-unpackbits"><strong>unpackbits</strong></a>(...)</dt><dd><tt><a href="#-unpackbits">unpackbits</a>(myarray,&nbsp;axis=None)<br>
+&nbsp;<br>
+Unpacks&nbsp;elements&nbsp;of&nbsp;a&nbsp;uint8&nbsp;array&nbsp;into&nbsp;a&nbsp;binary-valued&nbsp;output&nbsp;array.<br>
+&nbsp;<br>
+Each&nbsp;element&nbsp;of&nbsp;`myarray`&nbsp;represents&nbsp;a&nbsp;bit-field&nbsp;that&nbsp;should&nbsp;be&nbsp;unpacked<br>
+into&nbsp;a&nbsp;binary-valued&nbsp;output&nbsp;array.&nbsp;The&nbsp;shape&nbsp;of&nbsp;the&nbsp;output&nbsp;array&nbsp;is&nbsp;either<br>
+1-D&nbsp;(if&nbsp;`axis`&nbsp;is&nbsp;None)&nbsp;or&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;the&nbsp;input&nbsp;array&nbsp;with&nbsp;unpacking<br>
+done&nbsp;along&nbsp;the&nbsp;axis&nbsp;specified.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+myarray&nbsp;:&nbsp;ndarray,&nbsp;uint8&nbsp;type<br>
+&nbsp;&nbsp;&nbsp;Input&nbsp;array.<br>
+axis&nbsp;:&nbsp;int,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;dimension&nbsp;over&nbsp;which&nbsp;bit-unpacking&nbsp;is&nbsp;done.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``None``&nbsp;implies&nbsp;unpacking&nbsp;the&nbsp;flattened&nbsp;array.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+unpacked&nbsp;:&nbsp;ndarray,&nbsp;uint8&nbsp;type<br>
+&nbsp;&nbsp;&nbsp;The&nbsp;elements&nbsp;are&nbsp;binary-valued&nbsp;(0&nbsp;or&nbsp;1).<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+packbits&nbsp;:&nbsp;Packs&nbsp;the&nbsp;elements&nbsp;of&nbsp;a&nbsp;binary-valued&nbsp;array&nbsp;into&nbsp;bits&nbsp;in&nbsp;a&nbsp;uint8<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([[2],&nbsp;[7],&nbsp;[23]],&nbsp;dtype=np.uint8)<br>
+&gt;&gt;&gt;&nbsp;a<br>
+<a href="#-array">array</a>([[&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;7],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[23]],&nbsp;dtype=uint8)<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-unpackbits">unpackbits</a>(a,&nbsp;axis=1)<br>
+&gt;&gt;&gt;&nbsp;b<br>
+<a href="#-array">array</a>([[0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;1,&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;1,&nbsp;1,&nbsp;1],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;0,&nbsp;0,&nbsp;1,&nbsp;0,&nbsp;1,&nbsp;1,&nbsp;1]],&nbsp;dtype=uint8)</tt></dd></dl>
+ <dl><dt><a name="-unravel_index"><strong>unravel_index</strong></a>(...)</dt><dd><tt><a href="#-unravel_index">unravel_index</a>(indices,&nbsp;shape,&nbsp;order='C')<br>
+&nbsp;<br>
+Converts&nbsp;a&nbsp;flat&nbsp;index&nbsp;or&nbsp;array&nbsp;of&nbsp;flat&nbsp;indices&nbsp;into&nbsp;a&nbsp;tuple<br>
+of&nbsp;coordinate&nbsp;arrays.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+indices&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;integer&nbsp;array&nbsp;whose&nbsp;elements&nbsp;are&nbsp;indices&nbsp;into&nbsp;the&nbsp;flattened<br>
+&nbsp;&nbsp;&nbsp;&nbsp;version&nbsp;of&nbsp;an&nbsp;array&nbsp;of&nbsp;dimensions&nbsp;``shape``.&nbsp;Before&nbsp;version&nbsp;1.6.0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;function&nbsp;accepted&nbsp;just&nbsp;one&nbsp;index&nbsp;value.<br>
+shape&nbsp;:&nbsp;tuple&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;shape&nbsp;of&nbsp;the&nbsp;array&nbsp;to&nbsp;use&nbsp;for&nbsp;unraveling&nbsp;``indices``.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;versionchanged::&nbsp;1.16.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Renamed&nbsp;from&nbsp;``dims``&nbsp;to&nbsp;``shape``.<br>
+&nbsp;<br>
+order&nbsp;:&nbsp;{'C',&nbsp;'F'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Determines&nbsp;whether&nbsp;the&nbsp;indices&nbsp;should&nbsp;be&nbsp;viewed&nbsp;as&nbsp;indexing&nbsp;in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;row-major&nbsp;(C-style)&nbsp;or&nbsp;column-major&nbsp;(Fortran-style)&nbsp;order.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;..&nbsp;versionadded::&nbsp;1.6.0<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+unraveled_coords&nbsp;:&nbsp;tuple&nbsp;of&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Each&nbsp;array&nbsp;in&nbsp;the&nbsp;tuple&nbsp;has&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;the&nbsp;``indices``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;array.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+ravel_multi_index<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-unravel_index">unravel_index</a>([22,&nbsp;41,&nbsp;37],&nbsp;(7,6))<br>
+(<a href="#-array">array</a>([3,&nbsp;6,&nbsp;6]),&nbsp;<a href="#-array">array</a>([4,&nbsp;5,&nbsp;1]))<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-unravel_index">unravel_index</a>([31,&nbsp;41,&nbsp;13],&nbsp;(7,6),&nbsp;order='F')<br>
+(<a href="#-array">array</a>([3,&nbsp;6,&nbsp;6]),&nbsp;<a href="#-array">array</a>([4,&nbsp;5,&nbsp;1]))<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-unravel_index">unravel_index</a>(1621,&nbsp;(6,7,8,9))<br>
+(3,&nbsp;1,&nbsp;4,&nbsp;1)</tt></dd></dl>
+ <dl><dt><a name="-vdot"><strong>vdot</strong></a>(...)</dt><dd><tt><a href="#-vdot">vdot</a>(a,&nbsp;b)<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;dot&nbsp;product&nbsp;of&nbsp;two&nbsp;vectors.<br>
+&nbsp;<br>
+The&nbsp;<a href="#-vdot">vdot</a>(`a`,&nbsp;`b`)&nbsp;function&nbsp;handles&nbsp;complex&nbsp;numbers&nbsp;differently&nbsp;than<br>
+<a href="#-dot">dot</a>(`a`,&nbsp;`b`).&nbsp;&nbsp;If&nbsp;the&nbsp;first&nbsp;argument&nbsp;is&nbsp;complex&nbsp;the&nbsp;complex&nbsp;conjugate<br>
+of&nbsp;the&nbsp;first&nbsp;argument&nbsp;is&nbsp;used&nbsp;for&nbsp;the&nbsp;calculation&nbsp;of&nbsp;the&nbsp;dot&nbsp;product.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;`vdot`&nbsp;handles&nbsp;multidimensional&nbsp;arrays&nbsp;differently&nbsp;than&nbsp;`dot`:<br>
+it&nbsp;does&nbsp;*not*&nbsp;perform&nbsp;a&nbsp;matrix&nbsp;product,&nbsp;but&nbsp;flattens&nbsp;input&nbsp;arguments<br>
+to&nbsp;1-D&nbsp;vectors&nbsp;first.&nbsp;Consequently,&nbsp;it&nbsp;should&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;vectors.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;`a`&nbsp;is&nbsp;complex&nbsp;the&nbsp;complex&nbsp;conjugate&nbsp;is&nbsp;taken&nbsp;before&nbsp;calculation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;dot&nbsp;product.<br>
+b&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Second&nbsp;argument&nbsp;to&nbsp;the&nbsp;dot&nbsp;product.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+output&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Dot&nbsp;product&nbsp;of&nbsp;`a`&nbsp;and&nbsp;`b`.&nbsp;&nbsp;Can&nbsp;be&nbsp;an&nbsp;int,&nbsp;float,&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;complex&nbsp;depending&nbsp;on&nbsp;the&nbsp;types&nbsp;of&nbsp;`a`&nbsp;and&nbsp;`b`.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+dot&nbsp;:&nbsp;Return&nbsp;the&nbsp;dot&nbsp;product&nbsp;without&nbsp;using&nbsp;the&nbsp;complex&nbsp;conjugate&nbsp;of&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;first&nbsp;argument.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([1+2j,3+4j])<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-array">array</a>([5+6j,7+8j])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-vdot">vdot</a>(a,&nbsp;b)<br>
+(70-8j)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-vdot">vdot</a>(b,&nbsp;a)<br>
+(70+8j)<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;higher-dimensional&nbsp;arrays&nbsp;are&nbsp;flattened!<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([[1,&nbsp;4],&nbsp;[5,&nbsp;6]])<br>
+&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-array">array</a>([[4,&nbsp;1],&nbsp;[2,&nbsp;2]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-vdot">vdot</a>(a,&nbsp;b)<br>
+30<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-vdot">vdot</a>(b,&nbsp;a)<br>
+30<br>
+&gt;&gt;&gt;&nbsp;1*4&nbsp;+&nbsp;4*1&nbsp;+&nbsp;5*2&nbsp;+&nbsp;6*2<br>
+30</tt></dd></dl>
+ <dl><dt><a name="-where"><strong>where</strong></a>(...)</dt><dd><tt><a href="#-where">where</a>(condition,&nbsp;[x,&nbsp;y])<br>
+&nbsp;<br>
+Return&nbsp;elements&nbsp;chosen&nbsp;from&nbsp;`x`&nbsp;or&nbsp;`y`&nbsp;depending&nbsp;on&nbsp;`condition`.<br>
+&nbsp;<br>
+..&nbsp;note::<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;only&nbsp;`condition`&nbsp;is&nbsp;provided,&nbsp;this&nbsp;function&nbsp;is&nbsp;a&nbsp;shorthand&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.asarray(condition).nonzero()``.&nbsp;Using&nbsp;`nonzero`&nbsp;directly&nbsp;should&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;preferred,&nbsp;as&nbsp;it&nbsp;behaves&nbsp;correctly&nbsp;for&nbsp;subclasses.&nbsp;The&nbsp;rest&nbsp;of&nbsp;this<br>
+&nbsp;&nbsp;&nbsp;&nbsp;documentation&nbsp;covers&nbsp;only&nbsp;the&nbsp;case&nbsp;where&nbsp;all&nbsp;three&nbsp;arguments&nbsp;are<br>
+&nbsp;&nbsp;&nbsp;&nbsp;provided.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+condition&nbsp;:&nbsp;array_like,&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Where&nbsp;True,&nbsp;yield&nbsp;`x`,&nbsp;otherwise&nbsp;yield&nbsp;`y`.<br>
+x,&nbsp;y&nbsp;:&nbsp;array_like<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Values&nbsp;from&nbsp;which&nbsp;to&nbsp;choose.&nbsp;`x`,&nbsp;`y`&nbsp;and&nbsp;`condition`&nbsp;need&nbsp;to&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;broadcastable&nbsp;to&nbsp;some&nbsp;shape.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;with&nbsp;elements&nbsp;from&nbsp;`x`&nbsp;where&nbsp;`condition`&nbsp;is&nbsp;True,&nbsp;and&nbsp;elements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;`y`&nbsp;elsewhere.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+choose<br>
+nonzero&nbsp;:&nbsp;The&nbsp;function&nbsp;that&nbsp;is&nbsp;called&nbsp;when&nbsp;x&nbsp;and&nbsp;y&nbsp;are&nbsp;omitted<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+If&nbsp;all&nbsp;the&nbsp;arrays&nbsp;are&nbsp;1-D,&nbsp;`where`&nbsp;is&nbsp;equivalent&nbsp;to::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[xv&nbsp;if&nbsp;c&nbsp;else&nbsp;yv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;c,&nbsp;xv,&nbsp;yv&nbsp;in&nbsp;zip(condition,&nbsp;x,&nbsp;y)]<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(10)<br>
+&gt;&gt;&gt;&nbsp;a<br>
+<a href="#-array">array</a>([0,&nbsp;1,&nbsp;2,&nbsp;3,&nbsp;4,&nbsp;5,&nbsp;6,&nbsp;7,&nbsp;8,&nbsp;9])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-where">where</a>(a&nbsp;&lt;&nbsp;5,&nbsp;a,&nbsp;10*a)<br>
+<a href="#-array">array</a>([&nbsp;0,&nbsp;&nbsp;1,&nbsp;&nbsp;2,&nbsp;&nbsp;3,&nbsp;&nbsp;4,&nbsp;50,&nbsp;60,&nbsp;70,&nbsp;80,&nbsp;90])<br>
+&nbsp;<br>
+This&nbsp;can&nbsp;be&nbsp;used&nbsp;on&nbsp;multidimensional&nbsp;arrays&nbsp;too:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-where">where</a>([[True,&nbsp;False],&nbsp;[True,&nbsp;True]],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[1,&nbsp;2],&nbsp;[3,&nbsp;4]],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[9,&nbsp;8],&nbsp;[7,&nbsp;6]])<br>
+<a href="#-array">array</a>([[1,&nbsp;8],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;4]])<br>
+&nbsp;<br>
+The&nbsp;shapes&nbsp;of&nbsp;x,&nbsp;y,&nbsp;and&nbsp;the&nbsp;condition&nbsp;are&nbsp;broadcast&nbsp;together:<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;x,&nbsp;y&nbsp;=&nbsp;np.ogrid[:3,&nbsp;:4]<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-where">where</a>(x&nbsp;&lt;&nbsp;y,&nbsp;x,&nbsp;10&nbsp;+&nbsp;y)&nbsp;&nbsp;#&nbsp;both&nbsp;x&nbsp;and&nbsp;10+y&nbsp;are&nbsp;broadcast<br>
+<a href="#-array">array</a>([[10,&nbsp;&nbsp;0,&nbsp;&nbsp;0,&nbsp;&nbsp;0],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[10,&nbsp;11,&nbsp;&nbsp;1,&nbsp;&nbsp;1],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[10,&nbsp;11,&nbsp;12,&nbsp;&nbsp;2]])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-array">array</a>([[0,&nbsp;1,&nbsp;2],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;2,&nbsp;4],<br>
+...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;3,&nbsp;6]])<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-where">where</a>(a&nbsp;&lt;&nbsp;4,&nbsp;a,&nbsp;-1)&nbsp;&nbsp;#&nbsp;-1&nbsp;is&nbsp;broadcast<br>
+<a href="#-array">array</a>([[&nbsp;0,&nbsp;&nbsp;1,&nbsp;&nbsp;2],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0,&nbsp;&nbsp;2,&nbsp;-1],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0,&nbsp;&nbsp;3,&nbsp;-1]])</tt></dd></dl>
+ <dl><dt><a name="-zeros"><strong>zeros</strong></a>(...)</dt><dd><tt><a href="#-zeros">zeros</a>(shape,&nbsp;dtype=float,&nbsp;order='C')<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;new&nbsp;array&nbsp;of&nbsp;given&nbsp;shape&nbsp;and&nbsp;type,&nbsp;filled&nbsp;with&nbsp;zeros.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+shape&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;of&nbsp;the&nbsp;new&nbsp;array,&nbsp;e.g.,&nbsp;``(2,&nbsp;3)``&nbsp;or&nbsp;``2``.<br>
+dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;desired&nbsp;data-type&nbsp;for&nbsp;the&nbsp;array,&nbsp;e.g.,&nbsp;`numpy.int8`.&nbsp;&nbsp;Default&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`numpy.float64`.<br>
+order&nbsp;:&nbsp;{'C',&nbsp;'F'},&nbsp;optional,&nbsp;default:&nbsp;'C'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Whether&nbsp;to&nbsp;store&nbsp;multi-dimensional&nbsp;data&nbsp;in&nbsp;row-major<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(C-style)&nbsp;or&nbsp;column-major&nbsp;(Fortran-style)&nbsp;order&nbsp;in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;memory.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;zeros&nbsp;with&nbsp;the&nbsp;given&nbsp;shape,&nbsp;dtype,&nbsp;and&nbsp;order.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+zeros_like&nbsp;:&nbsp;Return&nbsp;an&nbsp;array&nbsp;of&nbsp;zeros&nbsp;with&nbsp;shape&nbsp;and&nbsp;type&nbsp;of&nbsp;input.<br>
+empty&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;uninitialized&nbsp;array.<br>
+ones&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;setting&nbsp;values&nbsp;to&nbsp;one.<br>
+full&nbsp;:&nbsp;Return&nbsp;a&nbsp;new&nbsp;array&nbsp;of&nbsp;given&nbsp;shape&nbsp;filled&nbsp;with&nbsp;value.<br>
+&nbsp;<br>
+Examples<br>
+--------<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-zeros">zeros</a>(5)<br>
+<a href="#-array">array</a>([&nbsp;0.,&nbsp;&nbsp;0.,&nbsp;&nbsp;0.,&nbsp;&nbsp;0.,&nbsp;&nbsp;0.])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-zeros">zeros</a>((5,),&nbsp;dtype=int)<br>
+<a href="#-array">array</a>([0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-zeros">zeros</a>((2,&nbsp;1))<br>
+<a href="#-array">array</a>([[&nbsp;0.],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0.]])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;s&nbsp;=&nbsp;(2,2)<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-zeros">zeros</a>(s)<br>
+<a href="#-array">array</a>([[&nbsp;0.,&nbsp;&nbsp;0.],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0.,&nbsp;&nbsp;0.]])<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;np.<a href="#-zeros">zeros</a>((2,),&nbsp;dtype=[('x',&nbsp;'i4'),&nbsp;('y',&nbsp;'i4')])&nbsp;#&nbsp;custom&nbsp;dtype<br>
+<a href="#-array">array</a>([(0,&nbsp;0),&nbsp;(0,&nbsp;0)],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dtype=[('x',&nbsp;'&lt;i4'),&nbsp;('y',&nbsp;'&lt;i4')])</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ALLOW_THREADS</strong> = 1<br>
+<strong>BUFSIZE</strong> = 8192<br>
+<strong>CLIP</strong> = 0<br>
+<strong>ERR_CALL</strong> = 3<br>
+<strong>ERR_DEFAULT</strong> = 521<br>
+<strong>ERR_IGNORE</strong> = 0<br>
+<strong>ERR_LOG</strong> = 5<br>
+<strong>ERR_PRINT</strong> = 4<br>
+<strong>ERR_RAISE</strong> = 2<br>
+<strong>ERR_WARN</strong> = 1<br>
+<strong>FLOATING_POINT_SUPPORT</strong> = 1<br>
+<strong>FPE_DIVIDEBYZERO</strong> = 1<br>
+<strong>FPE_INVALID</strong> = 8<br>
+<strong>FPE_OVERFLOW</strong> = 2<br>
+<strong>FPE_UNDERFLOW</strong> = 4<br>
+<strong>False_</strong> = False<br>
+<strong>Inf</strong> = inf<br>
+<strong>Infinity</strong> = inf<br>
+<strong>MAXDIMS</strong> = 32<br>
+<strong>MAY_SHARE_BOUNDS</strong> = 0<br>
+<strong>MAY_SHARE_EXACT</strong> = -1<br>
+<strong>NAN</strong> = nan<br>
+<strong>NINF</strong> = -inf<br>
+<strong>NZERO</strong> = -0.0<br>
+<strong>NaN</strong> = nan<br>
+<strong>PINF</strong> = inf<br>
+<strong>PZERO</strong> = 0.0<br>
+<strong>RAISE</strong> = 2<br>
+<strong>SHIFT_DIVIDEBYZERO</strong> = 0<br>
+<strong>SHIFT_INVALID</strong> = 9<br>
+<strong>SHIFT_OVERFLOW</strong> = 3<br>
+<strong>SHIFT_UNDERFLOW</strong> = 6<br>
+<strong>ScalarType</strong> = (&lt;class 'int'&gt;, &lt;class 'float'&gt;, &lt;class 'complex'&gt;, &lt;class 'int'&gt;, &lt;class 'bool'&gt;, &lt;class 'bytes'&gt;, &lt;class 'str'&gt;, &lt;class 'memoryview'&gt;, &lt;class 'numpy.timedelta64'&gt;, &lt;class 'numpy.float16'&gt;, &lt;class 'numpy.uint8'&gt;, &lt;class 'numpy.int8'&gt;, &lt;class 'numpy.complex64'&gt;, &lt;class 'numpy.float32'&gt;, &lt;class 'numpy.uint16'&gt;, &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.object_'&gt;, &lt;class 'numpy.complex128'&gt;, &lt;class 'numpy.float64'&gt;, &lt;class 'numpy.uint32'&gt;, ...)<br>
+<strong>True_</strong> = True<br>
+<strong>UFUNC_BUFSIZE_DEFAULT</strong> = 8192<br>
+<strong>UFUNC_PYVALS_NAME</strong> = 'UFUNC_PYVALS'<br>
+<strong>WRAP</strong> = 1<br>
+<strong>absolute</strong> = &lt;ufunc 'absolute'&gt;<br>
+<strong>add</strong> = &lt;ufunc 'add'&gt;<br>
+<strong>arccos</strong> = &lt;ufunc 'arccos'&gt;<br>
+<strong>arccosh</strong> = &lt;ufunc 'arccosh'&gt;<br>
+<strong>arcsin</strong> = &lt;ufunc 'arcsin'&gt;<br>
+<strong>arcsinh</strong> = &lt;ufunc 'arcsinh'&gt;<br>
+<strong>arctan</strong> = &lt;ufunc 'arctan'&gt;<br>
+<strong>arctan2</strong> = &lt;ufunc 'arctan2'&gt;<br>
+<strong>arctanh</strong> = &lt;ufunc 'arctanh'&gt;<br>
+<strong>bitwise_and</strong> = &lt;ufunc 'bitwise_and'&gt;<br>
+<strong>bitwise_not</strong> = &lt;ufunc 'invert'&gt;<br>
+<strong>bitwise_or</strong> = &lt;ufunc 'bitwise_or'&gt;<br>
+<strong>bitwise_xor</strong> = &lt;ufunc 'bitwise_xor'&gt;<br>
+<strong>c_</strong> = &lt;numpy.lib.index_tricks.CClass object&gt;<br>
+<strong>cast</strong> = {&lt;class 'numpy.timedelta64'&gt;: &lt;function &lt;lambda&gt;...umpy.bool_'&gt;: &lt;function &lt;lambda&gt; at 0x103d75950&gt;}<br>
+<strong>cbrt</strong> = &lt;ufunc 'cbrt'&gt;<br>
+<strong>ceil</strong> = &lt;ufunc 'ceil'&gt;<br>
+<strong>conj</strong> = &lt;ufunc 'conjugate'&gt;<br>
+<strong>conjugate</strong> = &lt;ufunc 'conjugate'&gt;<br>
+<strong>copysign</strong> = &lt;ufunc 'copysign'&gt;<br>
+<strong>cos</strong> = &lt;ufunc 'cos'&gt;<br>
+<strong>cosh</strong> = &lt;ufunc 'cosh'&gt;<br>
+<strong>deg2rad</strong> = &lt;ufunc 'deg2rad'&gt;<br>
+<strong>degrees</strong> = &lt;ufunc 'degrees'&gt;<br>
+<strong>divide</strong> = &lt;ufunc 'true_divide'&gt;<br>
+<strong>divmod</strong> = &lt;ufunc 'divmod'&gt;<br>
+<strong>e</strong> = 2.718281828459045<br>
+<strong>equal</strong> = &lt;ufunc 'equal'&gt;<br>
+<strong>euler_gamma</strong> = 0.5772156649015329<br>
+<strong>exp</strong> = &lt;ufunc 'exp'&gt;<br>
+<strong>exp2</strong> = &lt;ufunc 'exp2'&gt;<br>
+<strong>expm1</strong> = &lt;ufunc 'expm1'&gt;<br>
+<strong>fabs</strong> = &lt;ufunc 'fabs'&gt;<br>
+<strong>float_power</strong> = &lt;ufunc 'float_power'&gt;<br>
+<strong>floor</strong> = &lt;ufunc 'floor'&gt;<br>
+<strong>floor_divide</strong> = &lt;ufunc 'floor_divide'&gt;<br>
+<strong>fmax</strong> = &lt;ufunc 'fmax'&gt;<br>
+<strong>fmin</strong> = &lt;ufunc 'fmin'&gt;<br>
+<strong>fmod</strong> = &lt;ufunc 'fmod'&gt;<br>
+<strong>frexp</strong> = &lt;ufunc 'frexp'&gt;<br>
+<strong>gcd</strong> = &lt;ufunc 'gcd'&gt;<br>
+<strong>greater</strong> = &lt;ufunc 'greater'&gt;<br>
+<strong>greater_equal</strong> = &lt;ufunc 'greater_equal'&gt;<br>
+<strong>heaviside</strong> = &lt;ufunc 'heaviside'&gt;<br>
+<strong>hypot</strong> = &lt;ufunc 'hypot'&gt;<br>
+<strong>index_exp</strong> = &lt;numpy.lib.index_tricks.IndexExpression object&gt;<br>
+<strong>inf</strong> = inf<br>
+<strong>infty</strong> = inf<br>
+<strong>invert</strong> = &lt;ufunc 'invert'&gt;<br>
+<strong>isfinite</strong> = &lt;ufunc 'isfinite'&gt;<br>
+<strong>isinf</strong> = &lt;ufunc 'isinf'&gt;<br>
+<strong>isnan</strong> = &lt;ufunc 'isnan'&gt;<br>
+<strong>isnat</strong> = &lt;ufunc 'isnat'&gt;<br>
+<strong>lcm</strong> = &lt;ufunc 'lcm'&gt;<br>
+<strong>ldexp</strong> = &lt;ufunc 'ldexp'&gt;<br>
+<strong>left_shift</strong> = &lt;ufunc 'left_shift'&gt;<br>
+<strong>less</strong> = &lt;ufunc 'less'&gt;<br>
+<strong>less_equal</strong> = &lt;ufunc 'less_equal'&gt;<br>
+<strong>little_endian</strong> = True<br>
+<strong>log</strong> = &lt;ufunc 'log'&gt;<br>
+<strong>log10</strong> = &lt;ufunc 'log10'&gt;<br>
+<strong>log1p</strong> = &lt;ufunc 'log1p'&gt;<br>
+<strong>log2</strong> = &lt;ufunc 'log2'&gt;<br>
+<strong>logaddexp</strong> = &lt;ufunc 'logaddexp'&gt;<br>
+<strong>logaddexp2</strong> = &lt;ufunc 'logaddexp2'&gt;<br>
+<strong>logical_and</strong> = &lt;ufunc 'logical_and'&gt;<br>
+<strong>logical_not</strong> = &lt;ufunc 'logical_not'&gt;<br>
+<strong>logical_or</strong> = &lt;ufunc 'logical_or'&gt;<br>
+<strong>logical_xor</strong> = &lt;ufunc 'logical_xor'&gt;<br>
+<strong>matmul</strong> = &lt;ufunc 'matmul'&gt;<br>
+<strong>maximum</strong> = &lt;ufunc 'maximum'&gt;<br>
+<strong>mgrid</strong> = &lt;numpy.lib.index_tricks.MGridClass object&gt;<br>
+<strong>minimum</strong> = &lt;ufunc 'minimum'&gt;<br>
+<strong>mod</strong> = &lt;ufunc 'remainder'&gt;<br>
+<strong>modf</strong> = &lt;ufunc 'modf'&gt;<br>
+<strong>multiply</strong> = &lt;ufunc 'multiply'&gt;<br>
+<strong>nan</strong> = nan<br>
+<strong>nbytes</strong> = {&lt;class 'numpy.bool_'&gt;: 1, &lt;class 'numpy.int8'&gt;:....datetime64'&gt;: 8, &lt;class 'numpy.timedelta64'&gt;: 8}<br>
+<strong>negative</strong> = &lt;ufunc 'negative'&gt;<br>
+<strong>newaxis</strong> = None<br>
+<strong>nextafter</strong> = &lt;ufunc 'nextafter'&gt;<br>
+<strong>not_equal</strong> = &lt;ufunc 'not_equal'&gt;<br>
+<strong>ogrid</strong> = &lt;numpy.lib.index_tricks.OGridClass object&gt;<br>
+<strong>pi</strong> = 3.141592653589793<br>
+<strong>positive</strong> = &lt;ufunc 'positive'&gt;<br>
+<strong>power</strong> = &lt;ufunc 'power'&gt;<br>
+<strong>r_</strong> = &lt;numpy.lib.index_tricks.RClass object&gt;<br>
+<strong>rad2deg</strong> = &lt;ufunc 'rad2deg'&gt;<br>
+<strong>radians</strong> = &lt;ufunc 'radians'&gt;<br>
+<strong>reciprocal</strong> = &lt;ufunc 'reciprocal'&gt;<br>
+<strong>remainder</strong> = &lt;ufunc 'remainder'&gt;<br>
+<strong>right_shift</strong> = &lt;ufunc 'right_shift'&gt;<br>
+<strong>rint</strong> = &lt;ufunc 'rint'&gt;<br>
+<strong>s_</strong> = &lt;numpy.lib.index_tricks.IndexExpression object&gt;<br>
+<strong>sctypeDict</strong> = {'?': &lt;class 'numpy.bool_'&gt;, 0: &lt;class 'numpy.bool_'&gt;, 'byte': &lt;class 'numpy.int8'&gt;, 'b': &lt;class 'numpy.int8'&gt;, 1: &lt;class 'numpy.int8'&gt;, 'ubyte': &lt;class 'numpy.uint8'&gt;, 'B': &lt;class 'numpy.uint8'&gt;, 2: &lt;class 'numpy.uint8'&gt;, 'short': &lt;class 'numpy.int16'&gt;, 'h': &lt;class 'numpy.int16'&gt;, ...}<br>
+<strong>sctypeNA</strong> = {'Bool': &lt;class 'numpy.bool_'&gt;, &lt;class 'numpy.bo...'&gt;, &lt;class 'numpy.uint8'&gt;: 'UInt8', 'B': 'UInt8'}<br>
+<strong>sctypes</strong> = {'complex': [&lt;class 'numpy.complex64'&gt;, &lt;class 'numpy.complex128'&gt;, &lt;class 'numpy.complex256'&gt;], 'float': [&lt;class 'numpy.float16'&gt;, &lt;class 'numpy.float32'&gt;, &lt;class 'numpy.float64'&gt;, &lt;class 'numpy.float128'&gt;], 'int': [&lt;class 'numpy.int8'&gt;, &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.int32'&gt;, &lt;class 'numpy.int64'&gt;], 'others': [&lt;class 'bool'&gt;, &lt;class 'object'&gt;, &lt;class 'bytes'&gt;, &lt;class 'str'&gt;, &lt;class 'numpy.void'&gt;], 'uint': [&lt;class 'numpy.uint8'&gt;, &lt;class 'numpy.uint16'&gt;, &lt;class 'numpy.uint32'&gt;, &lt;class 'numpy.uint64'&gt;]}<br>
+<strong>sign</strong> = &lt;ufunc 'sign'&gt;<br>
+<strong>signbit</strong> = &lt;ufunc 'signbit'&gt;<br>
+<strong>sin</strong> = &lt;ufunc 'sin'&gt;<br>
+<strong>sinh</strong> = &lt;ufunc 'sinh'&gt;<br>
+<strong>spacing</strong> = &lt;ufunc 'spacing'&gt;<br>
+<strong>sqrt</strong> = &lt;ufunc 'sqrt'&gt;<br>
+<strong>square</strong> = &lt;ufunc 'square'&gt;<br>
+<strong>subtract</strong> = &lt;ufunc 'subtract'&gt;<br>
+<strong>tan</strong> = &lt;ufunc 'tan'&gt;<br>
+<strong>tanh</strong> = &lt;ufunc 'tanh'&gt;<br>
+<strong>tracemalloc_domain</strong> = 389047<br>
+<strong>true_divide</strong> = &lt;ufunc 'true_divide'&gt;<br>
+<strong>trunc</strong> = &lt;ufunc 'trunc'&gt;<br>
+<strong>typeDict</strong> = {'?': &lt;class 'numpy.bool_'&gt;, 0: &lt;class 'numpy.bool_'&gt;, 'byte': &lt;class 'numpy.int8'&gt;, 'b': &lt;class 'numpy.int8'&gt;, 1: &lt;class 'numpy.int8'&gt;, 'ubyte': &lt;class 'numpy.uint8'&gt;, 'B': &lt;class 'numpy.uint8'&gt;, 2: &lt;class 'numpy.uint8'&gt;, 'short': &lt;class 'numpy.int16'&gt;, 'h': &lt;class 'numpy.int16'&gt;, ...}<br>
+<strong>typeNA</strong> = {'Bool': &lt;class 'numpy.bool_'&gt;, &lt;class 'numpy.bo...'&gt;, &lt;class 'numpy.uint8'&gt;: 'UInt8', 'B': 'UInt8'}<br>
+<strong>typecodes</strong> = {'All': '?bhilqpBHILQPefdgFDGSUVOMm', 'AllFloat': 'efdgFDG', 'AllInteger': 'bBhHiIlLqQpP', 'Character': 'c', 'Complex': 'FDG', 'Datetime': 'Mm', 'Float': 'efdg', 'Integer': 'bhilqp', 'UnsignedInteger': 'BHILQP'}</td></tr></table>
+</body></html>

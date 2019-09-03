@@ -306,14 +306,14 @@ calculate_ionization (restart_stat)
 
 
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
-    /* We only want one process to write to the file */
+    /* We only want one process to write to the file, and we only do this if there is a disk */
 
 #ifdef MPI_ON
     if (rank_global == 0)
     {
 #endif
-      qdisk_save (files.disk, ztot);
-
+      if (geo.disk_type != DISK_NONE)
+        qdisk_save (files.disk, ztot);
 #ifdef MPI_ON
     }
     MPI_Barrier (MPI_COMM_WORLD);

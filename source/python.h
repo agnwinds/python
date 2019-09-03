@@ -844,13 +844,13 @@ typedef struct plasma
   double fmax[NXBANDS];         /* the maximum frequency photon seen in a band - this is incremented during photon flight */
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
-  
-  
-  /* banded, directional fluxes*/
+
+
+  /* banded, directional fluxes */
   double F_x[NXBANDS];
   double F_y[NXBANDS];
   double F_z[NXBANDS];
-  
+
 
 
 
@@ -1086,7 +1086,8 @@ typedef struct photon
     P_SEC = 8,                  //Photon hit secondary
     P_ADIABATIC = 9,            //records that a photon created a kpkt which was destroyed by adiabatic cooling
     P_ERROR_MATOM = 10,         //Some kind of error in processing of a photon which excited a macroattom
-    P_LOFREQ_FF = 11            //records a photon that had too low a frequency  
+    P_LOFREQ_FF = 11,           //records a photon that had too low a frequency
+    P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
   int nscat;                    /*number of scatterings */

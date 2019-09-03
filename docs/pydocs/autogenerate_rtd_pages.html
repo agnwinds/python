@@ -36,12 +36,25 @@ Arguments:<br>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-autogenerate_rtd_pages"><strong>autogenerate_rtd_pages</strong></a>()</dt><dd><tt>Write&nbsp;the&nbsp;RTD&nbsp;files&nbsp;to&nbsp;disk&nbsp;and&nbsp;add&nbsp;them&nbsp;to&nbsp;git,&nbsp;then&nbsp;run&nbsp;sphinx-build&nbsp;to&nbsp;generate&nbsp;the&nbsp;docs.</tt></dd></dl>
- <dl><dt><a name="-output_parameter"><strong>output_parameter</strong></a>(output_file: &lt;class 'TextIO'&gt;, parameter: dict, level: int = 0)</dt><dd><tt>Output&nbsp;a&nbsp;parameter&nbsp;to&nbsp;file<br>
+ <dl><dt><a name="-image_from_latex"><strong>image_from_latex</strong></a>(equation: str) -&gt; str</dt><dd><tt>Converts&nbsp;a&nbsp;LaTeX&nbsp;equation&nbsp;into&nbsp;an&nbsp;image<br>
 &nbsp;<br>
 Arguments:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;output_file:&nbsp;The&nbsp;file&nbsp;to&nbsp;write&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;equation:&nbsp;The&nbsp;string&nbsp;to&nbsp;convert&nbsp;into&nbsp;an&nbsp;image&nbsp;link<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;markdown&nbsp;image&nbsp;link&nbsp;to&nbsp;codecogs</tt></dd></dl>
+ <dl><dt><a name="-link_from_name"><strong>link_from_name</strong></a>(name: str) -&gt; str</dt><dd><tt>Converts&nbsp;a&nbsp;name&nbsp;into&nbsp;a&nbsp;mediawiki&nbsp;link<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name:&nbsp;The&nbsp;name&nbsp;to&nbsp;link&nbsp;to<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;mediawiki&nbsp;format&nbsp;link&nbsp;[[display&nbsp;name|link&nbsp;path]]</tt></dd></dl>
+ <dl><dt><a name="-output_parameter"><strong>output_parameter</strong></a>(parameter: dict, output_file: &lt;class 'TextIO'&gt;)</dt><dd><tt>Output&nbsp;a&nbsp;parameter&nbsp;to&nbsp;file<br>
+&nbsp;<br>
+Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;parameter:&nbsp;The&nbsp;parameter&nbsp;to&nbsp;write&nbsp;to&nbsp;file<br>
-&nbsp;&nbsp;&nbsp;&nbsp;level:&nbsp;The&nbsp;level&nbsp;of&nbsp;the&nbsp;parameter,&nbsp;e.g.&nbsp;heading,&nbsp;subheading</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;output_file:&nbsp;The&nbsp;file&nbsp;to&nbsp;write&nbsp;to</tt></dd></dl>
  <dl><dt><a name="-read_yaml"><strong>read_yaml</strong></a>(input_folder: str) -&gt; dict</dt><dd><tt>Read&nbsp;all&nbsp;the&nbsp;.yaml&nbsp;files&nbsp;in&nbsp;to&nbsp;dicts.&nbsp;Categorise&nbsp;by&nbsp;type,&nbsp;e.g.&nbsp;'reverb.mode'&nbsp;is&nbsp;type&nbsp;'reverb'<br>
 &nbsp;<br>
 Arguments:<br>
@@ -56,17 +69,18 @@ Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;output_file:&nbsp;The&nbsp;file&nbsp;to&nbsp;write&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;string:&nbsp;The&nbsp;text&nbsp;to&nbsp;write<br>
 &nbsp;&nbsp;&nbsp;&nbsp;level:&nbsp;The&nbsp;level&nbsp;of&nbsp;heading,&nbsp;0=heading,&nbsp;1=subheading,&nbsp;2=subsubheading,&nbsp;3=paragraph&nbsp;heading</tt></dd></dl>
- <dl><dt><a name="-write_rst"><strong>write_rst</strong></a>(output_folder: str, dox_structured: dict)</dt><dd><tt>Write&nbsp;the&nbsp;structured&nbsp;documentation&nbsp;out&nbsp;to&nbsp;rst&nbsp;files<br>
+ <dl><dt><a name="-write_rst"><strong>write_rst</strong></a>(output_folder: str, dox_all: dict, dox_structured: dict)</dt><dd><tt>Write&nbsp;the&nbsp;documentation&nbsp;out&nbsp;to&nbsp;rst&nbsp;files<br>
 &nbsp;<br>
 Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;output_folder:&nbsp;The&nbsp;folder&nbsp;to&nbsp;write&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;dox_structured:&nbsp;The&nbsp;tree&nbsp;structured&nbsp;documentation</tt></dd></dl>
- <dl><dt><a name="-write_str_indent"><strong>write_str_indent</strong></a>(output_file: &lt;class 'TextIO'&gt;, string: str, indent: str = '  ')</dt><dd><tt>Writes&nbsp;a&nbsp;passed&nbsp;string&nbsp;to&nbsp;the&nbsp;output&nbsp;file.&nbsp;If&nbsp;it's&nbsp;split&nbsp;over&nbsp;multiple&nbsp;lines,<br>
+ <dl><dt><a name="-write_str_indent"><strong>write_str_indent</strong></a>(output_file: &lt;class 'TextIO'&gt;, string: str, indent: str = '  ', all: bool = False)</dt><dd><tt>Writes&nbsp;a&nbsp;passed&nbsp;string&nbsp;to&nbsp;the&nbsp;output&nbsp;file.&nbsp;If&nbsp;it's&nbsp;split&nbsp;over&nbsp;multiple&nbsp;lines,<br>
 indent&nbsp;the&nbsp;subsequent&nbsp;lines&nbsp;by&nbsp;the&nbsp;specified&nbsp;amount.<br>
 &nbsp;<br>
 Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;output_file:&nbsp;The&nbsp;file&nbsp;to&nbsp;write&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;string:&nbsp;The&nbsp;text&nbsp;to&nbsp;write<br>
-&nbsp;&nbsp;&nbsp;&nbsp;indent:&nbsp;The&nbsp;indent&nbsp;to&nbsp;apply&nbsp;if&nbsp;the&nbsp;text&nbsp;splits&nbsp;over&nbsp;multiple&nbsp;lines</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;indent:&nbsp;The&nbsp;indent&nbsp;to&nbsp;apply&nbsp;if&nbsp;the&nbsp;text&nbsp;splits&nbsp;over&nbsp;multiple&nbsp;lines<br>
+&nbsp;&nbsp;&nbsp;&nbsp;all:&nbsp;Whether&nbsp;or&nbsp;not&nbsp;all&nbsp;lines&nbsp;should&nbsp;be&nbsp;indented</tt></dd></dl>
 </td></tr></table>
 </body></html>

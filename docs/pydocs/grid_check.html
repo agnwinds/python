@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module grid_check</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>grid_check</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/long/Python/py_progs/grid_check.py">/Users/long/Python/py_progs/grid_check.py</a></font></td></tr></table>
+    <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Space&nbsp;Telescope&nbsp;Science&nbsp;Institute<br>
+&nbsp;<br>
+Synopsis:&nbsp;&nbsp;<br>
+&nbsp;<br>
+When&nbsp;running&nbsp;a&nbsp;grid&nbsp;of&nbsp;models,&nbsp;it&nbsp;may&nbsp;not&nbsp;be&nbsp;clear&nbsp;whether<br>
+all&nbsp;of&nbsp;the&nbsp;runs&nbsp;have&nbsp;been&nbsp;completed,&nbsp;especially&nbsp;if&nbsp;time&nbsp;limits<br>
+are&nbsp;placed&nbsp;on&nbsp;the&nbsp;individual&nbsp;runs.&nbsp;&nbsp;This&nbsp;routine&nbsp;checks&nbsp;the<br>
+.sig&nbsp;files&nbsp;to&nbsp;see&nbsp;which&nbsp;of&nbsp;a&nbsp;list&nbsp;of&nbsp;.pf&nbsp;files&nbsp;have&nbsp;been&nbsp;<br>
+completed.<br>
+&nbsp;<br>
+&nbsp;<br>
+Command&nbsp;line&nbsp;usage&nbsp;(if&nbsp;any):<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;usage:&nbsp;grid_check.py&nbsp;filename&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;filename&nbsp;contains&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;.pf&nbsp;files&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;checked<br>
+&nbsp;<br>
+Description:&nbsp;&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;routine&nbsp;reads&nbsp;a&nbsp;file&nbsp;containing&nbsp;a&nbsp;list&nbsp;of&nbsp;.pf&nbsp;files,&nbsp;excluding&nbsp;those<br>
+&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;out.pf&nbsp;extensions&nbsp;and&nbsp;then&nbsp;checks&nbsp;the&nbsp;.sig&nbsp;files&nbsp;to&nbsp;see&nbsp;whether<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;run&nbsp;is&nbsp;complete.&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;generates&nbsp;a&nbsp;table&nbsp;Status.txt&nbsp;that&nbsp;contians&nbsp;the&nbsp;completion&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status&nbsp;of&nbsp;each&nbsp;.pf&nbsp;file&nbsp;and&nbsp;writes&nbsp;to&nbsp;the&nbsp;screen&nbsp;some&nbsp;information&nbsp;about<br>
+&nbsp;&nbsp;&nbsp;&nbsp;those&nbsp;that&nbsp;do&nbsp;not&nbsp;appear&nbsp;to&nbsp;be&nbsp;complete.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Additionally,&nbsp;if&nbsp;there&nbsp;are&nbsp;runs&nbsp;that&nbsp;look&nbsp;to&nbsp;be&nbsp;incomplete&nbsp;it&nbsp;writes&nbsp;out<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;file&nbsp;XRunRest&nbsp;that&nbsp;contains&nbsp;a&nbsp;proto&nbsp;run&nbsp;file&nbsp;for&nbsp;the&nbsp;incompleted&nbsp;runs.&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;will&nbsp;need&nbsp;to&nbsp;be&nbsp;edited&nbsp;for&nbsp;each&nbsp;specific&nbsp;situation.&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+Primary&nbsp;routines:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;doit<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+History:<br>
+&nbsp;<br>
+190516&nbsp;ksl&nbsp;Coding&nbsp;begun</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="astropy.io.ascii.html">astropy.io.ascii</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-doit"><strong>doit</strong></a>(filename='all.txt', outputfile='status.txt')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;containing&nbsp;a&nbsp;list&nbsp;of&nbsp;.pf&nbsp;files&nbsp;and&nbsp;<br>
+determine&nbsp;whether&nbsp;a&nbsp;run&nbsp;is&nbsp;complete.<br>
+&nbsp;<br>
+Description:<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;<br>
+History:</tt></dd></dl>
+ <dl><dt><a name="-read_file"><strong>read_file</strong></a>(filename, char='')</dt><dd><tt>Read&nbsp;a&nbsp;file&nbsp;and&nbsp;split&nbsp;it&nbsp;into&nbsp;words,&nbsp;eliminating&nbsp;comments<br>
+&nbsp;<br>
+char&nbsp;is&nbsp;an&nbsp;optional&nbsp;parameter&nbsp;used&nbsp;as&nbsp;the&nbsp;delimiter&nbsp;for<br>
+splitting&nbsp;lines&nbsp;into&nbsp;words.&nbsp;&nbsp;Otherwise&nbsp;white&nbsp;space&nbsp;is<br>
+assumed.<br>
+&nbsp;<br>
+History:<br>
+&nbsp;<br>
+110729&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Added&nbsp;optional&nbsp;delimiters<br>
+141209&nbsp;&nbsp;&nbsp;&nbsp;ksl&nbsp;&nbsp;&nbsp;&nbsp;Reinstalled&nbsp;in&nbsp;my&nbsp;standard&nbsp;startup<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;script&nbsp;so&nbsp;there&nbsp;was&nbsp;flexibility&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;read&nbsp;any&nbsp;ascii&nbsp;file</tt></dd></dl>
+</td></tr></table>
+</body></html>

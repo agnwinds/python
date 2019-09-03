@@ -85,13 +85,13 @@ translate (w, pp, tau_scat, tau, nres)
 {
   int istat;
   int ndomain;
-  
-  
 
-  if (where_in_wind (pp->x, &ndomain) < 0) //If the return is negative, this means we are outside the wind
+
+
+  if (where_in_wind (pp->x, &ndomain) < 0)      //If the return is negative, this means we are outside the wind
   {
-    istat = translate_in_space (pp);  //And so we should translate in space
-	  
+    istat = translate_in_space (pp);    //And so we should translate in space
+
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
   {
@@ -151,10 +151,10 @@ translate_in_space (pp)
 
   if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
   {
-    stuff_phot (pp, &ptest);	  
+    stuff_phot (pp, &ptest);
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
                                            From here on we should be in the grid  */
-		ds+=DFUDGE; /* We need to make sure we take account of the little extra path..*/
+    ds += DFUDGE;               //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
     /* XXX this is a test.  We check at the start whether we are in the grid */
 
     if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
@@ -180,7 +180,7 @@ translate_in_space (pp)
       {
         if ((delta = ds_in_cell (ndom, &ptest)) > 0)
         {
-          move_phot (&ptest, delta + DFUDGE);		  
+          move_phot (&ptest, delta + DFUDGE);
           s += delta + DFUDGE;  // The distance the photon has moved
         }
         else
@@ -283,7 +283,7 @@ ds_to_wind (pp, ndom_current)
       }
 
       if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-      {		  
+      {
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_RMAX;
@@ -292,13 +292,13 @@ ds_to_wind (pp, ndom_current)
       /* Check if the photon hits the inner or outer windcone */
 
       if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-      {		  
+      {
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_INNER_CONE;
       }
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-      {		  
+      {
         ds = x;
         *ndom_current = ndom;
         xxxbound = BOUND_OUTER_CONE;
@@ -489,7 +489,7 @@ return and record an error */
   }
   else if (one->inwind == W_IGNORE)
   {
-    smax += one->dfudge;	
+    smax += one->dfudge;
     move_phot (p, smax);
     return (p->istat);
 
@@ -801,11 +801,16 @@ walls (p, pold, normal)
   else if (geo.disk_type == DISK_FLAT && p->x[2] * pold->x[2] < 0.0)
   {                             /* Then the photon crossed the xy plane and probably hit the disk */
     s = (-(pold->x[2])) / (pold->lmn[2]);
+
+    if (s < 0 && fabs (pold->x[2]) < wmain[pold->grid].dfudge && pold->lmn[2] * p->lmn[2] < 0.0)
+      return (p->istat = P_REPOSITION_ERROR);
+
     if (s < 0)
     {
       Error ("walls: distance %g<0. Position %g %g %g \n", s, p->x[0], p->x[1], p->x[2]);
       return (-1);
     }
+
     /* Check whether it hit the disk plane beyond the geo.diskrad**2 */
     vmove (pold->x, pold->lmn, s, xxx);
 

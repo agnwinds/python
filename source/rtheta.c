@@ -69,7 +69,7 @@ rtheta_ds_in_cell (ndom, p)
   smax = ds_to_sphere (zdom[ndom].wind_x[ix], p);
   s = ds_to_sphere (zdom[ndom].wind_x[ix + 1], p);
   if (s < smax)
-  {	  
+  {
     smax = s;
   }
 
@@ -78,13 +78,13 @@ rtheta_ds_in_cell (ndom, p)
 
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz], p);
   if (s < smax)
-  {	  
+  {
     smax = s;
   }
 
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz + 1], p);
   if (s < smax)
-  {	  
+  {
     smax = s;
   }
 

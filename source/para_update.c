@@ -95,7 +95,7 @@ communicate_estimators_para ()
     redhelper[mpi_i + 15 * NPLASMA] = plasmamain[mpi_i].rad_force_es[0] / np_mpi_global;
     redhelper[mpi_i + 16 * NPLASMA] = plasmamain[mpi_i].rad_force_es[1] / np_mpi_global;
     redhelper[mpi_i + 17 * NPLASMA] = plasmamain[mpi_i].rad_force_es[2] / np_mpi_global;
-	
+
     for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
     {
       redhelper[mpi_i + (18 + mpi_j) * NPLASMA] = plasmamain[mpi_i].xj[mpi_j] / np_mpi_global;
@@ -169,9 +169,9 @@ communicate_estimators_para ()
     plasmamain[mpi_i].ip_direct = redhelper2[mpi_i + 12 * NPLASMA];
     plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i + 13 * NPLASMA];
     plasmamain[mpi_i].heat_auger = redhelper2[mpi_i + 14 * NPLASMA];
-	plasmamain[mpi_i].rad_force_es[0] = redhelper2[mpi_i + 15 * NPLASMA];
-	plasmamain[mpi_i].rad_force_es[1] = redhelper2[mpi_i + 16 * NPLASMA];
-	plasmamain[mpi_i].rad_force_es[2] = redhelper2[mpi_i + 17 * NPLASMA];
+    plasmamain[mpi_i].rad_force_es[0] = redhelper2[mpi_i + 15 * NPLASMA];
+    plasmamain[mpi_i].rad_force_es[1] = redhelper2[mpi_i + 16 * NPLASMA];
+    plasmamain[mpi_i].rad_force_es[2] = redhelper2[mpi_i + 17 * NPLASMA];
 
     for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
     {
