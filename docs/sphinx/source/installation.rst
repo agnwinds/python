@@ -76,11 +76,14 @@ Directory structure
 
 The python directory structure is fairly simple:
 
-progs
-  Location of source code for various fully debugged version of the code (Note that the progs directory is created as part of the make process.)
+source
+  Location of source code
 
 bin
   Location of executables
+
+docs 
+  Location of documentation, including sphinx docs, doxygen, parameters and documentation for the python programs in py_progs.
 
 data
   Location for all datafiles. Files that are mainly for reference should be gzipped to save space. Such files are not recreated in
@@ -91,7 +94,10 @@ bin
 software
   This directory contains libraries which are used in in python that must be recompiled when creating an installation on a new machine, primarily Bill Pence's cfitsio package and the GNU scientific library gsl
 
-Example
+py_progs
+  python programs for helping analyse the code. We recommend adding this directory to your PATH and PYTHON_PATH environment variables.
+
+examples
   A directory with a few examples of python runs. (Note that the input files will have changed and so one may not be able to run these examples without some changes in the input files.)
 
 Please help by reporting bugs in installation
