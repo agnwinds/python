@@ -804,6 +804,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     // macro atom case SS
     d1 = den_config (xplasma, lptr->nconfigl);
     d2 = den_config (xplasma, lptr->nconfigu);
+    levden_upper = xplasma->levden[config[lptr->nconfigu].nden];
   }
 
   else
@@ -824,6 +825,7 @@ calls to two_level atom
     }
     two_level_atom (lptr, xplasma, &d1, &d2);   // Calculate d1 & d2
     xplasma->density[nion] = d_hold;    // Restore w
+    levden_upper = d2 / xplasma->density[nion];
   }
 
 /* At this point d1 and d2 are known for all of the various ways sobolev can be called, and whether
@@ -836,17 +838,6 @@ calls to two_level atom
    * JM -- I've added something that checks if the fractional population for the upper level is below 
    * or equal to the minimum too.
    */
-
-  if (lptr->nconfigu >= 0)      // then we have an upper level identified, see #601 
-    nden = config[lptr->nconfigu].nden;
-  else
-    nden = -1;
-
-  /* sometimes nden is -1 for levels that are not "NLTE", so we have to catch this case */
-  if (nden >= 0)
-    levden_upper = xplasma->levden[nden];
-  else
-    levden_upper = xplasma->density[nion];
 
   if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (levden_upper <= DENSITY_MIN))
   {
