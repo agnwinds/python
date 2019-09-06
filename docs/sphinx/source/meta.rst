@@ -8,6 +8,49 @@ This documentation is written in **ReStructured Text**, and parsed by **Sphinx**
 A general guide to **ReStructured Text** can be found `here <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_.
 We're trying to maintain a roughly consistent format for the documentation.
 
+Installing the documentation tools
+----------------------------------
+
+This guide is produced using **Sphinx**.
+**Sphinx** is written in **python** and available from the **pip** package manager.
+We require the **Python 3** version of **Sphinx**. Install it, and the other modules required, as:
+
+.. code :: bash
+
+    cd docs/sphinx
+    pip3 install -r requirements.txt
+
+Building the documentation
+--------------------------
+
+Once **Sphinx** is installed, you can make the documentation using a **Makefile** as:
+
+.. code :: bash
+
+    make html
+
+You can tell if the documentation was built successfully by looking at the output of ``make html``.
+You should see:
+
+.. code ::
+
+    build succeeded.
+
+    The HTML pages are in html.
+
+If the build was successful then the documentation can be viewed by opening ``docs/sphinx/html/index.html``.
+Many errors will not stop the build process.
+Details on the build errors can be found in the section on :ref:`Common errors & warnings`.
+
+You can make minor changes to the documentation and recompile using :code:`make html` again.
+If you add new pages or move existing ones, the table of contents will need to be regenerated.
+Do this via:
+
+.. code :: bash
+
+    make clean
+    make html
+
 General documentation
 =====================
 
@@ -75,6 +118,18 @@ Content relating to a specific **GitHub** issue/pull request can be linked direc
 .. code :: rst
 
   This arose due to issue :issue:`1`, which was fixed by :user:`kslong` using :pr:`56`.
+
+When writing a table, use the full form where possible as:
+
+.. code :: rst
+
+    +----+----+
+    |Name|X   |
+    +----+----+
+
++----+----+
+|Name|X   |
++----+----+
 
 
 Parameter documentation
@@ -165,7 +220,7 @@ wind types and the like) we create subfolders to group them into. The order that
 enter the filenames explicitly in the ``docs/sphinx/source/input/parameters.rst`` file.
 
 
-Common Errors & Warnings
+Common errors & warnings
 ========================
 
 Undefined Label
