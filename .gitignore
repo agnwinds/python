@@ -93,3 +93,4 @@ logfile
 
 # IDE files
 .idea/
+py_progs/.idea/

@@ -35,7 +35,7 @@ due to photon frequencies being shifted outside of the wavelength range of the
 spectrum. If a significant number of photons are removed from the spectrum
 in this way, then the following Error is printed,
 
-.. code::
+.. code ::
 
    spectrum_create: Fraction of photons lost: 0.10 wi/ freq. low, 0.19 w/freq hi
 
@@ -84,7 +84,7 @@ various spectra` table, as shown below,
         0  838923   26143   29057       0       0      55  101775       0       0
 
 In the above table, one can see that 17,209 photons which scattered more than
-MAXSCAT times contributed to the the scattered spectrum, suggesting that a large
+``MAXSCAT`` times contributed to the the scattered spectrum, suggesting that a large
 number of photons were terminated due to too many scatters.
 
 .. note::
@@ -102,4 +102,4 @@ number of photons were terminated due to too many scatters.
 Issue
 =====
 
-The original GitHub issue discussing this problem can be found here; :issue:`471`.
+The original **GitHub** issue discussing this problem can be found here; :issue:`471`.

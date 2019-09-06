@@ -3,7 +3,7 @@ Bound-bound electron collision strengths
 
 Source
 ======
-We use the Chianti atomic database, specifically the *.scups files. These "contain the effective electron collision strengths scaled according to the rules formulated by `Burgess & Tully 1992, A&A, 254, 436 <http://articles.adsabs.harvard.edu/full/1992A%26A...254..436B>`_
+We use the Chianti atomic database, specifically the \*.scups files. These "contain the effective electron collision strengths scaled according to the rules formulated by `Burgess & Tully 1992, A&A, 254, 436 <http://articles.adsabs.harvard.edu/full/1992A%26A...254..436B>`_
 The values in the file are functional fits to :math:`\Upsilon(T)`$ which we referred to as :math:`\Omega` in our calculations for collisional de-excitation rate coefficient
 
 
@@ -18,7 +18,7 @@ These values of :math:`\Upsilon` simply replace :math:`\Omega`.
 Translation to Python format
 ============================
 
-It is necessary to link each line in our line list with the relevant electron collision strength. This is achieved using the python script "coll_stren_lookup.py" which first reads in the  "lines_linked_ver_2.py" line list, then attempts to work out which lines are which by comparing the energy and the oscillator strength of the line. If these match to within a factor of 10% then the code logs this as a possible match. If better matches come along, then the code adopts those instead. 
+It is necessary to link each line in our line list with the relevant electron collision strength. This is achieved using the python script "coll_stren_lookup.py" which first reads in the  "lines_linked_ver_2.py" line list, then attempts to work out which lines are which by comparing the energy and the oscillator strength of the line. If these match to within a factor of 10% then the code logs this as a possible match. If better matches come along, then the code adopts those instead.
 
 Each matched line get a line in the data file which is basically all of the line data for the matched line. This is to give Python the best chance of linking it up with the line internally.
 
@@ -67,11 +67,10 @@ The data is stored in Python in the Coll\_stren structure which has memebers
 - double sct[N_COLL_STREN_PTS] -The scaled temperature points in the fit
 - double scups[N_COLL_STREN_PTS]- The sclaed coll sttengths in ythe fit
 
- 
+
 There is also a member in the line structure (coll_index) which points to the relevant record
 
 comments
 ========
 
 This data has been generated to match the Verner line list. If we want to use the Kurukz line list, then a new set of data should be made
-

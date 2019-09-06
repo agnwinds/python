@@ -1,5 +1,5 @@
 Title
-===========
+=====
 Description.
 Use :ref:`Parameter.name` to link to other parameters, or other pages within the documentation.
 
