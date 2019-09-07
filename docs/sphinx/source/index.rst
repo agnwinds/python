@@ -11,12 +11,12 @@ Radiative transfer and ionisation code
 --------------------------------------
 
 Python is a Monte-Carlo radiative transfer code designed to simulate the spectrum of biconical (or spherical)
-winds in disk systems.  It was origianally written by 
-`Long and Knigge (2002) <https://ui.adsabs.harvard.edu/abs/2002ApJ...579..725L/abstract>`_ and 
+winds in disk systems.  It was origianally written by
+`Long and Knigge (2002) <https://ui.adsabs.harvard.edu/abs/2002ApJ...579..725L/abstract>`_ and
 was intended for simulating the spectra of winds in cataclysmic variables. Since then, it has
-also been used to simulate the spectra of systems ranging from young stellar objects to AGN.  
+also been used to simulate the spectra of systems ranging from young stellar objects to AGN.
 
-The name Python is today unfortunate, and changing the name is an ongoing debate within the development team.  
+The name Python is today unfortunate, and changing the name is an ongoing debate within the development team.
 The program is written in C and can be compiled on systems runining various flavors of linux, including OSX on Macs.
 
 
@@ -73,6 +73,7 @@ Mandy Hewitt
    :caption: Documentation
 
    installation
+   running_python
    input
    output
    *

@@ -36,7 +36,7 @@ extensions = ['sphinx.ext.mathjax',
     'sphinx.ext.githubpages',
     'sphinx.ext.todo',
     'sphinx.ext.autosectionlabel',
-#     'sphinx_issues',
+    'sphinx_issues',
 ]
 
 
@@ -45,6 +45,11 @@ extensions = ['sphinx.ext.mathjax',
 todo_include_todos = True
 # -- GitHub repo for issues -----------------------------------------------
 issues_github_path = "agnwinds/python"
+# -- Suppress warnings about autosectionlabel duplicates ------------------
+suppress_warnings = [
+    'autosectionlabel.*',
+]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
