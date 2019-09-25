@@ -1348,11 +1348,11 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
   alphamin = H * freqmin / (BOLTZMANN * t_bl);
   alphamax = H * freqmax / (BOLTZMANN * t_bl);
 //  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
-  
-  *f =  emittance_bb (freqmin, freqmax, t_bl)*lum_bl/(t_bl*t_bl*t_bl*t_bl*STEFAN_BOLTZMANN);
-  
-  
-  
+
+  *f = emittance_bb (freqmin, freqmax, t_bl) * lum_bl / (t_bl * t_bl * t_bl * t_bl * STEFAN_BOLTZMANN);
+
+
+
   return (lum_bl);
 }
 
