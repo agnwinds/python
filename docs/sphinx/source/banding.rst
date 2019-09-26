@@ -45,7 +45,7 @@ frequency bands considered important. Photons are now generated with the weight,
 
 where, again, this is a summation over all radiation sources. :math:`N` is the
 total number of photons, :math:`f_{i}` is the fraction of photons emerging from
-frequency band :math:`i`, :math:`\nu_{i}` and :math:`nu_{i+1}` are the lower
+frequency band :math:`i`, :math:`\nu_{i}` and :math:`\nu_{i+1}` are the lower
 and upper frequency boundaries for each frequency band and :math:`L_{\nu, j}` is
 the luminosity of the radiation source. Hence, more photons from frequency bands
 with a larger fraction :math:`f_{i}` will be generated. However, photons from
@@ -55,7 +55,97 @@ increased weight.
 
 This scheme has the benefit of allowing the generation of a lower number of
 photons whilst still sufficiently sampling important frequency ranges, 
-decreasing the computational expense of a simulation.
+decreasing the computational expense of a simulation. As such, this is the
+preferred sampling method.
 
-Implemented Banding Schemes
-===========================
+Available Sampling Schemes
+==========================
+
+Python currently implements seven pre-defined frequency bands and and two
+flexible *run time* banding schemes. The parameter used to define the photon
+sampling scheme is,
+
+``Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)``
+
+.. admonition :: Minimum and Maximum Wavelengths
+
+    At present, the largest wavelength a photon can be is hardwired to 20,000
+    Angstroms. The smallest wavelength a photon can take is defined by the 
+    temperature of hottest radiation source, but is at least 115 Angstroms - 
+    twice that of the Helium edge.
+
+.. todo :: more detailed description of the different bands
+
+T_star
+------
+
+Create a single frequency band given a temperature T, which is the temperature
+of the hottest radiation source in the model. All photons will then be 
+generated from this single frequency band.
+
+CV
+--
+
+Pre-defined bands which have been tuned for use with CV systems, where a hot
+accretion disk (~100,000 K) is assumed to exist. In this scheme, there are four
+bands where the majority of photons are generated with a wavelength of 912
+Angstroms or less.
+
+YSO
+---
+
+Pre-defined bands which have been tuned for use with YSO systems. In this 
+scheme, there are four bands.
+
+AGN
+---
+
+Pre-defined which have been tuned for use with AGN system. In this scheme, there
+are ten bands, with a minimum frequency of :math:`1 \times 10^{14}` Hz and a 
+maximum frequency of :math:`1 \times 10^{20}` Hz.
+
+.. todo :: this band mode just look like uniform banding but with different f1, f2? am I confusing something here?
+
+min_max_freq
+------------
+
+Create a single band using the minimum and maximum wavelength as described by
+the minimum and maximum wavelengths calculated for the current model.
+
+user_bands
+----------
+
+This allows a user to create their own frequency bands, defined by photon
+energies measured in electron volts. The first band has the lowest photon energy
+and each subsequent band must have a larger energy than the previous band. Each
+band also requires a minimum fraction of photons to be sampled from this band,
+where the sum of the fractions for each band must be equal to or less than one.
+
+.. todo :: there are currently no checks to see if nbands > 20 or if the total fraction >= 1
+
+.. admonition :: Maximum Number of Bands
+
+    Currently, a maximum of 20 frequency bands can be defined.
+
+cloudy_test
+-----------
+
+This set of bands were originally created for use in testing against the
+photoionisation and spectral synthesis code Cloudy_.
+
+.. _Cloudy: https://www.nublado.org
+
+wide
+----
+
+Pre-defined bands which have very wide frequency ranges. The purpose of this
+band is for testing, hence is best avoided for a working model. 
+
+.. todo :: very similar to uniform banding? but slight bias for smaller frequencies
+
+logarithmic
+-----------
+
+This is the same as ``user_bands``, however the frequency bands are now defined
+in log space. This allows one to better sample a frequency range which spans many
+orders of magnitude.
