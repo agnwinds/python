@@ -1,8 +1,8 @@
-Spectrum Generation
-###################
+Issues with Generating Spectra
+##############################
 
 With the current machinery to create spectra, it is possible to come across the
-situation where models with large optical depths or wind velocities generate
+situation where models with large optical depth or wind velocities will generate
 spectra with different flux normalisation depending on the wavelength range.
 
 This problem was originally encountered whilst modelling Tidal Disruption Events.
@@ -94,12 +94,7 @@ number of photons were terminated due to too many scatters.
    number of photons in the simulation, but only the number of photons in the current
    process.
 
-
-.. todo::
-
-   Link to wiki entry on information about the spectral files when created
-
-Issue
-=====
+GitHub Issue
+============
 
 The original **GitHub** issue discussing this problem can be found here; :issue:`471`.
