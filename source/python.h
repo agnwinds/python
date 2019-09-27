@@ -618,6 +618,24 @@ struct geometry
 }
 geo;
 
+/*
+ * EP: 27/09/19
+ * Added enumerator to define different banding modes to make the banding
+ * code more self-documenting
+ */
+
+enum band_definition_enum
+{
+  T_STAR_BAND = 0,
+  MIN_MAX_FREQ_BAND = 1,
+  CV_BAND = 2,
+  YSO_BAND = 3,
+  USER_DEF_BAND = 4,
+  CLOUDY_TEST_BAND = 5,
+  WIDE_BAND = 6,
+  AGN_BAND = 7,
+  LOG_USER_DEF_BAND = 8
+};
 
 /* xdisk is a structure that is used to store information about the disk in a system */
 #define NRINGS	3001            /* The actual number of rings completely defined

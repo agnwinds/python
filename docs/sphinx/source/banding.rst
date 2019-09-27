@@ -74,8 +74,6 @@ sampling scheme is,
     temperature of hottest radiation source, but is at least 115 Angstroms - 
     twice that of the Helium edge.
 
-.. todo :: more detailed description of the different bands
-
 T_star
 ------
 
@@ -104,8 +102,6 @@ Pre-defined which have been tuned for use with AGN system. In this scheme, there
 are ten bands, with a minimum frequency of :math:`1 \times 10^{14}` Hz and a 
 maximum frequency of :math:`1 \times 10^{20}` Hz.
 
-.. todo :: this band mode just look like uniform banding but with different f1, f2? am I confusing something here?
-
 min_max_freq
 ------------
 
@@ -121,31 +117,40 @@ and each subsequent band must have a larger energy than the previous band. Each
 band also requires a minimum fraction of photons to be sampled from this band,
 where the sum of the fractions for each band must be equal to or less than one.
 
-.. todo :: there are currently no checks to see if nbands > 20 or if the total fraction >= 1
-
 .. admonition :: Maximum Number of Bands
 
-    Currently, a maximum of 20 frequency bands can be defined.
+    Currently, a maximum of 20 frequency bands can be defined. If a user 
+    attemps to specify more than than 20 bands, Python will create an error
+    message and fallback to using 20 bands.
 
 cloudy_test
 -----------
 
-This set of bands were originally created for use in testing against the
-photoionisation and spectral synthesis code Cloudy_.
+This set of bands were created for use in testing against the photoionisation 
+and spectral synthesis code Cloudy_.
 
 .. _Cloudy: https://www.nublado.org
 
 wide
 ----
 
-Pre-defined bands which have very wide frequency ranges. The purpose of this
-band is for testing, hence is best avoided for a working model. 
-
-.. todo :: very similar to uniform banding? but slight bias for smaller frequencies
+Pre-defined bands which have very wide frequency range. The purpose of this
+band is for testing, hence is best to avoid using this band for a working model. 
 
 logarithmic
 -----------
 
 This is the same as ``user_bands``, however the frequency bands are now defined
-in log space. This allows one to better sample a frequency range which spans many
-orders of magnitude.
+in log space. This allows one to better sample a frequency range which spans
+many orders of magnitude. 
+
+.. admonition :: Maximum Number of Bands
+
+    Currently, a maximum of 20 frequency bands can be defined. If a user 
+    attemps to specify more than than 20 bands, Python will create an error
+    message and fallback to using 20 bands.
+
+.. admonition :: Minimum Fraction
+
+    For logarithmic user defined bands, the fraction of each band is set to
+    1 / nbands.
