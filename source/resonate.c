@@ -784,7 +784,7 @@ sobolev (one, x, den_ion, lptr, dvds)
   int nion;
   double d_hold;
   int nplasma;
-  int ndom, nden;
+  int ndom;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
