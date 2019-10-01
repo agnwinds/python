@@ -72,6 +72,7 @@ WindPtr (w);
   double c_rec, n_rec, o_rec, fe_rec;   //1701- NSH more outputs to show cooling from a few other elements
   double c_lum, n_lum, o_lum, fe_lum;   //1708- NSH and luminosities as well
   double cool_dr_metals;
+  double F_x_tot, F_y_tot, F_z_tot;
   int nn;                       //1701 - loop variable to compute recomb cooling
 
   double volume;
@@ -106,7 +107,7 @@ WindPtr (w);
    * size must must be increased.
    */
 
-  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 126) * (floor (NPLASMA / np_mpi_global) + 1);
+  size_of_commbuffer = 8 * (9 * nions + nlte_levels + 3 * nphot_total + 15 * NXBANDS + 126) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -271,6 +272,18 @@ WindPtr (w);
     for (i = 0; i < 3; i++)
       plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * C);
 
+
+/* Normalise the computed flux in cells by band */
+
+    for (i = 0; i < geo.nxfreq; i++)
+    {
+      plasmamain[n].F_x[i] = plasmamain[n].F_x[i] / volume;
+      plasmamain[n].F_y[i] = plasmamain[n].F_y[i] / volume;
+      plasmamain[n].F_z[i] = plasmamain[n].F_z[i] / volume;
+    }
+
+
+
     /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e
      * previous value of t_e.  Note that this may not be  best way to determien the cooling.
      * Changes made here should also be reflected in wind2d.c.  At present, adiabatic colling
@@ -393,6 +406,9 @@ WindPtr (w);
         MPI_Pack (plasmamain[n].xave_freq, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].xsd_freq, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].nxtot, NXBANDS, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].F_x, NXBANDS, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].F_y, NXBANDS, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].F_z, NXBANDS, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].max_freq, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_lines, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_ff, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -531,6 +547,9 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].xave_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].xsd_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].nxtot, NXBANDS, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_x, NXBANDS, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_y, NXBANDS, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_z, NXBANDS, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].max_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -658,7 +677,10 @@ WindPtr (w);
     Log ("Outputting heatcool file for connecting to zeus\n");
     fptr = fopen ("py_heatcool.dat", "w");
     fprintf (fptr,
-             "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z\n");
+             "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z ");
+    for (i = 0; i < geo.nxfreq; i++)
+      fprintf (fptr, "F_x_%i F_y_%i F_z_%i ", i, i, i); //directional flux by band
+    fprintf (fptr, "\n ");
 
   }
 
@@ -782,7 +804,11 @@ WindPtr (w);
         fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
         fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);     //electron scattering radiation force in the w(x) direction
         fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);     //electron scattering radiation force in the phi(rotational) directionz direction
-        fprintf (fptr, "%e\n ", plasmamain[nplasma].rad_force_es[2]);   //electron scattering radiation force in the z direction
+        fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[2]);     //electron scattering radiation force in the z direction
+        for (i = 0; i < geo.nxfreq; i++)
+          fprintf (fptr, "%e %e %e ", plasmamain[nplasma].F_x[i], plasmamain[nplasma].F_y[i], plasmamain[nplasma].F_z[i]);      //directional flux by band
+        fprintf (fptr, "\n ");
+
 
       }
     }
@@ -1012,6 +1038,20 @@ WindPtr (w);
         }
         Log ("\n");
       }
+      Log ("F_es %i %e %e %e\n", nshell, plasmamain[nshell].rad_force_es[0], plasmamain[nshell].rad_force_es[1],
+           plasmamain[nshell].rad_force_es[2]);
+      F_x_tot = F_y_tot = F_z_tot = 0.0;
+      for (i = 0; i < geo.nxfreq; i++)
+      {
+        Log ("Flux %e %e %e\n", plasmamain[nshell].F_x[i], plasmamain[nshell].F_y[i], plasmamain[nshell].F_z[i]);
+        F_x_tot += plasmamain[nshell].F_x[i];
+        F_y_tot += plasmamain[nshell].F_y[i];
+        F_z_tot += plasmamain[nshell].F_z[i];
+
+      }
+      Log ("Flux_tot %e %e %e\n", F_x_tot, F_y_tot, F_z_tot);
+
+
     }
   }
 
@@ -1100,6 +1140,7 @@ wind_rad_init ()
       plasmamain[n].xsd_freq[i] = 0.0;  /* NSH 120815 Zero the standard deviation counter */
       plasmamain[n].fmin[i] = geo.xfreq[i + 1]; /* Set the minium frequency to the max frequency in the band */
       plasmamain[n].fmax[i] = geo.xfreq[i];     /* Set the maximum frequency to the min frequency in the band */
+      plasmamain[n].F_x[i] = plasmamain[n].F_y[i] = plasmamain[n].F_z[i] = 0.0;
     }
 
 

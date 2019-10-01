@@ -1693,6 +1693,13 @@ a:printf ("There are %i wind elements in this model\n", NDIM2);
          xplasma->pl_alpha[nn], xplasma->exp_w[nn], xplasma->exp_temp[nn]);
   }
 
+  Log ("Flux:\n");
+  for (nn = 0; nn < geo.nxfreq; nn++)
+  {
+    Log ("F_w= %9.2e  F_phi= %9.2e  F_z= %9.2e \n", xplasma->F_x[nn], xplasma->F_y[nn], xplasma->F_z[nn]);
+  }
+
+
 
   goto a;
 
@@ -3497,6 +3504,9 @@ b:return (0);
 }
 
 
+
+
+
 /**************************************************************************
 
 
@@ -3789,4 +3799,110 @@ grid_summary (WindPtr w, char rootname[], int ochoice)
 
   }
   return (0);
+}
+
+
+
+
+
+
+int
+flux_summary (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n, np;
+  char filename[LINELENGTH];
+  int ii, jj;
+  FILE *fptr, *fopen ();
+  PlasmaPtr xplasma;
+  int ndom, m;
+
+
+  if (ochoice)
+  {
+    strcpy (filename, rootname);
+    strcat (filename, ".flux_summary");
+    fptr = fopen (filename, "w");
+  }
+  else
+    printf ("This mode is recommended purely for file output\n");
+
+
+  /* JM 1411 -- First we have to write out some headers so that 
+     astropy can read the output */
+
+
+
+
+  if (ochoice)
+  {
+    fprintf (fptr, "n\tnplasma\tinwind\ti\tj\tx\tz\tr\ttheta ");
+
+    for (m = 0; m < geo.nxfreq; m++)
+    {
+      fprintf (fptr, "\tF_w%i\tF_p%i\tF_z%i ", m, m, m);
+
+    }
+    fprintf (fptr, "\n");
+  }
+
+  Log ("py_wind_sub does not work yet\n");
+  ndom = 0;
+  for (n = 0; n < NDIM2; n++)
+  {
+    wind_n_to_ij (ndom, n, &ii, &jj);
+
+    if (w[n].vol > 0.0)
+    {
+      np = w[n].nplasma;
+      xplasma = &plasmamain[np];
+      if (ochoice)
+      {
+        fprintf (fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e ", n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], w[n].rcen,
+                 w[n].thetacen / RADIAN);
+        for (m = 0; m < geo.nxfreq; m++)
+        {
+          fprintf (fptr, "%8.4e %8.4e %8.4e ", plasmamain[np].F_x[m], plasmamain[np].F_y[m], plasmamain[np].F_z[m]);
+        }
+        fprintf (fptr, "\n");
+      }
+
+    }
+    else
+    {
+      /* if we aren't inwind then print out a load of zeroes */
+
+      /* printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+         0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+         0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+         0.0 0.0 0.0 0.0 0.0 0.0 \
+         0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+         n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+       */
+
+      if (ochoice)
+      {
+        fprintf (fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 ", n, np, -2, ii, jj, w[n].x[0], w[n].x[2]);
+        for (m = 0; m < geo.nxfreq; m++)
+        {
+          fprintf (fptr, "0.0 0.0 0.0 ");
+
+        }
+        fprintf (fptr, "\n");
+      }
+    }
+  }
+
+
+  if (ochoice)
+  {
+    fclose (fptr);
+    printf ("\nSaved flux details\n");
+  }
+
+  return (0);
+
+
 }

@@ -779,17 +779,18 @@ sobolev (one, x, den_ion, lptr, dvds)
      struct lines *lptr;
      double dvds;
 {
-  double tau, xden_ion, tau_x_dvds;
+  double tau, xden_ion, tau_x_dvds, levden_upper;
   double two_level_atom (), d1, d2;
   int nion;
   double d_hold;
   int nplasma;
-  int ndom;
+  int ndom, nden;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   ndom = wmain[plasmamain->nwind].ndom;
+  nion = lptr->nion;
 
   if ((dvds = fabs (dvds)) == 0.0)      // This forces dvds to be positive -- a good thing!
   {
@@ -803,12 +804,11 @@ sobolev (one, x, den_ion, lptr, dvds)
     // macro atom case SS
     d1 = den_config (xplasma, lptr->nconfigl);
     d2 = den_config (xplasma, lptr->nconfigu);
+    levden_upper = xplasma->levden[config[lptr->nconfigu].nden];
   }
 
   else
   {
-    nion = lptr->nion;
-
 /* Next few steps to allow used of better calculation of density of this particular
 ion which was done above in calculate ds.  It was made necessary by a change in the
 calls to two_level atom
@@ -825,6 +825,7 @@ calls to two_level atom
     }
     two_level_atom (lptr, xplasma, &d1, &d2);   // Calculate d1 & d2
     xplasma->density[nion] = d_hold;    // Restore w
+    levden_upper = d2 / xplasma->density[nion];
   }
 
 /* At this point d1 and d2 are known for all of the various ways sobolev can be called, and whether
@@ -834,9 +835,11 @@ calls to two_level atom
   /* Check whether both d1 and d2 are below a minium value where we expect tau to be zero and where 
    * we can be subject to the effects of roundoff errors in terms of the determination of densities.
    * If densities are this low we expect the sobolev optical depth to be extremely small in any event
+   * JM -- I've added something that checks if the fractional population for the upper level is below 
+   * or equal to the minimum too.
    */
 
-  if (d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN)
+  if ((d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN) || (levden_upper <= DENSITY_MIN))
   {
     return (0);
   }
@@ -849,20 +852,21 @@ calls to two_level atom
     sobolev_error_counter++;
     if (sobolev_error_counter < 100)
     {
-      Error ("sobolev: VERY BAD den_ion has negative density %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+      Error ("sobolev: VERY BAD population inversion in cell %d: d1 %g d2 %g g1 %g g2  %g freq %g f %g frac_upper %g\n",
+             xplasma->nplasma, d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f, levden_upper);
     }
     else if (sobolev_error_counter == 100)
     {
-      Error ("sobolev: suppressing negative density errors\n");
+      Error ("sobolev: suppressing population inversion errors\n");
     }
 
-    /* With the changes above to limit the densikies the above error should not be happening, and if this does occur then 
+    /* With the changes above to limit the densities the above error should not be happening, and if this does occur then 
      * we should determine why.  When we become convinced this problem has been dealt with effectively we can simplify this
      * code and just quit if the error occurs
      * ksl 181127
      */
 
-    /*SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should
+    /* SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should
        give exactly zero here but can be negative, numerically.
        So I'm modyfying this to set tau to zero in such cases, when the populations are vanishingly small anyway. */
     tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
@@ -872,6 +876,9 @@ calls to two_level atom
 
     if (tau > 1.e-3)
     {
+      /* JM -- I'm not sure why this particular value of tau is chosen, but I've added 
+         an error message to give more information and make sure no ambiguity for code exit */
+      Error ("sobolev: tau is >1e-3 and nu < gu/gl * nl. Exiting.\n");
       Exit (0);
     }
 

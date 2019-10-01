@@ -66,7 +66,6 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
                                    to this parameter, at the 10% level if raised from 1e-3 to 1.  There is a 
                                    trade-off since lower minima may give better results, especially for macro atoms. */
 
-//#define SMAX_FRAC     0.1  
 #define LDEN_MIN        1e-3    /* The minimum density required for a line to be conidered for scattering
                                    or emission in calculate_ds and lum_lines */
 
@@ -619,6 +618,24 @@ struct geometry
 }
 geo;
 
+/*
+ * EP: 27/09/19
+ * Added enumerator to define different banding modes to make the banding
+ * code more self-documenting
+ */
+
+enum band_definition_enum
+{
+  T_STAR_BAND = 0,
+  MIN_MAX_FREQ_BAND = 1,
+  CV_BAND = 2,
+  YSO_BAND = 3,
+  USER_DEF_BAND = 4,
+  CLOUDY_TEST_BAND = 5,
+  WIDE_BAND = 6,
+  AGN_BAND = 7,
+  LOG_USER_DEF_BAND = 8
+};
 
 /* xdisk is a structure that is used to store information about the disk in a system */
 #define NRINGS	3001            /* The actual number of rings completely defined
@@ -841,10 +858,17 @@ typedef struct plasma
   double j, ave_freq;           /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
-  double fmin[NXBANDS];         /* the minimum freqneucy photon seen in a band - this is incremented during photon flight */
+  double fmin[NXBANDS];         /* the minimum frequency photon seen in a band - this is incremented during photon flight */
   double fmax[NXBANDS];         /* the maximum frequency photon seen in a band - this is incremented during photon flight */
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
+
+
+  /* banded, directional fluxes */
+  double F_x[NXBANDS];
+  double F_y[NXBANDS];
+  double F_z[NXBANDS];
+
 
 
 
@@ -1080,7 +1104,8 @@ typedef struct photon
     P_SEC = 8,                  //Photon hit secondary
     P_ADIABATIC = 9,            //records that a photon created a kpkt which was destroyed by adiabatic cooling
     P_ERROR_MATOM = 10,         //Some kind of error in processing of a photon which excited a macroattom
-    P_LOFREQ_FF = 11            //records a photon that had too low a frequency  
+    P_LOFREQ_FF = 11,           //records a photon that had too low a frequency
+    P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
   int nscat;                    /*number of scatterings */
