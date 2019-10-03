@@ -23,7 +23,7 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-#include "my_linalg.h"
+#include <gsl/gsl_linalg.h>
 
 
 /**********************************************************/
@@ -728,7 +728,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   /* JM 140414 -- before we clean, we should check that the populations vector we have just created really is a solution to
      the matrix equation */
 
-  /* gsl_blas_dgemv declaration contained in my_linalg.h, taken from gsl library */
+  /* gsl_blas_dgemv declaration contained in gsl library */
   /* The following line does the matrix multiplication test_vector = 1.0 * test_matrix * populations The CblasNoTrans
      statement just says we do not do anything to test_matrix, and the 0.0 means we do not add a second matrix to the result
      If the solution has worked, then test_vector should be equal to b_temp */

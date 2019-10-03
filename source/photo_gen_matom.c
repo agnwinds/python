@@ -18,7 +18,7 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-#include "my_linalg.h"
+#include <gsl/gsl_linalg.h>
 
 /**********************************************************/
 /** 
