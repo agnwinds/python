@@ -2438,7 +2438,7 @@ J_summary (w, rootname, ochoice)
       }
     }
 
-    printf ("Line wavelength is %.2f\n", (C / line_ptr->freq) / ANGSTROM);
+    printf ("Line wavelength is %.2f\n", (VLIGHT / line_ptr->freq) / ANGSTROM);
     printf ("Line freq is %8.4e\n", line_ptr->freq);
     printf ("njump %i llvl %i uplvl %i nres %i", njump, llvl, uplvl, config[llvl].bbu_jump[njump]);
     display ("J in cell");
@@ -3702,13 +3702,13 @@ get_los_dvds (w, rootname, ochoice)
           r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
           rzero = sv_find_wind_rzero (ndom, p.x);
           v1[0] = v1[2] = 0.0;
-          v1[1] = sqrt (G * geo.mstar * rzero) / r;
+          v1[1] = sqrt (GRAV * geo.mstar * rzero) / r;
 
 
           r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
           rzero = sv_find_wind_rzero (ndom, ptest.x);
           v2[0] = v2[2] = 0.0;
-          v2[1] = sqrt (G * geo.mstar * rzero) / r;
+          v2[1] = sqrt (GRAV * geo.mstar * rzero) / r;
 
           if (p.x[1] != 0.0)
           {

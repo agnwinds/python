@@ -195,9 +195,9 @@ sv_velocity (x, v, ndom)
     zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
 
     if (rzero < geo.rstar)
-      v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
+      v_escape = sqrt (2. * GRAV * geo.mstar / geo.rstar);
     else
-      v_escape = sqrt (2. * G * geo.mstar / rzero);
+      v_escape = sqrt (2. * GRAV * geo.mstar / rzero);
 
     vl = vzero + (zdom[ndom].sv_v_infinity * v_escape - vzero) * zzz / (1. + zzz);
   }
@@ -205,7 +205,7 @@ sv_velocity (x, v, ndom)
   v[0] = vl * sin (theta);
 
   if (r > 0)
-    v[1] = sqrt (G * geo.mstar * rzero) / r;
+    v[1] = sqrt (GRAV * geo.mstar * rzero) / r;
   else
     v[1] = 0;
 

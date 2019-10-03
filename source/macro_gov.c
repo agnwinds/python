@@ -330,7 +330,7 @@ macro_pops (xplasma, xne)
               {
                 fast_line.gl = config[index_lvl].g;
                 fast_line.gu = config[index_fast_col + 1].g;
-                fast_line.freq = (config[index_fast_col + 1].ex - config[index_lvl].ex) / H;
+                fast_line.freq = (config[index_fast_col + 1].ex - config[index_lvl].ex) / PLANCK;
                 fast_line.f = 1e4;
                 rate = q12 (&fast_line, xplasma->t_e) * xne;
                 lower = conf_to_matrix[index_lvl];

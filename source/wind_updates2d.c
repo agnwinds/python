@@ -202,7 +202,7 @@ WindPtr (w);
       plasmamain[n].j_scatt /= (4. * PI * volume);
 
       plasmamain[n].t_r_old = plasmamain[n].t_r;        // Store the previous t_r in t_r_old immediately before recalculating
-      trad = plasmamain[n].t_r = H * plasmamain[n].ave_freq / (BOLTZMANN * 3.832);
+      trad = plasmamain[n].t_r = PLANCK * plasmamain[n].ave_freq / (BOLTZMANN * 3.832);
       plasmamain[n].w = PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad * trad);
 
 
@@ -261,16 +261,16 @@ WindPtr (w);
  * and number density of hydrogen in the cell
  * */
 
-    plasmamain[n].ip /= (C * volume * nh);
-    plasmamain[n].ip_direct /= (C * volume * nh);
-    plasmamain[n].ip_scatt /= (C * volume * nh);
+    plasmamain[n].ip /= (VLIGHT * volume * nh);
+    plasmamain[n].ip_direct /= (VLIGHT * volume * nh);
+    plasmamain[n].ip_scatt /= (VLIGHT * volume * nh);
 
 /* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
 
     plasmamain[n].xi *= 4. * PI;
     plasmamain[n].xi /= (volume * nh);
     for (i = 0; i < 3; i++)
-      plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * C);
+      plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * VLIGHT);
 
 
 /* Normalise the computed flux in cells by band */

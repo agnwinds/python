@@ -153,7 +153,7 @@ bands_init (imode, band)
   double total_min_frac = 0;
 
 
-  freqmin = C / 12000e-8;       /*20000 A */
+  freqmin = VLIGHT / 12000e-8;       /*20000 A */
 
   tmax = 30000.;                /* This sets a floor on freqmax */
 
@@ -171,7 +171,7 @@ bands_init (imode, band)
     tmax = geo.t_bl;
   if ((0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar)) > tmax)
     tmax = 0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-  freqmax = BOLTZMANN * tmax / H * 10.;
+  freqmax = BOLTZMANN * tmax / PLANCK * 10.;
   if (freqmax < 2.0 * 54.418 / HEV)
   {
     Log ("Increasing maximum frequency to twice the Helium edge\n");
@@ -203,8 +203,8 @@ bands_init (imode, band)
   {
     /* Mode 0 is sets a single band based on the temperature given */
     band->nbands = 1;
-    band->f1[0] = BOLTZMANN * t / H * 0.05;
-    band->f2[0] = BOLTZMANN * t / H * 20.;
+    band->f1[0] = BOLTZMANN * t / PLANCK * 0.05;
+    band->f2[0] = BOLTZMANN * t / PLANCK * 20.;
     band->min_fraction[0] = 1.0;
   }
   else if (mode == MIN_MAX_FREQ_BAND)
@@ -558,7 +558,7 @@ bands_init (imode, band)
     Log ("bands_init: band %i, eV1=%10.3e, eV2=%10.3e, frac=%.2f\n", nband,
          band->f1[nband] * HEV, band->f2[nband] * HEV, band->min_fraction[nband]);
     Log ("bands_init: band %i, alpha1=%f, alpha2=%f, frac=%.2f\n", nband,
-         band->f1[nband] * H / (BOLTZMANN * tmax), band->f2[nband] * H / (BOLTZMANN * tmax), band->min_fraction[nband]);
+         band->f1[nband] * PLANCK / (BOLTZMANN * tmax), band->f2[nband] * PLANCK / (BOLTZMANN * tmax), band->min_fraction[nband]);
   }
 
   /* Finally call the routine freqs_init which initializes the spectral bands 

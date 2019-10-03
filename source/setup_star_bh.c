@@ -82,7 +82,7 @@ get_stellar_params ()
 
   if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
   {
-    geo.rstar = 6. * G * geo.mstar / (C * C);   //Set value to ISCO, namely 6 x Rg 
+    geo.rstar = 6. * GRAV * geo.mstar / (VLIGHT * VLIGHT);   //Set value to ISCO, namely 6 x Rg 
   }
   else if (geo.system_type == SYSTEM_TYPE_CV)
   {
@@ -231,7 +231,7 @@ get_bl_and_agn_params (lstar)
 
   if (geo.bl_radiation && geo.bl_ion_spectype != SPECTYPE_POW)
   {
-    xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
+    xbl = geo.lum_bl = 0.5 * GRAV * geo.mstar * geo.disk_mdot / geo.rstar;
 
     rddoub ("Boundary_layer.luminosity(ergs/s)", &geo.lum_bl);
     Log ("OK, the boundary layer lum will be about %.2e the disk lum\n", geo.lum_bl / xbl);
@@ -247,7 +247,7 @@ get_bl_and_agn_params (lstar)
 
   if (geo.agn_radiation && (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH))   /* This peculiar line is to enamble us to add a star with a power law component */
   {
-    xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
+    xbl = geo.lum_agn = 0.5 * GRAV * geo.mstar * geo.disk_mdot / geo.rstar;
 
     /* If there is no disk, initilize geo.lum to the luminosity of a star */
     if (geo.disk_type == DISK_NONE)
@@ -317,7 +317,7 @@ get_bl_and_agn_params (lstar)
     if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
     {
       rddoub ("Central_object.lamp_post_height(r_g)", &geo.lamp_post_height);
-      geo.lamp_post_height *= G * geo.mstar / C / C;    //get it in CGS units
+      geo.lamp_post_height *= GRAV * geo.mstar / VLIGHT / VLIGHT;    //get it in CGS units
       Log ("lamp_post_height in cm is %g\n", geo.lamp_post_height);
     }
     else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only two options at the moment
@@ -346,7 +346,7 @@ get_bl_and_agn_params (lstar)
   }
   else if (geo.agn_radiation)   /* We want to add a power law to something other than an AGN */
   {
-    xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
+    xbl = geo.lum_agn = 0.5 * GRAV * geo.mstar * geo.disk_mdot / geo.rstar;
 
     // At present we have set geo.rstar = geo.rstar, and encouraged the user
     // set the default for the radius of the BH to be 6 R_Schwartschild.

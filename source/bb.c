@@ -154,8 +154,8 @@ planck (t, freqmin, freqmax)
   if (t != old_t || freqmin != old_freqmin || freqmax != old_freqmax)
   {
 
-    alphamin = H * freqmin / (BOLTZMANN * t);
-    alphamax = H * freqmax / (BOLTZMANN * t);
+    alphamin = PLANCK * freqmin / (BOLTZMANN * t);
+    alphamax = PLANCK * freqmax / (BOLTZMANN * t);
 
     old_t = t;
     old_freqmin = freqmin;
@@ -234,7 +234,7 @@ planck (t, freqmin, freqmax)
     alpha = cdf_get_rand_limit (&cdf_bb);       //We are in the region where we use the BB function
   }
 
-  freq = BOLTZMANN * t / H * alpha;
+  freq = BOLTZMANN * t / PLANCK * alpha;
   if (freq < freqmin || freqmax < freq)
   {
     Error ("planck: freq %g out of range %g %g\n", freq, freqmin, freqmax);
@@ -578,10 +578,10 @@ emittance_bb (freqmin, freqmax, t)
 {
   double alphamin, alphamax, q1;
   double integ_planck_d ();
-  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
+  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
 
-  alphamin = H * freqmin / (BOLTZMANN * t);
-  alphamax = H * freqmax / (BOLTZMANN * t);
+  alphamin = PLANCK * freqmin / (BOLTZMANN * t);
+  alphamax = PLANCK * freqmax / (BOLTZMANN * t);
 
 
   if (alphamin > ALPHAMIN && alphamax < ALPHAMAX)       //We are within the tabulated range

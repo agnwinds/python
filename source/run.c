@@ -461,8 +461,8 @@ make_spectra (restart_stat)
   p = photmain;
   w = wmain;
 
-  freqmax = C / (geo.swavemin * 1.e-8);
-  freqmin = C / (geo.swavemax * 1.e-8);
+  freqmax = VLIGHT / (geo.swavemin * 1.e-8);
+  freqmin = VLIGHT / (geo.swavemax * 1.e-8);
 
 #ifdef MPI_ON
   /* the length of the big arrays to help with the MPI reductions of the spectra

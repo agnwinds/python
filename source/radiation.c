@@ -101,7 +101,7 @@ radiation (p, ds)
   /* compute the initial momentum of the photon */
 
   stuff_v (p->lmn, p_in);       //Get the direction
-  renorm (p_in, p->w / C);      //Renormalise to momentum
+  renorm (p_in, p->w / VLIGHT);      //Renormalise to momentum
 
   /* Create phot, a photon at the position we are moving to 
    *  note that the actual movement of the photon gets done after 
@@ -115,8 +115,8 @@ radiation (p, ds)
 
   /* calculate photon frequencies in rest frame of cell */
 
-  freq_inner = p->freq * (1. - v1 / C);
-  freq_outer = phot.freq * (1. - v2 / C);
+  freq_inner = p->freq * (1. - v1 / VLIGHT);
+  freq_outer = phot.freq * (1. - v2 / VLIGHT);
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
@@ -457,12 +457,12 @@ radiation (p, ds)
       xplasma->heat_tot += z * frac_auger;      //All the inner shell opacities
 
       /* Calculate the number of H ionizing photons, see #255 */
-      if (freq > (RYD2ERGS / H))
+      if (freq > (RYD2ERGS / PLANCK))
         xplasma->nioniz++;
 
-      q = (z) / (H * freq * xplasma->vol);
+      q = (z) / (PLANCK * freq * xplasma->vol);
       /* So xplasma->ioniz for each species is just 
-         (energy_abs)*kappa_h/kappa_tot / H*freq / volume
+         (energy_abs)*kappa_h/kappa_tot / PLANCK*freq / volume
          or the number of photons absorbed in this bundle per unit volume by this ion
        */
 
@@ -480,7 +480,7 @@ radiation (p, ds)
 
 
   stuff_v (p->lmn, p_out);
-  renorm (p_out, z * frac_ff / C);
+  renorm (p_out, z * frac_ff / VLIGHT);
   project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
   if (p->x[2] < 0)
     dp_cyl[2] *= (-1);
@@ -490,7 +490,7 @@ radiation (p, ds)
   }
 
   stuff_v (p->lmn, p_out);
-  renorm (p_out, (z * (frac_tot + frac_auger)) / C);
+  renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
   project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
   if (p->x[2] < 0)
     dp_cyl[2] *= (-1);
@@ -946,7 +946,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
     /* IP needs to be radiation density in the cell. We sum contributions from
        each photon, then it is normalised in wind_update. */
-    xplasma->ip += ((w_ave * ds) / (H * p->freq));
+    xplasma->ip += ((w_ave * ds) / (PLANCK * p->freq));
 
     if (HEV * p->freq < 13600)  //Tartar et al integrate up to 1000Ryd to define the ionization parameter
     {
@@ -955,11 +955,11 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
     if (p->nscat == 0)
     {
-      xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+      xplasma->ip_direct += ((w_ave * ds) / (PLANCK * p->freq));
     }
     else
     {
-      xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+      xplasma->ip_scatt += ((w_ave * ds) / (PLANCK * p->freq));
     }
   }
 
@@ -1042,7 +1042,7 @@ mean_intensity (xplasma, freq, mode)
 
               else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)       //Exponential model
               {
-                J = xplasma->exp_w[i] * exp ((-1 * H * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
+                J = xplasma->exp_w[i] * exp ((-1 * PLANCK * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
               }
               else
               {
@@ -1086,8 +1086,8 @@ mean_intensity (xplasma, freq, mode)
     {
       if (mode == 1)            //We need a guess, so we use the initial guess of a dilute BB
       {
-        expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
-        J = (2 * H * freq * freq * freq) / (C * C);
+        expo = (PLANCK * freq) / (BOLTZMANN * xplasma->t_r);
+        J = (2 * PLANCK * freq * freq * freq) / (VLIGHT * VLIGHT);
         J *= 1 / (exp (expo) - 1);
         J *= xplasma->w;
       }
@@ -1101,8 +1101,8 @@ mean_intensity (xplasma, freq, mode)
 
   else                          /*Else, use dilute BB estimator of J */
   {
-    expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
-    J = (2 * H * freq * freq * freq) / (C * C);
+    expo = (PLANCK * freq) / (BOLTZMANN * xplasma->t_r);
+    J = (2 * PLANCK * freq * freq * freq) / (VLIGHT * VLIGHT);
     J *= 1 / (exp (expo) - 1);
     J *= xplasma->w;
   }
