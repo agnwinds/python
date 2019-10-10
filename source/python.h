@@ -531,8 +531,11 @@ struct geometry
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
   double heat_shock;            /*1806 - ksl - The amount of extra heating going into the wind due to shock heating. Added for FU Ori project */
 
+  double f1, f2;                /* The freguency minimum and maximum for which the band limted luminosities have been calculated */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;    /* The integrated specific L between a freq min and max which are
-                                                           used to establish the fraction of photons of various types */
+                                                           used to establish the band limited luminosity  of photons of various types.
+                                                           For detailed spectra cycles, this will the band limed luminosity between
+                                                           the minimum and maximum wavelength of the detailed spectrum */
 
 /* These variables are copies of the lum variables above, and are only calculated during ionization cycles
    This is a bugfix for JM130621, windsave bug */

@@ -333,10 +333,6 @@ check_convergence ()
     ("!!Check_convergence: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
   Log ("!!Check_convergence: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d\n", ntr, nte, nmax, nhc);
-  // The information in the next statement is identical to that two lines above so ksl has eliminated it
-  //Old Log
-  //Old   ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
-  //Old    nconverge, xconverge, nconverging, xconverging, ntot);
   Log_flush ();
   return (0);
 }

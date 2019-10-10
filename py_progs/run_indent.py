@@ -20,7 +20,7 @@ Description:
 Primary routines:
 
     doit  processes a single file
-    steer procesest the command calling either doi or do_all
+    steer processes the command calling either doi or do_all
     do_all processes all the .c and .h files in a directory
 
 Notes:
@@ -173,6 +173,36 @@ def do_all(ignore_list=None):
 
     return
 
+def do_changed():
+    '''
+    Indent only those files which have not yet been committed
+    '''
+    if get_gnu()=='':
+        return
+
+
+    proc = subprocess.Popen('git diff --name-only', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout,stderr=proc.communicate()
+    stdout = stdout.decode().split('\n')
+    # print(stdout)
+    stderr = stderr.decode().split('\n')
+    # print(stderr)
+
+    todo=[]
+    for one in stdout:
+        if one.count('source'):
+            word=one.split('/')
+            xfile=word[len(word)-1]
+            if xfile.count('.c'):
+                todo.append(xfile)
+    # print(todo)
+    for one in todo:
+        doit(one)
+
+    return
+
+
+
 
 
 
@@ -199,6 +229,9 @@ def steer(argv):
         # exclude python prototype files 
         if argv[i]=='-all_no_headers':
             do_all(ignore_list=["atomic_proto.h", "templates.h", "log.h"])
+            return
+        if argv[i]=='-changed':
+            do_changed()
             return
         else:
             files.append(argv[i])
@@ -228,8 +261,6 @@ def steer(argv):
 if __name__ == "__main__":
     import sys
     if len(sys.argv)>1:
-        # doit(int(sys.argv[1]))
-        # doit(sys.argv[1])
         steer(sys.argv)
     else:
         print (__doc__)
