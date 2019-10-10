@@ -2438,7 +2438,7 @@ J_summary (w, rootname, ochoice)
       }
     }
 
-    printf ("Line wavelength is %.2f\n", (VLIGHT / line_ptr->freq) / ANGSTROM);
+    printf ("Line wavelength is %.2f\n", (CSPEED / line_ptr->freq) / ANGSTROM);
     printf ("Line freq is %8.4e\n", line_ptr->freq);
     printf ("njump %i llvl %i uplvl %i nres %i", njump, llvl, uplvl, config[llvl].bbu_jump[njump]);
     display ("J in cell");

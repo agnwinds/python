@@ -101,7 +101,7 @@ radiation (p, ds)
   /* compute the initial momentum of the photon */
 
   stuff_v (p->lmn, p_in);       //Get the direction
-  renorm (p_in, p->w / VLIGHT);      //Renormalise to momentum
+  renorm (p_in, p->w / CSPEED);      //Renormalise to momentum
 
   /* Create phot, a photon at the position we are moving to 
    *  note that the actual movement of the photon gets done after 
@@ -115,8 +115,8 @@ radiation (p, ds)
 
   /* calculate photon frequencies in rest frame of cell */
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);
+  freq_inner = p->freq * (1. - v1 / CSPEED);
+  freq_outer = phot.freq * (1. - v2 / CSPEED);
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
@@ -480,7 +480,7 @@ radiation (p, ds)
 
 
   stuff_v (p->lmn, p_out);
-  renorm (p_out, z * frac_ff / VLIGHT);
+  renorm (p_out, z * frac_ff / CSPEED);
   project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
   if (p->x[2] < 0)
     dp_cyl[2] *= (-1);
@@ -490,7 +490,7 @@ radiation (p, ds)
   }
 
   stuff_v (p->lmn, p_out);
-  renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
+  renorm (p_out, (z * (frac_tot + frac_auger)) / CSPEED);
   project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
   if (p->x[2] < 0)
     dp_cyl[2] *= (-1);
@@ -1087,7 +1087,7 @@ mean_intensity (xplasma, freq, mode)
       if (mode == 1)            //We need a guess, so we use the initial guess of a dilute BB
       {
         expo = (PLANCK * freq) / (BOLTZMANN * xplasma->t_r);
-        J = (2 * PLANCK * freq * freq * freq) / (VLIGHT * VLIGHT);
+        J = (2 * PLANCK * freq * freq * freq) / (CSPEED * CSPEED);
         J *= 1 / (exp (expo) - 1);
         J *= xplasma->w;
       }
@@ -1102,7 +1102,7 @@ mean_intensity (xplasma, freq, mode)
   else                          /*Else, use dilute BB estimator of J */
   {
     expo = (PLANCK * freq) / (BOLTZMANN * xplasma->t_r);
-    J = (2 * PLANCK * freq * freq * freq) / (VLIGHT * VLIGHT);
+    J = (2 * PLANCK * freq * freq * freq) / (CSPEED * CSPEED);
     J *= 1 / (exp (expo) - 1);
     J *= xplasma->w;
   }

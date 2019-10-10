@@ -261,16 +261,16 @@ WindPtr (w);
  * and number density of hydrogen in the cell
  * */
 
-    plasmamain[n].ip /= (VLIGHT * volume * nh);
-    plasmamain[n].ip_direct /= (VLIGHT * volume * nh);
-    plasmamain[n].ip_scatt /= (VLIGHT * volume * nh);
+    plasmamain[n].ip /= (CSPEED * volume * nh);
+    plasmamain[n].ip_direct /= (CSPEED * volume * nh);
+    plasmamain[n].ip_scatt /= (CSPEED * volume * nh);
 
 /* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
 
     plasmamain[n].xi *= 4. * PI;
     plasmamain[n].xi /= (volume * nh);
     for (i = 0; i < 3; i++)
-      plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * VLIGHT);
+      plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * CSPEED);
 
 
 /* Normalise the computed flux in cells by band */

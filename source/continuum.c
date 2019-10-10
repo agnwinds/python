@@ -95,8 +95,8 @@ one_continuum (spectype, t, g, freqmin, freqmax)
       old_g = g;
     }
 
-    lambdamin = VLIGHT * 1e8 / freqmax;
-    lambdamax = VLIGHT * 1e8 / freqmin;
+    lambdamin = CSPEED * 1e8 / freqmax;
+    lambdamax = CSPEED * 1e8 / freqmin;
     nwave = 0;
 
     /* Create the first element of the array, precisely at lambdamin if that is possible
@@ -146,7 +146,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
       nwave++;
       w_local[nwave - 1] = w_local[nwave - 2];
       f_local[nwave - 1] = f_local[nwave - 2];
-      w_local[nwave - 2] = w_local[nwave - 3] / (1. - DELTA_V / (2. * VLIGHT));
+      w_local[nwave - 2] = w_local[nwave - 3] / (1. - DELTA_V / (2. * CSPEED));
       linterp (w_local[nwave - 2], comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
       f_local[nwave - 2] = y;
     }
@@ -165,7 +165,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 
   /* generate the frequency from the CDF that has been built up from the model fluxes */
 
-  f = (VLIGHT * 1.e8 / cdf_get_rand (&comp[spectype].xcdf));
+  f = (CSPEED * 1.e8 / cdf_get_rand (&comp[spectype].xcdf));
 
   /* check if the frequency is too small or too large, and default to simulation limits */
   if (f > freqmax)
@@ -234,8 +234,8 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
   double par[2];
   int model ();
 
-  lambdamin = VLIGHT / (freqmax * ANGSTROM);
-  lambdamax = VLIGHT / (freqmin * ANGSTROM);
+  lambdamin = CSPEED / (freqmax * ANGSTROM);
+  lambdamax = CSPEED / (freqmin * ANGSTROM);
 
   if (comp[spectype].nmods == 1)        //We only have one model - there is no way of interpolating
   {

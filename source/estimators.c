@@ -557,7 +557,7 @@ mc_estimator_normalise (n)
 
       /* normalise jbar. Note that this uses the cell volume rather than the filled volume */
       mplasma->jbar_old[config[i].bbu_indx_first + j] =
-          mplasma->jbar[config[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / volume / line_freq;
+          mplasma->jbar[config[i].bbu_indx_first + j] * CSPEED * stimfac / 4. / PI / volume / line_freq;
 
       mplasma->jbar[config[i].bbu_indx_first + j] = 0.0;
     }
@@ -1038,7 +1038,7 @@ get_gamma (cont_ptr, xplasma)
   // gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
   gamma_value = num_int (gamma_integrand, fthresh, flast, 1e-4);
 
-  gamma_value *= 8 * PI / VLIGHT / VLIGHT * xplasma->w;
+  gamma_value *= 8 * PI / CSPEED / CSPEED * xplasma->w;
 
   return (gamma_value);
 
@@ -1118,7 +1118,7 @@ get_gamma_e (cont_ptr, xplasma)
 //  gamma_e_value = qromb (gamma_e_integrand, fthresh, flast, 1e-4);
   gamma_e_value = num_int (gamma_e_integrand, fthresh, flast, 1e-4);
 
-  gamma_e_value *= 8 * PI / VLIGHT / VLIGHT * xplasma->w;
+  gamma_e_value *= 8 * PI / CSPEED / CSPEED * xplasma->w;
 
   return (gamma_e_value);
 

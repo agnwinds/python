@@ -1648,8 +1648,8 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
   /* Finished zeroing. */
 
   // Set frequency range to search to be the spectral range
-  freqmin = VLIGHT / (geo.swavemax * 1e-8);
-  freqmax = VLIGHT / (geo.swavemin * 1e-8);
+  freqmin = CSPEED / (geo.swavemax * 1e-8);
+  freqmax = CSPEED / (geo.swavemin * 1e-8);
 
   /* bb */
   /* First downward jumps. */

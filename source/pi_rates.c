@@ -249,7 +249,7 @@ tb_planck (double freq, void *params)
 {
   double answer, bbe;
   bbe = exp ((PLANCK * freq) / (BOLTZMANN * qromb_temp));
-  answer = (2. * PLANCK * pow (freq, 3.)) / (pow (VLIGHT, 2));
+  answer = (2. * PLANCK * pow (freq, 3.)) / (pow (CSPEED, 2));
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
   answer *= sigma_phot (xtop, freq);

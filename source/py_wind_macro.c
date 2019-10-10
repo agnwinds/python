@@ -847,7 +847,7 @@ level_escapeoverview (nlev, w, rootname, ochoice)
 
   nline--;
 
-  lambda = (VLIGHT / lin_ptr[nline]->freq) * 1e8;
+  lambda = (CSPEED / lin_ptr[nline]->freq) * 1e8;
 
   strcpy (name, "");
   sprintf (name, "Balmer series P_escapes for Level %i, Lambda %.1f", nlev, lambda);
@@ -940,7 +940,7 @@ level_tauoverview (nlev, w, rootname, ochoice)
 
   nline--;
 
-  lambda = (VLIGHT / lin_ptr[nline]->freq) * 1e8;
+  lambda = (CSPEED / lin_ptr[nline]->freq) * 1e8;
 
   strcpy (name, "");
   sprintf (name, "Balmer series taus for Level %i, Lambda %.1f", nlev, lambda);

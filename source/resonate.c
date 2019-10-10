@@ -158,7 +158,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
    *
    * If it is not monitocinc, then reduce smax
    */
-  vc = VLIGHT;
+  vc = CSPEED;
   while (vc > VCHECK && smax > DFUDGE)
   {
     stuff_phot (p, &p_now);
@@ -184,8 +184,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * then the photon frequency will be less. */
 
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);
+  freq_inner = p->freq * (1. - v1 / CSPEED);
+  freq_outer = phot.freq * (1. - v2 / CSPEED);
   dfreq = freq_outer - freq_inner;
 
 
@@ -938,13 +938,13 @@ doppler (pin, pout, v, nres)
 
   if (nres == -1)               //Electron scattering (SS)
   {                             /*It was a non-resonant scatter */
-    pout->freq = pin->freq * (1 - dot (v, pin->lmn) / VLIGHT) / (1 - dot (v, pout->lmn) / VLIGHT);
+    pout->freq = pin->freq * (1 - dot (v, pin->lmn) / CSPEED) / (1 - dot (v, pout->lmn) / CSPEED);
 
 
   }
   else if (nres > -1 && nres < nlines)
   {                             /* It was a resonant scatter. */
-    pout->freq = lin_ptr[nres]->freq / (1. - dot (v, pout->lmn) / VLIGHT);
+    pout->freq = lin_ptr[nres]->freq / (1. - dot (v, pout->lmn) / CSPEED);
   }
   else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
     /* It was continuum emission - new comoving frequency has been chosen by
@@ -960,7 +960,7 @@ doppler (pin, pout, v, nres)
       Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
       Exit (0);
     }
-    pout->freq = pout->freq / (1. - dot (v, pout->lmn) / VLIGHT);
+    pout->freq = pout->freq / (1. - dot (v, pout->lmn) / CSPEED);
   }
 /* Now do one final check that nothing is awry.  This is another
  * check added by SS that should probably be deleted or done before this point.
@@ -1042,7 +1042,7 @@ scatter (p, nres, nnscat)
 
   vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
   v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);   //This is the photon frequency in the comoving frame
+  freq_comoving = p->freq * (1. - v_dop / CSPEED);   //This is the photon frequency in the comoving frame
 
   if (n < 0)
   {
@@ -1052,7 +1052,7 @@ scatter (p, nres, nnscat)
 
   vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
   v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);   //This is the photon frequency in the comoving frame
+  freq_comoving = p->freq * (1. - v_dop / CSPEED);   //This is the photon frequency in the comoving frame
 
 
   /* On entering this subroutine we know that a photon packet has been
@@ -1264,7 +1264,7 @@ scatter (p, nres, nnscat)
     p->freq = freq_comoving;    //This is the photon frequency in the electron rest frame calculated earlier in the routine
     compton_dir (p, xplasma);   //Get a new direction using the KN formula
     v_dop = dot (p->lmn, v);    //Find the dot product of the new velocity with the wind
-    p->freq = p->freq / (1. - v_dop / VLIGHT);       //Transform back to the observers frame
+    p->freq = p->freq / (1. - v_dop / CSPEED);       //Transform back to the observers frame
 
   }
 
@@ -1315,9 +1315,9 @@ detailed spectrum calculation ??
 */
 
   stuff_v (pold.lmn, p_init);
-  renorm (p_init, pold.w / VLIGHT);
+  renorm (p_init, pold.w / CSPEED);
   stuff_v (p->lmn, p_final);
-  renorm (p_final, p->w / VLIGHT);
+  renorm (p_final, p->w / CSPEED);
   vsub (p_final, p_init, dp);
 
   project_from_xyz_cyl (pold.x, dp, dp_cyl);

@@ -1241,7 +1241,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
     vdisk (p[i].x, v);
-    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT);
+    p[i].freq /= (1. - dot (v, p[i].lmn) / CSPEED);
 
   }
 
@@ -1344,7 +1344,7 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
   double integ_planck_d ();
   double alphamin, alphamax;
 
-  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
+  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * CSPEED * CSPEED);
   alphamin = PLANCK * freqmin / (BOLTZMANN * t_bl);
   alphamax = PLANCK * freqmax / (BOLTZMANN * t_bl);
 //  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;

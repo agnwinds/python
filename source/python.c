@@ -674,8 +674,8 @@ main (argc, argv)
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 
-  freqmax = VLIGHT / (geo.swavemin * 1.e-8);
-  freqmin = VLIGHT / (geo.swavemax * 1.e-8);
+  freqmax = CSPEED / (geo.swavemin * 1.e-8);
+  freqmin = CSPEED / (geo.swavemax * 1.e-8);
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
      calculation of the spectrum.

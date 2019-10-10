@@ -1820,7 +1820,7 @@ described as macro-levels. */
             if (nwords == 6)
             {
               el = 0.0;
-              eu = PLANCK * VLIGHT / (freq * 1e-8);       // Convert Angstroms to ergs
+              eu = PLANCK * CSPEED / (freq * 1e-8);       // Convert Angstroms to ergs
               levl = -1;
               levu = -1;
 
@@ -1878,7 +1878,7 @@ would like to have simple lines for macro-ions */
               line[nlines].nion = n;
               line[nlines].z = z;
               line[nlines].istate = istate;
-              line[nlines].freq = VLIGHT / (freq * 1e-8);    /* convert Angstroms to frequency */
+              line[nlines].freq = CSPEED / (freq * 1e-8);    /* convert Angstroms to frequency */
               line[nlines].f = f;
               line[nlines].gl = gl;
               line[nlines].gu = gu;

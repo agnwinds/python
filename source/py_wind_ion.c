@@ -375,7 +375,7 @@ line_summary (w, rootname, ochoice)
   }
 
 /* Convert wavelength to energy and frequency */
-  freq_search = VLIGHT / lambda;
+  freq_search = CSPEED / lambda;
   energy = HC / lambda;
 
 /* Find the ion */
@@ -429,7 +429,7 @@ line_summary (w, rootname, ochoice)
       return (-1);
     }
     nline = 0;
-    freq_search = VLIGHT / lambda;
+    freq_search = CSPEED / lambda;
 
     while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001 && nline < nlines)
       nline++;
@@ -802,7 +802,7 @@ collision_summary (w, rootname, ochoice)
 
   while (nline < nlines)
   {
-    wavelength = VLIGHT / lin_ptr[nline]->freq / ANGSTROM;
+    wavelength = CSPEED / lin_ptr[nline]->freq / ANGSTROM;
 
     qup = q12 (lin_ptr[nline], t_e);
     qdown = q21 (lin_ptr[nline], t_e);

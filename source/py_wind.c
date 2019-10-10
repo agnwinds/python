@@ -477,7 +477,7 @@ one_choice (choice, root, ochoice)
     lambda = 1550;
 
     rddoub ("wavelength", &lambda);
-    freq = VLIGHT / (lambda * 1.e-8);
+    freq = CSPEED / (lambda * 1.e-8);
 
     while (rdint ("element(0=return)", &n) != EOF)
     {
