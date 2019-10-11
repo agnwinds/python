@@ -238,7 +238,8 @@ windsave2table: $(table_objects)
 
 
 # The next line runs recompiles all of the routines after first cleaning the directory
-all: clean run_indent python windsave2table py_wind
+# all: clean run_indent python windsave2table py_wind
+all: clean python windsave2table py_wind
 
 
 FILE = get_atomicdata.o atomic.o
