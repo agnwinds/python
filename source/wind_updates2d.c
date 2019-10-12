@@ -284,9 +284,9 @@ WindPtr (w);
 
 
 
-    /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e
-     * previous value of t_e.  Note that this may not be  best way to determien the cooling.
-     * Changes made here should also be reflected in wind2d.c.  At present, adiabatic colling
+    /* If geo.adiabatic is true, then calculate the adiabatic cooling using the current, i.e
+     * previous value of t_e.  Note that this may not be  best way to determine the cooling.
+     * Changes made here should also be reflected in wind2d.c.  At present, adiabatic cooling
      * is not included in updates to the temperature, even if the adiabatic cooling is calculated
      * here. 04nov -- ksl
      * 05apr -- ksl -- The index being used was incorrect.  This has been fixed now
