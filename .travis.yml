@@ -43,7 +43,6 @@ addons:
 
 # install numpy for test scripts
 before_install:
-  - brew install gsl
   - pip3 install numpy astropy
 
 install:
