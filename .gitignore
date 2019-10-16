@@ -36,17 +36,6 @@ bin/windsave2table*
 *.x86_64
 *.hex
 
-
-# things from gsl, may not be necessary
-software/gsl-2.5/Makefile
-software/gsl-2.5/*/Makefile
-software/gsl-2.5/*.dSYM
-software/gsl-2.5/*/*.dSYM
-software/gsl-2.5/bin/
-software/gsl-2.5/share/
-include/gsl/
-lib/pkgconfig/
-
 # the configure Makefile should not be tracked
 ./Makefile
 
@@ -90,6 +79,10 @@ source/version.h
 *.sig
 *.out.pf
 logfile
+
+# Testing files
+examples/*/*.dat
+examples/*/*/*.dat
 
 # IDE files
 .idea/

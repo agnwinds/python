@@ -39,11 +39,12 @@ notifications:
 addons:
   homebrew:
     packages:
-    - gsl
+      - python
+      - gsl
 
 # install numpy for test scripts
 before_install:
-  - pip install numpy astropy
+  - pip3 install numpy astropy
 
 install:
     # first configure
