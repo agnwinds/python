@@ -36,15 +36,6 @@ notifications:
     on_success: never       # default: change
     on_failure: never      # default: always
 
-addons:
-  homebrew:
-    packages:
-      - python3
-
-# install numpy for test scripts
-before_install:
-  - pip3 install numpy astropy
-
 install:
     # first configure
     - export PYTHON=$TRAVIS_BUILD_DIR
@@ -54,6 +45,8 @@ install:
 
     # Then install GSL
     - brew install gsl
+    - brew install python3
+    - pip3 install numpy astropy
 
     # do installation
     - make travis_install
