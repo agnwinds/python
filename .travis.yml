@@ -34,16 +34,16 @@ notifications:
       - long@stsci.edu
       - nick_higginbottom@fastmail.fm
     on_success: never       # default: change
-    on_failure: always      # default: always
+    on_failure: never      # default: always
 
 addons:
   homebrew:
     packages:
-      - python
-      - gsl
+      - python3
 
 # install numpy for test scripts
 before_install:
+  - brew install gsl
   - pip3 install numpy astropy
 
 install:
