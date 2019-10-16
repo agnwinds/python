@@ -44,6 +44,7 @@ install:
     - ./configure
 
     # Then install GSL
+    - brew update
     - brew install gsl
     - brew install python3
     - pip3 install numpy astropy
