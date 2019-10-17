@@ -5,11 +5,11 @@
  * @date   January, 2018
  *
  * @brief  These are a series of routines designed to store comments and errors
- * in a diagnostic file or files.  The routines also provide a mechanism for tracking the numbers of erorrs
+ * in a diagnostic file or files.  The routines also provide a mechanism for tracking the numbers of errors
  * of each type
  *
  * Instead of using printf and fprintf statements throughout varius subroutines, the set of routines
- * here are intended to provide a standard interface to various diagnostic files, and to manage the inteaction of 
+ * here are intended to provide a standard interface to various diagnostic files, and to manage the interaction of 
  * logging with the various mpi threads that can exist when running Python in multiprocessor mode.  The routines
  * also contain a verbosity mechanism to allow one to control how much information is written to the screen, and a 
  * mechanism to keep track of the number of times a particular error message has been generated.  The overall goal 
@@ -36,7 +36,7 @@
  *  One can control how much information is printed to the screen and how many times a specific error message is logged 
  *  to a file with several routines
  *  - Log_set_verbosity(vlevel)			Set the verbosity of the what is printed to the screen and the log file
- * 	- Log_print_max(print_max)			Set the number of times a single error will be 
+ *  - Log_print_max(print_max)			Set the number of times a single error will be 
  * 	    output to the screen and the log file
  *
  *  In most cases, it is sufficient to log to the screen only from thread 0.  there are a few times, one might want to 
@@ -46,8 +46,8 @@
  *
  *  There are several specific commands that have been included for debugging problems:
  *  - Log_flush()					simply flushes the logfile to disk (before the program crashes).
- *	- Debug( char *format, ...) 			Log an statement to the screen and to a file.  This is essentially a 
- *								intended to replace a printf statement in situations where
+ *  - Debug( char *format, ...) 			Log an statement to the screen and to a file.  This is essentially a 
+ *						        intended to replace a printf statement in situations where
  *							one is debugging code.  The use of Debug instead of log
  *							means that a future developer should be free to remove the
  *							Debug statement from the code.  Because the command prepends the word Debug to 

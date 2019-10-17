@@ -105,7 +105,6 @@ calculate_ionization (restart_stat)
   //1 simply implies we are in the ionization section of the code
   //and allows routines to act accordinaly.
 
-/* 67 -ksl- geo.wycle will start at zero unless we are completing an old run */
 
 /* BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
@@ -323,7 +322,7 @@ calculate_ionization (restart_stat)
 
     Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.cool_tot_ioniz);
 
-/* This step should be MPI_parallelised too - EP: It looks like this is, infact, parallelised */
+/* Note that this step is parallelized */
 
     wind_update (w);
 
@@ -688,6 +687,11 @@ make_spectra (restart_stat)
 
 
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
-  Log ("Completed entire program.  The elapsed TIME was %f\n", timer ());
+  Log ("\nBrief Run Summary\nAt program comppletion, the elapsed TIME was %f\n", timer ());
+  Log ("There were %d of %d ionization cycles and %d of %d spectral cycles run\n", geo.wcycle, geo.wcycles, geo.pcycle, geo.pcycles);
+  Log ("Convergence statistics for the wind after the ionization calculation:\n");
+  check_convergence ();
+  Log ("Information about luminosities and apparent fluxes due to various portions of the system:\n");
+  phot_status ();
   return EXIT_SUCCESS;
 }
