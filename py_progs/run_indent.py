@@ -36,7 +36,7 @@ History:
 '''
 
 import sys
-from astropy.io import ascii
+# from astropy.io import ascii
 import numpy
 from glob import glob
 import subprocess
