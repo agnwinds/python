@@ -178,7 +178,6 @@ prototypes:
 
 python: startup  python.o $(python_objects)
 	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-	../py_progs/run_indent.py -changed                   
 	cp $@ $(BIN)/py
 	mv $@ $(BIN)/py$(VERSION)
 
@@ -205,7 +204,6 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 
 py_wind: startup $(py_wind_objects)
 	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
-	../py_progs/run_indent.py -changed                   
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
 
@@ -226,20 +224,18 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		cooling.o
 
 
+
+windsave2table: $(table_objects)
+	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
+	cp $@ $(BIN)
+	mv $@ $(BIN)/windsave2table$(VERSION)
+
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
 
 
-windsave2table: $(table_objects)
-	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
-	../py_progs/run_indent.py -changed                   
-	cp $@ $(BIN)
-	mv $@ $(BIN)/windsave2table$(VERSION)
-
-
 # The next line runs recompiles all of the routines after first cleaning the directory
-# all: clean run_indent python windsave2table py_wind
-all: clean python windsave2table py_wind
+all: clean run_indent python windsave2table py_wind
 
 
 FILE = get_atomicdata.o atomic.o
