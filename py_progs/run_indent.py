@@ -165,7 +165,7 @@ def do_all(ignore_list=None):
     for one in files:
         # test if the file is in the "ignore" list 
         # np.array() ensures this works even if ignore_list is Nonetype 
-        # or has zero length (prevents TypeError)
+        # or has zero length (prevents TypeError)
         ignore = (one == ignore_list).any()
 
         if ignore == False:
