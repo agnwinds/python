@@ -687,12 +687,11 @@ make_spectra (restart_stat)
 
 
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
-  Log ("\nBrief Run Summary\nAt program comppletion, the elapsed TIME was %f\n", timer ())2
+  Log ("\nBrief Run Summary\nAt program comppletion, the elapsed TIME was %f\n", timer ());
   Log ("There were %d of %d ionization cycles and %d of %d spectral cycles run\n", geo.wcycle, geo.wcycles, geo.pcycle, geo.pcycles);
-  Log ("At the end or the calculation of the ionization for the wind, the convergence statistics were as follows\n");
+  Log ("Convergence statistics for the wind after the ionization calculation:\n");
   check_convergence ();
-  Log
-    ("During the last cycle, a summary of information about luminosities and fluxes\n arising from various portions of the system follows:");
+  Log ("Information about luminosities and apparent fluxes due to various portions of the system:\n");
   phot_status ();
   return EXIT_SUCCESS;
 }
