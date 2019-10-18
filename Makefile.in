@@ -24,7 +24,7 @@ else
 	PRINT_CLONE = 'No git installed- have to obtain release and data manually from releases page on github. Exiting.'
 endif
 
-MAKE_SOURCE = cd $(PYTHON)/source; make CC=$(CMAKE) python; make CC=$(CMAKE) py_wind; make CC=$(CMAKE) windsave2table
+MAKE_SOURCE = cd $(PYTHON)/source; make CC=$(CMAKE) INDENT=no python; make CC=$(CMAKE) INDENT=no py_wind; make CC=$(CMAKE) INDENT=no windsave2table
 
 
 
