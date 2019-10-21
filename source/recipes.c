@@ -16,8 +16,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "atomic.h"
 #include <math.h>
+#include <time.h>
+
+#include "python.h"
+
 #include "recipes.h"
 #include "log.h"
 #include <gsl/gsl_integration.h>
@@ -26,7 +31,6 @@
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
-
 
 
 
@@ -83,17 +87,22 @@ num_int (func, a, b, eps)
      double a, b;
      double eps;
 {
-  double result;
+  double result,error,result2;
   double alpha = 0.0;
   void *test = NULL;
   double delta;
   int zflag, i;
+  int status=0;
+  int status2=0;
+  
+  int npoints,j;
+  double dx;
   size_t neval;
-
   gsl_function F;
   F.function = func;
   F.params = &alpha;
   zflag = 1;
+  npoints=1000;
   if (func (a, test) == 0.0 && func (b, test) == 0.0)
   {
     zflag = 0;
@@ -106,15 +115,55 @@ num_int (func, a, b, eps)
   }
   if (zflag == 1)
   {
-    gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30);
-    gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval, w);
-    gsl_integration_romberg_free (w);
+      gsl_set_error_handler_off (); //We need to be able to catch and handle gsl errors 
+      
+//    gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (10);
+      gsl_integration_workspace *w = gsl_integration_workspace_alloc (1000);
+//    gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval, w);
+    status=gsl_integration_qags (&F, a, b, 0, eps, 1000 ,w, &result, &error);
+    if (status)
+    {
+      if (status == GSL_EROUND)   //The rounding error has been triggered - try a different integrator
+      {
+          gsl_integration_workspace_free(w);
+          gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (40); 
+          status2=gsl_integration_romberg (&F, a, b, 0, eps, &result2, &neval, w);
+          gsl_integration_romberg_free (w);
+          printf ("Errored %e %e %e %e\n",a,b,result,result2);
+          if (status2)
+          {
+              printf ("Oh no - we are still erroring Errored\n");
+          }
+/*          dx=(b-a)/npoints;
+          for (j=0;j<npoints+1;j++)
+          {
+              printf ("OUTPUT %e %e\n",a+j*dx,func(a+j*dx,test));
+          }
+          for (j=0;j<w->size;j++)
+          {
+              printf ("INTEG %i %e %e %e %e\n",j,w->alist[j],w->blist[j],w->rlist[j],w->elist[j]);
+          }
+          if (error*100. < result)
+          {
+          Error ("num_int: cannot reach tolerance because of roundoff - returning best guess\n");
+          }
+          else
+          {
+              Error ("BLAH num_int: cannot reach tolerance because of roundoff, and guess has error of more than 1pc %e %e\n",error,result);
+//              exit(0);
+          }*/
+      }
+    }
+    else
+    {
+        gsl_integration_workspace_free(w);
+    }
+//    gsl_integration_romberg_free (w);
   }
   else
   {
     result = 0.0;
   }
-
 
   return (result);
 }
