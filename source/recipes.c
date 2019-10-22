@@ -126,7 +126,7 @@ num_int (func, a, b, eps)
       if (status == GSL_EROUND)   //The rounding error has been triggered - try a different integrator
       {
           gsl_integration_workspace_free(w);
-          gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (40); 
+          gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30); 
           status2=gsl_integration_romberg (&F, a, b, 0, eps, &result2, &neval, w);
           gsl_integration_romberg_free (w);
           printf ("Errored %e %e %e %e\n",a,b,result,result2);
