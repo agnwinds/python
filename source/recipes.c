@@ -132,7 +132,7 @@ num_int (func, a, b, eps)
           printf ("Errored %e %e %e %e\n",a,b,result,result2);
           if (status2)
           {
-              printf ("Oh no - we are still erroring Errored\n");
+              Error ("num_init: some kind of error in romberg and qags integration\n");
           }
 /*          dx=(b-a)/npoints;
           for (j=0;j<npoints+1;j++)
