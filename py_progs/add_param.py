@@ -1,12 +1,12 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 '''
                     Space Telescope Science Institute
 
-Synopsis:  
+Synopsis:
 
 The purpose of this routine is to add a new parameter to an existing parameter
-file.  
+file.
 
 The routine uses a paremeter already existing in the parameter file to
 find where to place the new parameter
@@ -16,29 +16,29 @@ Command line usage (if any):
 
     usage: add_param.py new_param value old_param
 
-    where 
-        new_param is the new variable including what is normally included in 
-            parentheses.  This string will be written to the new .pf file. 
+    where
+        new_param is the new variable including what is normally included in
+            parentheses.  This string will be written to the new .pf file.
         value is the default value to assign to the new parameter, which can be a string
-        old_param is the the variable after which the new parameter is to 
-            be placed.  Note that this is a minimum match, which is to say 
+        old_param is the the variable after which the new parameter is to
+            be placed.  Note that this is a minimum match, which is to say
             that one does not need to include any more of the old parameter
             than what is required to make a unique identification
 
 The various paremeters may need to be enclosed in quotes.
 
-Description:  
+Description:
 
-    The routine first searches the parameter file to see whether the new 
+    The routine first searches the parameter file to see whether the new
     parameter exists, if it does then it does not create a new .pf file
 
-    If that is not the case then the routine puts the new parameter with its 
+    If that is not the case then the routine puts the new parameter with its
     value after the old_param.
 
     If a new paremeter file is merited it is written to a file with a prefix
     of new_
 
-    If new parameter files are written a command file MoveEm is created, which 
+    If new parameter files are written a command file MoveEm is created, which
     can be run by "source MoveEm" to replace the old .pf files with the new ones.
 
 Primary routines:
@@ -51,7 +51,7 @@ Notes:
     This is not intended to be a bulled-proof routine so one should use it
     with care, inspecting at least some of the new files before replacing the
     old parameter files is strongly advised.
-                                       
+
 History:
 
 190803 ksl Coding begun
@@ -67,13 +67,13 @@ from glob import glob
 def read_file(filename,char=''):
     '''
     Read a file and split it into words, eliminating comments
-    
+
     char is an optional parameter used as the delimiter for
     splitting lines into words.  Otherwise white space is
     assumed.
 
     History:
-    
+
     110729    ksl    Added optional delimiters
     141209    ksl    Reinstalled in my standard startup
             script so there was flexibility to
@@ -86,10 +86,10 @@ def read_file(filename,char=''):
         f.close()
     except IOError :
         print ("The file %s does not exist" % filename)
-        return []   
-    
+        return []
+
     lines=[]
-    
+
     i=0
     while i<len(xlines):
         z=xlines[i].strip()
@@ -108,8 +108,8 @@ def read_file(filename,char=''):
 
 def read_table(filename='foo.txt',format=''):
     '''
-    Read a file using astropy.io.ascii and 
-    return this 
+    Read a file using astropy.io.ascii and
+    return this
 
     Description:
 
@@ -132,7 +132,7 @@ def read_table(filename='foo.txt',format=''):
         return
 
     print ('Here are the column names:')
-    
+
     print (data.colnames)
 
     return data
@@ -142,7 +142,7 @@ def do_one(filename,new_param,value,old_param):
     Precess a single file
 
 
-    The routine returns True if a new .pf file has been written, False 
+    The routine returns True if a new .pf file has been written, False
     otherwise
     '''
 
@@ -218,7 +218,7 @@ def doit(new_param,value,old_param):
                 g=open('MoveEm','w')
                 command_file=True
             g.write ('mv new_%s %s\n' % (one,one))
-    
+
     return
 
 
