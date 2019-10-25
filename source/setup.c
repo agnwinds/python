@@ -382,8 +382,8 @@ init_observers ()
   /* convert wavelengths to frequencies and store for use
      in computing macro atom and k-packet emissivities. */
 
-  geo.sfmin = C / (geo.swavemax * 1.e-8);
-  geo.sfmax = C / (geo.swavemin * 1.e-8);
+  geo.sfmin = VLIGHT / (geo.swavemax * 1.e-8);
+  geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 

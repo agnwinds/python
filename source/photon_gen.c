@@ -741,7 +741,7 @@ star_init (freqmin, freqmax, ioniz_or_final, f)
   double emit, emittance_bb (), emittance_continuum ();
   int spectype;
 
-  log_g = geo.gstar = log10 (G * geo.mstar / (geo.rstar * geo.rstar));
+  log_g = geo.gstar = log10 (GRAV * geo.mstar / (geo.rstar * geo.rstar));
   r = geo.rstar;
 
   tstar = geo.tstar = geo.tstar_init;
@@ -1041,7 +1041,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
      the actual radius. */
 
   disk.r[0] = rmin;
-  disk.v[0] = sqrt (G * geo.mstar / rmin);
+  disk.v[0] = sqrt (GRAV * geo.mstar / rmin);
   nrings = 1;
   f = 0;
 
@@ -1072,7 +1072,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
         r = disk.r[nrings - 1] * (1. + 1.e-10);
       }
       disk.r[nrings] = r;
-      disk.v[nrings] = sqrt (G * geo.mstar / r);
+      disk.v[nrings] = sqrt (GRAV * geo.mstar / r);
       nrings++;
       if (nrings >= NRINGS)
       {
@@ -1089,7 +1089,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
 
   disk.r[NRINGS - 1] = exp (logrmax);
-  disk.v[NRINGS - 1] = sqrt (G * geo.mstar / disk.r[NRINGS - 1]);
+  disk.v[NRINGS - 1] = sqrt (GRAV * geo.mstar / disk.r[NRINGS - 1]);
 
 
   /* Now calculate the temperature and gravity of the annulae */
@@ -1271,7 +1271,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
     vdisk (p[i].x, v);
-    p[i].freq /= (1. - dot (v, p[i].lmn) / C);
+    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT);
 
   }
 
@@ -1374,9 +1374,9 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
   double integ_planck_d ();
   double alphamin, alphamax;
 
-  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
-  alphamin = H * freqmin / (BOLTZMANN * t_bl);
-  alphamax = H * freqmax / (BOLTZMANN * t_bl);
+  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
+  alphamin = PLANCK * freqmin / (BOLTZMANN * t_bl);
+  alphamax = PLANCK * freqmax / (BOLTZMANN * t_bl);
 //  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
 
   *f = emittance_bb (freqmin, freqmax, t_bl) * lum_bl / (t_bl * t_bl * t_bl * t_bl * STEFAN_BOLTZMANN);
@@ -1462,10 +1462,10 @@ photon_checks (p, freqmin, freqmax, comment)
   for (nn = 0; nn < NPHOT; nn++)
   {
     p[nn].np = nn;
-    if (H * p[nn].freq > ion[0].ip)
+    if (PLANCK * p[nn].freq > ion[0].ip)
     {
       geo.cool_tot_ioniz += p[nn].w;
-      geo.n_ioniz += p[nn].w / (H * p[nn].freq);
+      geo.n_ioniz += p[nn].w / (PLANCK * p[nn].freq);
     }
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
     {

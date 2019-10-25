@@ -219,7 +219,7 @@ calc_pi_rate (nion, xplasma, mode, type)
     }
   }
 
-  pi_rate = (4 * PI * pi_rate) / H;     //We multiply by 4pi and divide by photon energy - the division by nu is done in the integrands
+  pi_rate = (4 * PI * pi_rate) / PLANCK;     //We multiply by 4pi and divide by photon energy - the division by nu is done in the integrands
 
 
 
@@ -248,8 +248,8 @@ double
 tb_planck (double freq, void *params)
 {
   double answer, bbe;
-  bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
-  answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
+  bbe = exp ((PLANCK * freq) / (BOLTZMANN * qromb_temp));
+  answer = (2. * PLANCK * pow (freq, 3.)) / (pow (VLIGHT, 2));
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
   answer *= sigma_phot (xtop, freq);
@@ -308,7 +308,7 @@ tb_exp (double freq, void *params)
 {
   double answer;
 
-  answer = xexp_w * exp ((-1.0 * H * freq) / (BOLTZMANN * xexp_temp));
+  answer = xexp_w * exp ((-1.0 * PLANCK * freq) / (BOLTZMANN * xexp_temp));
   answer *= sigma_phot (xtop, freq);    // and finally multiply by the cross section.
   answer /= freq;               //then finally finally divide by the frequency
   return (answer);

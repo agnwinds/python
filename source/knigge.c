@@ -265,9 +265,9 @@ kn_velocity (ndom, x, v)
 the poloidal velocity at the inner edge of the wind. It is there for continuity reasons */
 
   if (rzero < geo.rstar)
-    v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
+    v_escape = sqrt (2. * GRAV * geo.mstar / geo.rstar);
   else
-    v_escape = sqrt (2. * G * geo.mstar / rzero);
+    v_escape = sqrt (2. * GRAV * geo.mstar / rzero);
 
 /* Note that vzero for kwd the sound speed dos not depend on any of the kwd parameters */
 
@@ -299,9 +299,9 @@ velocity law if kn_v_infinity is less than 0 */
 
 
   if (rzero > geo.rstar)
-    v[1] = sqrt (G * geo.mstar * rzero) / r;    // Eqn 8 KWD
+    v[1] = sqrt (GRAV * geo.mstar * rzero) / r;    // Eqn 8 KWD
   else if (r > 0)
-    v[1] = sqrt (G * geo.mstar * geo.rstar) / r;
+    v[1] = sqrt (GRAV * geo.mstar * geo.rstar) / r;
   else
     v[1] = 0;
   v[2] = vl * cos (theta);

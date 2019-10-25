@@ -227,8 +227,8 @@ spectral_estimators (xplasma)
       }
 
       /* We will start the search around the temperature that we know will yield a sensible answer  */
-      exp_temp_min = ((H * spec_numax) / (BOLTZMANN)) * 0.9;
-      exp_temp_max = ((H * spec_numax) / (BOLTZMANN)) / 0.9;    /* NSH 131107 - and the same for the maximum temp */
+      exp_temp_min = ((PLANCK * spec_numax) / (BOLTZMANN)) * 0.9;
+      exp_temp_max = ((PLANCK * spec_numax) / (BOLTZMANN)) / 0.9;    /* NSH 131107 - and the same for the maximum temp */
 
       /* Bracket the temperature of an exponential model */
 
@@ -237,7 +237,7 @@ spectral_estimators (xplasma)
       {
         /* In this case we are going to get errors since the temperature is too low
            give a result in the exponential, and we will divide by zero */
-        if ((H * spec_numax) < (100.0 * BOLTZMANN * exp_temp_min * 0.9))
+        if ((PLANCK * spec_numax) < (100.0 * BOLTZMANN * exp_temp_min * 0.9))
         {
           exp_temp_min = exp_temp_min * 0.9;    // Reduce the mininmum temperature, only if we will not end up with problems
         }
@@ -577,7 +577,7 @@ exp_mean (exp_temp, numin, numax)
   double emin, emax;            /*The exponential evaluated at numin and numax */
   double t1, t2;
 
-  exp1 = (-1.0 * H) / (BOLTZMANN * exp_temp);
+  exp1 = (-1.0 * PLANCK) / (BOLTZMANN * exp_temp);
 
   t1 = exp1 * numin;
   t2 = exp1 * numax;
@@ -624,7 +624,7 @@ exp_w (j, exp_temp, numin, numax)
   double exp1;                  /* We supply a temperature, but actually we expect the correct function to be of the form e^-hnu/kt, so this will hold -1*h/kt */
   double emin, emax;            /*The exponential evaluated at numin and numax */
 
-  exp1 = (-1.0 * H) / (BOLTZMANN * exp_temp);
+  exp1 = (-1.0 * PLANCK) / (BOLTZMANN * exp_temp);
 
 
   emin = exp (exp1 * numin);
@@ -666,7 +666,7 @@ exp_stddev (exp_temp, numin, numax)
   double numerator, denominator;
   double mean;
 
-  exp1 = (-1.0 * H) / (BOLTZMANN * exp_temp);
+  exp1 = (-1.0 * PLANCK) / (BOLTZMANN * exp_temp);
   emin = exp (exp1 * numin);
   emax = exp (exp1 * numax);
 

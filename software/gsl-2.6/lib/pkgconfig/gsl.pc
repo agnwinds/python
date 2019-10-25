@@ -1,0 +1,11 @@
+prefix=/home/smangham/python/software/gsl-2.6
+exec_prefix=/home/smangham/python/software/gsl-2.6
+libdir=/home/smangham/python/software/gsl-2.6/lib
+includedir=/home/smangham/python/software/gsl-2.6/include
+GSL_CBLAS_LIB=-lgslcblas
+
+Name: GSL
+Description: GNU Scientific Library
+Version: 2.6
+Libs: -L/home/smangham/python/software/gsl-2.6/lib -lgsl ${GSL_CBLAS_LIB} -lm -lm 
+Cflags: -I/home/smangham/python/software/gsl-2.6/include
