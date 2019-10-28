@@ -110,7 +110,7 @@ def get_hdf_data(fname):
     if coord_sys=='spherical polar':
         coord_sys='spol'
     else:
-        print ("get_hdf_data: I don't understand coordinate system ",coord_sys) 
+        print(("get_hdf_data: I don't understand coordinate system ",coord_sys)) 
         exit()
 
 #Now we know which of the datasets contain real data, we can extract all the data
@@ -128,7 +128,7 @@ def get_hdf_data(fname):
 #Loop over all the data sets in the hdf file - name each of the resulting dictionaries with the short name
 
     for i in range (len(data_sets)):
-        print (data_sets[i][2])
+        print((data_sets[i][2]))
         sds=hdf.select(data_sets[i][0])
         data = sds.get()
         c1=info[data_sets[i][0]][0][0]
@@ -149,7 +149,7 @@ def get_hdf_data(fname):
     r_ratio=(x1[2]-x1[1])/(x1[1]-x1[0])
     dr=(x1[1]-x1[0])/(0.5*(1.0+r_ratio))
     r_edge.append(x1[0]-0.5*dr)
-    print (r_edge[0],r_ratio)
+    print((r_edge[0],r_ratio))
     for i in range(len(x1)-1):
         r_edge.append(r_edge[-1]+dr)
         dr=dr*r_ratio
@@ -161,8 +161,8 @@ def get_hdf_data(fname):
     if theta_min<0.0:
         theta_min=0.0
     theta_edge.append(theta_min)
-    print (x2[0])
-    print (theta_edge[0],theta_ratio)
+    print((x2[0]))
+    print((theta_edge[0],theta_ratio))
     for i in range(len(x2)-1):
         theta_edge.append(theta_edge[-1]+dtheta)
         dtheta=dtheta*theta_ratio
@@ -230,7 +230,7 @@ def get_ndf_data(fname,r_file,theta_file):
             if int(data_temp[0]) == np.max(itheta):
                 break
         except:
-            print ("Something wrong with theta data file ",theta_file)
+            print(("Something wrong with theta data file ",theta_file))
     inp.close()
 
     inp=open(r_file,"r")
@@ -243,7 +243,7 @@ def get_ndf_data(fname,r_file,theta_file):
             if int(data_temp[0]) == np.max(ir):
                 break
         except:
-            print ("Something wrong with r data file ",r_file)
+            print(("Something wrong with r data file ",r_file))
     inp.close()
 
     data_sets=["DENSITY","1-VELOCITY","2-VELOCITY","3-VELOCITY","TOTAL ENERGY"]
@@ -286,7 +286,7 @@ if __name__ == "__main__":
     if len(sys.argv)>1:
         fname=sys.argv[1]
     else:
-        fname=raw_input("Enter name of file to convert (main data file): ")
+        fname=input("Enter name of file to convert (main data file): ")
 
 
 
@@ -324,7 +324,7 @@ if __name__ == "__main__":
 
 
     ndata=len(data)
-    data_names=data.keys()
+    data_names=list(data.keys())
     titles=[]
     titles=titles+["ir","r_cent","r_edge"]
     titles=titles+["itheta","theta_cent","theta_edge"]
