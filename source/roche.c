@@ -85,7 +85,7 @@ binary_basics ()
 
   /* Calculate a the separation of the primary and the secondary */
 
-  x = G * geo.period * geo.period * (geo.mstar + geo.m_sec) / (16. * PI * PI);
+  x = GRAV * geo.period * geo.period * (geo.mstar + geo.m_sec) / (16. * PI * PI);
   geo.a = pow (x, 1. / 3.);
 
   /*Calculate the mass ratio.  */
@@ -424,8 +424,8 @@ phi (double s, void *params)
 
   if (phi_init == 0)
   {
-    phi_gm1 = G * geo.mstar;
-    phi_gm2 = G * geo.m_sec;
+    phi_gm1 = GRAV * geo.mstar;
+    phi_gm2 = GRAV * geo.m_sec;
     phi_3 = (phi_gm1 + phi_gm2) / (geo.a * geo.a * geo.a);
     phi_3 = 0.5 * phi_3;
     phi_4 = geo.a * geo.m_sec / (geo.mstar + geo.m_sec);

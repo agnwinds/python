@@ -166,9 +166,9 @@ corona_velocity (ndom, x, v)
 
   rho = sqrt (x[0] * x[0] + x[1] * x[1]);
   if (rho > 0.0)
-    speed = sqrt (G * geo.mstar / rho);
+    speed = sqrt (GRAV * geo.mstar / rho);
   else
-    speed = sqrt (G * geo.mstar / geo.rstar);
+    speed = sqrt (GRAV * geo.mstar / geo.rstar);
 
   v[0] = -zdom[ndom].corona_vel_frac * speed;
   v[2] = 0.0;

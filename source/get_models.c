@@ -595,9 +595,9 @@ even, and so for those cases we want to make sure to calculate the ratio of qs d
 
       /* calculate h*nu/kT for both temperatures */
 
-      q1 = H_OVER_K * C / (lambda * par[0]);    //  h*nu/kT for model desired
+      q1 = H_OVER_K * VLIGHT / (lambda * par[0]);    //  h*nu/kT for model desired
 
-      q2 = H_OVER_K * C / (lambda * tscale);    //  h*nu/kT for model that exists
+      q2 = H_OVER_K * VLIGHT / (lambda * tscale);    //  h*nu/kT for model that exists
 
 
       /* q can be large- line below is attempt to keep exponents in range in that case */

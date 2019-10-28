@@ -18,7 +18,8 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-#include "my_linalg.h"
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
 
 /**********************************************************/
 /** 
@@ -658,7 +659,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     ndom = wmain[icell].ndom;
     vwind_xyz (ndom, &p[n], v);
-    p[n].freq /= (1. - dot (v, p[n].lmn) / C);
+    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;
@@ -842,7 +843,7 @@ photo_gen_matom (p, weight, photstart, nphot)
 
     ndom = wmain[icell].ndom;
     vwind_xyz (ndom, &p[n], v);
-    p[n].freq /= (1. - dot (v, p[n].lmn) / C);
+    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;

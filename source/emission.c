@@ -403,7 +403,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
       vwind_xyz (ndom, &p[np], v);
-      p[np].freq *= (1. + dot (v, p[np].lmn) / C);
+      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT);
       p[np].istat = 0;
       p[np].tau = p[np].nscat = p[np].nrscat = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon
