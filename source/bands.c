@@ -153,7 +153,7 @@ bands_init (imode, band)
   double total_min_frac = 0;
 
 
-  freqmin = VLIGHT / 12000e-8;       /*20000 A */
+  freqmin = VLIGHT / 12000e-8;  /*20000 A */
 
   tmax = 30000.;                /* This sets a floor on freqmax */
 

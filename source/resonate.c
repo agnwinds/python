@@ -1042,7 +1042,7 @@ scatter (p, nres, nnscat)
 
   vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
   v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);   //This is the photon frequency in the comoving frame
+  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //This is the photon frequency in the comoving frame
 
   if (n < 0)
   {
@@ -1052,7 +1052,7 @@ scatter (p, nres, nnscat)
 
   vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
   v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);   //This is the photon frequency in the comoving frame
+  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //This is the photon frequency in the comoving frame
 
 
   /* On entering this subroutine we know that a photon packet has been
@@ -1264,7 +1264,7 @@ scatter (p, nres, nnscat)
     p->freq = freq_comoving;    //This is the photon frequency in the electron rest frame calculated earlier in the routine
     compton_dir (p, xplasma);   //Get a new direction using the KN formula
     v_dop = dot (p->lmn, v);    //Find the dot product of the new velocity with the wind
-    p->freq = p->freq / (1. - v_dop / VLIGHT);       //Transform back to the observers frame
+    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observers frame
 
   }
 

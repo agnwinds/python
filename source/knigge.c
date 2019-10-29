@@ -299,7 +299,7 @@ velocity law if kn_v_infinity is less than 0 */
 
 
   if (rzero > geo.rstar)
-    v[1] = sqrt (GRAV * geo.mstar * rzero) / r;    // Eqn 8 KWD
+    v[1] = sqrt (GRAV * geo.mstar * rzero) / r; // Eqn 8 KWD
   else if (r > 0)
     v[1] = sqrt (GRAV * geo.mstar * geo.rstar) / r;
   else

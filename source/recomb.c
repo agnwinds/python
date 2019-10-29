@@ -571,10 +571,10 @@ use that instead if possible --  57h */
       freq = f1 + dfreq * n;    //The frequency of the array element we would make in the normal run of things
       if (freq > fb_jumps[nn] && nn < fb_njumps)        //The element we were going to make has a frequency abouve the jump
       {
-        fb_x[nnn] = fb_jumps[nn] * (1. - DELTA_V / (2. * VLIGHT));   //We make one frequency point DELTA_V cm/s below the jump
+        fb_x[nnn] = fb_jumps[nn] * (1. - DELTA_V / (2. * VLIGHT));      //We make one frequency point DELTA_V cm/s below the jump
         fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL);      //And the flux for that point
         nnn = nnn + 1;          //increase the index of the created array
-        fb_x[nnn] = fb_jumps[nn] * (1. + DELTA_V / (2 * VLIGHT));    //And one frequency point just above the jump
+        fb_x[nnn] = fb_jumps[nn] * (1. + DELTA_V / (2 * VLIGHT));       //And one frequency point just above the jump
         fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL);      //And the flux for that point
         nn = nn + 1;            //We heave dealt with this jump - on to the next one
         nnn = nnn + 1;          //And we will be filling the next array element next time

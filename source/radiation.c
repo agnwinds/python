@@ -101,7 +101,7 @@ radiation (p, ds)
   /* compute the initial momentum of the photon */
 
   stuff_v (p->lmn, p_in);       //Get the direction
-  renorm (p_in, p->w / VLIGHT);      //Renormalise to momentum
+  renorm (p_in, p->w / VLIGHT); //Renormalise to momentum
 
   /* Create phot, a photon at the position we are moving to 
    *  note that the actual movement of the photon gets done after 

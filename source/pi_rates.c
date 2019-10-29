@@ -219,7 +219,7 @@ calc_pi_rate (nion, xplasma, mode, type)
     }
   }
 
-  pi_rate = (4 * PI * pi_rate) / PLANCK;     //We multiply by 4pi and divide by photon energy - the division by nu is done in the integrands
+  pi_rate = (4 * PI * pi_rate) / PLANCK;        //We multiply by 4pi and divide by photon energy - the division by nu is done in the integrands
 
 
 

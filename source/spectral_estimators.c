@@ -228,7 +228,7 @@ spectral_estimators (xplasma)
 
       /* We will start the search around the temperature that we know will yield a sensible answer  */
       exp_temp_min = ((PLANCK * spec_numax) / (BOLTZMANN)) * 0.9;
-      exp_temp_max = ((PLANCK * spec_numax) / (BOLTZMANN)) / 0.9;    /* NSH 131107 - and the same for the maximum temp */
+      exp_temp_max = ((PLANCK * spec_numax) / (BOLTZMANN)) / 0.9;       /* NSH 131107 - and the same for the maximum temp */
 
       /* Bracket the temperature of an exponential model */
 
