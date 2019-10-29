@@ -24,8 +24,8 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
 
-#include "python.h"
 #include "atomic.h"
+#include "python.h"
 #include "recipes.h"
 #include "log.h"
 
