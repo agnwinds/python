@@ -22,7 +22,7 @@
  * @brief      calculate the luminosity of the entire
  * wind between freqencies f1 and f2
  *
- * @param [in out] double  f1   The minimum frequency for the calculation
+ * @param [in out] double  f1   The minimum frequency 
  * @param [in out] double  f2   The maximum frequency
  * @return     The luminosity of the entire wind
  *
@@ -32,7 +32,7 @@
  *
  * The routine also populates several luminosity related variables in
  * geo, which give the luminosity for separate processes, e.g free-free
- * and free_ound emission.
+ * and free-bound emission.
  *
  * ### Notes ###
  * @bug The do loop might be simpler if made over the plasma cells
@@ -41,7 +41,7 @@
  * 
  * CK20180801: 
  * 
- *           in non-macro atom mode, the only continuum process treates as scattering is 
+ *           in non-macro atom mode, the only continuum process treated as scattering is 
  *           electron scattering, and this is assigned nres = -1. The only valid values 
  *           of nres in non-macro-atom mode are therefore nres = -1 and 0 <= nres <= nlines-1
  *           (with the lattter range covering the lines).

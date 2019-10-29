@@ -102,6 +102,8 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 VERSION = 83c
 
+INDENT = yes
+
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
@@ -113,6 +115,22 @@ startup:
 # indent:
 # 	@echo $(INDENT_STRING)
 # 	$(INDENT_CMD)
+
+
+
+
+
+indent:
+	# Fix indenting, if necessary.
+	@if [ $(INDENT) = yes ] ; then  \
+	../py_progs/run_indent.py -changed ; \
+	fi \
+
+
+zoo:
+	# Fix indenting, if necessary.
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+
 
 
 foo: foo.o signal.o time.o
@@ -176,10 +194,13 @@ prototypes:
 	cproto -I$(INCLUDE) $(kpar_source) > log.h
 	cproto  -I$(INCLUDE) get_atomicdata.c > atomic_proto.h
 
-python: startup  python.o $(python_objects)
-	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
+python: startup python.o $(python_objects) 
+	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python           
 	cp $@ $(BIN)/py
 	mv $@ $(BIN)/py$(VERSION)
+	# Fix indenting, if necessary.
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+
 
 #This line is jsut so you can use make D python for debugging
 D:
@@ -203,10 +224,10 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 
 
 py_wind: startup $(py_wind_objects)
-	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
+	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind                   
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
-
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
 
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
@@ -224,18 +245,20 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		cooling.o
 
 
-
-windsave2table: $(table_objects)
-	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
-	cp $@ $(BIN)
-	mv $@ $(BIN)/windsave2table$(VERSION)
-
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
 
 
+windsave2table: $(table_objects)
+	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table               
+	cp $@ $(BIN)
+	mv $@ $(BIN)/windsave2table$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
-all: clean run_indent python windsave2table py_wind
+# all: clean run_indent python windsave2table py_wind
+all: clean python windsave2table py_wind indent
 
 
 FILE = get_atomicdata.o atomic.o
