@@ -24,7 +24,6 @@
  *
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -33,8 +32,6 @@
 #include "atomic.h"
 #include "python.h"
 #include "recipes.h"
-
-
 
 
 /** Next line is required for proper initialization

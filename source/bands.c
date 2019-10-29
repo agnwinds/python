@@ -53,8 +53,6 @@
 #include "atomic.h"
 #include "python.h"
 
-
-
 /* Actual structures are in python.h.  Here for reference only.
 
 #define NBANDS 10
@@ -73,7 +71,6 @@ xband;
 
 
 */
-
 
 
 /**********************************************************/

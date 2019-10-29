@@ -42,17 +42,14 @@
  *
  ***********************************************************/
 
-
-
-
 #include	<math.h>
 #include	<stdio.h>
-#include        <stdlib.h>
+#include    <stdlib.h>
 #include	<strings.h>
 #include	<string.h>
 #include 	"atomic.h"
 #include	"python.h"      //This needs to come before modlel.h so that what is in models.h is used
-#include         "models.h"
+#include    "models.h"
 #define    	BIG 1e32
 
 

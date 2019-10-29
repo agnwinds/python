@@ -9,7 +9,6 @@
  *
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,9 +18,6 @@
 #include "log.h"
 // If routines are added cproto > atomic_proto.h should be run
 #include "atomic_proto.h"
-
-
-
 
 #define LINELENGTH 400
 #define MAXWORDS    20

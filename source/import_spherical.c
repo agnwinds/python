@@ -17,14 +17,13 @@
  * a cell, but that r and v_r are at the edges of a cell.
  * This is someghing that would presumable be easy to change
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
 #include "python.h"
-
-
 
 #define LINELEN 512
 #define NCELLS  512

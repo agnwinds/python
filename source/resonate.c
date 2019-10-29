@@ -16,8 +16,6 @@
  *
  ***********************************************************/
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,10 +23,9 @@
 #include "atomic.h"
 #include "python.h"
 
-
-
 struct photon cds_phot_old;
 double cds_v2_old, cds_dvds2_old;
+
 
 /**********************************************************/
 /**

@@ -17,7 +17,6 @@
 #include "python.h"
 
 
-
 /**********************************************************/
 /** 
  * @brief      Calculate the reference temperarure for a standard Shakura-Sunyaeev disk

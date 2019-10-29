@@ -9,9 +9,6 @@
  * ???
  ***********************************************************/
 
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,7 +22,6 @@
 double spec_numin, spec_numax, spec_numean;
 /// Log versions of numin and numax - the band ends
 double lspec_numin, lspec_numax;
-
 
 
 /**********************************************************/

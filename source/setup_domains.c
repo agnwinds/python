@@ -20,7 +20,6 @@
 #include "python.h"
 
 
-
 /**********************************************************/
 /** 
  * @brief       Get inputs that describe a particular component of the wind

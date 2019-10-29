@@ -9,14 +9,15 @@
  * ???
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+
 #include "atomic.h"
 #include "python.h"
 
 PlasmaPtr xplasma;              /// Pointer to current plasma cell
+
 
 /**********************************************************/
 /** 

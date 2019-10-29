@@ -13,6 +13,7 @@
  *         alt="DOI"></a>
  *         \endhtmlonly
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -27,6 +28,7 @@ double temp_ext2;               //temperature passed externally
 double temp_ext_rad;            //radiation temperature passed externally 
 
 #define ALPHA_SP_CONSTANT 5.79618e-36   //
+
 
 /**********************************************************/
 /**

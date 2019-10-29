@@ -16,11 +16,10 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "atomic.h"
 #include "python.h"
-
 #include "log.h"
-
 
 
 /**********************************************************/
