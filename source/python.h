@@ -931,6 +931,8 @@ typedef struct plasma
                                            converging is an
                                            indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
 
+#define CELL_CONVERGING 0
+#define CELL_NOT_CONVERGING 1
 
 
   /* 1108 Increase sim estimators to cover all of the bands */
