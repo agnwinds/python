@@ -53,8 +53,6 @@
 #include "atomic.h"
 #include "python.h"
 
-
-
 /* Actual structures are in python.h.  Here for reference only.
 
 #define NBANDS 10
@@ -73,7 +71,6 @@ xband;
 
 
 */
-
 
 
 /**********************************************************/
@@ -153,7 +150,7 @@ bands_init (imode, band)
   double total_min_frac = 0;
 
 
-  freqmin = VLIGHT / 12000e-8;       /*20000 A */
+  freqmin = VLIGHT / 12000e-8;  /*20000 A */
 
   tmax = 30000.;                /* This sets a floor on freqmax */
 

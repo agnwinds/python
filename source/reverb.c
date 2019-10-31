@@ -6,11 +6,13 @@
  *
  * File containing reverberation mapping functions.
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+
 #include "atomic.h"
 #include "python.h"
 
@@ -18,6 +20,7 @@ char delay_dump_file[LINELENGTH];
 int delay_dump_bank_size = 65535, delay_dump_bank_curr = 0;
 int *delay_dump_spec;
 PhotPtr delay_dump_bank;
+
 
 /**********************************************************/
 /** 

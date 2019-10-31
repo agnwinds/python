@@ -14,9 +14,6 @@
  *
  ***********************************************************/
 
-
-
-
 #define MAXHYDRO 1000
 #define IGHOST 0
 
@@ -45,15 +42,12 @@ hydro_dummy, *HydroPtr;
 HydroPtr hydro_ptr;
 */
 
-
-
-
-
 #include  <stdio.h>
 #include  <stdlib.h>
 #include  <strings.h>
 #include  <string.h>
 #include  <math.h>
+
 #include  "log.h"
 #include  "atomic.h"
 #include  "python.h"

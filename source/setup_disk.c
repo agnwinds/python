@@ -9,7 +9,6 @@
  * File containing reverberation mapping functions.
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +16,7 @@
 
 #include "atomic.h"
 #include "python.h"
+
 
 /***********************************************************
              University of Southampton

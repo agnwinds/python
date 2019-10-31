@@ -10,14 +10,13 @@
  * which are steering routines to coordinate system specific
  * routines.
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
 #include "python.h"
-
-
 
 
 /**********************************************************/

@@ -8,6 +8,7 @@
  * for an agn and  * boundray layer
  *
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,7 +83,7 @@ get_stellar_params ()
 
   if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
   {
-    geo.rstar = 6. * GRAV * geo.mstar / (VLIGHT * VLIGHT);   //Set value to ISCO, namely 6 x Rg 
+    geo.rstar = 6. * GRAV * geo.mstar / (VLIGHT * VLIGHT);      //Set value to ISCO, namely 6 x Rg 
   }
   else if (geo.system_type == SYSTEM_TYPE_CV)
   {
@@ -317,7 +318,7 @@ get_bl_and_agn_params (lstar)
     if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
     {
       rddoub ("Central_object.lamp_post_height(r_g)", &geo.lamp_post_height);
-      geo.lamp_post_height *= GRAV * geo.mstar / VLIGHT / VLIGHT;    //get it in CGS units
+      geo.lamp_post_height *= GRAV * geo.mstar / VLIGHT / VLIGHT;       //get it in CGS units
       Log ("lamp_post_height in cm is %g\n", geo.lamp_post_height);
     }
     else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only two options at the moment

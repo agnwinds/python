@@ -8,18 +8,11 @@
  *
  ***********************************************************/
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <float.h>
-#include "atomic.h"
-#include "python.h"
-
 //gsl matrix solvers
-
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -27,6 +20,11 @@
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+
+#include <float.h>
+#include "atomic.h"
+#include "python.h"
+
 
 /**********************************************************/
 /**
