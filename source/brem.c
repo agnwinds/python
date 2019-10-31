@@ -20,9 +20,9 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "atomic.h"
 #include "python.h"
-
 #include "log.h"
 
 
@@ -276,7 +276,7 @@ get_rand_brem (freqmin, freqmax)
     alpha = cdf_get_rand_limit (&cdf_brem);     //We will be using the full CDF approach because we are in the regime where PL and exp are inappropriate
   }
 
-  freq = BOLTZMANN * geo.brem_temp / PLANCK * alpha; //Get a frequency back from the dimenionless alpha parameter
+  freq = BOLTZMANN * geo.brem_temp / PLANCK * alpha;    //Get a frequency back from the dimenionless alpha parameter
   if (freq < freqmin || freqmax < freq)
   {
     Error ("get_rand_brem: freq %g out of range %g %g\n", freq, freqmin, freqmax);

@@ -17,7 +17,6 @@
 #include "python.h"
 
 
-
 /**********************************************************/
 /** 
  * @brief      Calculate the reference temperarure for a standard Shakura-Sunyaeev disk
@@ -751,7 +750,7 @@ qdisk_save (diskfile, ztot)
     {
 
       qdisk.ave_freq[n] /= qdisk.heat[n];
-      qdisk.t_hit[n] = PLANCK * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);     // Basic conversion from freq to T
+      qdisk.t_hit[n] = PLANCK * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);        // Basic conversion from freq to T
       qdisk.w[n] = qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n]);
     }
 

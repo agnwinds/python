@@ -18,8 +18,8 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#include "atomic.h"
 
+#include "atomic.h"
 #include "python.h"
 
 int init_stuff_phot = 0;

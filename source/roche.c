@@ -42,15 +42,16 @@
  *
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "atomic.h"
 #include "python.h"
 
 /* Given the mass of the primary and secondary and the period calculate some other basic parameters
  for the binary system, including the L1 point. */
+
 
 /**********************************************************/
 /** p_roche provides a way to pass a photon structure to roche() and roche_derive which

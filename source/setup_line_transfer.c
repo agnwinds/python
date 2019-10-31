@@ -17,7 +17,6 @@
 #include "python.h"
 
 
-
 /**********************************************************/
 /** 
  * @brief       Get the line transfer mode for the wind

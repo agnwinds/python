@@ -49,9 +49,7 @@
 #include "atomic.h"
 #include "python.h"
 
-
 long n_lost_to_dfudge = 0;
-
 
 
 /**********************************************************/

@@ -13,11 +13,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-
 #include "atomic.h"
 #include "python.h"
-
-
 
 // These are external variables that are used to determine whether one needs to reinitialize
 // by running xdefine_phot
@@ -27,6 +24,7 @@ int iwind_old = 0;
 
 #define PRINT_OFF 0
 #define PRINT_ON  1
+
 
 /**********************************************************/
 /**

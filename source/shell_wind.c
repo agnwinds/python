@@ -12,7 +12,6 @@
  * in 2015 (See issue #172), we decided to keep it.
  ***********************************************************/
 
-
 /*
    This file was created in Feb 2011.
    The purpose is to have a model where we have a single shell of material.
@@ -22,15 +21,12 @@
 
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
 #include "python.h"
-
-
 
 
 /**********************************************************/

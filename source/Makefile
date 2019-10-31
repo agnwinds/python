@@ -100,7 +100,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 83c
+VERSION = 84
 
 INDENT = yes
 
@@ -129,7 +129,7 @@ indent:
 
 zoo:
 	# Fix indenting, if necessary.
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 
@@ -194,12 +194,12 @@ prototypes:
 	cproto -I$(INCLUDE) $(kpar_source) > log.h
 	cproto  -I$(INCLUDE) get_atomicdata.c > atomic_proto.h
 
-python: startup python.o $(python_objects) 
-	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python           
+python: startup python.o $(python_objects)
+	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
 	cp $@ $(BIN)/py
 	mv $@ $(BIN)/py$(VERSION)
 	# Fix indenting, if necessary.
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 #This line is jsut so you can use make D python for debugging
@@ -224,10 +224,10 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 
 
 py_wind: startup $(py_wind_objects)
-	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind                   
+	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
@@ -250,10 +250,10 @@ run_indent:
 
 
 windsave2table: $(table_objects)
-	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table               
+	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi 
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 # The next line runs recompiles all of the routines after first cleaning the directory

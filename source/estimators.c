@@ -13,6 +13,7 @@
  *         alt="DOI"></a>
  *         \endhtmlonly
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -27,6 +28,7 @@ double temp_ext2;               //temperature passed externally
 double temp_ext_rad;            //radiation temperature passed externally 
 
 #define ALPHA_SP_CONSTANT 5.79618e-36   //
+
 
 /**********************************************************/
 /**
@@ -468,9 +470,9 @@ mc_estimator_normalise (n)
     for (j = 0; j < config[i].n_bfu_jump; j++)
     {
 
-      mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / PLANCK / volume;     //normalise
+      mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / PLANCK / volume;        //normalise
       mplasma->gamma[config[i].bfu_indx_first + j] = 0.0;       //re-initialise for next iteration
-      mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / PLANCK / volume; //normalise
+      mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / PLANCK / volume;    //normalise
       mplasma->gamma_e[config[i].bfu_indx_first + j] = 0.0;     //re-initialise for next iteration
 
       /* For the stimulated recombination parts we need the the
@@ -481,11 +483,11 @@ mc_estimator_normalise (n)
       stat_weight_ratio = config[phot_top[config[i].bfu_jump[j]].uplev].g / config[i].g;
 
       mplasma->alpha_st_old[config[i].bfu_indx_first + j] =
-          mplasma->alpha_st[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / volume;
+        mplasma->alpha_st[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / volume;
       mplasma->alpha_st[config[i].bfu_indx_first + j] = 0.0;
 
       mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] =
-          mplasma->alpha_st_e[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / volume;
+        mplasma->alpha_st_e[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / volume;
       mplasma->alpha_st_e[config[i].bfu_indx_first + j] = 0.0;
 
       /* For continuua whose edges lie beyond freqmin assume that gamma
@@ -557,7 +559,7 @@ mc_estimator_normalise (n)
 
       /* normalise jbar. Note that this uses the cell volume rather than the filled volume */
       mplasma->jbar_old[config[i].bbu_indx_first + j] =
-          mplasma->jbar[config[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / volume / line_freq;
+        mplasma->jbar[config[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / volume / line_freq;
 
       mplasma->jbar[config[i].bbu_indx_first + j] = 0.0;
     }
@@ -652,14 +654,15 @@ total_fb_matoms (xplasma, t_e, f1, f2)
            This is essentially equation (33) of Lucy (2003) */
 
         cool_contribution =
-            (mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
+          (mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
            alpha_sp (cont_ptr, xplasma, 1)
            - mplasma->alpha_st_old[config[i].bfu_indx_first + j]
            - alpha_sp (cont_ptr, xplasma, 0)) * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * density * xplasma->ne * xplasma->vol;
 
         /* Now add the collisional ionization term. */
         density = den_config (xplasma, cont_ptr->nlev);
-        cool_contribution += q_ioniz (cont_ptr, t_e) * density * xplasma->ne * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * xplasma->vol;
+        cool_contribution +=
+          q_ioniz (cont_ptr, t_e) * density * xplasma->ne * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * xplasma->vol;
 
         /* That's the bf cooling contribution. */
         total += cool_contribution;
@@ -720,7 +723,7 @@ total_bb_cooling (xplasma, t_e)
       coll_rate = q21 (line_ptr, t_e) * xplasma->ne * (1. - exp (-H_OVER_K * line_ptr->freq / t_e));
 
       cool_contribution =
-          (lower_density * line_ptr->gu / line_ptr->gl -
+        (lower_density * line_ptr->gu / line_ptr->gl -
          upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq / t_e) - 1.) * xplasma->vol * line_ptr->freq * PLANCK;
 
 
@@ -821,13 +824,14 @@ macro_bf_heating (xplasma, t_e)
       /* Photoionization part. */
       lower_density = den_config (xplasma, phot_top[config[i].bfu_jump[j]].nlev);
       heat_contribution =
-          (mplasma->gamma_e_old[config[i].bfu_indx_first + j] -
-         mplasma->gamma_old[config[i].bfu_indx_first + j]) * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * lower_density * xplasma->vol;
+        (mplasma->gamma_e_old[config[i].bfu_indx_first + j] -
+         mplasma->gamma_old[config[i].bfu_indx_first +
+                            j]) * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * lower_density * xplasma->vol;
 
       /* Three body recombination part. */
       upper_density = den_config (xplasma, phot_top[config[i].bfu_jump[j]].uplev);
       heat_contribution +=
-          q_recomb (&phot_top[config[i].bfu_jump[j]],
+        q_recomb (&phot_top[config[i].bfu_jump[j]],
                   t_e) * xplasma->ne * xplasma->ne * PLANCK * upper_density * xplasma->vol * phot_top[config[i].bfu_jump[j]].freq[0];
 
       total += heat_contribution;

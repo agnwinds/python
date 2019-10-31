@@ -12,19 +12,11 @@
  *
  ***********************************************************/
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "atomic.h"
 #include <math.h>
 #include <time.h>
-
-#include "python.h"
-
-#include "recipes.h"
-#include "log.h"
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
@@ -32,6 +24,10 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
 
+#include "atomic.h"
+#include "python.h"
+#include "recipes.h"
+#include "log.h"
 
 
 /******************************

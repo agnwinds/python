@@ -18,8 +18,6 @@
 #include "python.h"
 
 
-
-
 /**********************************************************/
 /** 
  * @brief      gets input data which is necessary to describe a corona above

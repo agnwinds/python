@@ -29,11 +29,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "atomic.h"
-#include "python.h"
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
+#include "atomic.h"
+#include "python.h"
 
 #define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
 #define ALPHAMAX 30.            // Region above which we will use a high frequency approximation
@@ -50,6 +50,7 @@ double alphamin, alphamax;
 double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;        // The precise boundaries in the the bb cdf
 double cdf_bb_ylo, cdf_bb_yhi;  // The places in the CDF defined by freqmin & freqmax
 double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  //  the limits to use for the low and high frequency values
+
 
 /**********************************************************/
 /**

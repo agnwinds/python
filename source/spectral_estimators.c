@@ -9,9 +9,6 @@
  * ???
  ***********************************************************/
 
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,7 +22,6 @@
 double spec_numin, spec_numax, spec_numean;
 /// Log versions of numin and numax - the band ends
 double lspec_numin, lspec_numax;
-
 
 
 /**********************************************************/
@@ -228,7 +224,7 @@ spectral_estimators (xplasma)
 
       /* We will start the search around the temperature that we know will yield a sensible answer  */
       exp_temp_min = ((PLANCK * spec_numax) / (BOLTZMANN)) * 0.9;
-      exp_temp_max = ((PLANCK * spec_numax) / (BOLTZMANN)) / 0.9;    /* NSH 131107 - and the same for the maximum temp */
+      exp_temp_max = ((PLANCK * spec_numax) / (BOLTZMANN)) / 0.9;       /* NSH 131107 - and the same for the maximum temp */
 
       /* Bracket the temperature of an exponential model */
 
