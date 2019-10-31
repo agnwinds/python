@@ -36,9 +36,7 @@
  **********************************************************/
 
 int
-ion_abundances (xplasma, mode)
-  PlasmaPtr xplasma;
-  int mode;
+ion_abundances (PlasmaPtr xplasma, int mode)
 {
   int ireturn;
 
@@ -179,8 +177,7 @@ to match heating and cooling in the wind element! */
  **********************************************************/
 
 int
-convergence (xplasma)
-  PlasmaPtr xplasma;
+convergence (PlasmaPtr xplasma)
 {
   int trcheck, techeck, hccheck, whole_check;
   double min_gain, gain_damp, max_gain, gain_amp, cyc_frac;
@@ -217,12 +214,14 @@ convergence (xplasma)
   if (xplasma->t_e < TMAX)
   {
     // Electron temperature check
-    xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e)
+    xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e);
     if (xplasma->converge_t_e > epsilon)
       xplasma->techeck = techeck = 1;
 
     // Heating and cooling rates check
-    xplasma->converge_hc = fabs (xplasma->heat_tot + xplasma->heat_shock - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->heat_shock + xplasma->cool_tot);
+    xplasma->converge_hc =
+      fabs (xplasma->heat_tot + xplasma->heat_shock - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->heat_shock +
+                                                                                 xplasma->cool_tot);
     if (xplasma->converge_hc > epsilon)
       xplasma->hccheck = hccheck = 1;
   }
@@ -258,10 +257,10 @@ convergence (xplasma)
     if (xplasma->gain < min_gain)
       xplasma->gain = min_gain;
   }
-    /*
-     * The cell is not converging, which means either that the temperature is consistently moving in one direction or
-     * that the oscillations of the temperature have increased in the past two cycles.
-     */
+  /*
+   * The cell is not converging, which means either that the temperature is consistently moving in one direction or
+   * that the oscillations of the temperature have increased in the past two cycles.
+   */
   else
   {
     /*
@@ -319,7 +318,7 @@ convergence (xplasma)
  **********************************************************/
 
 int
-check_convergence ()
+check_convergence (void)
 {
   int n;
   int nconverge, nconverging, ntot;
@@ -391,10 +390,7 @@ PlasmaPtr xxxplasma;
  **********************************************************/
 
 int
-one_shot (xplasma, mode)
-  PlasmaPtr xplasma;
-  int mode;
-
+one_shot (PlasmaPtr xplasma, int mode)
 {
   double te_old, te_new;
   double gain;
@@ -499,9 +495,7 @@ meaning in nebular concentrations.
  **********************************************************/
 
 double
-calc_te (xplasma, tmin, tmax)
-  PlasmaPtr xplasma;
-  double tmin, tmax;
+calc_te (PlasmaPtr xplasma, double tmin, double tmax)
 {
   double z1, z2;
 
@@ -610,8 +604,7 @@ zero_emit2 (double t, void *params)
 }
 
 double
-zero_emit (t)
-  double t;
+zero_emit (double t)
 {
   double difference;
 
