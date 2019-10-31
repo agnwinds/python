@@ -87,22 +87,21 @@ num_int (func, a, b, eps)
      double a, b;
      double eps;
 {
-  double result,error,result2;
+  double result, error, result2;
   double alpha = 0.0;
   void *test = NULL;
   double delta;
   int zflag, i;
-  int status=0;
-  int status2=0;
-  
-  int npoints,j;
-  double dx;
+  int status = 0;
+  int status2 = 0;
+
+  int npoints;
   size_t neval;
   gsl_function F;
   F.function = func;
   F.params = &alpha;
   zflag = 1;
-  npoints=1000;
+  npoints = 1000;
   if (func (a, test) == 0.0 && func (b, test) == 0.0)
   {
     zflag = 0;
@@ -115,27 +114,27 @@ num_int (func, a, b, eps)
   }
   if (zflag == 1)
   {
-      gsl_set_error_handler_off (); //We need to be able to catch and handle gsl errors 
-      
-      gsl_integration_workspace *w = gsl_integration_workspace_alloc (1000);
-    status=gsl_integration_qags (&F, a, b, 0, eps, 1000 ,w, &result, &error);
+    gsl_set_error_handler_off ();       //We need to be able to catch and handle gsl errors 
+
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc (1000);
+    status = gsl_integration_qags (&F, a, b, 0, eps, 1000, w, &result, &error);
     if (status)
     {
-      if (status == GSL_EROUND)   //The rounding error has been triggered - try a different integrator
+      if (status == GSL_EROUND) //The rounding error has been triggered - try a different integrator
       {
-          gsl_integration_workspace_free(w);
-          gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30); 
-          status2=gsl_integration_romberg (&F, a, b, 0, eps, &result2, &neval, w);
-          gsl_integration_romberg_free (w);
-          if (status2)
-          {
-              Error ("num_init: some kind of error in romberg and qags integration\n");
-          }
+        gsl_integration_workspace_free (w);
+        gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30);
+        status2 = gsl_integration_romberg (&F, a, b, 0, eps, &result2, &neval, w);
+        gsl_integration_romberg_free (w);
+        if (status2)
+        {
+          Error ("num_init: some kind of error in romberg and qags integration\n");
+        }
       }
     }
     else
     {
-        gsl_integration_workspace_free(w);
+      gsl_integration_workspace_free (w);
     }
   }
   else
