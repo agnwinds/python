@@ -187,8 +187,8 @@ convergence (PlasmaPtr xplasma)
   gain_damp = 0.7;
   epsilon = 0.05;
 
-  trcheck = techeck = hccheck = 0;
-  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;   // NSH 70g - zero the global variables
+  trcheck = techeck = hccheck = CONVERGENCE_CHECK_PASS;
+  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = CONVERGENCE_CHECK_PASS;   // NSH 70g - zero the global variables
 
   /*
    * Check the fractional change (convergence) for the radiation temperature
@@ -196,7 +196,7 @@ convergence (PlasmaPtr xplasma)
 
   xplasma->converge_t_r = fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r);
   if (xplasma->converge_t_r > epsilon)
-    xplasma->trcheck = trcheck = 1;
+    xplasma->trcheck = trcheck = CONVERGENCE_CHECK_FAIL;
 
   /*
    * Check the convergence for electron temperature and heat + cooling rates
@@ -216,19 +216,19 @@ convergence (PlasmaPtr xplasma)
     // Electron temperature check
     xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e);
     if (xplasma->converge_t_e > epsilon)
-      xplasma->techeck = techeck = 1;
+      xplasma->techeck = techeck = CONVERGENCE_CHECK_FAIL;
 
     // Heating and cooling rates check
     xplasma->converge_hc =
       fabs (xplasma->heat_tot + xplasma->heat_shock - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->heat_shock +
                                                                                  xplasma->cool_tot);
     if (xplasma->converge_hc > epsilon)
-      xplasma->hccheck = hccheck = 1;
+      xplasma->hccheck = hccheck = CONVERGENCE_CHECK_FAIL;
   }
   else                          // If the cell has reached the maximum temperature we mark it as over-limit
     // TODO: does this make sense to label it this way?
   {
-    xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;
+    xplasma->techeck = techeck = xplasma->hccheck = hccheck = CONVERGENCE_CHECK_OVER_TEMP;
   }
 
   /*
@@ -332,15 +332,15 @@ check_convergence (void)
   for (n = 0; n < NPLASMA; n++)
   {
     ntot++;
-    if (plasmamain[n].converge_whole == 0)
+    if (plasmamain[n].converge_whole == CONVERGENCE_CHECK_PASS)
       nconverge++;
-    if (plasmamain[n].trcheck == 0)
+    if (plasmamain[n].trcheck == CONVERGENCE_CHECK_PASS)
       ntr++;
-    if (plasmamain[n].techeck == 0)
+    if (plasmamain[n].techeck == CONVERGENCE_CHECK_PASS)
       nte++;
-    if (plasmamain[n].hccheck == 0)
+    if (plasmamain[n].hccheck == CONVERGENCE_CHECK_PASS)
       nhc++;
-    if (plasmamain[n].techeck == 2)
+    if (plasmamain[n].techeck == CONVERGENCE_CHECK_OVER_TEMP)
       nmax++;
     if (plasmamain[n].converging == CELL_CONVERGING)
       nconverging++;

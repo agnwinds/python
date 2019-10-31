@@ -933,7 +933,9 @@ typedef struct plasma
 
 #define CELL_CONVERGING 0
 #define CELL_NOT_CONVERGING 1
-
+#define CONVERGENCE_CHECK_PASS 0
+#define CONVERGENCE_CHECK_FAIL 1
+#define CONVERGENCE_CHECK_OVER_TEMP 2
 
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
