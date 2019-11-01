@@ -17,9 +17,6 @@
 #include "python.h"
 
 
-
-
-
 /**********************************************************/
 /**
  * @brief      calculate the luminosity of the entire

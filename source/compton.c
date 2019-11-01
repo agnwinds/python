@@ -9,14 +9,15 @@
  * ???
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+
 #include "atomic.h"
 #include "python.h"
 
 PlasmaPtr xplasma;              /// Pointer to current plasma cell
+
 
 /**********************************************************/
 /** 
@@ -55,7 +56,7 @@ kappa_comp (xplasma, freq)
 
   sigma = alpha (freq) * THOMPSON;      //obtain the energy exchange cross section
 
-  x = (sigma * PLANCK) / (MELEC * VLIGHT * VLIGHT);    //Calculate the constant
+  x = (sigma * PLANCK) / (MELEC * VLIGHT * VLIGHT);     //Calculate the constant
   x *= xplasma->ne * freq;      //Multiply by cell electron density and frequency of the packet.
 
   x *= zdom[ndom].fill;         // multiply by the filling factor- should cancel with density enhancement
@@ -201,7 +202,7 @@ total_comp (one, t_e)
   else
     x = xplasma->comp_nujnu;    //We already have an integral, retrieve it
 
-  x *= (16. * PI * BOLTZMANN * t_e * xplasma->ne) / (MELEC * VLIGHT * VLIGHT) * xplasma->vol;     //Multply by the other terms - including temperature - this gives the temperature dependance of this cooling term.
+  x *= (16. * PI * BOLTZMANN * t_e * xplasma->ne) / (MELEC * VLIGHT * VLIGHT) * xplasma->vol;   //Multply by the other terms - including temperature - this gives the temperature dependance of this cooling term.
 
 
   return (x);
@@ -238,7 +239,7 @@ klein_nishina (nu)
 
   kn = THOMPSON;                /* NSH 130605 to remove o3 compile error */
   x1 = x2 = x3 = x4 = 0.0;      /* NSH 130605 to remove o3 compile error */
-  x = (PLANCK * nu) / (MELEC * VLIGHT * VLIGHT);       //The photon energy relative to the rest mass energy of an electron
+  x = (PLANCK * nu) / (MELEC * VLIGHT * VLIGHT);        //The photon energy relative to the rest mass energy of an electron
   if (x > 0.0001)               //If the photon energy is high enough - then we need to compute the cross section - otherwise it is just the Thmopson cross section
   {
     x1 = 1. + x;
@@ -300,7 +301,7 @@ compton_dir (p, xplasma)
   double x[3];                  /*photon direction in the frame of reference of the original photon */
   double dummy[3], c[3];
 
-  x1 = PLANCK * p->freq / MELEC / VLIGHT / VLIGHT;     //compute the ratio of photon energy to electron energy. In the electron rest frame this is just the electron rest mass energy
+  x1 = PLANCK * p->freq / MELEC / VLIGHT / VLIGHT;      //compute the ratio of photon energy to electron energy. In the electron rest frame this is just the electron rest mass energy
 
   n = l = m = 0.0;              //initialise some variables to avoid warnings
 

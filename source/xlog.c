@@ -85,6 +85,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <math.h>
+
 #include "log.h"
 
 #define LINELENGTH 256
@@ -121,6 +122,7 @@ int nerrors;
 FILE *diagptr;
 int init_log = 0;
 int log_verbosity = 5;          // A parameter which can be used to suppress what would normally be logged or printed
+
 
 /**********************************************************/
 /** 

@@ -71,11 +71,12 @@ as calculated by python.  This is the main routine.
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
 #include "atomic.h"
 #include "python.h"
 
-
 //char *choice_options;
+
 
 /**********************************************************/
 /** 111125 - ksl - Replaced print statements giving choices with a string. The point is to be able to include

@@ -1,5 +1,4 @@
 
-
 /***********************************************************/
 /** @file   cv.c
  * @author  ksl
@@ -11,7 +10,6 @@
  * and are only intended to intialize variables to be used in 
  * Python
 ***********************************************************/
-
 
 #include	<math.h>
 #include	<stdio.h>
