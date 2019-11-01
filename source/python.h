@@ -918,7 +918,7 @@ typedef struct plasma
 
 
 
-  double gain;                  /* The gain being used in interations of the structure */
+  double gain;                  /* The gain being used in iterations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
                                                            The first two are the fractional changes in t_r, t_e between this and the last cycle. The third
                                                            number is the fraction between heating and cooling divided by the sum of the 2       */
@@ -926,16 +926,15 @@ typedef struct plasma
                                            is 0 if the fractional change or in the case of the last check error is less than a value, currently
                                            set to 0.05.  ksl 111126   
                                            NSH 130725 - this number is now also used to say if the cell is over temperature - it is set to 2 in this case   */
-  int converge_whole, converging;       /* converge_whole is the sum of the indvidual convergence checks.  It is 0 if all of the
-                                           convergence checks indicated convergence. 
-                                           converging is an
-                                           indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
+  int converge_whole, converging;       /* converge_whole is the sum of the individual convergence checks.  It is 0 if all of the convergence checks indicated
+                                           convergence. converging is an indicator of whether the program thought the cell is on the way to convergence 0
+                                           implies converging */
 
-#define CELL_CONVERGING 0
-#define CELL_NOT_CONVERGING 1
-#define CONVERGENCE_CHECK_PASS 0
-#define CONVERGENCE_CHECK_FAIL 1
-#define CONVERGENCE_CHECK_OVER_TEMP 2
+#define CELL_CONVERGING 0               /* Indicator for a cell which is considered converging - temperature is oscillating and decreasing */
+#define CELL_NOT_CONVERGING 1           /* Indicator for a cell which is considered not converging (temperature is shooting off in one direction) */
+#define CONVERGENCE_CHECK_PASS 0        /* Indicator for that the cell has passed a convergence check */
+#define CONVERGENCE_CHECK_FAIL 1        /* Indicator for that the cell has failed a convergence check */
+#define CONVERGENCE_CHECK_OVER_TEMP 2   /* Indicator for a cell that its electron temperature is more than TMAX */
 
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */

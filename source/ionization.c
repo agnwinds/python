@@ -181,18 +181,20 @@ convergence (PlasmaPtr xplasma)
   double min_gain, gain_damp, max_gain, gain_amp, cyc_frac;
   double epsilon;
 
+  // TODO: are these values optimal?
   min_gain = 0.1;
   gain_damp = 0.7;
   epsilon = 0.05;
 
   trcheck = techeck = hccheck = CONVERGENCE_CHECK_PASS;
-  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = CONVERGENCE_CHECK_PASS;   // NSH 70g - zero the global variables
+  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = CONVERGENCE_CHECK_PASS;      // NSH 70g - zero the global variables
 
   /*
-   * Check the fractional change (convergence) for the radiation temperature
+   * Check the convergence of the radiation temperature
    */
 
-  xplasma->converge_t_r = fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r);
+  xplasma->converge_t_r =       // Radiation temperature check
+    fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r);
   if (xplasma->converge_t_r > epsilon)
     xplasma->trcheck = trcheck = CONVERGENCE_CHECK_FAIL;
 
@@ -211,20 +213,18 @@ convergence (PlasmaPtr xplasma)
 
   if (xplasma->t_e < TMAX)
   {
-    // Electron temperature check
-    xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e);
+    xplasma->converge_t_e =     // Electron temperature check
+      fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old + xplasma->t_e);
     if (xplasma->converge_t_e > epsilon)
       xplasma->techeck = techeck = CONVERGENCE_CHECK_FAIL;
 
-    // Heating and cooling rates check
-    xplasma->converge_hc =
+    xplasma->converge_hc =      // Heating and cooling rates check
       fabs (xplasma->heat_tot + xplasma->heat_shock - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->heat_shock +
                                                                                  xplasma->cool_tot);
     if (xplasma->converge_hc > epsilon)
       xplasma->hccheck = hccheck = CONVERGENCE_CHECK_FAIL;
   }
   else                          // If the cell has reached the maximum temperature we mark it as over-limit
-    // TODO: does this make sense to label it this way?
   {
     xplasma->techeck = techeck = xplasma->hccheck = hccheck = CONVERGENCE_CHECK_OVER_TEMP;
   }
@@ -241,7 +241,6 @@ convergence (PlasmaPtr xplasma)
    * oscillating around a temperature. If that is the case, we drop the amount by which the temperature can change in
    * this cycle. Else if the cell is not converging, we increase the amount by which the temperature can change in this
    * cycle.
-   * TODO: reconsider this whole gain scheme - is this optimal? Do we really need to do this for speed/convergence purposes?
    */
 
   /*
@@ -251,6 +250,7 @@ convergence (PlasmaPtr xplasma)
   {
     xplasma->converging = CELL_CONVERGING;
 
+    // TODO: is this optimal for converging cells? See discussion on Bug #631
     xplasma->gain *= gain_damp;
     if (xplasma->gain < min_gain)
       xplasma->gain = min_gain;
@@ -262,7 +262,6 @@ convergence (PlasmaPtr xplasma)
   else
   {
     /*
-     * TODO: not clear what the magic numbers should be :------)
      * EP: allow the gain to increase more for the first cyc_frac * cycles to
      * allow the plasma to change temperature more rapidly -- right now this
      * is controlled by some magic numbers and should probably be fine tuned
@@ -342,17 +341,17 @@ check_convergence (void)
       nmax++;
     if (plasmamain[n].converging == CELL_CONVERGING)
       nconverging++;
-
   }
 
   xconverge = ((double) nconverge) / ntot;
   xconverging = ((double) nconverging) / ntot;
   geo.fraction_converged = xconverge;
-  Log
-    ("!!Check_convergence: %4d (%.3f) converged and %4d (%.3f) converging of %d the cells actually in the wind\n",
-     nconverge, xconverge, nconverging, xconverging, ntot);
+
+  Log ("!!Check_convergence: %4d (%.3f) converged and %4d (%.3f) converging of %d the cells actually in the wind\n",
+       nconverge, xconverge, nconverging, xconverging, ntot);
   Log ("!!Check_convergence: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d\n", ntr, nte, nmax, nhc);
   Log_flush ();
+
   return (0);
 }
 
