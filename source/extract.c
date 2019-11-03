@@ -202,7 +202,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
 /**********************************************************/
 /** 
- * @brief      (w,pp,itype,nspec)
+ * @brief      Extract a single photon along a single line of sight.
  *
  * @param [in] WindPtr  w   The entire wind
  * @param [in] PhotPtr  pp  The photon to be extracted
