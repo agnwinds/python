@@ -893,6 +893,15 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
 
+/* We now update the fluxes in the three bands */
+
+  if (p->freq < UV_low)
+    vadd (xplasma->F_vis, flux, xplasma->F_vis);
+  else if (p->freq < UV_hi)
+    vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
+  else
+    vadd (xplasma->F_UV, flux, xplasma->F_UV);
+
 
   /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
      nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
@@ -903,7 +912,6 @@ update_banded_estimators (xplasma, p, ds, w_ave)
      as energy packets are indisivible in macro atom mode */
 
 
-
   for (i = 0; i < geo.nxfreq; i++)
   {
     if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
@@ -912,9 +920,6 @@ update_banded_estimators (xplasma, p, ds, w_ave)
       xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;   /* input to allow standard deviation to be calculated */
       xplasma->xj[i] += w_ave * ds;     /* photon weight times distance travelled */
       xplasma->nxtot[i]++;      /* increment the frequency banded photon counter */
-      xplasma->F_x[i] += flux[0];       //Increment the banded cartesian flux vectors
-      xplasma->F_y[i] += flux[1];
-      xplasma->F_z[i] += flux[2];
       /* work out the range of frequencies within a band where photons have been seen */
       if (p->freq < xplasma->fmin[i])
       {
