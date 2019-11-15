@@ -100,7 +100,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 84_flux
+VERSION = 84
 
 INDENT = yes
 
