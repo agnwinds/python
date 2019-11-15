@@ -4,6 +4,9 @@
 
 #endif
 
+#define UV_low 7.4e14 //The lower frequency bound of the UV band as defined in IOS 21348
+#define UV_hi 3e16 //The lower frequency bound of the UV band as defined in IOS 21348
+
 int q_test_count;
 
 int np_mpi_global;              /// Global variable which holds the number of MPI processes
@@ -866,14 +869,10 @@ typedef struct plasma
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
 
-
-  /* banded, directional fluxes */
-  double F_x[NXBANDS];
-  double F_y[NXBANDS];
-  double F_z[NXBANDS];
-
-
-
+  /* banded, directional fluxes */  
+  double F_vis[3];
+  double F_UV[3];
+  double F_Xray[3];
 
   double j_direct, j_scatt;     /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double ip_direct, ip_scatt;   /* 1309 NSH mean intensity due to direct photons and scattered photons */
