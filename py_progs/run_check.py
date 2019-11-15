@@ -55,9 +55,10 @@ import os
 from astropy.io import ascii
 import numpy
 import subprocess
-import pylab
+import matplotlib.pyplot as pylab
 import xhtml
 import plot_wind
+import plot_wind_1d
 import plot_spec
 import plot_tot
 
@@ -319,6 +320,21 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complet
     g=open(root+'.html','w')
     g.write(string)
 
+def how_many_dimensions(filename):
+    '''
+    Check whether a windsave file is one or two dimenaions
+    '''
+
+    x=ascii.read(filename)
+    for one in x.colnames:
+        if one=='j':
+            return 2
+    
+    return 1
+
+
+
+
 
 
 def doit(root='ixvel',outputfile='out.txt'):
@@ -347,9 +363,16 @@ def doit(root='ixvel',outputfile='out.txt'):
     for one in complete_message:
         print(one)
 
-    converge_plot=plot_wind.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
-    te_plot=plot_wind.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
-    tr_plot=plot_wind.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
+    xdim=how_many_dimensions('%s.0.master.txt' % root)
+
+    if xdim==2:
+        converge_plot=plot_wind.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
+        te_plot=plot_wind.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
+        tr_plot=plot_wind.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
+    else:
+        converge_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
+        te_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
+        tr_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
 
 
     converged,converging,t_r,t_e,hc=read_diag(root)

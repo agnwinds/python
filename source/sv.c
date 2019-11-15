@@ -7,6 +7,7 @@
  * @brief  The collection of routines needed to define a Shlossman-Vitello wind 
  *
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -17,7 +18,6 @@
 
 int sdom;
 int sv_zero_r_ndom;
-
 
 
 /**********************************************************/

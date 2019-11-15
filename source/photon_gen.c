@@ -13,11 +13,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-
 #include "atomic.h"
 #include "python.h"
-
-
 
 // These are external variables that are used to determine whether one needs to reinitialize
 // by running xdefine_phot
@@ -27,6 +24,7 @@ int iwind_old = 0;
 
 #define PRINT_OFF 0
 #define PRINT_ON  1
+
 
 /**********************************************************/
 /**
@@ -193,9 +191,11 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;
+    p[n].np = n;
     if (geo.reverb != REV_NONE && p[n].path < 0.0)      // SWM - Set path lengths for disk, star etc.
       simple_paths_gen_phot (&p[n]);
   }
+
   return (0);
 
 }
@@ -1435,16 +1435,10 @@ photon_checks (p, freqmin, freqmax, comment)
 {
   int nnn, nn;
   int nlabel;
-//OLD  int max_errors;
   geo.n_ioniz = 0;
   geo.cool_tot_ioniz = 0.0;
   nnn = 0;
   nlabel = 0;
-//OLD  max_errors = 100;
-//OLD  if (max_errors < 1e-5 * NPHOT)
-//OLD  {
-//OLD    max_errors = 1e-5 * NPHOT;
-//OLD  }
 
   /* Next two lines are to allow for fact that photons generated in
    * a frequency range may be Doppler shifted out of that range, especially
@@ -1461,7 +1455,7 @@ photon_checks (p, freqmin, freqmax, comment)
   freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
   {
-    p[nn].np = nn;
+//OLD    p[nn].np = nn;
     if (PLANCK * p[nn].freq > ion[0].ip)
     {
       geo.cool_tot_ioniz += p[nn].w;

@@ -8,11 +8,11 @@
  *
  * ???
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
 
 #include "atomic.h"
 #include "python.h"
@@ -25,7 +25,6 @@ double qromb_temp;              //Temperature used in integrations - has to be a
 
 double xpl_alpha, xpl_w, xpl_logw;
 double xexp_temp, xexp_w;
-
 
 
 /**********************************************************/
@@ -219,7 +218,7 @@ calc_pi_rate (nion, xplasma, mode, type)
     }
   }
 
-  pi_rate = (4 * PI * pi_rate) / PLANCK;     //We multiply by 4pi and divide by photon energy - the division by nu is done in the integrands
+  pi_rate = (4 * PI * pi_rate) / PLANCK;        //We multiply by 4pi and divide by photon energy - the division by nu is done in the integrands
 
 
 

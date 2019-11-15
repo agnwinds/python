@@ -9,21 +9,17 @@
  *
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "atomic.h"
 #include <time.h>               //To allow the used of the clock command without errors!!
 
-
-
+#include "atomic.h"
 #include "python.h"
 #include "models.h"
+
 #define NSPEC	20
-
-
 
 
 /**********************************************************/

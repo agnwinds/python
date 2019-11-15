@@ -38,6 +38,7 @@
 #include "atomic.h"
 #include "python.h"
 
+
 /**********************************************************/
 /**
  * @brief      a steering routine that either calls _in_space or _in_wind  depending upon the
@@ -730,22 +731,39 @@ walls (p, pold, normal)
   double xxx[3];
   double s, z;
   double theta, phi;
+  int hit_star = FALSE;
 
   /* Check to see if the photon has hit the star. If so
    * put the photon at the star surface and use that position
    * to determine the normal to the surface, the assumption
    * being that the star is located at the center of the
-   * coordiante grid.
+   * coordinate grid.
    */
+
+
+
+  s = ds_to_sphere (geo.rstar, pold);
 
   if ((r = dot (p->x, p->x)) < geo.rstar_sq)
   {
-    s = ds_to_sphere (geo.rstar, pold);
+    /* Then the photon is inside the star */
+    hit_star = TRUE;
+  }
+
+  else if (s < VERY_BIG && ds_to_sphere (geo.rstar, p) == VERY_BIG)
+  {
+    /* then we hit the star somewhere in between */
+    hit_star = TRUE;
+  }
+
+  if (hit_star == TRUE)
+  {
     stuff_phot (pold, p);
     move_phot (p, s);
     stuff_v (p->x, normal);
     return (p->istat = P_HIT_STAR);
   }
+
 
   /* Check to see if it has hit the disk.
    *

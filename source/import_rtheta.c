@@ -25,14 +25,13 @@
  * then one must translate them to the convention
  * here before the model is read in
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
 #include "python.h"
-
-
 
 #define LINELEN 512
 #define NCELLS  512

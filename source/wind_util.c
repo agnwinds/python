@@ -17,18 +17,16 @@
  *
  ***********************************************************/
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "log.h"
 #include "atomic.h"
 #include "python.h"
 
-
-
 int ierr_coord_fraction = 0;
+
 
 /**********************************************************/
 /**

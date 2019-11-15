@@ -12,10 +12,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "atomic.h"
 #include "python.h"
+
 #define LINELEN 512
 #define NCELLS  512
+
 /** The structure that holds the inputs and any subsidiary variables
  *
  * Note that i is the row number and j is the column number 
@@ -31,8 +34,6 @@ struct
 
   double wind_x[NDIM_MAX], wind_z[NDIM_MAX], wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];
 } xx_cyl;
-
-
 
 
 /**********************************************************/

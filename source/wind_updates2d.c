@@ -16,14 +16,13 @@
 #include <string.h>
 #include <math.h>
 
-
 #include "atomic.h"
 #include "python.h"
+
 #define LINELEN 256
 
-
-
 int num_updates = 0;
+
 
 /**********************************************************/
 /**
