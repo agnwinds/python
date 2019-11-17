@@ -1350,7 +1350,7 @@ xband;
 #define NTEMPS	60              // The number of temperatures which are stored in each fbstruct
                                 /* NSH this was increased from 30 to 60 to take account of 3 extra OOM 
                                    intemperature we wanted to have in fb */
-#define NFB	10              // The maximum number of frequency intervals for which the fb emission is calculated
+#define NFB	20              // The maximum number of frequency intervals for which the fb emission is calculated
 
 struct fbstruc
 {
