@@ -387,7 +387,7 @@ calculate_ionization (restart_stat)
       if (modes.make_tables)
       {
         strcpy (dummy, "");
-        sprintf (dummy, "diag_%s/%s%02d", files.root, files.root, geo.wcycle);
+        sprintf (dummy, "diag_%s/%s.%02d", files.root, files.root, geo.wcycle);
         do_windsave2table (dummy, 0);
       }
 
