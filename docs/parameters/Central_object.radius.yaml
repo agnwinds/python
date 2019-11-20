@@ -1,0 +1,7 @@
+name: Central_object.radius
+description: |
+  Radius of the central object in the system, e.g the white dwarf or black hole
+type: Double
+unit: cm
+values: Greater than 0
+file: setup_star_bh.c

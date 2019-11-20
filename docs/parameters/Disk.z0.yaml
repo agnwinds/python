@@ -1,0 +1,9 @@
+name: Disk.z0
+description: |
+  Fractional height at maximum radius.  The physical height at the
+  outer disk will be this * :ref:`Disk.radmax`.
+type: Double
+values: Greater than 0
+parent:
+  Disk.type: vertically.extended
+file: setup_disk.c

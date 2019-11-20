@@ -1,0 +1,11 @@
+name: Binary.mass_sec
+description: |
+  In binary systems the mass of the secondary. This is used along
+  with the period to establish the Roche lobes, so that one can
+  see the effects of eclipses on the system
+type: Double
+unit: M☉/year
+values: Greater than 0
+parent:
+  System_type: [cv, bh]           
+file: setup_star_bh.c

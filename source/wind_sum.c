@@ -1,50 +1,57 @@
 
+/***********************************************************/
+/** @file  wind_sum.c
+ * @author ksl
+ * @date   April, 2018
+ *
+ * @brief  Just prints a subset of quantities to the screen
+ *
+ * ### Notes ###
+ *
+ * At some level, a separate file for this does not seem
+ * merited.  One should consider either adding other routines
+ * to this file, or adding it to wind_updates2d.c 
+ *
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
-
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                         Space Telescope Science Institute
 
- Synopsis:
-	xtemp_rad (w) prints out t_r and t_e in the grid
-
- Arguments:		
-	WindPtr w;
-
-Returns:
- 
-Description:	
-	
-	This is just a logging routine
-	
-Notes:
-	This was added in spring 2004 to try to understand how the
-	temperature was evolving in the models
-
-	This routine is adapted from a very simillar routine in py_wind 
-
-	The routine won't fail but the output may be less useful
-	when coodinates sysstems other than cylindrical are
-	used.
-History:
- 	04mar	ksl	Coding on python began.
-        04May	SS	Modified so that Te is given too.
-	06may	ksl	57+ -- to reflect plasma structure
-	09feb	ksl	68b - Added back subsampling when dimensions
-			are very large, and a warning about
-			the display when not using cylindrical 
-			coords.
-	15aug	ksl	Modified for domains, on the assumption
-			that we wanted to print out results for
-			all of the domians
-
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      Prints out t_r and t_e and the total number of photons
+ * in a subsample of the the grid that fits on a typical output terminal
+ *
+ * @param [in] WindPtr  w   The entire wind
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * This is just a logging routine that prints out a few key parameters
+ * at the end of each ionization cycle so that one can get a crude overview
+ * of what is happening.  
+ *
+ * ### Notes ###
+ * 
+ * This routine is adapted from a very similar routine in py_wind 
+ *
+ * If the number of grid cells in the x direction is less more than 30 
+ * the grid gets subsampled in the x direction
+ * 
+ * The routine won't fail but the output is less useful
+ * when coodinates systems other than cylindrical are
+ * used.
+ *
+ * 180526 - ksl - Fixed #384
+ *
+ *
+ **********************************************************/
 
 int
 xtemp_rad (w)
@@ -60,109 +67,174 @@ xtemp_rad (w)
 
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+
+    Log ("Results for Domain %d:\n", ndom);
+    ndim = zdom[ndom].ndim;
+    mdim = zdom[ndom].mdim;
+    nstart = zdom[ndom].nstart;
+
+
+
+    py_wind_min = 0;
+    py_wind_max = ndim;
+
+    /* py_wind_delta can be used to subsample the array */
+    py_wind_delta = 1;
+    if (mdim > 30)
+      py_wind_delta = 1 + mdim / 30;
+
+
+    if (zdom[ndom].coord_type == SPHERICAL)
     {
-
-      Log ("Results for Dommain %d\n", ndom);
-      ndim = zdom[ndom].ndim;
-      mdim = zdom[ndom].mdim;
-      nstart = zdom[ndom].nstart;
-
-
-
-      py_wind_min = 0;
-      py_wind_max = ndim;
-
-      /* py_wind_delta can be used to subsample the array */
-      py_wind_delta = 1;
-      if (mdim > 30)
-	py_wind_delta = 1 + mdim / 30;
-
-
-      if (zdom[ndom].coord_type != 1)
-	{
-	  Log
-	    ("Warning: Since coord type is not cylindrical, next print out may look odd\n");
-	}
-
+      Log ("\n R\n");
+      j = 1;
+      for (i = py_wind_min; i < py_wind_max; i += 1)
+      {
+        Log ("%8.2e ", w[nstart + i * mdim].r);
+        if (j % 10 == 0)
+        {
+          Log ("\n");
+        }
+        j++;
+      }
       Log ("\n T rad\n");
 
-      Log ("   z\\x   ");
-      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	Log ("%8.2e ", w[nstart + i * mdim].x[0]);
-      Log ("\n");
-
-      for (j = 0; j < mdim; j++)
-	{
-	  Log ("%8.2e ", w[j].x[2]);
-	  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	    {
-	      n = nstart + i * mdim + j;
-	      if (w[n].vol > 0.0)
-		{
-		  nplasma = w[n].nplasma;
-		  x = plasmamain[nplasma].t_r;
-		}
-	      else
-		x = 0.0;
-	      Log ("%8.2g ", x);
-	    }
-	  Log ("\n");
-	}
+      j = 1;
+      for (i = py_wind_min; i < py_wind_max; i += 1)
+      {
+        n = nstart + i;
+        nplasma = w[n].nplasma;
+        Log ("%8.2e ", plasmamain[nplasma].t_r);
+        if (j % 10 == 0)
+        {
+          Log ("\n");
+        }
+        j++;
+      }
 
       Log ("\n T e\n");
 
-      Log ("   z\\x   ");
-      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	Log ("%8.2e ", w[nstart + i * mdim].x[0]);
-      Log ("\n");
+      j = 1;
+      for (i = py_wind_min; i < py_wind_max; i += 1)
+      {
+        n = nstart + i;
+        nplasma = w[n].nplasma;
+        Log ("%8.2e ", plasmamain[nplasma].t_e);
+        if (j % 10 == 0)
+        {
+          Log ("\n");
+        }
+        j++;
+      }
 
-      for (j = 0; j < mdim; j++)
-	{
-	  Log ("%8.2e ", w[j].x[2]);
-	  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	    {
-	      n = nstart + i * mdim + j;
-//	      if (w[n].vol > 0.0)
-	  	      nplasma = w[n].nplasma;
-		      if (plasmamain[nplasma].vol > 0.0)
-		{
-//		  nplasma = w[n].nplasma;
-		  x = plasmamain[nplasma].t_e;
-		}
-	      else
-		x = 0.0;
-	      Log ("%8.2g ", x);
-	    }
-	  Log ("\n");
-	}
+      Log ("\n nphot\n");
 
-      Log ("\n ntot \n");
+      j = 1;
+      for (i = py_wind_min; i < py_wind_max; i += 1)
+      {
+        n = nstart + i;
+        nplasma = w[n].nplasma;
+        if (plasmamain[nplasma].vol > 0.0)
+        {
+          ntot = plasmamain[nplasma].ntot;
+        }
+        else
+          ntot = 0;
+        Log ("%8d ", ntot);
+        if (j % 10 == 0)
+        {
+          Log ("\n");
+        }
+        j++;
+      }
 
-      Log ("   z\\x   ");
-      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	Log ("%8.2e ", w[nstart + i * mdim].x[0]);
-      Log ("\n");
 
-      for (j = 0; j < mdim; j++)
-	{
-	  Log ("%8.2e ", w[j].x[2]);
-	  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	    {
-	      n = nstart + i * mdim + j;
-  	      nplasma = w[n].nplasma;
-	      if (plasmamain[nplasma].vol > 0.0)
-		{
-	  	  ntot = plasmamain[nplasma].ntot;
-					}
-	      else
-		ntot = 0;
-	      Log ("%8d ", ntot);
-	    }
-	  Log ("\n");
-	}
+      return (0);
     }
-	
-	
+    /* 2d coord systems */
+    if (zdom[ndom].coord_type != CYLIND)
+    {
+      Log ("Warning: Since coord type is not cylindrical, next print out may look odd\n");
+    }
+
+
+    Log ("\n T rad\n");
+
+    Log ("   z\\x   ");
+    for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+      Log ("%8.2e ", w[nstart + i * mdim].x[0]);
+    Log ("\n");
+
+    for (j = 0; j < mdim; j++)
+    {
+      Log ("%8.2e ", w[j].x[2]);
+      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+      {
+        n = nstart + i * mdim + j;
+        if (w[n].vol > 0.0)
+        {
+          nplasma = w[n].nplasma;
+          x = plasmamain[nplasma].t_r;
+        }
+        else
+          x = 0.0;
+        Log ("%8.2g ", x);
+      }
+      Log ("\n");
+    }
+
+    Log ("\n T e\n");
+
+    Log ("   z\\x   ");
+    for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+      Log ("%8.2e ", w[nstart + i * mdim].x[0]);
+    Log ("\n");
+
+    for (j = 0; j < mdim; j++)
+    {
+      Log ("%8.2e ", w[j].x[2]);
+      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+      {
+        n = nstart + i * mdim + j;
+        nplasma = w[n].nplasma;
+        if (plasmamain[nplasma].vol > 0.0)
+        {
+          x = plasmamain[nplasma].t_e;
+        }
+        else
+          x = 0.0;
+        Log ("%8.2g ", x);
+      }
+      Log ("\n");
+    }
+
+    Log ("\n ntot \n");
+
+    Log ("   z\\x   ");
+    for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+      Log ("%8.2e ", w[nstart + i * mdim].x[0]);
+    Log ("\n");
+
+    for (j = 0; j < mdim; j++)
+    {
+      Log ("%8.2e ", w[j].x[2]);
+      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+      {
+        n = nstart + i * mdim + j;
+        nplasma = w[n].nplasma;
+        if (plasmamain[nplasma].vol > 0.0)
+        {
+          ntot = plasmamain[nplasma].ntot;
+        }
+        else
+          ntot = -99;
+        Log ("%8d ", ntot);
+      }
+      Log ("\n");
+    }
+  }
+
 
   return (0);
 

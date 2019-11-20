@@ -1,0 +1,9 @@
+name: geo.zlog_scale
+description: |
+  Choose the logarithmic scale length for the grid in the z-direction.
+type: Double
+unit: cm
+parent:
+  Diag.adjust_grid: true
+file: setup_domains.c
+advanced: true

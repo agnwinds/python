@@ -38,7 +38,6 @@ import py_read_output as r
 import numpy as np 
 import os, sys
 import py_plot_util as util
-import brewer2mpl
 
 has_astropy = True 
 try:
@@ -52,63 +51,27 @@ try:
 except ImportError:
     use_pretty = False
 
-
-colormaps = ["Set1", "Set2", "Dark2", "Paired", "Paired2", "Accent"]
-
-def set_pretty(cmap="jm"):
-
-    if type(cmap) is str:
-        if cmap != "jm":
-            color = cmap 
-        else:
-            color = "Set1"
-    elif type(cmap) is int:
-        color = colormaps[cmap]
-    else:
-        raise TypeError("cmap must be string or integer.")
-
-    
-
-
-    #r.setpars()
-
-    # Get "Set2" colors from ColorBrewer (all colorbrewer scales: http://bl.ocks.org/mbostock/5577023)
-    set2 = brewer2mpl.get_map(color, 'qualitative', 8).mpl_colors
-
-    if cmap == "jm":
-        g = set2[2]
-        b = set2[1]
-        red = set2[0]
-        set2[0] = b
-        set2[1] = g
-        set2[2] = red
-
-    p.rc("axes", color_cycle=set2)
-    p.rcParams["legend.frameon"] = "False"
-
-    return set2
-
 def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = False, with_composite=False):
 
-	'''
+    '''
     make a spectrum plot from astropy.table.table.Table object 
 
     Parameters
     ----------
     s: astropy.table.table.Table
-    	table containing spectrum data outputted from Python 
+        table containing spectrum data outputted from Python 
 
     fname: str 
-    	filename to save as e.g. sv
+        filename to save as e.g. sv
 
     smooth_factor: int 
-    	factor you would like to smooth by, default 10
+        factor you would like to smooth by, default 10
 
     angles: Bool 
-    	Would you like to plot the viewing angle spectra? 
+        Would you like to plot the viewing angle spectra? 
 
     components: Bool 
-    	would you like to plot the individual components e.g. Disk Wind 
+        would you like to plot the individual components e.g. Disk Wind 
     
     Returns
     ----------
@@ -118,99 +81,100 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
     Saves output as "spectrum_%s.png" % (fname)
     '''
 
-	if type(s) != astropy.table.table.Table:
-		raise TypeError("make_spec_plot takes astropy.table.table.Table object as first arg")
-		return 1
+    if type(s) != astropy.table.table.Table:
+        raise TypeError("make_spec_plot takes astropy.table.table.Table object as first arg")
+        return 1
 
-	if s.colnames[8] != "Scattered":
-		print "Warning- colnames are not in expected order! %s != Scattered" % (s.colnames[8])
+    if s.colnames[8] != "Scattered":
+        print ("Warning- colnames are not in expected order! {} != Scattered".format(s.colnames[8]))
 
-	ncomponents = 9
-
-
-	if angles:
-
-		# first make viewing angle plot
-		p.figure(figsize=(8,12))
-
-		nspecs = len(s.dtype.names) - ncomponents
-
-		nx = 1
-		ny = nspecs
-		if nspecs > 4:
-			nx = 2
-			ny = (1 + nspecs) / nx 
+    ncomponents = 9
 
 
-		print "Making a %i by %i plot, %i spectra" % (nx, ny, nspecs)
+    if angles:
 
-		if with_composite:
-			lambda_composite, f_composite, errors = np.loadtxt("%s/examples/telfer_qso_composite_hst.asc" % (os.environ["PYTHON"]), unpack=True, comments="#")
+        # first make viewing angle plot
+        p.figure(figsize=(8,12))
 
-		for i in range(nspecs):
+        nspecs = len(s.dtype.names) - ncomponents
 
-			p.subplot(ny, nx, i+1)
-
-			if with_composite:
-				f_1100 = util.get_flux_at_wavelength(s["Lambda"],s[s.dtype.names[ncomponents + i]], 1100.0)
-				p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]]/f_1100, window_len = smooth_factor), label="Model")
-				p.plot(lambda_composite, f_composite, label="HST composite")
-				p.legend()
-
-			else:
-				p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
+        nx = 1
+        ny = nspecs
+        if nspecs > 4:
+            nx = 2
+            ny = (1 + nspecs) / nx 
 
 
-			p.title(s.dtype.names[ncomponents + i])
-			p.xlabel("Wavelength")
-			p.ylabel("Flux")
+        print ("Making a {} by {} plot, {} spectra".format(nx, ny, nspecs))
 
-		p.savefig("spectrum_%s.png" % (fname), dpi=300)
-		p.clf()
+        if with_composite:
+            lambda_composite, f_composite, errors = np.loadtxt("%s/examples/telfer_qso_composite_hst.asc" % (os.environ["PYTHON"]), unpack=True, comments="#")
 
-	if components:
+        for i in range(nspecs):
 
-		p.figure(figsize=(8,12))
-		p.subplot(211)
-		p.plot(s["Lambda"], util.smooth(s["Created"], window_len = smooth_factor), label="Created")
-		p.plot(s["Lambda"], util.smooth(s["Emitted"], window_len = smooth_factor), label="Emitted")
+            p.subplot(ny, nx, i+1)
 
-		p.subplot(212)
+            if with_composite:
+                f_1100 = util.get_flux_at_wavelength(s["Lambda"],s[s.dtype.names[ncomponents + i]], 1100.0)
+                p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]]/f_1100, window_len = smooth_factor), label="Model")
+                p.plot(lambda_composite, f_composite, label="HST composite")
+                p.legend()
 
-		for i in range(4,9):
-			p.plot(s["Lambda"], util.smooth(s[s.dtype.names[i]], window_len = smooth_factor), label=s.dtype.names[i])
+            else:
+                p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
 
-		p.xlabel("Wavelength")
-		p.ylabel("Flux")
-		p.legend()
 
-		p.savefig("spec_components_%s.png" % (fname), dpi=300)
-		p.clf()
-		
-	return 0
+            p.title(s.dtype.names[ncomponents + i])
+            p.xlabel("Wavelength")
+            p.ylabel("Flux")
+
+        p.savefig("spectrum_%s.png" % (fname), dpi=300)
+        p.clf()
+
+    if components:
+
+        p.figure(figsize=(8,12))
+        p.subplot(211)
+        p.plot(s["Lambda"], util.smooth(s["Created"], window_len = smooth_factor), label="Created")
+        p.plot(s["Lambda"], util.smooth(s["Emitted"], window_len = smooth_factor), label="Emitted")
+        p.legend()
+
+        p.subplot(212)
+
+        for i in range(4,9):
+            p.plot(s["Lambda"], util.smooth(s[s.dtype.names[i]], window_len = smooth_factor), label=s.dtype.names[i])
+
+        p.xlabel("Wavelength")
+        p.ylabel("Flux")
+        p.legend()
+
+        p.savefig("spec_components_%s.png" % (fname), dpi=300)
+        p.clf()
+        
+    return 0
 
 
 def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, components = False):
 
-	'''
+    '''
     make a spectrum plot from py_classes.specclass object
 
     Parameters
     ----------
     s: specclass object
-    	table containing spectrum data outputted from Python 
+        table containing spectrum data outputted from Python 
 
     fname: str 
-    	filename to save as e.g. sv
+        filename to save as e.g. sv
 
     smooth_factor: int 
-    	factor you would like to smooth by, default 10
+        factor you would like to smooth by, default 10
 
     angles: Bool 
-    	Would you like to plot the viewing angle spectra? 
+        Would you like to plot the viewing angle spectra? 
 
     components: Bool 
-    	would you like to plot the individual components e.g. Disk Wind 
+        would you like to plot the individual components e.g. Disk Wind 
     
     Returns
     ----------
@@ -221,55 +185,55 @@ def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, compo
     '''
 
 
-	if angles:
+    if angles:
 
-		# first make viewing angle plot
-		p.figure(figsize=(8,12))
-		nspecs = len(s.spec)
+        # first make viewing angle plot
+        p.figure(figsize=(8,12))
+        nspecs = len(s.spec)
 
-		nx = 1
-		ny = nspecs
-		if nspecs > 4:
-			nx = 2
-			ny = (1 + nspecs) / nx 
-
-
-		print "Making a %i by %i plot, %i spectra" % (nx, ny, nspecs)
-
-		for i in range(nspecs):
+        nx = 1
+        ny = nspecs
+        if nspecs > 4:
+            nx = 2
+            ny = (1 + nspecs) / nx 
 
 
-			p.subplot(ny, nx, i+1)
+        print ("Making a {} by {} plot, {} spectra".format(nx, ny, nspecs))
 
-			p.plot(s.wavelength, util.smooth(s.spec[i], window_len = smooth_factor))
+        for i in range(nspecs):
 
-			p.xlabel("Wavelength")
-			p.ylabel("Flux")
 
-		p.savefig("spectrum_%s.png" % (fname))
-		p.clf()
+            p.subplot(ny, nx, i+1)
 
-	if components:
+            p.plot(s.wavelength, util.smooth(s.spec[i], window_len = smooth_factor))
 
-		p.figure(figsize=(8,12))
-		p.subplot(211)
-		p.plot(s.wavelength, util.smooth(s.created, window_len = smooth_factor), label="Created")
-		p.plot(s.wavelength, util.smooth(s.emitted, window_len = smooth_factor), label="Emitted")
+            p.xlabel("Wavelength")
+            p.ylabel("Flux")
 
-		p.subplot(212)
-		p.plot(s.wavelength, util.smooth(s.censrc, window_len = smooth_factor), label="CenSrc")
-		p.plot(s.wavelength, util.smooth(s.disk, window_len = smooth_factor), label="Disk")
-		p.plot(s.wavelength, util.smooth(s.wind, window_len = smooth_factor), label="Wind")
-		p.plot(s.wavelength, util.smooth(s.hitsurf, window_len = smooth_factor), label="HitSurf")
-		p.plot(s.wavelength, util.smooth(s.scattered, window_len = smooth_factor), label="Scattered")
-		p.xlabel("Wavelength")
-		p.ylabel("Flux")
-		p.legend()
+        p.savefig("spectrum_%s.png" % (fname))
+        p.clf()
 
-		p.savefig("spec_components_%s.png" % (fname))
-		p.clf()
+    if components:
 
-	return 0
+        p.figure(figsize=(8,12))
+        p.subplot(211)
+        p.plot(s.wavelength, util.smooth(s.created, window_len = smooth_factor), label="Created")
+        p.plot(s.wavelength, util.smooth(s.emitted, window_len = smooth_factor), label="Emitted")
+
+        p.subplot(212)
+        p.plot(s.wavelength, util.smooth(s.censrc, window_len = smooth_factor), label="CenSrc")
+        p.plot(s.wavelength, util.smooth(s.disk, window_len = smooth_factor), label="Disk")
+        p.plot(s.wavelength, util.smooth(s.wind, window_len = smooth_factor), label="Wind")
+        p.plot(s.wavelength, util.smooth(s.hitsurf, window_len = smooth_factor), label="HitSurf")
+        p.plot(s.wavelength, util.smooth(s.scattered, window_len = smooth_factor), label="Scattered")
+        p.xlabel("Wavelength")
+        p.ylabel("Flux")
+        p.legend()
+
+        p.savefig("spec_components_%s.png" % (fname))
+        p.clf()
+
+    return 0
 
 
 
@@ -281,20 +245,20 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, f
     Parameters
     ----------
     d: astropy.table.table.Table
-    	table containing wind data outputted from Python 
-    	if == None then this routine will get the data for you
+        table containing wind data outputted from Python 
+        if == None then this routine will get the data for you
 
     fname: str 
-    	filename to save as e.g. sv
+        filename to save as e.g. sv
 
     var: array type 
-    	array of string colnames to plot 
+        array of string colnames to plot 
 
     angles: Bool 
-    	Would you like to plot the viewing angle spectra? 
+        Would you like to plot the viewing angle spectra? 
 
     components: Bool 
-    	would you like to plot the individual components e.g. Disk Wind 
+        would you like to plot the individual components e.g. Disk Wind 
 
     axes: str 
         lin or log axes
@@ -323,18 +287,18 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, f
         var = ["ne", "te", "tr", "IP", "nphot", "v", "w", "ionC4"]
 
     if axes != "lin" and axes != "log":
-        print "Error: didn't understand mode %s, defaulting to log" % axes
+        print ("Error: didn't understand mode {}, defaulting to log".format(axes))
         axes = "log"
 
     nplots = len(var)
 
     # check shape is ok for variables required
     if shape[0] * shape[1] < nplots:
-        print "Error: shape is less than length of var array"
+        print ("Error: shape is less than length of var array")
         return 1
 
     if shape[0] * shape[1] > nplots:
-        print "Warning: shape is more than length of var array"
+        print ("Warning: shape is more than length of var array")
 
     p.figure(figsize=(8,12))
 
@@ -347,22 +311,32 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, f
 
         x,z,v = util.wind_to_masked(d, value_string)
 
+        print (np.mean(v))
+
         if "ion" in value_string and den_or_frac==1:
-            p.contourf(z,x,np.log10(v), extend="both", levels=np.arange(-5,0.2,0.2))
+            p.pcolormesh(x,z,np.log10(v), vmin=-5,vmax=0.1)
         else:
-            p.contourf(z,x,np.log10(v), extend="both")
+            p.pcolormesh(x,z,np.log10(v))
         p.colorbar()
         p.title("Log(%s)" % value_string)
 
-        if lims != None:
-            p.xlim(lims[0][0], lims[0][1])
-            p.ylim(lims[1][0], lims[1][1])
+        # if lims != None:
+        #     p.xlim(lims[0][0], lims[0][1])
+        #     p.ylim(lims[1][0], lims[1][1])
 
         if axes == "log":
             # log axes
-            p.semilogy()
-            p.semilogx()
+            p.loglog()
+            p.loglog()
 
+        # Figure out the "best" values for the lower and upper limits
+        lower_lim = x[0][0] if x[0][0] != 0 else x[1][0]
+        upper_lim = x[-1][0]
+
+        p.xlim(lower_lim, upper_lim)
+        p.ylim(lower_lim, upper_lim)
+
+    p.tight_layout()
     p.savefig("%s_%s.png" % (fname_prefix, fname))
 
     return 0
@@ -403,7 +377,6 @@ def make_spec_comparison_plot (s_array, labels, fname="comparison", smooth_facto
 
     ncomponents = 9
 
-    if use_pretty: set_pretty()
 
 
     if angles:
@@ -420,7 +393,7 @@ def make_spec_comparison_plot (s_array, labels, fname="comparison", smooth_facto
             ny = (1 + nspecs) / nx 
 
 
-        print "Making a %i by %i comparison plot, %i spectra" % (nx, ny, nspecs)
+        print ("Making a {} by {} comparison plot, {} spectra".format(nx, ny, nspecs))
 
         for j in range(len(s_array)):
             for i in range(nspecs):
@@ -457,7 +430,6 @@ def make_spec_comparison_plot (s_array, labels, fname="comparison", smooth_facto
             for i in range(4,9):
                 p.plot(s["Lambda"], util.smooth(s[s.dtype.names[i]], window_len = smooth_factor), label=s.dtype.names[i])
 
-            
             p.xlabel("Wavelength")
             p.ylabel("Flux")
             p.legend()
@@ -479,22 +451,19 @@ if __name__ == "__main__":
         fname = sys.argv[1]
         mode = sys.argv[2]
     else:
-        print __doc__
+        print (__doc__)
         sys.exit(1)
-
-    if use_pretty: 
-        set_pretty()
 
     # try to read a parms file in the directory
     io_print = True
     try:
         util.parse_rcparams()
     except IOError:
-        print "Tried to read parameters from params.rc in local directory, but none found- Continuing."
+        print ("Tried to read parameters from params.rc in local directory, but none found- Continuing.")
         io_print = False
 
     if io_print:
-        print "Read parameters from params.rc"
+        print ("Read parameters from params.rc")
 
     if mode == "spec":
         s = r.read_spectrum(fname)
@@ -518,7 +487,7 @@ if __name__ == "__main__":
 
     elif mode == "compare":     # comapre 2 or more spectra
         if len(sys.argv) <= 3:
-            print __doc__
+            print (__doc__)
             sys.exit(1)
 
         s_array = [r.read_spectrum(sys.argv[1])]
@@ -539,8 +508,8 @@ if __name__ == "__main__":
                        fname_prefix="ions", den_or_frac = 1)
 
     else:
-        print "didn't understand mode %s" % mode
-        print __doc__
+        print ("didn't understand mode {}".format(mode) )
+        print (__doc__)
 
 
 

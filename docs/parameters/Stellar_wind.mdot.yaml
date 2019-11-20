@@ -1,0 +1,10 @@
+name: Stellar_wind.mdot
+description: |
+  Mass loss rate for a wind modelled in terms of the
+  Caster and Lamemers prescription for a stellar wind.
+type: Double
+unit: M☉/year
+values: Greater than 0
+parent:
+  Wind.type: star
+file: stellar_wind.c

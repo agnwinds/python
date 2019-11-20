@@ -1,0 +1,80 @@
+System_type(star,cv,bh,agn,previous)                  agn
+
+### Parameters for the Central Object
+Central_object.mass(msol)                  4.3e6
+Central_object.radius(cm)                  6.34728e11
+
+### Parameters for the Disk (if there is one)
+Disk.type(none,flat,vertically.extended)                 flat
+Disk.radiation(yes,no)                          yes
+Disk.rad_type_to_make_wind(bb,models)                   bb
+Disk.temperature.profile(standard,readin)             standard
+Disk.mdot(msol/yr)                         8.8267e-3
+Disk.radmax(cm)                            5e16
+
+### Parameters for boundary layer or AGN
+Central_object.radiation(yes,no)                  yes
+Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems)                power
+Central_object.luminosity(ergs/s)          1e43
+Central_object.power_law_index             -1.38
+Central_object.geometry_for_source(sphere,lamp_post)               sphere
+
+### Parameters descibing the various winds or coronae in the system
+Wind.radiation(yes,no)                          yes
+Wind.number_of_components                  1
+Wind.type(SV,star,hydro,corona,kwd,homologous,shell,imported)                  kwd
+Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
+Wind.dim.in.x_or_r.direction               30
+Wind.dim.in.z_or_theta.direction           30
+
+### Parameters associated with photon number, cycles,ionization and radiative transfer options
+Photons_per_cycle                          2000000
+Ionization_cycles                          20
+Spectrum_cycles                            20
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
+Atomic_data                                data/standard80
+Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
+
+### Parameters for Domain 0
+Wind.mdot(msol/yr)                         0.1
+KWD.d(in_units_of_rstar)                   16.666666
+KWD.mdot_r_exponent                        -1
+KWD.v_infinity(in_units_of_vescape)        1
+KWD.acceleration_length(cm)                6.34728e13
+KWD.acceleration_exponent                  1.0
+KWD.v_zero(multiple_of_sound_speed_at_base)   0.0
+KWD.rmin(in_units_of_rstar)                16.666666
+KWD.rmax(in_units_of_rstar)                25
+Wind.radmax(cm)                            5e16
+Wind.t.init                                1e5
+Wind.filling_factor(1=smooth,<1=clumped)   1
+
+### Parameters defining the spectra seen by observers
+
+Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+Central_object.rad_type_in_final_spectrum(power,cloudy,brems)                power
+
+### The minimum and maximum wavelengths in the final spectra
+Spectrum.wavemin(Angstroms)                0.01
+Spectrum.wavemax(Angstroms)                200
+
+### The observers and their location relative to the system
+Spectrum.no_observers                      7
+Spectrum.angle(0=pole)                     10
+Spectrum.angle(0=pole)                     28
+Spectrum.angle(0=pole)                     47
+Spectrum.angle(0=pole)                     55
+Spectrum.angle(0=pole)                     62
+Spectrum.angle(0=pole)                     72
+Spectrum.angle(0=pole)                     80
+Spectrum.live_or_die(live.or.die,extract)              extract
+Spectrum.type(flambda,fnu,basic)                  fnu
+
+### Parameters for Reverberation Modeling (if needed)
+Reverb.type(none,photon,wind,matom)                 none
+
+### Other parameters
+Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                  agn
+udy_test,wide,logarithmic)                  agn

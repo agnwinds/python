@@ -1,0 +1,14 @@
+name: Spectrum.select_z
+description: |
+  Advanced command which defines a spherical  region of
+  space from which photons are to be extracted in constructing a detailed
+  spectrum.  The region is defined by a cylindrical distance, and z height
+  and an aximuth, and a radius r.  This parameter defines the z coordiante
+  of the region.
+type: Double
+unit: cm
+values: Within the z range of the model
+parent:
+  Spectrum.select_location: spherical_region
+file: setup.c
+advanced: true

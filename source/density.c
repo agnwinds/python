@@ -1,35 +1,14 @@
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis:
-	get_ion_density finds the density of a specific ion designated by nion, at a position held in
-the photon pointer p
-
-Arguments:		
-
-Returns:
- 
-Description:	
-Notes:
-
-	Densities (rho) are defined at the centers of cells. rho is defined in wind2d.c
-	an etends from 0 to NDIM-1 (inclusive), and 0 to MDIM-1 (inclusive) . However, 
-	in wind_updates2d.c, the ionization fractions are only calculated from 0 to NDIM-2, 
-        and 0 to MDIM-2 inclusive.
-
-
-History:
- 	01mar	ksl	Added this possibility
-	04nov	ksl	53b: Made modifications to allow for 
-			different coordinate systems
-	05apr	ksl	55d: Adapted to new version of coord_fraction
-			in continuing effort to enable more 
-			coordinate systems.
-	06may	ksl	57+ -- Modified to use plasma structure
-  	1411 	JM 	Modified to use a general vector x, rather than a PhotPtr
-	15aug	ksl	Modified for domains so that the domain is reuquired as an
-			input
-**************************************************************/
+/***********************************************************/
+/** @file  density.c
+ * @author ksl
+ * @date   January, 2018
+ *
+ * @brief  Contains a rroutine to find the density of an ion at a position
+ * designamted by a Pothon pointner
+ *
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,10 +18,33 @@ History:
 #include "python.h"
 
 
+/**********************************************************/
+/** 
+ * @brief      finds the density of a specific ion designated by nion at a position 
+ *
+ * @param [in] int  ndom   The domain number where the density is to be obtained
+ * @param [in] double  x[] A 3 vector contaiing a postion
+ * @param [in] int  nion   The ion number of the ion for which a density is needed
+ * @return     The density of the ion in cgs units
+ *
+ * @details
+ * The routine interpolates a density from the densitiees ad the centers of cells.
+ *
+ * ### Notes ###
+ *
+ * The routine does not determine what domain a parituclar position refers to, so
+ * this must be provided.
+ *
+ * Densities are defined at the centers of cells. The routine depends upon the
+ * fact that densities are defined in the edge cells to work out what to do
+ * at the edges of the wind.  The routine uses corrd_frac to determine what
+ * cells have to be interpolated.
+ *
+ **********************************************************/
 
 double
 get_ion_density (ndom, x, nion)
-int	ndom;
+     int ndom;
      double x[];
      int nion;
 {
@@ -57,20 +59,20 @@ structure that must be summed. We need to convert that to a position
 in the plasma structure*/
 
   if ((coord_fraction (ndom, 1, x, nnn, frac, &nelem)) > 0)
+  {
+
+    dd = 0;
+
+    for (nn = 0; nn < nelem; nn++)
     {
-
-      dd = 0;
-
-      for (nn = 0; nn < nelem; nn++)
-	{
-	  nplasma = wmain[nnn[nn]].nplasma;
-	  dd += plasmamain[nplasma].density[nion] * frac[nn];
-	}
+      nplasma = wmain[nnn[nn]].nplasma;
+      dd += plasmamain[nplasma].density[nion] * frac[nn];
     }
+  }
   else
-    {
-      dd = 0;
-    }
+  {
+    dd = 0;
+  }
 
 
   return (dd);

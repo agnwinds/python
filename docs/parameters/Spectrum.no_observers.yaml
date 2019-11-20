@@ -1,0 +1,9 @@
+name: Spectrum.no_observers
+description: |
+  The number of different inclination angles for which spectra
+  will be extracted.
+type: Integer
+values: Greater than 0
+parent:
+  Spectrum_cycles: Greater than or equal to 0
+file: setup.c

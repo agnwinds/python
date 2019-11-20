@@ -2,7 +2,7 @@
 '''
 	University of Southampton -- JM -- November 2014
 
-				py_wind_plot.py
+				py_plot_util.py
 
 Synopsis:
 	various utilities for processing Python outputs and plotting
@@ -13,8 +13,6 @@ Usage:
 Arguments:
 '''
 
-#import pylab as p 
-from pylab import *
 import py_read_output as r 
 import numpy as np 
 import os, sys
@@ -29,8 +27,6 @@ standard_cmds = np.array(["1", "n","t", "r","v","1","2","3","-1",\
 
 ion_standard_variables = ["ionh1", "ionhe1", "ionhe2", "ionc4", "ionc5"]
 
-ion_standard_variables
-
 def get_pywind_summary (fname, vers="", den_or_frac=0):
 
 	'''
@@ -41,11 +37,6 @@ def get_pywind_summary (fname, vers="", den_or_frac=0):
 
 	if den_or_frac is 1, return fractions, otherwise densities
 	'''
-
-
-
-	if ".complete" not in fname:
-		fname = fname + ".complete"
 
 	cmds = ["1", "1", den_or_frac, "q"] # these commands create onefile summary
 
@@ -66,7 +57,8 @@ def run_py_wind (fname, vers="", cmds=None, ilv=None):
 	x = cmds
 	np.savetxt("_tempcmd.txt", x, fmt = "%s")
 
-
+	print ("Running py_wind...")
+	print ("commands = {}".format(cmds))
 	isys = os.system('py_wind'+vers+' '+fname+' < _tempcmd.txt > tempfile')
 	time.sleep(3)
 
@@ -125,59 +117,85 @@ def read_pywind_smart(filename, return_inwind=False):
 
 
 
-def wind_to_masked(d, value_string, return_inwind=False):
+def wind_to_masked(d, value_string, return_inwind=False, mode="2d"):
 
-    '''
-    turn a table, one of whose colnames is value_string,
-    into a masked array based on values of inwind 
+	'''
+	turn a table, one of whose colnames is value_string,
+	into a masked array based on values of inwind 
 
-    Parameters
-    ----------
-    d: astropy.table.table.Table object 
-        data, probably read from .complete wind data 
+	Parameters
+	----------
+	d: astropy.table.table.Table object 
+	    data, probably read from .complete wind data 
 
-    value_string: str 
-        the variable you want in the array, e.g. "ne"
+	value_string: str 
+	    the variable you want in the array, e.g. "ne"
 
-    return_inwind: Bool
-        return the array which tells you whether you
-        are partly, fully or not inwind.
+	return_inwind: Bool
+	    return the array which tells you whether you
+	    are partly, fully or not inwind.
+
+	Returns
+	----------
+	x, z, value: Floats 
+	    value is the quantity you are concerned with, e.g. ne
+	'''
+	if mode == "1d":
+		inwind = d["inwind"]
+		x = d["r"]
+		values = d[value_string]
+
+		# create an inwind boolean to use to create mask
+		inwind_bool = (inwind >= 0)
+		mask = (inwind < 0)
+
+		# finally we have our mask, so create the masked array
+		masked_values = np.ma.masked_where ( mask, values )
+
+		#return the arrays later, z is None for 1d
+		z = None
+
+
+
+
+	elif mode == "2d":
+		# our indicies are already stored in the file- we will reshape them in a sec
+		zindices = d["j"]
+		xindices = d["i"]
+
+		# we get the grid size by finding the maximum in the indicies list 99 => 100 size grid
+		zshape = int(np.max(zindices) + 1)
+		xshape = int(np.max(xindices) + 1)
+
+		# now reshape our x,z and value arrays
+		x = d["x"].reshape(xshape, zshape)
+		z = d["z"].reshape(xshape, zshape)
+
+		values = d[value_string].reshape(xshape, zshape)
+
+		# these are the values of inwind PYTHON spits out
+		inwind = d["inwind"].reshape(xshape, zshape)
+
+		# create an inwind boolean to use to create mask
+		inwind_bool = (inwind >= 0)
+		mask = (inwind < 0)
+
+		# finally we have our mask, so create the masked array
+		masked_values = np.ma.masked_where ( mask, values )
+
+
+
+	else:
+		print ("Error: mode {} not understood!".format(mode))
+
+	#return the transpose for contour plots.
+	if return_inwind:
+		return x, z, masked_values, inwind_bool
+	else:
+		return x, z, masked_values
+
+
     
-    Returns
-    ----------
-    x, z, value: Floats 
-        value is the quantity you are concerned with, e.g. ne
-    '''
-
-    # our indicies are already stored in the file- we will reshape them in a sec
-    zindices = d["j"]
-    xindices = d["i"]
-
-    # we get the grid size by finding the maximum in the indicies list 99 => 100 size grid
-    zshape = int(np.max(zindices) + 1)
-    xshape = int(np.max(xindices) + 1)
-
-    # now reshape our x,z and value arrays
-    x = d["x"].reshape(xshape, zshape)
-    z = d["z"].reshape(xshape, zshape)
-
-    values = d[value_string].reshape(xshape, zshape)
-
-    # these are the values of inwind PYTHON spits out
-    inwind = d["inwind"].reshape(xshape, zshape)
-
-    # create an inwind boolean to use to create mask
-    inwind_bool = (inwind >= 0)
-    mask = (inwind < 0)
-
-    # finally we have our mask, so create the masked array
-    masked_values = np.ma.masked_where ( mask, values )
-
-    #return the transpose for contour plots.
-    if return_inwind:
-        return x, z, masked_values, inwind_bool
-    else:
-        return x, z, masked_values
 
 
 
@@ -188,16 +206,16 @@ def smooth(x,window_len=20,window='hanning'):
 	'''smooth data x by a factor with window of length window_len'''
 
 	if x.ndim != 1:
-		raise ValueError, "smooth only accepts 1 dimension arrays."
+		raise ValueError("smooth only accepts 1 dimension arrays.")
 
 	if x.size < window_len:
-		raise ValueError, "Input vector needs to be bigger than window size."
+		raise ValueError("Input vector needs to be bigger than window size.")
 
 	if window_len<3:
 		return x
 
 	if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-		raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+		raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
 	s=np.r_[2*x[0]-x[window_len-1::-1],x,2*x[-1]-x[-1:-window_len:-1]]
 
@@ -236,7 +254,7 @@ def parse_rcparams(fname = "params.rc"):
 			if data[0] != "#":	# comments
 
 				if data[1] != ":":
-					print "parse_rcparams: warning: unexpected format for filename %s" % (fname)
+					print("parse_rcparams: warning: unexpected format for filename %s" % (fname))
 
 
 				mpl.rcParams[data[0]] = data[2]
@@ -247,8 +265,7 @@ def parse_rcparams(fname = "params.rc"):
 def get_flux_at_wavelength(lambda_array, flux_array, w):
 
 	'''
-    turn a table, one of whose colnames is value_string,
-    into a masked array based on values of inwind 
+    Find the flux at wavelength w
 
     Parameters
     ----------

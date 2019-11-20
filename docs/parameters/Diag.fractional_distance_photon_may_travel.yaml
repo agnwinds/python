@@ -1,0 +1,13 @@
+name: Diag.fractional_distance_photon_may_travel
+description: |
+  The distance photon may travel in a cell is limited to prevent a photon
+  from moving such a long path that the velocity may change non-linearly.
+  This problem arises primarily when the photon is travelling azimuthally
+  in the grid.  This changes the default for the fraction of the maximum
+  distance in a cell.
+type: Double
+values: 0 to 1
+parent:
+  Diag.use_standard_care_factors: false
+file: diag.c
+advanced: true

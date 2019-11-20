@@ -1,0 +1,10 @@
+name: Disk.z1
+description: |
+  For a vertically extended the disk, the height of the disk is
+  set to be :ref:`Disk.z0` * :ref:`Disk.radmax` * (r/:ref:`Disk.radmax`)**Disk.z1 where Disk.z1
+  is the power law index
+type: Double
+values: Greater than 0
+parent:
+  Disk.type: vertically.extended
+file: setup_disk.c

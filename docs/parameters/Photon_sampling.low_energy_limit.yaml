@@ -1,0 +1,11 @@
+name: Photon_sampling.low_energy_limit
+description: |
+  During the ionization phase, stratified sampling is used to provide good coverage of the full ionizing spectrum. This
+  parameter sets the lowest envergy (frequency) of for phtoons to be generated whne the user wants to customize the
+  bands.
+type: Double
+unit: eV
+values: Greater than 0
+parent:
+  Photon_sampling.approach: user_bands
+file: bands.c

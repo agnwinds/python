@@ -1,0 +1,10 @@
+name: Photon_sampling.nbands
+description: |
+   Python uses stratified samplign to generate photons during the ionization phase.  This
+   parameter allows the user to define the number of bands for stratified sampling, if s/he
+   wants to customize the bands used for the generation of photons
+type: Integer
+values: Greater than 0
+parent:
+  Photon_sampling.approach: user_bands
+file: bands.c

@@ -23,7 +23,6 @@ Arguments:
 # we need the classes and numpy modules 
 import py_classes as cls
 import numpy as np
-import matplotlib.pyplot as plt
 import subprocess
 import py_plot_util as util
 
@@ -60,14 +59,15 @@ def read_spectrum(filename):
     if not '.spec' in filename: 
         if not '.log_spec_tot' in filename:
             if not '.spec_tot' in filename:
-                filename = filename + '.spec' # assume user wants the spectrum file if no suffix
+                if not ".log_spec" in filename:
+                    filename = filename + '.spec' # assume user wants the spectrum file if no suffix
 
     if has_astropy:
         spectrum = ascii.read(filename)
         return spectrum 
 
     else:
-        print "Please install astropy. returning 1"
+        print("Please install astropy. returning 1")
         return 1
 
 
@@ -144,7 +144,7 @@ def read_spectrum_to_class (filename, new=True):
         '''
         astropy is not present
         '''
-        print "Please install astropy. returning 1"
+        print("Please install astropy. returning 1")
         return 1
     
 
@@ -177,7 +177,7 @@ def read_pywind_summary(filename, return_inwind=False, mode="2d"):
     '''
 
     if has_astropy == False:
-        print "Please install astropy. returning 1"
+        print("Please install astropy. returning 1")
         return 1
 
     
@@ -216,7 +216,7 @@ def read_pywind(filename, return_inwind=False, mode="2d", complete=True):
     '''
 
     if has_astropy == False:
-        print "Please install astropy. returning 1"
+        print("Please install astropy. returning 1")
         return 1
 
 
@@ -224,7 +224,9 @@ def read_pywind(filename, return_inwind=False, mode="2d", complete=True):
     #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
     d = ascii.read(filename)
 
-    return util.wind_to_masked(d, "var", return_inwind=return_inwind)
+
+    return util.wind_to_masked(d, "var", return_inwind=return_inwind, mode=mode)
+
 
 
 
@@ -255,13 +257,13 @@ def read_pf(root):
     if not ".pf" in root:
         root = root + ".pf"
 
-    params, vals = np.loadtxt(root, dtype="string", unpack=True)
+    params, vals = np.loadtxt(root, dtype=str, unpack=True)
 
     if OrderedDict_present:
         pf_dict = OrderedDict()
     else:
         pf_dict = dict()    # should work with all version of python, but bad for writing
-        print "Warning, your dictionary object is not ordered."
+        print("Warning, your dictionary object is not ordered.")
 
     old_param = None 
     old_val = None
@@ -323,12 +325,12 @@ def write_pf(root, pf_dict):
         OrderedDict_present=False
 
     if (isinstance(pf_dict, OrderedDict) == False):
-        print "Warning, your dictionary object is not ordered. Output file will be wrong, writing anyway."
+        print("Warning, your dictionary object is not ordered. Output file will be wrong, writing anyway.")
 
 
     f = open(root, "w")
 
-    for key,val in pf_dict.iteritems():
+    for key,val in pf_dict.items():
 
         # convert if it is a float
         if isinstance(val, list):           
@@ -342,6 +344,8 @@ def write_pf(root, pf_dict):
         else:
             f.write("%s    %s\n" % (key, val))
 
+    f.close()
+
     return (0)
 
 
@@ -349,7 +353,9 @@ def setpars():
     '''
     set some standard parameters for plotting
     '''
-    print 'Setting plot parameters for matplotlib.'
+    import matplotlib.pyplot as plt
+    
+    print('Setting plot parameters for matplotlib.')
     plt.rcParams['lines.linewidth'] = 1.0
     plt.rcParams['axes.linewidth'] = 1.3
     plt.rcParams['font.family'] = 'serif'

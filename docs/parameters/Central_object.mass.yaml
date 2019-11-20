@@ -1,0 +1,7 @@
+name: Central_object.mass
+description: |
+  Mass of the central object. This is very important, affecting wind speeds, gravitational heating and such.
+type: Double
+unit: M☉
+values: Greater than 0
+file: setup_star_bh.c

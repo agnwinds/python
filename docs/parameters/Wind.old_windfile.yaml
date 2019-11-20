@@ -1,0 +1,9 @@
+name: Wind.old_windfile
+description: |
+  The rootname of a previously saved model in a calculation one wishes to
+  continue (with the possiblity of making changes to some of the details of
+  the radiation sources, or to extract spectra from different inclinations)
+type: String
+parent:
+  System_type: previous
+file: python.c

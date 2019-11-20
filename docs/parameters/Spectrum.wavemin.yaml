@@ -1,0 +1,9 @@
+name: Spectrum.wavemin
+description: |
+  The minimum wavelength of the final spectra in Angstroms
+type: Double
+unit: Angstroms
+values: Greater than 0
+parent:
+  Spectrum_cycles: Greater than or equal to 0
+file: setup.c

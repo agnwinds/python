@@ -1,0 +1,11 @@
+name: Stellar_wind.v_infinity
+description: |
+  The velocity at large distance of a stellar wind described in terms
+  of the Casters and Larmers equation
+  v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
+type: Double
+unit: cm/s
+values: Greater than 0
+parent:
+  Wind.type: star
+file: stellar_wind.c

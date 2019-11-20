@@ -1,0 +1,7 @@
+name: Disk.radiation
+description: |
+  Multi-line description, must keep indentation.
+type: Boolean(yes/no)
+parent:
+  Disk.type: [flat, vertically.extended]
+file: setup_disk.c

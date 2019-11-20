@@ -1,0 +1,8 @@
+name: Disk.mdot
+description: |
+    The mass transfer rate in the disk when considering a standard Shakura-disk.
+type: Double
+unit: M☉/year
+parent:
+  Disk.temperature.profile: standard
+file: setup_disk.c

@@ -1,0 +1,11 @@
+name: Photon_sampling.band_boundary
+description: |
+  When the user specifies what bands are used for stratfied sampling, this parameter specifies the boundaries
+  between energy bands in which a minimum fraction of photons will be generated.  The number of times this
+  parameter is request depends upon the number of energies bands being used.
+type: Double
+unit: eV
+values: Greater than 0, monotonically increasing
+parent:
+  Photon_sampling.nbands: Greater than 0, once per band
+file: bands.c

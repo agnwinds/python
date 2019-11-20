@@ -1,26 +1,27 @@
-/* lineio.c */
-int get_line(FILE *fptr, char line[]);
 /* rdpar.c */
 int opar(char filename[]);
-int restart_par(int doit);
+int add_par(char filename[]);
 int cpar(char filename[]);
 int rdpar_init(void);
 int string_process(char question[], char dummy[]);
+int string_process_from_command_line(char question[], char dummy[]);
+int string_process_from_file(char question[], char dummy[]);
 int rdpar_store_record(char *name, char *value);
 int rdpar_save(FILE *file_ptr);
+int rdpar_comment(char *format, ...);
 int message(char string[]);
 int rdstr(char question[], char answer[]);
 int rdchar(char question[], char *answer);
 int rdint(char question[], int *answer);
-int rdint2(char question[], int *answer1, int *answer2);
 int rdflo(char question[], float *answer);
 int rddoub(char question[], double *answer);
 int rdline(char question[], char answer[]);
+int string2int(char *word, char *string_choices, char *string_values, char *string_answer);
+int rdchoice(char question[], char answers[], char *answer);
 int get_root(char root[], char total[]);
 int rdpar_set_mpi_rank(int rank);
 int rdpar_set_verbose(int vlevel);
-int rd_extra(char firstword[], double *answer, int *wordlength);
-/* log.c */
+/* xlog.c */
 int Log_init(char *filename);
 int Log_append(char *filename);
 int Log_close(void);
@@ -35,7 +36,13 @@ int Shout(char *format, ...);
 int sane_check(double x);
 int error_count(char *format);
 int error_summary(char *message);
+int error_summary_parallel(char *msg);
 int Log_flush(void);
 int Log_set_mpi_rank(int rank, int n_mpi);
 int Log_parallel(char *format, ...);
 int Debug(char *format, ...);
+void Exit(int error_code);
+/* synonyms.c */
+int get_question_name_length(char question[]);
+int are_synonym_lists_valid(void);
+int is_input_line_synonym_for_question(char question[], char input_line[]);

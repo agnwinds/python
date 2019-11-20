@@ -1,4 +1,13 @@
 
+/***********************************************************/
+/** @file  get_atomicdata.c
+ * @author ksl
+ * @date   March, 2018
+ *
+ * @brief  Read in all of the atomic data for use with Python
+ * and other similar programs
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,159 +16,80 @@
 
 #include "atomic.h"
 #include "log.h"
-
-
-// DEBUG is deprecated as described by #111
-//#define DEBUG  0              /* nonzero implies debug */
-
-/***********************************************************
-                                       Space Telescope Science Institute
-
-Synopsis:
- 	get_atomic_data(masterfile) is a generalized subroutine for reading atomic data 
- 	into a set of structures defined in "atomic.h"   (Space for the structures is 
-	also allocated in this routine. 
-   
- 
-  
-Arguments:
-	masterfile is a file which contains the names of the files which will be read
-	as atomic data.  (This allows one to group the atomic data into logical units.)
-
-Returns:
- 
- 
-Description:	
-	get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
-	otherwise noted, e.g ionization potentials are converted to ergs.  
-	
-	The order of the data is important.  Elements should be defined before ions; ions
-	before levels, levels before  lines etc.  In most if not all cases, one can either define all 
-        of the elements first, all of the ions, etc ... or the first element and its ions, the 
-        second element and its ions etc. Commenting out an element in the datafile has the effect of
-	eliminating all of the data associated with that element, e.g ions, lines, etc.
-
-	The program assumes that the ions for a given element are grouped together,
-        that the levels for a given element are grouped together, etc.  
-
-	If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
-	x-sections should be read first.  The routine will ignore data in the VFKY list if there
-	is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
-	on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
-	would be difficult because you would have to drop various bits of Topbase data out of the 
-        middle of the structure or mark it NG or something.)
-
-	Similarly, as a general rule the macro information should be provided before the simple
-	ions are described, and the macro lines should be presented before simple lines.  
-
-	The only data which can be mixed up completely is the line array.
-	
-	Finally, get_atomic_data creates a pointer array to  lines, which has the lines in 
-	frequency ascending order.   This is actually done by a small subroutine index_lines
-	which in turn calls a Numerical Recipes routine.
-		
-Notes:
-	NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA 
-	IS TO BE USED.  Specifically nothing here should be specific to the Monte Carlo calculations
-	for which the routines were written. These routines are just ways to read in the atomic data 
-
-	For completeness the macro atom information should be probably be printed to the data file,
-	or alteranatively the printing to the data file should be eliminated altogether as a waste
-	of time -- ksl 
-History:
- 	97jan	ksl	Coded and debugged as part of Python effort.  
- 	97oct2	ck	Added steps to read in recombination fractions
- 	98feb27	ksl	Revised photoionization inputs so now use Verner, Ferland, Korista, & Yakolev
- 			formalism
- 	98apr4	ksl	Modified to read multiplicites of lower and upper states of resonance lines, and
- 			to exclude lines in which the oscillator strengths or frequencies etc were zero
- 	98may23	ksl	Corrected error which allowed ions to be read for which there were no elements.
- 			Also fixed initialization of phot_info
-	99jan4	ksl	Added code to keep track of the lowest frequency for which photoionization
-			can occur (phot_freq_min).
-	99nov28	ksl	Modified so that the datafiles it looks for are now in a subdirectory atomic.
-			This follows the approach I have been adopting in other programs of putting
-			data into a subdirectory of the program in which the program is being run.  This
-			way one can merely link to the appropriate directory
-	00nov27	ksl	Updated program to make it easier to consider different sets of atomic data
-			Also converted program so that it would use the standard logging procedures.
-        00nov28 ksl	Updated program to accept transitions which do not arise from ground states
-	01jul11	ksl	Updated program to accept levels as produced by kurucz, using for example
-			gfall.dat .  This was in preparation for incorporating some non-LTE aspects
-			into python 
-	01sep24	ksl	Updated program to define some levels to use in a non_lte calculation.  I
-			assume that the number of levels to consider in non_lte is the last integer
-			on the ion line.
-	01sep24	ksl	Elimated use of foo_ion and foo_ele.  These were simply confusing.
-	01sep25	ksl	Incorporated topbase levels and photoinization cross sections.
-	01nov22	ksl	Hopefully sorted out all of the various read formats to allow for use
-			of the output files of various programs in py_atomic.
-	01dec12	ksl	Have split the configurations into to indentifiable groups, those which are
-			to be treated on the fly -- aka LTE --  and those which in principle can
-			be treated in detail -- aka non-LTE.  In practice, we are also making modifica-
-			tions to the lines on the fly.  Any configureation with is "non-LTE" has space
-			in the levden array for that ion.
-	02jun	ksl	Converted all multiplicities from integers to doubles, since in some cases
-			one may have non-integer g's and also to prevent gu/gl divisions from giving
-			incorrect answer.
-        04Feb19 SS      Made modifications to read atomic data in format suitable for the proposed implementation
-                        of Macro Atoms. Modifications should preserve all the previous options and place Macro
-                        Atoms data at top of hierarchy - i.e. other data read later should be ignored. 
-        04Mar   SS      Minor changes (following suggestions of ksl). 
-	04Apr	ksl	Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line 
-			that is not part of a macro atom.).  Simplified inputs so that when one reads IonM
-			it is assumed to be a macro-ion.  If it is just Ion or IonV, then the assumption is that
-			it is a "simple" ion
-	04Dec	ksl	Made use of DEBUG to eliminate printout of many error in get_atomic_data that
-			are really part of normal flow of program.  To print out these lines, set
-			DEBUG to a nonzero value at top of program
-	04dec	ksl	54a-Modified the macro atom reading portion of the program so that one can limit levels
-			in the elements_ions section of the input and "seamlessly" avoid reading them in 
-			elsewhere.  This makes the macro portion of the program consistent with the
-			"simple" atom approach.
-	04dec	ksl	54b-Added a bit clearer set of comments and reorganized a bit to collect all of the
-			indexing in one place. There is no change in funtionality regarding this.
-	05jul	ksl	56d -- Added if DEBUG lines so that data.out is not normally printed
-	06jul	ksl	57+ -- Modified so that calloc is used to allocate space for structures
-	06aug	ksl	57h -- Added checks to ensure that macro_info which is set to -1 in various
-			of the structures, is set to 0 or 1 somewhere in the process.  This simplifies
-			some of the switches in the program.  Note that I did not check for self-consitency
-			just that the value is not -1, which it was initially.
-	080810	ksl	62 -- Modified the way in which levels are read in.  Basically the routine assumes
-			and prevents one from reading in more than one level type, e.g macro_atom, top_base
-			record, kurucz record etc.  One cannot use more than one type anymore.  
-	080812	ksl	62 -- Made additional changes to make sure photoionization records were only
-			linked to levels for which the density could be calculated.  (Note, that there
-			may be a problem if we decide to use topbase data for ions with 0 nlte levels
-			allowed, i.e. zero levels in which we keep track of the density.  
-        081115  nsh     70 -- added in structures and routines to read in data to implement
-			dielectronic recombination.
-	11dec	ksl	71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
-	12jun   nsh	72 - added structures and routines to read in partition function data from 
-			cardona 2010
-			than once
-	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
-        12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
-  14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
-	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
-                 Also used write_atomicdata to control if summary is written to file.
-  15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
-**************************************************************/
-
-
+// If routines are added cproto > atomic_proto.h should be run
+#include "atomic_proto.h"
 
 #define LINELENGTH 400
 #define MAXWORDS    20
+
+
+/**********************************************************/
+/**
+ * @brief      generalized subroutine for reading atomic data
+ *  	into a set of structures defined in "atomic.h"
+ *
+ *
+ * @param [in] char  masterfile[]   The name of the "masterfile" which refers to other files which contain the data
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
+ * 	otherwise noted, e.g ionization potentials are converted to ergs.
+ *
+ *
+ *
+ * The masterfile is a list of other files, which contain atomic data for specific puruposes.
+ *
+ * All of the files are ascii.  The information is keyword based.
+ *
+ * The order of the data is important.  Elements should be defined before ions; ions
+ * before levels, levels before  lines etc.  In most if not all cases, one can either define all
+ * of the elements first, all of the ions, etc ... or the first element and its ions, the
+ * second element and its ions etc. Commenting out an element in the datafile has the effect of
+ * eliminating all of the data associated with that element, e.g ions, lines, etc.
+ *
+ * The program assumes that the ions for a given element are grouped together,
+ * that the levels for a given element are grouped together, etc.
+ *
+ * If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
+ * x-sections should be read first.  The routine will ignore data in the VFKY list if there
+ * is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
+ * on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
+ * would be difficult because you would have to drop various bits of Topbase data out of the
+ * middle of the structure or mark it NG or something.)
+ *
+ * Similarly, as a general rule the macro information should be provided before the simple
+ * ions are described, and the macro lines should be presented before simple lines.
+ *
+ * The only data which can be mixed up completely is the line array.
+ *
+ * Finally, get_atomic_data creates a pointer array to  lines, which has the lines in
+ * frequency ascending order.   This is actually done by a small subroutine index_lines
+ * which in turn calls a Numerical Recipes routine.
+ *
+ * ### Notes ###
+ *
+ * get_atomic data is intended to be stand-alone, that is one should be able to use it for routines
+ * other than Python, e.g for another routine intended to calculate the ionization state of
+ * a plasma in collisional equilibrium.
+ *
+ * To this end, the routines populate stuctures in atomic.h, which are not part of python.h, and 
+ * one should avoid calling routines like Exit(0) that are very python centric.  It's important
+ * that future modifications to get_atomic_data maintain this independence.
+ *
+ *
+ *
+ **********************************************************/
 
 int
 get_atomic_data (masterfile)
      char masterfile[];
 {
-
-  FILE *fopen (), *fptr, *mptr, *vptr;
-  char *fgets (), aline[LINELENGTH];
-
-  char file[LINELENGTH];
+  int match;
+  FILE *fptr, *mptr;            //, fopen ();
+  char aline[LINELENGTH];       //, *fgets ();
+  char file[LINELENGTH], atomic_file[LINELENGTH];
 
   char word[LINELENGTH];
   int n, m, i, j;
@@ -179,22 +109,20 @@ get_atomic_data (masterfile)
   int levl, levu;
   int in, il;                   //The levels used in inner shell data
   double q;
-  double freq, f, exx, lambda, alpha, beta, tm, et, p;
+  double freq, f, exx, et, p;
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
-  int index_collisions (), index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
+  int simple_line_ignore[NIONS], cstren_no_line;
   int nwords;
   int nlte, nmax;
-  //  
   int mflag;                    //flag to identify reading data for macro atoms
   int nconfigl, nconfigu;       //internal labels for configurations
-  //
   int islp, ilv, np;
   char configname[15];
   double e, rl;
   double xe[NCROSS], xx[NCROSS];
-  double a21 ();
+  // double a21 ();
   int nlines_simple;
   int nspline;
   double tmin;
@@ -203,20 +131,21 @@ get_atomic_data (masterfile)
   int ntop_phot_simple, ntop_phot_macro;
   int bb_max, bf_max;
   int lev_type;
-  int nn, nl, dumnn, dumnl, dumz, dumistate, n_verner, ion_index, target_index;
-  double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
-  double adi, t0di, bdi, t1di;
-  double part_eps;              //Temporary storage for partition function epsilon data
-  int J, part_G, part_m;        //Temporary storage for partiton function J, G and m data
+  int nn;
+//  double yield;
   double gstemp[BAD_GS_RR_PARAMS];      //Temporary storage for badnell resolved GS RR rates
   double temp[LINELENGTH];      //Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;          //Flags to say what part of data is being read in for DR and RR
   double gstmin, gstmax;        //The range of temperatures for which all ions have GS RR rates
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;    //Temporary storage for gaunt factors
   int n_elec_yield_tot;         //The number of inner shell cross sections with matching electron yield arrays
-  int n_fluor_yield_tot;        //The number of inner shell cross sections with matching fluorescent photon yield arrays
+  int inner_no_e_yield;         //The number of inner shell cross sections with no yields
+//  int n_fluor_yield_tot;        //The number of inner shell cross sections with matching fluorescent photon yield arrays
   double I, Ea;                 //The ionization energy and mean electron energy for electron yields
-  double energy;                //The energy of inner shell fluorescent photons
+//  double energy;                //The energy of inner shell fluorescent photons
+  int c_l, c_u;                 //Chianti level indicators
+  double en, gf, hlt, sp;       //Parameters in collision strangth file
+  int type;                     //used in collision strength
 
   /* define which files to read as data files */
 
@@ -317,12 +246,15 @@ get_atomic_data (masterfile)
     ele[n].abun = (-1);
     ele[n].firstion = (-1);
     ele[n].nions = (-1);
+    ele[n].istate_max = (-1);
   }
 
   for (n = 0; n < NIONS; n++)
   {
+    simple_line_ignore[n] = 0;  // diagnostic counter for how many lines ignored
     ion[n].z = (-1);
     ion[n].istate = (-1);
+    ion[n].nelem = (-1);
     ion[n].ip = (-1);
     ion[n].g = (-1);
     ion[n].nmax = (-1);
@@ -333,18 +265,16 @@ get_atomic_data (masterfile)
     ion[n].nlte = (-1);
     ion[n].phot_info = (-1);
     ion[n].macro_info = (-1);   //Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-    ion[n].ntop_first = 0;      // The fact that ntop_first and ntop  are initialized to 0 and not -1 is important 
+    ion[n].ntop_first = 0;      // The fact that ntop_first and ntop  are initialized to 0 and not -1 is important
     ion[n].ntop_ground = 0;     //NSH 0312 initialize the new pointer for GS cross sections
     ion[n].ntop = 0;
     ion[n].nxphot = (-1);
     ion[n].lev_type = (-1);     // Initialise to indicate we don't know what types of configurations will be read
     ion[n].drflag = 0;          //Initialise to indicate as far as we know, there are no dielectronic recombination parameters associated with this ion.
-    ion[n].cpartflag = 0;       //Initialise to indicate this ion has cardona partition function data
-    ion[n].nxcpart = -1;
-    ion[n].total_rrflag = 0;    //Initialise to say this ion has no Badnell total recombination data 
-    ion[n].nxtotalrr = -1;      //Initialise the pointer into the bad_t_rr structure. 
-    ion[n].bad_gs_rr_t_flag = 0;        //Initialise to say this ion has no Badnell ground state recombination data 
-    ion[n].bad_gs_rr_r_flag = 0;        //Initialise to say this ion has no Badnell ground state recombination data       
+    ion[n].total_rrflag = 0;    //Initialise to say this ion has no Badnell total recombination data
+    ion[n].nxtotalrr = -1;      //Initialise the pointer into the bad_t_rr structure.
+    ion[n].bad_gs_rr_t_flag = 0;        //Initialise to say this ion has no Badnell ground state recombination data
+    ion[n].bad_gs_rr_r_flag = 0;        //Initialise to say this ion has no Badnell ground state recombination data
     ion[n].nxbadgsrr = -1;      //Initialise the pointer into the bad_gs_rr structure.
     ion[n].dere_di_flag = 0;    //Initialise to say this ion has no Dere DI rate data
     ion[n].nxderedi = -1;       //Initialise the pointer into the Dere DI rate structure
@@ -353,11 +283,13 @@ get_atomic_data (masterfile)
       ion[n].nxinner[i] = -1;   //Inintialise the inner shell pointer array
   }
 
-  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = n_inner_tot = 0;    //Added counter for DR//
-  n_elec_yield_tot = n_fluor_yield_tot = 0;     //Counters for electron and fluorescent photon yields
+  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;     //Added counter for DR//
+  n_elec_yield_tot = 0;         //Counter for electron yield
+  //  n_fluor_yield_tot = 0;     and fluorescent photon yields
 
-  //This initialisese the top_phot array - it is used for all ionization processes so some elements
-  //are only used in some circumstances
+  /*This initializes the top_phot array - it is used for all ionization processes so some elements
+     are only used in some circumstances
+   */
 
   for (n = 0; n < NLEVELS; n++)
   {
@@ -365,7 +297,7 @@ get_atomic_data (masterfile)
     phot_top[n].uplev = (-1);
     phot_top[n].nion = (-1);    //the ion to which this cross section belongs
     phot_top[n].n_elec_yield = -1;      //pointer to the electron yield array (for inner shell)
-    phot_top[n].n_fluor_yield = -1;     //pointer to the fluorescent photon yield (for inner shell)
+//    phot_top[n].n_fluor_yield = -1;     //pointer to the fluorescent photon yield (for inner shell)
     phot_top[n].n = -1;         //pointer to shell (inner shell)
     phot_top[n].l = -1;         //pointer to l subshell (inner shell only)
     phot_top[n].z = (-1);       //atomic number
@@ -387,7 +319,7 @@ get_atomic_data (masterfile)
     inner_cross[n].uplev = (-1);
     inner_cross[n].nion = inner_elec_yield[n].nion = inner_fluor_yield[n].nion = (-1);
     inner_cross[n].n_elec_yield = -1;
-    inner_cross[n].n_fluor_yield = -1;
+//    inner_cross[n].n_fluor_yield = -1;
     inner_cross[n].n = inner_elec_yield[n].n = inner_fluor_yield[n].n = (-1);
     inner_cross[n].l = inner_elec_yield[n].l = inner_fluor_yield[n].l = (-1);
     inner_cross[n].z = inner_elec_yield[n].z = inner_fluor_yield[n].z = (-1);
@@ -425,9 +357,10 @@ get_atomic_data (masterfile)
     line[n].gl = line[n].gu = 0;
     line[n].el = line[n].eu = 0.0;
     line[n].macro_info = -1;
+    line[n].coll_index = -999;
   }
 
-/* 081115 nsh The following lines initialise the dielectronic recombination structure */
+/* The following lines initialise the dielectronic recombination structure */
   for (n = 0; n < NIONS; n++)
   {
     drecomb[n].nion = -1;
@@ -439,16 +372,8 @@ get_atomic_data (masterfile)
     }
   }
 
-/* 0612 nsh The following lines initialise the cardona partition function  structure */
-  for (n = 0; n < NIONS; n++)
-  {
-    cpart[n].nion = -1;
-    cpart[n].part_eps = -1.0;   //Mean energy term
-    cpart[n].part_G = -1;       //Mean multiplicity term
-    cpart[n].part_m = -1;
-  }
 
-/* 0712 nsh The following lines initialise the badnell total radiative recombination rate structure */
+/* The following lines initialise the badnell total radiative recombination rate structure */
   for (n = 0; n < NIONS; n++)
   {
     total_rr[n].nion = -1;
@@ -460,7 +385,7 @@ get_atomic_data (masterfile)
   }
 
 
-/* 0712 nsh The following lines initialise the badnell total radiative recombination rate structure */
+/* The following lines initialise the badnell total radiative recombination rate structure */
   for (n = 0; n < NIONS; n++)
   {
     bad_gs_rr[n].nion = -1;
@@ -475,7 +400,7 @@ get_atomic_data (masterfile)
   gstmax = 1e99;
 
 
-/* 0814 nsh The following lines initialise the dere direct ionization rate struture */
+/* The following lines initialise the dere direct ionization rate struture */
   for (n = 0; n < NIONS; n++)
   {
     dere_di_rate[n].nion = -1;
@@ -492,7 +417,7 @@ get_atomic_data (masterfile)
 
 
 
-/* 0912 nsh the following lines initialise the sutherland gaunt factors */
+/* The following lines initialise the Sutherland gaunt factors */
   gaunt_n_gsqrd = 0;            //The number of sets of scaled temperatures we have data for
   for (n = 0; n < MAX_GAUNT_N_GSQRD; n++)
   {
@@ -504,14 +429,28 @@ get_atomic_data (masterfile)
   }
 
 
+/* The following lines initialise the collision strengths */
+  n_coll_stren = 0;             //The number of data sets
+  cstren_no_line = 0;           // counter to track how many times we don't find a matching line 
+  for (n = 0; n < NLINES; n++)
+  {
+    coll_stren[n].n = -1;       //Internal index
+    coll_stren[n].lower = -1;   //The lower energy level - this is in Chianti notation and is currently unused
+    coll_stren[n].upper = -1;   //The upper energy level - this is in Chianti notation and is currently unused
+    coll_stren[n].energy = 0.0; //The energy of the transition
+    coll_stren[n].gf = 0.0;
+    coll_stren[n].hi_t_lim = 0.0;       //The high temerature limit
+    coll_stren[n].n_points = 0.0;       //The number of points in the splie fit
+    coll_stren[n].type = -1;    //The type of fit, this defines how one computes the scaled temperature and scaled coll strength
+    coll_stren[n].scaling_param = 0.0;  //The scaling parameter C used in the Burgess and Tully calculations
+    for (n1 = 0; n1 < N_COLL_STREN_PTS; n1++)
+    {
+      coll_stren[n].sct[n1] = 0.0;      //The scaled temperature points in the fit
+      coll_stren[n].scups[n1] = 0.0;
+    }
+  }
 
 
-  /*              for (n=0;nions;n++) {
-     ground_frac[n].z=-1;
-     ground_frac[n].istate=-1;
-     for (j=0;j<20;j++) {
-     ground_frac[n].frac[j]=1.;}
-     } */
 
   choice = 'x';                 /* Start by assuming you cannot determine what kind of line it is */
   nelements = 0;
@@ -522,7 +461,6 @@ get_atomic_data (masterfile)
   nlines = nlines_simple = nlines_macro = 0;
   lineno = 0;
   nxphot = 0;
-  nxcol = 0;
 /*mflag is set initially to 1, in order to establish that
 macro-lines need to be read in before any "simple" lines.  This
 is so that we can assure that the first lines in the line array
@@ -537,13 +475,11 @@ structure does not have this property! */
 
   if ((mptr = fopen (masterfile, "r")) == NULL)
   {
-    Error ("Get_atomic_data:  Could not open masterfile %s\n", masterfile);
-    exit (0);
+    Error ("Get_atomic_data: Could not find masterfile %s in current directory\n", masterfile);
+    exit (1);
   }
-  else
-  {
-    Log ("Get_atomicdata: Reading from masterfile %s\n", masterfile);
-  }
+
+  Log ("Get_atomic_data: Reading from masterfile %s\n", masterfile);
 
 /* Open and read each line in the masterfile in turn */
 
@@ -552,18 +488,18 @@ structure does not have this property! */
     if (sscanf (aline, "%s", file) == 1 && file[0] != '#')
     {
 
-      /* Open one of the files designated in the masterfile and begin to read it */
+      /*
+       * Open one of the files designated in the masterfile and begin to read it
+       */
 
       if ((fptr = fopen (file, "r")) == NULL)
       {
-        Error ("Get_atomic_data:  Could not open %s\n", file);
-        exit (0);
+        Error ("Get_atomic_data: Could not open %s in current directory\n", file);
+        exit (1);
       }
-      else
-      {
-        Log_silent ("Get_atomic_data: Now reading data from %s\n", file);
-        lineno = 1;
-      }
+
+      Log_silent ("Get_atomic_data: Reading data from %s\n", atomic_file);
+      lineno = 1;
 
       /* Main loop for reading each data file line by line */
 
@@ -580,6 +516,8 @@ structure does not have this property! */
           choice = 'c';
         else if (strncmp (word, "#", 1) == 0)
           choice = 'c';         /* It's a comment */
+        else if (strncmp (word, "CSTREN", 6) == 0)      //collision strengths
+          choice = 'C';
         else if (strncmp (word, "Element", 5) == 0)
           choice = 'e';
         else if (strncmp (word, "Ion", 3) == 0)
@@ -598,18 +536,12 @@ structure does not have this property! */
           choice = 'r';
         else if (strncmp (word, "Frac", 4) == 0)
           choice = 'f';         /*ground state fractions */
-        else if (strncmp (word, "Xcol", 4) == 0)
-          choice = 'x';         /*It's a collision strength line */
-        else if (strncmp (word, "InPhot", 6) == 0)
-          choice = 'A';         /*It's an inner shell ionization for Auger effect */
         else if (strncmp (word, "InnerVYS", 8) == 0)
           choice = 'I';         /*Its a set of inner shell photoionization cross sections */
         else if (strncmp (word, "DR_BADNL", 8) == 0)    /* It's a badnell type dielectronic recombination file */
           choice = 'D';
         else if (strncmp (word, "DR_SHULL", 8) == 0)    /*its a schull type dielectronic recombination */
           choice = 'S';
-        else if (strncmp (word, "CPART", 5) == 0)       /* It's a cardona partition function file */
-          choice = 'P';
         else if (strncmp (word, "RR_BADNL", 8) == 0)    /*Its a badnell type line in the total RR file */
           choice = 'T';
         else if (strncmp (word, "DI_DERE", 7) == 0)     /*Its a data file giving direct ionization rates from Dere (2007) */
@@ -618,12 +550,12 @@ structure does not have this property! */
           choice = 's';
         else if (strncmp (word, "BAD_GS_RR", 9) == 0)   /*Its a badnell resolved ground state RR file */
           choice = 'G';
-        else if (strncmp (word, "FF_GAUNT", 8) == 0)    /*Its a data file giving the temperature averaged gaunt factors from Sutherland (1997) */
+        else if (strncmp (word, "FF_GAUNT", 8) == 0)    /*Its a data file giving the temperature averaged gaunt factors from Sutherland (1998) */
           choice = 'g';
         else if (strncmp (word, "Kelecyield", 10) == 0) /*Electron yield from inner shell ionization fro Kaastra and Mewe */
           choice = 'K';
-        else if (strncmp (word, "Kphotyield", 10) == 0) /*Floruescent photon yield from IS ionization from Kaastra and Mewe */
-          choice = 'F';
+//        else if (strncmp (word, "Kphotyield", 10) == 0) /*Floruescent photon yield from IS ionization from Kaastra and Mewe */
+//          choice = 'F';
         else if (strncmp (word, "*", 1) == 0);  /* It's a continuation so record type remains same */
 
         else
@@ -632,7 +564,16 @@ structure does not have this property! */
 
         switch (choice)
         {
-// Elements
+/**
+ * @section Elements
+ *
+ * A typical element has the following format
+ *
+ *  Element    6    C    8.56
+ *
+ * where 6 here refers to z of the elemnt, C is the name, and 8.56 is the abundance relative to H at 12
+ *
+ * */
         case 'e':
           if (sscanf (aline, "%*s %d %s %le", &ele[nelements].z, ele[nelements].name, &ele[nelements].abun) != 3)
           {
@@ -651,58 +592,35 @@ structure does not have this property! */
           break;
 
 
-//Ions
-/* 
+/**
+ * @section Ions
+ *
+ * Ions are specified with the keyword Ion.  A typical entry for ions looks like
+ *
+ *  @verbatim
+ *  IonV    C   6   4   2   64.49400 1000   10     1s^22s(2S_{1/2})
+ *  @endverbatim
+ *
+ * where C is the elment name, 6 is the elemnt z, 4 is the ionization state (in conventional
+ * astrophysics notation, 2 is the mulitplicity  of the ground state, and 1000 and 10 refer
+ * to maximum number of allowed LTE and nLTE configurations.  The configuration is not actually
+ * required and is for information only.
+ *
+ * @detail
+ *
+ * Note that keyword parsing is done only on the first 3 letters, so Ion and IonV are equivlalent
+ *
+ * The routine still supports an earlier format which consists of the first 6 "words" in which case
+ * default values are assigned to for the maximum number of LTE/simple and nLTE/macro atom configurations.
+ *
+ * @bug Exactly what is meant by LTE here needs clarification.  Is there code here that should
+ * be removed because we do not need the "earlier" format?
+ *
+ */
 
-Until mid-2001, very little use was made of configurations or levels in Python
-and hence the original ion specification contained no control parameters associated
-with the configurations that would follow.
-
-Hence the old style specified, the element, ion state, multiplicity, and
-ionization potential in the following format:
-
-Ion	C	6	1	3	11.26
-
-The newer style adds two more variables
-
-Ion	H	1	1	2	13.598   5 3
-
-which correspond to the maximum number of LTE and nLTE configurations. 
-
-?? Stuart uses the same actual format as the new style configuration, which has 
-two additional variables for the number of LTE and nLTE configurations.  
-
-1.  Given this, why does he create input lines that begin with IonV rather
-than Ion. It might be simpler for now just to use this to declare we want this
-particular ion to be part of the macro-levels.  The alternative, if one does
-not want to proliferate types of keywords is to use a switch in the line.  
-
-I have changed this aprt of the code so that it recognizes IonM as a macro-ion.
-
-2.  Exactly how are the number of LTE and nLTE configurations used in the
-code.  
-
-One fundamental distinction is that space to store the populations of nlte 
-levels are contained in the wind structure, whereas the lte exist as energy levels, 
-in the atomic data files but the populations are not part of the wind structure.
-It's clear therefore that macro-levels need to be nlte levels.
-
-But it is pretty unclear how nlte levels from ksl's version are actually used.
-
-ksl 04Apr  ??
-
-*/
         case 'i':
 
-          if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) == 6)
-          {
-          }                     // It's a new style ion line specifying levels to treat in nlte
-          else if (nwords == 4)
-          {                     //It's an old style ion line
-            nlte = 0;
-            nmax = 10;
-          }
-          else
+          if ((nwords = sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z, &istate, &gg, &p, &nmax, &nlte)) != 6)
           {
             Error ("get_atomic_data: file %s line %d: Ion istate line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
@@ -760,110 +678,117 @@ ksl 04Apr  ??
           }
           break;
 
-//Levels or Configurations  
-/* This version of get_atomicdata can read various types of configuration inputs, some of which should gradually be
-exsized from the program.  Originally, the idea was that Levels would immediately follow an ion, and in that case
-all that was need to describe a level, was a level number, a multiplicity, and an energy for the level.  An example
-of this type of line follows:
-
-Ion	He	2	1	1	24.587  6 2
-Level 1 1 0.0
-Level 2 3 19.819
-It is a requirement that when an OLDSTYLE line is used, it must immediately follow the ion.
-
-The second type of LEVEL style was developed solely to allow the levels to be disjoint from
-the ions.  Disjoint in this case implies that the level must follow the ion, but it does not
-have to be immediately after the ion line.
-
-It was developed to allow one to use levels developed from the Kurucz
-line list, and the new Verner level file.  
-
-A typical KURUCZSTYLE record would look like:
-
-Comment-- Ion H  1
-# There are 17 unique levels for 1 1
-Level   1   1   0    2   0.000000
-Level   1   1   1    2  10.200121
-Level   1   1   2    4  10.200166
-Level   1   1   3    2  12.089051
-
-where the colums are z, istate (in conventianal notation), a unique level no,
-the multiplicity of the level and the exitation energy of the level in eV
-
-
-NOTE: Historically (prior to Oct2001) Levels were of miminimal importance to Python
-
-The new Topbase style records (created by py_parse_levels) look like this:
-
-
-# ======================================================================================
-#      i NZ NE iSLP iLV iCONF                 E(RYD)      TE(RYD)   gi     EQN    RL(NS)
-# ======================================================================================
-# ======================================================================================
-LevTop  1  1  200  1 -13.605698   0.000000  2  1.0000 1.00e+21 () 1s           
-LevTop  1  1  200  2  -3.401425  10.204273  2  2.0000 1.00e+21 () 2s           
-LevTop  1  1  211  1  -3.401425  10.204273  6  2.0000 1.60e-09 () 2p           
-LevTop  1  1  220  1  -1.511743  12.093955 10  3.0000 1.55e-08 () 3d           
-LevTop  1  1  200  3  -1.511743  12.093955  2  3.0000 1.59e-07 () 3s           
-LevTop  1  1  211  2  -1.511743  12.093955  6  3.0000 5.28e-09 () 3p           
-LevTop  2  1  100  1 -24.310389   0.000000  1  0.7481 1.00e+21 1s2             
-LevTop  2  1  300  1  -4.766334  19.544041  3  1.6895 1.00e+21 1s 2s           
-LevTop  2  1  100  2  -3.941516  20.368818  1  1.8579 1.00e+21 1s 2s           
-
-
-Col
-
-2     NZ  the atomic number of the level
-3     NE  the ionization state according to the usual astronomical convention.  Note
-	that Topbase uses the number of electrons but this is fixed in my reformatting
-	program.
-4   iSLP  A coded version of the angular momentum
-5   iLV   The level number (starts with 1)
-6   E(Ryd)  The energy in eV  relative to the continuum
-7   TE(Ryd) The energy in ev  realative to the ground state
-8   gi     The multiplicity
-9   eqn    The equivalent quantum number  (Not necessarily an integer)
-10  rl	   The radiative lifetime
-11  config  A string showing the configuration
-
-
--------------------------------------------------------------------------
-Macro Atoms (SS)
-
-When the macro atom method is to be used the level data should look like:
-e.g.
-
-#         z ion lvl ion_pot   ex_energy  g  rad_rate
-LevMacro  1  1  1 -13.605698   0.000000  2  1.00e+21 () n=1
-LevMacro  1  1  2  -3.401425  10.204273  8  1.60e-09 () n=2
-LevMacro  1  1  3  -1.511743  12.093955 18  1.00e-08 () n=3
-LevMacro  1  1  4  -0.850356  12.755342 32  1.00e-08 () n=4
-LevMacro  1  2  1   0.000000  13.605698  1  1.00e+21 () cnt
-
-
-The details are:
-
-Col
-2      Atomic number 
-3      Ionisation state (usual astronomical convention: neutral=1)
-4      An index for the level: this index must be assigned consistently in all
-       the macro input files (i.e. also in photoionisation data)
-       Each level index in a particular ion must be unique.
-5      ionisation potential (electron volts)
-6      excitation energy (electron volts). A consistent definition of energy=0
-       must be used for all ions of the same element: ground state energy for the
-       neutral species = 0.
-7      statistical weight
-8      radiative lifetime
-9      a string giving a name for the level (not used by code)
-
-
-*/
+/**
+ * @section levels Levels or Configurations
+ *
+ * This version of get_atomicdata can read various types of configuration inputs, some of which should gradually be
+ * exsized from the program.  Originally, the idea was that Levels would immediately follow an ion, and in that case
+ * all that was need to describe a level, was a level number, a multiplicity, and an energy for the level.  An example
+ * of this type of line follows:
+ *
+ *  @verbatim
+ *  Ion	He	2	1	1	24.587  6 2
+ *  Level 1 1 0.0
+ *  Level 2 3 19.819
+ *  @endverbatim
+ *
+ * It is a requirement that when an OLDSTYLE line is used, it must immediately follow the ion.
+ *
+ * The second type of LEVEL style was developed solely to allow the levels to be disjoint from
+ * the ions.  Disjoint in this case implies that the level must follow the ion, but it does not
+ * have to be immediately after the ion line.
+ *
+ * It was developed to allow one to use levels developed from the Kurucz
+ * line list, and the new Verner level file.
+ *
+ * A typical KURUCZSTYLE record would look like:
+ *
+ *  @verbatim
+ *  Comment-- Ion H  1
+ *  \# There are 17 unique levels for 1 1
+ *  Level   1   1   0    2   0.000000
+ *  Level   1   1   1    2  10.200121
+ *  Level   1   1   2    4  10.200166
+ *  Level   1   1   3    2  12.089051
+ *  @endverbatim
+ * where the colums are z, istate (in conventianal notation), a unique level no,
+ * the multiplicity of the level and the exitation energy of the level in eV
+ *
+ *
+ *
+ * The new Topbase style records (created by py_parse_levels) look like this:
+ *
+ *
+ *  @verbatim
+ *  ======================================================================================
+ *  #      i NZ NE iSLP iLV iCONF                 E(RYD)      TE(RYD)   gi     EQN    RL(NS)
+ *  # ======================================================================================
+ *  # ======================================================================================
+ *  LevTop  1  1  200  1 -13.605698   0.000000  2  1.0000 1.00e+21 () 1s
+ *  LevTop  1  1  200  2  -3.401425  10.204273  2  2.0000 1.00e+21 () 2s
+ *  LevTop  1  1  211  1  -3.401425  10.204273  6  2.0000 1.60e-09 () 2p
+ *  LevTop  1  1  220  1  -1.511743  12.093955 10  3.0000 1.55e-08 () 3d
+ *  LevTop  1  1  200  3  -1.511743  12.093955  2  3.0000 1.59e-07 () 3s
+ *  LevTop  1  1  211  2  -1.511743  12.093955  6  3.0000 5.28e-09 () 3p
+ *  LevTop  2  1  100  1 -24.310389   0.000000  1  0.7481 1.00e+21 1s2
+ *  LevTop  2  1  300  1  -4.766334  19.544041  3  1.6895 1.00e+21 1s 2s
+ *  LevTop  2  1  100  2  -3.941516  20.368818  1  1.8579 1.00e+21 1s 2s
+ *  @endverbatim
+ *
+ * The details are:
+ *
+ * | Col | Name    | Description
+ * | --- | ------- | -----------
+ * | 2   |  NZ     | the atomic number of the level
+ * | 3   |  NE     | the ionization state according to the usual astronomical convention.
+ * |     |         | Note that Topbase uses the number of electrons but this is fixed in my reformatting program.
+ * | 4   | iSLP    | A coded version of the angular momentum
+ * | 5   | iLV     | The level number (starts with 1)
+ * | 6   | E(Ryd)  | The energy in eV  relative to the continuum
+ * | 7   | TE(Ryd) | The energy in ev  realative to the ground state
+ * | 8   | gi      | The multiplicity
+ * | 9   | eqn     | The equivalent quantum number  (Not necessarily an integer)
+ * | 10  | rl	     | The radiative lifetime
+ * | 11  | config  | A string showing the configuration
+ *
+ *
+ * \subsection matoms Macro Atoms (SS)
+ *
+ * When the macro atom method is to be used the level data should look like:
+ * e.g.
+ *
+ *  @verbatim
+ *  #         z ion lvl ion_pot   ex_energy  g  rad_rate
+ *  LevMacro  1  1  1 -13.605698   0.000000  2  1.00e+21 () n=1
+ *  LevMacro  1  1  2  -3.401425  10.204273  8  1.60e-09 () n=2
+ *  LevMacro  1  1  3  -1.511743  12.093955 18  1.00e-08 () n=3
+ *  LevMacro  1  1  4  -0.850356  12.755342 32  1.00e-08 () n=4
+ *  LevMacro  1  2  1   0.000000  13.605698  1  1.00e+21 () cnt
+ *  @endverbatim
+ *
+ *
+ * The details are:
+ *
+ * | Col | Name      | Description
+ * |---- | --------- | ------------
+ * | 2   | z         | Atomic number
+ * | 3   | ion       | Ionisation state (usual astronomical convention: neutral=1)
+ * | 4   | lvl       | An index for the level: this index must be assigned consistently in all the macro input files
+ * |     |           | (i.e. also in photoionisation data). Each level index in a particular ion must be unique.
+ * | 5   | ion_pot   | Ionisation potential (electron volts)
+ * | 6   | ex_energy | Excitation energy (electron volts). A consistent definition of energy=0 must be used for all ions of the same element:
+ * |     |           | ground state energy for the neutral species = 0.
+ * | 7   | g         | Statistical weight
+ * | 8   | rad_rate  | Radiative lifetime
+ * | 9   |           | A string giving a name for the level (not used by code)
+ *
+ *
+ * */
 
 
         case 'N':
-/*  
-	080809 - It's a non-lte level, i.e. one for which we are going to calculate populations, at least for some number of these.
+/*
+    It's a non-lte level, i.e. one for which we are going to calculate populations, at least for some number of these.
 	For these, we have to set aside space in the levden array in the plasma structure.  This is used for topbase
 	photoionization and macro atoms
 */
@@ -873,7 +798,7 @@ topbase level densities in some of the same arrays in python.  Leave for now, bu
 the program working in both cases, and certainly mixed cases  04apr ksl  */
 
 /* 080810 -- ksl -- 62 -- I have changed the way levels are created so that one can only read one type
- * of levels for each ion.  Note also that all of the confiruations for a single ion need to be read together.  
+ * of levels for each ion.  Note also that all of the confiruations for a single ion need to be read together.
  * It will be possible to read other types of records but one should not mix levels of different ions (This
  * last bit is not actually new.
  */
@@ -907,6 +832,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             Error ("get_atomic_data: file %s line %d: Level line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
+            return (0);
           }
 // Now check that the ion for this level is already known.  If not break out
           n = 0;
@@ -919,9 +845,20 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             break;
           }
 
+          /* Check that for a non-lte (macro atom) that the configuration level is not greater than was allowed for in the
+           * ion line
+           */
+
+          if (lev_type == 1 && ilv > ion[n].n_lte_max)
+          {
+            Error ("get_atomic_data: macro level %d ge %d for z %d  istate %d\n", ilv, ion[n].n_lte_max, ion[n].z, ion[n].istate);
+            //exit(0);
+            break;
+          }
+
 /*  So now we know that this level can be associated with an ion
 
-Now either set the type of level that will be used for this ion or set it if 
+Now either set the type of level that will be used for this ion or set it if
 a level type has not been established
 		   */
 
@@ -931,16 +868,12 @@ a level type has not been established
           }
           else if (ion[n].lev_type != lev_type)
           {
-            //XXX Why are these lines commented out?  ksl 160212
-//OLD                 Error
-//OLD                   ("Get_atomic_data: file %s  Reading lev_type (%d) for ion %d with lev_type (%d). Not allowed\n",
-//OLD                    file, lev_type, n, ion[n].lev_type);
             break;
           }
 
-/* 
- Now check 1) if it was a LevMacro that there isn't already a LevTop (if there was then 
- something has gone wrong in the input order). 
+/*
+ Now check 1) if it was a LevMacro that there isn't already a LevTop (if there was then
+ something has gone wrong in the input order).
  2) if it was a LevTop that there wasn't already a LevMacro.If there was then ignore the new LevTop data
  for this ion. (SS)
 */
@@ -998,7 +931,7 @@ a level type has not been established
           config[nlevels].ex = exx;
           config[nlevels].rad_rate = rl;
           /* SS Aug 2005
-             Previously, the line above set the rad_rate to 0 and is was never used. 
+             Previously, the line above set the rad_rate to 0 and is was never used.
              Now I'm setting it to the radiative lifetime of the level.
              It will now be used in the macro atom calculation - if the lifetime is
              set to be long (infinite) in the input data, the level is assumed to be
@@ -1008,7 +941,7 @@ a level type has not been established
 
 
           if (ion[n].n_lte_max > 0)
-          {                     // Then this ion wants nlte levels 
+          {                     // Then this ion wants nlte levels
             if (ion[n].first_nlte_level < 0)
             {                   // Then this is the first one that has been found
               ion[n].first_nlte_level = nlevels;
@@ -1032,9 +965,8 @@ a level type has not been established
 
 
 /* Now associate this config with the levden array where appropriate.  The -1 is because ion[].nlte
-is already incremented 
+is already incremented
 
-080810 -- 62 -- Also want to treat these as simple levels in cases where we want to sum everything
 */
 
           if (ion[n].firstlevel < 0)
@@ -1079,6 +1011,7 @@ is already incremented
             Error ("get_atomic_data: file %s line %d: Level line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
+            return (0);
           }
 /* Check whether the ion for this level is known.  If not, skip the level */
 
@@ -1094,7 +1027,7 @@ is already incremented
 
           }
 
-          /* Now either set the type of level that will be used for this ion or set it if 
+          /* Now either set the type of level that will be used for this ion or set it if
            * a level type has not been established
            */
 
@@ -1104,9 +1037,6 @@ is already incremented
           }
           else if (ion[n].lev_type != lev_type)
           {
-//OLD                 Error
-//OLD                   ("Get_atomic_data: file %s  Reading lev_type (%d) for ion %d with lev_type (%d). Not allowed\n",
-//OLD                    file, lev_type, n, ion[n].lev_type)
 
             break;
           }
@@ -1114,7 +1044,7 @@ is already incremented
 
 
 /* Check whether this is a macro-ion.  If it is a macro-ion, but the level appears to be described as a
-simple level (i.e without a keyword LeVMacro), then skip it, since a macro-ion has to have all the levels 
+simple level (i.e without a keyword LeVMacro), then skip it, since a macro-ion has to have all the levels
 described as macro-levels. */
           if (ion[n].macro_info == 1)
           {
@@ -1122,7 +1052,7 @@ described as macro-levels. */
             break;
           }
 /* Check to prevent one from adding simple levels to an ionized that already has some nlte levels.  Note that
-   an ion may have simple levels, i.e. levels with no entries in the plasma structure levden array, but this 
+   an ion may have simple levels, i.e. levels with no entries in the plasma structure levden array, but this
    will only be the case if there are too many of this type of level.
 */
           if (ion[n].nlte > 0)
@@ -1158,7 +1088,7 @@ described as macro-levels. */
             ion[n].nlevels++;
 
 
-/* 080808 - ksl - Now declare that this level has no corresponding element in the levden array which is part 
+/* Now declare that this level has no corresponding element in the levden array which is part
    of the plasma stucture.  To do this set config[].ndent to -1
 */
 
@@ -1177,80 +1107,84 @@ described as macro-levels. */
 
 
 
-// Photoionization
-/* 
-Until at least Oct 2001, Python used photoionization crossections from Verner, Ferland, Korista, and Yakolev (DFKY)
-The routine sigma_phot(xptr, freq) calculates the crossection based on this.
-
-The original topbase records look like this
- ================================================
-       I  NZ  NE  ISLP  ILV        E(RYD)      NP
- ================================================
-       1   2   1   200    1  -4.00000E+00     101
-  3.960000E+00 1.619E+00
-  4.000000E+00 1.576E+00
-  4.101260E+00 1.474E+00
-  4.205084E+00 1.379E+00
-  4.311536E+00 1.289E+00
-  4.420684E+00 1.206E+00
-
-They are converted to something that is more compatible with Topbase 
-by py_top_phot
-
-The new topbase style records look like this.  
-
-PhotTopS  2  1 200    1    54.422791 101
-PhotTop    54.422791 1.576e-18
-PhotTop    66.508772 9.197e-19
-PhotTop    78.594753 5.817e-19
-PhotTop    90.680734 3.906e-19
-PhotTop   102.766715 2.746e-19
-PhotTop   114.852696 2.001e-19
-PhotTop   126.938677 1.502e-19
-PhotTop   139.024658 1.155e-19
-PhotTop   151.110639 9.057e-20
-
-The main changes from the original records are that energy levels
-have been converted to eV, cross sections to cm**2, and the electron
-number has been converted to conventional astronomical notiation
-for the ionstate.
-*/
-
-
-/*
-  Macro atoms (SS)
-  =================
-  
-  For the Macro Atom method the input photoionisation data should look like
-  (one entry for every photoionisation process):
-  
-  z  ion ll ul   threshold  npts  
-  PhotMacS  1  1  1  1    13.605698  50
-  PhotMac    13.605698 6.304e-18
-  PhotMac    16.627193 3.679e-18
-  PhotMac    19.648688 2.327e-18
-  PhotMac    22.670183 1.563e-18
-  PhotMac    25.691679 1.098e-18
-  PhotMac    28.713174 8.004e-19
-  PhotMac    31.734669 6.006e-19
-  PhotMac    34.756165 4.618e-19
-  
-  Details:
-  Col (first row of entry)
-  2     atomic number
-  3     ionisation stage (astronomical convention): LOWER ION (i.e. the one that GETS IONISED)
-        it is always assumed that the upper stage is this+1!
-  4     index for the level in the LOWER ION (must match the index given to the level in 
-        input level data)
-  5     index for the level in the UPPER ION (must match the index given to the level in the 
-        input level data)
-  6     threshold energy of edge (in eV)
-  7     npts: number of data points in the following table
-  
-  Then follows the table of energy and cross-section values (same as TopBase above)
-  04dec	ksl	Modified this section so that "unknown" level information is skipped so that
-  		one need modify only the higher level elements_ions file
-*/
+/**
+ * @section  Photoionization
+ *
+ * Until at least Oct 2001, Python used photoionization crossections from Verner, Ferland, Korista, and Yakolev (DFKY)
+ * The routine sigma_phot(xptr, freq) calculates the crossection based on this.
+ *
+ *
+ * The original topbase records look like this
+ *
+ * @verbatim
+ *  ================================================
+ *        I  NZ  NE  ISLP  ILV        E(RYD)      NP
+ *  ================================================
+ *        1   2   1   200    1  -4.00000E+00     101
+ *   3.960000E+00 1.619E+00
+ *   4.000000E+00 1.576E+00
+ *   4.101260E+00 1.474E+00
+ *   4.205084E+00 1.379E+00
+ *   4.311536E+00 1.289E+00
+ *   4.420684E+00 1.206E+00
+ * @endverbatim
+ *
+ * They are converted to something that is more compatible with Topbase
+ * by py_top_phot
+ *
+ * The new topbase style records look like this.
+ *
+ * @verbatim
+ * PhotTopS  2  1 200    1    54.422791 101
+ * PhotTop    54.422791 1.576e-18
+ * PhotTop    66.508772 9.197e-19
+ * PhotTop    78.594753 5.817e-19
+ * PhotTop    90.680734 3.906e-19
+ * PhotTop   102.766715 2.746e-19
+ * PhotTop   114.852696 2.001e-19
+ * PhotTop   126.938677 1.502e-19
+ * PhotTop   139.024658 1.155e-19
+ * PhotTop   151.110639 9.057e-20
+ * @endverbatim
+ *
+ * The main changes from the original records are that energy levels
+ * have been converted to eV, cross sections to cm**2, and the electron
+ * number has been converted to conventional astronomical notiation
+ * for the ionstate.
+ *
+ * ### Macro atoms (SS)
+ *
+ * For the Macro Atom method the input photoionisation data should look like
+ * (one entry for every photoionisation process):
+ *
+ * @verbatim
+ * z  ion ll ul   threshold  npts
+ * PhotMacS  1  1  1  1    13.605698  50
+ * PhotMac    13.605698 6.304e-18
+ * PhotMac    16.627193 3.679e-18
+ * PhotMac    19.648688 2.327e-18
+ * PhotMac    22.670183 1.563e-18
+ * PhotMac    25.691679 1.098e-18
+ * PhotMac    28.713174 8.004e-19
+ * PhotMac    31.734669 6.006e-19
+ * PhotMac    34.756165 4.618e-19
+ * @endverbatim
+ *
+ * Details for the first row of each entry:
+ * | Col | Name  | Description
+ * | --- | ----- | -----------
+ * | 2   | z     | Atomic number
+ * | 3   | ion   | Ionisation stage (astronomical convention): LOWER ION (i.e. the one that GETS IONISED)
+ * |     |       | it is always assumed that the upper stage is this+1!
+ * | 4   | ll    | index for the level in the LOWER ION (must match the index given to the level in input level data)
+ * | 5   | ul    | index for the level in the UPPER ION (must match the index given to the level in the input level data)
+ * | 6   | thresh| threshold energy of edge (in eV)
+ * | 7   | npts  | number of data points in the following table
+ *
+ * * Then follows the table of energy and cross-section values (same as TopBase above)
+ * * 04dec	ksl	Modified this section so that "unknown" level information is skipped so that
+ *   		one need modify only the higher level elements_ions file
+ */
 
         case 'w':
           if (strncmp (word, "PhotMacS", 8) == 0)
@@ -1287,7 +1221,7 @@ for the ionstate.
 
             // Locate lower state
             m = 0;
-            while ((config[m].z != z || config[m].istate != istate      //Now searching for the lower 
+            while ((config[m].z != z || config[m].istate != istate      //Now searching for the lower
                     || config[m].ilv != levl) && m < nlevels)   //configuration (SS)
               m++;
             if (m == nlevels)
@@ -1333,7 +1267,7 @@ for the ionstate.
               ion[config[m].nion].ntop_first = ntop_phot;
             }
 
-            /* JM 1508 -- next line sees if the topbase level just read in is the ground state - 
+            /* next line sees if the topbase level just read in is the ground state -
                if it is, the ion structure element ntop_ground is set to that topbase level number
                note that m is the lower level here */
             if (m == config[ion[config[n].nion].first_nlte_level].ilv)
@@ -1347,7 +1281,7 @@ for the ionstate.
 
             for (n = 0; n < np; n++)
             {
-              phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / H;        // convert from eV to freqency
+              phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / PLANCK;   // convert from eV to freqency
               phot_top[ntop_phot].x[n] = xx[n]; // leave cross sections in  CGS
             }
             if (phot_freq_min > phot_top[ntop_phot].freq[0])
@@ -1358,7 +1292,6 @@ for the ionstate.
             ntop_phot++;
             nphot_total++;
 
-            /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
             if (nphot_total > NTOP_PHOT)
             {
               Error ("get_atomicdata: More macro photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n", NTOP_PHOT);
@@ -1389,10 +1322,10 @@ for the ionstate.
             n = 0;
 
 
-            /* 080812 - 63 - ksl - added additional check to assure that records were
+            /* additional check to assure that records were
              * only matched with levels whose density was being tracked in levden.  This
              * is now necesary since a change was made to use topbase levels for calculating
-             * partition functions 
+             * partition functions
              */
 
             while ((config[n].nden == -1
@@ -1401,10 +1334,10 @@ for the ionstate.
             if (n == nlevels)
             {
 
-              Debug ("No ion found to match PhotTop data in file %s on line %d. Data ignored.\n", file, lineno);
+              Debug ("No level found to match PhotTop data in file %s on line %d. Data ignored.\n", file, lineno);
               break;            // There was no pre-existing ion
             }
-            if (ion[config[n].nion].macro_info == 0)    //this is not a macro atom level (SS) 
+            if (ion[config[n].nion].macro_info == 0)    //this is not a macro atom level (SS)
             {
               phot_top[ntop_phot].nlev = n;     // level associated with this crossection.
               phot_top[ntop_phot].nion = config[n].nion;
@@ -1414,7 +1347,7 @@ for the ionstate.
               phot_top[ntop_phot].nlast = -1;
               phot_top[ntop_phot].macro_info = 0;
 
-              /* NSH 0312 - next line sees if the topbase level just read in is the ground state - 
+              /* next line sees if the topbase level just read in is the ground state -
                  if it is, the ion structure element ntop_ground is set to that topbase level number */
               if (islp == config[ion[config[n].nion].first_nlte_level].isp && ilv == config[ion[config[n].nion].first_nlte_level].ilv)
               {
@@ -1439,7 +1372,7 @@ for the ionstate.
               ion[config[n].nion].ntop++;
               for (n = 0; n < np; n++)
               {
-                phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / H;      // convert from eV to freqency
+                phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / PLANCK; // convert from eV to freqency
 
                 phot_top[ntop_phot].x[n] = xx[n];       // leave cross sections in  CGS
               }
@@ -1451,7 +1384,7 @@ for the ionstate.
               ntop_phot++;
               nphot_total++;
 
-              /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
+              /* check to assure we did not exceed the allowed number of photoionization records */
               if (nphot_total > NTOP_PHOT)
               {
                 Error
@@ -1469,12 +1402,12 @@ for the ionstate.
           }
 
 
-          /* Check that there is an ion which has the same ionization state as this record 
+          /* Check that there is an ion which has the same ionization state as this record
              otherwise it must be a VFKY style record and so read with that format */
 
           else if (strncmp (word, "PhotVfkyS", 8) == 0)
           {
-            // It's a TOPBASE style photoionization record, beginning with the summary record
+            // It's a VFKY style photoionization record, beginning with the summary record
             sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &islp, &ilv, &exx, &np);
             for (n = 0; n < np; n++)
             {
@@ -1492,7 +1425,7 @@ for the ionstate.
 
             for (nion = 0; nion < nions; nion++)
             {
-              if (ion[nion].z == z && ion[nion].istate == istate)
+              if (ion[nion].z == z && ion[nion].istate == istate && ion[nion].macro_info != 1)
               {
                 if (ion[nion].phot_info == -1)
                 {
@@ -1510,7 +1443,7 @@ for the ionstate.
 
                   for (n = 0; n < np; n++)
                   {
-                    phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / H;        // convert from eV to freqency
+                    phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / PLANCK;   // convert from eV to freqency
                     phot_top[nphot_total].x[n] = xx[n]; // leave cross sections in  CGS
                   }
                   if (phot_freq_min > phot_top[ntop_phot].freq[0])
@@ -1520,9 +1453,9 @@ for the ionstate.
                 }
 
                 else if (ion[nion].phot_info == 1 && ion[nion].macro_info != 1)
-                  /* We already have a topbase cross section, but the VFKY 
-                     data is superior for the ground state, so we replace that data with the current data */
-                  /* JM 1508 -- don't do this with macro-atoms for the moment */
+                  /* We already have a topbase cross section, but the VFKY
+                     data is superior for the ground state, so we replace that data with the current data
+                     JM 1508 -- don't do this with macro-atoms for the moment */
                 {
                   phot_top[ion[nion].ntop_ground].nlev = ion[nion].firstlevel;  // ground state
                   phot_top[ion[nion].ntop_ground].nion = nion;
@@ -1534,12 +1467,11 @@ for the ionstate.
                   ion[nion].phot_info = 2;      //We mark this as having hybrid data - VFKY ground, TB excited, potentially VFKY innershell
                   for (n = 0; n < np; n++)
                   {
-                    phot_top[ion[nion].ntop_ground].freq[n] = xe[n] * EV2ERGS / H;      // convert from eV to freqency
+                    phot_top[ion[nion].ntop_ground].freq[n] = xe[n] * EV2ERGS / PLANCK; // convert from eV to freqency
                     phot_top[ion[nion].ntop_ground].x[n] = xx[n];       // leave cross sections in  CGS
                   }
                   if (phot_freq_min > phot_top[ion[nion].ntop_ground].freq[0])
                     phot_freq_min = phot_top[ion[nion].ntop_ground].freq[0];
-//                              
                   Debug
                     ("Get_atomic_data: file %s  Replacing ground state topbase photoionization for ion %d with VFKY photoionization\n",
                      file, nion);
@@ -1593,9 +1525,10 @@ for the ionstate.
           }
           for (nion = 0; nion < nions; nion++)
           {
-            if (ion[nion].z == z && ion[nion].istate == istate)
+            if (ion[nion].z == z && ion[nion].istate == istate && ion[nion].macro_info != 1)
             {
               /* Then there is a match */
+              inner_cross[n_inner_tot].nlev = ion[nion].firstlevel;     //All these are for the ground state
               inner_cross[n_inner_tot].nion = nion;
               inner_cross[n_inner_tot].np = np;
               inner_cross[n_inner_tot].z = z;
@@ -1607,7 +1540,7 @@ for the ionstate.
               ion[nion].nxinner[ion[nion].n_inner] = n_inner_tot;
               for (n = 0; n < np; n++)
               {
-                inner_cross[n_inner_tot].freq[n] = xe[n] * EV2ERGS / H; // convert from eV to freqency
+                inner_cross[n_inner_tot].freq[n] = xe[n] * EV2ERGS / PLANCK;    // convert from eV to freqency
                 inner_cross[n_inner_tot].x[n] = xx[n];  // leave cross sections in  CGS
               }
               if (inner_freq_min > inner_cross[n_inner_tot].freq[0])
@@ -1626,165 +1559,187 @@ for the ionstate.
 
           /*Input data for innershell ionization followed by
              Auger effect */
+/**
+ * @section Auger
+ */
+/*
+		case 'A':
+		  if (sscanf (aline,
+			      "%*s %d %d %d %d %le %le %le %le %le %le %le",
+			      &z, &istate, &nn, &nl, &yield, &arad, &etarad,
+			      &adi, &t0di, &bdi, &t1di) != 11)
+		    {
+		      Error ("Auger input incorrectly formatted\n");
+		      Error ("Get_atomic_data: %s\n", aline);
+		      exit (0);
+		    }
+		  if (nauger < NAUGER)
+		    {
+		      if ((vptr =
+			   fopen ("atomic/photo_verner.data", "r")) == NULL)
+			{
+			  Error
+			    ("get_atomic data:  Could not open photo_verner.data\n");
+			  exit (0);
+			}
+		      ion_index = -2;
+		      target_index = -1;
+		      for (n_verner = 0; n_verner < 1696; n_verner++)
+			{
+			  fscanf (vptr,
+				  "%d %d %d %d %le %le %le %le %le %le\n",
+				  &dumz, &dumistate, &dumnn, &dumnl, &dumE_th,
+				  &dumE_0, &dumSigma, &dumya, &dumP, &dumyw);
+			  if ((dumz == z)
+			      && (dumistate == (dumz - istate + 1))
+			      && (dumnn == nn) && (dumnl == nl))
+			    {
+			      // Now need to check that this ion is really in the data set and find which it is
+			      ion_index = -1;
+			      for (n = 0; n < nions; n++)
+				{
+				  if (ion[n].z == z
+				      && ion[n].istate == istate)
+				    {
+				      ion_index = n;
+				      augerion[nauger].nion = n;
+				      augerion[nauger].yield = yield;
+				      augerion[nauger].arad = arad;
+				      augerion[nauger].etarad = etarad;
+				      augerion[nauger].adi = adi;
+				      augerion[nauger].t0di = t0di;
+				      augerion[nauger].bdi = bdi;
+				      augerion[nauger].t1di = t1di;
 
-        case 'A':
-          if (sscanf (aline,
-                      "%*s %d %d %d %d %le %le %le %le %le %le %le",
-                      &z, &istate, &nn, &nl, &yield, &arad, &etarad, &adi, &t0di, &bdi, &t1di) != 11)
-          {
-            Error ("Auger input incorrectly formatted\n");
-            Error ("Get_atomic_data: %s\n", aline);
-            exit (0);
-          }
-          if (nauger < NAUGER)
-          {
-            if ((vptr = fopen ("atomic/photo_verner.data", "r")) == NULL)
-            {
-              Error ("get_atomic data:  Could not open photo_verner.data\n");
-              exit (0);
-            }
-            ion_index = -2;
-            target_index = -1;
-            for (n_verner = 0; n_verner < 1696; n_verner++)
-            {
-              fscanf (vptr,
-                      "%d %d %d %d %le %le %le %le %le %le\n",
-                      &dumz, &dumistate, &dumnn, &dumnl, &dumE_th, &dumE_0, &dumSigma, &dumya, &dumP, &dumyw);
-              if ((dumz == z) && (dumistate == (dumz - istate + 1)) && (dumnn == nn) && (dumnl == nl))
-              {
-                /* Now need to check that this ion is really in the data set and find which it is */
-                ion_index = -1;
-                for (n = 0; n < nions; n++)
-                {
-                  if (ion[n].z == z && ion[n].istate == istate)
-                  {
-                    ion_index = n;
-                    augerion[nauger].nion = n;
-                    augerion[nauger].yield = yield;
-                    augerion[nauger].arad = arad;
-                    augerion[nauger].etarad = etarad;
-                    augerion[nauger].adi = adi;
-                    augerion[nauger].t0di = t0di;
-                    augerion[nauger].bdi = bdi;
-                    augerion[nauger].t1di = t1di;
+				      augerion[nauger].z = z;
+				      augerion[nauger].istate = istate;
+				      augerion[nauger].n = nn;
+				      augerion[nauger].l = nl;
+				      augerion[nauger].freq_t = dumE_th / HEV;
+				      augerion[nauger].E_0 = dumE_0;
+				      augerion[nauger].Sigma = dumSigma * 1.e-18;	//input in megabarns
+				      augerion[nauger].ya = dumya;
+				      augerion[nauger].yw = dumyw;
+				      augerion[nauger].P = dumP;
+				      nauger++;
+				    }
 
-                    augerion[nauger].z = z;
-                    augerion[nauger].istate = istate;
-                    augerion[nauger].n = nn;
-                    augerion[nauger].l = nl;
-                    augerion[nauger].freq_t = dumE_th / HEV;
-                    augerion[nauger].E_0 = dumE_0;
-                    augerion[nauger].Sigma = dumSigma * 1.e-18; //input
-                    //in megabarns
-                    augerion[nauger].ya = dumya;
-                    augerion[nauger].yw = dumyw;
-                    augerion[nauger].P = dumP;
-                    nauger++;
-                  }
+				  //We also want the index for the
+				     targe ion (i.e. the one that is
+				     two ionization stages up from the
+				     one found above
+				  if (ion[n].z == z
+				      && ion[n].istate == istate + 2)
+				    {
+				      target_index = n;
+				    }
 
-                  /*We also want the index for the
-                     targe ion (i.e. the one that is
-                     two ionization stages up from the
-                     one found above */
-                  if (ion[n].z == z && ion[n].istate == istate + 2)
-                  {
-                    target_index = n;
-                  }
-
-                }
-                if (ion_index == -1)
-                {
-                  Error
-                    ("Get_atomic_data: Failed to find ion to match Auger input data. Ignoring.  %d %d %d %d\n",
-                     dumz, dumistate, dumnn, dumnl);
-                }
-                else
-                {
-                  augerion[nauger - 1].nion_target = target_index;
-                }
-              }
-            }
-            fclose (vptr);
-            if (ion_index == -2)
-            {
-              Error ("Get_atomic_data: Failed to find source data to match Auger input data. Ignoring. %d %d %d %d\n", z, istate, nn, nl);
-            }
-            else
-            {
-              Log
-                ("Matched Auger ionization input to Z %d istate %d going to Z %d istate %d.\n",
-                 ion[augerion[nauger - 1].nion].z,
-                 ion[augerion[nauger - 1].nion].istate,
-                 ion[augerion[nauger - 1].nion_target].z, ion[augerion[nauger - 1].nion_target].istate);
-            }
-          }
-          else
-          {
-            Error ("Get_atomic_data: NAUGER is filled up! Ignoring input data %d.\n", nauger);
-          }
-          break;
-
-
-
-// Lines
-/* There are various types of line files which get_atomicdata must parse
-This is the original format
-Line 1 1 1215.673584 0.139000  2  2
-Line 1 1 1215.668213 0.277000  2  4
-
-This is the first format developed for including excited state lines.  It adds the energy of the lower
-and upper level
-
-Line  6  3 1174.933000    0.115845   3   5    6.496462   17.050273
-Line  6  3 1175.263000    0.282488   1   3    6.493525   17.044369
-Line  6  3 1175.590000    0.069804   3   3    6.496462   17.044369
-
-Finally there is a new format developed to link lines to configurations.  
-
-Line  1  1 1215.673584  0.139000   2   2     0.000000    10.200121    0    1
-Line  1  1 1215.668213  0.277000   2   4     0.000000    10.200166    0    2
+				}
+			      if (ion_index == -1)
+				{
+				  Error
+				    ("Get_atomic_data: Failed to find ion to match Auger input data. Ignoring.  %d %d %d %d\n",
+				     dumz, dumistate, dumnn, dumnl);
+				}
+			      else
+				{
+				  augerion[nauger - 1].nion_target =
+				    target_index;
+				}
+			    }
+			}
+		      fclose (vptr);
+		      if (ion_index == -2)
+			{
+			  Error
+			    ("Get_atomic_data: Failed to find source data to match Auger input data. Ignoring. %d %d %d %d\n",
+			     z, istate, nn, nl);
+			}
+		      else
+			{
+			  Log
+			    ("Matched Auger ionization input to Z %d istate %d going to Z %d istate %d.\n",
+			     ion[augerion[nauger - 1].nion].z,
+			     ion[augerion[nauger - 1].nion].istate,
+			     ion[augerion[nauger - 1].nion_target].z,
+			     ion[augerion[nauger - 1].nion_target].istate);
+			}
+		    }
+		  else
+		    {
+		      Error
+			("Get_atomic_data: NAUGER is filled up! Ignoring input data %d.\n",
+			 nauger);
+		    }
+		  break;
+*/
 
 
-Macro Atoms (SS)
-===========
-
-For the macro atom method the lines are input in the following format:
-
-
-#
-# z = element, ion= ionstage, f = osc. str., gl(gu) = stat. we. lower(upper) level
-# el(eu) = energy lower(upper) level (eV), ll(lu) = lvl index lower(upper) level
-#          z ion lambda      f         gl  gu    el          eu          ll   lu
-LinMacro  1  1 1215.671021  0.416200   2   8     0.000000    10.200143    1    2
-LinMacro  1  1 1025.722046  0.079100   2  18     0.000000    12.089062    1    3
-LinMacro  1  1  972.540000  0.028990   2  32     0.000000    12.755342    1    4
-LinMacro  1  1 6562.800000  0.640700   8  18    10.200143    12.089062    2    3
-LinMacro  1  1 4861.320000  0.119300   8  32    10.200143    12.755342    2    4
-LinMacro  1  1 18751.00000  0.842100  18  32    12.089062    12.755342    3    4
-#
-
-Details:
-
-Col
-
-2    Atomic Number
-3    Ionisation stage (astronomical convention)
-4    Wavelength of transition (AA)
-5    oscillator strength
-6    stat. weight for lower level of transition
-7    stat. weight for upper level of transition
-8    energy of lower level of transition (eV)
-9    energy of upper level of transition (eV)
-10   index for lower level of transition (MUST match the index assigned to this level in
-     level data
-11   index for upper level of transition (MUST match the index assigned to this level in
-     level data
-
-  04dec ksl -- I have modified the next section to try to conform to the "philosophy" of
-  get_atomic_data which is that one does not need to modify the more detailed files, e.g
-  the LinMacro file, if one has eliminated a particular level in the elements ion file.  
-  Basically this was accomplished by checking both the upper and lower level and breaking 
-  out if either was not accounted for.
+/**
+ * @section Lines
+ *
+ * here are various types of line files which get_atomicdata must parse
+ * This is the original format
+ *
+ * @verbatim
+ * Line 1 1 1215.673584 0.139000  2  2
+ * Line 1 1 1215.668213 0.277000  2  4
+ * @endverbatim
+ *
+ * This is the first format developed for including excited state lines.  It adds the energy of the lower
+ * and upper level
+ *
+ * @verbatim
+ * Line  6  3 1174.933000    0.115845   3   5    6.496462   17.050273
+ * Line  6  3 1175.263000    0.282488   1   3    6.493525   17.044369
+ * Line  6  3 1175.590000    0.069804   3   3    6.496462   17.044369
+ * @endverbatim
+ *
+ * Finally there is a new format developed to link lines to configurations.
+ *
+ * @verbatim
+ * Line  1  1 1215.673584  0.139000   2   2     0.000000    10.200121    0    1
+ * Line  1  1 1215.668213  0.277000   2   4     0.000000    10.200166    0    2
+ * @endverbatim
+ *
+ *
+ * ### Macro Atoms (SS)
+ *
+ * For the macro atom method the lines are input in the following format:
+ *
+ *
+ * @verbatim
+ * # z = element, ion= ionstage, f = osc. str., gl(gu) = stat. we. lower(upper) level
+ * # el(eu) = energy lower(upper) level (eV), ll(lu) = lvl index lower(upper) level
+ * #          z ion lambda      f         gl  gu    el          eu          ll   lu
+ * LinMacro  1  1 1215.671021  0.416200   2   8     0.000000    10.200143    1    2
+ * LinMacro  1  1 1025.722046  0.079100   2  18     0.000000    12.089062    1    3
+ * LinMacro  1  1  972.540000  0.028990   2  32     0.000000    12.755342    1    4
+ * LinMacro  1  1 6562.800000  0.640700   8  18    10.200143    12.089062    2    3
+ * LinMacro  1  1 4861.320000  0.119300   8  32    10.200143    12.755342    2    4
+ * LinMacro  1  1 18751.00000  0.842100  18  32    12.089062    12.755342    3    4
+ * @endverbatim
+ *
+ * Details:
+ *
+ * | Col | Description
+ * | --- | -----------
+ * | 2   | Atomic Number
+ * | 3   | Ionisation stage (astronomical convention)
+ * | 4   | Wavelength of transition (AA)
+ * | 5   | oscillator strength
+ * | 6   | stat. weight for lower level of transition
+ * | 7   | stat. weight for upper level of transition
+ * | 8   | energy of lower level of transition (eV)
+ * | 9   | energy of upper level of transition (eV)
+ * | 10  | index for lower level of transition (MUST match the index assigned to this level in level data
+ * | 11  | index for upper level of transition (MUST match the index assigned to this level in level data
+ *
+ *   04dec ksl -- I have modified the next section to try to conform to the "philosophy" of
+ *   get_atomic_data which is that one does not need to modify the more detailed files, e.g
+ *   the LinMacro file, if one has eliminated a particular level in the elements ion file.
+ *   Basically this was accomplished by checking both the upper and lower level and breaking
+ *   out if either was not accounted for.
 */
         case 'r':
           if (strncmp (word, "LinMacro", 8) == 0)
@@ -1861,7 +1816,7 @@ Col
             if (nwords == 6)
             {
               el = 0.0;
-              eu = H * C / (freq * 1e-8);       // Convert Angstroms to ergs
+              eu = PLANCK * VLIGHT / (freq * 1e-8);     // Convert Angstroms to ergs
               levl = -1;
               levu = -1;
 
@@ -1901,12 +1856,13 @@ Col
               }
               //
               //define macro atom case (SS)
-/* ?? 04 April ksl -- Right now have enforced a clean separation between macro-ions and simple-ions
+/* XXXX  04 April ksl -- Right now have enforced a clean separation between macro-ions and simple-ions
 but this is proably not what we want if we move all bf & fb transitions to macro-ion approach.  We
 would like to have simple lines for macro-ions */
               if (ion[n].macro_info == 1 && mflag == -1)
               {
-                Error ("Get_atomic_data: Simple line data ignored for Macro-ion: %d\n", n);
+                /* count how many times this happens to report to user */
+                simple_line_ignore[n] += 1;
                 break;
               }
 
@@ -1918,7 +1874,7 @@ would like to have simple lines for macro-ions */
               line[nlines].nion = n;
               line[nlines].z = z;
               line[nlines].istate = istate;
-              line[nlines].freq = C / (freq * 1e-8);    /* convert Angstroms to frequency */
+              line[nlines].freq = VLIGHT / (freq * 1e-8);       /* convert Angstroms to frequency */
               line[nlines].f = f;
               line[nlines].gl = gl;
               line[nlines].gu = gu;
@@ -1928,6 +1884,7 @@ would like to have simple lines for macro-ions */
               line[nlines].eu = eu;
               line[nlines].nconfigl = nconfigl;
               line[nlines].nconfigu = nconfigu;
+              line[nlines].coll_index = -999;   //Tokick off with we assume there is no collisional strength data
               if (mflag == -1)
               {
                 line[nlines].macro_info = 0;    // It's an old-style line`
@@ -1948,8 +1905,8 @@ would like to have simple lines for macro-ions */
           }
           break;
 
-
-// Ground state fractions
+/** @section Ground state fractions
+ */
         case 'f':
           if (sscanf
               (aline,
@@ -1983,35 +1940,25 @@ would like to have simple lines for macro-ions */
           break;
 
 
-// Collision strengths --- Not currently used
-        case 'x':              /*The line contains collision strength information--Gaetz & Salpeter */
-          if (sscanf (aline, "%*s %*s %d %d %le %le %le %le %le", &z, &istate, &exx, &lambda, &alpha, &beta, &tm) != 7)
-          {
-            Error ("get_atomic_data: file %s line %d: Collision strengths incorrectly formatted\n", file, lineno);
-            Error ("Get_atomic_data: %s\n", aline);
-            exit (0);
-          }
-          for (n = 0; n < nions; n++)
-          {
-            if (ion[n].z == z && ion[n].istate == istate)
-            {                   /* Then there is a match */
-              xcol[nxcol].nion = n;
-              xcol[nxcol].z = z;
-              xcol[nxcol].istate = istate;
-              xcol[nxcol].ex = exx * EV2ERGS;
-              xcol[nxcol].freq = C / (lambda * 1.e-8);
-              xcol[nxcol].alpha = alpha;
-              xcol[nxcol].beta = beta;
-              xcol[nxcol].tm = pow (10., tm);
-              nxcol++;
-            }
-          }
 
-          break;
-
-
-
-
+/** @section Dielectronic Recombination - type 1
+ * This section reads in dielectronic recombination rates.
+ * The data comes from Chianti, and there are two types of dielectronic data.
+ * This is type 1 - which has fis decribed by Arnaud & Raymond (1992)
+ * There are two fitting parameters, E and C which represent different
+ * degrees in the fit - one sums over a set of parameters.
+ *
+ * A typical ion data would look like this
+ *
+ *
+ @verbatim
+ * DR_BADNL E 2 2 4.5560e+05 5.5520e+05 8.9820e+05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00
+ * DR_BADNL C 2 2 5.9660e-04 1.6130e-04 -2.2230e-05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00
+ @endverbatim
+ *
+ * where there are two lines for a given ion - this is for helium (z=2) 2 (istate=2)
+ *
+ */
 
         case 'D':              /* Dielectronic recombination data read in. */
           nparam = sscanf (aline, "%*s %s %d %d %le %le %le %le %le %le %le %le %le", &drflag, &z, &ne, &drp[0], &drp[1], &drp[2], &drp[3], &drp[4], &drp[5], &drp[6], &drp[7], &drp[8]);       //split and assign the line
@@ -2024,7 +1971,6 @@ would like to have simple lines for macro-ions */
           }
 
           istate = ne;          //         get the ionisation state we are recombining from
-//                istate--;     //    we will associate the rate with the ion we are recombining to
 
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
@@ -2034,13 +1980,13 @@ would like to have simple lines for macro-ions */
               {
                 drecomb[ndrecomb].nion = n;     //put the ion number into the DR structure
                 drecomb[ndrecomb].nparam = nparam;      //Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
-                ion[n].nxdrecomb = ndrecomb;    //put the number of the DR into the ion                            
+                ion[n].nxdrecomb = ndrecomb;    //put the number of the DR into the ion
                 drecomb[ndrecomb].type = DRTYPE_BADNELL;        //define the type of data
                 ndrecomb++;     //increment the counter of number of dielectronic recombination parameter sets
                 ion[n].drflag++;        //increment the flag by 1. We will do this rather than simply setting it to 1 so we will get errors if we do this more than once....
 
               }
-              if (drflag == 'E')        // this ion has no parameters, so it must be the first time through        
+              if (drflag == 'E')        // this ion has no parameters, so it must be the first time through
               {
 
                 n1 = ion[n].nxdrecomb;  //     Get the pointer to the correct bit of the recombination coefficient array. This should already be set from the first time through
@@ -2066,6 +2012,24 @@ would like to have simple lines for macro-ions */
 
           break;
 
+/** @section Dielectronic Recombination - type 2
+ * This section reads in type 2 dielectronic recombination rates.
+ * The data comes from Chianti, and there are two types of dielectronic data.
+ * This is type 2 - which has a fit decribed by Shull & van Steenberg (1982)
+ * There are four fitting parameters.
+ * A typical ion data would look like this
+ *
+ *
+ @verbatim
+ * DR_SHULL 17 2 2.6510e-03 2.9300e-02 2.4120e+05 4.9410e+05
+ @endverbatim
+ *
+ * where there are two lines for a given ion - this is for z=17 (istate=2)
+ *
+ */
+
+
+
         case 'S':
           nparam = sscanf (aline, "%*s %d %d %le %le %le %le ", &z, &ne, &drp[0], &drp[1], &drp[2], &drp[3]);   //split and assign the line
           nparam -= 2;          //take 4 off the nparam to give the number of actual parameters
@@ -2077,7 +2041,6 @@ would like to have simple lines for macro-ions */
           }
 
           istate = ne;          //         get the ionisation state we are recombining from
-//                istate--;     //    we will associate the rate with the ion we are recombining to
 
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
@@ -2087,7 +2050,7 @@ would like to have simple lines for macro-ions */
               {
                 drecomb[ndrecomb].nion = n;     //put the ion number into the DR structure
                 drecomb[ndrecomb].nparam = nparam;      //Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
-                ion[n].nxdrecomb = ndrecomb;    //put the number of the DR into the ion                            
+                ion[n].nxdrecomb = ndrecomb;    //put the number of the DR into the ion
                 drecomb[ndrecomb].type = DRTYPE_SHULL;  //define the type of data
                 ndrecomb++;     //increment the counter of number of dielectronic recombination parameter sets
                 ion[n].drflag++;        //increment the flag by 1. We will do this rather than simply setting it to 1 so we will get errors if we do this more than once....
@@ -2102,58 +2065,26 @@ would like to have simple lines for macro-ions */
           }
           break;
 
-
-
-/* Parametrised partition function data read in. At the moment, the data we are using comes from Cardona et al (2010). The file currently used(paert_cardona.dat) is saved from the internet, with a couple of changes. The word CPART is prepended to each line of data, and any comment lines are prepended with an #. This is the general format:
-
-CPART   1       0       150991.49       278     2
-CPART   2       0       278302.52       556     4
-CPART   2       1       604233.37       278     2
-CPART   3       0       52534.09        124     2
-CPART   3       1       839918.28       299     4
-CPART   3       2       1359687.21      278     2
-CPART   4       0       96994.39        318     7
-CPART   4       1       183127.29       250     2
-
-the first number is the element number, then the ion, then the three parameters */
-
-
-        case 'P':              /* Partition function data */
-          if (sscanf (aline, "%*s %d %d %le %d %d ", &z, &J, &part_eps, &part_G, &part_m) != 5)
-          {
-            Error ("Something wrong with cardona partition function data\n", file, lineno);     /*Standard error state */
-            Error ("Get_atomic_data: %s\n", aline);
-            exit (0);
-          }
-          istate = J + 1;       //
-          for (n = 0; n < nions; n++)
-          {
-            if (ion[n].z == z && ion[n].istate == istate)
-            {                   /* Then there is a match */
-              cpart[ncpart].nion = n;
-              cpart[ncpart].part_eps = part_eps;        //Mean energy term
-              cpart[ncpart].part_G = part_G;    //Mean multiplicity term
-              cpart[ncpart].part_m = part_m;
-              ion[n].cpartflag = 1;     //Set the flag to say we have data for this ion
-              ion[n].nxcpart = ncpart;  //Set the pointer
-              ncpart++;         //increment the pointer
-
-            }
-          }
-          break;
-
-/*!RR RATE COEFFICIENT FITS (C)20110412 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
-!This is total radiative rate into all possible states or the recombined ion.
-!This data was downloaded from http://amdpp.phys.strath.ac.uk/tamoc/DATA/RR/ on 13/July/2013
-!It is described in http://adsabs.harvard.edu/abs/2006ApJS..167..334B
-!Only modification to original file is to insert the BAD_T_RR label to the front of each line and comments
-!There are metastable levels in here, M=1 means we are recombining from the ground state, which is what we tend to want.
-!  Z  N  M  W      A        B        T0         T1        C        T2
-BAD_T_RR  1  0  1  1  8.318E-11  0.7472  2.965E+00  7.001E+05
-BAD_T_RR  2  0  1  1  1.818E-10  0.7492  1.017E+01  2.786E+06
-BAD_T_RR  3  0  1  1  2.867E-10  0.7493  2.108E+01  6.268E+06
-BAD_T_RR  4  0  1  1  3.375E-10  0.7475  4.628E+01  1.121E+07
-BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
+/**
+ * @section total radiative Recombination rates from Chianti - type 1 and 2
+ * !RR RATE COEFFICIENT FITS (C)20110412 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
+ * !This is total radiative rate into all possible states or the recombined ion.
+ * !This data was downloaded from http://amdpp.phys.strath.ac.uk/tamoc/DATA/RR/ on 13/July/2013
+ * !It is described in http://adsabs.harvard.edu/abs/2006ApJS..167..334B
+ * !Only modification to original file is to insert the BAD_T_RR label to the front of each line and comments
+ * !There are metastable levels in here, M=1 means we are recombining from the ground state, which is what we tend to want.
+ * Some of these have one four parameters, a fit introduced by Verner & Ferland (1996) and
+ * some have six, which is from Gu (2003). A four parameter data type is shown below
+ *
+ * @verbatim
+ * !  Z  N  M  W      A        B        T0         T1        C        T2
+ * BAD_T_RR  1  0  1  1  8.318E-11  0.7472  2.965E+00  7.001E+05
+ * BAD_T_RR  2  0  1  1  1.818E-10  0.7492  1.017E+01  2.786E+06
+ * BAD_T_RR  3  0  1  1  2.867E-10  0.7493  2.108E+01  6.268E+06
+ * BAD_T_RR  4  0  1  1  3.375E-10  0.7475  4.628E+01  1.121E+07
+ * BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07
+ * @endverbatim
+ * */
 
         case 'T':              /*Badnell type total raditive rate coefficients read in */
 
@@ -2167,12 +2098,11 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }
 
           istate = ne;          //         get the traditional ionisation state
-//                istate--;     //    we will associate the rate with the ion we are recombining to
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
             if (ion[n].z == z && ion[n].istate == istate)       // this works out which ion we are dealing with
             {
-              if (ion[n].total_rrflag == 0)     // this ion has no parameters, so it must be the first time through        
+              if (ion[n].total_rrflag == 0)     // this ion has no parameters, so it must be the first time through
               {
                 total_rr[n_total_rr].nion = n;  //put the ion number into the bad_t_rr structure
                 ion[n].nxtotalrr = n_total_rr;  /*put the number of the bad_t_rr into the ion
@@ -2203,6 +2133,23 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 
           break;
 
+/**
+ * @section Total radiative recombination - type 3
+ * These are some rare ion recombination rates that have
+ * a two parameter fit by Aldrovandi & Pequignot (1973)
+ * They have data like
+ * @verbatim
+ * RR_SHULL 22 2 1.0965e-11 6.9901e-01
+ * RR_SHULL 22 3 1.8600e-11 7.2800e-01
+ * @endverbatim
+ *
+ * For erroneous historical reasons they are referred to as SHULL
+ *
+ */
+
+
+
+
         case 's':
           nparam = sscanf (aline, "%*s %d %d %le %le ", &z, &ne, &btrr[0], &btrr[1]);   //split and assign the line
           nparam -= 2;          //take 4 off the nparam to give the number of actual parameters
@@ -2214,12 +2161,11 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }
 
           istate = ne;          //         get the traditional ionisation state
-//                istate--;     //    we will associate the rate with the ion we are recombining to
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
             if (ion[n].z == z && ion[n].istate == istate)       // this works out which ion we are dealing with
             {
-              if (ion[n].total_rrflag == 0)     // this ion has no parameters, so it must be the first time through        
+              if (ion[n].total_rrflag == 0)     // this ion has no parameters, so it must be the first time through
               {
                 total_rr[n_total_rr].nion = n;  //put the ion number into the bad_t_rr structure
                 ion[n].nxtotalrr = n_total_rr;  /*put the number of the bad_t_rr into the ion
@@ -2248,7 +2194,23 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           break;
 
 
+/**
+ * @section Ground state recombination rate data
+ * !RR RATE COEFFICIENT FITS (C)20110412 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
+ * !This is resolved radiative rate from ground state to ground state.
+ * !This data was downloaded from http://amdpp.phys.strath.ac.uk/tamoc/DATA/RR/ on 13/July/2013
+ * !It is described in http://adsabs.harvard.edu/abs/2006ApJS..167..334B
+ * !THe data comes as one file for each ion, with many rates. This file contains the first rate line in each file
+ * ! which should relate to the ground state of the upper ion recombining into the ground state of the recombined ion.
+ * !The data is tabulated in temperature, first line for each ion is temp, second is rate.
+ * !As with other Badnell data, first number is z, second is number of remianing electrons.
+ *
+ * @verbatim
+ * BAD_GS_RR T 1 0 1.00E+01 2.00E+01 5.00E+01 1.00E+02 2.00E+02 5.00E+02 1.00E+03 2.00E+03 5.00E+03 1.00E+04 2.00E+04 5.00E+04 1.00E+05 2.00E+05 5.00E+05 1.00E+06 2.00E+06 5.00E+06 1.00E+07
+ * BAD_GS_RR R 1 0 5.21E-12 3.68E-12 2.33E-12 1.65E-12 1.16E-12 7.35E-13 5.18E-13 3.65E-13 2.28E-13 1.58E-13 1.08E-13 6.21E-14 3.88E-14 2.28E-14 1.01E-14 5.05E-15 2.36E-15 7.90E-16 3.27E-16
+ * @endverbatim
 
+ */
 
         case 'G':
           nparam = sscanf (aline, "%*s %s %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &gsflag, &z, &ne, &gstemp[0], &gstemp[1], &gstemp[2], &gstemp[3], &gstemp[4], &gstemp[5], &gstemp[6], &gstemp[7], &gstemp[8], &gstemp[9], &gstemp[10], &gstemp[11], &gstemp[12], &gstemp[13], &gstemp[14], &gstemp[15], &gstemp[16], &gstemp[17], &gstemp[18]);   //split and assign the line
@@ -2260,7 +2222,6 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
             exit (0);
           }
           istate = z - ne + 1;  //         get the traditional ionisation state
-//                istate--;     //    we will associate the rate with the ion we are recombining to
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
             if (ion[n].z == z && ion[n].istate == istate)       // this works out which ion we are dealing with
@@ -2329,12 +2290,28 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }                     //end of loop over ions
 
           break;
-/* NSH 120921 The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchanged 
- * from the data on the website, just with the top few lines commented out, and a label prepended to each line */
 
+/**
+ * @section gaunt factor
+ * The following are lines to read in temperature averaged free-free gaunt factors
+ * from the data of Sutherland (1998). The atomic file is basically unchanged
+ * from the data on the website, just with the top few lines commented out,
+ * and a label prepended to each line
+ * The data is a spline fit to the gaunt factor as a function of g - the reduced
+ * temperature.  The file format is shown below; there are 45 lines
+ * @verbatim
+ * # log(g^2) <gff(g^2)>       s1           s2            s3
+ * # ------------------------------------------------------------
+ * FF_GAUNT -4.00 1.113883E+00  1.348000E-02  1.047100E-02 -1.854972E-03
+ * FF_GAUNT -3.80 1.116983E+00  1.744580E-02  9.358014E-03  5.564917E-03
+ * FF_GAUNT -3.60 1.120891E+00  2.185680E-02  1.269696E-02  4.970250E-03
+ * FF_GAUNT -3.40 1.125810E+00  2.753201E-02  1.567911E-02  6.429140E-03
+* @endverbatim
+
+ */
         case 'g':
           nparam = sscanf (aline, "%*s %le %le %le %le %le", &gsqrdtemp, &gfftemp, &s1temp, &s2temp, &s3temp);  //split and assign the line
-          if (nparam > 5 || nparam < 1) //     trap errors 
+          if (nparam > 5 || nparam < 1) //     trap errors
           {
             Error ("Something wrong with sutherland gaunt data\n");
             Error ("Get_atomic_data: %s\n", aline);
@@ -2359,11 +2336,23 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 
 
           break;
-
+/**
+ * @section direct (collisional) ionization data from Dere 07.
+ * #Title: Ionization rate coefficients for elements H to Zn (Dere+, 2007)
+ * #Table  J_A_A_466_771_table29:
+ * #Title: Spline fits, multiplied by a factor of 10^6^, to the scaled ionization rate coefficients
+ * #Column Z       (I2)    [1/30] Nuclear charge   [ucd=phys.atmol.element]
+ * #Column Ion     (I2)    [1/30] Ion (spectroscopic notation)     [ucd=phys.atmol.ionStage]
+ * #Column Nspl    (I2)    [15/20] Number of splines       [ucd=meta.number]
+ * #Column I       (F9.3)  Ionization potential    [ucd=phys.energy;phys.atmol.ionization]
+ * #Column Tmin    (E10.3) Minimum temperature     [ucd=phys.temperature]
+ * #Column x1-X20      (F7.4)  Scaled temperature 1 (1)        [ucd=phys.temperature]
+ * #Column rho1 -rho20   (F8.4)  ? Scaled rate coefficient 1 (2) [ucd=arith.rate;phys.atmol.collisional]
+ */
         case 'd':
           nparam = sscanf (aline, "%*s %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &nspline, &et, &tmin, &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9], &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19], &temp[20], &temp[21], &temp[22], &temp[23], &temp[24], &temp[25], &temp[26], &temp[27], &temp[28], &temp[29], &temp[30], &temp[31], &temp[32], &temp[33], &temp[34], &temp[35], &temp[36], &temp[37], &temp[38], &temp[39]);     //split and assign the line
 
-          if (nparam != 5 + (nspline * 2))      //     trap errors 
+          if (nparam != 5 + (nspline * 2))      //     trap errors
           {
             Error ("Something wrong with Dere DI data\n");
             Error ("Get_atomic_data: %s\n", aline);
@@ -2397,9 +2386,26 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }
           break;
 
+/**
+ * @section Electron yield - goes with auger ionization rates
+ * #This is electron yield data from Kaastra & Mewe (1993) -1993A&AS...97..443K
+ * #It is processed from data downloaded from http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+AS/97/443
+ * #Via the python script kaastra_2_py.py. Example lines of file below
+ * #
+ * @verbatim
+ * #Label z state n l IP mean_electron_energy Prob_of_1e Prob_of_2e Prob_of_3e ....
+ * Kelecyield 4 1 1 0 1.1500e+02 9.280e+01 0.000e+00 1.000e+04 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00
+ * Kelecyield 5 1 1 0 1.9200e+02 1.639e+02 6.000e+00 9.994e+03 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00
+ * @endverbatim
+
+*/
+
         case 'K':
-          nparam = sscanf (aline, "%*s %d %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &in, &il, &I, &Ea,
-                           &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9]);
+          nparam =
+            sscanf (aline,
+                    "%*s %d %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le",
+                    &z, &istate, &in, &il, &I, &Ea, &temp[0],
+                    &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9]);
           if (nparam != 16)
           {
             Error ("Something wrong with electron yield data\n");
@@ -2428,12 +2434,25 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
+                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i z=%i istate=%i\n", n, z, istate);
               }
             }
           }
           break;
-
+/**
+ * @section Fluorescent photon yield from inner shell ionization - not currently used but read in.
+		  now not read in - see #499
+ * #This is fluorescent yield data from Kaastra & Mewe (1993) -1993A&AS...97..443K
+ * #It is processed from data downloaded from http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+AS/97/443
+ * #Via the python script kaastra_2_py.py.
+ * Data format below
+ * #
+ * @verbatim
+ * #Label z state n l photon_energy yield
+ * Kphotyield 5 1 1 0 1.837e+02 6.000e-04
+ * Kphotyield 5 1 1 0 1.690e+01 7.129e-01
+ * @endverbatim
+ 
         case 'F':
           nparam = sscanf (aline, "%*s %d %d %d %d %le %le ", &z, &istate, &in, &il, &energy, &yield);
           if (nparam != 6)
@@ -2446,9 +2465,9 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           {
             if (inner_cross[n].z == z && inner_cross[n].istate == istate && inner_cross[n].n == in && inner_cross[n].l == il)
             {
-              if (inner_cross[n].n_fluor_yield == -1)   /*This is the first yield data for this vacancy */
+              if (inner_cross[n].n_fluor_yield == -1)   //This is the first yield data for this vacancy 
               {
-                inner_fluor_yield[n_fluor_yield_tot].nion = n;  /*This yield refers to this ion */
+                inner_fluor_yield[n_fluor_yield_tot].nion = n;  //This yield refers to this ion 
                 inner_cross[n].n_fluor_yield = n_fluor_yield_tot;
                 inner_fluor_yield[n_fluor_yield_tot].z = z;
                 inner_fluor_yield[n_fluor_yield_tot].istate = istate;
@@ -2460,9 +2479,120 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
               }
               else
               {
-                Error ("Get_atomic_data: more than one electron yield record for inner_cross %i\n", n);
+                Error ("Get_atomic_data: more than one fluorescent yield record for inner_cross %i\n", n);
               }
             }
+          }
+          break;
+		  */
+
+/**
+ * @section Chianti Collision Strengths
+ * The lines below read in collision strength data from Chianti (after Burgess and Tully). The original
+ *		  is stored in .scups files in chianti. The python script searches for matches to the lines_linked_ver_2.py
+ *		  data file, on the basis of energy and oscillator strength (and z and state). As a rather hamfisted
+ *		  approach, all of the line data is stored on the same line as the collision strength data in
+ *		  the file, so it is possible to make a very accurate match. It does mean quite a lot is read in
+ *		  from a line, but most is thrown away. Currently the code below matches based on z, state, upper and
+ *		  lower level numbers and oscillator strength
+ * Each line is defned with a set of three lines
+ * first line is CSTREN - this contains line data to try and match
+ * Second two lines are collision strength data from Burgess and Tully 1992A&A...254..436B
+ * These are generally 5 pojnt but up to 20 point spline fits of the T vs upsilon data. Typical lines are below
+ * @verbatim
+CSTREN Line  1  1 1215.673584  0.139000   2   2     0.000000    10.200121    0    1       1      3   7.500e-01   2.772e-01   1.478e+00    5    1   1.700e+00
+SCT   0.000e+00   2.500e-01   5.000e-01   7.500e-01   1.000e+00
+SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
+ * @endverbatim
+
+
+
+ *		  */
+
+        case 'C':
+          nparam =
+            (sscanf
+             (aline,
+              "%*s %*s %d %2d %le %le %le %le %le %le %d %d %d %d %le %le %le %d %d %le",
+              &z, &istate, &freq, &f, &gl, &gu, &el, &eu, &levl, &levu, &c_l, &c_u, &en, &gf, &hlt, &np, &type, &sp));
+          if (nparam != 18)
+          {
+            Error ("Get_atomic_data: file %s line %d: Collision strength line incorrectly formatted\n", file, lineno);
+            Error ("Get_atomic_data: %s\n", aline);
+            exit (0);
+          }
+          match = 0;
+          for (n = 0; n < nlines; n++)  //loop over all the lines we have read in - look for a match
+          {
+            if (line[n].z == z && line[n].istate == istate
+                && line[n].levl == levl && line[n].levu == levu && line[n].gl == gl && line[n].gu == gu && line[n].f == f)
+            {
+              if (line[n].coll_index > -1)      //We already have a collision strength record from this line - throw an error and quit
+              {
+                Error ("Get_atomic_data More than one collision strength record for line %i\n", n);
+                exit (0);
+              }
+              match = 1;
+              coll_stren[n_coll_stren].n = n_coll_stren;
+              coll_stren[n_coll_stren].lower = c_l;
+              coll_stren[n_coll_stren].upper = c_u;
+              coll_stren[n_coll_stren].energy = en;
+              coll_stren[n_coll_stren].gf = gf;
+              coll_stren[n_coll_stren].hi_t_lim = hlt;
+              coll_stren[n_coll_stren].n_points = np;
+              coll_stren[n_coll_stren].type = type;
+              coll_stren[n_coll_stren].scaling_param = sp;
+
+              line[n].coll_index = n_coll_stren;        //point the line to its matching collision strength
+
+              //We now read in two lines of fitting data
+              if (fgets (aline, LINELENGTH, fptr) == NULL)
+              {
+                Error ("Get_atomic_data: Problem reading collision strength record\n");
+                Error ("Get_atomic_data: %s\n", aline);
+                exit (0);
+              }
+
+              /* JM 1709 -- increased number of entries read up to max of 20 */
+              nparam =
+                sscanf (aline,
+                        "%*s %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le",
+                        &temp[0], &temp[1], &temp[2], &temp[3],
+                        &temp[4], &temp[5], &temp[6], &temp[7],
+                        &temp[8], &temp[9], &temp[10], &temp[11],
+                        &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19]);
+
+              for (nn = 0; nn < np; nn++)
+              {
+                coll_stren[n_coll_stren].sct[nn] = temp[nn];
+              }
+              if (fgets (aline, LINELENGTH, fptr) == NULL)
+              {
+                Error ("Get_atomic_data: Problem reading collision strength record\n");
+                Error ("Get_atomic_data: %s\n", aline);
+                exit (0);
+              }
+
+              nparam =
+                sscanf (aline,
+                        "%*s %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le",
+                        &temp[0], &temp[1], &temp[2], &temp[3],
+                        &temp[4], &temp[5], &temp[6], &temp[7],
+                        &temp[8], &temp[9], &temp[10], &temp[11],
+                        &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19]);
+
+              for (nn = 0; nn < np; nn++)
+              {
+                coll_stren[n_coll_stren].scups[nn] = temp[nn];
+              }
+              n_coll_stren++;
+            }
+          }
+          if (match == 0)       //Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
+          {
+            fgets (aline, LINELENGTH, fptr);
+            fgets (aline, LINELENGTH, fptr);
+            cstren_no_line++;
           }
           break;
 
@@ -2490,16 +2620,18 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 /* OK now summarize the data that has been read*/
 
   n_elec_yield_tot = 0;         //Reset this numnber, we are now going to use it to check we have yields for all inner shells
-  n_fluor_yield_tot = 0;        //Reset this numnber, we are now going to use it to check we have yields for all inner shells
+//  n_fluor_yield_tot = 0;        //Reset this numnber, we are now going to use it to check we have yields for all inner shells
+  inner_no_e_yield = 0;
 
   for (n = 0; n < n_inner_tot; n++)
   {
     if (inner_cross[n].n_elec_yield != -1)
       n_elec_yield_tot++;
     else
-      Error ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
-    if (inner_cross[n].n_fluor_yield != -1)
-      n_fluor_yield_tot++;
+      inner_no_e_yield++;
+//      Error_silent ("get_atomicdata: No inner electron yield data for inner cross section %i\n", n);
+//    if (inner_cross[n].n_fluor_yield != -1)
+//    n_fluor_yield_tot++;
 
   }
 
@@ -2510,17 +2642,33 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
   Log
     ("Simple  %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
      nelements, nions_simple, nlevels_simple, nlines_simple, ntop_phot_simple);
+  Log ("We have read in %3d photoionization cross sections\n", nphot_total);
+  Log ("                %3d are topbase \n", ntop_phot);
+  Log ("                %3d are VFKY \n", nxphot);
+  Log ("We have read in %5d   Chiantic collision strengths\n", n_coll_stren);   //1701 nsh collision strengths
   Log ("We have read in %3d Inner shell photoionization cross sections\n", n_inner_tot);        //110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("                %3d have matching electron yield data\n", n_elec_yield_tot);
-  Log ("                %3d have matching fluorescent yield data\n", n_fluor_yield_tot);
+//  Log ("                %3d have matching fluorescent yield data\n", n_fluor_yield_tot);
 
   Log ("We have read in %3d Dielectronic recombination coefficients\n", ndrecomb);      //110818 nsh added a reporting line about dielectronic recombination coefficients
-  Log ("We have read in %3d Cardona partition functions coefficients\n", ncpart);
   Log ("We have read in %3d Badnell totl Radiative rate coefficients\n", n_total_rr);
   Log ("We have read in %3d Badnell GS   Radiative rate coefficients over the temp range %e to %e\n", n_bad_gs_rr, gstmin, gstmax);
   Log ("We have read in %3d Scaled electron temperature frequency averaged gaunt factors\n", gaunt_n_gsqrd);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
   Log ("The minimum frequency for inner shell ionization is %8.2e\n", inner_freq_min);
+
+  /* report ignored simple lines for macro-ions */
+  for (n = 0; n < NIONS; n++)
+  {
+    if (simple_line_ignore[n] > 0)
+      Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
+  }
+  /* report ignored collision strengths */
+  if (cstren_no_line > 0)
+    Error ("Ignored %d collision strengths with no matching line transition\n", cstren_no_line);
+  if (inner_no_e_yield > 0)
+    Error ("Ignoring %d inner shell cross sections because no matching yields\n", inner_no_e_yield);
+
 
 
 /* Now begin a series of calculations with the data that has been read in in order
@@ -2539,7 +2687,7 @@ somewhat inexact  because it assumes all elements have equal neutrons and proton
   rho2nh = 1. / q;
 
 
-/* Now find the first and last ion associated with each named element and 
+/* Now find the first and last ion associated with each named element and
 exit if there is an element with no ions */
 
   for (nelem = 0; nelem < nelements; nelem++)
@@ -2547,14 +2695,25 @@ exit if there is an element with no ions */
     n = 0;
     while (ion[n].z != ele[nelem].z && n < nions)
       n++;                      /* Find the first ion of that element for which there is data */
+
     ele[nelem].firstion = n;
+    ion[n].nelem = nelem;
+
+    /* find the highest ion stage and the number of ions */
+    ele[nelem].istate_max = ion[n].istate;
+
     while (ion[n].z == ele[nelem].z && n < nions)
+    {
+      if (ele[nelem].istate_max < ion[n].istate)
+        ele[nelem].istate_max = ion[n].istate;
+      ion[n].nelem = nelem;
       n++;
+    }
     ele[nelem].nions = n - ele[nelem].firstion;
     if (ele[nelem].firstion == nions)
     {
       ele[nelem].firstion = -1; /* There were no ions for this element */
-// In principle, there might be a program which uses elements but not ions, but it seems unlikely, 
+// In principle, there might be a program which uses elements but not ions, but it seems unlikely,
 // therefore stop if there is not at least one ion for each element
       Error ("Get_atomic_data: There were no ions for element %d %s\n", nelem, ele[nelem].name);
       exit (0);
@@ -2566,9 +2725,9 @@ exit if there is an element with no ions */
 a total emission oscillator strength for the level....really ought to be radiative lifefime */
 
 
-/* This next loop is connects levels to configurations for "simple atoms". 
- For Macro Atoms files, the data files already contain this infomration and 
- so the check is avoided by checking tte macro_info flag SS 
+/* This next loop is connects levels to configurations for "simple atoms".
+ For Macro Atoms files, the data files already contain this infomration and
+ so the check is avoided by checking tte macro_info flag SS
 */
 
 
@@ -2601,7 +2760,7 @@ a total emission oscillator strength for the level....really ought to be radiati
     }
   }
 
-/* 57h -- Check that all of the macro_info variables are initialized to 1
+/* Check that all of the macro_info variables are initialized to 1
 or zero so that simple checks of true and false can be used for them */
 
   for (n = 0; n < nions; n++)
@@ -2668,7 +2827,7 @@ or zero so that simple checks of true and false can be used for them */
   Log ("get_atomic_data: Evaluation:  The maximum value bf jumps is %d while %d are currently allowed\n", bb_max, NBBJUMPS);
 
 /* Now, write the data to a file so you can check it later if you wish */
-/* JM 1411 -- this is now controlled by one of the -d flag modes, defined in atomic.h */
+/* this is controlled by one of the -d flag modes, defined in atomic.h */
   if (write_atomicdata)
   {
 
@@ -2708,8 +2867,8 @@ or zero so that simple checks of true and false can be used for them */
     fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
     for (n = 0; n < ntop_phot + nxphot; n++)
     {
-      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n", n,
-               phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
+      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n",
+               n, phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
     }
 
     /* Write the resonance line data to the file */
@@ -2729,17 +2888,6 @@ or zero so that simple checks of true and false can be used for them */
       fprintf (fptr, "%3d %3d %6.3f %6.3f\n", ground_frac[n].z, ground_frac[n].istate, ground_frac[n].frac[0], ground_frac[n].frac[19]);
     }
 
-    /* Write the collisions strengths to the file */
-
-    fprintf (fptr, "Collision strengths: There were %d collision strengths\n", nxcol);
-
-    for (n = 0; n < nxcol; n++)
-    {
-      fprintf (fptr,
-               "nion %d z,i %d %d freq %8.2e alpha %8.2e beta %8.2e tmax %8.2e\n",
-               xcol[n].nion, xcol[n].z, xcol[n].istate, xcol[n].freq, xcol[n].alpha, xcol[n].beta, xcol[n].tm);
-    }
-
     fclose (fptr);
   }                             // end of if statement based on modes.write_atomicdata
 
@@ -2751,16 +2899,6 @@ or zero so that simple checks of true and false can be used for them */
 
   /* Index the lines */
   index_lines ();
-
-  /* Index the collisions */
-  index_collisions ();
-
-/* Index the verner photionization structure by threshold frequecy -- 57h -- 06jul ksl */
-//   if (nxphot > 0)
-//      {
-//     /index_phot_verner ();
-// tabulate_verner(); //Create a tabulated version of the data
-//      }
 
 /* Index the topbase photoionization structure by threshold freqeuncy */
   if (ntop_phot + nxphot > 0)
@@ -2775,34 +2913,20 @@ or zero so that simple checks of true and false can be used for them */
   return (0);
 }
 
-/**************************************************************************
-                    Space Telescope Science Institute
-                                                                                                   
-                                                                                                   
-  Synopsis:
-	The next set of routines index_... simply provide ways to created pointer
-arrays that are ordered a useful frequency order.  
-                                                                                                   
-  Description:
-                                                                                                   
-  Arguments:  
-                                                                                                   
-                                                                                                   
-  Returns:
-                                                                                                   
-  Notes:
-	All use a Numerical recipes routine indexx for this 
-                                                                                                   
-  History:
-                                                                                                   
- ************************************************************************/
 
 
-/* index_lines sorts the lines into frequency order
-   History:
-   97aug27	ksl	Modified to allocate space for freqs and index since MAC
-			compiler does not allocate a very large stack.
- */
+/**********************************************************/
+/**
+ * @brief      sort the lines into frequency order
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ * All use a Numerical recipes routine indexx for this
+ *
+ **********************************************************/
 
 int
 index_lines ()
@@ -2818,16 +2942,16 @@ index_lines ()
 
   freqs[0] = 0;
   for (n = 0; n < nlines; n++)
-    freqs[n + 1] = line[n].freq;        /* So filled matrix 
+    freqs[n + 1] = line[n].freq;        /* So filled matrix
                                            elements run from 1 to nlines */
 
-  indexx (nlines, freqs, index);        /* Note that this math recipes routine 
+  indexx (nlines, freqs, index);        /* Note that this math recipes routine
                                            expects arrays to run from 1 to nlines inclusive */
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   /* SS - adding quantity "where_in_list" to line structure so that it is easy to from emission
@@ -2847,11 +2971,24 @@ index_lines ()
   return (0);
 }
 
-/* Index the topbase photoionzation crossections by frequency
 
-	01oct	ksl	Adapted from index_lines as part to topbase 
-			addition to python 
-*/
+/**********************************************************/
+/**
+ * @brief      Index the topbase photoionzation crossections by frequency
+ *
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * The results are stored in phot_top_ptr
+ *
+ * ### Notes ###
+ * Adapted from index_lines as part to topbase
+ *             addition to python
+ *
+ **********************************************************/
+
 int
 index_phot_top ()
 {
@@ -2866,16 +3003,16 @@ index_phot_top ()
 
   freqs[0] = 0;
   for (n = 0; n < ntop_phot + nxphot; n++)
-    freqs[n + 1] = phot_top[n].freq[0]; /* So filled matrix 
+    freqs[n + 1] = phot_top[n].freq[0]; /* So filled matrix
                                            elements run from 1 to ntop_phot */
 
-  indexx (ntop_phot + nxphot, freqs, index);    /* Note that this math recipes routine 
+  indexx (ntop_phot + nxphot, freqs, index);    /* Note that this math recipes routine
                                                    expects arrays to run from 1 to nlines inclusive */
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   for (n = 0; n < ntop_phot + nxphot; n++)
@@ -2891,6 +3028,21 @@ index_phot_top ()
 
 }
 
+
+/**********************************************************/
+/**
+ * @brief      Index inner shell xsections in frequency order
+ *
+ * @return     Alwasy returns 0
+ *
+ * @details
+ * The rusults are stored in inner_cross_ptr
+ *
+ * ### Notes ###
+ * ??? NOTES ???
+ *
+ **********************************************************/
+
 int
 index_inner_cross ()
 {
@@ -2905,16 +3057,16 @@ index_inner_cross ()
 
   freqs[0] = 0;
   for (n = 0; n < n_inner_tot; n++)
-    freqs[n + 1] = inner_cross[n].freq[0];      /* So filled matrix 
+    freqs[n + 1] = inner_cross[n].freq[0];      /* So filled matrix
                                                    elements run from 1 to ntop_phot */
 
-  indexx (n_inner_tot, freqs, index);   /* Note that this math recipes routine 
+  indexx (n_inner_tot, freqs, index);   /* Note that this math recipes routine
                                            expects arrays to run from 1 to nlines inclusive */
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   for (n = 0; n < n_inner_tot; n++)
@@ -2931,58 +3083,26 @@ index_inner_cross ()
 }
 
 
-
-/* index_xcol sorts the collisional lines into frequency order
-   History:
-	98mar8	ksl	Copied and adapted from index lines.  Note that it is possible
-			that one could accomplish this in a more generic fashion
-
- */
-
-int
-index_collisions ()
-{
-  float *freqs, foo;
-  int *index, ioo;
-  int n;
-  void indexx ();
-
-  /* Allocate memory for some modestly large arrays */
-  freqs = calloc (sizeof (foo), NTRANS + 2);
-  index = calloc (sizeof (ioo), NTRANS + 2);
-
-  freqs[0] = 0;
-  for (n = 0; n < nxcol; n++)
-    freqs[n + 1] = xcol[n].freq;        /* So filled matrix 
-                                           elements run from 1 to ntrans */
-
-  if (nxcol > 0)                //if statement added (SS, feb 04)
-  {
-    indexx (nxcol, freqs, index);       /* Note that this math recipes routine 
-                                           expects arrays to run from 1 to nlines inclusive */
-  }
-
-
-  /* The for loop indices are complicated by the numerical recipes routine, 
-     which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
-     pointer array is only filled from elements 0 to nlines -1 */
-
-  for (n = 0; n < nxcol; n++)
-  {
-    xcol_ptr[n] = &xcol[index[n + 1] - 1];
-  }
-
-  /* Free the memory for the arrays */
-  free (freqs);
-  free (index);
-
-  return (0);
-}
-
-
 /* Numerical recipes routine used by index_lines which in turn is used by get_atomic_data */
+
+
+/**********************************************************/
+/**
+ * @brief      Numerical recipes routine used by various routines to sort the atomic data
+ *
+ * @param [in] int  n   The dimension of the array that needs sorting
+ * @param [in] float  arrin[]   The array to sort
+ * @param [out] int  indx[]   The array that contains poionters to the sorted array
+ * @return     N/A
+ *
+ * @details
+ *
+ * ### Notes ###
+ * See nuerical recipes
+ *
+ * @bug Should probably replaces this with the equivalent gsl routine
+ *
+ **********************************************************/
 
 void
 indexx (n, arrin, indx)
@@ -2995,6 +3115,8 @@ indexx (n, arrin, indx)
   if (n < 2)
   {
     Log_silent ("Nothing for indexx to do! Only one element\n");
+    indx[0] = 0;
+    indx[1] = 1;                /* NSH 1707 - We still need to populate the array */
     return;
   }
 
@@ -3034,53 +3156,48 @@ indexx (n, arrin, indx)
   }
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h  
-	which can be used to limit the lines searched for resonances to a specific 
-	frequency range.
-   
-Arguments:		
-	double freqmin, freqmax  a range of frequencies in which one is interested in the lines
-
-Returns:
-	limit_lines returns the number of lines that are potentially in resonance.  If limit_lines 
-	returns 0 there are no lines of interest and one does not need to worry about any 
-	resonaces at this frequency.  If limit_lines returns a number greater than 0, then 
-	the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
-	nline_delt is also set which is the number of lines that are in the specified range
-
-Description:	
-	limit_lines  define the lines that are close to a given frequency.  The degree of closeness
-	is defined by v. The routine must be used in conjuction with get_atomic_data which 
-	will have created an ordered list of the lines.   
-Notes:
-	Limit_lines needs to be used somewhat carefully.  Carefully means checking the
-	return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
-	were no lines in the region of interest.  Assuming there were lines in thte range,
-	one must sum over lines from nline_min to nline_max inclusive.  
-	
-	One might wonder why nline_max is not set to one larger than the last line which
-	is in range.  This is because depending on how the velocity is trending you may
-	want to sum from the highest frequency line to the lowest.
-
-?? It is unclear to me whether given that limit lines is very similar 
-from call to call
-that it would not be more efficeint to expand from previous 
-limits rather than adopt the approach hre 02may
-
-History:
- 	97jan      ksl	Coded and debugged as part of Python effort.  
- 	98apr4	ksl	Modified inputs so one gives freqmin and freqmax directly
-	01nov	ksl	Rewritten to handle large numbers of lines more
-			efficiently
-
-**************************************************************/
 
 
 
+/**********************************************************/
+/**
+ * @brief      uses freqmin and freqmax to set limits on which lines in the
+ * frequency ordered list of lines need to be
+ * considered when, for example,  calculating which lines have Sobolev surfaces
+ * along a path. 
+ *
+ *
+ * @param [in] double  freqmin   The minimum frequency we are interested in
+ * @param [in] double  freqmax   The maximum frequency we are interested in
+ * @return     the number of lines that are potentially in resonance.
+ *
+ * limit_lines sets the external variables nline_min and nline_max for use with
+ * other routines
+ *
+ *
+ * If limit_lines
+ * 	returns 0 there are no lines of interest and one does not need to worry about any
+ * 	resonances at this frequency.  If limit_lines returns a number greater than 0, then
+ * 	the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
+ * 	nline_delt is also set which is the number of lines that are in the specified range
+ *
+ * @details
+ * limit_lines  define the lines that are close to a given frequency.  The degree of closeness
+ * 	is defined by v. The routine must be used in conjuction with get_atomic_data which
+ * 	will have created an ordered list of the lines.
+ *
+ * ### Notes ###
+ * Limit_lines needs to be used somewhat carefully.  Carefully means checking the
+ * 	return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
+ * 	were no lines in the region of interest.  Assuming there were lines in thte range,
+ * 	one must sum over lines from nline_min to nline_max inclusive.
+ *
+ * 	One might wonder why nline_max is not set to one larger than the last line which
+ * 	is in range.  This is because depending on how the velocity is trending you may
+ * 	want to sum from the highest frequency line to the lowest.
+ *
+ *
+ **********************************************************/
 
 int
 limit_lines (freqmin, freqmax)
@@ -3137,8 +3254,22 @@ limit_lines (freqmin, freqmax)
 }
 
 
-/* check_xsections is  a routine which checks xsections are ok.
-   Only prints out each xsection with verbosity > 4 as uses Debug function */
+
+
+/**********************************************************/
+/**
+ * @brief      Perform sanity checks on xsection data
+ *
+ * @return     Alway returns 0; errors are written to the log file
+ *
+ * @details
+ * Results are written to the log file
+ *
+ * ### Notes ###
+ *
+ * @bug  A careful look at this routine is warranted as get_atomic_data has changed over the years.
+ *
+ **********************************************************/
 
 int
 check_xsections ()
@@ -3149,9 +3280,9 @@ check_xsections ()
   {
     nion = phot_top[n].nion;
     if (ion[nion].phot_info == 1)
-      Debug ("Topbase Ion %i Z %i istate %i nground %i ilv %i ntop %i f0 %8.4e IP %8.4e\n",
-             nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, phot_top[n].nlev, ion[nion].ntop, phot_top[n].freq[0],
-             ion[nion].ip);
+      Debug
+        ("Topbase Ion %i Z %i istate %i nground %i ilv %i ntop %i f0 %8.4e IP %8.4e\n",
+         nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, phot_top[n].nlev, ion[nion].ntop, phot_top[n].freq[0], ion[nion].ip);
     else if (ion[nion].phot_info == 0)
       Debug ("Vfky Ion %i Z %i istate %i nground %i f0 %8.4e IP %8.4e\n",
              nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[n].freq[0], ion[nion].ip);
@@ -3159,17 +3290,464 @@ check_xsections ()
     /* some simple checks -- could be made more robust */
     if (ion[nion].n_lte_max == 0 && ion[nion].phot_info == 1)
     {
-      Error ("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
-             nion, ion[nion].z, ion[nion].istate);
-      //exit(0);
+      Error
+        ("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
+         nion, ion[nion].z, ion[nion].istate);
     }
     if (ion[nion].phot_info != 1 && ion[nion].macro_info)
     {
-      Error ("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
-             nion, ion[nion].z, ion[nion].istate);
-      //exit(0);
+      Error
+        ("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
+         nion, ion[nion].z, ion[nion].istate);
+    }
+
+    if (ion[nion].macro_info != phot_top[n].macro_info)
+    {
+      Error ("Macro info for ion doesn't match with xsection!! Could be serious.\n");
     }
   }
 
   return 0;
+}
+
+
+
+
+/*
+
+   q21 calculates and returns the collisional de-excitation coefficient q21
+
+   Notes:  This uses a simple approximation for the effective_collision_strength omega.
+   ?? I am not sure where this came from at present and am indeed no sure that
+   omega is omega(2->1) as it should be.  This should be carefully checked.??
+   This has no been improved, and wherever possible we use tabulated collision
+   stength data from Chianti (after Burgess and Tully 1992)
+
+   c21=n_e * q21
+   q12 = g_2/g_1 q21 exp(-h nu / kT )
+
+   History:
+   98aug        ksl     Recoded from other routines so that one always calculates q21 in
+			the same way.
+	01nov	ksl	Add tracking mechanism so if called with same conditions it
+			returns without recalculation
+	12oct	nsh	Added, then commented out approximate gaunt factor given in
+			hazy 2.
+	17jan	nsh Added code to use the actual collision strength date from chianti
+
+ */
+
+
+/// (8*PI)/(sqrt(3) *nu_1Rydberg
+#define ECS_CONSTANT 4.773691e16
+
+struct lines *q21_line_ptr;
+double q21_a, q21_t_old;
+
+
+/**********************************************************/
+/**
+ * @brief      calculates and returns the collisional de-excitation coefficient q21
+ *
+ * @param [in] struct lines *  line_ptr   A single line
+ * @param [in] double  t   The temperature at wich to calculate the coefficient
+ * @return    The collisional de-excitiation coefficient
+ *
+ * @details
+ * This routine uses stored coefficients if we have them, or the Van Regemortor
+ * approximation if we do not.
+ *
+ * ### Notes ###
+ * the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt
+ * factor to calculate collision strengths. There is one regime in which kt < hnu. For that
+ * consult equation 4.20 and 4.21 of Hazy.
+************************************************************/
+
+double
+q21 (line_ptr, t)
+     struct lines *line_ptr;
+     double t;
+{
+  double gaunt;
+//OLD  double gbar;
+  double omega;
+  double u0;
+  double upsilon ();
+
+
+  if (q21_line_ptr != line_ptr || t != q21_t_old)
+  {
+
+
+    u0 = (BOLTZMANN * t) / (PLANCK * line_ptr->freq);
+
+    if (line_ptr->istate == 1 && u0 < 2)        // neutrals at low energy. Used 2 to give continuous function.
+      gaunt = u0 / 10.0;
+    else                        // low energy electrons, positive ions
+      gaunt = 0.2;
+
+
+
+    if (line_ptr->coll_index < 0)       //if we do not have a collision strength for this line use the g-bar formulation
+    {
+      omega = ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
+    }
+    else                        //otherwise use the collision strength directly. NB what we call omega, most people including hazy call upsilon.
+    {
+      omega = upsilon (line_ptr->coll_index, u0);
+//OLD      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;
+    }
+
+
+    q21_a = 8.629e-6 / (sqrt (t) * line_ptr->gu) * omega;
+    q21_t_old = t;
+  }
+
+  return (q21_a);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the collisional excitation coefficient for a line
+ *
+ * @param [in] struct lines *  line_ptr   The line of interest
+ * @param [in] double  t   The temperature of interest
+ * @return     The collisional excitation coeffient
+ *
+ * @details
+ * The routine calls q21 and uses detailed balance to derive q12
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+double
+q12 (line_ptr, t)
+     struct lines *line_ptr;
+     double t;
+{
+  double x;
+  double q21 ();
+  double exp ();
+
+  x = line_ptr->gu / line_ptr->gl * q21 (line_ptr, t) * exp (-H_OVER_K * line_ptr->freq / t);
+
+  return (x);
+}
+
+
+/*
+   a21 alculates and returns the Einstein A coefficient
+   History:
+   98aug        ksl     Coded and debugged
+   99jan        ksl Modified so would shortcircuit calculation if
+   called multiple times for same a
+ */
+#define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
+
+struct lines *a21_line_ptr;
+double a21_a;
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the Einstein A coefficient for aline
+ *
+ * @param [in out] struct lines *  line_ptr   The structure that describes a single line
+ * @return     The Einstein A coefficient
+ *
+ * @details
+ * Using the oscillator strecnth and the multiplicity (which are
+ * read in) calculate A
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+double
+a21 (line_ptr)
+     struct lines *line_ptr;
+{
+  double freq;
+
+  if (a21_line_ptr != line_ptr)
+  {
+    freq = line_ptr->freq;
+    a21_a = A21_CONSTANT * line_ptr->gl / line_ptr->gu * freq * freq * line_ptr->f;
+    a21_line_ptr = line_ptr;
+  }
+
+  return (a21_a);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      calculates the thermally averaged collision strength thermally excited line emission.
+ *
+ * @param [in out] int  n_coll   the index of the collision strength record we are working with
+ * @param [in out] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
+ * @return     upsilon - the thermally averaged collision strength for a given line at a given temp
+ *
+ * @details
+ *
+ * ### Notes ###
+ * It uses data extracted from Chianti stored in coll_stren.
+ * The paper to consult is Burgess and Tully A&A 254,436 (1992).
+ * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
+ * divided by Plancks constant times the frequency of the line under analysis.
+ *
+ *
+ **********************************************************/
+
+double
+upsilon (n_coll, u0)
+     int n_coll;
+     double u0;
+{
+  double x;                     //The scaled temperature
+  double y;                     //The scaled collision sterngth
+  double upsilon;               //The actual collision strength
+  int linterp ();
+
+  /* first we compute x. This is the "reduced temperature" from
+     Burgess & Tully 1992. */
+  x = 0.0;
+  if (coll_stren[n_coll].type == 1 || coll_stren[n_coll].type == 4)
+  {
+    x = 1. - (log (coll_stren[n_coll].scaling_param) / log (u0 + coll_stren[n_coll].scaling_param));
+  }
+  else if (coll_stren[n_coll].type == 2 || coll_stren[n_coll].type == 3)
+  {
+    x = u0 / (u0 + coll_stren[n_coll].scaling_param);
+  }
+  else
+  {
+    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    exit (0);
+  }
+
+
+  /* we now compute y from the interpolation formulae
+     y is the reduced upsilon from Burgess & Tully 1992. */
+  linterp (x, coll_stren[n_coll].sct, coll_stren[n_coll].scups, coll_stren[n_coll].n_points, &y, 0);
+
+  /*  now we extract upsilon from y  - there are four different parametrisations */
+
+  upsilon = 0.0;
+  if (coll_stren[n_coll].type == 1)
+  {
+    upsilon = y * (log (u0 + exp (1)));
+  }
+  else if (coll_stren[n_coll].type == 2)
+  {
+    upsilon = y;
+  }
+  else if (coll_stren[n_coll].type == 3)
+  {
+    upsilon = y / (u0 + 1);
+  }
+  else if (coll_stren[n_coll].type == 4)
+  {
+    upsilon = y * (log (u0 + coll_stren[n_coll].scaling_param));
+  }
+  else
+  {
+    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    exit (0);
+  }
+  return (upsilon);
+}
+
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief Perform linear/logarithmic interpolation of an array
+ *
+ * @param [in] double  value   The value used for interpoaltion
+ * @param [in] double  array[]   An array containing a set of asceding values
+ * @param [in] int  npts   The size of the array
+ * @param [out] int *  ival  The lower index to use in the interpolation
+ * of the array which need to be used to interpolate on
+ * @param [out] double *  f   The fraction of the upper point to use in the interpolation
+ * @param [in] int  mode  A switch to choose linear(0)  or lograrithmic(1) interpolation
+ * @return     Usually returns 0, but returns -1 if the input value is less
+ * than the first elememnt in the array, and 1 if it is greater than the
+ * last element int he array.  In either of these cases, the fractions are
+ * set up only to access one array element
+ *
+ * @details
+ *
+ *
+ * Typically one has two parallel arrays, one containing a set of values,
+ * in the original case frequencies, and another containing some function
+ * of those values.  This routine finds the fraction of the function at
+ * two point in the data array to interpolate.
+ *
+ * The values for the input array can be interpolated linear or logarithmically.
+ * that is the fraction that is returned are based on the values in the
+ * array or the logarithm of them.
+ *
+ *
+ * The routine uses bisection
+ *
+ *
+ *
+ * ### Notes ###
+ *
+ * fraction is a utility written to speed up the search for the bracketing
+ * topbase photionization x-sections, but in principle it should work in
+ * other situations within python (which at one time at least contributed
+ * significantly to the runtime for Python).
+ *
+ * Today, fraction is called directly in the routines that are used to set up coordinate
+ * systems, and indirectly through linterp (below) which should be inspected
+ * to see how the logarithmic interpolation is supposed to work.
+ *
+ * The routine is similar to the numerical * recipes routine locate.
+ * There may be a gsl routine as well.  The routine
+ * should probably be replaced.
+ *
+ *
+ **********************************************************/
+
+int
+fraction (value, array, npts, ival, f, mode)
+     double array[];            // The array in we want to search
+     int npts, *ival;           // ival is the lower point
+     double value;              // The value we want to index
+     double *f;                 // The fractional "distance" to the next point in the array
+     int mode;                  // 0 = compute in linear space, 1=compute in log space
+{
+  int imin, imax, ihalf;
+
+  if (value < array[0])
+  {
+    *ival = 0;
+    *f = 0.0;
+    return (-1);
+  }
+
+  imax = npts - 1;
+  if (value > array[imax])
+  {
+    *ival = npts - 2;
+    *f = 1.0;
+    return (1);
+  }
+
+
+
+  imin = 0;
+
+/* In what follows, there is a specific issue as to how to treat
+the situation where the value is exactly on an array element. Right
+now this is set to try to identify the array element below the one
+on which the value sits, and to set the fraction to 1.  This was
+to reflect the behavior of the search routine in where_in_grid. */
+
+  while (imax - imin > 1)
+  {
+    ihalf = (imin + imax) >> 1; // Compute a midpoint >> is a bitwise right shift
+    if (value > array[ihalf])
+    {
+      imin = ihalf;
+    }
+    else
+      imax = ihalf;
+  }
+
+// So array[imin] just <= value
+
+  if (mode == 0)
+    *f = (value - array[imin]) / (array[imax] - array[imin]);   //linear interpolation
+  else if (mode == 1)
+    *f = (log (value) - log (array[imin])) / (log (array[imax]) - log (array[imin]));   //log interpolation
+  else
+  {
+    Error ("Fraction - unknown mode %i\n", mode);
+    exit (0);
+    return (0);
+  }
+
+  *ival = imin;
+
+  return (0);
+}
+
+
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Perform a linear interpolation on two parallel arrays, the first
+ * of which contains a set of values to be interpolated and the second of
+ * which has the function at those values
+ *
+ * @param [in] double  x   A value
+ * @param [in] double  xarray[]   The array that is interpolated
+ * @param [in] double  yarray[]   The array that contains a function of the values in xarray
+ * @param [in] int  xdim   The length of the two arrays
+ * @param [out] double *  y   The resulting interpolated value
+ * @param [in] int  mode   A switch to choose linear(0) or "logarithmic" (1)
+ * interpolation
+ *
+ * @return     The number of the array element that is used for the lower of the two
+ * elements that are interpolated on.
+ *
+ * @details
+ * Given a number x, and an array of x's in xarray, and functional
+ * values y = f(x) in yarray and the dimension of xarray and yarray,
+ * linterp calculates y, the linearly interpolated value of y(x). It
+ * also returns the element in the xarray so that one can consider
+ * not doing a search to find the right array element in certain
+ * circumstances
+
+ *
+ * ### Notes ###
+ *
+ * For mode 0, the value that is returned is
+ *
+ * (1-f)*y[nelem]+f*[nelem+1)
+ *
+ * For mode 1, the value returned is
+ * exp ((1. - f) * log (y[nelem]) + f * log (y[nelem + 1]))
+ *
+ *
+ **********************************************************/
+
+int
+linterp (x, xarray, yarray, xdim, y, mode)
+     double x;                  // The value that we wish to index i
+     double xarray[], yarray[];
+     int xdim;
+     double *y;
+     int mode;                  //0 = linear, 1 = log
+{
+  int nelem = 0;
+  double frac;
+
+
+  fraction (x, xarray, xdim, &nelem, &frac, mode);
+
+  if (mode == 0)
+    *y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
+  else if (mode == 1)
+    *y = exp ((1. - frac) * log (yarray[nelem]) + frac * log (yarray[nelem + 1]));
+  else
+  {
+    Error ("linterp - unknown mode %i\n", mode);
+    exit (0);
+  }
+
+  return (nelem);
+
 }

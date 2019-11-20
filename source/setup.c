@@ -1,3 +1,24 @@
+/***********************************************************/
+/** @file  setup.c
+ * @author ksl
+ * @date   March, 2018
+ *
+ * @brief  Various intialization routines, including a number
+ * that read values from the parameter files
+ *
+ * ### Notes ###
+ *
+ * Because the input and setup of Python is relatively complex,
+ * we have over time moved much of this out of main into
+ * subroutines, and we have generally tried to collect
+ * related portion of the initialization into different setup
+ * routines, such as setup_disk or setup_files.
+ *
+ * This file contains a collection of these setup routines,
+ * that either stand-alone or have not been moved into their
+ * own files.
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,1539 +27,781 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-             University of Southampton
 
-Synopsis: 
-  parse_command_line parses the command line and communicates stuff
-  to the loggin routines (e.g. verbosity).
-   
-Arguments:   
-  argc            command line arguments 
-
-Returns:
-
-  restart_start   1 if restarting
- 
-Description:  
-
-Notes:
-
-	The switches should be described in the introduction to
-	python.c, instead of here
-
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
-
-
-int
-parse_command_line (argc, argv)
-     int argc;
-     char *argv[];
-{
-  int restart_stat, verbosity, time_to_quit, i;
-  char dummy[LINELENGTH];
-  int mkdir ();
-  double time_max;
-
-  restart_stat = 0;
-
-  if (argc == 1)
-    {
-      printf ("Input file (interactive=stdin):");
-      fgets (dummy, LINELENGTH, stdin);
-      get_root (files.root, dummy);
-      strcpy (files.diag, files.root);
-      strcat (files.diag, ".diag");
-    }
-  else
-    {
-
-      for (i = 1; i < argc; i++)
-	{
-	  if (strcmp (argv[i], "-h") == 0)
-	    {
-	      help ();
-	    }
-	  else if (strcmp (argv[i], "-r") == 0)
-	    {
-	      Log ("Restarting %s\n", files.root);
-	      restart_stat = 1;
-	    }
-	  else if (strcmp (argv[i], "-t") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
-		{
-		  Error ("python: Expected time after -t switch\n");
-		  exit (0);
-		}
-	      i++;
-
-	    }
-	  else if (strcmp (argv[i], "-v") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
-		{
-		  Error ("python: Expected verbosity after -v switch\n");
-		  exit (0);
-		}
-	      Log_set_verbosity (verbosity);
-	      i++;
-
-	    }
-	  else if (strcmp (argv[i], "-e") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
-		{
-		  Error ("python: Expected max errors after -e switch\n");
-		  exit (0);
-		}
-	      Log_quit_after_n_errors (time_to_quit);
-	      i++;
-
-	    }
-	  else if (strcmp (argv[i], "-d") == 0)
-	    {
-	      modes.iadvanced = 1;
-	    }
-	  else if (strcmp (argv[i], "-f") == 0)
-	    {
-	      modes.fixed_temp = 1;
-	    }
-
-    /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
-    else if (strcmp (argv[i], "--rseed") == 0)
-      {
-        modes.rand_seed_usetime = 1;
-      }
-	  else if (strcmp (argv[i], "-z") == 0)
-	    {
-	      modes.zeus_connect = 1;
-	      Log ("setting zeus_connect to %i\n", modes.zeus_connect);
-	    }
-	  else if (strcmp (argv[i], "-i") == 0)
-	    {
-	      modes.quit_after_inputs = 1;
-	    }
-
-	  else if (strcmp (argv[i], "--version") == 0)
-	    {
-	      /* give information about the pyhon version, such as commit hash */
-	      Log ("Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
-	      Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
-	      /* warn the user if there are uncommited changes */
-	      int git_diff_status = GIT_DIFF_STATUS;
-	      if (git_diff_status > 0)
-		Log
-		  ("This version was compiled with %i files with uncommitted changes.\n",
-		   git_diff_status);
-	      exit (0);
-	    }
-
-	  else if (strncmp (argv[i], "-", 1) == 0)
-	    {
-	      Error ("python: Unknown switch %s\n", argv[i]);
-	      help ();
-	    }
-	}
-
-      /* The last command line variable is always the .pf file */
-
-      strcpy (dummy, argv[argc - 1]);
-      get_root (files.root, dummy);
-
-      /* This completes the parsing of the command line */
-
-      /* Create a subdirectory to store diaganostic files*/
-
-      sprintf (files.diagfolder, "diag_%s/", files.root);
-      mkdir (files.diagfolder, 0777);
-      strcpy (files.diag, files.diagfolder);
-      sprintf (dummy, "_%d.diag", rank_global);
-      strcat (files.diag, files.root);
-      strcat (files.diag, dummy);
-
-
-    }
-
-  return (restart_stat);
-}
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  init_files 
-   
-Arguments:   
-  argc            command line arguments 
-
-Returns:
-  restart_start   1 if restarting
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
+/**********************************************************/
+/**
+ * @brief      initializes the geo structure to something that is semi-reasonable
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * Initial values for all of the variables that are not part of the individual
+ * wind descriptions that are actully read(!) into the program should be
+ * created here.  The derived values are not needed.
+ *
+ * ### Notes ###
+ *
+ * In general, cgs units are the working units for Python.  Thus all
+ * intialization should be converted to these units.
+ *
+ * @bug Currently init_geo is set up for CVs and Stars and not AGN.  We now
+ * read in the system type as the first variable. The intent was to
+ * allow one to use the system type to particularize how geo (aqnd
+ * other variables) were intialized. But this has yet to be carreid
+ * out.
+ *
+ *
+ **********************************************************/
 
 int
-init_log_and_windsave (restart_stat)
-     int restart_stat;
+init_geo ()
 {
-  FILE *fopen (), *qptr;
+  geo.ndomain = 0;              /*ndomain is a convenience variable so we do not always
+                                   need to write geo.ndomain but it should nearly always
+                                   be set to the same value as geo.ndomain */
+  geo.run_type = 0;             /* Indicates this is a run from scratch, which includes
+                                   the case where we already have a wind model but want
+                                   to change some of the parameters.  init_goe should not
+                                   be called at all if we are simply continuing a previous
+                                   run */
+  geo.hydro_domain_number = -1;
 
-  if (restart_stat == 0)
-    {				// Then we are simply running from a new model
-      xsignal_rm (files.root);	// Any old signal file
-      xsignal (files.root, "%-20s %s \n", "START", files.root);
-      Log_init (files.diag);
-    }
-  else
-    {
-      /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
-
-      strcpy (files.windsave, files.root);
-      strcat (files.windsave, ".wind_save");
-      qptr = fopen (files.windsave, "r");
-
-      if (qptr != NULL)
-	{
-	  /* Then the file does exist and we can restart */
-	  fclose (qptr);
-	  xsignal (files.root, "%-20s %s\n", "RESTART", files.root);
-	  Log_append (files.diag);
-	}
-      else
-	{
-	  /* It does not exist and so we start from scratch */
-	  restart_stat = 0;
-	  xsignal_rm (files.root);	// Any old signal file
-	  xsignal (files.root, "%-20s %s \n", "START", files.root);
-	  Log_init (files.diag);
-	}
-    }
-
-  return (0);
-}
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_grid_params reads information on the coordinate system
-  and grid dimensions and sets the corresponding variables
-  in the geo structure
-   
-Arguments:    
-
-Returns:
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-  1508	ksl	Updated for domains
-
-**************************************************************/
-
-int
-get_grid_params (ndom)
-     int ndom;
-{
-  int input_int;
-
-
-  if (ndom >= geo.ndomain)
-    Error ("Trying to get grid params for a non-existent domain!\n");
-
-  input_int = 1;
-
-  /* ksl - The if statement seems superflous.  Why are we entering this routine if 
-   * we are continuing and earlier calculation? */
-
-  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
-    {
-      /* Define the coordinate system for the grid and allocate memory for the wind structure */
-      rdint
-	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
-	 &input_int);
-      switch (input_int)
-	{
-	case 0:
-	  zdom[ndom].coord_type = SPHERICAL;
-	  break;
-	case 1:
-	  zdom[ndom].coord_type = CYLIND;
-	  break;
-	case 2:
-	  zdom[ndom].coord_type = RTHETA;
-	  break;
-	case 3:
-	  zdom[ndom].coord_type = CYLVAR;
-	  break;
-	default:
-	  Error
-	    ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-	}
-
-      rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
-      if (zdom[ndom].coord_type)
-	{
-	  rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
-	  if (zdom[ndom].mdim < 4)
-	    {
-	      Error
-		("python: domain mdim must be at least 4 to allow for boundaries\n");
-	      exit (0);
-	    }
-	}
-      else
-	zdom[ndom].mdim = 1;
-
-    }
-  else {
-	  Error("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
+  if (geo.system_type == SYSTEM_TYPE_CV || geo.system_type == SYSTEM_TYPE_BH)
+  {
+    geo.binary = TRUE;
   }
 
-/* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
+/*  The domains have been created but have not been initialized at all */
 
-  if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
-    {
-      Error
-	("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
-	 NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
-      exit (0);
-    }
+  zdom[0].coord_type = CYLIND;
+  zdom[0].ndim = 30;
+  zdom[0].mdim = 30;
+  zdom[0].log_linear = 0;       /* Set intervals to be logarithmic */
 
+  zdom[1].coord_type = CYLIND;
+  zdom[1].ndim = 30;
+  zdom[1].mdim = 10;
+  zdom[1].log_linear = 0;       /* Set intervals to be logarithmic */
 
-  /* If we are in advanced then allow the user to modify scale lengths */
-  if (modes.iadvanced)
-    {
-      rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
-      if (modes.adjust_grid)
-	{
-	  Log ("You have opted to adjust the grid scale lengths\n");
-	  rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
-	  if (&zdom[ndom].coord_type)
-	    rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
-	}
-    }
+  geo.disk_z0 = geo.disk_z1 = 0.0;
+  geo.adiabatic = 1;            // Default is now set so that adiabatic cooling is included in the wind
+  geo.auger_ionization = TRUE;  //Default is on.
 
-  zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
 
+  geo.run_type = 0;             // Not a restart of a previous run
 
-  return (0);
-}
+  geo.star_ion_spectype = geo.star_spectype
+    = geo.disk_ion_spectype = geo.disk_spectype = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
+  geo.agn_ion_spectype = SPECTYPE_POW;
 
 
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_line_transfer_mode reads in the variable geo.line_mode
-  and sets the variables geo.line_mode, geo.scatter_mode,
-  geo.rt_mode and geo.macro_simple accordingly
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
-
-
-int
-get_line_transfer_mode ()
-{
-  rdint
-    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
-     &geo.line_mode);
-
-
-  /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
-     It also seems likely that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
-
-  /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
-     transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
-     ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
-     treatment and treat everything as 2-level simple ions inside the macro atom formalism */
-
-  /* For now handle scattering as part of a hidden line transfermode ?? */
-  if (geo.line_mode == 4)
-    {
-      geo.scatter_mode = 1;	// Turn on anisotropic scattering
-      geo.line_mode = 3;	// Drop back to escape probabilities
-      geo.rt_mode = 1;		// Not macro atom (SS)
-    }
-  else if (geo.line_mode == 5)
-    {
-      geo.scatter_mode = 2;	// Thermal trapping model
-      geo.line_mode = 3;	// Single scattering model is best for this mode
-      geo.rt_mode = 1;		// Not macro atom (SS) 
-    }
-  else if (geo.line_mode == 6)
-    {
-      geo.scatter_mode = 0;	// isotropic
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment (SS)
-      geo.macro_simple = 0;	// We don't want the all simple case (SS)
-    }
-  else if (geo.line_mode == 7)
-    {
-      geo.scatter_mode = 2;	// thermal trapping
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment (SS)
-      geo.macro_simple = 0;	// We don't want the all simple case (SS)
-    }
-  else if (geo.line_mode == 8)
-    {
-      geo.scatter_mode = 0;	// isotropic
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment i.e. indivisible packets
-      geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
-    }
-  else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
-    {
-      geo.scatter_mode = 1;	// anisotropic scatter mode 1
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment 
-      geo.macro_simple = 0;	// We don't want the all simple case 
-    }
-  else
-    {
-      geo.scatter_mode = 0;	// isotropic
-      geo.rt_mode = 1;		// Not macro atom (SS)
-    }
-
-  return (0);
-}
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_radiation_sources
-   
-Arguments:    
-
-Returns:
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-  1605	ksl Modified the logic of this so that different radiation
-  	    sources could be chosen for SYSTEM_TYPE_ONE_D
-
-**************************************************************/
-
-int
-get_radiation_sources ()
-{
- if (geo.system_type == SYSTEM_TYPE_AGN) 				/* If it is an AGN */
-    {
-      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      geo.bl_radiation = 0;
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 1;
-      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
-    }
-
- else if (geo.system_type==SYSTEM_TYPE_ONE_D) 
-     {
-	     geo.search_light_radiation=1; // The point of this model is we need this
-	     geo.star_radiation = 0;
-	     rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-	     geo.bl_radiation = 0;
-	     rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-	     geo.agn_radiation = 0;
-     }
-
- else 
-    {				/* If is a stellar system */
-      rdint ("Star_radiation(y=1)", &geo.star_radiation);
-      if (geo.disk_type != DISK_NONE)
-	{
-	  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-	}
-      else
-	{
-	  geo.disk_radiation = 0;
-	}
-      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
-    }
-
-  if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
-      && !geo.bl_radiation && !geo.agn_radiation)
-    {
-      Error ("python: No radiation sources so nothing to do but quit!\n");
-      exit (0);
-    }
-
-  /* 
-     With the macro atom approach we won't want to generate photon 
-     bundles in the wind so switch it off here. (SS)
-   */
-
-  if (geo.rt_mode == 2)
-    {
-      Log
-	("python: Using Macro Atom method so switching off wind radiation.\n");
-      geo.wind_radiation = 0;
-    }
-
-
-  /* 080517 - ksl - Reassigning bb to -1, etc is to make room for reading in model
-     grids, but complicates what happens if one tries to restart a model.  This needs
-     to be updated so one can re-read the geo file, proabbly by defining variaables 
-     BB etc, and then by checking whether or not the type is assigned to BB or read
-     in as 0.  Also need to store each of these model list names in geo structure.
-   */
-
-  get_spectype (geo.star_radiation,
-		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
-		&geo.star_ion_spectype);
-
-  get_spectype (geo.disk_radiation,
-		"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
-		&geo.disk_ion_spectype);
-
-  get_spectype (geo.bl_radiation,
-		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
-		&geo.bl_ion_spectype);
-  get_spectype (geo.agn_radiation,
-		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
-		&geo.agn_ion_spectype);
-
-  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
-     is to remove the bl emission, which we always assume to some kind of temperature
-     driven source, and replace it with a power law source
-
-     Note that the next 3 or 4 lines just tell you that there is supposed to be a power
-     law source.  They don't teel you what the parameters are.
-   */
-
-  if (geo.bl_ion_spectype == SPECTYPE_POW)
-    {
-      geo.agn_radiation = 1;
-      geo.agn_ion_spectype = SPECTYPE_POW;
-      geo.bl_radiation = 0;
-      Log ("Trying to make a start with a power law boundary layer\n");
-    }
-  else
-    {
-      Log ("Not Trying to make a start with a power law boundary layer %d\n",
-	   geo.bl_ion_spectype);
-    }
-
-  return (0);
-}
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_wind_params calls the relevant subroutine to get wind parameters
-  according to the wind type specified 
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
-
-int
-get_wind_params (ndom)
-     int ndom;
-{
-  // XXX These need to be initalized sensibly and 
-  // it is not obvious that is happenning
-
-  zdom[ndom].rmax = 1e12;
-  zdom[ndom].twind = 1e5;
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      zdom[ndom].rmax = 50. * geo.r_agn;
-    }
-
-
-  /* XXX - This should be part of the individual get_wind_parameters, not here */
-
-  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
-  rddoub ("wind.t.init", &geo.twind);
-
-  /* ksl XXX - There is something of a philosophical problem that needs to be worked
-   * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
-   * we wish to create, say a spherical outflow with two domains one going from 
-   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
-   * intended to be the distance beyond which photons are moving through free space separate
-   * from the values in the wind zones.  Right now we are setting the outer limit of each
-   * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
-   * This is not what we want.  What should happen is that for each componetn where it is
-   * relevant we should ask for the outer edge of the domain and then at the end we should determine
-   * what geo.rmax should be set to.  There are some cases, e.g. get_hydor_wind where one should not
-   * need to ask the question about rmax, but others where it is necessary
-   */
-
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   */
-
-  if (zdom[ndom].rmax > geo.rmax)
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
-
-
-  /* Now get parameters that are specific to a given wind model
-
-     Note: When one adds a new model, the only things that should be read in and modified
-     are parameters in geo.  This is in order to preserve the ability to continue a calculation
-     with the same basic wind geometry, without reading in all of the input parameters.  
-   */
-
-  if (zdom[ndom].wind_type == SPHERE)
-    {
-      get_stellar_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == SV)
-    {
-      get_sv_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == HYDRO)
-    {
-      get_hydro_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == CORONA)
-    {
-      get_corona_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == KNIGGE)
-    {
-      get_knigge_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == HOMOLOGOUS)
-    {
-      get_homologous_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == YSO)
-    {
-      get_yso_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == ELVIS)
-    {
-      get_elvis_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
-    {
-      get_shell_wind_params (ndom);
-    }
-  else 
-    {
-      Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
-      exit (0);
-    }
-
-  /* Get the filling factor of the wind */
-  // XXX  This may  not in the right place to set the filling factor.  
-
-  zdom[ndom].fill = 1.;
-
-  /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
-     XXX allows any domain to be allowed a filling factor but this should be modified when
-     we know what we are doing with inputs for multiple domains. Could create confusion */
-
-  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
-
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   */
-
-  if (zdom[ndom].rmax > geo.rmax)
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
-
-  return (0);
-}
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_stellar_params sets rstar, mstar, tstar as well
-  as secondary parameters based on user inputs
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
-
-double
-get_stellar_params ()
-{
-  double lstar;
-
-  /* Describe the basic binary star system */
-
-  geo.mstar /= MSOL;		// Convert to MSOL for ease of data entry
-  rddoub ("mstar(msol)", &geo.mstar);
-  geo.mstar *= MSOL;
-
-  /* If a BH we want geo.rstar to be at least as large as the last stable orbit for
-   * a non-rotating BH
-   */
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      geo.rstar = 6. * G * geo.mstar / (C * C);	//correction - ISCO is 6x Rg NSH 121025
-    }
-
-  rddoub ("rstar(cm)", &geo.rstar);
-
-
-  geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
+  geo.rstar = 7e8;
   geo.rstar_sq = geo.rstar * geo.rstar;
-  if (geo.star_radiation)
-    rddoub ("tstar", &geo.tstar);
+  geo.mstar = 0.8 * MSOL;
+  geo.m_sec = 0.4 * MSOL;
+  geo.period = 3.2 * 3600;
+  geo.tstar = 40000;
 
-  lstar =
-    4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
+  geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
+  geo.line_mode = 3;            /* default is escape probabilites */
 
+  geo.star_radiation = TRUE;    /* 1 implies star will radiate */
+  geo.disk_radiation = TRUE;    /* 1 implies disk will radiate */
+  geo.bl_radiation = FALSE;     /*1 implies boundary layer will radiate */
+  geo.wind_radiation = TRUE;    /* 1 implies wind will radiate */
 
-  /* Describe the secondary if that is required */
+  geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
+  geo.diskrad = 2.4e10;
+  geo.disk_mdot = 1.e-8 * MSOL / YR;
 
-  if (geo.system_type == SYSTEM_TYPE_BINARY)	/* It's a binary system */
-    {
+  geo.t_bl = 100000.;
 
-      geo.m_sec /= MSOL;	// Convert units for ease of data entry
-      rddoub ("msec(msol)", &geo.m_sec);
-      geo.m_sec *= MSOL;
-
-      geo.period /= 3600.;	// Convert units to hours for easy of data entry
-      rddoub ("period(hr)", &geo.period);
-      geo.period *= 3600.;	// Put back to cgs immediately                   
-    }
-
-  return (lstar);
-}
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_disk_params sets up the disk parameters according to user inputs, 
-  e.g. the temperature profile, accretion rate etc.
-   
-Arguments:		
-
-Returns:
-  disk_illum - this is used by python.c and so needs to be returned
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-	1510	ksl	Modified to restore illumination
-			options, which were brokedn
-
-**************************************************************/
+  geo.pl_geometry = PL_GEOMETRY_SPHERE; // default to spherical geometry
+  geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
 
 
-double
-get_disk_params ()
-{
-  geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
-  rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
-  geo.disk_mdot *= (MSOL / YR);
-  rdint
-    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)",
-     &geo.disk_illum);
-  rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
-  if (geo.disk_tprofile == 1)
-    {
-      rdstr ("T_profile_file", files.tprofile);
-    }
+  strcpy (geo.atomic_filename, "data/standard80");
+  strcpy (geo.fixed_con_file, "none");
 
-  /* Set a default for diskrad for an AGN */
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      geo.diskrad = 100. * geo.r_agn;
-    }
+  // Note that geo.model_list is initialized through get_spectype
 
-  rddoub ("disk.radmax(cm)", &geo.diskrad);
-  Log ("geo.diskrad  %e\n", geo.diskrad);
+  /* Initialize a few other variables in python.h */
+  x_axis[0] = 1.0;
+  x_axis[1] = x_axis[2] = 0.0;
+  y_axis[1] = 1.0;
+  y_axis[0] = y_axis[2] = 0.0;
+  z_axis[2] = 1.0;
+  z_axis[1] = z_axis[0] = 0.0;
 
-  geo.diskrad_sq = geo.diskrad * geo.diskrad;
+  geo.wcycles = geo.pcycles = 1;
+  geo.wcycle = geo.pcycle = 0;
 
-/* If diskrad <= geo.rstar set geo.disk_type = DISK_NONE to make any disk transparent anyway. */
+  geo.model_count = 0;          //The number of models read in
 
-  if (geo.diskrad < geo.rstar)
-    {
-      Log ("Disk radius is less than star radius, so assuming no disk)\n");
-      geo.disk_type = DISK_NONE;
-    }
-
-  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {		/* Get the additional variables need to describe a vertically extended disk */
-      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
-      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
-    }
   return (0);
 }
 
+/// This is to assure that we read model lists in the same order everytime
+char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";
+//int model_count = 0;
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_bl_and_agn_params sets up the boundary layer and agn power law parameters
-  based on user input and system type
-   
-Arguments:		
-  lstar     double 
-            star luminosity as calculated by get_stellar_params
-Returns:
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
+/**********************************************************/
+/**
+ * @brief      Generalized routine to get the spectrum type for a radiation source
+ * and if necessary read a set of precalculated spectra
+ *
+ * @param [in] int  yesno  An integer used to decide whether to ask for a spectrum type
+ * @param [in, out] char *  question  The query for a spectrum type for this component
+ * @param [in, out] int *  spectype   The type of spectrum to assign
+ * @return    the spectype, a number that says what type of spectrum (bb, power law, etc)
+ * to generate for this source
+ *
+ * @details
+ *
+ * If yesno is non-zero, the user will be asked for the type of spectrum
+ * for a radation source.  If yesno is 0, we presume that this radiation source (a star
+ * a disk or the wind itself) is not to radiate in the calculation, and the spectrum
+ * type is set to SPECTYPE_NONE.
+ *
+ * If one wants to geneate spectra from a seriels of models (such as synthetic spectra
+ * calculated for stars), this routine calls routines to read the models.
+ *
+ * ### Notes ###
+ *
+ * This routine is awkwardly constructed. For reasons that are probably
+ * historical the routine converts the internally stored values to different
+ * values in order to ask what type of spectrum the user wants, and then
+ * translates these back to the internal value.
+ *
+ *
+ **********************************************************/
 
 int
-get_bl_and_agn_params (lstar)
-     double lstar;
+get_spectype (yesno, question, spectype)
+     int yesno;
+     char *question;
+     int *spectype;
 {
-  double xbl;
-  double temp_const_agn;
+  char model_list[LINELENGTH];
+  char one_choice[LINELENGTH];
+  char choices[LINELENGTH];
+  int get_models ();            // Note: Needed because get_models cannot be included in templates.h
+  int i;
+  int init_choices (), get_choices ();
 
-  /* Describe the boundary layer */
+  if (yesno)
+  {
+    init_choices ();            // Populate the spect array
 
-  //OLD 130622      if (geo.bl_radiation )    Change made to allow a power law boundary layer
-  if (geo.bl_radiation && geo.bl_ion_spectype != SPECTYPE_POW)
+    /* If this is is RUN_TYPE_PREVIOUS or RUN_TYPE_RESTART, we need to check
+       whether a model spectrum was read in, and if so set the spectype to
+       SPEC_TYPE_MODEL.  Note that this assume that all other spectrum types
+       have negative values
+     */
+
+    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS))
     {
-      xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
-
-      rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
-      Log ("OK, the bl lum will be about %.2e the disk lum\n",
-	   geo.lum_bl / xbl);
-      rddoub ("t_bl", &geo.t_bl);
+      *spectype = SPECTYPE_MODEL;
     }
+    /* Locate the word that corresponds to the spectype that was entered
+     */
+
+    for (i = 0; i < zz_spec.n; i++)
+    {
+      if (*spectype == zz_spec.vals[i])
+      {
+        strcpy (one_choice, zz_spec.choices[i]);
+        break;
+      }
+    }
+
+    if (i == zz_spec.n)
+    {
+      Error ("get_spectype: Programming error.  Unknown spectype %d\n", *spectype);
+      exit (0);
+    }
+
+    get_choices (question, choices, &zz_spec);
+    *spectype = rdchoice (question, choices, one_choice);
+
+    if (*spectype == SPECTYPE_MODEL)
+    {
+      if (geo.run_type == RUN_TYPE_PREVIOUS)
+      {                         // Continuing an old model
+        strcpy (model_list, geo.model_list[geo.model_count]);
+      }
+      else
+      {                         // Starting a new model
+        strcpy (model_list, get_spectype_oldname);
+      }
+
+      rdstr ("Input_spectra.model_file", model_list);
+
+      for (i = 0; i < geo.model_count; i++)     //See if we have already read in this model
+      {
+        if (strcmp (model_list, geo.model_list[i]) == 0)
+        {
+          *spectype = i;
+          return (*spectype);
+        }
+      }
+
+      get_models (model_list, 2, spectype);
+      strcpy (geo.model_list[geo.model_count], model_list);     // Copy it to geo
+      strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
+
+      geo.model_count++;
+    }
+  }
   else
-    {
-      geo.lum_bl = 0;
-      geo.t_bl = 0;
-    }
+  {
+    *spectype = SPECTYPE_NONE;  // No radiation
+  }
 
-  /* Describe the agn */
-
-  if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)	/* This peculiar line is to enamble us to add a star with a power law component */
-    {
-      xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
-
-      /* If there is no disk, initilize geo.lum to the luminosity of a star */
-      if (geo.disk_type == DISK_NONE)
-	{
-	  geo.lum_agn = lstar;
-	}
-
-      // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-      // set the default for the radius of the BH to be 6 R_Schwartschild.
-      // rddoub("R_agn(cm)",&geo.r_agn);
-
-      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-      Log ("OK, the agn lum will be about %.2e the disk lum\n",
-	   geo.lum_agn / xbl);
-      if (geo.agn_ion_spectype == SPECTYPE_POW
-	  || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
-	{
-	  geo.alpha_agn = (-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
-	  geo.const_agn =
-	    geo.lum_agn /
-	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
-	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-	  Log ("AGN Input parameters give a power law constant of %e\n",
-	       geo.const_agn);
-	}
-      else if (geo.agn_ion_spectype == SPECTYPE_BREM)
-	{
-
-		geo.brem_temp=1.16e8; //10kev
-		geo.brem_alpha=-0.2; //This is the cloudy form of bremstrahlung
-		geo.const_agn=1.0;
-		rddoub ("agn_bremsstrahlung_temp(K)",&geo.brem_temp);
-		rddoub ("agn_bremsstrahlung_alpha",&geo.brem_alpha);
-		temp_const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
-		geo.const_agn=temp_const_agn;
-      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
-		
-	}
-
-      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-         only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-      geo.pl_low_cutoff = 0.0;
-      if (modes.iadvanced)
-	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
-
-      rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)",
-	     &geo.pl_geometry);
-
-      if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
-	{
-	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
-	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units 
-	  Log("lamp_post_height is cm is %g\n",geo.lamp_post_height);
-	}
-      else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)	// only two options at the moment
-	{
-	  Error ("Did not understand power law geometry %i. Fatal.\n",
-		 geo.pl_geometry);
-	  exit (0);
-	}
-
-
-
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
-         Afterwards, the photons are used to compute the sim parameters. */
-
-
-
-      if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-	{
-	  geo.agn_cltab_low = 1.0;
-	  geo.agn_cltab_hi = 10000;
-	  rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
-	  rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-	  geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
-	  geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
-	}
-    }
-  else if (geo.agn_radiation)	/* We want to add a power law to something other than an AGN */
-    {
-      xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
-
-      // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-      // set the default for the radius of the BH to be 6 R_Schwartschild.
-      // rddoub("R_agn(cm)",&geo.r_agn);
-
-      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-      Log ("OK, the agn lum will be about %.2e the disk lum\n",
-	   geo.lum_agn / xbl);
-      geo.alpha_agn = (-1.5);
-      rddoub ("agn_power_law_index", &geo.alpha_agn);
-
-      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-         only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-      geo.pl_low_cutoff = 0.0;
-      if (modes.iadvanced)
-	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
-
-
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
-         Afterwards, the photons are used to compute the sim parameters. */
-
-      geo.const_agn =
-	geo.lum_agn /
-	(((pow (2.42e18, geo.alpha_agn + 1.)) -
-	  pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-      Log ("AGN Input parameters give a power law constant of %e\n",
-	   geo.const_agn);
-
-      if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-	{
-	  geo.agn_cltab_low = 1.0;
-	  geo.agn_cltab_hi = 10000;
-	  rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
-	  rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-	  geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
-	  geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
-	}
-    }
-
-  else
-    {
-      geo.r_agn = 0.0;
-      geo.lum_agn = 0.0;
-      geo.alpha_agn = 0.0;
-      geo.const_agn = 0.0;
-    }
-  return (0);
+  return (*spectype);
 }
 
 
 
 
-
-/***********************************************************
-             University of Southampton
-Synopsis: 
-  get_meta_params reads in data pertaining to simulation meta-
-  properties like reverberation mapping settings and variance
-  reduction techniques.
-   
-Arguments:    
-Returns:
- 
-Description:  
-Notes:
-History:
-  1504  SWM   Added
-**************************************************************/
+/**********************************************************/
+/**
+ * @brief      simply initialises the set of
+ * advanced modes stored in the modes structure to a
+ * default value.
+ *
+ * @return   Allways returns 0
+ *
+ *
+ * @details
+ *
+ * ### Notes ###
+ * modes is a structure declared in python.h
+ *
+ * Most of the modes are initialized to 0, which means that
+ * activites that could be uddertaken for this mode, will
+ * not be.
+ *
+ * Advanced modes are turned off by default, unless the
+ * -d flag is invoked at runtime.  If it is invoked,
+ * one will be asked whether to turn-on an advanced mode.
+ *
+ * In most cases, the advanced modes cause extra diagnostic
+ * information to be saved.
+ *
+ * see #111 and #120 for recent work
+ *
+ **********************************************************/
 
 int
-get_meta_params (void)
+init_advanced_modes ()
 {
-  int meta_param, i, j, k, z, istate, levl, levu;
-  char trackline[LINELENGTH];
+  modes.iadvanced = 0;          // this is controlled by the -d flag, global mode control.
+  modes.extra_diagnostics = 0;  //  when set, want to save some extra diagnostic info
+  modes.save_cell_stats = 0;    // want to save photons statistics by cell
+  modes.keep_ioncycle_windsaves = 0;    // want to save wind file each ionization cycle
+  modes.track_resonant_scatters = 0;    // want to track resonant scatters
+  modes.save_extract_photons = 0;       // we want to save details on extracted photons
+  modes.adjust_grid = 0;        // the user wants to adjust the grid scale
+  modes.diag_on_off = 0;        // extra diagnostics
+  modes.use_debug = 0;
+  modes.print_dvds_info = 0;    // print out information on velocity gradients
+  modes.quit_after_inputs = 0;  // testing mode which quits after reading in inputs
+  modes.fixed_temp = 0;         // do not attempt to change temperature - used for testing
+  modes.zeus_connect = 0;       // connect with zeus
 
-  meta_param=0; // initialize to no reverberation tracking
-  rdint ("reverb.type", &meta_param);
-  switch (meta_param)
-    {				//Read in reverb tyoe, if any
-    case 0:
-      geo.reverb = REV_NONE;
-      break;
-    case 1:
-      geo.reverb = REV_PHOTON;
-      break;
-    case 2:
-      geo.reverb = REV_WIND;
-      break;
-    case 3:
-      geo.reverb = REV_MATOM;
-      break;
-    default:
-      Error ("reverb.type: Invalid reverb mode.\n \
-      Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
-    }
+  //note write_atomicdata  is defined in atomic.h, rather than the modes structure
+  write_atomicdata = 0;         // print out summary of atomic data
 
-  if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-    {				//If this requires further parameters, set defaults
-      geo.reverb_lines = 0;
-      geo.reverb_path_bins = 1000;
-      geo.reverb_angle_bins = 100;
-      geo.reverb_dump_cells = 0;
-      geo.reverb_vis = REV_VIS_NONE;
 
-      //Read in the number of path bins to use (1000+ is recommended)
-      rdint ("reverb.path_bins", &geo.reverb_path_bins);
+  modes.keep_photoabs = 1;      // keep photoabsorption in final spectrum
 
-      //Read in the visualisation setting
-      rdint ("reverb.visualisation", &meta_param);
-      switch (meta_param)
-	{			//Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
-	case 0:
-	  geo.reverb_vis = REV_VIS_NONE;
-	  break;
-	case 1:
-	  geo.reverb_vis = REV_VIS_VTK;
-	  break;
-	case 2:
-	  geo.reverb_vis = REV_VIS_DUMP;
-	  break;
-	case 3:
-	  geo.reverb_vis = REV_VIS_BOTH;
-	  break;
-	default:
-	  Error ("reverb.visualisation: Invalid mode.\n \
-        Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
-	}
-
-      if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
-	{			//If we're producing a 3d visualisation, select bins. This is just for aesthetics
-	  rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
-	}
-
-      if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-	{			//If we're dumping path arrays, read in the number of cells to dump them for and allocate space
-	  rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
-	  geo.reverb_dump_x =
-	    (double *) calloc (geo.reverb_dump_cells, sizeof (int));
-	  geo.reverb_dump_z =
-	    (double *) calloc (geo.reverb_dump_cells, sizeof (int));
-
-	  for (k = 0; k < geo.reverb_dump_cells; k++)
-	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-	      rdline ("reverb.dump_cell", trackline);
-	      if (sscanf
-		  (trackline, "%lf:%lf", &geo.reverb_dump_x[k],
-		   &geo.reverb_dump_z[k]) == EOF)
-		{		//If this line is malformed, warn the user and quit
-		  Error ("reverb.dump_cell: Invalid position line '%s'\n \
-            Expected format '[x]:[z]'\n", trackline);
-		  exit (0);
-		}
-	    }
-	}
-    }
-
-  if (geo.reverb == REV_MATOM)
-    {				//If this is macro-atom mode
-      if (geo.rt_mode != 2)
-	{			//But we're not actually working in matom mode...
-	  Error ("reverb.type: Invalid reverb mode.\n \
-      Macro-atom mode selected but macro-atom scattering not on.\n");
-	  exit (0);
-	}
-
-      //Read in the number of lines to be tracked and allocate space for them
-      rdint ("reverb.matom_lines", &geo.reverb_lines);
-      geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
-      if (geo.reverb_lines < 1)
-	{			//If this is <1, then warn the user and quit
-	  Error ("reverb.matom_lines: \
-      Must specify 1 or more lines to watch in macro-atom mode.\n");
-	  exit (0);
-	}
-
-      for (i = 0; i < geo.reverb_lines; i++)
-	{			//Finally, for each line we expect, read it in
-	  rdline ("reverb.matom_line", trackline);
-	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
-	      EOF)
-	    {			//If this line is malformed, warn the user
-	      Error ("reverb.matom_line: Malformed line '%s'\n \
-          Expected format '[z]:[istate]:[upper level]:[lower level]'\n", trackline);
-	      exit (0);
-	    }
-	  else
-	    {			//Otherwise, sift through the line list to find what this transition corresponds to
-	      for (j = 0; j < nlines_macro; j++)
-		{		//And record the line position in geo for comparison purposes
-		  if (line[j].z == z && line[j].istate == istate
-		      && line[j].levu == levu && line[j].levl == levl)
-		    {		//We're matching z, ionisation state, and upper and lower level transitions
-		      geo.reverb_line[i] = line[j].where_in_list;
-		    }
-		}
-	    }
-	}
-    }
-  else if (geo.reverb == REV_WIND)
-    {				//For wind mode...
-      if (geo.wind_radiation == 0)
-	{			//Warn if this data is being gathered but not used (can be useful for debug)
-	  Error
-	    ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
-	}
-    }
   return (0);
 }
 
 
-/***********************************************************
-             University of Southampton
 
-Synopsis: 
+/**********************************************************/
+/**
+ * @brief      get inputs that describe the detailed spectra that
+ * one intends to extract.
+ *
+ * @return   Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * There are inputs here both for a normal extaction and in
+ * advanced mode for selecting spectra from photons with specific numbers
+ * of scatters, or from a certain reagion.  It is also possible
+ * to extact spectra in the 'live or die" mode, in which one
+ * simply tracks photons that emerge in a certain inclination
+ * range.
+ *
+ **********************************************************/
 
-  setup_dfudge works out dfudge and returns it to the user.
-  the global variable DFUDGE is not altered here.
-   
-Arguments:		
-
-Returns:
-  dfudge 	the push through distance 
-
-Description:	
-
-  DFUDGE is the push through distance when photons are not
-  travelling within wind cells.  (Inside a cell in a domain
-  the push through distance is defined on a cell by cell
-  basis)
-  
-Notes:
-
-  There are two competing factors in defining DFUDGE.  It
-  should be short enough so that the push through distane
-  goes only a small way into s cell.  It should be large
-  enough though that round-off errors do not prevent one
-  from actually getting into a cell.  When this happens
-  one can get "stuck photons".
-
-  Prior to domains, we had effectively 3 separate ways of
-  defining dfudge, one for the SHELL model, one for normal
-  stellar systems and one for AGN,  The shell model was
-  different because it can be thin but large scale.
-
-  The current version of setup_dfudge preserves the onld
-  value of dfudge as much as possible (except the it
-  senses the old SHELL case bu the differene between
-  gero.rmax and geo.rmin
+int
+init_observers ()
+{
+  int n;
+  int ichoice;
+  char answer[LINELENGTH];
 
 
-History:
-	1502	JM 	Moved here from main()
-	1605	ksl	Revised to remove the dependence on
-			a specific geometry namely SHELL
+  geo.nangles = 4;
+  geo.angle[0] = 10;
+  geo.angle[1] = 30.;
+  geo.angle[2] = 60.;
+  geo.angle[3] = 80.;
+  for (n = 4; n < NSPEC; n++)
+    geo.angle[n] = 45;
+  for (n = 0; n < NSPEC; n++)
+  {
+    geo.phase[n] = 0.5;
+    geo.scat_select[n] = 1000;
+    geo.top_bot_select[n] = 0;
+  }
+  geo.swavemin = 850;
+  geo.swavemax = 1850;
 
-**************************************************************/
+  rdpar_comment ("The minimum and maximum wavelengths in the final spectra");
+  rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
+  rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
+  if (geo.swavemin > geo.swavemax)
+  {
+    geo.swavemax = geo.swavemin;
+    geo.swavemin = geo.swavemax;
+  }
+
+  /* convert wavelengths to frequencies and store for use
+     in computing macro atom and k-packet emissivities. */
+
+  geo.sfmin = VLIGHT / (geo.swavemax * 1.e-8);
+  geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
+
+  geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
+
+
+  rdpar_comment ("The observers and their location relative to the system");
+
+  if (geo.system_type == SYSTEM_TYPE_STAR)
+  {
+    geo.nangles = 1;
+    geo.angle[0] = 45;
+  }
+
+  rdint ("Spectrum.no_observers", &geo.nangles);
+
+  if (geo.nangles < 1 || geo.nangles > NSPEC)
+  {
+    Error ("no_observers %d should not be > %d or <0\n", geo.nangles, NSPEC);
+    Exit (0);
+  }
+
+
+  for (n = 0; n < geo.nangles; n++)
+    rddoub ("Spectrum.angle(0=pole)", &geo.angle[n]);
+
+  /* Phase 0 in this case corresponds to
+   * an extraction direction which is in the xz plane
+   */
+
+  if (geo.system_type == SYSTEM_TYPE_CV || geo.system_type == SYSTEM_TYPE_BH)
+  {
+
+    for (n = 0; n < geo.nangles; n++)
+      rddoub ("Spectrum.orbit_phase(0=inferior_conjunction)", &geo.phase[n]);
+  }
+  else
+    Log ("No phase information needed as system type %i is not a binary\n", geo.system_type);
+
+
+  strcpy (answer, "extract");
+  geo.select_extract = rdchoice ("Spectrum.live_or_die(live.or.die,extract)", "0,1", answer);
+  if (geo.select_extract != 0)
+  {
+    geo.select_extract = 1;
+    Log ("OK, extracting from specific angles\n");
+  }
+  else
+    Log ("OK, using live or die option\n");
+
+/* In advanced mode, select spectra with certain numbers of scatteringsi, and or other
+ * characteristics
+ */
+
+  if (modes.iadvanced)
+  {
+    strcpy (answer, "no");
+    ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
+
+    if (ichoice)
+
+    {
+      Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+      for (n = 0; n < geo.nangles; n++)
+      {
+        rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
+      }
+    }
+    strcpy (answer, "no");
+    ichoice = rdchoice ("@Spectrum.select_photons_by_position(yes,no)", "1,0", answer);
+    if (ichoice)
+    {
+      for (n = 0; n < geo.nangles; n++)
+      {
+        strcpy (answer, "all");
+        geo.top_bot_select[n] = rdchoice ("@Spectrum.select_location(all,below_disk,above_disk,spherical_region)", "0,-1,1,2", answer);
+
+
+        if (geo.top_bot_select[n] == 2)
+        {
+          Log ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
+          rddoub ("@Spectrum.select_rho(cm)", &geo.rho_select[n]);
+          rddoub ("@Spectrum.select_z(cm)", &geo.z_select[n]);
+          rddoub ("@Spectrum.select_azimuth(deg)", &geo.az_select[n]);
+          rddoub ("@Spectrum.select_r(cm)", &geo.r_select[n]);
+
+        }
+      }
+    }
+  }
+
+  /* Select the units of the output spectra.  This is always needed.
+   * There are 3 basics choices flambda, fnu, and the internal units
+   * of the program.  The first two imply that output units are scaled
+   * to a distance of 100 pc. The internal units are basically a luminosity
+   * within a wavelength/frequency interval. */
+
+  strcpy (answer, "flambda");
+  geo.select_spectype = rdchoice ("Spectrum.type(flambda,fnu,basic)", "1,2,3", answer);
+
+  if (geo.select_spectype == 1)
+  {
+    Log ("OK, generating flambda at 100pc\n");
+    geo.select_spectype = SPECTYPE_FLAMBDA;
+  }
+  else if (geo.select_spectype == 2)
+  {
+    Log ("OK, generating fnu at 100 pc\n");
+    geo.select_spectype = SPECTYPE_FNU;
+  }
+  else
+  {
+    Log ("OK, basic Monte Carlo spectrum\n");
+    geo.select_spectype = SPECTYPE_RAW;
+  }
+
+  return (0);
+}
+
+
+/**********************************************************/
+/**
+ * @brief      gets information about the number of
+ * 	cycles and how many photons there should be per cycle.
+ *
+ * @return     Generally returns 0
+ *
+ * @details
+ * ??? DESCRIPTION ???
+ *
+ * ### Notes ###
+ * The routine also allocates memory for the photon structure.
+ * If the routine is unable to allocate this membory, the routine
+ * will exit.
+ *
+ **********************************************************/
+
+PhotPtr
+init_photons ()
+{
+  PhotPtr p;
+
+  /* Although Photons_per_cycle is really an integer,
+     read in as a double so it is easier for input
+     (in scientific notation) */
+
+
+  double nphot = 1e5;
+  rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
+  if ((NPHOT = (int) nphot) <= 0)
+  {
+    Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
+    Exit (1);
+  }
+
+
+#ifdef MPI_ON
+  Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
+  NPHOT /= np_mpi_global;
+#endif
+
+  rdint ("Ionization_cycles", &geo.wcycles);
+
+  /* On restarts, the spectra that are read in have to be renormalized if
+   * the number of spectral cycles has been increased before a restart, and
+   * so we need to record this number. If this is not a restart, then
+   * geo.pcycles_renorm will not be used.
+   */
+
+  geo.pcycles_renorm = geo.pcycles;
+
+  rdint ("Spectrum_cycles", &geo.pcycles);
+
+
+  if (geo.wcycles == 0 && geo.pcycles == 0)
+  {
+    Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
+    exit (1);                   //There is really nothing to do!
+  }
+
+  /* Allocate the memory for the photon structure now that NPHOT is established */
+
+  photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
+  /* If the number of photons per cycle is changed, NPHOT can be less, so we define NPHOT_MAX
+   * to the maximum number of photons that one can create.  NPHOT is used extensively with
+   * Python.  It is the NPHOT in a particular cycle, in a given thread.
+   */
+
+  NPHOT_MAX = NPHOT;
+
+
+  if (p == NULL)
+  {
+    Error ("init_photons: There is a problem in allocating memory for the photon structure\n");
+    Exit (0);
+  }
+  else
+  {
+    /* large photon numbers can cause problems / runs to crash. Report to use (see #209) */
+    Log
+      ("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
+       sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
+    if ((NPHOT * sizeof (p_dummy)) > 1e9)
+      Error ("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
+  }
+
+  return (p);
+}
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Select the ionization and line transfer modes, along
+ * with various other parameters about ionization
+ *
+ * @return   Always returns 0
+ *
+ * @details
+ * The routine queries for a variety of parameters which describe
+ * how ionization and line transfer are handled.  This includes
+ * whether surfaces reflect
+ *
+ * ### Notes ###
+ *
+ * The routine is not particular well named, and it is not
+ * immediately obvious that all of the parmenters that are queried
+ * for here are related.
+ *
+ **********************************************************/
+
+int
+init_ionization ()
+{
+  int thermal_opt;
+  char answer[LINELENGTH];
+
+
+
+  strcpy (answer, "matrix_bb");
+  geo.ioniz_mode = rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
+
+  if (geo.ioniz_mode == IONMODE_FIXED)
+  {
+    rdstr ("Wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
+  }
+
+
+
+  /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
+     full advantage of the data file.  This means that in calculating the partition functions, the information
+     on levels and their multiplicities is taken into account.   */
+
+  geo.partition_mode = -1;      //?? Stuart, is there a reason not to move this earlier so it does not affect restart
+
+
+  /* get_line_transfer_mode reads in the Line_transfer question from the user,
+     then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple.
+     This is fairly involved and so is a separate routine  */
+
+  get_line_transfer_mode ();
+
+
+  strcpy (answer, "reflect");
+  geo.absorb_reflect = rdchoice ("Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)", "1,0,2", answer);
+
+
+  /* Setup options associated with non radiative process that can affect the thermal balance.  At present
+   * these are adiabatic heating and an extra heating term explicitly implemented for FU Ori stars.  The
+   * default is set to 0.  Adiabatic cooling only
+   */
+
+  strcpy (answer, "adiabatic");
+
+  thermal_opt = rdchoice ("Wind_heating.extra_processes(none,adiabatic,nonthermal,both)", "1,0,2,3", answer);
+
+  if (thermal_opt == 0)
+  {
+    geo.adiabatic = 1;
+    geo.nonthermal = 0;
+  }
+
+  else if (thermal_opt == 1)
+  {
+    geo.adiabatic = 0;
+    geo.nonthermal = 0;
+  }
+  else if (thermal_opt == 2)
+  {
+    geo.adiabatic = 0;
+    geo.nonthermal = 1;
+  }
+
+  else if (thermal_opt == 3)
+  {
+    geo.adiabatic = 1;
+    geo.nonthermal = 1;
+  }
+  else
+  {
+    Error ("Unknown thermal balance mode %d\n", thermal_opt);
+    exit (0);
+  }
+
+  if (geo.nonthermal)
+  {
+    /* The shock heating is defined initally as a luminosity to be added to wind
+     * but is immediately converted to a luminosity per unit volumne
+     *
+     * Since nearly all systems that we are dealing with have a star we initialize
+     * the amount of extra heating as a fraction of the stellar luminosity
+     *
+     * See cooling.c shock_heating
+     */
+
+    Log
+      ("Warning: Non-thermal heating has been selected.  This is a very special option put in place for modelling FU Ori stars, and should be used with extreme caution\n");
+
+    geo.shock_factor = 0.001 * 4 * PI * pow (geo.rstar, 2) * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
+    rddoub ("Wind_heating.extra_luminosity", &geo.shock_factor);
+    geo.shock_factor /= (4 * PI * pow (geo.rstar, 3));
+    Log ("The non_thermal emissivity at the base is %.2e\n", geo.shock_factor);
+
+    if (geo.rt_mode == RT_MODE_MACRO)
+    {
+      geo.frac_extra_kpkts = 0.1;
+      rddoub ("Wind_heating.kpacket_frac", &geo.frac_extra_kpkts);
+
+    }
+  }
+
+  /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */
+
+  if (nlevels_macro == 0)
+    geo.macro_simple = 1;       // Make everything simple if no macro atoms -- 57h
+
+  /* initialise the choice of handling for macro pops. */
+  if (geo.run_type == RUN_TYPE_PREVIOUS)
+  {
+    geo.macro_ioniz_mode = 1;   // Now that macro atom properties are available for restarts
+  }
+  else
+  {
+    geo.macro_ioniz_mode = 0;
+  }
+
+  return (0);
+
+}
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Sets a global "push_through_distance" designed
+ * to prevent photons from being trapped at boundaries
+ *
+ * @return     dfudge 	the push through distance
+ *
+ * @details
+ *
+ * dfudge is intended to be a small positive number that prevents
+ * photons from being trapped at the edges of cells or wind cones.
+ * It is often added to the distance to an "edge" to push the photon
+ * thorough whatever boundary is being calculated.
+ *
+ * ### Notes ###
+ *
+ * setup_dfudge is used to modify the variable DFUDGE which
+ * can be found in python.h.
+ *
+ * Originally, DFUDGE was the only number used to push through
+ * boundariies, but today DFUDGE is used sparingly, if at all,
+ * as push through distances within wind cells are defined
+ * differently for each cell.
+ *
+ * There are two competing factors in defining DFUDGE.  It
+ * should be short enough so that the push through distane
+ * goes only a small way into s cell.  It should be large
+ * enough though that round-off errors do not prevent one
+ * from actually getting into a cell.
+ *
+ **********************************************************/
 
 double
 setup_dfudge ()
 {
   double dfudge;
   double delta;
+  double rmin;
+  int ndom;
 
-  delta=geo.rmax-geo.rmin;
+  rmin = VERY_BIG;
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+    if (rmin > zdom[ndom].rmin)
+    {
+      rmin = zdom[ndom].rmin;
+    }
+  }
+
+
+
+  delta = geo.rmax - rmin;
 
   if (delta < 1.e8)
-    {
-      dfudge = (geo.rmax - geo.rmin) / 1000.0;
-    }
-  else if (delta  < 1e15)
-	{
-	  dfudge = 1e5;
-	}
-      else
-	{
-	  dfudge = geo.rmax / 1.e10;
-	}
+  {
+    dfudge = (geo.rmax - rmin) / 1000.0;
+  }
+  else if (delta < 1e15)
+  {
+    dfudge = 1e5;
+  }
+  else
+  {
+    dfudge = geo.rmax / 1.e10;
+  }
 
   Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
   return (dfudge);
-}
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  setup_windcone sets up the windcone 
-   
-Arguments:		
-
-Returns:
-  dfudge 	double	
-  			the push through distance
-Description:	
-
-Notes:
-  The angles thetamin and
-  thetamax are all defined from the z axis, so that an angle of 0
-  is a flow that is perpeindicular to to the disk and one that is
-  close to 90 degrees will be parallel to the plane of the disk
-  geo.wind_thetamin and max are defined in the routines that initialize
-  the various wind models, e. g. get_sv_wind_parameters. These
-  have been called at this point.  
-
-  z is the place where the windcone intercepts the z axis
-  dzdr is the slope 
-
-  111124 fixed notes on this - ksl
-History:
-	1502  JM 	Moved here from main()
-	1508	ksl	Modified to construct wind cones  fo
-			all domains
-
-**************************************************************/
-
-int
-setup_windcone ()
-{
-  int ndom;
-
-  for (ndom = 0; ndom < geo.ndomain; ndom++)
-    {
-
-      if (zdom[ndom].wind_thetamin > 0.0)
-	{
-	  zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
-	  zdom[ndom].windcone[0].z =
-	    (-zdom[ndom].wind_rho_min / tan (zdom[ndom].wind_thetamin));
-	}
-      else
-	{
-	  zdom[ndom].windcone[0].dzdr = VERY_BIG;
-	  zdom[ndom].windcone[0].z = -VERY_BIG;;
-	}
-
-
-      if (zdom[ndom].wind_thetamax > 0.0)
-	{
-	  zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
-	  zdom[ndom].windcone[1].z =
-	    (-zdom[ndom].wind_rho_max / tan (zdom[ndom].wind_thetamax));
-	}
-      else
-	{
-	  zdom[ndom].windcone[1].dzdr = VERY_BIG;
-	  zdom[ndom].windcone[1].z = -VERY_BIG;;
-	}
-    }
-  return (0);
-}
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_spectrum_params 
-   
-Arguments:    
-
-Returns:
-  dfudge  double  
-        the push through distance
-Description:  
-
-Notes:
-  The angles thetamin and
-  thetamax are all defined from the z axis, so that an angle of 0
-  is a flow that is perpeindicular to to the disk and one that is
-  close to 90 degrees will be parallel to the plane of the disk
-  geo.wind_thetamin and max are defined in the routines that initialize
-  the various wind models, e. g. get_sv_wind_parameters. These
-  have been called at this point.  
-
-  z is the place where the windcone intercepts the z axis
-  dzdr is the slope 
-
-  111124 fixed notes on this - ksl
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
-
-
-
-
-
-
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  setup_created_files 
-   
-Arguments:    
-
-Returns:
-
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
-
-int
-setup_created_files ()
-{
-  int opar_stat;
-
-  opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
-				   the assumption is that we are reading from the command line */
-
-  if (strncmp (files.root, "dummy", 5) == 0)
-    {
-      Log
-	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
-    }
-
-  else if (strncmp (files.root, "stdin", 5) == 0
-	   || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
-	   || strlen (files.root) == 0)
-    {
-      strcpy (files.root, "mod");
-      Log
-	("Proceeding in interactive mode\n Output files will have rootname mod\n");
-    }
-
-  else
-    {
-      strcpy (files.input, files.root);
-      strcat (files.input, ".pf");
-
-      if ((opar_stat = opar (files.input)) == 2)
-	{
-	  Log ("Reading data from file %s\n", files.input);
-	}
-      else
-	{
-	  Log ("Creating a new parameter file %s\n", files.input);
-	}
-
-    }
-
-
-  /* Now create the names of all the files which will be written.  Note that some files
-     have the same root as the input file, while others have a generic name of python.
-     This is intended so that files which you really want to keep have unique names, while
-     those which are for short-term diagnostics are overwritten.  ksl 97aug. */
-
-  strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
-
-  strcpy (files.wspec, files.root);  //generated photons
-  strcpy (files.lwspec, files.root);  //generated photon in log space
-  
-  strcpy (files.wspec_wind, files.root);
-  strcpy (files.lwspec_wind, files.root);
-  
-  strcpy (files.spec, files.root);  
-  strcpy (files.lspec, files.root);  
-  
-  strcpy (files.spec_wind, files.root);  
-  strcpy (files.lspec_wind, files.root); 
-  
-  
-  
-
-  strcpy (files.windrad, "python");
-  strcpy (files.windsave, files.root);
-  strcpy (files.specsave, files.root);
-
-  /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
-  strcpy (files.phot, files.diagfolder);
-  strcpy (files.disk, files.diagfolder);
-  strcat (files.phot, "python");
-  strcat (files.disk, files.root);
-
-  strcat (files.wspec, ".spec_tot");
-  strcat (files.lwspec, ".log_spec_tot");
-  
-  strcat (files.wspec_wind, ".spec_tot_wind");
-  strcat (files.lwspec_wind, ".log_spec_tot_wind");
-  
-  
-  strcat (files.spec, ".spec");
-  strcat (files.lspec, ".log_spec");
-
-  strcat (files.spec_wind, ".spec_wind");
-  strcat (files.lspec_wind, ".log_spec_wind");
-  
-  
-  strcat (files.windrad, ".wind_rad");
-  strcat (files.windsave, ".wind_save");
-  strcat (files.specsave, ".spec_save");
-  strcat (files.phot, ".phot");
-  strcat (files.disk, ".disk.diag");
-
-
-  return (opar_stat);
-}
-
-
-
-
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_standard_care_factors provides more control over how the program is
-  run
-   
-Arguments:    
-
-Returns:
-
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
-
-int
-get_standard_care_factors ()
-{
-  int istandard;
-  istandard = 1;
-  SMAX_FRAC = 0.5;
-  DENSITY_PHOT_MIN = 1.e-10;
-
-  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
-
-  if (modes.iadvanced)
-    {
-      rdint ("Use.standard.care.factors(1=yes)", &istandard);
-
-      if (!istandard)
-	{
-	  rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-	  rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
-		  &DENSITY_PHOT_MIN);
-	  rdint ("Keep.photoabs.during.final.spectrum(1=yes)",
-		 &modes.keep_photoabs);
-	}
-    }
-  return (0);
 }
