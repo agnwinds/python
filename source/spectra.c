@@ -317,7 +317,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   lfreqmax = log10 (freqmax);
   ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
-
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
     if ((j = p[nphot].nscat) < 0 || j > MAXSCAT)
@@ -330,7 +329,8 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     else
       nres[j]++;
 
-    /* Determine whether this is a wind photon, that is was it created in the
+    /*
+     * Determine whether this is a wind photon, that is was it created in the
      * wind or scattered by the wind
      */
 
@@ -362,7 +362,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       k1_orig = NWAVE - 1;
     }
 
-
     /* lines to work out where we are in a normal spectrum with linear spacing */
     k = (p[nphot].freq - freqmin) / dfreq;
     if (k < 0)
@@ -393,7 +392,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       k_orig = NWAVE - 1;
     }
 
-
     xxspec[SPEC_CREATED].f[k_orig] += p[nphot].w_orig;  /* created spectrum with original weights and wavelengths */
     xxspec[SPEC_CREATED].lf[k1_orig] += p[nphot].w_orig;        /* logarithmic created spectrum */
     if (iwind)
@@ -401,7 +399,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       xxspec[SPEC_CREATED].f_wind[k_orig] += p[nphot].w_orig;
       xxspec[SPEC_CREATED].lf_wind[k1_orig] += p[nphot].w_orig;
     }
-
 
     if ((i = p[nphot].istat) == P_ESCAPE)
     {
@@ -475,7 +472,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
           if (((mscat = xxspec[n].nscat) > 999 ||
                p[nphot].nscat == mscat ||
                (mscat < 0 && p[nphot].nscat >= (-mscat))) && ((mtopbot = xxspec[n].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
-
           {
             if (xxspec[n].mmin < x1 && x1 < xxspec[n].mmax)
             {
@@ -488,7 +484,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
               }
             }
           }
-
         }
       }
     }
@@ -505,7 +500,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     }
 
     if (p[nphot].nscat > 0 || p[nphot].nrscat > 0)
-
     {
       xxspec[SPEC_SCATTERED].f[k] += p[nphot].w;        /* j is the number of scatters so this constructs */
       xxspec[SPEC_SCATTERED].lf[k1] += p[nphot].w;      /* logarithmic j is the number of scatters so this constructs */
@@ -524,8 +518,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       nstat[NSTAT - 1]++;
     else
       nstat[i]++;
-
-
   }
 
 
