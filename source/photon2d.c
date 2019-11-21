@@ -139,7 +139,6 @@ translate_in_space (pp)
      PhotPtr pp;
 {
   double ds, delta, s, smax;
-  //OLD double x;
   int ndom, ndom_next;
   struct photon ptest;
   int ifail;
@@ -148,7 +147,7 @@ translate_in_space (pp)
 
   /* For IMPORT, although we have reached the edge of the wind, we may be in a cell that is
    * not really in the wind, so we have to address this situtation here.  The first problem
-   * we have though is that we do not know hat domain we are in.*/
+   * we have though is that we do not know what domain we are in.*/
 
   if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
   {
@@ -750,7 +749,7 @@ walls (p, pold, normal)
     hit_star = TRUE;
   }
 
-  else if (s < VERY_BIG && ds_to_sphere (geo.rstar, p) == VERY_BIG)
+  else if (s < VERY_BIG && ds_to_sphere (geo.rstar, p) == VERY_BIG && dot (p->lmn, pold->lmn) > 0.99)
   {
     /* then we hit the star somewhere in between */
     hit_star = TRUE;
@@ -821,7 +820,10 @@ walls (p, pold, normal)
     s = (-(pold->x[2])) / (pold->lmn[2]);
 
     if (s < 0 && fabs (pold->x[2]) < wmain[pold->grid].dfudge && pold->lmn[2] * p->lmn[2] < 0.0)
+    {
+      Error ("walls: Reposition error\n");
       return (p->istat = P_REPOSITION_ERROR);
+    }
 
     if (s < 0)
     {

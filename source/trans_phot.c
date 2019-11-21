@@ -302,15 +302,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        which case it reach the inner edge and was reabsorbed. If the photon escapes then we leave the photon at the position
        of it's last scatter.  In most other cases though we store the final position of the photon. */
 
-
     istat = translate (w, &pp, tau_scat, &tau, &nres);
+
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
        not yet eliminated it from translate. ?? 02jan ksl */
 
     icell++;
     istat = walls (&pp, p, normal);
     /* pp is where the photon is going, p is where it was  */
-
 
     if (istat == -1)
     {
@@ -654,10 +653,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
    * outer boundary of the calculation you would want pp.  So one should keep both lines below, and comment
    * out the one you do not want. */
 
-//OLD  if (modes.save_photons)
-//OLD    {
+  if (modes.save_photons && (istat == P_HIT_STAR || istat == P_HIT_DISK))
+  {
 //OLD      // save_photons (p, "Final");  // Where the last position of the photon in the wind
-//OLD      save_photons (&pp, "Final"); //The position of the photon where it exits the calculation
-//OLD    }
+    save_photons (&pp, "Final");        //The position of the photon where it exits the calculation
+  }
   return (0);
 }

@@ -101,7 +101,7 @@ int NPHOT_MAX;                  /* The maximum number of photon bundles created 
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
 #define NWAVE  			  10000 //This is the number of wavelength bins in spectra that are produced
-#define MAXSCAT 			1000
+#define MAXSCAT 			2000
 
 /* Define the structures */
 
