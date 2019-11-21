@@ -4,6 +4,9 @@
 
 #endif
 
+#define UV_low 7.4e14 //The lower frequency bound of the UV band as defined in IOS 21348
+#define UV_hi 3e16 //The lower frequency bound of the UV band as defined in IOS 21348
+
 int q_test_count;
 
 int np_mpi_global;              /// Global variable which holds the number of MPI processes
@@ -866,14 +869,10 @@ typedef struct plasma
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
 
-
-  /* banded, directional fluxes */
-  double F_x[NXBANDS];
-  double F_y[NXBANDS];
-  double F_z[NXBANDS];
-
-
-
+  /* banded, directional fluxes */  
+  double F_vis[3];
+  double F_UV[3];
+  double F_Xray[3];
 
   double j_direct, j_scatt;     /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double ip_direct, ip_scatt;   /* 1309 NSH mean intensity due to direct photons and scattered photons */
@@ -918,7 +917,7 @@ typedef struct plasma
 
 
 
-  double gain;                  /* The gain being used in interations of the structure */
+  double gain;                  /* The gain being used in iterations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
                                                            The first two are the fractional changes in t_r, t_e between this and the last cycle. The third
                                                            number is the fraction between heating and cooling divided by the sum of the 2       */
@@ -926,12 +925,15 @@ typedef struct plasma
                                            is 0 if the fractional change or in the case of the last check error is less than a value, currently
                                            set to 0.05.  ksl 111126   
                                            NSH 130725 - this number is now also used to say if the cell is over temperature - it is set to 2 in this case   */
-  int converge_whole, converging;       /* converge_whole is the sum of the indvidual convergence checks.  It is 0 if all of the
-                                           convergence checks indicated convergence. 
-                                           converging is an
-                                           indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
+  int converge_whole, converging;       /* converge_whole is the sum of the individual convergence checks.  It is 0 if all of the convergence checks indicated
+                                           convergence. converging is an indicator of whether the program thought the cell is on the way to convergence 0
+                                           implies converging */
 
-
+#define CELL_CONVERGING 0               /* Indicator for a cell which is considered converging - temperature is oscillating and decreasing */
+#define CELL_NOT_CONVERGING 1           /* Indicator for a cell which is considered not converging (temperature is shooting off in one direction) */
+#define CONVERGENCE_CHECK_PASS 0        /* Indicator for that the cell has passed a convergence check */
+#define CONVERGENCE_CHECK_FAIL 1        /* Indicator for that the cell has failed a convergence check */
+#define CONVERGENCE_CHECK_OVER_TEMP 2   /* Indicator for a cell that its electron temperature is more than TMAX */
 
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
@@ -1354,7 +1356,7 @@ xband;
 #define NTEMPS	60              // The number of temperatures which are stored in each fbstruct
                                 /* NSH this was increased from 30 to 60 to take account of 3 extra OOM 
                                    intemperature we wanted to have in fb */
-#define NFB	10              // The maximum number of frequency intervals for which the fb emission is calculated
+#define NFB	20              // The maximum number of frequency intervals for which the fb emission is calculated
 
 struct fbstruc
 {

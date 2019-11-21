@@ -888,6 +888,8 @@ init_freebound (t1, t2, f1, f2)
   double xinteg_fb ();
   int nput;
 
+//OLD  Log ("init_freebound %10.3e %10.3e %10.3e %10.3e\n", t1, t2, f1, f2);
+
 
   if (nfb == 0)
   {
@@ -930,7 +932,11 @@ been calculated for these conditions, and if so simply return.
 */
   i = 0;
   while ((freebound[i].f1 != f1 || freebound[i].f2 != f2) && i < nfb)
+  {
+
+//OLD    Log ("init_freebound: test: %d %10.3e %10.3e Want  %10.3e %10.3e\n", i, freebound[i].f1, freebound[i].f2, f1, f2);
     i++;
+  }
 
   if (i < nfb)
   {
@@ -938,7 +944,7 @@ been calculated for these conditions, and if so simply return.
   }
 
 /* We have to calculate a new set of freebound data */
-  if (i == NFB - 1)
+  if (i == NFB)
   {
     /* We've filled all the available space in freebound so we start recycling elements, assuming that the latest
      * ones are still likelyt to be needed
@@ -963,7 +969,7 @@ on the assumption that the fb information will be reused.
 */
 
 
-  Log ("init_freebound: Creating recombination emissivites between %e and %e\n", f1, f2);
+  Log ("init_freebound: Creating recombination emissivites between %e and %e in stucture element %d\n", f1, f2, nput);
 
 
   freebound[nput].f1 = f1;
@@ -1571,13 +1577,10 @@ gs_rrate (nion, T)
  **********************************************************/
 
 int
-sort_and_compress (array_in, array_out, npts)
-     double *array_in, *array_out;
-     int npts;
+sort_and_compress (double *array_in, double *array_out, int npts)
 {
   double *values;
   int n, nfinal;
-  int compare_doubles ();
 
   values = calloc (sizeof (double), npts);
   for (n = 0; n < npts; n++)
@@ -1601,7 +1604,7 @@ sort_and_compress (array_in, array_out, npts)
     }
   }
 
-
+  free (values);
 
   return (nfinal);
 }

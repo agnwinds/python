@@ -330,6 +330,8 @@ create_master_table (ndom, rootname)
   }
 
 
+  fclose (fptr);
+
   return (0);
 }
 
@@ -538,6 +540,8 @@ create_heat_table (ndom, rootname)
     }
   }
 
+  fclose (fptr);
+
   return (0);
 }
 
@@ -730,6 +734,8 @@ create_convergence_table (ndom, rootname)
     }
   }
 
+  fclose (fptr);
+
   return (0);
 }
 
@@ -889,6 +895,7 @@ create_ion_table (ndom, rootname, iz, ion_switch)
     }
   }
 
+  fclose (fptr);
   return (0);
 
 }

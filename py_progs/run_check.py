@@ -222,9 +222,12 @@ def check_completion(root):
         message='%s ionization cycles were completed in %s s' % (word[8],word[5])
         ion_time=eval(word[5])
         complete_message.append(message)
-        word=spec_string.split()
-        spec_time=eval(word[5])
-        message='%s   spectrum cycles were completed in %s s' % (word[8],spec_time-ion_time)
+        try:
+            word=spec_string.split()
+            spec_time=eval(word[5])
+            message='%s   spectrum cycles were completed in %s s' % (word[8],spec_time-ion_time)
+        except:
+            message='There were no spectrum cycles for this run'
         complete_message.append(message)
 
     else:

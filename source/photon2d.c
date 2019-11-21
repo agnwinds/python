@@ -553,7 +553,6 @@ The choice of SMAX_FRAC can affect execution time.*/
     one = &w[p->grid];
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
-    xplasma->ntot++;
 
 
     if (geo.ioniz_or_extract == 1)
@@ -567,6 +566,7 @@ The choice of SMAX_FRAC can affect execution time.*/
       /* frequency weighted by the weights and distance in the shell.  See eqn 2 ML93 */
       xplasma->ave_freq += p->freq * p->w * ds_current;
 
+      xplasma->ntot++;
     }
 
   }
