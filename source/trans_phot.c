@@ -177,11 +177,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
          equal to 1/nnscat */
 
       pextract.w *= p[nphot].nnscat / p_norm;
-
-//OLD      if (sane_check (pextract.w))
-//OLD      {
-//OLD        Error ("trans_phot: sane_check photon %d has weight %e before extract\n", nphot, pextract.w);
-//OLD      }
       extract (w, &pextract, pextract.origin);
 
 
@@ -280,7 +275,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   struct photon pp, pextract;
   struct photon pp_reposition_test;
   int nnscat;
-//OLD  int nerr;
   double p_norm, tau_norm;
   double x_dfudge_check[3];
   int ndom;
@@ -459,22 +453,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       nnscat = 0;
       nnscat++;
       ptr_nres = &nres;
-
-//OLD      if (sane_check (pp.w))
-//OLD      {
-//OLD        Error ("trans_phot:sane_check photon %d has weight %e before scatter\n", p->np, pp.w);
-//OLD      }
-//OLD      if ((nerr = scatter (&pp, ptr_nres, &nnscat)) != 0)
-//OLD      {
-//OLD        Error ("trans_phot: Bad return from scatter %d at point 2", nerr);
-//OLD      }
       pp.nscat++;
 
 
-//OLD      if (sane_check (pp.w))
-//OLD      {
-//OLD        Error ("trans_phot:sane_check photon %d has weight %e after scatter\n", p->np, pp.w);
-//OLD      }
 
       /* SS June 04: During the spectrum calculation cycles, photons are thrown away when they interact with macro atoms or
          become k-packets. This is done by setting their weight to zero (effectively they have been absorbed into either
@@ -566,11 +547,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
            probability, which is equal to 1/nnscat */
 
         pextract.w *= nnscat / p_norm;
-
-//OLD        if (sane_check (pextract.w))
-//OLD        {
-//OLD          Error ("trans_phot: sane_check photon %d has weight %e before extract\n", p->np, pextract.w);
-//OLD        }
         extract (w, &pextract, PTYPE_WIND);     // Treat as wind photon for purpose of extraction
       }
 
@@ -587,7 +563,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
 
 
-      stuff_phot (&pp, p);      // At this point we know the old position is OK, and object should be in the wind 
+//Test      stuff_phot (&pp, p);      // At this point we know the old position is OK, and object should be in the wind 
       reposition (&pp);
 
       /* JM 1506 -- call walls again to account for instance where DFUDGE
@@ -603,7 +579,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (istat != p->istat)
       {
-        Log ("Status of %9d changed from %d ti %d on reposition\n", p->np, p->istat, istat);
+        Log ("Status of %9d changed from %d to %d on reposition\n", p->np, p->istat, istat);
       }
 
       /*
