@@ -4,8 +4,8 @@
 
 #endif
 
-#define UV_low 7.4e14 //The lower frequency bound of the UV band as defined in IOS 21348
-#define UV_hi 3e16 //The lower frequency bound of the UV band as defined in IOS 21348
+#define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
+#define UV_hi 3e16              //The lower frequency bound of the UV band as defined in IOS 21348
 
 int q_test_count;
 
@@ -869,7 +869,7 @@ typedef struct plasma
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
 
-  /* banded, directional fluxes */  
+  /* banded, directional fluxes */
   double F_vis[3];
   double F_UV[3];
   double F_Xray[3];
@@ -929,8 +929,8 @@ typedef struct plasma
                                            convergence. converging is an indicator of whether the program thought the cell is on the way to convergence 0
                                            implies converging */
 
-#define CELL_CONVERGING 0               /* Indicator for a cell which is considered converging - temperature is oscillating and decreasing */
-#define CELL_NOT_CONVERGING 1           /* Indicator for a cell which is considered not converging (temperature is shooting off in one direction) */
+#define CELL_CONVERGING 0       /* Indicator for a cell which is considered converging - temperature is oscillating and decreasing */
+#define CELL_NOT_CONVERGING 1   /* Indicator for a cell which is considered not converging (temperature is shooting off in one direction) */
 #define CONVERGENCE_CHECK_PASS 0        /* Indicator for that the cell has passed a convergence check */
 #define CONVERGENCE_CHECK_FAIL 1        /* Indicator for that the cell has failed a convergence check */
 #define CONVERGENCE_CHECK_OVER_TEMP 2   /* Indicator for a cell that its electron temperature is more than TMAX */
@@ -1198,12 +1198,21 @@ basis_cartesian;
 #define SPECTYPE_FNU        2
 #define D_SOURCE 100.0          // distance to the source in parsecs for genearating spectra
 
-#define MSPEC                            7
-int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or 
+int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or
                                    alternatively the number of spectra one has to work with.  Note that
                                    general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
                                    while elements higher than this will contain spectra as seen by different observers */
 
+#define MSPEC               7   /* The number of standard spectra - i.e. not user defined angles */
+#define SPEC_CREATED        0   /* The spectrum of the original weight before transmission through the wind */
+#define SPEC_EMITTED        1   /* The emitted spectrum - i.e. photons with their weights changed by transmission through the wind */
+#define SPEC_CENSRC         2   /* The emitted spectrum from photons emitted from the central source (if there is one) */
+#define SPEC_DISK           3   /* The emitted spectrum from photons emitted from the disk (if there is one) */
+#define SPEC_WIND           4   /* The emitted spectrum from photons emitted from the wind itself */
+#define SPEC_HITSURF        5   /* The spectrum for photons which hit the a surface and were absorbed - should be zero for when reflection
+                                 * is turned on */
+#define SPEC_SCATTERED      6   /* The spectrum of photons which were scattered at least once in the wind - the weight used is the final
+                                 * weight after transmission through the wind */
 
 int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
 
@@ -1244,10 +1253,7 @@ spectrum_dummy, *SpecPtr;
 
 SpecPtr xxspec;
 
-
-
-
-/* Parameters used only by py_wind 
+/* Parameters used only by py_wind
  * py_wind_projecti	0 -> simply print the various parameters without 
  * 			atempting toproject onto a yz plane
  * 			1 -> project onto a yz plane.
