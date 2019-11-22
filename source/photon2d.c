@@ -549,15 +549,14 @@ The choice of SMAX_FRAC can affect execution time.*/
        subroutine radiation can be avoided.
      */
 
-
     one = &w[p->grid];
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
-    xplasma->ntot++;
-
 
     if (geo.ioniz_or_extract == 1)
     {
+      xplasma->ntot++;  // EP 11-19: Moved so only increments during ionisation cycles
+
       /* For an ionization cycle */
       bf_estimators_increment (one, p, ds_current);
 
@@ -568,7 +567,6 @@ The choice of SMAX_FRAC can affect execution time.*/
       xplasma->ave_freq += p->freq * p->w * ds_current;
 
     }
-
   }
   else
   {

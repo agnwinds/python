@@ -1577,13 +1577,10 @@ gs_rrate (nion, T)
  **********************************************************/
 
 int
-sort_and_compress (array_in, array_out, npts)
-     double *array_in, *array_out;
-     int npts;
+sort_and_compress (double *array_in, double *array_out, int npts)
 {
   double *values;
   int n, nfinal;
-  int compare_doubles ();
 
   values = calloc (sizeof (double), npts);
   for (n = 0; n < npts; n++)
@@ -1607,7 +1604,7 @@ sort_and_compress (array_in, array_out, npts)
     }
   }
 
-
+  free (values);
 
   return (nfinal);
 }

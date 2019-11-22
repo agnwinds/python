@@ -456,10 +456,6 @@ radiation (p, ds)
       xplasma->heat_auger += z * frac_auger;
       xplasma->heat_tot += z * frac_auger;      //All the inner shell opacities
 
-      /* Calculate the number of H ionizing photons, see #255 */
-      if (freq > (RYD2ERGS / PLANCK))
-        xplasma->nioniz++;
-
       q = (z) / (PLANCK * freq * xplasma->vol);
       /* So xplasma->ioniz for each species is just 
          (energy_abs)*kappa_h/kappa_tot / PLANCK*freq / volume
@@ -948,6 +944,14 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
   if (HEV * p->freq > 13.6)     // only record if above H ionization edge
   {
+
+    /*
+     * Calculate the number of H ionizing photons, see #255
+     * EP 11-19: moving the number of ionizing photons counter into this
+     * function so it will be incremented for both macro and non-macro modes
+     */
+
+    xplasma->nioniz++;
 
     /* IP needs to be radiation density in the cell. We sum contributions from
        each photon, then it is normalised in wind_update. */
