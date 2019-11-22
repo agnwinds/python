@@ -676,15 +676,14 @@ double xsouth[] = {
 
 /**********************************************************/
 /**
- * @brief      determines whether the photon has encountered the star of disk or
- * reached the edges of the grid and returns the appropriate
+ * @brief      determines whether the photon has reached a boundary, the central object, the disk or
+ * reached the edges of the wind and, if so, modify the position of the photon, and return the appropriate
  * status.
  *
  * @param [in, out] PhotPtr  p   A photon at its new proposed location.  On exiting the routine
- * this will contain the position of the photon after taking wind boundaries (e.g wind cones)
+ * this will contain the position of the photon after taking boundaries (e.g wind cones)
  * into account.
- * @param [in, out] PhotPtr  pold   the current and previous description of the photon bundle.
- * beore the lates movee
+ * @param [in] PhotPtr  pold   the previous position and direction of the photon. .
  * @param [out] double *  normal   A vector when the star or disk has been hit, which contains
  * the normal for the reflecting surface at the point the photon encountered the the boundary
  * @return   A status
@@ -709,7 +708,7 @@ double xsouth[] = {
  * location of p is either at the edge of a cell, or at the position of a resonance.  So pold should
  * be a valid position for the photon, but p may need to be adjusted.
  *
- * If one of the walls has been hit, the routine should have moved the photon to that wall, but not
+ * If one of the walls has been hit, the moves the photon back to that wall, but not
  * othewise changed it.
  *
  * The routine also calculates the normal to the surface that was hit, which is intended to
@@ -717,8 +716,6 @@ double xsouth[] = {
  *
  * ### Notes ###
  *
- * This really does determine whether the photon is in the grid, as opposed to whether the photon
- * has reached a radial distance geo.rwind.  I am not sure whether this is what we want???.
  *
  **********************************************************/
 int
@@ -739,7 +736,16 @@ walls (p, pold, normal)
    * coordinate grid.
    */
 
+  /* The next error indicates that pold has not been updated for
+     to be in the same direction as p.  This violates the spirit
+     of the routine,and one needs to find out why this happened.
+     ksl
+   */
 
+  if (dot (p->lmn, pold->lmn) < 0.99)
+  {
+    Log ("Error: walls: the direction p and pold differ\n");
+  }
 
   s = ds_to_sphere (geo.rstar, pold);
 
@@ -785,13 +791,11 @@ walls (p, pold, normal)
       {
         Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n", pold->np, pold->x[0],
                pold->x[1], pold->x[2], s);
-        //OLD s = ds_to_disk (pold, 0);
       }
       else if (s == VERY_BIG)
       {
         Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e (%11.4e/%11.4e %11.4e/%11.4e %11.4e) \n", pold->np,
                pold->x[0], pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]), z, ds_to_disk (pold, 1));
-        //OLD s = ds_to_disk (pold, 0);
         save_photons (pold, "Disk");
       }
       stuff_phot (pold, p);
