@@ -716,6 +716,9 @@ double xsouth[] = {
  *
  * ### Notes ###
  *
+ * Note that p and pold must be travelling in the same directon to work properly.  There is an
+ * error check at the beginning of the routine to make sure this is the case.  
+ *
  *
  **********************************************************/
 int
