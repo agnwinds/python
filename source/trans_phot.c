@@ -450,9 +450,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          decide what the direction of emission is before returning here.
        */
 
-
-      nnscat = 0;
-      nnscat++;
+      nnscat = 1;
       pp.nscat++;
 
       ierr = scatter (&pp, &current_nres, &nnscat);
