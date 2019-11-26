@@ -267,9 +267,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 {
   double tau_scat, tau;
   int istat;
+  int ierr;
   double rrr;
   int icell;
-  int nres, *ptr_nres;
+  int current_nres;
   int kkk, n;
   double weight_min;
   struct photon pp, pextract;
@@ -304,7 +305,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        which case it reach the inner edge and was reabsorbed. If the photon escapes then we leave the photon at the position
        of it's last scatter.  In most other cases though we store the final position of the photon. */
 
-    istat = translate (w, &pp, tau_scat, &tau, &nres);
+    istat = translate (w, &pp, tau_scat, &tau, &current_nres);
 
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
        not yet eliminated it from translate. ?? 02jan ksl */
@@ -452,9 +453,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       nnscat = 0;
       nnscat++;
-      ptr_nres = &nres;
       pp.nscat++;
 
+      ierr = scatter (&pp, &current_nres, &nnscat);
+      if (ierr != 0)
+        Error ("trans_phot: bad return from scatter %d at point 2\n", ierr);
 
 
       /* SS June 04: During the spectrum calculation cycles, photons are thrown away when they interact with macro atoms or
@@ -480,7 +483,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       // XXXX ??? Need to modify line_heat for multiple scattering but not yet
       // Condition that nres < nlines added (SS)
 
-      if (nres > -1 && nres < nlines)
+      if (current_nres > -1 && current_nres < nlines)
       {
         pp.nrscat++;
 
@@ -489,11 +492,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           track_scatters (&pp, wmain[n].nplasma, "Resonant");
 
 
-        plasmamain[wmain[n].nplasma].scatters[line[nres].nion] += 1;
+        plasmamain[wmain[n].nplasma].scatters[line[current_nres].nion] += 1;
 
         if (geo.rt_mode == RT_MODE_2LEVEL)      // only do next line for non-macro atom case
         {
-          line_heat (&plasmamain[wmain[n].nplasma], &pp, nres);
+          line_heat (&plasmamain[wmain[n].nplasma], &pp, current_nres);
         }
 
         if (pp.w < weight_min)
