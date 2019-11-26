@@ -292,7 +292,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   n = 0;                        /* Avoid 03 warning */
 
-
+  save_photons (&pp, "emission");
 
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
 
@@ -305,6 +305,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        which case it reach the inner edge and was reabsorbed. If the photon escapes then we leave the photon at the position
        of it's last scatter.  In most other cases though we store the final position of the photon. */
 
+    pp.ds = 0;
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
 
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
@@ -312,6 +313,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     icell++;
     istat = walls (&pp, p, normal);
+    if (istat == P_HIT_STAR)
+      Log ("aaaa THIS IS FINE\n");
     /* pp is where the photon is going, p is where it was  */
 
     if (istat == -1)
@@ -564,7 +567,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
 
 
-//Test      stuff_phot (&pp, p);      // At this point we know the old position is OK, and object should be in the wind 
+//Test      stuff_phot (&pp, p);      // At this point we know the old position is OK, and object should be in the wind
+
+      save_photons (&pp, "before_reposition");
+
       reposition (&pp);
 
       /* JM 1506 -- call walls again to account for instance where DFUDGE
@@ -576,7 +582,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          but not escaped. translate_in_space will take care of this next time
          round. All a bit convoluted but should work. */
 
+      save_photons (&pp, "after_reposition");
+
       istat = walls (&pp, p, normal);
+
+      if (istat == P_HIT_STAR)
+        Log ("aaaa THIS IS BAAAAAAAAAAD\n");
 
       if (istat != p->istat)
       {
@@ -637,7 +648,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     p->nscat = pp.nscat;
     p->nrscat = pp.nrscat;
     p->w = pp.w;                // Assure that final weight of photon is returned.
-
+    save_photons (p, "trans_phot");
   }
   /* This is the end of the loop over a photon */
 

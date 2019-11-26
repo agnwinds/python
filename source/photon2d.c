@@ -529,6 +529,7 @@ The choice of SMAX_FRAC can affect execution time.*/
 /* Note that ds_current does not alter p in any way */
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
+  p->ds = ds_current;
 
   if (p->nres < 0)
     xplasma->nscat_es++;
@@ -739,32 +740,12 @@ walls (p, pold, normal)
    * coordinate grid.
    */
 
-  /* The next error indicates that pold has not been updated for
-     to be in the same direction as p.  This violates the spirit
-     of the routine,and one needs to find out why this happened.
-     ksl
-   */
-
-  if (dot (p->lmn, pold->lmn) < 0.99)
-  {
-    Log ("Error: walls: the direction p and pold differ\n");
-  }
-
   s = ds_to_sphere (geo.rstar, pold);
 
-  if ((r = dot (p->x, p->x)) < geo.rstar_sq)
-  {
-    /* Then the photon is inside the star */
-    hit_star = TRUE;
-  }
+//  if (p->ds > s)
+//    Log ("ds %e s %e\n", p->ds, s);
 
-  else if (s < VERY_BIG && ds_to_sphere (geo.rstar, p) == VERY_BIG && dot (p->lmn, pold->lmn) > 0.99)
-  {
-    /* then we hit the star somewhere in between */
-    hit_star = TRUE;
-  }
-
-  if (hit_star == TRUE)
+  if (dot (p->x, p->x) < geo.rstar_sq || p->ds > s)
   {
     stuff_phot (pold, p);
     move_phot (p, s);
@@ -772,6 +753,22 @@ walls (p, pold, normal)
     return (p->istat = P_HIT_STAR);
   }
 
+//  if ((r = dot (p->x, p->x)) < geo.rstar_sq)
+//  {
+//    hit_star = TRUE;
+//  }
+//  else if (s < VERY_BIG && ds_to_sphere (geo.rstar, p) == VERY_BIG)     //  && dot (p->lmn, pold->lmn) > 0.99)
+//  {
+//    /* then we hit the star somewhere in between */
+//    hit_star = TRUE;
+//  }
+//  if (hit_star == TRUE)
+//  {
+//    stuff_phot (pold, p);
+//    move_phot (p, s);
+//    stuff_v (p->x, normal);
+//    return (p->istat = P_HIT_STAR);
+//  }
 
   /* Check to see if it has hit the disk.
    *
@@ -869,7 +866,9 @@ walls (p, pold, normal)
   rho_sq = (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
   if (rho_sq > geo.rmax_sq)
     return (p->istat = P_ESCAPE);       /* The photon is coursing through the universe */
+
   if (fabs (p->x[2]) > geo.rmax)
     return (p->istat = P_ESCAPE);
+
   return (p->istat);            /* The photon is still in the wind */
 }
