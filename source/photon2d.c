@@ -730,7 +730,6 @@ walls (p, pold, normal)
   double xxx[3];
   double s, z;
   double theta, phi;
-  int hit_star = FALSE;
 
   /* Check to see if the photon has hit the star. If so
    * put the photon at the star surface and use that position
@@ -739,9 +738,10 @@ walls (p, pold, normal)
    * coordinate grid.
    */
 
+  r = dot (p->x, p->x);
   s = ds_to_sphere (geo.rstar, pold);
 
-  if (dot (p->x, p->x) < geo.rstar_sq || p->ds > s)
+  if (r < geo.rstar_sq || p->ds > s)
   {
     stuff_phot (pold, p);
     move_phot (p, s);
