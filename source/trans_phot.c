@@ -311,8 +311,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     icell++;
     istat = walls (&pp, p, normal);
-    if (istat == P_HIT_STAR)
-      Log ("aaaa THIS IS FINE\n");
     /* pp is where the photon is going, p is where it was  */
 
     if (istat == -1)
