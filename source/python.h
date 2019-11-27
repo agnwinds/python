@@ -1152,7 +1152,7 @@ typedef struct photon
   int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
                                    so we can write out details of where the photon goes */
   double path;                  /* SWM - Photon path length */
-  double ds;    // EP 11/19 - the distance ds a photon has moved between an old and new position
+  double ds;    // EP 11/19 - the distance of the path the photon previously moved
 }
 p_dummy, *PhotPtr;
 
