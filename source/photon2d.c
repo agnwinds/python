@@ -198,6 +198,7 @@ translate_in_space (pp)
     }
 
   }
+
   move_phot (pp, ds + DFUDGE);
 
 
@@ -529,7 +530,6 @@ The choice of SMAX_FRAC can affect execution time.*/
 /* Note that ds_current does not alter p in any way */
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-  p->ds = ds_current;
 
   if (p->nres < 0)
     xplasma->nscat_es++;
@@ -574,7 +574,6 @@ The choice of SMAX_FRAC can affect execution time.*/
   {
     radiation (p, ds_current);
   }
-
 
   move_phot (p, ds_current);
 
@@ -742,9 +741,6 @@ walls (p, pold, normal)
 
   s = ds_to_sphere (geo.rstar, pold);
 
-//  if (p->ds > s)
-//    Log ("ds %e s %e\n", p->ds, s);
-
   if (dot (p->x, p->x) < geo.rstar_sq || p->ds > s)
   {
     stuff_phot (pold, p);
@@ -752,23 +748,6 @@ walls (p, pold, normal)
     stuff_v (p->x, normal);
     return (p->istat = P_HIT_STAR);
   }
-
-//  if ((r = dot (p->x, p->x)) < geo.rstar_sq)
-//  {
-//    hit_star = TRUE;
-//  }
-//  else if (s < VERY_BIG && ds_to_sphere (geo.rstar, p) == VERY_BIG)     //  && dot (p->lmn, pold->lmn) > 0.99)
-//  {
-//    /* then we hit the star somewhere in between */
-//    hit_star = TRUE;
-//  }
-//  if (hit_star == TRUE)
-//  {
-//    stuff_phot (pold, p);
-//    move_phot (p, s);
-//    stuff_v (p->x, normal);
-//    return (p->istat = P_HIT_STAR);
-//  }
 
   /* Check to see if it has hit the disk.
    *

@@ -245,8 +245,6 @@ init_extra_diagnostics ()
   {
     epltptr = fopen ("python.ext.txt", "w");
     eplinit = 1;
-    fprintf (epltptr, "PHOTON, geo.wcycle, p->np, p->freq, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], p->grid, "
-             "p->istat, p->origin, p->nres, comment\n");
   }
 
   ncstat = 0;                   /*Zero the counter for the number of cells to be tracked */
