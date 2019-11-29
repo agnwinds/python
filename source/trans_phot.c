@@ -118,13 +118,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
     Log_flush ();
 
-    /* Verify that the weights are real, a check that is proably unnecessary */
-
-//OLD    if (sane_check (p[nphot].w))
-//OLD    {
-//OLD      Error ("trans_phot:sane_check photon %d has weight %e\n", nphot, p[nphot].w);
-//OLD    }
-
     stuff_phot (&p[nphot], &pp);
     absorb_reflect = geo.absorb_reflect;
 
