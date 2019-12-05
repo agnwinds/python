@@ -1036,10 +1036,6 @@ scatter (p, nres, nnscat)
   stuff_phot (p, &pold);
   n = where_in_grid (ndom, pold.x);     // Find out where we are
 
-  vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
-  v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //This is the photon frequency in the comoving frame
-
   if (n < 0)
   {
     Error ("scatter: Trying to scatter a photon in grid cell %d\n", n);
@@ -1057,7 +1053,8 @@ scatter (p, nres, nnscat)
      absorption (flagged by +ve integer < NLINES), bf absorption
      (flagged by +ve integer > NLINES) and ff absorption (flagged -2). (SS) */
 
-  /* If the macro atom method is being used then the following section must be
+  /* BEGINNING OF SECTION FOR HANDLING MACRO-ATOMS 
+     If the macro atom method is being used then the following section must be
      performed to select a macro atom deactivation process. If not then the
      deactivation process is always the same as the activation process and so
      nothing needs to be done. */
@@ -1238,14 +1235,10 @@ scatter (p, nres, nnscat)
     }
   }
 
-  /* So at this point we have completed all the bits that are specific to the macro approach. 54b--ksl */
+  /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
 
-  /* SS Apr 04: I've moved this next block up so that nres is set correctly for the call to randvec */
+  /* Set nres  correctly for the call to randvec */
 
-  /* Since the error check is commented out for good reason, we should just assign
-   * *nres to p->nres,  and be done with it.  ?? Stuart, assuming you agree just
-   * eliminate all the clutter here.  KSL  ??
-   */
   p->nres = *nres;              // Update the resonance number on a scatter
 
   /* SS July 04
@@ -1255,20 +1248,20 @@ scatter (p, nres, nnscat)
      For macro atoms the code above decides that emission will occur in the line - we now just need
      to use the thermal trapping model to choose the direction. */
 
-  if (*nres == -1)              //Its an electron scatter, so we will call compton to get a direction
+  if (*nres == -1)              //Its an electron scatter
   {
-    p->freq = freq_comoving;    //This is the photon frequency in the electron rest frame calculated earlier in the routine
-    compton_dir (p, xplasma);   //Get a new direction using the KN formula
-    v_dop = dot (p->lmn, v);    //Find the dot product of the new velocity with the wind
-    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observers frame
+    p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
+    compton_dir (p, xplasma);   // Get a new direction using the KN formula
+    v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
+    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame
 
   }
-
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {
-    /*  It was either an electron scatter, bf emission or ff emission so the  distribution is isotropic,
-       or it was a line photon but we want isotropic scattering anyway.  */
-    randvec (z_prime, 1.0);     /* Get a new direction for the photon */
+    /*  ff emission (-2) , bf emission (>NLINES) or 
+       or it was a line photon but we want isotropic scattering anyway. Note
+       that ff and bf are only treated as scattering processes in macro-atom mode */
+    randvec (z_prime, 1.0);
     stuff_v (z_prime, p->lmn);
   }
   else
@@ -1285,46 +1278,38 @@ scatter (p, nres, nnscat)
 
 
 
-  vwind_xyz (ndom, p, v);       /* Get the velocity vector for the wind */
+//OLD (We already calculated this)  vwind_xyz (ndom, p, v);       /* Get the velocity vector for the wind */
 
   if (*nres != -1)              //Only do this if its not an electron scatter, otherwise we have already dealt with this
     doppler (&pold, p, v, *nres);
 
 
 
-/* We estimate velocities by interpolating between the velocities at the edges of the cell based
-on the photon direction.  We have now changed the direction of the photon, and so we may not
-be at the resoance as calculated this way.  reposition moves the photon to the resonance using
-the new velocity
-
-Note that one cannot fudge the frequencies, e.g. for some kind of thermal
-broadening  before this or else one will defeat the purpose of reposition.
-
-*/
-
-
-
 /*Now calculate the momentum transfer.  What follows appears to be
 correct only if there was no energy absorbed at the scattering site.
-?? The rest of this is only needed in the ionization cycle.  Need to eliminate in the
-detailed spectrum calculation ??
+The rest of this is only needed during ionization cycles, before the wind itself
+if fixed.  
 */
 
-  stuff_v (pold.lmn, p_init);
-  renorm (p_init, pold.w / VLIGHT);
-  stuff_v (p->lmn, p_final);
-  renorm (p_final, p->w / VLIGHT);
-  vsub (p_final, p_init, dp);
-
-  project_from_xyz_cyl (pold.x, dp, dp_cyl);
-
-
-
-  if (pold.x[2] < 0)
-    dp_cyl[2] *= (-1);
-  for (i = 0; i < 3; i++)
+  if (geo.pcycle == 0)
   {
-    xplasma->dmo_dt[i] += dp_cyl[i];
+    stuff_v (pold.lmn, p_init);
+    renorm (p_init, pold.w / VLIGHT);
+    stuff_v (p->lmn, p_final);
+    renorm (p_final, p->w / VLIGHT);
+    vsub (p_final, p_init, dp);
+
+    project_from_xyz_cyl (pold.x, dp, dp_cyl);
+
+
+
+    if (pold.x[2] < 0)
+      dp_cyl[2] *= (-1);
+    for (i = 0; i < 3; i++)
+    {
+      xplasma->dmo_dt[i] += dp_cyl[i];
+    }
+
   }
 
 

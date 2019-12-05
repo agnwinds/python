@@ -398,10 +398,11 @@ iwind = -1 	Don't generate any wind photons at all
 
   if (geo.matom_radiation)
   {
-    /* JM 1408 -- only calculate macro atom emissivity if first cycle.
-       Otherwise have restarted run and can use saved emissivities */
-    /* This returns the specific luminosity
+    /* Only calculate macro atom emissivity during ionization cycles ant
+       at the beginning of the spectral cycles.  Otherwise we can 
+       can use the saved emissivities.  The routine  returns the specific luminosity
        in the spectral band of interest */
+
     if (geo.pcycle == 0)
     {
       geo.f_matom = get_matom_f (CALCULATE_MATOM_EMISSIVITIES);
@@ -413,7 +414,7 @@ iwind = -1 	Don't generate any wind photons at all
     geo.f_kpkt = get_kpkt_f (); /* This returns the specific luminosity
                                    in the spectral band of interest */
 
-    matom_emiss_report ();      // function which logs the macro atom level emissivites
+    matom_emiss_report ();      // Log the macro atom level emissivites
   }
 
   geo.f_tot = geo.f_star + geo.f_disk + geo.f_bl + geo.f_wind + geo.f_kpkt + geo.f_matom + geo.f_agn;
