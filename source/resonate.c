@@ -1062,7 +1062,6 @@ scatter (p, nres, nnscat)
   if (geo.rt_mode == RT_MODE_MACRO)     //check if macro atom method in use
   {
 
-
     mplasma = &macromain[xplasma->nplasma];
 
     /* Electron scattering is the simplest to deal with. The co-moving
@@ -1080,12 +1079,12 @@ scatter (p, nres, nnscat)
 
     else if (*nres > NLINES)
     {
-      /* This means that it was a photoionisation process.
+      /* It was a photoionisation process.
          For this case we need to decide first whether to excite
          a macro atom directly or to create a k-packet. */
 
       /*
-         The probability if creating a k-packet is given by the
+         The probability of creating a k-packet is given by the
          mc estimators gamma, gamma_e, alpha_st, alpha_st_e.
          Start by identifying which estimators we want and then
          by computing gamma_twiddle (in Leon's notation -
@@ -1102,7 +1101,9 @@ scatter (p, nres, nnscat)
 
       if (phot_top[*nres - NLINES - 1].macro_info == 1 && geo.macro_simple == 0)
       {
-        /* Macro ion case (SS) */
+        /* Macro ion case (SS) This is the case bound free interaction for a 
+           xsection that is part of a macro atom (and we have not defaulted 
+           to the simplifed approach) */
 
         /* Note:  NLINES-1 in the lines below is correct.  This is becasue
            the 1st bf is identified by nres = NLINES+1 and this is
@@ -1172,11 +1173,18 @@ scatter (p, nres, nnscat)
         {
           macro_gov (p, nres, 1, &which_out);   //routine to deal with macro atom excitation
         }
+
+        /* This ends the calculation for dealing with free-bound absorption of a macro atom */
       }
       else if (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1)
       {
-        // Simple ion case //
-        /* Need to make decision about making a k-packet. Get the fraction of the energy
+        /* Simple ion case.  It's a bf interaction in a calculation involving macro-atmos, 
+           but this photoionization x-section  is not associated with one of the levels
+           of a full blown macro atom.
+
+           (Alternatively we are treating all atoms in a simplfied mode)
+
+           Need to make decision about making a k-packet. Get the fraction of the energy
            that goes into the electron rather than being stored as ionisation energy: this
            fraction gives the selection probability for the packet. It's given by the
            (photon frequency / edge frequency - 1) (SS) */
@@ -1193,7 +1201,6 @@ scatter (p, nres, nnscat)
           }
           prob_kpkt = 0.0;
         }
-
 
         /* Now choose whether or not to make a k-packet. */
 

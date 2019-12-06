@@ -795,11 +795,11 @@ typedef struct plasma
   double *partition;            /*The partition function for each  ion. 78 - changed to dynamic allocation */
   double *levden;               /*The number density (occupation number?) of a specific level */
 
-  double kappa_ff_factor;       /* Multiplicative factor for calculating the FF heating for                                      a photon. */
+  double kappa_ff_factor;       /* Multiplicative factor for calculating the FF heating for a photon. */
 
 
   double *recomb_simple;        /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
-  double *recomb_simple_upweight;       /* multiplicative factor to account for ration of total to "cooling" energy for b-f processes in simple atoms. */
+  double *recomb_simple_upweight;       /* multiplicative factor to account for ratio of total to "cooling" energy for b-f processes in simple atoms. */
 
 /* Begining of macro information */
   double kpkt_emiss;            /*This is the specific emissivity due to the conversion k-packet -> r-packet in the cell
