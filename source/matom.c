@@ -797,7 +797,7 @@ kpkt (p, nres, escape, mode)
     freqmax = 1.1 * freqmin;
   }
 
-  /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
+  /* If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
    * every time the wind is updated */
 
   if (mplasma->kpkt_rates_known != 1)
@@ -808,6 +808,7 @@ kpkt (p, nres, escape, mode)
     cooling_ff = 0.0;
     cooling_bf_coltot = 0.0;
 
+    /* Start of BF calculation */
     /* JM 1503 -- we used to loop over ntop_phot here, 
        but we should really loop over the tabulated Verner Xsections too
        see #86, #141 */
@@ -870,7 +871,7 @@ kpkt (p, nres, escape, mode)
 
     }
 
-    /* end of loop over nphot_total */
+    /* End of BF ccalculation and beginning of BB calculation */
 
     for (i = 0; i < nlines; i++)
     {
@@ -916,7 +917,7 @@ kpkt (p, nres, escape, mode)
       cooling_normalisation += cooling_bb[i];
     }
 
-    /* end of loop over nlines  */
+    /* end of BB calculation  */
 
 
     /* 57+ -- This might be modified later since we "know" that xplasma cannot be for a grid with zero
@@ -941,7 +942,6 @@ kpkt (p, nres, escape, mode)
 
       cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
       Error ("kpkt: A scattering event in cell %d with vol = 0???\n", one->nwind);
-      //Diagnostic      return(-1);  //57g -- Cannot diagnose with an exit
       *escape = 1;
       p->istat = P_ERROR_MATOM;
       return (0);
@@ -1036,9 +1036,6 @@ kpkt (p, nres, escape, mode)
   cooling_normalisation += cooling_adiabatic;
 
 
-
-
-
   /* The cooling rates for the recombination and collisional processes are now known. 
      Choose which process destroys the k-packet with a random number. */
 
@@ -1063,7 +1060,7 @@ kpkt (p, nres, escape, mode)
     {
       if (destruction_choice < mplasma->cooling_bf[i])
       {
-        /* Having got here we know that desturction of the k-packet was via the process labelled
+        /* Having got here we know that destruction of the k-packet was via the BF process labelled
            by i. Let's just check that i is a sensible number. */
 
         if (i > nphot_total - 1)
@@ -1114,8 +1111,9 @@ kpkt (p, nres, escape, mode)
     }
   }
   else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot))
-  {                             //this means that a collisional destruction has occurred - this results in 
-    //a macro atom being excited. Choose which macro atom and level to excite
+  {
+    /*this means that a collisional destruction has occurred - this results in 
+       a macro atom being excited. Choose which macro atom and level to excite  */
     destruction_choice = destruction_choice - mplasma->cooling_bftot;
     for (i = 0; i < nlines; i++)
     {
@@ -1152,9 +1150,10 @@ kpkt (p, nres, escape, mode)
     }
   }
 
-  /* consult issues #187, #492 regarding free-free */
   else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff))
-  {                             //this is a ff destruction
+  {
+    /* If reached this point, it is a FF destruction event */
+    /* consult issues #187, #492 regarding free-free */
     *escape = 1;                //we are making an r-packet not exciting a macro atom
     *nres = -2;
     p->freq = one_ff (one, freqmin, freqmax);   //get frequency of resulting energy packet
@@ -1241,7 +1240,6 @@ kpkt (p, nres, escape, mode)
   p->istat = P_ERROR_MATOM;
   return (0);
 
-  return (0);
 }
 
 
