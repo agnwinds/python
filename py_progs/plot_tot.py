@@ -116,10 +116,29 @@ def doit(rootname='sphere',smooth=21,fig_no=2):
     # integrate over frequency
 
     freq=numpy.array(data['Freq.'])
-    dfreq=freq[1]-freq[0]  # For a linear scale the frequencies are all equally spaced
 
-    lum_created=dfreq*numpy.sum(numpy.array(data['Created']))
-    lum=dfreq*numpy.sum(data['Emitted'])
+    dfreq=[]
+    i=0
+    while i<len(freq):
+        if i==0:
+            dfreq.append(freq[1]-freq[0])
+        elif i==len(freq)-1:
+            dfreq.append(freq[i]-freq[i-1])
+        else:
+            dfreq.append(0.5*(freq[i+1]-freq[i-1]))
+
+        i+=1
+
+    print(len(freq),i,len(dfreq))
+    dfreq=numpy.array(dfreq)
+
+    lum_created=numpy.sum(dfreq*data['Created'])
+    lum=numpy.sum(dfreq*data['Emitted'])
+    
+    #dfreq=freq[1]-freq[0]  # For a linear scale the frequencies are all equally spaced
+
+    # lum_created=dfreq*numpy.sum(numpy.array(data['Created']))
+    # lum=dfreq*numpy.sum(data['Emitted'])
     # print(data['Created'])
     print('The total   luminosity was ',lum_created)
     print('The emitted luminosity was ',lum)
