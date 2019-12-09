@@ -66,6 +66,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
   escape = 0;                   //start with it not being ready to escape as an r-packet
 
+  /* Beginning of the main loop for processing a macro-atom */
   while (escape == 0)
   {
     if (matom_or_kpkt == 1)     //excite a macro atom (either complete or simple)
@@ -100,7 +101,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         }
       }
       else if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == 1 || lin_ptr[*nres]->macro_info == 0))
-        /*  Make a bb tranisiton  without the full macro atom treatment. */
+        /*  Make a bb transition  without the full macro atom treatment. */
       {
         fake_matom_bb (p, nres, &escape);
       }
@@ -140,7 +141,11 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         }
       }
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1))
-        /* This is a bf continuum but we don't want the full macro atom treatment. */
+        /* This is a bf continuum but we don't want the full macro atom treatment. In the pre-2018
+           approach, we process the photon in a way that makes it return a bf photon of the same type
+           as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
+           In the new approach, we should never satisfy the do loop, and
+           so an error is thrown and we exit. */
       {
 #if BF_SIMPLE_EMISSIVITY_APPROACH
         Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
@@ -149,10 +154,16 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         fake_matom_bf (p, nres, &escape);
       }
 
-      matom_or_kpkt = 2;        //if it did not escape then it must have had a
-      //de-activation by collision processes -> need a k-packet
+      matom_or_kpkt = 2;
+      /* If it did not escape then it must have had a
+         de-activation by collision processes, and so we label it a kpkt.  On the next go-through 
+         of the loop we will process it as such */
     }
-    else if (matom_or_kpkt == 2)        //deal with a k-packet
+
+    /* This the end of the section of the loop that deals with matom excitations. next domes the 
+       section of the loop that deals with kpts */
+
+    else if (matom_or_kpkt == 2)
     {
       if (geo.matom_radiation == 1)
       {
@@ -177,7 +188,9 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     }
   }
 
-  //When it gets here an escpae has taken place. That's it done.
+  /* End of main matom processing loop 
+     When it gets here an escpae has taken place. 
+   */
 
   *which_out = 2;
 

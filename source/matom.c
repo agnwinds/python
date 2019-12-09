@@ -621,6 +621,8 @@ int temp_choice;                //choice of type of calcualation for alpha_sp
  * 					and spontaneous
  * 
  * 	06may	ksl	57+ -- Modified to use plasma structure
+ *  Energy weighted means that the integrand has an extra factor nu/nu_threshold
+ *  The difference case is (nu-nu_threshold)/nu_threhold 
 ***********************************************************/
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
@@ -669,6 +671,10 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 /**********************************************************/
 /** 
  *  @brief This returns the integrand for alpha_sp at a chosen frequency - 
+ *
+ * Note:
+ *  The peculiar variable *params is needed by the gsl routine
+ *  that does the integration.
 ***********************************************************/
 
 double
@@ -690,10 +696,10 @@ alpha_sp_integrand (double freq, void *params)
 
 
   if (temp_choice == 1)
-    return (integrand * freq / fthresh);        //energy weighed case
+    return (integrand * freq / fthresh);        //energy weighted case
   if (temp_choice == 2)
     return (integrand * (freq - fthresh) / fthresh);    // difference case
-  return (integrand);           //spontanoues case
+  return (integrand);           //spontaneous case
 }
 
 
@@ -708,10 +714,9 @@ alpha_sp_integrand (double freq, void *params)
  * that destroys the k-packet and the packet information has been updated in the same
  * way as at the end of matom
  *
- * @param [in]     WindPtr w   the ptr to the structure defining the wind
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
- * @param [in,out]  int escape  to tell us whether the matom de-activation
+ * @param [out]  int escape  to tell us whether the matom de-activation
  *                             is via an r-packet (1) or a k-packet (0)
  * @param [in] int mode         switch which allows photon to be deactivated by a non-radiative
  * term.  (non_zero is true)
@@ -871,7 +876,7 @@ kpkt (p, nres, escape, mode)
 
     }
 
-    /* End of BF ccalculation and beginning of BB calculation */
+    /* End of BF calculation and beginning of BB calculation */
 
     for (i = 0; i < nlines; i++)
     {
@@ -1263,7 +1268,8 @@ kpkt (p, nres, escape, mode)
  *        PhotPtr p                   the packet at the point of activation
  *        int nres                    the process which activates the Macro Atom
  * 
- * Returns:
+ * Returns:  (The routine always returns 0)
+
  *        int nres                    the process by which deactivation occurs
  *        PhotPtr p                   the packet following deactivation
  *        int escape                  identifies whether the macro atom deactivated via an
@@ -1273,9 +1279,6 @@ kpkt (p, nres, escape, mode)
  * 
  * ###Notes###
  * Apr 04  SS   Coding began.
- * Jun 04  SS   Modified to return escape = 1 for r-packet and 2 for k-packet
- * to avoid call to k-packet within this routine.
- * 06may	ksl	57+ -- Eliminationg passing entire w structure
 ************************************************************/
 
 int
@@ -1292,7 +1295,7 @@ fake_matom_bb (p, nres, escape)
   double normalisation;
   double choice;
 
-  one = &wmain[p->grid];        //record where we are
+  one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
 
   line_ptr = lin_ptr[*nres];    //record the line pointer
@@ -1404,7 +1407,7 @@ fake_matom_bf (p, nres, escape)
   WindPtr one;
   PlasmaPtr xplasma;
 
-  one = &wmain[p->grid];        //record where we are
+  one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
 
   /* All that can happen is radiative recombination (no collisional recombination
@@ -1415,7 +1418,6 @@ fake_matom_bf (p, nres, escape)
 
   p->freq = matom_select_bf_freq (one, *nres - NLINES - 1);
 
-  /* Currently this assumes hydrogenic shape cross-section - Improve */
 
   return (0);
 

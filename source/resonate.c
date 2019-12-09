@@ -1178,16 +1178,16 @@ scatter (p, nres, nnscat)
       }
       else if (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1)
       {
-        /* Simple ion case.  It's a bf interaction in a calculation involving macro-atmos, 
-           but this photoionization x-section  is not associated with one of the levels
-           of a full blown macro atom.
+        /* Simple ion case.  It's a bf interaction in a calculation involving macro-atoms, 
+           but this photoionization x-section is is associated with one of the levels
+           a simple atom, not one that is part of a full blown macro atom.
 
            (Alternatively we are treating all atoms in a simplfied mode)
 
            Need to make decision about making a k-packet. Get the fraction of the energy
            that goes into the electron rather than being stored as ionisation energy: this
-           fraction gives the selection probability for the packet. It's given by the
-           (photon frequency / edge frequency - 1) (SS) */
+           fraction gives the selection probability for creating a k packet. It's given by 
+           (1 - ionization edge frequecy / photon frequency)  */
 
         prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
@@ -1210,13 +1210,26 @@ scatter (p, nres, nnscat)
            altered mode for bound-free in "simple-macro mode". If we do,
            then the photon weight gets multiplied down by a factor (nu-nu_0)/nu
            and we force a kpkt to be created */
+
 #if BF_SIMPLE_EMISSIVITY_APPROACH
+        /* This is the new approach which does not explicityly conserve energy.
+           Re record the amount of energy going into the simple ion ionization pool.  This
+           version does not produce nan if prob_kpt is 0 and then reduce the photon weight
+           to allow for the portion of the energy that went into the ionization pool before
+           generating a kpkt.  In this approach we always generate a kpkt */
+
+        xplasma->bf_simple_ionpool_in += p->w * (1 - prob_kpkt);
         p->w *= prob_kpkt;
 
-        /* record the amount of energy going into the simple ion ionization pool */
-        xplasma->bf_simple_ionpool_in += (p->w / prob_kpkt) - p->w;
+//OLD        /* record the amount of energy going into the simple ion ionization pool */
+//OLD        xplasma->bf_simple_ionpool_in += (p->w / prob_kpkt) - p->w;
         macro_gov (p, nres, 2, &which_out);     //routine to deal with kpkt
 #else
+        /* This is the old apporach.  Process the BF photon for a simple atom.  In this
+           approach we generate a kpkt or an r-packet depending on whether the probility
+           of creating a kpkt, namely prob_kpkt
+         */
+
         if (prob_kpkt > kpkt_choice)
         {
           macro_gov (p, nres, 2, &which_out);   //routine to deal with kpkt
