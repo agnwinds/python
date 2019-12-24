@@ -3354,13 +3354,13 @@ double q21_a, q21_t_old;
  * @return    The collisional de-excitiation coefficient
  *
  * @details
- * This routine uses stored coefficients if we have them, or the Van Regemortor
+ * This routine uses stored coefficients if we have them, or the Van Regemorter
  * approximation if we do not.
  *
  * ### Notes ###
- * the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt
- * factor to calculate collision strengths. There is one regime in which kt < hnu. For that
- * consult equation 4.20 and 4.21 of Hazy.
+ * the relevant paper to consult here is Van Regemorter 1962 (ApJ 136 906). We use an effective gaunt
+ * factor to calculate collision strengths. There is one regime in which kt < hnu. 
+ * 
 ************************************************************/
 
 double
@@ -3452,7 +3452,7 @@ double a21_a;
 
 /**********************************************************/
 /**
- * @brief      Calculate the Einstein A coefficient for aline
+ * @brief      Calculate the Einstein A coefficient for a line
  *
  * @param [in out] struct lines *  line_ptr   The structure that describes a single line
  * @return     The Einstein A coefficient
@@ -3486,8 +3486,8 @@ a21 (line_ptr)
 /**
  * @brief      calculates the thermally averaged collision strength thermally excited line emission.
  *
- * @param [in out] int  n_coll   the index of the collision strength record we are working with
- * @param [in out] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
+ * @param [in] int  n_coll   the index of the collision strength record we are working with
+ * @param [in] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
  * @return     upsilon - the thermally averaged collision strength for a given line at a given temp
  *
  * @details
@@ -3507,7 +3507,7 @@ upsilon (n_coll, u0)
      double u0;
 {
   double x;                     //The scaled temperature
-  double y;                     //The scaled collision sterngth
+  double y;                     //The scaled collision strength
   double upsilon;               //The actual collision strength
   int linterp ();
 
