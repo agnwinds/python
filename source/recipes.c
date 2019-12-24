@@ -91,12 +91,7 @@ num_int (func, a, b, eps)
   int status = 0;
   int status2 = 0;
 
-<<<<<<< Updated upstream
   int npoints;
-=======
-  int npoints, j;
-  double dx;
->>>>>>> Stashed changes
   size_t neval;
   gsl_function F;
   F.function = func;
@@ -117,13 +112,7 @@ num_int (func, a, b, eps)
   {
     gsl_set_error_handler_off ();       //We need to be able to catch and handle gsl errors 
 
-<<<<<<< Updated upstream
     gsl_integration_workspace *w = gsl_integration_workspace_alloc (1000);
-=======
-//    gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (10);
-    gsl_integration_workspace *w = gsl_integration_workspace_alloc (1000);
-//    gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval, w);
->>>>>>> Stashed changes
     status = gsl_integration_qags (&F, a, b, 0, eps, 1000, w, &result, &error);
     if (status)
     {
@@ -133,35 +122,10 @@ num_int (func, a, b, eps)
         gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30);
         status2 = gsl_integration_romberg (&F, a, b, 0, eps, &result2, &neval, w);
         gsl_integration_romberg_free (w);
-<<<<<<< Updated upstream
-=======
-        printf ("Errored %e %e %e %e\n", a, b, result, result2);
->>>>>>> Stashed changes
         if (status2)
         {
           Error ("num_init: some kind of error in romberg and qags integration\n");
         }
-<<<<<<< Updated upstream
-=======
-/*          dx=(b-a)/npoints;
-          for (j=0;j<npoints+1;j++)
-          {
-              printf ("OUTPUT %e %e\n",a+j*dx,func(a+j*dx,test));
-          }
-          for (j=0;j<w->size;j++)
-          {
-              printf ("INTEG %i %e %e %e %e\n",j,w->alist[j],w->blist[j],w->rlist[j],w->elist[j]);
-          }
-          if (error*100. < result)
-          {
-          Error ("num_int: cannot reach tolerance because of roundoff - returning best guess\n");
-          }
-          else
-          {
-              Error ("BLAH num_int: cannot reach tolerance because of roundoff, and guess has error of more than 1pc %e %e\n",error,result);
-//              exit(0);
-          }*/
->>>>>>> Stashed changes
       }
     }
     else
