@@ -1129,7 +1129,7 @@ described as macro-levels. */
  *   4.420684E+00 1.206E+00
  * @endverbatim
  *
- * They are converted to something that is more compatible with Topbase
+ * They are converted to something that is more compatible with Python 
  * by py_top_phot
  *
  * The new topbase style records look like this.
@@ -1149,7 +1149,7 @@ described as macro-levels. */
  *
  * The main changes from the original records are that energy levels
  * have been converted to eV, cross sections to cm**2, and the electron
- * number has been converted to conventional astronomical notiation
+ * number has been converted to conventional astronomical notation
  * for the ionstate.
  *
  * ### Macro atoms (SS)
@@ -1193,6 +1193,13 @@ described as macro-levels. */
             sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &levl, &levu, &exx, &np);
             islp = -1;
             ilv = -1;
+
+            if (np > NCROSS)
+            {
+              Error ("Get_atomicdata: More x-sections (%d) to be read in than maximum allowed (%d).  Increase NCROSS\n", np, NCROSS);
+              Error ("Get_atomic_data: %s\n", aline);
+              exit (0);
+            }
 
             for (n = 0; n < np; n++)
             {
@@ -1306,6 +1313,14 @@ described as macro-levels. */
           {
             // It's a TOPBASE style photoionization record, beginning with the summary record
             sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &islp, &ilv, &exx, &np);
+
+            if (np > NCROSS)
+            {
+              Error ("Get_atomicdata: More x-sections (%d) to be read in than maximum allowed (%d).  Increase NCROSS\n", np, NCROSS);
+              Error ("Get_atomic_data: %s\n", aline);
+              exit (0);
+            }
+
             for (n = 0; n < np; n++)
             {                   //Read the topbase photoionization records
               if (fgets (aline, LINELENGTH, fptr) == NULL)
@@ -1884,7 +1899,7 @@ would like to have simple lines for macro-ions */
               line[nlines].eu = eu;
               line[nlines].nconfigl = nconfigl;
               line[nlines].nconfigu = nconfigu;
-              line[nlines].coll_index = -999;   //Tokick off with we assume there is no collisional strength data
+              line[nlines].coll_index = -999;   // We start assuming there is no collisional strength data
               if (mflag == -1)
               {
                 line[nlines].macro_info = 0;    // It's an old-style line`
@@ -2489,14 +2504,18 @@ would like to have simple lines for macro-ions */
 /**
  * @section Chianti Collision Strengths
  * The lines below read in collision strength data from Chianti (after Burgess and Tully). The original
- *		  is stored in .scups files in chianti. The python script searches for matches to the lines_linked_ver_2.py
- *		  data file, on the basis of energy and oscillator strength (and z and state). As a rather hamfisted
- *		  approach, all of the line data is stored on the same line as the collision strength data in
- *		  the file, so it is possible to make a very accurate match. It does mean quite a lot is read in
- *		  from a line, but most is thrown away. Currently the code below matches based on z, state, upper and
- *		  lower level numbers and oscillator strength
- * Each line is defned with a set of three lines
- * first line is CSTREN - this contains line data to try and match
+ * is stored in .scups files in chianti. 
+ * 
+ * To create the input data files,  a python script searches for matches to the lines_linked_ver_2.py
+ * data file, on the basis of energy and oscillator strength (and z and state). 
+ *
+ * As a rather hamfisted
+ * approach, all of the line data is stored on the same line as the collision strength data in
+ * the file, so it is possible to make a very accurate match. It does mean quite a lot is read in
+ * from a line, but most is thrown away. Currently the code below matches based on z, state, upper and
+ * lower level numbers and oscillator strength.
+ * Each line is defined with a set of three lines.
+ * The first line is CSTREN - this contains line data to try and match
  * Second two lines are collision strength data from Burgess and Tully 1992A&A...254..436B
  * These are generally 5 pojnt but up to 20 point spline fits of the T vs upsilon data. Typical lines are below
  * @verbatim
@@ -2530,6 +2549,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               if (line[n].coll_index > -1)      //We already have a collision strength record from this line - throw an error and quit
               {
                 Error ("Get_atomic_data More than one collision strength record for line %i\n", n);
+                Error ("Get_atomic_data: %s\n", aline);
                 exit (0);
               }
               match = 1;

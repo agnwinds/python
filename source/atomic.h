@@ -297,8 +297,8 @@ int nxphot;                     /*The actual number of ions for which there are 
 double phot_freq_min;           /*The lowest frequency for which photoionization can occur */
 double inner_freq_min;          /*The lowest frequency for which inner shel ionization can take place */
 
-#define NCROSS 1500
-#define NTOP_PHOT 400           /* Maximum number of photoionisation processes. (SS) */
+#define NCROSS 2000             /* Maximum number of x-sections for a single photionization process */
+#define NTOP_PHOT 400           /* Maximum number of photoionisation processes.  */
 int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
 int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
