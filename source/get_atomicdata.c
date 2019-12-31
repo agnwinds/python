@@ -2930,15 +2930,9 @@ atomicdata2file ()
   /* Write the excitation level data */
   fprintf (fptr, "Excitation levels: There are %d levels\n", nlevels);
   for (n = 0; n < nlevels; n++)
-    fprintf (fptr, "n %3d q %.1f g %3.0f ex %8.3g\n", n, config[n].q_num, config[n].g, config[n].ex);
-
-  /* Write the photoionization data  */
-  fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
-  for (n = 0; n < ntop_phot + nxphot; n++)
-  {
-    fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n",
-             n, phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
-  }
+    fprintf (fptr, "n %3d z %2d istate %2d q %.1f g %3.0f ex %8.3g  bb %2d %2d bf %2d %2d\n", n,
+             config[n].z, config[n].istate, config[n].q_num, config[n].g, config[n].ex,
+             config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump, config[n].n_bfd_jump);
 
   /* Write the resonance line data to the file */
 
@@ -2946,7 +2940,18 @@ atomicdata2file ()
 
   for (n = 0; n < nlines; n++)
   {
-    fprintf (fptr, "n %3d ion %3d freq %8.1e f %6.3f\n", n, line[n].nion, line[n].freq, line[n].f);
+    fprintf (fptr, "n %3d ion_no %3d z %2d ion %2d freq %8.1e f %6.3f macro %2d coll %4d up_down %2d %2d\n",
+             n, line[n].nion, line[n].z, line[n].istate, line[n].freq, line[n].f, line[n].macro_info, line[n].coll_index,
+             line[n].down_index, line[n].up_index);
+  }
+
+  /* Write the photoionization data  */
+  fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
+  {
+    fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e nlev %2d uplev %2d macro %2d  %2d %2d use %2d\n",
+             n, phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0],
+             phot_top[n].nlev, phot_top[n].uplev, phot_top[n].macro_info, phot_top[n].down_index, phot_top[n].up_index, phot_top[n].use);
   }
 
   /* Write the ground fraction data to the file */
