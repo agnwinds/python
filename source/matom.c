@@ -116,6 +116,7 @@ matom (p, nres, escape)
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
   int uplvl, uplvl_old;
+  int icheck;
   double jprbs[2 * (NBBJUMPS + NBFJUMPS)];
   double eprbs[NBBJUMPS + NBFJUMPS];
   double pjnorm, penorm;
@@ -408,21 +409,26 @@ matom (p, nres, escape)
     }
 
     /* n now identifies the jump that occurs - now set the new level. */
+    icheck = 0;
     if (n < nbbd)
     {                           /* bb downwards jump */
       uplvl = line[config[uplvl].bbd_jump[n]].nconfigl;
+      icheck = 1;
     }
     else if (n < (nbbd + nbfd))
     {                           /* bf downwards jump */
       uplvl = phot_top[config[uplvl].bfd_jump[n - nbbd]].nlev;
+      icheck = 2;
     }
     else if (n < (nbbd + nbfd + nbbu))
     {                           /* bb upwards jump */
       uplvl = line[config[uplvl].bbu_jump[n - nbbd - nbfd]].nconfigu;
+      icheck = 3;
     }
     else if (n < (nbbd + nbfd + nbbu + nbfu))
     {                           /* bf upwards jump */
       uplvl = phot_top[config[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
+      icheck = 4;
     }
     else
     {
@@ -435,7 +441,12 @@ matom (p, nres, escape)
 /* ksl: Check added to verify that the level actually changed */
     if (uplvl_old == uplvl)
     {
-      Error ("matom: uplvl did not change with jump: %d %d\n", uplvl, n);
+      Error ("matom: uplvl did not change with jump: %d %d z %d state %d type %d\n", uplvl, n, config[uplvl].z, config[uplvl].istate,
+             icheck);
+      Error ("matom: %10.4e %10.4e %10.4f\n", line[config[uplvl].bbd_jump[n]].el, line[config[uplvl].bbd_jump[n]].eu,
+             line[config[uplvl].bbd_jump[n]].f);
+      Error ("matom: %1d %1d %d %d\n", line[config[uplvl].bbd_jump[n]].levl, line[config[uplvl].bbd_jump[n]].levu,
+             line[config[uplvl].bbd_jump[n]].nconfigl, line[config[uplvl].bbd_jump[n]].nconfigu);
 
     }
 

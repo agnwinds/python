@@ -2850,65 +2850,8 @@ or zero so that simple checks of true and false can be used for them */
 /* this is controlled by one of the -d flag modes, defined in atomic.h */
   if (write_atomicdata)
   {
+    atomicdata2file ();
 
-    if ((fptr = fopen ("data.out", "w")) == NULL)
-    {
-      Error ("get_atomic data:  Could not open data.out\n");
-      exit (0);
-    }
-
-    fprintf (fptr, "This file contains data which was read in by get_atomicdata\n");
-
-    fprintf (fptr, "Data of %d elements, %d ions, and %d levels %d lines\n", nelements, nions, nlevels, nlines);
-
-
-    /* Write the element array */
-    fprintf (fptr, "Element Data:\n");
-    for (nelem = 0; nelem < nelements; nelem++)
-    {
-      fprintf (fptr, "Element %2d %5s firstion %2d nions %2d\n", nelem, ele[nelem].name, ele[nelem].firstion, ele[nelem].nions);
-    }
-
-    /* Write the ion array */
-    fprintf (fptr, "Ion data:\n");
-    for (n = 0; n < nions; n++)
-    {
-      fprintf (fptr,
-               "ion %3d z %3d istate %3d firstlevel %3d nlevels %3d potential %8.3g\n",
-               n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS);
-    }
-
-    /* Write the excitation level data */
-    fprintf (fptr, "Excitation levels: There are %d levels\n", nlevels);
-    for (n = 0; n < nlevels; n++)
-      fprintf (fptr, "n %3d q %.1f g %3.0f ex %8.3g\n", n, config[n].q_num, config[n].g, config[n].ex);
-
-    /* Write the photoionization data  */
-    fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
-    for (n = 0; n < ntop_phot + nxphot; n++)
-    {
-      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n",
-               n, phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
-    }
-
-    /* Write the resonance line data to the file */
-
-    fprintf (fptr, "Line data: There are %d lines\n", nlines);
-
-    for (n = 0; n < nlines; n++)
-    {
-      fprintf (fptr, "n %3d ion %3d freq %8.1e f %6.3f\n", n, line[n].nion, line[n].freq, line[n].f);
-    }
-
-    /* Write the ground fraction data to the file */
-    fprintf (fptr, "Ground frac data (just first and last fracs here as a check):\n");
-
-    for (n = 0; n < NIONS; n++)
-    {
-      fprintf (fptr, "%3d %3d %6.3f %6.3f\n", ground_frac[n].z, ground_frac[n].istate, ground_frac[n].frac[0], ground_frac[n].frac[19]);
-    }
-
-    fclose (fptr);
   }                             // end of if statement based on modes.write_atomicdata
 
 
@@ -2933,6 +2876,91 @@ or zero so that simple checks of true and false can be used for them */
   return (0);
 }
 
+
+
+/**********************************************************/
+/**
+ * @brief      Write out the atomic data to a file   
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * Note that there are a number of "variables" such as 
+ * nelements, and nions, that are global variables which
+ * are part of atomic.h
+ **********************************************************/
+
+int
+atomicdata2file ()
+{
+  FILE *fptr;                   //, fopen ();
+  int nelem;
+  int n;
+
+  if ((fptr = fopen ("data.out", "w")) == NULL)
+  {
+    Error ("get_atomic data:  Could not open data.out\n");
+    exit (0);
+  }
+
+  fprintf (fptr, "This file contains data which was read in by get_atomicdata\n");
+
+  fprintf (fptr, "Data of %d elements, %d ions, and %d levels %d lines\n", nelements, nions, nlevels, nlines);
+
+
+  /* Write the element array */
+  fprintf (fptr, "Element Data:\n");
+  for (nelem = 0; nelem < nelements; nelem++)
+  {
+    fprintf (fptr, "Element %2d %5s firstion %2d nions %2d\n", nelem, ele[nelem].name, ele[nelem].firstion, ele[nelem].nions);
+  }
+
+  /* Write the ion array */
+  fprintf (fptr, "Ion data:\n");
+  for (n = 0; n < nions; n++)
+  {
+    fprintf (fptr,
+             "ion %3d z %3d istate %3d firstlevel %3d nlevels %3d potential %8.3g\n",
+             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS);
+  }
+
+  /* Write the excitation level data */
+  fprintf (fptr, "Excitation levels: There are %d levels\n", nlevels);
+  for (n = 0; n < nlevels; n++)
+    fprintf (fptr, "n %3d q %.1f g %3.0f ex %8.3g\n", n, config[n].q_num, config[n].g, config[n].ex);
+
+  /* Write the photoionization data  */
+  fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
+  {
+    fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n",
+             n, phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
+  }
+
+  /* Write the resonance line data to the file */
+
+  fprintf (fptr, "Line data: There are %d lines\n", nlines);
+
+  for (n = 0; n < nlines; n++)
+  {
+    fprintf (fptr, "n %3d ion %3d freq %8.1e f %6.3f\n", n, line[n].nion, line[n].freq, line[n].f);
+  }
+
+  /* Write the ground fraction data to the file */
+  fprintf (fptr, "Ground frac data (just first and last fracs here as a check):\n");
+
+  for (n = 0; n < NIONS; n++)
+  {
+    fprintf (fptr, "%3d %3d %6.3f %6.3f\n", ground_frac[n].z, ground_frac[n].istate, ground_frac[n].frac[0], ground_frac[n].frac[19]);
+  }
+
+  fclose (fptr);
+
+  return (0);
+}
 
 
 /**********************************************************/

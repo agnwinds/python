@@ -335,6 +335,7 @@ typedef struct topbase_phot
 
 Topbase_phot phot_top[NLEVELS];
 TopPhotPtr phot_top_ptr[NLEVELS];       /* Pointers to phot_top in threshold frequency order - this */
+
 Topbase_phot inner_cross[N_INNER * NIONS];
 TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
 
