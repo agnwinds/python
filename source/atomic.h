@@ -231,7 +231,7 @@ typedef struct lines
   int macro_info;               /* Identifies whether line is to be treated using a Macro Atom approach.
                                    set to -1 (not known initially) 
                                    set to 0 if not a macro atom line  
-                                   set to 1 if a macro atom line  (ksl 04 apr)
+                                   set to 1 if a macro atom line  
                                    Note: program will exit if -1 before leaving get_atomicdata
                                  */
   double freq;                  /* The frequency of the resonance line */

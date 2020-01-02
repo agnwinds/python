@@ -1864,10 +1864,18 @@ described as macro-levels. */
           {
             if (ion[n].z == z && ion[n].istate == istate)
             {                   /* Then there is a match */
-              if (freq == 0 || f <= 0 || gl == 0 || gu == 0)
+              if (gl == 0 || gu == 0 || freq == 0)
               {
-                Error_silent ("getatomic_data: line input incomplete: %s\n", aline);
+                Error_silent ("getatomic_data: line input freq, gl or gu = 0: %s\n", aline);
                 break;
+              }
+              if (f <= 0)
+              {
+                Error_silent ("getatomic_data: line input f odd (may be OK if Macro): %s\n", aline);
+                if (mflag == -1)
+                {
+                  break;
+                }
               }
               //
               //define macro atom case (SS)
@@ -2777,6 +2785,17 @@ a total emission oscillator strength for the level....really ought to be radiati
       }
       else
         line[n].nconfigu = -9999;
+
+    }
+    else
+    {                           // a macro atom so check for collision data
+      if (line[n].f <= 0 && line[n].coll_index == -999)
+      {
+        Error ("get_atomic_data: Macro line with neither collision data or oscillator strength\n");
+        Error ("get_atomic_data: n %3d ion_no %3d z %2d ion %2d freq %8.1e f %6.3f macro %2d coll %4d up_down %2d %2d\n",
+               n, line[n].nion, line[n].z, line[n].istate, line[n].freq, line[n].f, line[n].macro_info, line[n].coll_index,
+               line[n].down_index, line[n].up_index);
+      }
     }
   }
 
