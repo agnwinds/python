@@ -5,11 +5,23 @@
 # please make sure your $PYTHON path is setup to use this script
 top=$PYTHON
 xdata=xdata
+xmod=xmod
 
-rm data
-rm models
-ln -s -f $top/$xdata data
-ln -s -f $top/xmodels models
+if [ -d "data" ]; then 
+    rm data
+fi
+
+if [ -d "xmod" ]; then 
+    rm xmod
+fi
+
+if [ -d "$top/$xdata" ]; then
+    ln -s -f $top/$xdata data
+fi
+
+if [ -d "$top/$xmod" ]; then
+    ln -s -f $top/$xmod xmod
+fi
 
 
 
