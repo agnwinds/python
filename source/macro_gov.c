@@ -140,11 +140,11 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         }
       }
 
-        /* This is a bf continuum but we don't want the full macro atom treatment. In the pre-2018
-           approach, we process the photon in a way that makes it return a bf photon of the same type
-           as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
-           In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error 
-           is thrown and we exit. */
+      /* This is a bf continuum but we don't want the full macro atom treatment. In the pre-2018
+         approach, we process the photon in a way that makes it return a bf photon of the same type
+         as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
+         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error 
+         is thrown and we exit. */
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1))
       {
 #if BF_SIMPLE_EMISSIVITY_APPROACH
@@ -176,7 +176,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         kpkt (p, nres, &escape, KPKT_MODE_ALL); // 1 implies include the possibility of deactivation due to non-thermal processes
       }
 
-      matom_or_kpkt = 1;        
+      matom_or_kpkt = 1;
       /* if it did not escape then the k-packet must have been
          destroyed by collisionally exciting a macro atom -
          excite a macro atom next, which is set by making matom_or_kpkt 1 */
