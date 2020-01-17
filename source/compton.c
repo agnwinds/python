@@ -237,10 +237,16 @@ klein_nishina (nu)
   double x1, x2, x3, x4;        //variables to store intermediate results.
   double kn;                    // the final cross section
 
-  kn = THOMPSON;                /* NSH 130605 to remove o3 compile error */
-  x1 = x2 = x3 = x4 = 0.0;      /* NSH 130605 to remove o3 compile error */
-  x = (PLANCK * nu) / (MELEC * VLIGHT * VLIGHT);        //The photon energy relative to the rest mass energy of an electron
-  if (x > 0.0001)               //If the photon energy is high enough - then we need to compute the cross section - otherwise it is just the Thmopson cross section
+  kn = THOMPSON;                
+  x1 = x2 = x3 = x4 = 0.0;      
+
+  /* x is the photon energey relative to the electron mass */
+  x = (PLANCK * nu) / (MELEC * VLIGHT * VLIGHT);       
+
+  /* Use the full KN formula if the photon energy is high enough.  Otherwise just
+   * use the Thompson x-section.
+   */
+  if (x > 0.0001)               
   {
     x1 = 1. + x;
     x2 = 1. + (2. * x);
