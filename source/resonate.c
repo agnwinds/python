@@ -1273,7 +1273,7 @@ scatter (p, nres, nnscat)
   if (*nres == -1)              //Its an electron scatter
   {
     p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
-    compton_dir (p, xplasma);   // Get a new direction using the KN formula
+    compton_dir (p);   // Get a new direction using the KN formula
     v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
     p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame
 

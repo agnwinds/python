@@ -271,8 +271,7 @@ double x1;                      //The ratio of photon eneergy to electron energy
 /** 
  * @brief      computes a random direction for a photon undergoing compton scattering.
  *
- * @param [in] PhotPtr  p   - the photon currently being scattered
- * @param [in] PlasmaPtr  xplasma   - the cell in which the scattering is taking place
+ * @param [in,out] PhotPtr  p   - the photon currently being scattered
  * @return     0 if successful - the new direction is returned as part of the photon structure
  *
  * @details
@@ -283,7 +282,7 @@ double x1;                      //The ratio of photon eneergy to electron energy
  * ### Notes ###
  * EVerything is calculated in the rest frame of the electron.
  * In this frame, the photon energy change is E/E'=1+(hnu/mc^2)(1+cos\theta)
- * where \theta is the angle thruogh which the photon is deflected.
+ * where \theta is the angle through which the photon is deflected.
  * This is a maximum for \theta=180 - E/E'=1+2hnumc^2
  * and minimum for \theta=0 - E/E'=1
  * We compute everything by first drawing a random cross section that our photon packet will see.
@@ -295,9 +294,8 @@ double x1;                      //The ratio of photon eneergy to electron energy
  **********************************************************/
 
 int
-compton_dir (p, xplasma)
+compton_dir (p)
      PhotPtr p;                 // Pointer to the current photon
-     PlasmaPtr xplasma;         // Pointer to current plasma cell
 
 {
   double f_min, f_max, f;       //Fractional energy changes - E_old/E_new - minimum possible, maximum possible, actual as implied by random cross section
