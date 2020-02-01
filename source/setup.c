@@ -361,7 +361,7 @@ init_observers ()
   for (n = 0; n < NSPEC; n++)
   {
     geo.phase[n] = 0.5;
-    geo.scat_select[n] = 1000;
+    geo.scat_select[n] = MAXSCAT;
     geo.top_bot_select[n] = 0;
   }
   geo.swavemin = 850;

@@ -412,7 +412,7 @@ double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
-int compton_dir(PhotPtr p, PlasmaPtr xplasma);
+int compton_dir(PhotPtr p);
 double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double alpha(double nu);
