@@ -499,8 +499,10 @@ one_fb (one, f1, f2)
     Exit (0);
   }
 
-/* Check if an apprpriate photon frequency has already been generated, and
-use that instead if possible --  57h */
+/* Check if an appropriate photon frequency has already been generated, 
+   and use that instead if possible 
+ */
+
   tt = xplasma->t_e;
   if (xphot->n < NSTORE && xphot->f1 == f1 && xphot->f2 == f2 && xphot->t == tt)
   {
@@ -509,7 +511,8 @@ use that instead if possible --  57h */
     return (freq);
   }
 
-  delta = 500;                  // Fudge factor to prevent generation of a CDF if t has changed only slightly
+  delta = tt / 100;             // Fudge factor to prevent generation of a CDF if t has changed only slightly
+
   /* Check to see if we have already generated a cdf */
   if (tt > (one_fb_te + delta) || tt < (one_fb_te - delta) || f1 != one_fb_f1 || f2 != one_fb_f2)
   {
