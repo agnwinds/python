@@ -468,11 +468,9 @@ double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
  * ### Notes ###
  *
  *
- * 	@bug This routine contains questions from Stuart in May 04 that have never been
- * 	addressed. Furthemore, the routine has a parameter delta which is used to decide
- * 	whether one is close enough in temperature to a previously generated DCF. This
- * 	is set to 500, which is probably OK if the temperatures are high, but in appropriate
- * 	if T is of order 1000 K.
+ * 	@bug This routine still assumes the possibility of jumps
+ *      even though this possibility has been removed from the cdf generation
+ *      routines.
  *
  **********************************************************/
 
