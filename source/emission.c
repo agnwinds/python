@@ -17,15 +17,12 @@
 #include "python.h"
 
 
-
-
-
 /**********************************************************/
 /**
  * @brief      calculate the luminosity of the entire
  * wind between freqencies f1 and f2
  *
- * @param [in out] double  f1   The minimum frequency for the calculation
+ * @param [in out] double  f1   The minimum frequency 
  * @param [in out] double  f2   The maximum frequency
  * @return     The luminosity of the entire wind
  *
@@ -35,7 +32,7 @@
  *
  * The routine also populates several luminosity related variables in
  * geo, which give the luminosity for separate processes, e.g free-free
- * and free_ound emission.
+ * and free-bound emission.
  *
  * ### Notes ###
  * @bug The do loop might be simpler if made over the plasma cells
@@ -44,7 +41,7 @@
  * 
  * CK20180801: 
  * 
- *           in non-macro atom mode, the only continuum process treates as scattering is 
+ *           in non-macro atom mode, the only continuum process treated as scattering is 
  *           electron scattering, and this is assigned nres = -1. The only valid values 
  *           of nres in non-macro-atom mode are therefore nres = -1 and 0 <= nres <= nlines-1
  *           (with the lattter range covering the lines).
@@ -286,7 +283,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
     nplasma = wmain[icell].nplasma;
     ndom = wmain[icell].ndom;
-    plasmamain[nplasma].nrad += 1;      /* Increment the counter for the number of photons generatd in the cell */
+    plasmamain[nplasma].nrad += 1;      /* Increment the counter for the number of photons generated in the cell */
 
 
 
@@ -365,34 +362,15 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       p[np].w = weight;
       get_random_location (icell, p[np].x);
       p[np].grid = icell;
-      /*
-         Determine the direction of the photon
-         Need to allow for anisotropic emission here
 
-         CK20180801: in non-macro-atom mode, the only continuum process that is treated
-         as a scatter is electron scattering; but in any case, all continuum processes in non-macro-atom
-         mode correspond to nres < 0.
-
-         in macro-atom mode, bf and ff continuum processes are also treated as scattering processes, 
-         and then they, too, are treated isotropically. however, in macro atom mode, nres = -1 specifically
-         indicates electron scattering, nres = -2 specifically indicates ff, and nres > NLINES indicates
-         bound-free. 
-         [nres == NLINES is never used. Note also that NLINES is the *max* number of lines, whereas nlines
-         is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but 
-         the entire range of nlines <= nres <= NLINES]
-
-         in both macro-atom and non-macro-atom modes, 
-         line processes are treated isotropically only if geo.scatter_mode == SCATTER_MODE_ISOTROPIC;
-         note that, confusingly, geo.scatter_mode == SCATTER_MODE_ANISOTROPIC is *not*
-         the only anisotropic mode -- SCATTER_MODE_THERMAL is *also* anisotropic.
-
-       */
       nnscat = 1;
+
+      /* Select a direction for the photon, depending on the scattering mode and/or
+         the type of photon that was generated
+       */
 
       if (p[np].nres < 0 || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
       {
-/*  It was either an electron scatter so the  distribution is isotropic, or it
-was a resonant scatter but we want isotropic scattering anyway.  */
         randvec (p[np].lmn, 1.0);       /* The photon is emitted isotropically */
       }
       else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
@@ -400,13 +378,19 @@ was a resonant scatter but we want isotropic scattering anyway.  */
         randwind_thermal_trapping (&p[np], &nnscat);
       }
       p[np].nnscat = nnscat;
-      /* The next two lines correct the frequency to first order, but do not result in
-         forward scattering of the distribution */
+
+      /* Photons are generated in the CMF and so must be Doppler shifted into 
+         the Lab Frame.  We only correct the frequency to first order for the velocity of the wind.,
+         We don not make adjust the direction for relativistic effects.
+       */
+
       vwind_xyz (ndom, &p[np], v);
-      p[np].freq *= (1. + dot (v, p[np].lmn) / C);
+      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT);
       p[np].istat = 0;
       p[np].tau = p[np].nscat = p[np].nrscat = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon
+
+      /* Extra processing for revereration calculations */
       switch (geo.reverb)
       {                         // SWM 26-3-15: Added wind paths
       case REV_WIND:
@@ -420,6 +404,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       default:
         break;
       }
+
     }
 
   }

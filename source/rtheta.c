@@ -9,15 +9,12 @@
  *
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "atomic.h"
 #include "python.h"
-
-
-
 
 
 /**********************************************************/
@@ -53,7 +50,6 @@ rtheta_ds_in_cell (ndom, p)
   int n, ix, iz;
   double s, smax;
 
-
   /* Check that that the photon is in the domain it is supposed to be
    * in.  */
 
@@ -64,7 +60,6 @@ rtheta_ds_in_cell (ndom, p)
   }
 
   wind_n_to_ij (ndom, n, &ix, &iz);     /*Convert the index n to two dimensions */
-
 
   /* Set up the quadratic equations in the radial  direction */
 
@@ -184,7 +179,7 @@ rtheta_make_grid (w, ndom)
       else
       {                         //logarithmic intervals
 
-        dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (mdim - 3);
+        dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (ndim - 3);
         w[n].r = geo.rstar * pow (10., dlogr * (i - 1));
         w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (i)) + pow (10., dlogr * (i - 1)));
       }

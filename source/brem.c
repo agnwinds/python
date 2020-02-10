@@ -20,9 +20,9 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "atomic.h"
 #include "python.h"
-
 #include "log.h"
 
 
@@ -46,7 +46,7 @@ double
 integ_brem (double freq, void *params)
 {
   double answer;
-  answer = geo.const_agn * pow (freq, geo.brem_alpha) * exp ((-1.0 * H * freq) / (BOLTZMANN * geo.brem_temp));
+  answer = geo.const_agn * pow (freq, geo.brem_alpha) * exp ((-1.0 * PLANCK * freq) / (BOLTZMANN * geo.brem_temp));
   return (answer);
 }
 
@@ -157,7 +157,7 @@ get_rand_brem (freqmin, freqmax)
   double freq, alpha, y, brem_alpha_tiny;
   int echeck;
 
-  brem_alpha_tiny = H * xband.f1[0] / BOLTZMANN / geo.brem_temp;
+  brem_alpha_tiny = PLANCK * xband.f1[0] / BOLTZMANN / geo.brem_temp;
 
   if (brem_alpha_tiny > BREM_ALPHAMIN)
     brem_alpha_tiny = BREM_ALPHAMIN / 10.;
@@ -198,8 +198,8 @@ get_rand_brem (freqmin, freqmax)
   {
 
 /* set alphamin and alphamax - the dimensionless versions of the frequency range	*/
-    brem_alphamin = H * freqmin / (BOLTZMANN * geo.brem_temp);
-    brem_alphamax = H * freqmax / (BOLTZMANN * geo.brem_temp);
+    brem_alphamin = PLANCK * freqmin / (BOLTZMANN * geo.brem_temp);
+    brem_alphamax = PLANCK * freqmax / (BOLTZMANN * geo.brem_temp);
 
 /* set the parameters for which these calculations have been done, so we dont redo them */
     old_brem_t = geo.brem_temp;
@@ -276,7 +276,7 @@ get_rand_brem (freqmin, freqmax)
     alpha = cdf_get_rand_limit (&cdf_brem);     //We will be using the full CDF approach because we are in the regime where PL and exp are inappropriate
   }
 
-  freq = BOLTZMANN * geo.brem_temp / H * alpha; //Get a frequency back from the dimenionless alpha parameter
+  freq = BOLTZMANN * geo.brem_temp / PLANCK * alpha;    //Get a frequency back from the dimenionless alpha parameter
   if (freq < freqmin || freqmax < freq)
   {
     Error ("get_rand_brem: freq %g out of range %g %g\n", freq, freqmin, freqmax);

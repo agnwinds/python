@@ -29,11 +29,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "atomic.h"
-#include "python.h"
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
+#include "atomic.h"
+#include "python.h"
 
 #define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
 #define ALPHAMAX 30.            // Region above which we will use a high frequency approximation
@@ -50,6 +50,7 @@ double alphamin, alphamax;
 double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;        // The precise boundaries in the the bb cdf
 double cdf_bb_ylo, cdf_bb_yhi;  // The places in the CDF defined by freqmin & freqmax
 double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  //  the limits to use for the low and high frequency values
+
 
 /**********************************************************/
 /**
@@ -154,8 +155,8 @@ planck (t, freqmin, freqmax)
   if (t != old_t || freqmin != old_freqmin || freqmax != old_freqmax)
   {
 
-    alphamin = H * freqmin / (BOLTZMANN * t);
-    alphamax = H * freqmax / (BOLTZMANN * t);
+    alphamin = PLANCK * freqmin / (BOLTZMANN * t);
+    alphamax = PLANCK * freqmax / (BOLTZMANN * t);
 
     old_t = t;
     old_freqmin = freqmin;
@@ -234,7 +235,7 @@ planck (t, freqmin, freqmax)
     alpha = cdf_get_rand_limit (&cdf_bb);       //We are in the region where we use the BB function
   }
 
-  freq = BOLTZMANN * t / H * alpha;
+  freq = BOLTZMANN * t / PLANCK * alpha;
   if (freq < freqmin || freqmax < freq)
   {
     Error ("planck: freq %g out of range %g %g\n", freq, freqmin, freqmax);
@@ -578,10 +579,10 @@ emittance_bb (freqmin, freqmax, t)
 {
   double alphamin, alphamax, q1;
   double integ_planck_d ();
-  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
+  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
 
-  alphamin = H * freqmin / (BOLTZMANN * t);
-  alphamax = H * freqmax / (BOLTZMANN * t);
+  alphamin = PLANCK * freqmin / (BOLTZMANN * t);
+  alphamax = PLANCK * freqmax / (BOLTZMANN * t);
 
 
   if (alphamin > ALPHAMIN && alphamax < ALPHAMAX)       //We are within the tabulated range

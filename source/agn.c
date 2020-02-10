@@ -16,11 +16,10 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "atomic.h"
 #include "python.h"
-
 #include "log.h"
-
 
 
 /**********************************************************/
@@ -491,7 +490,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
-
   }
 
   return (0);

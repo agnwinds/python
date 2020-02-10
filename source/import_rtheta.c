@@ -5,9 +5,9 @@
  *
  * @brief
  * These are general routines to read in a model that
- * is in polar or rtheta coordinates
- * grids
+ * is in polar or rtheta coordinates.
  * ###Notes###
+ *
  * There a various possibilities for how the
  * velocities could be entered.  One possibility
  * which is the way the zeus_python models work
@@ -25,14 +25,13 @@
  * then one must translate them to the convention
  * here before the model is read in
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
 #include "python.h"
-
-
 
 #define LINELEN 512
 #define NCELLS  512
@@ -83,7 +82,9 @@ struct
  * * inwind defines whether or not a particular cell is actually
  * in the wind
  *
- * This routine assumes the same conventions as used else where
+ * Guard cells are required at the outer boundaries. 
+ *
+ * This routine assumes the same conventions as used elsewhere
  * in Python, that is that the positions and velocities are given
  * at the edges of a cell, but that rho is given at the center.
  *
@@ -204,7 +205,6 @@ import_rtheta (ndom, filename)
 
 
 
-
 /**********************************************************/
 /**
  * @brief      Use the imported data to initialize various
@@ -304,32 +304,35 @@ rtheta_make_grid_import (w, ndom)
   {
     wind_ij_to_n (ndom, xx_rtheta.i[n], xx_rtheta.j[n], &nn);
 
-
-    r_inner = length (w[nn].x);
-
-    nn_outer = nn + xx_rtheta.mdim;
-
-    if (nn_outer < zdom[ndom].ndim2)
-    {
-
-      r_outer = length (w[nn_outer].x);
-    }
-
-
-
     if (w[nn].inwind >= 0)
     {
-      if (w[nn_outer].x[0] > rho_max)
+
+      r_inner = length (w[nn].x);
+
+      nn_outer = nn + xx_rtheta.mdim;
+
+      if (nn_outer + 1 >= zdom[ndom].ndim2)
       {
-        rho_max = w[nn_outer].x[0];
+        Error ("rtheta_make_grid_import: Trying to access cell %d > %d outside grid\n", nn_outer + 1, zdom[ndom].ndim2);
       }
-      if (w[nn - 1].x[2] > zmax)
+
+      if (nn_outer < zdom[ndom].ndim2)
       {
-        zmax = w[nn - 1].x[2];
+        r_outer = length (w[nn_outer].x);
       }
-      if (w[nn].x[2] < zmin && w[nn].x[2] > 0)
+
+
+      if (w[nn_outer + 1].x[0] > rho_max)
       {
-        zmin = w[nn].x[2];
+        rho_max = w[nn_outer + 1].x[0];
+      }
+      if (w[nn_outer].x[2] > zmax)
+      {
+        zmax = w[nn_outer].x[2];
+      }
+      if (w[nn + 1].x[2] < zmin && w[nn + 1].x[2] > 0)
+      {
+        zmin = w[nn + 1].x[2];
       }
       if (r_outer > rmax)
       {
@@ -345,7 +348,6 @@ rtheta_make_grid_import (w, ndom)
       }
     }
   }
-
   Log ("Imported:    rmin    rmax  %e %e\n", rmin, rmax);
   Log ("Imported:    zmin    zmax  %e %e\n", zmin, zmax);
   Log ("Imported: rho_min rho_max  %e %e\n", rho_min, rho_max);
@@ -378,7 +380,7 @@ rtheta_make_grid_import (w, ndom)
 
 /**********************************************************/
 /**
- * @brief      The velcity at any position in an imported
+ * @brief      The velocity at any position in an imported
  * rtheat model
  *
  * @param [in] int  ndom   The domain for the imported model
@@ -433,11 +435,6 @@ velocity_rtheta (ndom, x, v)
 
 
 
-
-
-
-
-
 /**********************************************************/
 /**
  * @brief      Get the density for an imported rtheta model at x
@@ -452,7 +449,7 @@ velocity_rtheta (ndom, x, v)
  * simply locates the cell associated with x
  *
  * ### Notes ###
- * This routine is really only used to intialize rho in the
+ * This routine is really only used to initialize rho in the
  * Plasma structure.  In reality, once the Plasma structure is
  * initialized, we always interpolate within the plasma structure
  * and do not access the original data

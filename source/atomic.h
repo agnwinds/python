@@ -4,12 +4,12 @@
 #define TRUE		1
 #define FALSE		0
 
-#define H   				6.6262e-27
+#define PLANCK   				6.6262e-27
 #define HC  				1.98587e-16
 #define HEV				4.13620e-15     /* Planck's constant in eV */
 #define HRYD				3.04005e-16     /* NSH 1204 Planck's constant in Rydberg */
-#define C   				2.997925e10
-#define G				6.670e-8
+#define VLIGHT   				2.997925e10
+#define GRAV				6.670e-8
 #define BOLTZMANN 			1.38062e-16
 #define WIEN				5.879e10        /* NSH 1208 Wien Disp Const in frequency units */
 #define H_OVER_K			4.799437e-11
@@ -17,7 +17,7 @@
 #define THOMPSON			0.66524e-24
 #define PI  				3.1415927
 #define MELEC 				9.10956e-28
-#define E				4.8035e-10      /* Electric charge in esu */
+#define ECHARGE				4.8035e-10      /* Electric charge in esu */
 #define MPROT 				1.672661e-24
 #define MSOL 				1.989e33
 #define PC				3.08e18
@@ -231,7 +231,7 @@ typedef struct lines
   int macro_info;               /* Identifies whether line is to be treated using a Macro Atom approach.
                                    set to -1 (not known initially) 
                                    set to 0 if not a macro atom line  
-                                   set to 1 if a macro atom line  (ksl 04 apr)
+                                   set to 1 if a macro atom line  
                                    Note: program will exit if -1 before leaving get_atomicdata
                                  */
   double freq;                  /* The frequency of the resonance line */
@@ -297,8 +297,8 @@ int nxphot;                     /*The actual number of ions for which there are 
 double phot_freq_min;           /*The lowest frequency for which photoionization can occur */
 double inner_freq_min;          /*The lowest frequency for which inner shel ionization can take place */
 
-#define NCROSS 1500
-#define NTOP_PHOT 400           /* Maximum number of photoionisation processes. (SS) */
+#define NCROSS 2000             /* Maximum number of x-sections for a single photionization process */
+#define NTOP_PHOT 400           /* Maximum number of photoionisation processes.  */
 int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
 int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
@@ -335,6 +335,7 @@ typedef struct topbase_phot
 
 Topbase_phot phot_top[NLEVELS];
 TopPhotPtr phot_top_ptr[NLEVELS];       /* Pointers to phot_top in threshold frequency order - this */
+
 Topbase_phot inner_cross[N_INNER * NIONS];
 TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
 
@@ -439,7 +440,8 @@ int n_total_rr;
 typedef struct total_rr
 {
   int nion;                     //Internal cross reference to the ion that this refers to
-  double params[T_RR_PARAMS];   /*There are up to six parameters. If the last two are zero, we stillthe                                   data in the same way, but they have no effect - NB - 
+  double params[T_RR_PARAMS];   /*There are up to six parameters. If the last two are zero, we still
+                                   the data in the same way, but they have no effect - NB - 
                                    important to zero these! */
   /* NSH 23/7/2012 - This array will double up for Shull parameters */
   int type;                     /* NSH 23/7/2012 - What type of parampeters we have for this ion */

@@ -33,7 +33,7 @@ Ionization_cycles                          20
 Spectrum_cycles                            20
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
-Atomic_data                                data/standard80
+Atomic_data                                data/standard80.dat
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)                 both
 Wind_heating.extra_luminosity              0
@@ -48,8 +48,9 @@ SV.mdot_r_exponent                         0
 SV.v_infinity(in_units_of_vescape          1
 SV.acceleration_length(cm)                 1e18
 SV.acceleration_exponent                   1.0
+SV.gamma(streamline_skew;1=usually)        1
 SV.v_zero_mode(fixed,sound_speed)                fixed
-SV.v_zero(cm/s)                              600000
+SV.v_zero(cm/s)                            600000
 Wind.radmax(cm)                            1e19
 Wind.t.init                                1e5
 Wind.filling_factor(1=smooth,<1=clumped)   1
@@ -57,7 +58,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 ### Parameters defining the spectra seen by observers
 
 Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
-Central_object.rad_type_in_final_spectrum(power,cloudy,brems)                power
+Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
 Spectrum.wavemin(Angstroms)                200

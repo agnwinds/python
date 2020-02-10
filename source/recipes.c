@@ -12,14 +12,11 @@
  *
  ***********************************************************/
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
-#include "atomic.h"
+#include <stdarg.h>
 #include <math.h>
-#include "recipes.h"
-#include "log.h"
+#include <time.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
@@ -27,7 +24,10 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
 
-
+#include "atomic.h"
+#include "python.h"
+#include "recipes.h"
+#include "log.h"
 
 
 /******************************
@@ -83,17 +83,21 @@ num_int (func, a, b, eps)
      double a, b;
      double eps;
 {
-  double result;
+  double result, error, result2;
   double alpha = 0.0;
   void *test = NULL;
   double delta;
   int zflag, i;
-  size_t neval;
+  int status = 0;
+  int status2 = 0;
 
+  int npoints;
+  size_t neval;
   gsl_function F;
   F.function = func;
   F.params = &alpha;
   zflag = 1;
+  npoints = 1000;
   if (func (a, test) == 0.0 && func (b, test) == 0.0)
   {
     zflag = 0;
@@ -106,15 +110,33 @@ num_int (func, a, b, eps)
   }
   if (zflag == 1)
   {
-    gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30);
-    gsl_integration_romberg (&F, a, b, 0, eps, &result, &neval, w);
-    gsl_integration_romberg_free (w);
+    gsl_set_error_handler_off ();       //We need to be able to catch and handle gsl errors 
+
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc (1000);
+    status = gsl_integration_qags (&F, a, b, 0, eps, 1000, w, &result, &error);
+    if (status)
+    {
+      if (status == GSL_EROUND) //The rounding error has been triggered - try a different integrator
+      {
+        gsl_integration_workspace_free (w);
+        gsl_integration_romberg_workspace *w = gsl_integration_romberg_alloc (30);
+        status2 = gsl_integration_romberg (&F, a, b, 0, eps, &result2, &neval, w);
+        gsl_integration_romberg_free (w);
+        if (status2)
+        {
+          Error ("num_init: some kind of error in romberg and qags integration\n");
+        }
+      }
+    }
+    else
+    {
+      gsl_integration_workspace_free (w);
+    }
   }
   else
   {
     result = 0.0;
   }
-
 
   return (result);
 }
@@ -133,7 +155,7 @@ num_int (func, a, b, eps)
 * @details
 * This routine finds the root  of the function func from a to b. It currently
 * uses the gsl implementation of the BRENT root finding scheme. This replaced the zbrent 
-* numerical recipie, and the call is intended to be indentical
+* numerical recipie, and the call is intended to be identical
 *
 * ### Notes ###
 *

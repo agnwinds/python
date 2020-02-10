@@ -7,6 +7,7 @@
  * @brief  The collection of routines needed to define a Shlossman-Vitello wind 
  *
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -17,7 +18,6 @@
 
 int sdom;
 int sv_zero_r_ndom;
-
 
 
 /**********************************************************/
@@ -81,8 +81,16 @@ get_sv_wind_params (ndom)
   rddoub ("SV.mdot_r_exponent", &zdom[ndom].sv_lambda); /* Mass loss rate exponent */
   rddoub ("SV.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);      /* Final speed of wind in units of escape velocity */
 
-  rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
-  rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
+  rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Acceleration length scale for wind */
+  rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Acceleration scale exponent */
+  rddoub ("SV.gamma(streamline_skew;1=usually)", &zdom[ndom].sv_gamma); /* Parameter controlling how concentrated the streamlines
+                                                                           are toward theta_min.  Large values concentrate toward
+                                                                           the polls, must be greater than 0 */
+  if (zdom[ndom].sv_gamma <= 0)
+  {
+    Error ("SV.gamma must be greater than 0. Large values skew streamlines to poles, small values to equator\n");
+    exit (0);
+  }
 
   /* allow the user to pick whether they set v0 by a fixed value or by the sound speed */
   strcpy (answer, "fixed");
@@ -187,9 +195,9 @@ sv_velocity (x, v, ndom)
     zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
 
     if (rzero < geo.rstar)
-      v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
+      v_escape = sqrt (2. * GRAV * geo.mstar / geo.rstar);
     else
-      v_escape = sqrt (2. * G * geo.mstar / rzero);
+      v_escape = sqrt (2. * GRAV * geo.mstar / rzero);
 
     vl = vzero + (zdom[ndom].sv_v_infinity * v_escape - vzero) * zzz / (1. + zzz);
   }
@@ -197,7 +205,7 @@ sv_velocity (x, v, ndom)
   v[0] = vl * sin (theta);
 
   if (r > 0)
-    v[1] = sqrt (G * geo.mstar * rzero) / r;
+    v[1] = sqrt (GRAV * geo.mstar * rzero) / r;
   else
     v[1] = 0;
 
@@ -406,10 +414,10 @@ double zero_p[3];
  * @brief      A setup routine for finding the footpoint of a stream line in a SV model
  *
  *
- * @param [in] double  p[]   A position in cartesian coordiantes
+ * @param [in] double  p[]   A position in cartesian coordinates
  * @return     The routine simply returns 0
  *
- * One of two routines used to find the postion on the disk from which a steamline
+ * One of two routines used to find the position on the disk from which a steamline
  * arises. This routine is just a setup routine, to make the position an external
  * variable so it can be accessed by sv_zero_r 
  *

@@ -10,6 +10,7 @@
  *
  * v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
  ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -18,14 +19,12 @@
 #include "python.h"
 
 
-
-
 /**********************************************************/
 /** 
  * @brief      gets input data which is necessary for a Castor and Larmors'
  * 	(1979) description of an O star wind, 
  *
- * @param [in] int  ndom   The domaain number
+ * @param [in] int  ndom   The domain number
  * @return     Always returns zero
  *
  *

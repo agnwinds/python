@@ -34,7 +34,7 @@ Ionization_cycles                          10
 Spectrum_cycles                            10
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)            matrix_bb
 Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
-Atomic_data                                data/standard78
+Atomic_data                                data/standard80_reduced.dat
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)    thermalized.rerad
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
@@ -48,6 +48,7 @@ SV.mdot_r_exponent                         0
 SV.v_infinity(in_units_of_vescape          3
 SV.acceleration_length(cm)                 7e10
 SV.acceleration_exponent                   1.5
+SV.gamma(streamline_skew;1=usually)        1
 SV.v_zero_mode(fixed,sound_speed)                fixed
 SV.v_zero(cm/s)                            6e5
 Wind.radmax(cm)                            1e+12

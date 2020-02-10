@@ -19,16 +19,13 @@
  * own files.
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
 #include "atomic.h"
-
-
 #include "python.h"
-
 
 
 /**********************************************************/
@@ -124,7 +121,7 @@ init_geo ()
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
 
 
-  strcpy (geo.atomic_filename, "data/standard80");
+  strcpy (geo.atomic_filename, "data/standard80.dat");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype
@@ -164,12 +161,12 @@ char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";
  * @details
  *
  * If yesno is non-zero, the user will be asked for the type of spectrum
- * for a radation source.  If yesno is 0, we presume that this radiation souce (a star
+ * for a radation source.  If yesno is 0, we presume that this radiation source (a star
  * a disk or the wind itself) is not to radiate in the calculation, and the spectrum
  * type is set to SPECTYPE_NONE.
  *
  * If one wants to geneate spectra from a seriels of models (such as synthetic spectra
- * caluclated for stars), this routine calls routines to read the models.
+ * calculated for stars), this routine calls routines to read the models.
  *
  * ### Notes ###
  *
@@ -198,6 +195,16 @@ get_spectype (yesno, question, spectype)
   {
     init_choices ();            // Populate the spect array
 
+    /* If this is is RUN_TYPE_PREVIOUS or RUN_TYPE_RESTART, we need to check
+       whether a model spectrum was read in, and if so set the spectype to
+       SPEC_TYPE_MODEL.  Note that this assume that all other spectrum types
+       have negative values
+     */
+
+    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS))
+    {
+      *spectype = SPECTYPE_MODEL;
+    }
     /* Locate the word that corresponds to the spectype that was entered
      */
 
@@ -354,7 +361,7 @@ init_observers ()
   for (n = 0; n < NSPEC; n++)
   {
     geo.phase[n] = 0.5;
-    geo.scat_select[n] = 1000;
+    geo.scat_select[n] = MAXSCAT;
     geo.top_bot_select[n] = 0;
   }
   geo.swavemin = 850;
@@ -372,8 +379,8 @@ init_observers ()
   /* convert wavelengths to frequencies and store for use
      in computing macro atom and k-packet emissivities. */
 
-  geo.sfmin = C / (geo.swavemax * 1.e-8);
-  geo.sfmax = C / (geo.swavemin * 1.e-8);
+  geo.sfmin = VLIGHT / (geo.swavemax * 1.e-8);
+  geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 

@@ -24,7 +24,6 @@
  *
  ***********************************************************/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -33,8 +32,6 @@
 #include "atomic.h"
 #include "python.h"
 #include "recipes.h"
-
-
 
 
 /** Next line is required for proper initialization
@@ -136,7 +133,7 @@ fb_topbase_partial (freq)
   if (fbfr == FB_REDUCED)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == FB_RATE)
-    partial /= (H * freq);
+    partial /= (PLANCK * freq);
 
 
 
@@ -471,11 +468,9 @@ double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
  * ### Notes ###
  *
  *
- * 	@bug This routine contains questions from Stuart in May 04 that have never been
- * 	addressed. Furthemore, the routine has a parameter delta which is used to decide
- * 	whether one is close enough in temperature to a previously generated DCF. This
- * 	is set to 500, which is probably OK if the temperatures are high, but in appropriate
- * 	if T is of order 1000 K.
+ * 	@bug This routine still assumes the possibility of jumps
+ *      even though this possibility has been removed from the cdf generation
+ *      routines.
  *
  **********************************************************/
 
@@ -502,8 +497,10 @@ one_fb (one, f1, f2)
     Exit (0);
   }
 
-/* Check if an apprpriate photon frequency has already been generated, and
-use that instead if possible --  57h */
+/* Check if an appropriate photon frequency has already been generated, 
+   and use that instead if possible 
+ */
+
   tt = xplasma->t_e;
   if (xphot->n < NSTORE && xphot->f1 == f1 && xphot->f2 == f2 && xphot->t == tt)
   {
@@ -512,7 +509,8 @@ use that instead if possible --  57h */
     return (freq);
   }
 
-  delta = 500;                  // Fudge factor to prevent generation of a CDF if t has changed only slightly
+  delta = tt / 100;             // Fudge factor to prevent generation of a CDF if t has changed only slightly
+
   /* Check to see if we have already generated a cdf */
   if (tt > (one_fb_te + delta) || tt < (one_fb_te - delta) || f1 != one_fb_f1 || f2 != one_fb_f2)
   {
@@ -571,10 +569,10 @@ use that instead if possible --  57h */
       freq = f1 + dfreq * n;    //The frequency of the array element we would make in the normal run of things
       if (freq > fb_jumps[nn] && nn < fb_njumps)        //The element we were going to make has a frequency abouve the jump
       {
-        fb_x[nnn] = fb_jumps[nn] * (1. - DELTA_V / (2. * C));   //We make one frequency point DELTA_V cm/s below the jump
+        fb_x[nnn] = fb_jumps[nn] * (1. - DELTA_V / (2. * VLIGHT));      //We make one frequency point DELTA_V cm/s below the jump
         fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL);      //And the flux for that point
         nnn = nnn + 1;          //increase the index of the created array
-        fb_x[nnn] = fb_jumps[nn] * (1. + DELTA_V / (2 * C));    //And one frequency point just above the jump
+        fb_x[nnn] = fb_jumps[nn] * (1. + DELTA_V / (2 * VLIGHT));       //And one frequency point just above the jump
         fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL);      //And the flux for that point
         nn = nn + 1;            //We heave dealt with this jump - on to the next one
         nnn = nnn + 1;          //And we will be filling the next array element next time
@@ -891,6 +889,8 @@ init_freebound (t1, t2, f1, f2)
   double xinteg_fb ();
   int nput;
 
+//OLD  Log ("init_freebound %10.3e %10.3e %10.3e %10.3e\n", t1, t2, f1, f2);
+
 
   if (nfb == 0)
   {
@@ -933,7 +933,11 @@ been calculated for these conditions, and if so simply return.
 */
   i = 0;
   while ((freebound[i].f1 != f1 || freebound[i].f2 != f2) && i < nfb)
+  {
+
+//OLD    Log ("init_freebound: test: %d %10.3e %10.3e Want  %10.3e %10.3e\n", i, freebound[i].f1, freebound[i].f2, f1, f2);
     i++;
+  }
 
   if (i < nfb)
   {
@@ -941,7 +945,7 @@ been calculated for these conditions, and if so simply return.
   }
 
 /* We have to calculate a new set of freebound data */
-  if (i == NFB - 1)
+  if (i == NFB)
   {
     /* We've filled all the available space in freebound so we start recycling elements, assuming that the latest
      * ones are still likelyt to be needed
@@ -966,7 +970,7 @@ on the assumption that the fb information will be reused.
 */
 
 
-  Log ("init_freebound: Creating recombination emissivites between %e and %e\n", f1, f2);
+  Log ("init_freebound: Creating recombination emissivites between %e and %e in stucture element %d\n", f1, f2, nput);
 
 
   freebound[nput].f1 = f1;
@@ -1574,13 +1578,10 @@ gs_rrate (nion, T)
  **********************************************************/
 
 int
-sort_and_compress (array_in, array_out, npts)
-     double *array_in, *array_out;
-     int npts;
+sort_and_compress (double *array_in, double *array_out, int npts)
 {
   double *values;
   int n, nfinal;
-  int compare_doubles ();
 
   values = calloc (sizeof (double), npts);
   for (n = 0; n < npts; n++)
@@ -1604,7 +1605,7 @@ sort_and_compress (array_in, array_out, npts)
     }
   }
 
-
+  free (values);
 
   return (nfinal);
 }
@@ -1651,13 +1652,20 @@ compare_doubles (const void *a, const void *b)
  * @param [in]     int nconf   the index into phot_top that identifies the continuum we wish to sample
  * @return freq    double freq the frequency of the packet to be emitted
  *
- * a scaled down version of one_fb for use with macro atom implementation. Objective is to select the 
+ * a scaled down version of one_fb for use with macro atom implementation. The objective is to select the 
  * emission frequency of a bound free photon that is to be generated by a specific continuum process
- * Prior to this routine, the macro atom routines always did this using an analytic hydrogenic approximation.
- * (SS/JM 1Aug2018)
  * 
  *
  * ###Notes###
+ * 
+ * To improve the overall speed of Python, the routine generates
+ * Mulitiple bf photons for a transition, and stores them in the 
+ * matomxphot structure.  (It is not entirely clear that this
+ * represents a signficant savings.)
+ *
+ * Prior to the creation of this routine, the macro atom routines always did 
+ * this using an analytic hydrogenic approximation.
+ * (SS/JM 1Aug2018)
 ***********************************************************/
 double
 matom_select_bf_freq (WindPtr one, int nconf)
@@ -1713,7 +1721,10 @@ matom_select_bf_freq (WindPtr one, int nconf)
   {
     freq = f1 + dfreq * n;      //The frequency of the array element we would make in the normal run of things
     fb_x[n] = freq;             //Set the next array element frequency
-    fb_y[n] = fb_topbase_partial (freq);        //should return proportional to the total emissivity from this SINGLE bf. Note we don't need to multiply by n_e or n_ion since we only want a CDF for one process: so these factors will scale out
+    fb_y[n] = fb_topbase_partial (freq);        /* should return proportional to the total emissivity from this SINGLE bf. 
+                                                   Note we don't need to multiply by n_e or n_ion since we only want a CDF 
+                                                   for one process: so these factors will scale out
+                                                 */
   }
 
 

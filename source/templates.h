@@ -10,6 +10,7 @@ double emittance_bb(double freqmin, double freqmax, double t);
 double check_fmax(double fmax, double temp);
 /* get_atomicdata.c */
 int get_atomic_data(char masterfile[]);
+int atomicdata2file(void);
 int index_lines(void);
 int index_phot_top(void);
 int index_inner_cross(void);
@@ -35,6 +36,7 @@ int walls(PhotPtr p, PhotPtr pold, double *normal);
 int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
 double populate_bands(int ioniz_or_final, int iwind, struct xbands *band);
 int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind, int print_mode);
+int phot_status(void);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
 int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -292,6 +294,7 @@ double dvwind_ds(PhotPtr p);
 int dvds_ave(void);
 /* reposition.c */
 int reposition(PhotPtr p);
+void reposition_lost_disk_photon(PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* wind_util.c */
@@ -410,7 +413,7 @@ double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
-int compton_dir(PhotPtr p, PlasmaPtr xplasma);
+int compton_dir(PhotPtr p);
 double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double alpha(double nu);
@@ -478,6 +481,7 @@ int macro_pops(PlasmaPtr xplasma, double xne);
 int do_windsave2table(char *root, int ion_switch);
 int create_master_table(int ndom, char rootname[]);
 int create_heat_table(int ndom, char rootname[]);
+int create_convergence_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch);
 double *get_one(int ndom, char variable_name[]);
@@ -605,6 +609,7 @@ int find_ion(int element, int istate);
 int find_element(int element);
 int get_los_dvds(WindPtr w, char rootname[], int ochoice);
 int grid_summary(WindPtr w, char rootname[], int ochoice);
+int flux_summary(WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
@@ -640,6 +645,7 @@ int main(int argc, char *argv[]);
 int do_windsave2table(char *root, int ion_switch);
 int create_master_table(int ndom, char rootname[]);
 int create_heat_table(int ndom, char rootname[]);
+int create_convergence_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch);
 double *get_one(int ndom, char variable_name[]);

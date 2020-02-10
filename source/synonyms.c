@@ -14,12 +14,15 @@
  * It is important to note that this process cannot continue indefinitely because , one may want
  * to change keyword/parameters so that they are not simple rplacements.
  ***********************************************************/
+
 #include <stdio.h>
 #include <strings.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "log.h"
+
 #define	LINELEN 256
 char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.type",
   "Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file",
