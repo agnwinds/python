@@ -646,10 +646,6 @@ one_fb (one, f1, f2)
   xphot->f1 = f1;
   xphot->f2 = f2;
 
-  /* test */
-
-//  freq *= 1.05;
-
   return (freq);
 }
 

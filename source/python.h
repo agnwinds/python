@@ -800,7 +800,7 @@ typedef struct plasma
   double *recomb_simple;        /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
   double *recomb_simple_upweight;       /* multiplicative factor to account for ratio of total to "cooling" energy for b-f processes in simple atoms. */
 
-/* Begining of macro information */
+/* Beginning of macro information */
   double kpkt_emiss;            /*This is the specific emissivity due to the conversion k-packet -> r-packet in the cell
                                    in the frequency range that is required for the final spectral synthesis. (SS) */
 
@@ -1096,11 +1096,11 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 
 typedef struct photon
 {
-  double x[3];                  /* Vector containing position of packet */
-  double lmn[3];                /*direction cosines of this packet */
+  double x[3];                  /* The position of packet */
+  double lmn[3];                /* Direction cosines of the packet */
   double freq, freq_orig;       /* current and original frequency of this packet */
   double w, w_orig;             /* current and original weight of this packet */
-  double tau;
+  double tau;                   /* optical depth of the photon since its creation or last interaction */
   enum istat_enum
   {
     P_INWIND = 0,               //in wind,
@@ -1118,7 +1118,7 @@ typedef struct photon
     P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
-  int nscat;                    /*number of scatterings */
+  int nscat;                    /*Number of scatters for this photon */
   int nres;                     /*For line scattering, indicates the actual transition; 
                                    for continuum scattering, meaning 
                                    depends on matom vs non-matom. See headers of emission.c 
@@ -1154,10 +1154,10 @@ typedef struct photon
      Comment - ksl - 180712 - The logic for all of this is obscure to me, since we keep track of the
      photons origin separately.  At some point one might want to revisit the necessity for this
    */
-  int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
-                                   so we can write out details of where the photon goes */
-  double path;                  /* SWM - Photon path length */
-  double ds;                    // EP 11/19 - the distance of the path the photon previously moved
+  int np;                       /* The photon number, which used ease tracking a photon for diagnostic
+                                   purposes */
+  double path;                  /* The total path length of a photon (used for reverberation calcuations) */
+  double ds;                    /* the distance a photon has moved since its creattion or last interaction */
 }
 p_dummy, *PhotPtr;
 
