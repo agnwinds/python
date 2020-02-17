@@ -52,7 +52,7 @@ do_windsave2table (root, ion_switch)
 {
   int ndom, i;
   char rootname[LINELENGTH];
-  int all[6] = { 0, 5, 6, 7, 8, 9 };
+  int all[7] = { 0, 4, 5, 6, 7, 8, 9 };
 
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
@@ -84,7 +84,7 @@ do_windsave2table (root, ion_switch)
     }
     else
     {
-      for (i = 0; i < 6; i++)
+      for (i = 0; i < 7; i++)
       {
         create_ion_table (ndom, rootname, 1, all[i]);
         create_ion_table (ndom, rootname, 2, all[i]);
