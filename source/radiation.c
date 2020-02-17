@@ -850,6 +850,13 @@ pop_kappa_ff_array ()
  * 
  **********************************************************/
 
+
+/* A couple of external variables to improve the counting of ionizing
+   photons coming into a cell
+*/
+int nioniz_nplasma = -1;
+int nioniz_np = -1;
+
 int
 update_banded_estimators (xplasma, p, ds, w_ave)
      PlasmaPtr xplasma;
@@ -956,7 +963,12 @@ update_banded_estimators (xplasma, p, ds, w_ave)
      * function so it will be incremented for both macro and non-macro modes
      */
 
-    xplasma->nioniz++;
+    if (xplasma->nplasma != nioniz_nplasma || p->np != nioniz_np)
+    {
+      xplasma->nioniz++;
+      nioniz_nplasma = xplasma->nplasma;
+      nioniz_np = p->np;
+    }
 
     /* IP needs to be radiation density in the cell. We sum contributions from
        each photon, then it is normalised in wind_update. */
