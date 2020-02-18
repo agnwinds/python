@@ -53,15 +53,18 @@ double DFUDGE;
 #define VCHECK	1.e6            // The maximum allowable error in calculation of the velocity in calculate_ds
 
 
-/* 57h -- Changed several defined variables to numbers to allow one to vary them 
-in the process of running the code */
 double SMAX_FRAC;               /* In translate_in_wind, a limit is placed on the maximum distance a
                                    photon can travel in one step.  It is a fraction SMAX_FRAC of the
                                    distance of the photon from the origin.  This had been hardwired to
                                    0.1 for up to 57h.  Changing it to 0.5 speeds up the current version
                                    of the code by as much as a factor of 2 for small sized grids.  This
                                    had been introduced as part of the attempt to assure ourselves that
-                                   line shapes were calculated as accurately as possilble. 
+                                   line shapes were calculated as accurately as possible.  The underlhying
+                                   rational for having a maximum disstance is associated with the fact that
+                                   we use linear interpolation along the line of sight to establish velocities
+                                   and most of our grid cells in 2.5d are actually hoop shaped, which means
+                                   one can travel a long distance within a hoop if the direction of the photon
+                                   is not more or less radial, but if moving along the hoop. 
                                  */
 double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the purpose of calculating
                                    photoionization heating and recombination cooling.  It is important that heating and cooling
