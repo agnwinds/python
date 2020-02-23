@@ -846,15 +846,15 @@ typedef struct plasma
   int nscat_res;                /* The number of resonant line scatters in the cell */
 
   double mean_ds;               /* NSH 6/9/12 Added to allow a check that a thin shell is really optically thin */
-  int n_ds;                     /* NSH 6/9/12 Added to allow the mean dsto be computed */
+  int n_ds;                     /* NSH 6/9/12 Added to allow the mean ds to be computed */
   int nrad;                     /* Total number of photons created within the cell */
   int nioniz;                   /* Total number of photon passages by photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 
                                    to each ion[n].  */
   double *inner_recomb;
-  int *scatters;                /* 68b - The number of scatters in this cell for each ion.*/
-  double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. */
+  int *scatters;                /* The number of scatters in this cell for each ion.*/
+  double *xscatters;            /* Diagnostic measure of energy scattered out of beam on extract. */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
                                    by this ion via photoionization.*/
   double *cool_rr_ion;          /* The amount of energy being released from the electron pool
@@ -889,10 +889,10 @@ typedef struct plasma
   /* The total luminosity of all processes in the cell, basically the emissivity of the cell times it volume. Not the same 
      as what escapes the cell, since photons can interact within the cell and lose weight or even be destroyed */
   double lum_lines, lum_ff, cool_adiabatic;
-  double lum_rr, lum_rr_metals; /* 1706 NSH - the radiative recombination luminosity - not the same as the cooling rate */
-  double cool_comp;             /* 1108 NSH The compton luminosity of the cell */
-  double cool_di;               /* 1409 NSH The direct ionization luminosity */
-  double cool_dr;               /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double lum_rr, lum_rr_metals; /* the radiative recombination luminosity - not the same as the cooling rate */
+  double cool_comp;             /* The compton luminosity of the cell */
+  double cool_di;               /* The direct ionization luminosity */
+  double cool_dr;               /* The dielectronic recombination luminosity of the cell */
   double cool_rr, cool_rr_metals;       /*fb luminosity & fb of metals metals */
   double lum_tot, lum_tot_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
@@ -900,9 +900,9 @@ typedef struct plasma
   double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
   double lum_rr_ioniz;
-  double cool_comp_ioniz;       /* 1108 NSH The compton luminosity of the cell */
-  double cool_di_ioniz;         /* 1409 NSH The direct ionization luminosity */
-  double cool_dr_ioniz;         /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double cool_comp_ioniz;       /* The compton luminosity of the cell */
+  double cool_di_ioniz;         /* The direct ionization luminosity */
+  double cool_dr_ioniz;         /* The dielectronic recombination luminosity of the cell */
   double cool_rr_ioniz, cool_rr_metals_ioniz;   /*fb luminosity & fb of metals metals */
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
@@ -950,16 +950,19 @@ typedef struct plasma
     SPEC_MOD_PL = 1,
     SPEC_MOD_EXP = 2,
     SPEC_MOD_FAIL = -1
-  } spec_mod_type[NXBANDS];     /* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+  } spec_mod_type[NXBANDS];     /* A switch to say which type of representation we are using for this band in this cell. 
+                                   Negative means we have no useful representation, 0 means power law, 1 means exponential */
 
-  double pl_alpha[NXBANDS];     /*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
-  double pl_log_w[NXBANDS];     /* NSH 131106 - this is the log version of the power law weight. It is in an attempt to allow very large values of alpha to work with the PL spectral model to avoide NAN problems. The pl_w version can be deleted once testing is complete */
+  double pl_alpha[NXBANDS];     /*Computed spectral index for a power law spectrum representing this cell*/
+  double pl_log_w[NXBANDS];     /*This is the log version of the power law weight. It is in an attempt to allow very large 
+                                  values of alpha to work with the PL spectral model to avoide NAN problems. 
+                                  The pl_w version can be deleted once testing is complete */
 
 
-  double exp_temp[NXBANDS];     /*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
-  double exp_w[NXBANDS];        /*NSH 120817 - The prefactor of an exponential representation of the radiation field in a cell */
-  double ip;                    /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  double xi;                    /*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
+  double exp_temp[NXBANDS];     /* The effective temperature of an exponential representation of the radiation field in a cell */
+  double exp_w[NXBANDS];        /* The prefactor of an exponential representation of the radiation field in a cell */
+  double ip;                    /* Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
+  double xi;                    /* Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;

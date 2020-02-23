@@ -43,8 +43,8 @@ struct
  * @brief      Read the an arbitray wind model intended to mimic a stellar
  * wind or shell.
  *
- * @param [in out] int  ndom   The domain number for the imported model
- * @param [in out] char *  filename   The file containing the model to import
+ * @param [in] int  ndom   The domain number for the imported model
+ * @param [in] char *  filename   The file containing the model to import
  * @return     Always returns 0
  *
  * @details
