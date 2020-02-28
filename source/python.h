@@ -800,7 +800,7 @@ typedef struct plasma
   double *recomb_simple;        /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
   double *recomb_simple_upweight;       /* multiplicative factor to account for ratio of total to "cooling" energy for b-f processes in simple atoms. */
 
-/* Begining of macro information */
+/* Beginning of macro information */
   double kpkt_emiss;            /*This is the specific emissivity due to the conversion k-packet -> r-packet in the cell
                                    in the frequency range that is required for the final spectral synthesis. (SS) */
 
@@ -848,16 +848,16 @@ typedef struct plasma
   int nioniz;                   /* Total number of photon passages by photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 
-                                   to each ion[n] . 78 - changed to dynamic allocation */
+                                   to each ion[n].  */
   double *inner_recomb;
-  int *scatters;                /* 68b - The number of scatters in this cell for each ion. 78 - changed to dynamic allocation */
-  double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. 78 - changed to dynamic allocation */
+  int *scatters;                /* 68b - The number of scatters in this cell for each ion.*/
+  double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
-                                   by this ion via photoionization. 78 - changed to dynamic allocation */
+                                   by this ion via photoionization.*/
   double *cool_rr_ion;          /* The amount of energy being released from the electron pool
-                                   by this ion via recombination. 78 - changed to dynamic allocation */
+                                   by this ion via recombination.*/
   double *lum_rr_ion;           /* The recombination luminosity
-                                   by this ion via recombination. 78 - changed to dynamic allocation */
+                                   by this ion via recombination.*/
 
   double *cool_dr_ion;
   double j, ave_freq;           /*Respectively mean intensity, intensity_averaged frequency, 
@@ -873,16 +873,20 @@ typedef struct plasma
   double F_UV[3];
   double F_Xray[3];
 
+  /* The term direct here means from photons which have not been scattered. These are photons which have been
+     created by the central object, or the disk, or in the simple case the wind, but which have not undergone
+     any kind of interaction which would change their direction
+  */
   double j_direct, j_scatt;     /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double ip_direct, ip_scatt;   /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double xsd_freq[NXBANDS];     /* 1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
-  double max_freq;              /*1208 NSH The maximum frequency photon seen in this cell */
+  double max_freq;              /* 1208 NSH The maximum frequency photon seen in this cell */
   double cool_tot;              /*The total cooling in a cell */
-  /* The total luminosity of all processes in the cell (Not the same 
-     as what escapes the cell) */
+  /* The total luminosity of all processes in the cell, basically the emissivity of the cell times it volume. Not the same 
+     as what escapes the cell, since photons can interact within the cell and lose weight or even be destroyed */
   double lum_lines, lum_ff, cool_adiabatic;
-  double lum_rr, lum_rr_metals; /* 1706 NSH - the radiative recobination luminosity - not the same as the cooling rate */
+  double lum_rr, lum_rr_metals; /* 1706 NSH - the radiative recombination luminosity - not the same as the cooling rate */
   double cool_comp;             /* 1108 NSH The compton luminosity of the cell */
   double cool_di;               /* 1409 NSH The direct ionization luminosity */
   double cool_dr;               /* 1109 NSH The dielectronic recombination luminosity of the cell */
@@ -907,7 +911,9 @@ typedef struct plasma
      ionization pool */
   double bf_simple_ionpool_in, bf_simple_ionpool_out;
 
-  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to compute compton cooling-  only needs computing once per cycle */
+  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to 
+                                   compute compton cooling-  only needs computing once per cycle 
+                                 */
 
   double dmo_dt[3];             /*Radiative force of wind */
   double rad_force_es[3];       /*Radiative force of wind */
@@ -1090,11 +1096,11 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 
 typedef struct photon
 {
-  double x[3];                  /* Vector containing position of packet */
-  double lmn[3];                /*direction cosines of this packet */
+  double x[3];                  /* The position of packet */
+  double lmn[3];                /* Direction cosines of the packet */
   double freq, freq_orig;       /* current and original frequency of this packet */
   double w, w_orig;             /* current and original weight of this packet */
-  double tau;
+  double tau;                   /* optical depth of the photon since its creation or last interaction */
   enum istat_enum
   {
     P_INWIND = 0,               //in wind,
@@ -1112,7 +1118,7 @@ typedef struct photon
     P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
-  int nscat;                    /*number of scatterings */
+  int nscat;                    /*Number of scatters for this photon */
   int nres;                     /*For line scattering, indicates the actual transition; 
                                    for continuum scattering, meaning 
                                    depends on matom vs non-matom. See headers of emission.c 
@@ -1148,10 +1154,10 @@ typedef struct photon
      Comment - ksl - 180712 - The logic for all of this is obscure to me, since we keep track of the
      photons origin separately.  At some point one might want to revisit the necessity for this
    */
-  int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
-                                   so we can write out details of where the photon goes */
-  double path;                  /* SWM - Photon path length */
-  double ds;                    // EP 11/19 - the distance of the path the photon previously moved
+  int np;                       /* The photon number, which used ease tracking a photon for diagnostic
+                                   purposes */
+  double path;                  /* The total path length of a photon (used for reverberation calcuations) */
+  double ds;                    /* the distance a photon has moved since its creattion or last interaction */
 }
 p_dummy, *PhotPtr;
 
