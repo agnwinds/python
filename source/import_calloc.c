@@ -1,14 +1,13 @@
 /* ************************************************************************** */
 /**
- * @file  import_calloc.h
+ * @file  import_calloc.c
  * @author EJP
  * @date   Feb 2019
  *
- * @brief    Global structures for containing imported models
- *
- * @details
+ * @brief    Functions for memory management for the import structures.
  *
  * ************************************************************************** */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,10 +18,9 @@
 #include "import.h"
 
 
-
 /* ************************************************************************** */
 /**
- * @brief   Allocate memory for the import_model structures
+ * @brief   Allocate memory for the import_model structures.
  *
  * @param[in]   int coord_type     The coordinate system of the imported grid
  *
@@ -84,9 +82,18 @@ calloc_import (int coord_type)
 }
 
 
+
 /* ************************************************************************** */
 /**
- * @brief
+ * @brief    Free the memory allocated for the import structures.
+ *
+ * @param[in]   int coord_type     The coordinate system of the imported grid
+ *
+ * @details
+ *
+ * When the raw imported grid is no longer needed as the relevant data has been
+ * assigned to the wind or domain structure, then we should free the memory
+ * so as not to have extra data hanging around.
  *
  * ************************************************************************** */
 
@@ -127,4 +134,3 @@ free_import (int coord_type)
     Exit (1);
   }
 }
-
