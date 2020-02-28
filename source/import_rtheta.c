@@ -80,7 +80,7 @@ import_rtheta (ndom, filename)
   int n, icell, jcell, ncell, inwind;
   int jz, jx;
   double delta;
-  double r, theta, v_x, v_y, v_z, rho, t_r;
+  double r, theta, v_x, v_y, v_z, rho, t_r, t_e;
 
 
   Log ("Reading a model %s in polar (r,theta) coordinates \n", filename);
@@ -96,9 +96,9 @@ import_rtheta (ndom, filename)
   ncell = 0;
   while (fgets (line, LINELENGTH, fptr) != NULL)
   {
-    n = sscanf (line, " %d %d %d %le %le %le %le %le %le %le", &icell, &jcell, &inwind, &r, &theta, &v_x, &v_y, &v_z, &rho, &t_r);
+    n = sscanf (line, " %d %d %d %le %le %le %le %le %le %le %le", &icell, &jcell, &inwind, &r, &theta, &v_x, &v_y, &v_z, &rho, &t_r, &t_e);
 
-    if (n < READ_NO_TEMP)
+    if (n < READ_NO_TEMP_2D)
     {
       continue;
     }
@@ -114,9 +114,14 @@ import_rtheta (ndom, filename)
       import_model_2d.v_z[ncell] = v_z;
       import_model_2d.mass_rho[ncell] = rho;
 
-      if (n >= READ_RAD_TEMP)
+      if (n >= READ_RAD_TEMP_2D)
       {
         import_model_2d.t_r[ncell] = t_r;
+      }
+      else if (n >= READ_BOTH_TEMP_2D)
+      {
+        import_model_2d.t_r[ncell] = t_r;
+        import_model_2d.t_e[ncell] = t_e;
       }
       else
       {

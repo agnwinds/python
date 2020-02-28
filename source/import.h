@@ -19,6 +19,7 @@ struct
   double *v_r;
   double *mass_rho;
   double *t_r;
+  double *t_e;
 
 } import_model_1d;
 
@@ -27,9 +28,13 @@ struct
  * j is the column number
  */
 
-#define READ_NO_TEMP 9
-#define READ_RAD_TEMP 10
-#define READ_BOTH_TEMP 11
+#define READ_NO_TEMP_1D     4
+#define READ_RAD_TEMP_1D    5
+#define READ_BOTH_TEMP_1D   6
+
+#define READ_NO_TEMP_2D     9
+#define READ_RAD_TEMP_2D    10
+#define READ_BOTH_TEMP_2D   11
 
 struct
 {
