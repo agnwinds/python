@@ -1429,9 +1429,9 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
  * photons.  It is not entirely clear why this is where this is done
  *
  * 181009 - ksl - Previously, this routine caused Python to exit 
- * if phtoon_checks produced more than a small number of errors. I
- * have removed this exterme measure but that toes not mean that
- * photon checks should be igrnored.
+ * if photon_checks produced more than a small number of errors. I
+ * have removed this extreme measure but that does not mean that
+ * photon checks should be ignored.
  *
  **********************************************************/
 
@@ -1459,16 +1459,21 @@ photon_checks (p, freqmin, freqmax, comment)
 
   Debug ("photon_checks: %s\n", comment);
 
+  // TODO: these checks aren't very good - should be related to V / C somehow
+
   freqmax *= (1.8);
   freqmin *= (0.6);
+
   for (nn = 0; nn < NPHOT; nn++)
   {
-//OLD    p[nn].np = nn;
     if (PLANCK * p[nn].freq > ion[0].ip)
     {
       geo.cool_tot_ioniz += p[nn].w;
       geo.n_ioniz += p[nn].w / (PLANCK * p[nn].freq);
     }
+
+    // TODO: add w to the list of photon_checks output
+
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
     {
       if (nlabel == 0)
@@ -1476,8 +1481,10 @@ photon_checks (p, freqmin, freqmax, comment)
         Error ("photon_checks:   nphot  origin  freq     freqmin    freqmax\n");
         nlabel++;
       }
-      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-             freqmax);
+//      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
+//             freqmax);
+      Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
+           freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
@@ -1488,8 +1495,10 @@ photon_checks (p, freqmin, freqmax, comment)
         Error ("photon_checks:   nphot  origin  nres  freq     freqmin    freqmax\n");
         nlabel++;
       }
-      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-             freqmax);
+//      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
+//             freqmax);
+      Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
+           freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
@@ -1501,13 +1510,6 @@ photon_checks (p, freqmin, freqmax, comment)
   {
     Log ("photon_checks: %d of %d or %e per cent of photons failed checks\n", nnn, NPHOT, nnn * 100. / NPHOT);
   }
-
-//OLD  if (nnn > max_errors)
-//OLD  {
-//OLD    error_summary ("Exiting because too many bad photons generated");
-//OLD Avoide the exit      Exit (0);
-//OLD  }
-
 
   return (0);
 }
