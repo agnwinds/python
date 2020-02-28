@@ -1448,6 +1448,8 @@ photon_checks (p, freqmin, freqmax, comment)
   nnn = 0;
   nlabel = 0;
 
+  int nlog = 0;
+
   /* Next two lines are to allow for fact that photons generated in
    * a frequency range may be Doppler shifted out of that range, especially
    * if they are disk photons generated right up against one of the frequency
@@ -1483,8 +1485,12 @@ photon_checks (p, freqmin, freqmax, comment)
       }
 //      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
 //             freqmax);
-      Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-           freqmax);
+      if (nlog < 10)
+      {
+        Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq,
+             freqmin, freqmax);
+        nlog++;
+      }
       p[nn].freq = freqmax;
       nnn++;
     }
@@ -1497,8 +1503,12 @@ photon_checks (p, freqmin, freqmax, comment)
       }
 //      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
 //             freqmax);
-      Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-           freqmax);
+      if (nlog < 10)
+      {
+        Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq,
+             freqmin, freqmax);
+        nlog++;
+      }
       p[nn].freq = freqmax;
       nnn++;
     }
