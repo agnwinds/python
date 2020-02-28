@@ -103,7 +103,29 @@ calloc_import (int coord_type)
   }
   else if (coord_type == CYLIND || coord_type == RTHETA)
   {
+    import_model_2d.i = calloc (sizeof *import_model_2d.i, NDIM_MAX * NDIM_MAX);
+    import_model_2d.j = calloc (sizeof *import_model_2d.j, NDIM_MAX * NDIM_MAX);
+    import_model_2d.inwind = calloc (sizeof *import_model_2d.inwind, NDIM_MAX * NDIM_MAX);
+    import_model_2d.v_x = calloc (sizeof *import_model_2d.v_x, NDIM_MAX * NDIM_MAX);
+    import_model_2d.v_y = calloc (sizeof *import_model_2d.v_y, NDIM_MAX * NDIM_MAX);
+    import_model_2d.v_z = calloc (sizeof *import_model_2d.v_z, NDIM_MAX * NDIM_MAX);
+    import_model_2d.mass_rho = calloc (sizeof *import_model_2d.mass_rho, NDIM_MAX * NDIM_MAX);
+    import_model_2d.t_r = calloc (sizeof *import_model_2d.t_r, NDIM_MAX * NDIM_MAX);
+    import_model_2d.wind_x = calloc (sizeof *import_model_2d.wind_x, NDIM_MAX * NDIM_MAX);
+    import_model_2d.wind_z = calloc (sizeof *import_model_2d.wind_z, NDIM_MAX * NDIM_MAX);
+    import_model_2d.wind_midx = calloc (sizeof *import_model_2d.wind_midx, NDIM_MAX * NDIM_MAX);
+    import_model_2d.wind_midz = calloc (sizeof *import_model_2d.wind_midz, NDIM_MAX * NDIM_MAX);
 
+    if (coord_type == CYLIND)
+    {
+      import_model_2d.x = calloc (sizeof *import_model_2d.x, NDIM_MAX * NDIM_MAX);
+      import_model_2d.z = calloc (sizeof *import_model_2d.z, NDIM_MAX * NDIM_MAX);
+    }
+    else
+    {
+      import_model_2d.r = calloc (sizeof *import_model_2d.r, NDIM_MAX * NDIM_MAX);
+      import_model_2d.theta = calloc (sizeof *import_model_2d.theta, NDIM_MAX * NDIM_MAX);
+    }
   }
   else
   {
@@ -132,7 +154,29 @@ free_import (int coord_type)
   }
   else if (coord_type == CYLIND || coord_type == RTHETA)
   {
+    free (import_model_2d.i);
+    free (import_model_2d.j);
+    free (import_model_2d.inwind);
+    free (import_model_2d.v_x);
+    free (import_model_2d.v_y);
+    free (import_model_2d.v_z);
+    free (import_model_2d.mass_rho);
+    free (import_model_2d.t_r);
+    free (import_model_2d.wind_x);
+    free (import_model_2d.wind_z);
+    free (import_model_2d.wind_midx);
+    free (import_model_2d.wind_midz);
 
+    if (coord_type == CYLIND)
+    {
+      free (import_model_2d.x);
+      free (import_model_2d.z);
+    }
+    else
+    {
+      free (import_model_2d.r);
+      free (import_model_2d.theta);
+    }
   }
   else
   {
@@ -324,12 +368,56 @@ import_rho (ndom, x)
 
 /* ************************************************************************** */
 /**
- * @brief
+ * @brief  Get the temperature of an imported model at the given position x.
+ *
+ * @param[in]    int ndom       The domain of interest
+ *
+ * @param[in]    double x[3]    The position of interest
+ *
+ * @return       t_r            The radiation temperature at the position x
+ *
+ * @details
+ *
+ * The purpose of this function is to simply look up the temperature at a given
+ * grid cell for an imported wind model. In some cases this will be the
+ * temperature which is given by the model, however, we also allow one to not
+ * provide a cell temperature. In these cases, a default temperature value is
+ * used which at writing this function header is 10,000 K.
  *
  * ************************************************************************** */
 
 double
-model_temperature (int ndom, double x[])
+model_temp (int ndom, double *x)
 {
-  return zdom[ndom].twind;
+  int n;
+  double t_r;
+
+  n = where_in_grid (ndom, x);
+  if (n < 0)
+  {
+    Error ("%s : %i : position x = (%e, %e, %e) not in wind grid, returning t.init instead\n", __FILE__, __LINE__, x[0], x[1], x[2]);
+    return zdom[ndom].twind;
+  }
+
+  /*
+   * TODO:
+   * Will need to double check that the element number in the imported model
+   * does not change order between the import_model structs and the element
+   * number in the wmain grid...
+   */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    t_r = import_model_1d.t_r[n];
+  }
+  else if (zdom[ndom].coord_type == CYLIND || zdom[ndom].coord_type == RTHETA)
+  {
+    t_r = import_model_2d.t_r[n];
+  }
+  else
+  {
+    t_r = zdom[ndom].twind;
+  }
+
+  return t_r;
 }

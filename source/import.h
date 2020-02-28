@@ -22,11 +22,16 @@ struct
 
 } import_model_1d;
 
+/*
+ * i is the row number
+ * j is the column number
+ */
+
 struct
 {
   int ndim, mdim, ncell;
   int *i, *j, *inwind;
-  double *x, *z;
+  double *x, *z, *r, *theta;
   double *v_x, *v_y, *v_z;
   double *mass_rho, *t_r;
   double *wind_x, *wind_z, *wind_midx, *wind_midz;
