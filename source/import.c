@@ -166,30 +166,21 @@ free_import (int coord_type)
     free (import_model_2d.wind_z);
     free (import_model_2d.wind_midx);
     free (import_model_2d.wind_midz);
-
-    if (coord_type == CYLIND)
-    {
-      free (import_model_2d.x);
-      free (import_model_2d.z);
-    }
-    else
-    {
-      free (import_model_2d.r);
-      free (import_model_2d.theta);
-    }
+    free (import_model_2d.x);
+    free (import_model_2d.z);
+    free (import_model_2d.r);
+    free (import_model_2d.theta);
   }
   else
   {
     Error ("%s: %i: Unknown coord_type %i\n", __FILE__, __LINE__, coord_type);
     Exit (1);
   }
-
 }
 
-/* Create the coordinate grids depending on the coord_type 
- *
- * */
-
+/*
+ * Create the coordinate grids depending on the coord_type
+ */
 
 /**********************************************************/
 /** 

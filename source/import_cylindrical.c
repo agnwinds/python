@@ -74,17 +74,16 @@ import_cylindrical (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("import_cylindrical: No such file\n");
-    exit (1);                   /* No need to worry about mp at this point */
+    Exit (1);                   /* No need to worry about mp at this point */
   }
 
-
   ncell = 0;
-  while (fgets (line, 512, fptr) != NULL)
+  while (fgets (line, LINELENGTH, fptr) != NULL)
   {
     n = sscanf (line, " %d %d %d %le %le %le %le %le %le %le", &icell, &jcell, &inwind, &x, &z, &v_x, &v_y, &v_z, &rho, &t_r);
-    if (n < 4)
+
+    if (n < READ_NO_TEMP)
     {
-      printf ("Error. Ignore %s \n", line);
       continue;
     }
     else
@@ -98,7 +97,7 @@ import_cylindrical (ndom, filename)
       import_model_2d.v_y[ncell] = v_y;
       import_model_2d.v_z[ncell] = v_z;
       import_model_2d.mass_rho[ncell] = rho;
-      if (n > 9)
+      if (n >= READ_RAD_TEMP)
       {
         import_model_2d.t_r[ncell] = t_r;
       }
@@ -133,7 +132,7 @@ import_cylindrical (ndom, filename)
   {
     Error ("The dimensions of the imported grid seem wrong % d x %d != %d\n", import_model_2d.ndim, import_model_2d.mdim,
            import_model_2d.ncell);
-    exit (1);
+    Exit (1);
   }
 
 /* Fill 1-d arrays in x and z */
