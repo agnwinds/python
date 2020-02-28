@@ -19,6 +19,7 @@
  * We then map these models into the structures that Python uses.
  * Most of the mapping is one-to-one, but Python wants the densities
  * to be a the cell centers and not at the corners.
+ *
  ***********************************************************/
 
 #include <stdio.h>
@@ -29,8 +30,6 @@
 #include "python.h"
 #include "import.h"
 
-#define LINELEN 512
-#define NCELLS  512
 
 /* Read in a model of in various coordiante systems, using the coord_type
  * to specify the type of model */
@@ -46,8 +45,8 @@
  * @details
  *
  * This is a steering routine.  It reads the name of the file
- * to import and depending on the pre-established coordiante
- * system calls one of several coordiante system specific 
+ * to import and depending on the pre-established coordinate
+ * system calls one of several coordinate system specific
  * routines to actually read in the model
  *
  * ### Notes ###
@@ -58,7 +57,7 @@ int
 import_wind (ndom)
      int ndom;
 {
-  char filename[LINELEN];
+  char filename[LINELENGTH];
 
   rdstr ("Wind.model2import", filename);
 
@@ -78,11 +77,9 @@ import_wind (ndom)
   }
   else
   {
-    Error ("import_wind: Do not know how to import a model of coor_type %d\n", zdom[ndom].coord_type);
+    Error ("%s : %i : Do not know how to import a model of coord_type %d\n", __FILE__, __LINE__, zdom[ndom].coord_type);
     Exit (0);
   }
-
-  free_import (zdom[ndom].coord_type);
 
   return (0);
 }
@@ -269,7 +266,7 @@ int
 get_import_wind_params (ndom)
      int ndom;
 {
-  Log ("get_import_wind_params is currently a NOP\n");
+//  Log ("get_import_wind_params is currently a NOP\n");
   return (0);
 }
 

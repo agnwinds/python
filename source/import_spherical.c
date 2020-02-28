@@ -210,14 +210,14 @@ spherical_make_grid_import (w, ndom)
 
 /**********************************************************/
 /**
- * @brief      The velocity at any positiion in an imported spherical
+ * @brief      The velocity at any position in an imported spherical
  * model
  *
  *
  * @param [in] int  ndom   The domain of the imported model
  * @param [in] double *  x   A position (3d)
  * @param [out] double *  v   The velocity at x
- * @return     The speeed at x
+ * @return     The speed at x
  *
  * @details
  * This routine interpolates on the values read in for the
@@ -313,9 +313,6 @@ rho_1d (ndom, x)
   {
     rho = import_model_1d.mass_rho[import_model_1d.ncell - 1];
   }
-
-  // TODO: debug code
-  Log ("ZZZZ %d %.3e %.3e rho %e \n", n, r, import_model_1d.r[n], rho);
 
   return (rho);
 }

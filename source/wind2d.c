@@ -500,6 +500,17 @@ be optional which variables beyond here are moved to structures othere than Wind
     }
   }
 
+  /*
+   * We have finished with imported models here, so free the memory to clear
+   * up the memory space for stuff we don't need anymore.
+   */
+
+  for (n = 0; n < geo.ndomain; n++)
+  {
+    if (zdom[n].wind_type == IMPORT)
+      free_import (zdom[n].coord_type);
+  }
+
   return (0);
 }
 
