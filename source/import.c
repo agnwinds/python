@@ -27,6 +27,7 @@
 
 #include "atomic.h"
 #include "python.h"
+#include "import.h"
 
 #define LINELEN 512
 #define NCELLS  512
@@ -61,6 +62,8 @@ import_wind (ndom)
 
   rdstr ("Wind.model2import", filename);
 
+  calloc_import (zdom[ndom].coord_type);
+
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     import_1d (ndom, filename);
@@ -78,9 +81,69 @@ import_wind (ndom)
     Error ("import_wind: Do not know how to import a model of coor_type %d\n", zdom[ndom].coord_type);
     Exit (0);
   }
+
+  free_import (zdom[ndom].coord_type);
+
   return (0);
 }
 
+/* ************************************************************************** */
+/**
+ * @brief
+ *
+ * ************************************************************************** */
+
+void
+calloc_import (int coord_type)
+{
+  if (coord_type == SPHERICAL)
+  {
+    import_model_1d.element = calloc (sizeof *import_model_1d.element, NDIM_MAX);
+    import_model_1d.r = calloc (sizeof *import_model_1d.r, NDIM_MAX);
+    import_model_1d.v_r = calloc (sizeof *import_model_1d.v_r, NDIM_MAX);
+    import_model_1d.mass_rho = calloc (sizeof *import_model_1d.mass_rho, NDIM_MAX);
+    import_model_1d.t_r = calloc (sizeof *import_model_1d.t_r, NDIM_MAX);
+  }
+  else if (coord_type == CYLIND || coord_type == RTHETA)
+  {
+
+  }
+  else
+  {
+    Error ("%s: %i: Unknown coord_type %i\n", __FILE__, __LINE__, coord_type);
+    Exit (1);
+  }
+}
+
+
+/* ************************************************************************** */
+/**
+ * @brief
+ *
+ * ************************************************************************** */
+
+void
+free_import (int coord_type)
+{
+  if (coord_type == SPHERICAL)
+  {
+    free (import_model_1d.element);
+    free (import_model_1d.r);
+    free (import_model_1d.v_r);
+    free (import_model_1d.mass_rho);
+    free (import_model_1d.t_r);
+  }
+  else if (coord_type == CYLIND || coord_type == RTHETA)
+  {
+
+  }
+  else
+  {
+    Error ("%s: %i: Unknown coord_type %i\n", __FILE__, __LINE__, coord_type);
+    Exit (1);
+  }
+
+}
 
 /* Create the coordinate grids depending on the coord_type 
  *
@@ -260,4 +323,16 @@ import_rho (ndom, x)
   }
 
   return (rho);
+}
+
+/* ************************************************************************** */
+/**
+ * @brief
+ *
+ * ************************************************************************** */
+
+double
+model_temperature (int ndom, double x[])
+{
+  return zdom[ndom].twind;
 }
