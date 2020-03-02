@@ -1461,8 +1461,6 @@ photon_checks (p, freqmin, freqmax, comment)
 
   Debug ("photon_checks: %s\n", comment);
 
-  // TODO: these checks aren't very good - should be related to V / C somehow
-
   freqmax *= (1.8);
   freqmin *= (0.6);
 
@@ -1474,41 +1472,17 @@ photon_checks (p, freqmin, freqmax, comment)
       geo.n_ioniz += p[nn].w / (PLANCK * p[nn].freq);
     }
 
-    // TODO: add w to the list of photon_checks output
-
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
     {
-      if (nlabel == 0)
-      {
-        Error ("photon_checks:   nphot  origin  freq     freqmin    freqmax\n");
-        nlabel++;
-      }
-//      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-//             freqmax);
-      if (nlog < 10)
-      {
-        Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq,
-             freqmin, freqmax);
-        nlog++;
-      }
+      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
+             freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
     if (p[nn].origin < 10 && (p[nn].freq < freqmin || freqmax < p[nn].freq))
     {
-      if (nlabel == 0)
-      {
-        Error ("photon_checks:   nphot  origin  nres  freq     freqmin    freqmax\n");
-        nlabel++;
-      }
-//      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-//             freqmax);
-      if (nlog < 10)
-      {
-        Log ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq,
-             freqmin, freqmax);
-        nlog++;
-      }
+      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
+             freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
