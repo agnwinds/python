@@ -36,8 +36,6 @@
  *
  * ************************************************************************** */
 
-#define NDIM_MAX2D NDIM_MAX * NDIM_MAX
-
 void
 calloc_import (int coord_type)
 {

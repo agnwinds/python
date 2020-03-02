@@ -115,10 +115,10 @@ import_cylindrical (ndom, filename)
 
       ncell++;
 
-      if (ncell > NDIM_MAX * NDIM_MAX)
+      if (ncell > NDIM_MAX2D)
       {
         Error ("%s : %i : trying to read in more grid points than allowed (%i). Try changing NDIM_MAX and recompiling.\n", __FILE__,
-               __LINE__, NDIM_MAX * NDIM_MAX);
+               __LINE__, NDIM_MAX2D);
         Exit (1);
       }
 

@@ -14,6 +14,7 @@
  *
  * ************************************************************************** */
 
+#define NDIM_MAX2D NDIM_MAX * NDIM_MAX      // Maximum dimensions for 2D importing
 #define DEFAULT_IMPORT_TEMPERATURE 40000    // Default initialisation temperature if one isn't provided
 
 /*
