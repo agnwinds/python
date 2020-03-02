@@ -102,7 +102,8 @@ import_1d (ndom, filename)
 
       if (n > READ_ELECTRON_TEMP_1D)
       {
-        imported_model.t_r[ncell] = t_e;
+        imported_model.t_e[ncell] = t_e;
+        imported_model.t_r[ncell] = 1.1 * t_e;
       }
       else if (n > READ_BOTH_TEMP_1D)
       {

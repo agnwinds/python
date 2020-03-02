@@ -295,10 +295,10 @@ import_rho (ndom, x)
  * ************************************************************************** */
 
 double
-model_temp (int ndom, double x[])
+model_temp (int ndom, double x[], int return_t_e)
 {
   int n;
-  double t_r;
+  double temperature;
 
   n = where_in_grid (ndom, x);
   if (n < 0)
@@ -314,7 +314,14 @@ model_temp (int ndom, double x[])
    * number in the wmain grid... but has seemed to work so far!
    */
 
-  t_r = imported_model.t_r[n];
+  if (return_t_e)
+  {
+    temperature = imported_model.t_e[n];
+  }
+  else
+  {
+    temperature = imported_model.t_r[n];
+  }
 
-  return t_r;
+  return temperature;
 }

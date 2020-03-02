@@ -100,7 +100,8 @@ import_cylindrical (ndom, filename)
 
       if (n >= READ_ELECTRON_TEMP_2D)
       {
-        imported_model.t_r[ncell] = t_e;
+        imported_model.t_e[ncell] = t_e;
+        imported_model.t_r[ncell] = 1.1 * t_e;
       }
       else if (n >= READ_BOTH_TEMP_2D)
       {
