@@ -490,7 +490,7 @@ int import_make_grid(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
 int get_import_wind_params(int ndom);
 double import_rho(int ndom, double *x);
-double model_temp(int ndom, double *x);
+double model_temp(int ndom, double x[]);
 /* import_spherical.c */
 int import_1d(int ndom, char *filename);
 int spherical_make_grid_import(WindPtr w, int ndom);

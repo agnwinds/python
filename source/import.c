@@ -12,8 +12,10 @@
  * routines. The real works is done in import_spherical,
  * etc
  *
+ * TODO: this is confusing
+ *
  * For importing models, we first read in the data from a file.
- * We assume all of the data, positions, velocities and importanly
+ * We assume all of the data, positions, velocities and importantly
  * densities are given at the grid points of the imported model.
  *
  * We then map these models into the structures that Python uses.
@@ -104,7 +106,7 @@ import_wind (ndom)
  * a grid from one of the imported models
  *
  * ### Notes ###
- * The fact that w is called by this routine is for constency.
+ * The fact that w is provided to this routine is for consistency.
  *
  **********************************************************/
 
@@ -209,7 +211,6 @@ int
 get_import_wind_params (ndom)
      int ndom;
 {
-//  Log ("get_import_wind_params is currently a NOP\n");
   return (0);
 }
 
@@ -283,10 +284,18 @@ import_rho (ndom, x)
  * provide a cell temperature. In these cases, a default temperature value is
  * used which at writing this function header is 10,000 K.
  *
+ * ## Programming Notes ##
+ *
+ * This function does not follow the previous conventions of setting the
+ * velocity or density by having specific helper functions depending on the
+ * imported coordinate system. Instead, we can take advantage of the fact by
+ * this point in the program, the wind has already been copied into wmain so
+ * we can now use where_in_grid() to find grid locations.
+ *
  * ************************************************************************** */
 
 double
-model_temp (int ndom, double *x)
+model_temp (int ndom, double x[])
 {
   int n;
   double t_r;
@@ -294,15 +303,15 @@ model_temp (int ndom, double *x)
   n = where_in_grid (ndom, x);
   if (n < 0)
   {
-    Error ("%s : %i : position x = (%e, %e, %e) not in wind grid, returning t.init instead\n", __FILE__, __LINE__, x[0], x[1], x[2]);
-    return zdom[ndom].twind;
+    Error ("%s : %i : position x = (%e, %e, %e) not in wind, returning 0 K\n", __FILE__, __LINE__, x[0], x[1], x[2]);
+    return 0.0;
   }
 
   /*
    * TODO:
    * Will need to double check that the element number in the imported model
    * does not change order between the import_model structs and the element
-   * number in the wmain grid...
+   * number in the wmain grid... but has seemed to work so far!
    */
 
   t_r = imported_model.t_r[n];
