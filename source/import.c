@@ -81,6 +81,8 @@ import_wind (ndom)
     Exit (0);
   }
 
+  Log ("The imported model has dimensions %d x %d\n", imported_model.ndim, imported_model.mdim);
+
   return (0);
 }
 
@@ -303,18 +305,7 @@ model_temp (int ndom, double *x)
    * number in the wmain grid...
    */
 
-  if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    t_r = import_model_1d.t_r[n];
-  }
-  else if (zdom[ndom].coord_type == CYLIND || zdom[ndom].coord_type == RTHETA)
-  {
-    t_r = import_model_2d.t_r[n];
-  }
-  else
-  {
-    t_r = zdom[ndom].twind;
-  }
+  t_r = imported_model.t_r[n];
 
   return t_r;
 }

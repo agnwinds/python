@@ -31,47 +31,50 @@
  * rather than static memory to avoid storing the raw imported grid details
  * when it isn't required.
  *
- * NDIM_MAX (or NDIM_MAX * NDIM_MAX) elements are allocated for each array, as
+ * NDIM_MAX (or NDIM_MAX2D) elements are allocated for each array, as
  * at this point we do not know how many elements comprise the grid. Note that
  *
  * ************************************************************************** */
+
+#define NDIM_MAX2D NDIM_MAX * NDIM_MAX
 
 void
 calloc_import (int coord_type)
 {
   if (coord_type == SPHERICAL)
   {
-    import_model_1d.element = calloc (sizeof *import_model_1d.element, NDIM_MAX);
-    import_model_1d.r = calloc (sizeof *import_model_1d.r, NDIM_MAX);
-    import_model_1d.v_r = calloc (sizeof *import_model_1d.v_r, NDIM_MAX);
-    import_model_1d.mass_rho = calloc (sizeof *import_model_1d.mass_rho, NDIM_MAX);
-    import_model_1d.t_r = calloc (sizeof *import_model_1d.t_r, NDIM_MAX);
-    import_model_1d.t_e = calloc (sizeof *import_model_1d.t_e, NDIM_MAX);
+    imported_model.i = calloc (sizeof *imported_model.i, NDIM_MAX);
+    imported_model.r = calloc (sizeof *imported_model.r, NDIM_MAX);
+    imported_model.v_r = calloc (sizeof *imported_model.v_r, NDIM_MAX);
+    imported_model.mass_rho = calloc (sizeof *imported_model.mass_rho, NDIM_MAX);
+    imported_model.t_r = calloc (sizeof *imported_model.t_r, NDIM_MAX);
+    imported_model.t_e = calloc (sizeof *imported_model.t_e, NDIM_MAX);
   }
   else if (coord_type == CYLIND || coord_type == RTHETA)
   {
-    import_model_2d.i = calloc (sizeof *import_model_2d.i, NDIM_MAX * NDIM_MAX);
-    import_model_2d.j = calloc (sizeof *import_model_2d.j, NDIM_MAX * NDIM_MAX);
-    import_model_2d.inwind = calloc (sizeof *import_model_2d.inwind, NDIM_MAX * NDIM_MAX);
-    import_model_2d.v_x = calloc (sizeof *import_model_2d.v_x, NDIM_MAX * NDIM_MAX);
-    import_model_2d.v_y = calloc (sizeof *import_model_2d.v_y, NDIM_MAX * NDIM_MAX);
-    import_model_2d.v_z = calloc (sizeof *import_model_2d.v_z, NDIM_MAX * NDIM_MAX);
-    import_model_2d.mass_rho = calloc (sizeof *import_model_2d.mass_rho, NDIM_MAX * NDIM_MAX);
-    import_model_2d.t_r = calloc (sizeof *import_model_2d.t_r, NDIM_MAX * NDIM_MAX);
-    import_model_2d.wind_x = calloc (sizeof *import_model_2d.wind_x, NDIM_MAX * NDIM_MAX);
-    import_model_2d.wind_z = calloc (sizeof *import_model_2d.wind_z, NDIM_MAX * NDIM_MAX);
-    import_model_2d.wind_midx = calloc (sizeof *import_model_2d.wind_midx, NDIM_MAX * NDIM_MAX);
-    import_model_2d.wind_midz = calloc (sizeof *import_model_2d.wind_midz, NDIM_MAX * NDIM_MAX);
+    imported_model.i = calloc (sizeof *imported_model.i, NDIM_MAX2D);
+    imported_model.j = calloc (sizeof *imported_model.j, NDIM_MAX2D);
+    imported_model.inwind = calloc (sizeof *imported_model.inwind, NDIM_MAX2D);
+    imported_model.v_x = calloc (sizeof *imported_model.v_x, NDIM_MAX2D);
+    imported_model.v_y = calloc (sizeof *imported_model.v_y, NDIM_MAX2D);
+    imported_model.v_z = calloc (sizeof *imported_model.v_z, NDIM_MAX2D);
+    imported_model.mass_rho = calloc (sizeof *imported_model.mass_rho, NDIM_MAX2D);
+    imported_model.t_r = calloc (sizeof *imported_model.t_r, NDIM_MAX2D);
+    imported_model.t_e = calloc (sizeof *imported_model.t_e, NDIM_MAX2D);
+    imported_model.wind_x = calloc (sizeof *imported_model.wind_x, NDIM_MAX2D);
+    imported_model.wind_z = calloc (sizeof *imported_model.wind_z, NDIM_MAX2D);
+    imported_model.wind_midx = calloc (sizeof *imported_model.wind_midx, NDIM_MAX2D);
+    imported_model.wind_midz = calloc (sizeof *imported_model.wind_midz, NDIM_MAX2D);
 
     if (coord_type == CYLIND)
     {
-      import_model_2d.x = calloc (sizeof *import_model_2d.x, NDIM_MAX * NDIM_MAX);
-      import_model_2d.z = calloc (sizeof *import_model_2d.z, NDIM_MAX * NDIM_MAX);
+      imported_model.x = calloc (sizeof *imported_model.x, NDIM_MAX2D);
+      imported_model.z = calloc (sizeof *imported_model.z, NDIM_MAX2D);
     }
     else
     {
-      import_model_2d.r = calloc (sizeof *import_model_2d.r, NDIM_MAX * NDIM_MAX);
-      import_model_2d.theta = calloc (sizeof *import_model_2d.theta, NDIM_MAX * NDIM_MAX);
+      imported_model.r = calloc (sizeof *imported_model.r, NDIM_MAX2D);
+      imported_model.theta = calloc (sizeof *imported_model.theta, NDIM_MAX2D);
     }
   }
   else
@@ -102,31 +105,32 @@ free_import (int coord_type)
 {
   if (coord_type == SPHERICAL)
   {
-    free (import_model_1d.element);
-    free (import_model_1d.r);
-    free (import_model_1d.v_r);
-    free (import_model_1d.mass_rho);
-    free (import_model_1d.t_r);
-    free (import_model_1d.t_e);
+    free (imported_model.i);
+    free (imported_model.r);
+    free (imported_model.v_r);
+    free (imported_model.mass_rho);
+    free (imported_model.t_r);
+    free (imported_model.t_e);
   }
   else if (coord_type == CYLIND || coord_type == RTHETA)
   {
-    free (import_model_2d.i);
-    free (import_model_2d.j);
-    free (import_model_2d.inwind);
-    free (import_model_2d.v_x);
-    free (import_model_2d.v_y);
-    free (import_model_2d.v_z);
-    free (import_model_2d.mass_rho);
-    free (import_model_2d.t_r);
-    free (import_model_2d.wind_x);
-    free (import_model_2d.wind_z);
-    free (import_model_2d.wind_midx);
-    free (import_model_2d.wind_midz);
-    free (import_model_2d.x);
-    free (import_model_2d.z);
-    free (import_model_2d.r);
-    free (import_model_2d.theta);
+    free (imported_model.i);
+    free (imported_model.j);
+    free (imported_model.inwind);
+    free (imported_model.v_x);
+    free (imported_model.v_y);
+    free (imported_model.v_z);
+    free (imported_model.mass_rho);
+    free (imported_model.t_r);
+    free (imported_model.t_e);
+    free (imported_model.wind_x);
+    free (imported_model.wind_z);
+    free (imported_model.wind_midx);
+    free (imported_model.wind_midz);
+    free (imported_model.x);
+    free (imported_model.z);
+    free (imported_model.r);
+    free (imported_model.theta);
   }
   else
   {
