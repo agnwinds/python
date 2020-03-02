@@ -126,7 +126,7 @@ import_rtheta (ndom, filename)
       }
       else
       {
-        imported_model.t_r[ncell] = DEFAULT_IMPORT_TEMPERATURE;
+        imported_model.t_r[ncell] = imported_model.t_e[ncell] = DEFAULT_IMPORT_TEMPERATURE;
       }
 
       ncell++;
