@@ -363,7 +363,7 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       plasmamain[n].t_e = model_temp (ndom, x, TRUE);
     }
-    else if (modes.fixed_temp == 0 && modes.zeus_connect == 0)  //NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes
+    else if (modes.fixed_temp == FALSE && modes.zeus_connect == FALSE)  //NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes
     {
       plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;      //Lucy guess
     }

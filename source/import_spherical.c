@@ -100,12 +100,12 @@ import_1d (ndom, filename)
       imported_model.v_r[ncell] = v_r;
       imported_model.mass_rho[ncell] = mass_rho;
 
-      if (n > READ_ELECTRON_TEMP_1D)
+      if (n == READ_ELECTRON_TEMP_1D)
       {
         imported_model.t_e[ncell] = t_e;
         imported_model.t_r[ncell] = 1.1 * t_e;
       }
-      else if (n > READ_BOTH_TEMP_1D)
+      else if (n == READ_BOTH_TEMP_1D)
       {
         imported_model.t_e[ncell] = t_e;
         imported_model.t_r[ncell] = t_r;

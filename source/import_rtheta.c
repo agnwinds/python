@@ -114,12 +114,12 @@ import_rtheta (ndom, filename)
       imported_model.v_z[ncell] = v_z;
       imported_model.mass_rho[ncell] = rho;
 
-      if (n >= READ_ELECTRON_TEMP_2D)
+      if (n == READ_ELECTRON_TEMP_2D)
       {
         imported_model.t_e[ncell] = t_e;
         imported_model.t_r[ncell] = 1.1 * t_e;
       }
-      else if (n >= READ_BOTH_TEMP_2D)
+      else if (n == READ_BOTH_TEMP_2D)
       {
         imported_model.t_e[ncell] = t_e;
         imported_model.t_r[ncell] = t_r;
