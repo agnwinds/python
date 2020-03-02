@@ -87,7 +87,7 @@ import_1d (ndom, filename)
   ncell = 0;
   while (fgets (line, LINELENGTH, fptr) != NULL)
   {
-    n = sscanf (line, " %d %le %le %le %le %le", &icell, &r, &v_r, &mass_rho, &t_r, &t_e);
+    n = sscanf (line, " %d %le %le %le %le %le", &icell, &r, &v_r, &mass_rho, &t_e, &t_r);
 
     if (n < READ_NO_TEMP_1D)
     {
@@ -100,14 +100,14 @@ import_1d (ndom, filename)
       imported_model.v_r[ncell] = v_r;
       imported_model.mass_rho[ncell] = mass_rho;
 
-      if (n > READ_RAD_TEMP_1D)
+      if (n > READ_ELECTRON_TEMP_1D)
       {
-        imported_model.t_r[ncell] = t_r;
+        imported_model.t_r[ncell] = t_e;
       }
       else if (n > READ_BOTH_TEMP_1D)
       {
-        imported_model.t_r[ncell] = t_r;
         imported_model.t_e[ncell] = t_e;
+        imported_model.t_r[ncell] = t_r;
       }
       else
       {

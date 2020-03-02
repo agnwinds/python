@@ -23,11 +23,11 @@
  */
 
 #define READ_NO_TEMP_1D     4
-#define READ_RAD_TEMP_1D    5
+#define READ_ELECTRON_TEMP_1D    5
 #define READ_BOTH_TEMP_1D   6
 
 #define READ_NO_TEMP_2D     9
-#define READ_RAD_TEMP_2D    10
+#define READ_ELECTRON_TEMP_2D    10
 #define READ_BOTH_TEMP_2D   11
 
 /*

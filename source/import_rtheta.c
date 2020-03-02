@@ -96,7 +96,7 @@ import_rtheta (ndom, filename)
   ncell = 0;
   while (fgets (line, LINELENGTH, fptr) != NULL)
   {
-    n = sscanf (line, " %d %d %d %le %le %le %le %le %le %le %le", &icell, &jcell, &inwind, &r, &theta, &v_x, &v_y, &v_z, &rho, &t_r, &t_e);
+    n = sscanf (line, " %d %d %d %le %le %le %le %le %le %le %le", &icell, &jcell, &inwind, &r, &theta, &v_x, &v_y, &v_z, &rho, &t_e, &t_r);
 
     if (n < READ_NO_TEMP_2D)
     {
@@ -114,14 +114,14 @@ import_rtheta (ndom, filename)
       imported_model.v_z[ncell] = v_z;
       imported_model.mass_rho[ncell] = rho;
 
-      if (n >= READ_RAD_TEMP_2D)
+      if (n >= READ_ELECTRON_TEMP_2D)
       {
-        imported_model.t_r[ncell] = t_r;
+        imported_model.t_r[ncell] = t_e;
       }
       else if (n >= READ_BOTH_TEMP_2D)
       {
-        imported_model.t_r[ncell] = t_r;
         imported_model.t_e[ncell] = t_e;
+        imported_model.t_r[ncell] = t_r;
       }
       else
       {
