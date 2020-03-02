@@ -1474,6 +1474,11 @@ photon_checks (p, freqmin, freqmax, comment)
 
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
     {
+      if (nlabel == 0)
+      {
+        Error ("photon_checks:   nphot  origin  freq     freqmin    freqmax\n");
+        nlabel++;
+      }
       Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
              freqmax);
       p[nn].freq = freqmax;
@@ -1481,6 +1486,11 @@ photon_checks (p, freqmin, freqmax, comment)
     }
     if (p[nn].origin < 10 && (p[nn].freq < freqmin || freqmax < p[nn].freq))
     {
+      if (nlabel == 0)
+      {
+        Error ("photon_checks:   nphot  origin  freq     freqmin    freqmax\n");
+        nlabel++;
+      }
       Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
              freqmax);
       p[nn].freq = freqmax;
