@@ -254,6 +254,9 @@ rtheta_make_grid_import (w, ndom)
     w[nn].v[2] = imported_model.v_z[n];
     w[nn].inwind = imported_model.inwind[n];
 
+    if (w[nn].inwind == W_NOT_INWIND || w[nn].inwind == W_PART_INWIND)
+      w[nn].inwind = W_IGNORE;
+
     w[nn].thetacen = imported_model.wind_midz[imported_model.j[n]];
     theta = w[nn].thetacen / RADIAN;
 
