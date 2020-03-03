@@ -137,7 +137,7 @@ import_make_grid (w, ndom)
 
 
 /* Determine velocities for the various coord_types.  Note that
- * depending on the coordinate system we may alrady have calculated
+ * depending on the coordinate system we may already have calculated
  * velocities for wmain, and in that case these calls are used
  * for interpolation.
  */
@@ -219,10 +219,10 @@ get_import_wind_params (ndom)
 
 /**********************************************************/
 /** 
- * @brief      Get the density at an arbitray position in an imported 
+ * @brief      Get the density at an arbitrary position in an imported
  * model
  *
- * @param [in] int  ndom   The domain assosciated with an imported model
+ * @param [in] int  ndom   The domain associated with an imported model
  * @param [in] double *  x   The position where we desire rho
  * @return     rho              
  *
@@ -259,7 +259,7 @@ import_rho (ndom, x)
   }
   else
   {
-    Error ("import_rho:  Do not know how to create velocities from model of coor_type %d\n", zdom[ndom].coord_type);
+    Error ("import_rho:  Do not know how to create velocities from model of coord_type %d\n", zdom[ndom].coord_type);
     Exit (0);
   }
 
@@ -301,7 +301,6 @@ model_temp (int ndom, double x[], int return_t_e)
   double temperature;
 
   n = where_in_grid (ndom, x);
-  n -= zdom[ndom].nstart;
   if (n < 0)
   {
     Error ("%s : %i : position x = (%e, %e, %e) not in wind, returning 0 K\n", __FILE__, __LINE__, x[0], x[1], x[2]);
@@ -309,10 +308,26 @@ model_temp (int ndom, double x[], int return_t_e)
   }
 
   /*
-   * TODO:
-   * Will need to double check that the element number in the imported model
-   * does not change order between the import_model structs and the element
-   * number in the wmain grid... but has seemed to work so far!
+   * At this point, we need to subtract off the domain nstart to ensure we are
+   * indexing correctly into that domain's imported model struct
+   */
+
+  n -= zdom[ndom].nstart;
+
+  if ((zdom[ndom].coord_type == RTHETA || zdom[ndom].coord_type == CYLIND) && n > NDIM_MAX2D - 1)
+  {
+    Error ("%s : %i : trying to index out of grid bounds for domain %i\n", __FILE__, __LINE__, ndom);
+    return zdom[ndom].twind;
+  }
+  else if (zdom[ndom].coord_type == SPHERICAL && n > NDIM_MAX - 1)
+  {
+    Error ("%s : %i : trying to index out of grid bounds for domain %i\n", __FILE__, __LINE__, ndom);
+    return zdom[ndom].twind;
+  }
+
+  /*
+   * After finding out where we are in the grid, we can now find the temperature
+   * in the correct domain
    */
 
   if (return_t_e)
