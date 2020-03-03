@@ -560,8 +560,8 @@ double diskrad(double m1, double m2, double period);
 double roche2(double q, double a);
 double logg(double mass, double rwd);
 /* import_calloc.c */
-void calloc_import(int coord_type);
-void free_import(int coord_type);
+void calloc_import (int coord_type, int ndom);
+void free_import (int coord_type, int ndom);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

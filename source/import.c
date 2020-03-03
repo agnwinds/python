@@ -63,7 +63,7 @@ import_wind (ndom)
 
   rdstr ("Wind.model2import", filename);
 
-  calloc_import (zdom[ndom].coord_type);
+  calloc_import (zdom[ndom].coord_type, ndom);
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
@@ -83,7 +83,7 @@ import_wind (ndom)
     Exit (0);
   }
 
-  Log ("The imported model has dimensions %d x %d\n", imported_model.ndim, imported_model.mdim);
+  Log ("The imported model has dimensions %d x %d\n", imported_model[ndom].ndim, imported_model[ndom].mdim);
 
   return (0);
 }
@@ -301,6 +301,7 @@ model_temp (int ndom, double x[], int return_t_e)
   double temperature;
 
   n = where_in_grid (ndom, x);
+  n -= zdom[ndom].nstart;
   if (n < 0)
   {
     Error ("%s : %i : position x = (%e, %e, %e) not in wind, returning 0 K\n", __FILE__, __LINE__, x[0], x[1], x[2]);
@@ -316,11 +317,11 @@ model_temp (int ndom, double x[], int return_t_e)
 
   if (return_t_e)
   {
-    temperature = imported_model.t_e[n];
+    temperature = imported_model[ndom].t_e[n];
   }
   else
   {
-    temperature = imported_model.t_r[n];
+    temperature = imported_model[ndom].t_r[n];
   }
 
   return temperature;

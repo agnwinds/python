@@ -518,7 +518,7 @@ be optional which variables beyond here are moved to structures othere than Wind
   for (n = 0; n < geo.ndomain; n++)
   {
     if (zdom[n].wind_type == IMPORT)
-      free_import (zdom[n].coord_type);
+      free_import (zdom[n].coord_type, n);
   }
 
   return (0);

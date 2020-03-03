@@ -88,30 +88,30 @@ import_cylindrical (ndom, filename)
     }
     else
     {
-      imported_model.i[ncell] = icell;
-      imported_model.j[ncell] = jcell;
-      imported_model.inwind[ncell] = inwind;
-      imported_model.x[ncell] = x;
-      imported_model.z[ncell] = z;
-      imported_model.v_x[ncell] = v_x;
-      imported_model.v_y[ncell] = v_y;
-      imported_model.v_z[ncell] = v_z;
-      imported_model.mass_rho[ncell] = rho;
+      imported_model[ndom].i[ncell] = icell;
+      imported_model[ndom].j[ncell] = jcell;
+      imported_model[ndom].inwind[ncell] = inwind;
+      imported_model[ndom].x[ncell] = x;
+      imported_model[ndom].z[ncell] = z;
+      imported_model[ndom].v_x[ncell] = v_x;
+      imported_model[ndom].v_y[ncell] = v_y;
+      imported_model[ndom].v_z[ncell] = v_z;
+      imported_model[ndom].mass_rho[ncell] = rho;
 
       if (n == READ_ELECTRON_TEMP_2D)
       {
-        imported_model.t_e[ncell] = t_e;
-        imported_model.t_r[ncell] = 1.1 * t_e;
+        imported_model[ndom].t_e[ncell] = t_e;
+        imported_model[ndom].t_r[ncell] = 1.1 * t_e;
       }
       else if (n == READ_BOTH_TEMP_2D)
       {
-        imported_model.t_e[ncell] = t_e;
-        imported_model.t_r[ncell] = t_r;
+        imported_model[ndom].t_e[ncell] = t_e;
+        imported_model[ndom].t_r[ncell] = t_r;
       }
       else
       {
-        imported_model.t_e[ncell] = DEFAULT_IMPORT_TEMPERATURE;
-        imported_model.t_r[ncell] = 1.1 * DEFAULT_IMPORT_TEMPERATURE;
+        imported_model[ndom].t_e[ncell] = DEFAULT_IMPORT_TEMPERATURE;
+        imported_model[ndom].t_r[ncell] = 1.1 * DEFAULT_IMPORT_TEMPERATURE;
       }
 
       ncell++;
@@ -137,33 +137,33 @@ import_cylindrical (ndom, filename)
  * the wrong number of elements in wmain for the wind will be allocated
  */
 
-  zdom[ndom].ndim = imported_model.ndim = icell + 1;
-  zdom[ndom].mdim = imported_model.mdim = jcell + 1;
+  zdom[ndom].ndim = imported_model[ndom].ndim = icell + 1;
+  zdom[ndom].mdim = imported_model[ndom].mdim = jcell + 1;
   zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
-  imported_model.ncell = ncell;
+  imported_model[ndom].ncell = ncell;
 
   /* Check that the grid is complete */
 
-  if (ncell != imported_model.ndim * imported_model.mdim)
+  if (ncell != imported_model[ndom].ndim * imported_model[ndom].mdim)
   {
-    Error ("The dimensions of the imported grid seem wrong % d x %d != %d\n", imported_model.ndim, imported_model.mdim,
-           imported_model.ncell);
+    Error ("The dimensions of the imported grid seem wrong % d x %d != %d\n", imported_model[ndom].ndim, imported_model[ndom].mdim,
+           imported_model[ndom].ncell);
     Exit (1);
   }
 
 /* Fill 1-d arrays in x and z */
 
   jz = jx = 0;
-  for (n = 0; n < imported_model.ncell; n++)
+  for (n = 0; n < imported_model[ndom].ncell; n++)
   {
-    if (imported_model.i[n] == 0)
+    if (imported_model[ndom].i[n] == 0)
     {
-      imported_model.wind_z[jz] = imported_model.z[n];
+      imported_model[ndom].wind_z[jz] = imported_model[ndom].z[n];
       jz++;
     }
-    if (imported_model.j[n] == 0)
+    if (imported_model[ndom].j[n] == 0)
     {
-      imported_model.wind_x[jx] = imported_model.x[n];
+      imported_model[ndom].wind_x[jx] = imported_model[ndom].x[n];
       jx++;
     }
   }
@@ -176,24 +176,24 @@ import_cylindrical (ndom, filename)
 
   for (n = 0; n < jz - 1; n++)
   {
-    imported_model.wind_midz[n] = 0.5 * (imported_model.wind_z[n] + imported_model.wind_z[n + 1]);
+    imported_model[ndom].wind_midz[n] = 0.5 * (imported_model[ndom].wind_z[n] + imported_model[ndom].wind_z[n + 1]);
   }
 
 
-  delta = (imported_model.wind_z[n - 1] - imported_model.wind_z[n - 2]);
-  imported_model.wind_midz[n] = imported_model.wind_z[n - 1] + 0.5 * delta;
+  delta = (imported_model[ndom].wind_z[n - 1] - imported_model[ndom].wind_z[n - 2]);
+  imported_model[ndom].wind_midz[n] = imported_model[ndom].wind_z[n - 1] + 0.5 * delta;
 
 
 
   for (n = 0; n < jx - 1; n++)
   {
-    imported_model.wind_midx[n] = 0.5 * (imported_model.wind_x[n] + imported_model.wind_x[n + 1]);
+    imported_model[ndom].wind_midx[n] = 0.5 * (imported_model[ndom].wind_x[n] + imported_model[ndom].wind_x[n + 1]);
   }
 
 
 
-  delta = (imported_model.wind_x[n - 1] - imported_model.wind_x[n - 2]);
-  imported_model.wind_midx[n] = imported_model.wind_x[n - 1] + 0.5 * delta;
+  delta = (imported_model[ndom].wind_x[n - 1] - imported_model[ndom].wind_x[n - 2]);
+  imported_model[ndom].wind_midx[n] = imported_model[ndom].wind_x[n - 1] + 0.5 * delta;
 
 
   return (0);
@@ -240,23 +240,23 @@ cylindrical_make_grid_import (w, ndom)
  *  Note also that none of this will work unless a complete grid is read
  *  in
  *  */
-  for (n = 0; n < imported_model.ncell; n++)
+  for (n = 0; n < imported_model[ndom].ncell; n++)
   {
-    wind_ij_to_n (ndom, imported_model.i[n], imported_model.j[n], &nn);
-    w[nn].x[0] = imported_model.x[n];
+    wind_ij_to_n (ndom, imported_model[ndom].i[n], imported_model[ndom].j[n], &nn);
+    w[nn].x[0] = imported_model[ndom].x[n];
     w[nn].x[1] = 0;
-    w[nn].x[2] = imported_model.z[n];
-    w[nn].v[0] = imported_model.v_x[n];
-    w[nn].v[1] = imported_model.v_y[n];
-    w[nn].v[2] = imported_model.v_z[n];
-    w[nn].inwind = imported_model.inwind[n];
+    w[nn].x[2] = imported_model[ndom].z[n];
+    w[nn].v[0] = imported_model[ndom].v_x[n];
+    w[nn].v[1] = imported_model[ndom].v_y[n];
+    w[nn].v[2] = imported_model[ndom].v_z[n];
+    w[nn].inwind = imported_model[ndom].inwind[n];
 
     if (w[nn].inwind == W_NOT_INWIND || w[nn].inwind == W_PART_INWIND)
       w[nn].inwind = W_IGNORE;
 
-    w[nn].xcen[0] = imported_model.wind_midx[imported_model.i[n]];
+    w[nn].xcen[0] = imported_model[ndom].wind_midx[imported_model[ndom].i[n]];
     w[nn].xcen[1] = 0;
-    w[nn].xcen[2] = imported_model.wind_midz[imported_model.j[n]];
+    w[nn].xcen[2] = imported_model[ndom].wind_midz[imported_model[ndom].j[n]];
 
   }
 
@@ -266,14 +266,14 @@ cylindrical_make_grid_import (w, ndom)
 
   for (n = 0; n < zdom[ndom].ndim; n++)
   {
-    zdom[ndom].wind_x[n] = imported_model.wind_x[n];
+    zdom[ndom].wind_x[n] = imported_model[ndom].wind_x[n];
   }
 
 
 
   for (n = 0; n < zdom[ndom].mdim; n++)
   {
-    zdom[ndom].wind_z[n] = imported_model.wind_z[n];
+    zdom[ndom].wind_z[n] = imported_model[ndom].wind_z[n];
   }
 
 
@@ -294,42 +294,42 @@ cylindrical_make_grid_import (w, ndom)
 
   rmax = rho_max = zmax = 0;
   rmin = rho_min = zmin = VERY_BIG;
-  for (n = 0; n < imported_model.ncell; n++)
+  for (n = 0; n < imported_model[ndom].ncell; n++)
 
   {
-    if (imported_model.inwind[n] >= 0)
+    if (imported_model[ndom].inwind[n] >= 0)
     {
-      x[0] = imported_model.x[n];
+      x[0] = imported_model[ndom].x[n];
       x[1] = 0;
-      x[2] = imported_model.z[n];
+      x[2] = imported_model[ndom].z[n];
 
       r_inner = length (x);
 
-      x[0] = imported_model.x[n + imported_model.mdim];
+      x[0] = imported_model[ndom].x[n + imported_model[ndom].mdim];
       x[1] = 0;
-      x[2] = imported_model.z[n + 1];
+      x[2] = imported_model[ndom].z[n + 1];
 
       r_outer = length (x);
 
-      if (imported_model.x[n + imported_model.mdim] > rho_max)
+      if (imported_model[ndom].x[n + imported_model[ndom].mdim] > rho_max)
       {
-        rho_max = imported_model.x[n + imported_model.mdim];
+        rho_max = imported_model[ndom].x[n + imported_model[ndom].mdim];
       }
-      if (imported_model.z[n + 1] > zmax)
+      if (imported_model[ndom].z[n + 1] > zmax)
       {
-        zmax = imported_model.z[n + 1];
+        zmax = imported_model[ndom].z[n + 1];
       }
-      if (imported_model.z[n] < zmin)
+      if (imported_model[ndom].z[n] < zmin)
       {
-        zmin = imported_model.z[n];
+        zmin = imported_model[ndom].z[n];
       }
       if (r_outer > rmax)
       {
         rmax = r_outer;
       }
-      if (rho_min > imported_model.x[n])
+      if (rho_min > imported_model[ndom].x[n])
       {
-        rho_min = imported_model.x[n];
+        rho_min = imported_model[ndom].x[n];
       }
       if (rmin > r_inner)
       {
@@ -481,22 +481,22 @@ rho_cylindrical (ndom, x)
   z = fabs (x[2]);
 
   i = 0;
-  while (z > imported_model.wind_z[i] && i < imported_model.mdim)
+  while (z > imported_model[ndom].wind_z[i] && i < imported_model[ndom].mdim)
   {
     i++;
   }
   i--;
 
   j = 0;
-  while (r > imported_model.wind_x[j] && j < imported_model.ndim)
+  while (r > imported_model[ndom].wind_x[j] && j < imported_model[ndom].ndim)
   {
     j++;
   }
   j--;
 
-  n = j * imported_model.mdim + i;
+  n = j * imported_model[ndom].mdim + i;
 
-  rho = imported_model.mass_rho[n];
+  rho = imported_model[ndom].mass_rho[n];
 
 
   return (rho);

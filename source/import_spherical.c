@@ -95,25 +95,25 @@ import_1d (ndom, filename)
     }
     else
     {
-      imported_model.i[ncell] = icell;
-      imported_model.r[ncell] = r;
-      imported_model.v_r[ncell] = v_r;
-      imported_model.mass_rho[ncell] = mass_rho;
+      imported_model[ndom].i[ncell] = icell;
+      imported_model[ndom].r[ncell] = r;
+      imported_model[ndom].v_r[ncell] = v_r;
+      imported_model[ndom].mass_rho[ncell] = mass_rho;
 
       if (n == READ_ELECTRON_TEMP_1D)
       {
-        imported_model.t_e[ncell] = t_e;
-        imported_model.t_r[ncell] = 1.1 * t_e;
+        imported_model[ndom].t_e[ncell] = t_e;
+        imported_model[ndom].t_r[ncell] = 1.1 * t_e;
       }
       else if (n == READ_BOTH_TEMP_1D)
       {
-        imported_model.t_e[ncell] = t_e;
-        imported_model.t_r[ncell] = t_r;
+        imported_model[ndom].t_e[ncell] = t_e;
+        imported_model[ndom].t_r[ncell] = t_r;
       }
       else
       {
-        imported_model.t_e[ncell] = DEFAULT_IMPORT_TEMPERATURE;
-        imported_model.t_r[ncell] = 1.1 * DEFAULT_IMPORT_TEMPERATURE;
+        imported_model[ndom].t_e[ncell] = DEFAULT_IMPORT_TEMPERATURE;
+        imported_model[ndom].t_r[ncell] = 1.1 * DEFAULT_IMPORT_TEMPERATURE;
       }
 
       ncell++;
@@ -128,14 +128,14 @@ import_1d (ndom, filename)
     }
   }
 
-  imported_model.ncell = ncell;
+  imported_model[ndom].ncell = ncell;
 
   /* Although much of the initialization of zdom can be postponed
    * one has to define mdim and ndim of zdom here, so that the correct
    * number of wind cells will be allocated */
 
-  imported_model.ndim = zdom[ndom].ndim2 = zdom[ndom].ndim = imported_model.ncell;
-  imported_model.mdim = zdom[ndom].mdim = 1;
+  imported_model[ndom].ndim = zdom[ndom].ndim2 = zdom[ndom].ndim = imported_model[ndom].ncell;
+  imported_model[ndom].mdim = zdom[ndom].mdim = 1;
 
   return (0);
 }
@@ -177,16 +177,16 @@ spherical_make_grid_import (w, ndom)
   int j, n;
 
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
-  zdom[ndom].rmin = imported_model.r[0];
-  zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max = zdom[ndom].rmax = imported_model.r[imported_model.ncell - 1];
+  zdom[ndom].rmin = imported_model[ndom].r[0];
+  zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max = zdom[ndom].rmax = imported_model[ndom].r[imported_model[ndom].ncell - 1];
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
 
-  for (j = 0; j < imported_model.ncell; j++)
+  for (j = 0; j < imported_model[ndom].ncell; j++)
   {
     n = j + zdom[ndom].nstart;
-    w[n].r = imported_model.r[j];
+    w[n].r = imported_model[ndom].r[j];
     /* Put the radial velocity in v[0] */
-    w[n].v[0] = imported_model.v_r[j];
+    w[n].v[0] = imported_model[ndom].v_r[j];
   }
 
   /* Need to define the midpoints of the grid */
@@ -317,19 +317,19 @@ rho_1d (ndom, x)
   r = length (x);
 
   n = 0;
-  while (r >= imported_model.r[n] && n < imported_model.ncell)
+  while (r >= imported_model[ndom].r[n] && n < imported_model[ndom].ncell)
   {
     n++;
   }
   n--;
 
-  if (n < imported_model.ncell)
+  if (n < imported_model[ndom].ncell)
   {
-    rho = imported_model.mass_rho[n];
+    rho = imported_model[ndom].mass_rho[n];
   }
   else
   {
-    rho = imported_model.mass_rho[imported_model.ncell - 1];
+    rho = imported_model[ndom].mass_rho[imported_model[ndom].ncell - 1];
   }
 
   return (rho);

@@ -37,42 +37,42 @@
  * ************************************************************************** */
 
 void
-calloc_import (int coord_type)
+calloc_import (int coord_type, int ndom)
 {
   if (coord_type == SPHERICAL)
   {
-    imported_model.i = calloc (sizeof *imported_model.i, NDIM_MAX);
-    imported_model.r = calloc (sizeof *imported_model.r, NDIM_MAX);
-    imported_model.v_r = calloc (sizeof *imported_model.v_r, NDIM_MAX);
-    imported_model.mass_rho = calloc (sizeof *imported_model.mass_rho, NDIM_MAX);
-    imported_model.t_r = calloc (sizeof *imported_model.t_r, NDIM_MAX);
-    imported_model.t_e = calloc (sizeof *imported_model.t_e, NDIM_MAX);
+    imported_model[ndom].i = calloc (sizeof *imported_model[ndom].i, NDIM_MAX);
+    imported_model[ndom].r = calloc (sizeof *imported_model[ndom].r, NDIM_MAX);
+    imported_model[ndom].v_r = calloc (sizeof *imported_model[ndom].v_r, NDIM_MAX);
+    imported_model[ndom].mass_rho = calloc (sizeof *imported_model[ndom].mass_rho, NDIM_MAX);
+    imported_model[ndom].t_r = calloc (sizeof *imported_model[ndom].t_r, NDIM_MAX);
+    imported_model[ndom].t_e = calloc (sizeof *imported_model[ndom].t_e, NDIM_MAX);
   }
   else if (coord_type == CYLIND || coord_type == RTHETA)
   {
-    imported_model.i = calloc (sizeof *imported_model.i, NDIM_MAX2D);
-    imported_model.j = calloc (sizeof *imported_model.j, NDIM_MAX2D);
-    imported_model.inwind = calloc (sizeof *imported_model.inwind, NDIM_MAX2D);
-    imported_model.v_x = calloc (sizeof *imported_model.v_x, NDIM_MAX2D);
-    imported_model.v_y = calloc (sizeof *imported_model.v_y, NDIM_MAX2D);
-    imported_model.v_z = calloc (sizeof *imported_model.v_z, NDIM_MAX2D);
-    imported_model.mass_rho = calloc (sizeof *imported_model.mass_rho, NDIM_MAX2D);
-    imported_model.t_r = calloc (sizeof *imported_model.t_r, NDIM_MAX2D);
-    imported_model.t_e = calloc (sizeof *imported_model.t_e, NDIM_MAX2D);
-    imported_model.wind_x = calloc (sizeof *imported_model.wind_x, NDIM_MAX2D);
-    imported_model.wind_z = calloc (sizeof *imported_model.wind_z, NDIM_MAX2D);
-    imported_model.wind_midx = calloc (sizeof *imported_model.wind_midx, NDIM_MAX2D);
-    imported_model.wind_midz = calloc (sizeof *imported_model.wind_midz, NDIM_MAX2D);
+    imported_model[ndom].i = calloc (sizeof *imported_model[ndom].i, NDIM_MAX2D);
+    imported_model[ndom].j = calloc (sizeof *imported_model[ndom].j, NDIM_MAX2D);
+    imported_model[ndom].inwind = calloc (sizeof *imported_model[ndom].inwind, NDIM_MAX2D);
+    imported_model[ndom].v_x = calloc (sizeof *imported_model[ndom].v_x, NDIM_MAX2D);
+    imported_model[ndom].v_y = calloc (sizeof *imported_model[ndom].v_y, NDIM_MAX2D);
+    imported_model[ndom].v_z = calloc (sizeof *imported_model[ndom].v_z, NDIM_MAX2D);
+    imported_model[ndom].mass_rho = calloc (sizeof *imported_model[ndom].mass_rho, NDIM_MAX2D);
+    imported_model[ndom].t_r = calloc (sizeof *imported_model[ndom].t_r, NDIM_MAX2D);
+    imported_model[ndom].t_e = calloc (sizeof *imported_model[ndom].t_e, NDIM_MAX2D);
+    imported_model[ndom].wind_x = calloc (sizeof *imported_model[ndom].wind_x, NDIM_MAX2D);
+    imported_model[ndom].wind_z = calloc (sizeof *imported_model[ndom].wind_z, NDIM_MAX2D);
+    imported_model[ndom].wind_midx = calloc (sizeof *imported_model[ndom].wind_midx, NDIM_MAX2D);
+    imported_model[ndom].wind_midz = calloc (sizeof *imported_model[ndom].wind_midz, NDIM_MAX2D);
 
     if (coord_type == CYLIND)
     {
-      imported_model.x = calloc (sizeof *imported_model.x, NDIM_MAX2D);
-      imported_model.z = calloc (sizeof *imported_model.z, NDIM_MAX2D);
+      imported_model[ndom].x = calloc (sizeof *imported_model[ndom].x, NDIM_MAX2D);
+      imported_model[ndom].z = calloc (sizeof *imported_model[ndom].z, NDIM_MAX2D);
     }
     else
     {
-      imported_model.r = calloc (sizeof *imported_model.r, NDIM_MAX2D);
-      imported_model.theta = calloc (sizeof *imported_model.theta, NDIM_MAX2D);
+      imported_model[ndom].r = calloc (sizeof *imported_model[ndom].r, NDIM_MAX2D);
+      imported_model[ndom].theta = calloc (sizeof *imported_model[ndom].theta, NDIM_MAX2D);
     }
   }
   else
@@ -99,36 +99,36 @@ calloc_import (int coord_type)
  * ************************************************************************** */
 
 void
-free_import (int coord_type)
+free_import (int coord_type, int ndom)
 {
   if (coord_type == SPHERICAL)
   {
-    free (imported_model.i);
-    free (imported_model.r);
-    free (imported_model.v_r);
-    free (imported_model.mass_rho);
-    free (imported_model.t_r);
-    free (imported_model.t_e);
+    free (imported_model[ndom].i);
+    free (imported_model[ndom].r);
+    free (imported_model[ndom].v_r);
+    free (imported_model[ndom].mass_rho);
+    free (imported_model[ndom].t_r);
+    free (imported_model[ndom].t_e);
   }
   else if (coord_type == CYLIND || coord_type == RTHETA)
   {
-    free (imported_model.i);
-    free (imported_model.j);
-    free (imported_model.inwind);
-    free (imported_model.v_x);
-    free (imported_model.v_y);
-    free (imported_model.v_z);
-    free (imported_model.mass_rho);
-    free (imported_model.t_r);
-    free (imported_model.t_e);
-    free (imported_model.wind_x);
-    free (imported_model.wind_z);
-    free (imported_model.wind_midx);
-    free (imported_model.wind_midz);
-    free (imported_model.x);
-    free (imported_model.z);
-    free (imported_model.r);
-    free (imported_model.theta);
+    free (imported_model[ndom].i);
+    free (imported_model[ndom].j);
+    free (imported_model[ndom].inwind);
+    free (imported_model[ndom].v_x);
+    free (imported_model[ndom].v_y);
+    free (imported_model[ndom].v_z);
+    free (imported_model[ndom].mass_rho);
+    free (imported_model[ndom].t_r);
+    free (imported_model[ndom].t_e);
+    free (imported_model[ndom].wind_x);
+    free (imported_model[ndom].wind_z);
+    free (imported_model[ndom].wind_midx);
+    free (imported_model[ndom].wind_midz);
+    free (imported_model[ndom].x);
+    free (imported_model[ndom].z);
+    free (imported_model[ndom].r);
+    free (imported_model[ndom].theta);
   }
   else
   {

@@ -49,4 +49,4 @@ struct
   double *t_e, *t_r;                  // the electron and radiation temperature in Kelvin
   double *wind_x, *wind_z;
   double *wind_midx, *wind_midz;
-} imported_model;
+} imported_model[MaxDom];
