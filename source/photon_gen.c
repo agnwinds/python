@@ -1448,7 +1448,6 @@ photon_checks (p, freqmin, freqmax, comment)
   nnn = 0;
   nlabel = 0;
 
-  int nlog = 0;
 
   /* Next two lines are to allow for fact that photons generated in
    * a frequency range may be Doppler shifted out of that range, especially
@@ -1479,8 +1478,8 @@ photon_checks (p, freqmin, freqmax, comment)
         Error ("photon_checks:   nphot  origin  freq     freqmin    freqmax\n");
         nlabel++;
       }
-      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq, freqmin,
-             freqmax);
+      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq or weight are not sane\n", nn, p[nn].origin, p[nn].nres, p[nn].freq,
+             freqmin, freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
