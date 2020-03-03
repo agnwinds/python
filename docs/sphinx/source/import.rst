@@ -113,6 +113,10 @@ in the wind. The following enumerator flags are used,
     W_NOT_INWIND  = -1   // this cell is not in the wind
     W_ALL_INWIND  = 0    // this cell is in the wind
 
+Whilst it is possible to set in `inwind = 1` for a grid cell, that is that the
+cell is partially in the wind, Python will instead set these cells with
+`inwind = -2` and ignore these grid cells.
+
 Setting Wind Temperatures
 -------------------------
 
