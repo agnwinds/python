@@ -1530,8 +1530,6 @@ int xxxbound;
  * used for the selection of spec_types
  */
 
-
-
 typedef struct rdpar_choices
 {
   char choices[10][LINELENGTH];
