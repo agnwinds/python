@@ -49,4 +49,4 @@ struct
   double *t_e, *t_r;                  // the electron and radiation temperature in Kelvin
   double *wind_x, *wind_z;
   double *wind_midx, *wind_midz;
-} imported_model[MaxDom];
+} imported_model[MaxDom];             // MaxDom is defined in python.h and as such import.h has to be included after
