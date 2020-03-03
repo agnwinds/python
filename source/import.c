@@ -83,7 +83,7 @@ import_wind (ndom)
     Exit (0);
   }
 
-  Log ("The imported model has dimensions %d x %d\n", imported_model[ndom].ndim, imported_model[ndom].mdim);
+  Log ("The imported model for domain %i has dimensions %d x %d\n", ndom, imported_model[ndom].ndim, imported_model[ndom].mdim);
 
   return (0);
 }
