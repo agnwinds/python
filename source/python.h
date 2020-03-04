@@ -459,7 +459,6 @@ struct geometry
 
   int scatter_mode;             /*The way in which scattering for resonance lines is treated 
                                    0  isotropic
-                                   1  anisotropic
                                    2  thermally broadened anisotropic
                                  */
 
