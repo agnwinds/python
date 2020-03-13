@@ -466,7 +466,10 @@ radiation (p, ds)
         xplasma->ioniz[nion] += kappa_ion[nion] * q;
         xplasma->heat_ion[nion] += frac_ion[nion] * z;
       }
-
+      for (n = 0; n < n_inner_tot; n++)
+      {
+        xplasma->inner_ioniz[n] += 1.0; //PLACEHOLDER
+      }
     }
   }
 
