@@ -570,7 +570,6 @@ calloc_dyn_plasma (nelem)
 {
   int n;
 
-
 /*  Loop over all elements in the plasma array, adding one for an empty cell 
  *  used for extrapolations.
  */
