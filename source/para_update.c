@@ -45,12 +45,14 @@ communicate_estimators_para ()
   double *maxbandfreqhelper, *maxbandfreqhelper2, *minbandfreqhelper, *minbandfreqhelper2;
   double *redhelper, *redhelper2, *qdisk_helper, *qdisk_helper2;
   double *ion_helper, *ion_helper2;
+  double test;
   int *iredhelper, *iredhelper2, *iqdisk_helper, *iqdisk_helper2;
   // int size_of_helpers;
   int plasma_double_helpers, plasma_int_helpers;
 
   /* The size of the helper array for doubles. We transmit 10 numbers 
      for each cell, plus three arrays, each of length NXBANDS */
+
   plasma_double_helpers = (30 + 3 * NXBANDS) * NPLASMA;
 
   /* The size of the helper array for integers. We transmit 7 numbers 
@@ -126,7 +128,7 @@ communicate_estimators_para ()
     }
     for (mpi_j = 0; mpi_j < nions; mpi_j++)
     {
-      ion_helper[mpi_i * NPLASMA + mpi_j] = plasmamain[mpi_i].ioniz[mpi_j] / np_mpi_global;
+      ion_helper[mpi_i * nions + mpi_j] = plasmamain[mpi_i].ioniz[mpi_j] / np_mpi_global;
     }
   }
 
@@ -215,7 +217,7 @@ communicate_estimators_para ()
     }
     for (mpi_j = 0; mpi_j < nions; mpi_j++)
     {
-      plasmamain[mpi_i].ioniz[mpi_j] = ion_helper2[mpi_i * NPLASMA + mpi_j];
+      plasmamain[0].ioniz[0] = ion_helper2[mpi_i * nions + mpi_j];
     }
   }
 
