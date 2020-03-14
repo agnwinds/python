@@ -611,6 +611,11 @@ calloc_dyn_plasma (nelem)
       Error ("calloc_dyn_plasma: Error in allocating memory for heat_ion\n");
       Exit (0);
     }
+    if ((plasmamain[n].heat_inner_ion = calloc (sizeof (double), nions)) == NULL)
+    {
+      Error ("calloc_dyn_plasma: Error in allocating memory for heat_ion\n");
+      Exit (0);
+    }
     if ((plasmamain[n].cool_rr_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for cool_rr_ion\n");

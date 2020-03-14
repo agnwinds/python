@@ -855,7 +855,9 @@ typedef struct plasma
   int *scatters;                /* The number of scatters in this cell for each ion.*/
   double *xscatters;            /* Diagnostic measure of energy scattered out of beam on extract. */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
-                                   by this ion via photoionization.*/
+                                   by this ion via photoionization.*/ 
+      double *heat_inner_ion;             /* The amount of energy being transferred to the electron pool
+                                       by this ion via photoionization.*/       
   double *cool_rr_ion;          /* The amount of energy being released from the electron pool
                                    by this ion via recombination.*/
   double *lum_rr_ion;           /* The recombination luminosity
@@ -1097,6 +1099,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models (power law or expoentials)
 #define NEBULARMODE_MATRIX_BB 8 // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      // matrix solver spectral model
+
 
 
 typedef struct photon
