@@ -851,11 +851,13 @@ typedef struct plasma
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 
                                    to each ion[n].  */
-  double *inner_recomb;
+  double *inner_ioniz, *inner_recomb;
   int *scatters;                /* The number of scatters in this cell for each ion.*/
   double *xscatters;            /* Diagnostic measure of energy scattered out of beam on extract. */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
-                                   by this ion via photoionization.*/
+                                   by this ion via photoionization.*/ 
+      double *heat_inner_ion;             /* The amount of energy being transferred to the electron pool
+                                       by this ion via photoionization.*/       
   double *cool_rr_ion;          /* The amount of energy being released from the electron pool
                                    by this ion via recombination.*/
   double *lum_rr_ion;           /* The recombination luminosity
@@ -1086,6 +1088,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_ML93 3          // Lucy Mazzali
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model based on power laws
+#define IONMODE_MATRIX_ESTIMATORS 10  // matrix solver spectral model based on power laws
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0        // LTE using t_r
@@ -1097,6 +1100,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models (power law or expoentials)
 #define NEBULARMODE_MATRIX_BB 8 // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      // matrix solver spectral model
+#define NEBULARMODE_MATRIX_ESTIMATORS 10      // matrix solver spectral model
 
 
 typedef struct photon
