@@ -1060,7 +1060,7 @@ mean_intensity (xplasma, freq, mode)
 
 
 
-  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)   /*If we are using power law ionization, use PL estimators */
+  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL || geo.ioniz_mode == IONMODE_MATRIX_ESTIMATORS)    /*If we are using power law ionization, use PL estimators */
   {
     if (geo.spec_mod > 0)       /* do we have a spectral model yet */
     {
