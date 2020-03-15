@@ -137,7 +137,7 @@ matrix_ion_populations (xplasma, mode)
       }
       else if (mode == NEBULARMODE_MATRIX_ESTIMATORS)
       {
-        pi_rates[mm] = xplasma->ioniz[mm];      // PI rate for an explicit spectral model
+        pi_rates[mm] = xplasma->ioniz[mm] / xplasma->density[mm];       // PI rate logged during the photon passage
       }
       else
       {
