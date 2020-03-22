@@ -463,6 +463,8 @@ wind_check (www, n)
      int n;
 {
   int i, j, k, istart, istop;
+  int ierr = 0;
+
   if (n < 0)
   {
     istart = 0;
@@ -476,19 +478,27 @@ wind_check (www, n)
 
   for (i = istart; i < istop; i++)
   {
+    if (length (www[i].v) > VLIGHT)
+    {
+      Error ("wind_check: greater than light speed velocity %e in wind element %d\n", length (www[i].v), i);
+      ierr++;
+    }
     for (j = 0; j < 3; j++)
     {
       if (sane_check (www[i].x[j]))
       {
         Error ("wind_check:sane_check www[%d].x[%d] %e\n", i, j, www[i].x[j]);
+        ierr++;
       }
       if (sane_check (www[i].xcen[j]))
       {
         Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i, j, www[i].xcen[j]);
+        ierr++;
       }
       if (sane_check (www[i].v[j]))
       {
         Error ("wind_check:sane_check www[%d].v[%d] %e\n", i, j, www[i].v[j]);
+        ierr++;
       }
     }
     for (j = 0; j < 3; j++)
@@ -498,12 +508,18 @@ wind_check (www, n)
         if (sane_check (www[i].v_grad[j][k]))
         {
           Error ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n", i, j, k, www[i].v_grad[j][k]);
+          ierr++;
         }
       }
 
     }
   }
 
+  if (ierr)
+  {
+    Error ("wind_check: Something is very seriously wrong with the wind.  %d problems Exiting\n", ierr);
+    Exit (0);
+  }
   Log ("Wind_check: Punchthrough distance DFUDGE %e www[1].x[2] %e\n", DFUDGE, www[1].x[2]);
   return (0);
 }
