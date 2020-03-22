@@ -267,10 +267,6 @@ model_velocity (ndom, x, v)
   {
     speed = homologous_velocity (ndom, x, v);
   }
-//OLD  else if (zdom[ndom].wind_type == YSO)
-//OLD  {
-//OLD    speed = yso_velocity (ndom, x, v);
-//OLD  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     speed = stellar_velocity (ndom, x, v);
@@ -409,10 +405,6 @@ model_rho (ndom, x)
   {
     rho = homologous_rho (ndom, x);
   }
-//OLD  else if (zdom[ndom].wind_type == YSO)
-//OLD  {
-//OLD    rho = yso_rho (ndom, x);
-//OLD  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     rho = stellar_rho (ndom, x);
@@ -436,8 +428,8 @@ model_rho (ndom, x)
 /** 
  * @brief      Simple checks of the wind structure for reasonability
  *
- * @param [in, out] WindPtr  www   The entire wind
- * @param [in, out] int  n   n >= 0  then an element of the array will be checked
+ * @param [in] WindPtr  www   The entire wind
+ * @param [in] int  n   n >= 0  then an element of the array will be checked
  * @return     Always returns 0
  *
  * @details
@@ -445,13 +437,14 @@ model_rho (ndom, x)
  * 
  * * wind_check(w,-1);  to check the entire structure
  * * wind_check(w,50);   to check element 50 of the structure
- * * wind_check(w[50],0) to check elemetn 50 of the structure
+ * * wind_check(w[50],0) to check element 50 of the structure
  *
  * ### Notes ###
  * 
- * These checks are so basic, just NaN (sane_checks), that they hardly 
- * seem worth doing.  One would think one would want to stop the
- * program if any of them failed.  But this does not take much time.
+ * These checks are basic, just NaN (sane_checks) and a check that
+ * the wind does not contain velocities that exceed the speed of light. 
+ * 
+ * The program will stop if any of the checks failed.
  *
  * The checks are made on the wind, without reference to domains
  *
