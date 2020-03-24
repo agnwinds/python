@@ -19,11 +19,12 @@ set(CMAKE_C_COMPILER mpicc)
 add_definitions(-D MPI_ON)
 
 # Include the source
-include_directories(inc)
+include_directories(include)
 link_directories(lib)
 
 # Define the executables
 add_executable(python
+        source/import_calloc.c
         source/rdpar_init.c
         source/bb.c
         source/get_atomicdata.c
@@ -115,7 +116,7 @@ add_executable(python
         source/setup_line_transfer.c
         source/cv.c
         source/wind_util.c
-        )
+        source/import.h)
 
 add_executable(py_wind
         source/bb.c
@@ -211,8 +212,7 @@ add_executable(py_wind
         source/py_wind_write.c
         source/setup_line_transfer.c
         source/cv.c
-        source/wind_util.c
-        )
+        source/wind_util.c)
 
 add_executable(windsave2table
         source/bb.c

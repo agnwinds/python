@@ -128,7 +128,6 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 int radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
-double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
@@ -490,6 +489,7 @@ int import_make_grid(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
 int get_import_wind_params(int ndom);
 double import_rho(int ndom, double *x);
+double model_temp(int ndom, double x[], int return_t_e);
 /* import_spherical.c */
 int import_1d(int ndom, char *filename);
 int spherical_make_grid_import(WindPtr w, int ndom);
@@ -558,6 +558,9 @@ double wdrad(double m);
 double diskrad(double m1, double m2, double period);
 double roche2(double q, double a);
 double logg(double mass, double rwd);
+/* import_calloc.c */
+void calloc_import(int coord_type, int ndom);
+void free_import(int coord_type, int ndom);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

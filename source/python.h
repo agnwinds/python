@@ -53,15 +53,18 @@ double DFUDGE;
 #define VCHECK	1.e6            // The maximum allowable error in calculation of the velocity in calculate_ds
 
 
-/* 57h -- Changed several defined variables to numbers to allow one to vary them 
-in the process of running the code */
 double SMAX_FRAC;               /* In translate_in_wind, a limit is placed on the maximum distance a
                                    photon can travel in one step.  It is a fraction SMAX_FRAC of the
                                    distance of the photon from the origin.  This had been hardwired to
                                    0.1 for up to 57h.  Changing it to 0.5 speeds up the current version
                                    of the code by as much as a factor of 2 for small sized grids.  This
                                    had been introduced as part of the attempt to assure ourselves that
-                                   line shapes were calculated as accurately as possilble. 
+                                   line shapes were calculated as accurately as possible.  The underlhying
+                                   rational for having a maximum disstance is associated with the fact that
+                                   we use linear interpolation along the line of sight to establish velocities
+                                   and most of our grid cells in 2.5d are actually hoop shaped, which means
+                                   one can travel a long distance within a hoop if the direction of the photon
+                                   is not more or less radial, but if moving along the hoop. 
                                  */
 double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the purpose of calculating
                                    photoionization heating and recombination cooling.  It is important that heating and cooling
@@ -437,6 +440,14 @@ struct geometry
                                    the same results as pre-Macro Atom versions of the code. */
   int partition_mode;           /* Diagnostic to force the partition function to be calculated in
                                    a specific way. */
+
+#define LINE_MODE_ABSORB      0     
+#define LINE_MODE_SCAT        1
+#define LINE_MODE_SINGLE_SCAT 2
+#define LINE_MODE_ESC_PROB    3
+
+
+
   int line_mode;                /*0, the atomosphere is a completely absorbing and no photons
                                    will be scattered.  In this mode, assuming the wind is a source
                                    of emission, the emissivity will be the Einstein A coefficient
@@ -445,18 +456,18 @@ struct geometry
                                    as a result of radiation transfer
                                    2, then a simple single scattering approximation is applied in which
                                    case the scattered flux is just  A21/(C21+A21). 
-                                   3, then radiation trapping is included as well.
-                                   6, If set to 6 initially, this switches on the macro atom stuff
-                                   and then behaves like 3. (SS)
+                                   3, then radiation trapping aka escape probabilities are included as well.
+                                   6 - 9,  If set to 6-9 initially, this switches on the macro atom case
+                                   and then behaves like LINE_MODE_ESC_PROB. 
                                  */
-/* Note that the scatter_mode is actually a subsidiary variable of the line_mode.  Chooising a line_mode
+/* Note that the scatter_mode is actually a subsidiary variable of the line_mode.  Choosing a line_mode
  * results in the selection of a scatter_mode */
+
 #define SCATTER_MODE_ISOTROPIC    0
 #define SCATTER_MODE_THERMAL      2
 
   int scatter_mode;             /*The way in which scattering for resonance lines is treated 
                                    0  isotropic
-                                   1  anisotropic
                                    2  thermally broadened anisotropic
                                  */
 
@@ -843,17 +854,19 @@ typedef struct plasma
   int nscat_res;                /* The number of resonant line scatters in the cell */
 
   double mean_ds;               /* NSH 6/9/12 Added to allow a check that a thin shell is really optically thin */
-  int n_ds;                     /* NSH 6/9/12 Added to allow the mean dsto be computed */
+  int n_ds;                     /* NSH 6/9/12 Added to allow the mean ds to be computed */
   int nrad;                     /* Total number of photons created within the cell */
   int nioniz;                   /* Total number of photon passages by photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 
                                    to each ion[n].  */
-  double *inner_recomb;
-  int *scatters;                /* 68b - The number of scatters in this cell for each ion.*/
-  double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. */
+  double *inner_ioniz, *inner_recomb;
+  int *scatters;                /* The number of scatters in this cell for each ion.*/
+  double *xscatters;            /* Diagnostic measure of energy scattered out of beam on extract. */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
-                                   by this ion via photoionization.*/
+                                   by this ion via photoionization.*/ 
+      double *heat_inner_ion;             /* The amount of energy being transferred to the electron pool
+                                       by this ion via photoionization.*/       
   double *cool_rr_ion;          /* The amount of energy being released from the electron pool
                                    by this ion via recombination.*/
   double *lum_rr_ion;           /* The recombination luminosity
@@ -886,10 +899,10 @@ typedef struct plasma
   /* The total luminosity of all processes in the cell, basically the emissivity of the cell times it volume. Not the same 
      as what escapes the cell, since photons can interact within the cell and lose weight or even be destroyed */
   double lum_lines, lum_ff, cool_adiabatic;
-  double lum_rr, lum_rr_metals; /* 1706 NSH - the radiative recombination luminosity - not the same as the cooling rate */
-  double cool_comp;             /* 1108 NSH The compton luminosity of the cell */
-  double cool_di;               /* 1409 NSH The direct ionization luminosity */
-  double cool_dr;               /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double lum_rr, lum_rr_metals; /* the radiative recombination luminosity - not the same as the cooling rate */
+  double cool_comp;             /* The compton luminosity of the cell */
+  double cool_di;               /* The direct ionization luminosity */
+  double cool_dr;               /* The dielectronic recombination luminosity of the cell */
   double cool_rr, cool_rr_metals;       /*fb luminosity & fb of metals metals */
   double lum_tot, lum_tot_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
@@ -897,9 +910,9 @@ typedef struct plasma
   double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
   double lum_rr_ioniz;
-  double cool_comp_ioniz;       /* 1108 NSH The compton luminosity of the cell */
-  double cool_di_ioniz;         /* 1409 NSH The direct ionization luminosity */
-  double cool_dr_ioniz;         /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double cool_comp_ioniz;       /* The compton luminosity of the cell */
+  double cool_di_ioniz;         /* The direct ionization luminosity */
+  double cool_dr_ioniz;         /* The dielectronic recombination luminosity of the cell */
   double cool_rr_ioniz, cool_rr_metals_ioniz;   /*fb luminosity & fb of metals metals */
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
@@ -947,16 +960,19 @@ typedef struct plasma
     SPEC_MOD_PL = 1,
     SPEC_MOD_EXP = 2,
     SPEC_MOD_FAIL = -1
-  } spec_mod_type[NXBANDS];     /* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+  } spec_mod_type[NXBANDS];     /* A switch to say which type of representation we are using for this band in this cell. 
+                                   Negative means we have no useful representation, 0 means power law, 1 means exponential */
 
-  double pl_alpha[NXBANDS];     /*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
-  double pl_log_w[NXBANDS];     /* NSH 131106 - this is the log version of the power law weight. It is in an attempt to allow very large values of alpha to work with the PL spectral model to avoide NAN problems. The pl_w version can be deleted once testing is complete */
+  double pl_alpha[NXBANDS];     /*Computed spectral index for a power law spectrum representing this cell*/
+  double pl_log_w[NXBANDS];     /*This is the log version of the power law weight. It is in an attempt to allow very large 
+                                  values of alpha to work with the PL spectral model to avoide NAN problems. 
+                                  The pl_w version can be deleted once testing is complete */
 
 
-  double exp_temp[NXBANDS];     /*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
-  double exp_w[NXBANDS];        /*NSH 120817 - The prefactor of an exponential representation of the radiation field in a cell */
-  double ip;                    /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  double xi;                    /*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
+  double exp_temp[NXBANDS];     /* The effective temperature of an exponential representation of the radiation field in a cell */
+  double exp_w[NXBANDS];        /* The prefactor of an exponential representation of the radiation field in a cell */
+  double ip;                    /* Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
+  double xi;                    /* Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;
@@ -1081,6 +1097,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_ML93 3          // Lucy Mazzali
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model based on power laws
+#define IONMODE_MATRIX_ESTIMATORS 10  // matrix solver spectral model based on power laws
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0        // LTE using t_r
@@ -1092,6 +1109,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models (power law or expoentials)
 #define NEBULARMODE_MATRIX_BB 8 // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      // matrix solver spectral model
+#define NEBULARMODE_MATRIX_ESTIMATORS 10      // matrix solver spectral model
 
 
 typedef struct photon
@@ -1523,8 +1541,6 @@ int xxxbound;
  * for each input variable.  At present, this is only
  * used for the selection of spec_types
  */
-
-
 
 typedef struct rdpar_choices
 {
