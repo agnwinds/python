@@ -81,7 +81,7 @@ spherical_ds_in_cell (ndom, p)
 
   if (smax == VERY_BIG && s == VERY_BIG)
   {
-    Error ("spherical: ds_in_cell s and smax returning VERY_BIG in cell %i nudging photon by DFUDGE\n");
+    Error ("spherical: ds_in_cell s and smax returning VERY_BIG in cell %i nudging photon by DFUDGE\n", p->grid);
     return (DFUDGE);            //Set an error condtion and leave
   }
 
@@ -154,7 +154,6 @@ spherical_make_grid (w, ndom)
       dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
       w[n].r = zdom[ndom].rmin * pow (10., dlogr * (j - 1));
       w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (j)) + pow (10., dlogr * (j - 1)));
-      Log_silent ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
     }
 
     /* Now calculate the positions of these points in the xz plane.
@@ -276,6 +275,12 @@ spherical_volumes (ndom, w)
     n = i + nstart;             /* nstart is the offset into the wind structure */
     rmin = zdom[ndom].wind_x[i];
     rmax = zdom[ndom].wind_x[i + 1];
+
+    if (w[n].inwind != W_ALL_INWIND && zdom[ndom].wind_type == IMPORT)
+    {
+      w[n].vol = 0;
+      continue;
+    }
 
     w[n].vol = 4. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin);
 

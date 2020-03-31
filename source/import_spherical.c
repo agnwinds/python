@@ -73,7 +73,7 @@ import_1d (ndom, filename)
 {
   FILE *fptr;
   char line[LINELENGTH];
-  int n, icell, ncell;
+  int n, inwind, icell, ncell;
   double r, v_r, mass_rho, t_r, t_e;
 
   Log ("Reading a 1d model %s\n", filename);
@@ -87,7 +87,7 @@ import_1d (ndom, filename)
   ncell = 0;
   while (fgets (line, LINELENGTH, fptr) != NULL)
   {
-    n = sscanf (line, " %d %le %le %le %le %le", &icell, &r, &v_r, &mass_rho, &t_e, &t_r);
+    n = sscanf (line, " %d %d %le %le %le %le %le", &icell, &inwind, &r, &v_r, &mass_rho, &t_e, &t_r);
 
     if (n < READ_NO_TEMP_1D)
     {
@@ -96,6 +96,7 @@ import_1d (ndom, filename)
     else
     {
       imported_model[ndom].i[ncell] = icell;
+      imported_model[ndom].inwind[ncell] = inwind;
       imported_model[ndom].r[ncell] = r;
       imported_model[ndom].v_r[ncell] = v_r;
       imported_model[ndom].mass_rho[ncell] = mass_rho;
@@ -112,8 +113,8 @@ import_1d (ndom, filename)
       }
       else
       {
-        imported_model[ndom].t_e[ncell] = DEFAULT_IMPORT_TEMPERATURE;
-        imported_model[ndom].t_r[ncell] = 1.1 * DEFAULT_IMPORT_TEMPERATURE;
+        imported_model[ndom].t_e[ncell] = zdom[ndom].twind;
+        imported_model[ndom].t_r[ncell] = 1.1 * zdom[ndom].twind;
       }
 
       ncell++;
@@ -185,6 +186,7 @@ spherical_make_grid_import (w, ndom)
   {
     n = j + zdom[ndom].nstart;
     w[n].r = imported_model[ndom].r[j];
+    w[n].inwind = imported_model[ndom].inwind[j];
     /* Put the radial velocity in v[0] */
     w[n].v[0] = imported_model[ndom].v_r[j];
   }

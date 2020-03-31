@@ -295,7 +295,6 @@ cylindrical_make_grid_import (w, ndom)
   rmax = rho_max = zmax = 0;
   rmin = rho_min = zmin = VERY_BIG;
   for (n = 0; n < imported_model[ndom].ncell; n++)
-
   {
     if (imported_model[ndom].inwind[n] >= 0)
     {
@@ -337,12 +336,6 @@ cylindrical_make_grid_import (w, ndom)
       }
     }
   }
-
-
-
-  Log ("Imported:    rmin    rmax  %e %e\n", rmin, rmax);
-  Log ("Imported:    zmin    zmax  %e %e\n", zmin, zmax);
-  Log ("Imported: rho_min rho_max  %e %e\n", rho_min, rho_max);
 
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = rho_min;
   zdom[ndom].wind_rho_max = zdom[ndom].rho_max = rho_max;

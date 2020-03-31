@@ -463,6 +463,7 @@ int get_bl_and_agn_params(double lstar);
 /* setup_domains.c */
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
+void check_domain_boundaries(int ndom);
 int setup_windcone(void);
 /* setup_disk.c */
 double get_disk_params(void);
