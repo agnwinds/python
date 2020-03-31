@@ -42,6 +42,7 @@ calloc_import (int coord_type, int ndom)
   if (coord_type == SPHERICAL)
   {
     imported_model[ndom].i = calloc (sizeof *imported_model[ndom].i, NDIM_MAX);
+    imported_model[ndom].inwind = calloc (sizeof *imported_model[ndom].inwind, NDIM_MAX);
     imported_model[ndom].r = calloc (sizeof *imported_model[ndom].r, NDIM_MAX);
     imported_model[ndom].v_r = calloc (sizeof *imported_model[ndom].v_r, NDIM_MAX);
     imported_model[ndom].mass_rho = calloc (sizeof *imported_model[ndom].mass_rho, NDIM_MAX);
@@ -104,6 +105,7 @@ free_import (int coord_type, int ndom)
   if (coord_type == SPHERICAL)
   {
     free (imported_model[ndom].i);
+    free (imported_model[ndom].inwind);
     free (imported_model[ndom].r);
     free (imported_model[ndom].v_r);
     free (imported_model[ndom].mass_rho);

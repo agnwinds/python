@@ -243,7 +243,6 @@ define_wind ()
       Exit (1);
     }
 
-
     if (zdom[ndom].coord_type != SPHERICAL && zdom[ndom].wind_type != IMPORT)
     {
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
@@ -438,8 +437,6 @@ be optional which variables beyond here are moved to structures othere than Wind
       plasmamain[i].heat_shock = 0.0;
     }
   }
-
-
 
 
   /* Calculate one over dvds */

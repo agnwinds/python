@@ -201,10 +201,6 @@ get_wind_params (ndom)
   {
     get_homologous_params (ndom);
   }
-//OLD  else if (zdom[ndom].wind_type == YSO)
-//OLD  {
-//OLD    get_yso_wind_params (ndom);
-//OLD  }
   else if (zdom[ndom].wind_type == SHELL)       //NSH 18/2/11 This is a new wind type to produce a thin shell.
   {
     get_shell_wind_params (ndom);
@@ -236,9 +232,32 @@ get_wind_params (ndom)
    * stellar, homologous, shell, corona
    */
 
+  if (zdom[ndom].wind_type != IMPORT)
+    check_domain_boundaries (ndom);
+
+  zdom[ndom].twind = 40000;
+  rddoub ("Wind.t.init", &zdom[ndom].twind);
+
+  /* Get the filling factor of the wind */
+  /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
+     XXX allows any domain to be allowed a filling factor but this should be modified when
+     we know what we are doing with inputs for multiple domains. Could create confusion */
+
+  zdom[ndom].fill = 1.;
+  rddoub ("Wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+
+  return (0);
+}
+
+
+void
+check_domain_boundaries (int ndom)
+{
+  Log ("Checking wind boundaries for domain %i\n", ndom);
+
   if (zdom[ndom].rmax == 0)
   {
-    Error ("get_wind_params: zdom[ndom].rmax 0 for wind type %d\n", zdom[ndom].wind_type);
+    Error ("check_domain_boundaries: zdom[ndom].rmax 0 for wind type %d\n", zdom[ndom].wind_type);
 
     if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
     {
@@ -250,42 +269,32 @@ get_wind_params (ndom)
     }
 
     rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
+    if (zdom[ndom].rmax <= 0)
+    {
+      Error ("check_domain_boundaries: wind.radmax <= 0. Should be positive, non-zero number\n");
+      Exit (1);
+    }
   }
 
-  if (zdom[ndom].rmax <= zdom[ndom].rmin)
-  {
-    Error ("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n", zdom[ndom].rmax, zdom[ndom].rmin, ndom);
-    Exit (0);
-  }
-
-  zdom[ndom].twind = 40000;
-  rddoub ("Wind.t.init", &zdom[ndom].twind);
-
-
-  /* Next lines are to assure that we have the largest possible value of the 
+  /* Next lines are to assure that we have the largest possible value of the
    * sphere surrounding the system
    * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
    */
-  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
+
+  if ((zdom[ndom].rmax > geo.rmax) || ndom == 0)
   {
     geo.rmax = zdom[ndom].rmax;
   }
+
   geo.rmax_sq = geo.rmax * geo.rmax;
 
-  /* Get the filling factor of the wind */
-
-  zdom[ndom].fill = 1.;
-
-  /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
-     XXX allows any domain to be allowed a filling factor but this should be modified when
-     we know what we are doing with inputs for multiple domains. Could create confusion */
-
-  rddoub ("Wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
-
-  return (0);
+  if (zdom[ndom].rmax <= zdom[ndom].rmin)
+  {
+    Error ("check_domain_boundaries: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n", zdom[ndom].rmax, zdom[ndom].rmin,
+           ndom);
+    Exit (1);
+  }
 }
-
-
 
 
 /**********************************************************/

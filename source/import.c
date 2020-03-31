@@ -115,6 +115,8 @@ import_make_grid (w, ndom)
      WindPtr w;
      int ndom;
 {
+  int n;
+
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     spherical_make_grid_import (w, ndom);
@@ -129,9 +131,15 @@ import_make_grid (w, ndom)
   }
   else
   {
-    Error ("import_wind: Do not know how to import a model of coor_type %d\n", zdom[ndom].coord_type);
+    Error ("import_wind: Do not know how to import a model of coord_type %d\n", zdom[ndom].coord_type);
     Exit (0);
   }
+
+  DFUDGE = setup_dfudge ();
+  for (n = 0; n < NDIM2; ++n)
+    if (wmain[n].dfudge == 0)
+      wmain[n].dfudge = DFUDGE;
+
   return (0);
 }
 
