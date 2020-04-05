@@ -143,15 +143,22 @@ import_1d (ndom, filename)
 
 
 
+
 /* ************************************************************************** */
 /**
- * @brief
+ * @brief   Set up the various domain boundaries for a spherical coordinate
+ *          system
  *
- * @param[in]
+ * @param[in] int ndom         The domain of interest
  *
- * @return
+ * @return    Always returns 0
  *
  * @details
+ *
+ * This used to be contained within spherical_make_grid_import, however, it
+ * does not reply on any of the variables in that function and only relies on
+ * the imported_model struct. Therefore, the boundary setup was moved into a
+ * separate function so it could be done else where in the program flow.
  *
  * ************************************************************************** */
 
