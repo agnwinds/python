@@ -219,7 +219,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
-		rdpar_init.o import_calloc.o setup_domains.o setup.o setup_line_transfer.o get_models.o
+		rdpar_init.o import_calloc.o
 
 
 
@@ -242,7 +242,7 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
-		cooling.o import_calloc.o setup_domains.o setup.o setup_line_transfer.o get_models.o
+		cooling.o import_calloc.o
 
 
 run_indent:

@@ -220,7 +220,9 @@ spherical_wind_complete (ndom, w)
 
 
 
-
+/*
+ * What does RESOLUTION do?
+ */
 
 #define RESOLUTION   100
 
@@ -320,13 +322,16 @@ spherical_volumes (ndom, w)
       }
       fraction = num / denom;
     }
+
     if (jj == 0)
     {
       w[n].inwind = W_NOT_INWIND;       // The cell is not in the wind
       w[n].vol = 0.0;
     }
     else if (jj == kk)
+    {
       w[n].inwind = W_ALL_INWIND;       // The cell is completely in the wind
+    }
     else
     {
       w[n].inwind = W_PART_INWIND;      //The cell is partially in the wind

@@ -340,7 +340,7 @@ be optional which variables beyond here are moved to structures othere than Wind
     }
     else if (zdom[ndom].wind_type == IMPORT)
     {
-      plasmamain[n].t_r = model_temp (ndom, x, FALSE);
+      plasmamain[n].t_r = import_temperature (ndom, x, FALSE);
     }
     else
     {
@@ -360,7 +360,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
     if (zdom[ndom].wind_type == IMPORT)
     {
-      plasmamain[n].t_e = model_temp (ndom, x, TRUE);
+      plasmamain[n].t_e = import_temperature (ndom, x, TRUE);
     }
     else if (modes.fixed_temp == FALSE && modes.zeus_connect == FALSE)  //NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes
     {
