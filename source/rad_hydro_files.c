@@ -105,9 +105,9 @@ parse_arguments (int argc, char *argv[], char root[], int *ion_switch)
     strcpy (input, argv[argc - 1]);
     get_root (root, input);
   }
-  
-  
-  
+
+
+
 }
 
 
@@ -147,15 +147,15 @@ main (argc, argv)
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
-  int ion_switch,nwind,nplasma;
-  int i,j,ii,domain;
-  double vol,kappa_es;
+  int ion_switch, nwind, nplasma;
+  int i, j, ii, domain;
+  double vol, kappa_es, lum_sum, cool_sum;
   double t_opt, t_UV, t_Xray, v_th, fhat[3];    /*This is the dimensionless optical depth parameter computed for communication to rad-hydro. */
-  
+
   struct photon ptest;          //We need a test photon structure in order to compute t
-  
+
   FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fopen ();        /*This is the file to communicate with zeus */
-  
+
 
 
   strcpy (parameter_file, "NONE");
@@ -198,6 +198,10 @@ main (argc, argv)
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
 
 
+  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  lum_sum = wind_luminosity (0.0, VERY_BIG);    /*and we also call wind_luminosity to get the luminosities */
+
+
   fptr = fopen ("py_heatcool.dat", "w");
   fptr2 = fopen ("py_flux.dat", "w");
   fptr3 = fopen ("py_ion_data.dat", "w");
@@ -206,7 +210,7 @@ main (argc, argv)
 
   fprintf (fptr,
            "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z bf_f_w bf_f_phi bf_f_z\n");
-  fprintf (fptr2, "i j F_vis_x F_vis_y F_vis_z F_UV_x F_UV_y F_UV_z F_Xray_x F_Xray_y F_Xray_z\n");   //directional flux by band
+  fprintf (fptr2, "i j F_vis_x F_vis_y F_vis_z F_UV_x F_UV_y F_UV_z F_Xray_x F_Xray_y F_Xray_z\n");     //directional flux by band
 
   fprintf (fptr3, "nions %i\n", nions);
   for (i = 0; i < nions; i++)
@@ -215,113 +219,124 @@ main (argc, argv)
   }
   fprintf (fptr3, "nplasma %i\n", NPLASMA);
 
-  fprintf (fptr4, "nbands %i\n", geo.nxfreq);
-  fprintf (fptr4, "nplasma %i\n", NPLASMA);
-  for (i = 0; i < geo.nxfreq + 1; i++)
-    fprintf (fptr4, "%e ", geo.xfreq[i]);     //hard wired band edges
-  fprintf (fptr4, "\n ");
+
+  fprintf (fptr4, "model %i\n", geo.ioniz_mode);
+  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)
+  {
+    fprintf (fptr4, "nbands %i\n", geo.nxfreq);
+    fprintf (fptr4, "nplasma %i\n", NPLASMA);
+    for (i = 0; i < geo.nxfreq + 1; i++)
+      fprintf (fptr4, "%e ", geo.xfreq[i]);     //hard wired band edges
+    fprintf (fptr4, "\n ");
+  }
+  else if (geo.ioniz_mode == IONMODE_MATRIX_BB)
+    fprintf (fptr4, "nplasma %i\n", NPLASMA);
 
   fprintf (fptr5, "nplasma %i\n", NPLASMA);
   printf ("Set up files\n");
-   
-   if (geo.hydro_domain_number>0)
-   {
-       domain=geo.hydro_domain_number;
-   }
-   else
-   {
-       domain=0;
-   }
-   
-   
+
+  if (geo.hydro_domain_number > 0)
+  {
+    domain = geo.hydro_domain_number;
+  }
+  else
+  {
+    domain = 0;
+  }
+
+
   for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
   {
-      printf ("nwind=%i\n",nwind);
+    printf ("nwind=%i\n", nwind);
     if (wmain[nwind].vol > 0.0)
     {
       nplasma = wmain[nwind].nplasma;
-      printf ("Doing cell %i\n",nplasma);
+      printf ("Doing cell %i\n", nplasma);
       wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
-      i = i - 1;              //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
+      i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
       vol = wmain[plasmamain[nplasma].nwind].vol;
-      fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);        //output geometric things
-      fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);   //output temp, xi and ne to ease plotting of heating rates
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol); //Xray heating - or photoionization
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);   //Compton heating
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_lines) / vol);  //Line heating 28/10/15 - not currently used in zeus
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_ff) / vol);     //FF heating 28/10/15 - not currently used in zeus
-      fprintf (fptr, "%e ", (plasmamain[nplasma].cool_comp) / vol);   //Compton cooling
-      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);       //Line cooling must include all recombination cooling
-      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);      //ff cooling
-      fprintf (fptr, "%e ", plasmamain[nplasma].rho); //density
-      fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
-      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);     //electron scattering radiation force in the w(x) direction
-      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);     //electron scattering radiation force in the phi(rotational) directionz direction
-      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[2]);     //electron scattering radiation force in the z direction
-      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_bf[0]);     //bound free scattering radiation force in the w(x) direction
-      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_bf[1]);     //bound free scattering radiation force in the phi(rotational) direction
-      fprintf (fptr, "%e \n", plasmamain[nplasma].rad_force_bf[2]);   //bound free scattering radiation force in the z direction
-      fprintf (fptr2, "%d %d ", i, j);        //output geometric things               
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2]); //directional flux by band
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2]);    //directional flux by band
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2]);      //directional flux by band
+      fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);  //output geometric things
+      fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);     //output temp, xi and ne to ease plotting of heating rates
+      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);   //Xray heating - or photoionization
+      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);     //Compton heating
+      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_lines) / vol);    //Line heating 28/10/15 - not currently used in zeus
+      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_ff) / vol);       //FF heating 28/10/15 - not currently used in zeus
+      fprintf (fptr, "%e ", (plasmamain[nplasma].cool_comp) / vol);     //Compton cooling
+      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol); //Line cooling must include all recombination cooling
+      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);        //ff cooling
+      fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
+      fprintf (fptr, "%e ", plasmamain[nplasma].rho * rho2nh);  //hydrogen number density
+      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[0]);       //electron scattering radiation force in the w(x) direction
+      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[1]);       //electron scattering radiation force in the phi(rotational) directionz direction
+      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_es[2]);       //electron scattering radiation force in the z direction
+      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_bf[0]);       //bound free scattering radiation force in the w(x) direction
+      fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_bf[1]);       //bound free scattering radiation force in the phi(rotational) direction
+      fprintf (fptr, "%e \n", plasmamain[nplasma].rad_force_bf[2]);     //bound free scattering radiation force in the z direction
+      fprintf (fptr2, "%d %d ", i, j);  //output geometric things               
+      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2]);   //directional flux by band
+      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2]);      //directional flux by band
+      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2]);        //directional flux by band
 
       fprintf (fptr2, "\n");
-      fprintf (fptr3, "%d %d ", i, j);        //output geometric things               
+      fprintf (fptr3, "%d %d ", i, j);  //output geometric things               
       for (ii = 0; ii < nions; ii++)
         fprintf (fptr3, "%e ", plasmamain[nplasma].density[ii]);
       fprintf (fptr3, "\n");
-
-      fprintf (fptr4, "%d %d ", i, j);        //output geometric things       
-      for (ii = 0; ii < geo.nxfreq; ii++)
-        fprintf (fptr4, "%e %e %i %e %e %e %e ",
-                 plasmamain[nplasma].fmin_mod[ii], plasmamain[nplasma].fmax_mod[ii], plasmamain[nplasma].spec_mod_type[ii],
-                 plasmamain[nplasma].pl_log_w[ii], plasmamain[nplasma].pl_alpha[ii], plasmamain[nplasma].exp_w[ii],
-                 plasmamain[nplasma].exp_temp[ii]);
+      fprintf (fptr4, "%d %d ", i, j);  //output geometric things 
+      if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)
+      {
+        for (ii = 0; ii < geo.nxfreq; ii++)
+          fprintf (fptr4, "%e %e %i %e %e %e %e ",
+                   plasmamain[nplasma].fmin_mod[ii], plasmamain[nplasma].fmax_mod[ii], plasmamain[nplasma].spec_mod_type[ii],
+                   plasmamain[nplasma].pl_log_w[ii], plasmamain[nplasma].pl_alpha[ii], plasmamain[nplasma].exp_w[ii],
+                   plasmamain[nplasma].exp_temp[ii]);
+      }
+      else if (geo.ioniz_mode == IONMODE_MATRIX_BB)
+        fprintf (fptr4, "%e %e ", plasmamain[nplasma].t_r, plasmamain[nplasma].w);
       fprintf (fptr4, "\n ");
 
 
       //We need to compute the g factor for this cell and output it.
 
 
-      v_th = pow ((2. * BOLTZMANN * plasmamain[nplasma].t_e / MPROT), 0.5);   //We need the thermal velocity for hydrogen
-      stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x);   //place our test photon at the centre of the cell
-      ptest.grid = nwind;     //We need our test photon to know where it is 
+      v_th = pow ((2. * BOLTZMANN * plasmamain[nplasma].t_e / MPROT), 0.5);     //We need the thermal velocity for hydrogen
+      stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x); //place our test photon at the centre of the cell
+      ptest.grid = nwind;       //We need our test photon to know where it is 
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
 
       //First for the optcial band (up to 4000AA)     
-      if (length (plasmamain[nplasma].F_vis) > 0.0)   //Only makes sense if flux in this band is non-zero
+      if (length (plasmamain[nplasma].F_vis) > 0.0)     //Only makes sense if flux in this band is non-zero
       {
         stuff_v (plasmamain[nplasma].F_vis, fhat);
-        renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-        stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+        renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
+        stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
         t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
       }
       else
-        t_opt = 0.0;          //Essentually a flag that there is no way of computing t (and hence M) in this cell.
+        t_opt = 0.0;            //Essentually a flag that there is no way of computing t (and hence M) in this cell.
 
       //Now for the UV band (up to 4000AA->100AA)                                             
-      if (length (plasmamain[nplasma].F_UV) > 0.0)    //Only makes sense if flux in this band is non-zero
+      if (length (plasmamain[nplasma].F_UV) > 0.0)      //Only makes sense if flux in this band is non-zero
       {
         stuff_v (plasmamain[nplasma].F_UV, fhat);
-        renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-        stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+        renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
+        stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
         t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
       }
       else
-        t_UV = 0.0;           //Essentually a flag that there is no way of computing t (and hence M) in this cell.
+        t_UV = 0.0;             //Essentually a flag that there is no way of computing t (and hence M) in this cell.
 
 
       //And finally for the Xray band (up to 100AA and up)
-      if (length (plasmamain[nplasma].F_Xray) > 0.0)  //Only makes sense if flux in this band is non-zero
+      if (length (plasmamain[nplasma].F_Xray) > 0.0)    //Only makes sense if flux in this band is non-zero
       {
         stuff_v (plasmamain[nplasma].F_Xray, fhat);
-        renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-        stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+        renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
+        stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
         t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
       }
       else
-        t_Xray = 0.0;         //Essentually a flag that there is no way of computing t (and hence M) in this cell.                
+        t_Xray = 0.0;           //Essentually a flag that there is no way of computing t (and hence M) in this cell.                
 
       fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
@@ -333,8 +348,8 @@ main (argc, argv)
   fclose (fptr4);
   fclose (fptr5);
 
-  
-  
+
+
 
   exit (0);
 }
