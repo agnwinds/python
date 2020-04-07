@@ -15,7 +15,7 @@
  * polar coordinates.
 
  * However, internally, python uses xyz coordinates
- * for velocites (as measured in the xz plane),
+ * for velocities (as measured in the xz plane),
  * and that is the model followed, here.  This also
  * makes these routines similar to those used
  * in imported cylindrical models.
@@ -54,7 +54,7 @@
  *
  * where
  *
- * * r is the radial coordianate
+ * * r is the radial coordinates
  * * theta is the angular coordinate measured from the z axis
  * * v_x, v_y, and v_z is the velocity in cartesian coordinates
  *      as measured in the x,z plane
@@ -334,9 +334,6 @@ rtheta_make_grid_import (w, ndom)
 {
   int n, nn;
   double theta;
-  double rho_max, rho_min, r_inner, r_outer, rmin, rmax;
-  double zmin, zmax;
-  double x_inner[3], r_inner_next, x_outer[3], r_outer_next;
 
   /* As in the case of other models we assume that the grid has been
    * read in correctly and so now that the WindPtrs have been generated
