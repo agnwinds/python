@@ -313,7 +313,7 @@ import_rtheta_setup_boundaries (int ndom)
         rho_min = x_inner;
       }
 
-      if (rmin > r_inner)
+      if (rmin > rho_inner)
       {
         rmin = rho_inner;
       }
