@@ -226,9 +226,13 @@ int
 import_rtheta_setup_boundaries (int ndom)
 {
   int n_inner, n_outer;
-  double rho_max, rho_min, r_inner, r_outer, rmin, rmax;
+  double rho_max, rho_min, rho_inner, rho_outer, rmin, rmax;
   double zmin, zmax;
-  double x_inner[3], r_inner_next, x_outer[3], r_outer_next;
+  double cell_inner[3], cell_outer[3];
+  double x_inner, y_inner, z_inner;
+  double x_inner_next, z_inner_next;
+  double x_outer, y_outer, z_outer;
+  double x_outer_next, z_outer_next;
 
 
   /* Now set up wind boundaries so they are harmless.
@@ -236,59 +240,86 @@ import_rtheta_setup_boundaries (int ndom)
    * to the equator
    */
 
-
   rmax = rho_max = zmax = 0;
   rmin = rho_min = zmin = VERY_BIG;
+
   for (n_inner = 0; n_inner < imported_model[ndom].ncell; n_inner++)
   {
+    // Only update wind boundaries taking into account cells which are inwind
     if (imported_model[ndom].inwind[n_inner] >= 0)
     {
       n_outer = n_inner + imported_model[ndom].mdim;
 
-      x_inner[0] = imported_model[ndom].r[n_inner] * sin (imported_model[ndom].theta[n_inner]);
-      x_inner[1] = 0;
-      x_inner[2] = imported_model[ndom].r[n_inner] * cos (imported_model[ndom].theta[n_inner]);
-      r_inner_next = imported_model[ndom].r[n_inner + 1] * cos (imported_model[ndom].theta[n_inner + 1]);
-
-      r_inner = length (x_inner);
-
-      x_outer[0] = imported_model[ndom].r[n_outer] * sin (imported_model[ndom].theta[n_outer]);
-      x_outer[1] = 0;
-      x_outer[2] = imported_model[ndom].r[n_inner + 1] * cos (imported_model[ndom].theta[n_inner + 1]);
-      r_outer_next = imported_model[ndom].r[n_outer + 1] * sin (imported_model[ndom].theta[n_outer + 1]);
-
-      r_outer = length (x_outer);
-
-      if (r_outer_next > rho_max)
+      if (n_outer + 1 >= zdom[ndom].ndim2)
       {
-        rho_max = r_outer_next;
+        Error ("import_rtheta_setup_boundaries: attempting to access cell outside of grid");
+        Exit (1);               // Something has gone wrong programmatically, best thing to do imo is exit
       }
 
-      if (x_outer[2] > zmax)
+      /*
+       * Calculate the x, y, and z coordinates for the inner cell and the
+       * next inner cell
+       */
+
+      x_inner = cell_inner[0] = imported_model[ndom].r[n_inner] * sin (imported_model[ndom].theta[n_inner]);
+      y_inner = cell_inner[1] = 0;
+      z_inner = cell_inner[2] = imported_model[ndom].r[n_inner] * cos (imported_model[ndom].theta[n_inner]);
+      rho_inner = length (cell_inner);
+
+      x_inner_next = imported_model[ndom].r[n_inner + 1] * sin (imported_model[ndom].theta[n_inner + 1]);
+      z_inner_next = imported_model[ndom].r[n_inner + 1] * cos (imported_model[ndom].theta[n_inner + 1]);
+
+      /*
+       * Calculate the x, y and z coordinates for the outer side of the cell
+       * and for the next inner/outer cell
+       */
+
+      x_outer = cell_outer[0] = imported_model[ndom].r[n_outer] * sin (imported_model[ndom].theta[n_outer]);
+      y_outer = cell_outer[1] = 0;
+      z_outer = cell_outer[2] = imported_model[ndom].r[n_outer] * cos (imported_model[ndom].theta[n_outer]);
+
+      if (n_outer < zdom[ndom].ndim2)
+        rho_outer = length (cell_outer);
+
+      x_outer_next = imported_model[ndom].r[n_outer + 1] * sin (imported_model[ndom].theta[n_outer + 1]);
+      z_outer_next = imported_model[ndom].r[n_outer + 1] * cos (imported_model[ndom].theta[n_outer + 1]);
+
+      /*
+       * Now we need to check if this cell is within the currently set boundaries.
+       * If it is not, then we must update the boundaries to accommodate these
+       * cells as they have been marked inwind, and hence should be inwind when
+       * read into Python.
+       */
+
+      if (x_outer_next > rho_max)
       {
-        zmax = x_outer[2];
+        rho_max = x_outer_next;
       }
 
-      if (r_inner_next < zmin && r_inner_next > 0)
+      if (z_outer > zmax)
       {
-        zmin = r_inner_next;
+        zmax = z_outer;
       }
 
-      if (r_outer > rmax)
+      if (z_inner_next < zmin && z_inner_next > 0)
       {
-        rmax = r_outer;
+        zmin = z_inner_next;
       }
 
-      if (rho_min > x_inner[0])
+      if (rho_outer > rmax)
       {
-        rho_min = x_inner[0];
+        rmax = rho_outer;
       }
 
-      if (rmin > r_inner)
+      if (rho_min > x_inner)
       {
-        rmin = r_inner;
+        rho_min = x_inner;
       }
 
+      if (rmin > rho_inner)
+      {
+        rmin = rho_inner;
+      }
     }
   }
 
