@@ -229,10 +229,8 @@ import_rtheta_setup_boundaries (int ndom)
   double rho_max, rho_min, rho_inner, rho_outer, rmin, rmax;
   double zmin, zmax;
   double cell_inner[3], cell_outer[3];
-  double x_inner, y_inner, z_inner;
-  double x_inner_next, z_inner_next;
-  double x_outer, y_outer, z_outer;
-  double x_outer_next, z_outer_next;
+  double x_inner, z_inner_next;
+  double z_outer, x_outer_next;
 
 
   /* Now set up wind boundaries so they are harmless.
@@ -240,6 +238,7 @@ import_rtheta_setup_boundaries (int ndom)
    * to the equator
    */
 
+  rho_inner = rho_outer = 0;
   rmax = rho_max = zmax = 0;
   rmin = rho_min = zmin = VERY_BIG;
 
@@ -261,28 +260,26 @@ import_rtheta_setup_boundaries (int ndom)
        * next inner cell
        */
 
-      x_inner = cell_inner[0] = imported_model[ndom].r[n_inner] * sin (imported_model[ndom].theta[n_inner]);
-      y_inner = cell_inner[1] = 0;
-      z_inner = cell_inner[2] = imported_model[ndom].r[n_inner] * cos (imported_model[ndom].theta[n_inner]);
+      x_inner = cell_inner[0] = imported_model[ndom].r[n_inner] * sin (imported_model[ndom].theta[n_inner] / RADIAN);
+      cell_inner[1] = 0;
+      cell_inner[2] = imported_model[ndom].r[n_inner] * cos (imported_model[ndom].theta[n_inner] / RADIAN);
       rho_inner = length (cell_inner);
 
-      x_inner_next = imported_model[ndom].r[n_inner + 1] * sin (imported_model[ndom].theta[n_inner + 1]);
-      z_inner_next = imported_model[ndom].r[n_inner + 1] * cos (imported_model[ndom].theta[n_inner + 1]);
+      z_inner_next = imported_model[ndom].r[n_inner + 1] * cos (imported_model[ndom].theta[n_inner + 1] / RADIAN);
 
       /*
        * Calculate the x, y and z coordinates for the outer side of the cell
        * and for the next inner/outer cell
        */
 
-      x_outer = cell_outer[0] = imported_model[ndom].r[n_outer] * sin (imported_model[ndom].theta[n_outer]);
-      y_outer = cell_outer[1] = 0;
-      z_outer = cell_outer[2] = imported_model[ndom].r[n_outer] * cos (imported_model[ndom].theta[n_outer]);
+      cell_outer[0] = imported_model[ndom].r[n_outer] * sin (imported_model[ndom].theta[n_outer] / RADIAN);
+      cell_outer[1] = 0;
+      z_outer = cell_outer[2] = imported_model[ndom].r[n_outer] * cos (imported_model[ndom].theta[n_outer] / RADIAN);
 
       if (n_outer < zdom[ndom].ndim2)
         rho_outer = length (cell_outer);
 
-      x_outer_next = imported_model[ndom].r[n_outer + 1] * sin (imported_model[ndom].theta[n_outer + 1]);
-      z_outer_next = imported_model[ndom].r[n_outer + 1] * cos (imported_model[ndom].theta[n_outer + 1]);
+      x_outer_next = imported_model[ndom].r[n_outer + 1] * sin (imported_model[ndom].theta[n_outer + 1] / RADIAN);
 
       /*
        * Now we need to check if this cell is within the currently set boundaries.
@@ -316,7 +313,7 @@ import_rtheta_setup_boundaries (int ndom)
         rho_min = x_inner;
       }
 
-      if (rmin > rho_inner)
+      if (rmin > r_inner)
       {
         rmin = rho_inner;
       }
