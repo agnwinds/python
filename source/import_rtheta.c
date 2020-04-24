@@ -256,6 +256,8 @@ import_rtheta_setup_boundaries (int ndom)
         Exit (1);               // Something has gone wrong programmatically, best thing to do imo is exit
       }
 
+      Log ("n_inner %i n_outer %i\n", n_inner, n_outer);
+
       /*
        * Calculate the x, y, and z coordinates for the inner cell and the
        * next inner cell
@@ -283,6 +285,11 @@ import_rtheta_setup_boundaries (int ndom)
 
       x_outer_next = imported_model[ndom].r[n_outer + 1] * sin (imported_model[ndom].theta[n_outer + 1]);
       z_outer_next = imported_model[ndom].r[n_outer + 1] * cos (imported_model[ndom].theta[n_outer + 1]);
+
+      Log ("inner x %e %e %e\n", x_inner, y_inner, z_inner);
+      Log ("inner + 1 x %e %e %e\n", x_inner_next, 0, z_inner_next);
+      Log ("outer x %e %e %e\n", x_outer, y_outer, z_outer);
+      Log ("outer + 1 x %e %e %e\n", x_outer_next, 0, z_outer_next);
 
       /*
        * Now we need to check if this cell is within the currently set boundaries.
