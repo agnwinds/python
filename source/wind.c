@@ -457,6 +457,10 @@ wind_check (www, n)
 {
   int i, j, k, istart, istop;
   int ierr = 0;
+  int ndom, ndim, mdim;
+  double dxmin, dzmin;
+  double drmin, dtmin;
+  int outer_n, outer_m;
 
   if (n < 0)
   {
@@ -513,6 +517,95 @@ wind_check (www, n)
     Error ("wind_check: Something is very seriously wrong with the wind.  %d problems Exiting\n", ierr);
     Exit (0);
   }
+
+
+/* Now perform some checks to ensure DFUDGE is unliely to punch thruogh any cells  */
+
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+    printf ("BOOM domain %i has coord type %i\n", ndom, zdom[ndom].coord_type);
+    ndim = zdom[ndom].ndim;
+    mdim = zdom[ndom].mdim;
+    if (zdom[ndom].coord_type == RTHETA)
+    {
+      drmin = 1e99;
+      dtmin = 1e99;
+      printf ("BOOM domain %i is RTHETA\n", ndom);
+      for (i = 0; i < ndim; i++)
+      {
+        for (j = 0; j < mdim; j++)
+        {
+          wind_ij_to_n (ndom, i, j, &n);
+          if (wmain[n].vol > 0.0)
+          {
+            wind_ij_to_n (ndom, i + 1, j, &outer_n);
+            wind_ij_to_n (ndom, i, j + 1, &outer_m);
+            if (fabs (wmain[outer_n].r - wmain[n].r) < drmin)
+              drmin = fabs (wmain[outer_n].r - wmain[n].r);
+            if (fabs (wmain[n].r * (wmain[outer_m].theta - wmain[n].theta) / RADIAN) < dtmin)
+              dtmin = fabs (wmain[n].r * (wmain[outer_m].theta - wmain[n].theta) / RADIAN);
+          }
+        }
+      }
+      printf ("BOOM DOMAIN %i DFUDGE from dr=%e from dtheta=%e DFUDGE=%e\n", ndom, drmin, dtmin, DFUDGE);
+    }
+    else if (zdom[ndom].coord_type == CYLIND || zdom[ndom].coord_type == CYLVAR)
+    {
+      dxmin = 1e99;
+      dzmin = 1e99;
+      printf ("BOOM domain %i is CYLIND\n", ndom);
+      for (i = 0; i < ndim; i++)
+      {
+        for (j = 0; j < mdim; j++)
+        {
+          wind_ij_to_n (ndom, i, j, &n);
+          if (wmain[n].vol > 0.0)
+          {
+            wind_ij_to_n (ndom, i + 1, j, &outer_n);
+            wind_ij_to_n (ndom, i, j + 1, &outer_m);
+            if (fabs (wmain[outer_n].x[0] - wmain[n].x[0]) < dxmin)
+              dxmin = fabs (wmain[outer_n].x[0] - wmain[n].x[0]);
+            if (fabs (wmain[outer_m].x[2] - wmain[n].x[2]) < dzmin)
+              dzmin = fabs (wmain[outer_m].x[2] - wmain[n].x[2]);
+          }
+        }
+      }
+      printf ("BOOM DOMAIN %i DFUDGE from dx=%e from dz=%e DFUDGE %e\n", ndom, dxmin, dzmin, DFUDGE);
+    }
+    else if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      drmin = 1e99;
+      printf ("BOOM domain %i is SPHERICAL ndmin=%i mdim=%i\n", ndom, ndim, mdim);
+      for (i = 0; i < ndim; i++)
+      {
+        wind_ij_to_n (ndom, i, 0, &n);
+        if (wmain[n].vol > 0.0)
+        {
+          wind_ij_to_n (ndom, i + 1, j, &outer_n);
+          if (fabs (wmain[outer_n].r - wmain[n].r) < drmin)
+            drmin = fabs (wmain[outer_n].r - wmain[n].r);
+        }
+      }
+      printf ("BOOM DOMAIN %i DFUDGE from dx=%e DFUDGE %e\n", ndom, drmin, DFUDGE);
+
+
+    }
+    else
+    {
+      Error ("wind_check: Disaster - unknown wind type\n");
+      Exit (0);
+    }
+  }
+
+
+
+
+
+
+
+
+
   Log ("Wind_check: Punchthrough distance DFUDGE %e www[1].x[2] %e\n", DFUDGE, www[1].x[2]);
   return (0);
 }
