@@ -110,16 +110,6 @@ teff (t, x)
     {
       linterp (r, &blmod.r[0], &blmod.t[0], blmod.n_blpts, &temp, 0);
       return (temp);
-
-//OLD      for (n = 1; n < blmod.n_blpts; n++)
-//OLD      {
-//OLD        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
-//OLD        {
-//OLD          return (blmod.t[n]);
-//OLD        }
-//OLD      }
-//OLD      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
-
     }
   }
   else
