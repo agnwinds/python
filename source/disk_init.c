@@ -74,8 +74,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   /* Calculate the reference temperature and luminosity of the disk */
   tref = tdisk (m, mdot, rmin);
-
-
   gref = gdisk (m, mdot, rmin);
 
   q_test_count = 0;
@@ -265,25 +263,65 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
  * 	wavelength bands are changed the radii in the disk structure are recalibratied.
  * 	We want qdisk to have fixed boundaries when this happens.
  *
+ *
+ * The annular are defined differently than in disk_init.  Here they are simply
+ * logarithmically spaced; there they are spaced so that equal amounts of emission
+ * are emitted from each annulus.
+ *
  **********************************************************/
 
 int
-qdisk_init ()
+qdisk_init (rmin, rmax, m, mdot)
+     double rmin, rmax, m, mdot;
 {
-  int n;
-  for (n = 0; n < NRINGS; n++)
+  int nrings;
+  double log_rmin, log_rmax, dlog_r, log_r;
+  double r;
+  double tref, gref;
+
+  log_rmin = log10 (disk.r[0]);
+  log_rmax = log10 (disk.r[NRINGS - 1]);
+  dlog_r = (log_rmax - log_rmin) / (NRINGS - 1);
+
+
+
+
+
+  for (nrings = 0; nrings < NRINGS; nrings++)
   {
-    qdisk.r[n] = disk.r[n];
-    qdisk.t[n] = disk.t[n];
-    qdisk.g[n] = disk.g[n];
-    qdisk.v[n] = disk.v[n];
-    qdisk.heat[n] = 0.0;
-    qdisk.nphot[n] = 0;
-    qdisk.nhit[n] = 0;
-    qdisk.w[n] = 0;
-    qdisk.ave_freq[n] = 0;
-    qdisk.t_hit[0] = 0;
+    log_r = log_rmin + dlog_r * nrings;
+    qdisk.r[nrings] = pow (10, log_r);
   }
+
+  /* Calculate the reference temperature and luminosity of the disk */
+  tref = tdisk (m, mdot, rmin);
+  gref = gdisk (m, mdot, rmin);
+
+  for (nrings = 0; nrings < NRINGS; nrings++)
+  {
+    if (nrings < NRINGS - 1)
+    {
+      r = 0.5 * (qdisk.r[nrings + 1] + qdisk.r[nrings]);
+    }
+    else
+    {
+      r = qdisk.r[nrings];
+    }
+    qdisk.t[nrings] = teff (tref, r / rmin);
+    qdisk.g[nrings] = geff (gref, r / rmin);
+    qdisk.v[nrings] = sqrt (GRAV * geo.mstar / r);
+    qdisk.heat[nrings] = 0.0;
+    qdisk.nphot[nrings] = 0;
+    qdisk.nhit[nrings] = 0;
+    qdisk.w[nrings] = 0;
+    qdisk.ave_freq[nrings] = 0;
+    qdisk.t_hit[nrings] = 0;
+  }
+
+
+
+  /* Now calculate the temperature and gravity of the annulae */
+
   return (0);
 }
 
@@ -319,7 +357,7 @@ qdisk_save (diskfile, ztot)
   int n;
   double area, theat, ttot;
   qptr = fopen (diskfile, "w");
-  fprintf (qptr, "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  fprintf (qptr, "r          zdisk      t_disk    heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
 
   for (n = 0; n < NRINGS; n++)
   {
@@ -337,7 +375,7 @@ qdisk_save (diskfile, ztot)
     ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
     ttot = pow (ttot, 0.25);
     fprintf (qptr,
-             "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             "%9.4e %9.4e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
              qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
              qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
   }

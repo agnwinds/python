@@ -647,7 +647,7 @@ main (argc, argv)
 
 
   disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
-  qdisk_init ();                /* Initialize a disk qdisk to store the information about photons impinging on the disk */
+  qdisk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot);        /* Initialize a disk qdisk to store the information about photons impinging on the disk */
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
 
