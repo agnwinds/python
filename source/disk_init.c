@@ -231,7 +231,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     disk.g[nrings] = geff (gref, r / rmin);
   }
 
-  /* Wrap up by zerrowing other parameters */
+  /* Wrap up by zeroing other parameters */
   for (nrings = 0; nrings < NRINGS; nrings++)
   {
     disk.nphot[nrings] = 0;
@@ -246,3 +246,200 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 }
 
 
+
+
+/**********************************************************/
+/** 
+ * @brief      Initialize a structure (qdisk) for recording information about photons/energy impinging
+ * 	on the disk, which is stored in a disk structure called qdisk.
+ *
+ * @return     Always return zero
+ *
+ *
+ * ###Notes###
+ *
+ * The information stored in qdisk can be used to modify the effective temperature
+ * of the disk
+ *
+ * The reason the qdisk is needed as well as disk structure is that whenever the
+ * 	wavelength bands are changed the radii in the disk structure are recalibratied.
+ * 	We want qdisk to have fixed boundaries when this happens.
+ *
+ **********************************************************/
+
+int
+qdisk_init ()
+{
+  int n;
+  for (n = 0; n < NRINGS; n++)
+  {
+    qdisk.r[n] = disk.r[n];
+    qdisk.t[n] = disk.t[n];
+    qdisk.g[n] = disk.g[n];
+    qdisk.v[n] = disk.v[n];
+    qdisk.heat[n] = 0.0;
+    qdisk.nphot[n] = 0;
+    qdisk.nhit[n] = 0;
+    qdisk.w[n] = 0;
+    qdisk.ave_freq[n] = 0;
+    qdisk.t_hit[0] = 0;
+  }
+  return (0);
+}
+
+
+/**********************************************************/
+/** 
+ * @brief      Save the information in the qdisk structure to a file
+ *
+ * @param [in] char *  diskfile   Name of the file whihc is writteen
+ * @param [in] double  ztot   The total luminosity of the disk as
+ *                      calculate over multiple cycles
+ * @return     Always returns 0
+ *
+ * The routine reformats the data about disk heating which has
+ * been accumulated and writes it to a file
+ *
+ * ###Notes###
+ *
+ * The data concerning heating by the disk is built up during
+ * a the ionization cycles
+ *
+ * The file that is produced should be readable as an astropy
+ * table
+ *
+ **********************************************************/
+
+int
+qdisk_save (diskfile, ztot)
+     char *diskfile;
+     double ztot;
+{
+  FILE *qptr;
+  int n;
+  double area, theat, ttot;
+  qptr = fopen (diskfile, "w");
+  fprintf (qptr, "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+
+  for (n = 0; n < NRINGS; n++)
+  {
+    area = (2. * PI * (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
+    theat = qdisk.heat[n] / area;
+    theat = pow (theat / STEFAN_BOLTZMANN, 0.25);       // theat is temperature if no internal energy production
+    if (qdisk.nhit[n] > 0)
+    {
+
+      qdisk.ave_freq[n] /= qdisk.heat[n];
+      qdisk.t_hit[n] = PLANCK * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);        // Basic conversion from freq to T
+      qdisk.w[n] = qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n]);
+    }
+
+    ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
+    ttot = pow (ttot, 0.25);
+    fprintf (qptr,
+             "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
+             qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
+  }
+
+  fclose (qptr);
+  return (0);
+}
+
+
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Read the temperature profile from a file
+ *
+ * @param [in, out] char *  tprofile   Name of the input file
+ * @return     Always returns 0
+ *
+ * The input format for the file to be read in is quite spefic
+ * The first line should contina the number of points n
+ * the profile
+ *
+ * Subsequent lines should contian a radius and a temperarue
+ *
+ * The radius values shoule be in units of 1e11 cm
+ * The temperature should be in units of 1000K
+ *
+ * ###Notes###
+ *
+ * @bug This routine which was written for the YSO study
+ *  needs to be made less YSO centric. It should also be
+ *  retested.
+ *
+ **********************************************************/
+
+int
+read_non_standard_disk_profile (tprofile)
+     char *tprofile;
+{
+
+  FILE *fopen (), *fptr;
+  int n;
+  float dumflt1, dumflt2;
+
+  char *line;
+  size_t buffsize = LINELENGTH;
+
+  if ((fptr = fopen (tprofile, "r")) == NULL)
+  {
+    Error ("Could not open filename %s\n", tprofile);
+    Exit (0);
+  }
+
+  line = (char *) malloc (buffsize * sizeof (char));
+  blmod.n_blpts = 0;
+
+
+  while (getline (&line, &buffsize, fptr) > 0)
+  {
+    n = sscanf (line, "%g %g", &dumflt1, &dumflt2);
+    if (n == 2)
+    {
+      blmod.r[blmod.n_blpts] = dumflt1;
+      blmod.t[blmod.n_blpts] = dumflt2;
+      blmod.n_blpts += 1;
+    }
+    else
+    {
+      Error ("read_non_standard_disk_file: could not convert a line in %s, OK if comment\n", tprofile);
+    }
+
+    if (blmod.n_blpts == NBLMODEL)
+    {
+      Error ("read_non_standard_disk_file: More than %d points in %s; increase NBLMODEL\n", NBLMODEL, tprofile);
+      Exit (1);
+
+    }
+  }
+
+
+  if (geo.diskrad > blmod.r[blmod.n_blpts - 1])
+  {
+    Error ("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n", geo.diskrad,
+           blmod.r[blmod.n_blpts - 1]);
+    Log ("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
+  }
+
+
+
+//OLD  result = fscanf (fptr, "%d\n", &dumint);
+//OLD  blmod.n_blpts = dumint;
+
+
+//OLD  for (n = 0; n < blmod.n_blpts; n++)
+//OLD  {
+//OLD    result = fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+//OLD    blmod.r[n] = dumflt1 * 1.e11;
+//OLD    blmod.t[n] = dumflt2 * 1.e3;
+//OLD  }
+
+  fclose (fptr);
+
+  return (0);
+}
