@@ -548,7 +548,10 @@ wind_check (www, n)
           }
         }
       }
-      printf ("BOOM DOMAIN %i DFUDGE from dr=%e from dtheta=%e DFUDGE=%e\n", ndom, drmin, dtmin, DFUDGE);
+      if (dtmin / 100. < DFUDGE)
+        DFUDGE = dtmin / 100.;
+      if (drmin / 100. < DFUDGE)
+        DFUDGE = drmin / 100.;
     }
     else if (zdom[ndom].coord_type == CYLIND || zdom[ndom].coord_type == CYLVAR)
     {
@@ -571,7 +574,10 @@ wind_check (www, n)
           }
         }
       }
-      printf ("BOOM DOMAIN %i DFUDGE from dx=%e from dz=%e DFUDGE %e\n", ndom, dxmin, dzmin, DFUDGE);
+      if (dxmin / 100. < DFUDGE)
+        DFUDGE = dxmin / 100.;
+      if (dzmin / 100. < DFUDGE)
+        DFUDGE = dzmin / 100.;
     }
     else if (zdom[ndom].coord_type == SPHERICAL)
     {
@@ -579,17 +585,14 @@ wind_check (www, n)
       printf ("BOOM domain %i is SPHERICAL ndmin=%i mdim=%i\n", ndom, ndim, mdim);
       for (i = 0; i < ndim; i++)
       {
-        wind_ij_to_n (ndom, i, 0, &n);
-        if (wmain[n].vol > 0.0)
+        if (wmain[i].vol > 0.0)
         {
-          wind_ij_to_n (ndom, i + 1, j, &outer_n);
-          if (fabs (wmain[outer_n].r - wmain[n].r) < drmin)
-            drmin = fabs (wmain[outer_n].r - wmain[n].r);
+          if (fabs (wmain[i + 1].r - wmain[i].r) < drmin)
+            drmin = fabs (wmain[i + 1].r - wmain[i].r);
         }
       }
-      printf ("BOOM DOMAIN %i DFUDGE from dx=%e DFUDGE %e\n", ndom, drmin, DFUDGE);
-
-
+      if (drmin / 100. < DFUDGE)
+        DFUDGE = drmin / 100.;
     }
     else
     {
