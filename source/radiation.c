@@ -862,17 +862,20 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
   stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
+
   renorm (p_dir_cos, w_ave * ds);       //Renormnalise the direction into a flux element
   project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
 
   if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
 
+
+
 /* We now update the fluxes in the three bands */
 
   if (p->freq < UV_low)
     vadd (xplasma->F_vis, flux, xplasma->F_vis);
-  else if (p->freq < UV_hi)
+  else if (p->freq > UV_hi)
     vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
   else
     vadd (xplasma->F_UV, flux, xplasma->F_UV);

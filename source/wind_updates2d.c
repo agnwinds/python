@@ -691,6 +691,7 @@ WindPtr (w);
     }
     fprintf (fptr3, "nplasma %i\n", NPLASMA);
 
+    fprintf (fptr4, "model %i\n", geo.ioniz_mode);
     fprintf (fptr4, "nbands %i\n", geo.nxfreq);
     fprintf (fptr4, "nplasma %i\n", NPLASMA);
     for (i = 0; i < geo.nxfreq + 1; i++)

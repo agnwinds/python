@@ -244,6 +244,19 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o
 
+rhf_objects = rad_hydro_files.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
+		emission.o recomb.o wind_util.o  \
+		cdf.o random.o recipes.o saha.o \
+		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
+		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
+		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
+		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
+		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
+		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
+		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		cooling.o import_calloc.o
 
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
@@ -256,9 +269,18 @@ windsave2table: $(table_objects)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
+
+rad_hydro_files: $(rhf_objects)
+	$(CC) $(CFLAGS) $(rhf_objects) $(LDFLAGS) -o rad_hydro_files
+	cp $@ $(BIN)
+	mv $@ $(BIN)/rad_hydro_files$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
+
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
-all: clean python windsave2table py_wind indent
+all: clean python windsave2table py_wind indent rad_hydro_files
 
 
 FILE = get_atomicdata.o atomic.o
