@@ -775,10 +775,19 @@ walls (p, pold, normal)
                pold->x[0], pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]), z, ds_to_disk (pold, 1));
         save_photons (pold, "Disk");
       }
+
+
+      Log ("ZZZZ 1 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1],
+           pold->lmn[2]);
+      Log ("ZZZZ 2 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);
+      Log ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+      Log ("ZZZZ 4 %11.4e %11.4e \n", s, DFUDGE);
 
-      /* Finally, we must calculate the normal to the disk at this point */
+
+      /* Finally, we must calculate the normal to the disk at this point to be able to calculate the scattering direction */
 
       theta = atan ((zdisk (r * (1. + EPSILON)) - z) / (EPSILON * r));
       phi = atan2 (p->x[0], p->x[1]);
