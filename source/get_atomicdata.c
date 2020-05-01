@@ -2736,6 +2736,7 @@ exit if there is an element with no ions */
       n++;
     }
     ele[nelem].nions = n - ele[nelem].firstion;
+    ele[nelem].lastion = ele[nelem].firstion + ele[nelem].nions - 1;
     if (ele[nelem].firstion == nions)
     {
       ele[nelem].firstion = -1; /* There were no ions for this element */
