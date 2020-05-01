@@ -588,6 +588,7 @@ main (argc, argv)
      sets the push through distance depending on the size of the system.
    */
 
+//  DFUDGE = setup_dfudge ();
   DFUDGE = setup_dfudge ();
 
   /* Next line finally defines the wind if this is the initial time this model is being run */

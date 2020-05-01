@@ -739,7 +739,7 @@ qdisk_save (diskfile, ztot)
   int n;
   double area, theat, ttot;
   qptr = fopen (diskfile, "w");
-  fprintf (qptr, "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  fprintf (qptr, "r           zdisk       t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
 
   for (n = 0; n < NRINGS; n++)
   {
@@ -757,7 +757,7 @@ qdisk_save (diskfile, ztot)
     ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
     ttot = pow (ttot, 0.25);
     fprintf (qptr,
-             "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             "%10.5e %10.5e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
              qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
              qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
   }

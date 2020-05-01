@@ -150,6 +150,9 @@ define_wind ()
       Exit (1);
     }
 
+
+    printf ("BOOM - made the grid\n");
+
     for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
     {
       /* For imported models we we have already set the velocities
