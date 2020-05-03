@@ -702,15 +702,15 @@ double xsouth[] = {
  * grid is regular.
  *
  * pold is the place where the photon was before the last attempt to move the photon forward.
- * p on input is a proposed location for photon before considering whethe one has hit a boundary. The
+ * p on input is a proposed location for photon before considering whether one has hit a boundary. The
  * location of p is either at the edge of a cell, or at the position of a resonance.  So pold should
  * be a valid position for the photon, but p may need to be adjusted.
  *
- * If one of the walls has been hit, the moves the photon back to that wall, but not
+ * If one of the walls has been hit, the routine moves the photon back to that wall, but does not
  * othewise changed it.
  *
  * The routine also calculates the normal to the surface that was hit, which is intended to
- * be used by trans_phot to redirect the photon
+ * be used by trans_phot to redirect the photon.
  *
  * ### Notes ###
  *
@@ -734,6 +734,10 @@ walls (p, pold, normal)
    * to determine the normal to the surface, the assumption
    * being that the star is located at the center of the
    * coordinate grid.
+   * 
+   * Note that we check both whether the new position is inside
+   * the star and whether the path the photon has travelled 
+   * passed thourht the star. 
    */
 
   r = dot (p->x, p->x);
@@ -759,10 +763,13 @@ walls (p, pold, normal)
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     if ((rho) < geo.diskrad && fabs (p->x[2]) <= (z = zdisk (rho)))
     {
-      /* 0 here means to return VERY_BIG if one has missed the disk, something
+      /* This is the case where the proposed position is inside the disk.  
+       * 
+       * 0 here means to return VERY_BIG if one has missed the disk, something
        * that should not happen
        */
 
+      Log ("ZZXX Calling ds_to_disk %d\n", pold->np);
       s = ds_to_disk (pold, 0);
       if (s <= -1)              // -1 allows  for very small errors in the calculation of the distance to the disk
       {
@@ -784,7 +791,7 @@ walls (p, pold, normal)
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);
       Log ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-      Log ("ZZZZ 4 %11.4e %11.4e \n", s, DFUDGE);
+      Log ("ZZZZ 4 %11.4e %11.4e %5d \n", s, DFUDGE, p->np);
 
 
       /* Finally, we must calculate the normal to the disk at this point to be able to calculate the scattering direction */

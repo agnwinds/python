@@ -282,7 +282,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   istat = P_INWIND;
   tau = 0;
   icell = 0;
-
   n = 0;                        /* Avoid 03 warning */
 
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
@@ -290,10 +289,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   while (istat == P_INWIND)
   {
 
-    /* translate involves only a single shell (or alternatively a single tranfer in the windless region). istat as returned by
-       should either be 0 in which case the photon hit the other side of the shell without scattering or 1 in which case there
-       was a scattering event in the shell, 2 in which case the photon reached the outside edge of the grid and escaped, 3 in
-       which case it reach the inner edge and was reabsorbed. If the photon escapes then we leave the photon at the position
+    /* The call to translate below involves only a single cell (or alternatively a single tranfer in the windless region). istat as returned by
+       should either be P_INWIND in which case the photon hit the other side of the cell without scattering or P_SCAT in which case there
+       was a scattering event in the shell, P_ESCAPE in which case the photon reached the outside edge of the grid and escaped, P_STAR in
+       which case it reach the inner central object, etc. If the photon escapes then we leave the photon at the position
        of it's last scatter.  In most other cases though we store the final position of the photon. */
 
     pp.ds = 0;                  // EP 11-19: reinitialise for safety
@@ -304,9 +303,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     icell++;
     istat = walls (&pp, p, normal);
+    Log ("XXZZ  Called from trans_phot_single %d\n", p->np);
     /* pp is where the photon is going, p is where it was  */
 
-    if (istat == -1)
+    if (istat == P_ERROR)
     {
       Error_silent ("trans_phot: Abnormal return from translate on photon %d\n", p->np);
       break;
@@ -569,6 +569,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          round. All a bit convoluted but should work. */
 
       istat = walls (&pp, p, normal);
+      Log ("XXZZ Called from extract %d\n", pp.np);
 
       if (istat != p->istat)
       {
@@ -589,6 +590,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         reposition_lost_disk_photon (&pp_reposition_test);
         stuff_phot (&pp_reposition_test, &pp);
         istat = walls (&pp, p, normal);
+        Log ("XXZZ Caled as a Reposition Error %d\n", pp.np);
       }
 
       /* JM 1506 -- we don't throw errors here now, but we do keep a track
