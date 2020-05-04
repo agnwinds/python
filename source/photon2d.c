@@ -761,16 +761,17 @@ walls (p, pold, normal)
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
-    if ((rho) < geo.diskrad && fabs (p->x[2]) <= (z = zdisk (rho)))
+    z = zdisk (rho);
+    s = ds_to_disk (pold, 0);
+    if ((rho < geo.diskrad && fabs (p->x[2]) <= z) || p->ds > s)
     {
-      /* This is the case where the proposed position is inside the disk.  
+      /* This is the case where the proposed position is inside the disk  
+       * or we have hit the disk along the path
        * 
        * 0 here means to return VERY_BIG if one has missed the disk, something
        * that should not happen
        */
 
-      Log ("ZZXX Calling ds_to_disk %d\n", pold->np);
-      s = ds_to_disk (pold, 0);
       if (s <= -1)              // -1 allows  for very small errors in the calculation of the distance to the disk
       {
         Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n", pold->np, pold->x[0],
@@ -780,7 +781,11 @@ walls (p, pold, normal)
       {
         Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e (%11.4e/%11.4e %11.4e/%11.4e %11.4e) \n", pold->np,
                pold->x[0], pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]), z, ds_to_disk (pold, 1));
-        save_photons (pold, "Disk");
+        if (modes.save_photons)
+        {
+          save_photons (pold, "Disk");
+        }
+
       }
 
 
@@ -790,6 +795,7 @@ walls (p, pold, normal)
 
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);
+      /* This leaves the photon just outside the disk */
       Log ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
       Log ("ZZZZ 4 %11.4e %11.4e %5d \n", s, DFUDGE, p->np);
 

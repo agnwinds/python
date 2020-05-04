@@ -300,6 +300,9 @@ vdisk (x, v)
  * 	often needs to take this account if for example one has
  * 	a photon that hits the disk below the z=0 plane.
  *
+ *      zdisk does not take the maximum radius of the disk
+ *      into account
+ *
  **********************************************************/
 
 double
@@ -374,8 +377,8 @@ ds_to_disk (p, allow_negative)
    * boundary.
    */
 
-  double s_disk, s_top, s_bot, s_cyl, s;
-  double z_cyl;
+  double s_disk, s_top, s_bot, s_cyl, s_cyl2, s;
+  double z_cyl, z_cyl2;
 
   double r_disk, r_top, r_bot;
   //rho at various positions
@@ -450,6 +453,7 @@ ds_to_disk (p, allow_negative)
    * first determine this, by checking where the ray hits a pill box that
    * just encompasses the disk.
    */
+  r_phot = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
 
   s_top = ds_to_plane (&disktop, p);
   stuff_phot (p, &phit);
@@ -461,10 +465,32 @@ ds_to_disk (p, allow_negative)
   move_phot (&phit, s_bot);
   r_bot = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
+  /* When a photon is outside of the cylinder of the disk
+     there are instances where we need to know 
+     both of the cylinder boundaries.   
+
+     In this case s_cyl will be the distance to the closest
+     intersection and z_cyl will be the distance to the further
+     intersection.  
+   */
+
   s_cyl = ds_to_cylinder (geo.diskrad, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_cyl);
   z_cyl = phit.x[2];
+  z_cyl2 = VERY_BIG;
+  s_cyl2 = VERY_BIG;
+  if (r_phot > geo.diskrad)
+  {
+    move_phot (&phit, DFUDGE);
+    s_cyl2 = ds_to_cylinder (geo.diskrad, &phit);
+    move_phot (&phit, s_cyl2);
+    z_cyl2 = phit.x[2];
+    s_cyl2 += s_cyl;
+  }
+
+
+
   /*
    * So now we know the distances to the top and bottom planes, as well
    * as to the disk plane, and we also know the distnace to the
@@ -474,9 +500,14 @@ ds_to_disk (p, allow_negative)
    * inside the disk
    */
 
-  r_phot = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
+  if ((r_phot < geo.diskrad) && (fabs (p->x[2]) - zdisk (r_phot) < 1e-4 * DFUDGE))
+  {
+    Log ("ZZXX photon %d at disk boundary already\n", p->np);
+    return (0);
+  }
 
-  if (fabs (p->x[2]) > zdisk (r_phot))
+
+  if (r_phot > geo.diskrad || fabs (p->x[2]) > zdisk (r_phot))
   {
     /*
      * This is the case where the photon location is outside 
@@ -487,6 +518,20 @@ ds_to_disk (p, allow_negative)
     {
       /* The photon is moving away from the disk and does not hit 
          the edge of the disk */
+      return (VERY_BIG);
+    }
+    else if (s_cyl == VERY_BIG)
+    {
+      /* This is the case that one is outside the pill box, and 
+         never even hit the cylinder that encloses the disk
+       */
+      return (VERY_BIG);
+    }
+    else if (r_disk > geo.diskrad && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
+    {
+      /* This is the case that one is outside the pill box, and don't hit either
+         the disk or the edgest of the disk
+       */
       return (VERY_BIG);
     }
     else
@@ -505,13 +550,22 @@ ds_to_disk (p, allow_negative)
 
       /* We certainly do not need to go further than
          the distance to the disk and (if we are inside the cylinder) 
-         the distnace to the cylinder wall.
+         the distance to the cylinder wall.
        */
 
-      smax = s_disk;
-      if (r_phot < geo.diskrad && s_cyl < smax)
+      smax = VERY_BIG;
+      if (s_disk > 0)
+      {
+        smax = s_disk;
+      }
+      else if (r_phot < geo.diskrad && s_cyl < smax)
       {
         smax = s_cyl;
+      }
+      else
+      {
+        smax = 2 * geo.diskrad; /* this is a cheat */
+        Log ("ZZXX - Cheat %d\n", p->np);
       }
 
       /* For the minimum, we need to either to be inside the
@@ -536,7 +590,7 @@ ds_to_disk (p, allow_negative)
         {
           smin = s_bot;
         }
-        if (s_cyl > smin)
+        if (s_cyl < smin)
         {
           smin = s_cyl;
         }
@@ -669,6 +723,11 @@ ds_to_disk (p, allow_negative)
  *  The function we are trying to zero is the
  *  difference between the height of the disk and the z height of the photon.
  *  Modified 2019 to allow use of gsl rather than old numerical recipies
+ *
+ *  Note that the disk height is defined even outside or the region
+ *  actually occupied by the disk, so one needs to make sure
+ *  this is not called unless there is a valid intersection with
+ *  the disk, or alternatively one needs to check afterwards
  *
  **********************************************************/
 

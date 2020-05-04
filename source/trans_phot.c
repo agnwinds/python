@@ -303,7 +303,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     icell++;
     istat = walls (&pp, p, normal);
-    Log ("XXZZ  Called from trans_phot_single %d\n", p->np);
     /* pp is where the photon is going, p is where it was  */
 
     if (istat == P_ERROR)
@@ -569,7 +568,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          round. All a bit convoluted but should work. */
 
       istat = walls (&pp, p, normal);
-      Log ("XXZZ Called from extract %d\n", pp.np);
 
       if (istat != p->istat)
       {
@@ -590,7 +588,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         reposition_lost_disk_photon (&pp_reposition_test);
         stuff_phot (&pp_reposition_test, &pp);
         istat = walls (&pp, p, normal);
-        Log ("XXZZ Caled as a Reposition Error %d\n", pp.np);
       }
 
       /* JM 1506 -- we don't throw errors here now, but we do keep a track
