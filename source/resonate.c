@@ -228,7 +228,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /*Compute the angle averaged electron scattering cross section.  Note the es is always
      treated as a scattering event. */
 
-  kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
+  kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill; //XFRAME In principle, lines like this need a transformation: kappa transforms
 
 /* If in macro-atom mode, calculate the bf and ff opacities, becuase in macro-atom mode
  * everthing including bf is calculated as a scattering process.  The routine
@@ -266,7 +266,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity
-
+//XFRAME Probably here to transformation on all opacities for continuum, once summed up? ds (below) is observer frame
 
 /* Finally begin the loop over the resonances that can interact
  * with the photon in the cell
