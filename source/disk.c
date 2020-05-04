@@ -609,42 +609,70 @@ ds_to_disk (p, allow_negative)
      * This is the case where the photon is already inside the
      * disk.  The main issue here is we want to push the
      * photon back where it came from now allow it to go
-     * forward
+     * forward.
+     *  
+     * We will make the assumption that if you are moving away from the disk plane (z=0) you want to go
+     * forward, but if you are moving towards the plane you want to go backwards
      */
 
-    location = 1;
     Log_silent ("ZZXX  b %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
     Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
 
-    smax = 0;
-
-    /* One or the other of s_top or s_bot should be negative */
-
-    if (s_top < 0)
+    if (p->x[2] * p->lmn[2] > 0)
     {
-      smin = s_top;
+      /* The photon is moving away from the disk plane and want to continue in that direction */
+      location = 1;
+
+      smin = 0;
+
+      smax = s_top;
+      if (s_bot > 0)
+      {
+        smax = s_bot;
+      }
+      if (s_cyl < smax)
+      {
+        smax = s_cyl;
+      }
+
+
     }
     else
     {
-      smin = s_bot;
-    }
+      /* We are moving toward the disk plane, and we want to go back to a position on the disk */
 
-    /* This ignores the possibility that a photon inside the disk goes out 
-       the edge of the disk, so we have to deal with this possibility */
-    stuff_phot (p, &phit);
-    phit.lmn[0] *= (-1);
-    phit.lmn[1] *= (-1);
-    phit.lmn[2] *= (-1);
-    s_cyl = ds_to_cylinder (geo.diskrad, &phit);
-    s_cyl *= (-1);
+      location = 2;
 
-    /* s_cyl should be negative and but it may be closer to 0 than 
-       where the photons hit the disk. If that is the case we want to
-       use s_cyl */
+      smax = 0;
 
-    if (s_cyl > smin)
-    {
-      smin = s_cyl;
+      /* One or the other of s_top or s_bot should be negative */
+
+      if (s_top < 0)
+      {
+        smin = s_top;
+      }
+      else
+      {
+        smin = s_bot;
+      }
+
+      /* This ignores the possibility that a photon inside the disk goes out 
+         the edge of the disk, so we have to deal with this possibility */
+      stuff_phot (p, &phit);
+      phit.lmn[0] *= (-1);
+      phit.lmn[1] *= (-1);
+      phit.lmn[2] *= (-1);
+      s_cyl = ds_to_cylinder (geo.diskrad, &phit);
+      s_cyl *= (-1);
+
+      /* s_cyl should be negative and but it may be closer to 0 than 
+         where the photons hit the disk. If that is the case we want to
+         use s_cyl */
+
+      if (s_cyl > smin)
+      {
+        smin = s_cyl;
+      }
     }
 
     Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
@@ -697,7 +725,8 @@ ds_to_disk (p, allow_negative)
   Log_silent ("ZZXX  %d  %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot, zdisk (r_phot));
   if (s == smin || s == smax)
   {
-    Log ("ZZXX Time to worry, at one limit \n");
+    Log ("ZZXX Time to worry, at limit for %d %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot,
+         zdisk (r_phot));
   }
 
 
