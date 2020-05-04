@@ -484,7 +484,7 @@ return and record an error */
     s = ds_to_wind (p, &ndom_current);  /* smax is set to be the distance to edge of the wind */
     if (s < smax)
       smax = s;
-    s = ds_to_disk (p, 0);      /* ds_to_disk can return a negative distance */
+    s = ds_to_disk (p, 0);      /* the 0 implies ds_to_disk can not return a negative distance */
     if (s > 0 && s < smax)
       smax = s;
   }
@@ -762,7 +762,7 @@ walls (p, pold, normal)
   {
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     z = zdisk (rho);
-    s = ds_to_disk (pold, 0);
+    s = ds_to_disk (pold, 0);   /* The 0 imples that s cannot be negative */
     if ((rho < geo.diskrad && fabs (p->x[2]) <= z) || p->ds > s)
     {
       /* This is the case where the proposed position is inside the disk  
@@ -789,15 +789,15 @@ walls (p, pold, normal)
       }
 
 
-      Log ("ZZZZ 1 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1],
-           pold->lmn[2]);
-      Log ("ZZZZ 2 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+      Log_silent ("ZZZZ 1 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1],
+                  pold->lmn[2]);
+      Log_silent ("ZZZZ 2 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
 
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);
       /* This leaves the photon just outside the disk */
-      Log ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-      Log ("ZZZZ 4 %11.4e %11.4e %5d \n", s, DFUDGE, p->np);
+      Log_silent ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+      Log_silent ("ZZZZ 4 %11.4e %11.4e %5d \n", s, DFUDGE, p->np);
 
 
       /* Finally, we must calculate the normal to the disk at this point to be able to calculate the scattering direction */
