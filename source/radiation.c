@@ -117,13 +117,13 @@ radiation (p, ds)
 
   /* calculate photon frequencies in rest frame of cell */
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);
+  freq_inner = p->freq * (1. - v1 / VLIGHT); //XFRAME
+  freq_outer = phot.freq * (1. - v2 / VLIGHT); //XFRAME
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
 
-  /* calculate free-free, Compton and ind-Compton opacities 
+  /* calculate free-free, Compton and induced-Compton opacities 
      note that we also call these with the average frequency along ds */
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);       /* Add ff opacity */

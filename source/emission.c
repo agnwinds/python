@@ -384,8 +384,9 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          We don not make adjust the direction for relativistic effects.
        */
 
+       
       vwind_xyz (ndom, &p[np], v);
-      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT);
+      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT);  // XFRAME
       p[np].istat = 0;
       p[np].tau = p[np].nscat = p[np].nrscat = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon

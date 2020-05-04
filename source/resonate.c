@@ -181,8 +181,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * then the photon frequency will be less. */
 
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);
+  freq_inner = p->freq * (1. - v1 / VLIGHT);  //XFRAME
+  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
   dfreq = freq_outer - freq_inner;
 
 
@@ -925,6 +925,7 @@ calls to two_level atom
  *
  **********************************************************/
 
+// XFRAME - The entire doppler routine needs updating
 int
 doppler (pin, pout, v, nres)
      PhotPtr pin, pout;
@@ -973,6 +974,7 @@ doppler (pin, pout, v, nres)
   return (0);
 
 }
+//XFRAME - end of doppler routine which needs to be updated
 
 
 
@@ -1046,7 +1048,7 @@ scatter (p, nres, nnscat)
 
   vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
   v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //This is the photon frequency in the comoving frame
+  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //XFRAME This is the photon frequency in the comoving frame
 
 
   /* On entering this subroutine we know that a photon packet has been
@@ -1275,7 +1277,7 @@ scatter (p, nres, nnscat)
     p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
     compton_dir (p);            // Get a new direction using the KN formula
     v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
-    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame
+    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame  XFRAME
 
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
