@@ -463,7 +463,6 @@ int get_bl_and_agn_params(double lstar);
 /* setup_domains.c */
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
-void check_domain_boundaries(int ndom);
 int setup_windcone(void);
 /* setup_disk.c */
 double get_disk_params(void);
@@ -485,8 +484,8 @@ int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
 /* import.c */
-int import_set_wind_boundaries (int ndom);
 int import_wind(int ndom);
+int import_set_wind_boundaries(int ndom);
 int import_make_grid(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
 double import_rho(int ndom, double *x);
@@ -568,6 +567,9 @@ double logg(double mass, double rwd);
 /* import_calloc.c */
 void calloc_import(int coord_type, int ndom);
 void free_import(int coord_type, int ndom);
+/* frame.c */
+double observer_to_local_frame(PhotPtr p);
+double local_to_observer_frame(PhotPtr p);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
