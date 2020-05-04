@@ -461,6 +461,8 @@ wind_check (www, n)
   double dxmin, dzmin;
   double drmin, dtmin;
   int outer_n, outer_m;
+  double delta;
+  double frac = 0.01;
 
   if (n < 0)
   {
@@ -520,7 +522,10 @@ wind_check (www, n)
 
 
 /* Now perform some checks to ensure DFUDGE is unlikely to punch through any cells  */
+/* This versions does not change DFUDGE but simply logs places where problems might arise */
 
+
+  delta = frac * DFUDGE;
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
@@ -539,17 +544,15 @@ wind_check (www, n)
           {
             wind_ij_to_n (ndom, i + 1, j, &outer_n);
             wind_ij_to_n (ndom, i, j + 1, &outer_m);
-            if (fabs (wmain[outer_n].r - wmain[n].r) < drmin)
-              drmin = fabs (wmain[outer_n].r - wmain[n].r);
-            if (fabs (wmain[n].r * (wmain[outer_m].theta - wmain[n].theta) / RADIAN) < dtmin)
-              dtmin = fabs (wmain[n].r * (wmain[outer_m].theta - wmain[n].theta) / RADIAN);
+            drmin = fabs (wmain[outer_n].r - wmain[n].r);
+            dtmin = fabs (wmain[n].r * (wmain[outer_m].theta - wmain[n].theta) / RADIAN);
+            if (drmin < delta || dtmin < delta)
+            {
+              Error ("wind_check: DFUDGE may be large in cell %d %d (%.1e %.1e)\n", i, j, drmin, dtmin);
+            }
           }
         }
       }
-      if (dtmin / 100. < DFUDGE)
-        DFUDGE = dtmin / 100.;
-      if (drmin / 100. < DFUDGE)
-        DFUDGE = drmin / 100.;
     }
     else if (zdom[ndom].coord_type == CYLIND || zdom[ndom].coord_type == CYLVAR)
     {
@@ -564,17 +567,16 @@ wind_check (www, n)
           {
             wind_ij_to_n (ndom, i + 1, j, &outer_n);
             wind_ij_to_n (ndom, i, j + 1, &outer_m);
-            if (fabs (wmain[outer_n].x[0] - wmain[n].x[0]) < dxmin)
-              dxmin = fabs (wmain[outer_n].x[0] - wmain[n].x[0]);
-            if (fabs (wmain[outer_m].x[2] - wmain[n].x[2]) < dzmin)
-              dzmin = fabs (wmain[outer_m].x[2] - wmain[n].x[2]);
+            dxmin = fabs (wmain[outer_n].x[0] - wmain[n].x[0]);
+            dzmin = fabs (wmain[outer_m].x[2] - wmain[n].x[2]);
+
+            if (drmin < delta || dtmin < delta)
+            {
+              Error ("wind_check: DFUDGE may be large in cell %d %d (%.1e %.1e)\n", i, j, drmin, dtmin);
+            }
           }
         }
       }
-      if (dxmin / 100. < DFUDGE)
-        DFUDGE = dxmin / 100.;
-      if (dzmin / 100. < DFUDGE)
-        DFUDGE = dzmin / 100.;
     }
     else if (zdom[ndom].coord_type == SPHERICAL)
     {
@@ -583,12 +585,13 @@ wind_check (www, n)
       {
         if (wmain[i].vol > 0.0)
         {
-          if (fabs (wmain[i + 1].r - wmain[i].r) < drmin)
-            drmin = fabs (wmain[i + 1].r - wmain[i].r);
+          drmin = fabs (wmain[i + 1].r - wmain[i].r);
+          if (drmin < delta || dtmin < delta)
+          {
+            Error ("wind_check: DFUDGE may be large in cell %d (%.1e)\n", i, drmin);
+          }
         }
       }
-      if (drmin / 100. < DFUDGE)
-        DFUDGE = drmin / 100.;
     }
     else
     {
