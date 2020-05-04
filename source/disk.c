@@ -386,6 +386,8 @@ ds_to_disk (p, allow_negative)
   //rho of the photon
 
   double smin, smax;
+  double delta;
+
   struct photon phit;
 
   int location = -1;
@@ -500,9 +502,10 @@ ds_to_disk (p, allow_negative)
    * inside the disk
    */
 
-  if ((r_phot < geo.diskrad) && (fabs (p->x[2]) - zdisk (r_phot) < 1e-4 * DFUDGE))
+  delta = fabs (fabs (p->x[2]) - zdisk (r_phot));
+  if ((r_phot < geo.diskrad) && (delta < 1.0))
   {
-    Log ("ZZXX photon %d at disk boundary already\n", p->np);
+    Log_silent ("ZZXX photon %d at disk boundary already: %e \n", p->np, delta);
     return (0);
   }
 
@@ -544,8 +547,8 @@ ds_to_disk (p, allow_negative)
        */
 
       location = 0;
-      Log ("ZZXX  a %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-      Log ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
+      Log_silent ("ZZXX  a %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+      Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
 
 
       /* We certainly do not need to go further than
@@ -595,8 +598,8 @@ ds_to_disk (p, allow_negative)
           smin = s_cyl;
         }
       }
-      Log ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
-      Log ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
+      Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
+      Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
     }
 
   }
@@ -610,8 +613,8 @@ ds_to_disk (p, allow_negative)
      */
 
     location = 1;
-    Log ("ZZXX  b %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-    Log ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
+    Log_silent ("ZZXX  b %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+    Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
 
     smax = 0;
 
@@ -644,8 +647,8 @@ ds_to_disk (p, allow_negative)
       smin = s_cyl;
     }
 
-    Log ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
-    Log ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
+    Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
+    Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
 
   }
 
@@ -682,16 +685,20 @@ ds_to_disk (p, allow_negative)
   if ((smax - smin) > 0.)
   {
     s = zero_find (disk_height, 0.0, smax - smin, 1e-8);
-    Log ("ZZXX Normally se expect this  smin %e smax %e s_disk%e\n", smin, smax, s_disk);
+    Log_silent ("ZZXX Normally we expect this  smin %e < %e s_disk %e\n", smin, smax, s_disk);
   }
   else
   {
     s = zero_find (disk_height, smax - smin, 0.0, 1e-8);
-    Log ("ZZXX This should Not Possible smin %e smax %e s_disk%e\n", smin, smax, s_disk);
+    Log_silent ("ZZXX This seems unusual       smin %e > smax %e s_disk%e\n", smin, smax, s_disk);
   }
 
-  Log ("ZZXX  %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-  Log ("ZZXX  %d  %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot, zdisk (r_phot));
+  Log_silent ("ZZXX  %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+  Log_silent ("ZZXX  %d  %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot, zdisk (r_phot));
+  if (s == smin || s == smax)
+  {
+    Log ("ZZXX Time to worry, at one limit \n");
+  }
 
 
   s += smin;
