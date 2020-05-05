@@ -568,9 +568,9 @@ double logg(double mass, double rwd);
 void calloc_import(int coord_type, int ndom);
 void free_import(int coord_type, int ndom);
 /* frame.c */
-double observer_to_local_frame(PhotPtr p);
-double local_to_observer_frame(PhotPtr p);
-double local_to_observer_frame_disk(PhotPtr p);
+double observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
+double local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
+double local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

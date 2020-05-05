@@ -9,9 +9,9 @@
  *
  * ###Notes###
  *
- * These routines do not change the frequence of the photon 
- * internally, because Python has not been written to 
- * change the fraqencies back in all cases.
+ * These routines are written so that if p and p_obs point 
+ * to the same variable then everything occurs in place
+ *
  *
  ***********************************************************/
 
@@ -24,52 +24,70 @@
 
 
 double
-observer_to_local_frame (p)
-     PhotPtr p;
+observer_to_local_frame (p_in, p_out)
+     PhotPtr p_in, p_out;
 {
   WindPtr one;
   int ndom;
   double f;
   double v[3], vel;
 
-  one = &wmain[p->grid];
+  /* Initialize the output photon */
+  stuff_phot (p_in, p_out);
+
+  /* Calculate the local velocity of the wind at this position */
+  one = &wmain[p_in->grid];
   ndom = one->ndom;
-  vwind_xyz (ndom, p, v);
-  vel = dot (p->lmn, v);
-  f = p->freq * (1. - vel / VLIGHT);
+  vwind_xyz (ndom, p_in, v);
+
+  vel = dot (p_in->lmn, v);
+  f = p_out->freq = p_in->freq * (1. - vel / VLIGHT);
+
   return (f);
 }
 
 
 
 double
-local_to_observer_frame (p)
-     PhotPtr p;
+local_to_observer_frame (p_in, p_out)
+     PhotPtr p_in, p_out;
 {
   WindPtr one;
   int ndom;
   double f;
   double v[3], vel;
 
-  one = &wmain[p->grid];
-  ndom = one->ndom;
-  vwind_xyz (ndom, p, v);
+  /* Initialize the output photon */
+  stuff_phot (p_in, p_out);
 
-  vel = dot (p->lmn, v);
-  f = p->freq / (1. - vel / VLIGHT);
+  /* Calculate the local velocity of the wind at this position */
+  one = &wmain[p_in->grid];
+  ndom = one->ndom;
+  vwind_xyz (ndom, p_in, v);
+
+  vel = dot (p_in->lmn, v);
+  f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+
   return (f);
 }
 
 double
-local_to_observer_frame_disk (p)
-     PhotPtr p;
+local_to_observer_frame_disk (p_in, p_out)
+     PhotPtr p_in, p_out;
 {
   double f;
   double v[3], vel;
 
-  vdisk (p->x, v);
+  /* Initialize the output photon */
+  stuff_phot (p_in, p_out);
 
-  vel = dot (p->lmn, v);
-  f = p->freq / (1. - vel / VLIGHT);
+
+  /* Calculate the local velocity of the disk at this position */
+  vdisk (p_in->x, v);
+  vel = dot (p_in->lmn, v);
+
+
+  f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+
   return (f);
 }

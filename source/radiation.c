@@ -81,7 +81,7 @@ radiation (p, ds)
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
-  struct photon phot, phot_mid;
+  struct photon phot, phot_mid, phot_dummy;
   int ndom, i;
 
 //OLD  double ftest;
@@ -122,8 +122,8 @@ radiation (p, ds)
 //OLD  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
 //OLD  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
 
-  freq_inner = observer_to_local_frame (&phot);
-  freq_outer = observer_to_local_frame (p);
+  freq_inner = observer_to_local_frame (&phot, &phot_dummy);
+  freq_outer = observer_to_local_frame (p, &phot_dummy);
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);

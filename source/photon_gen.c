@@ -1279,7 +1279,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     /* Now Doppler shift this. Use convention of dividing when going from rest
        to moving frame */
 
-    p[i].freq = local_to_observer_frame_disk (&p[i]);
+    /* When given the same input photons the transformation is made in place */
+    local_to_observer_frame_disk (&p[i], &p[i]);
 
 //OLD    vdisk (p[i].x, v);
 //OLD    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT);     //XFRAME
