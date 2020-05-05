@@ -1160,7 +1160,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   double planck ();
   double t, r, z, theta, phi;
   int nring;
-  double north[3], v[3];
+  double north[3];
+//OLD  double v[3];
   if ((iend = istart + nphot) > NPHOT)
   {
     Error ("photo_gen_disk: iend %d > NPHOT %d\n", iend, NPHOT);
@@ -1278,8 +1279,13 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     /* Now Doppler shift this. Use convention of dividing when going from rest
        to moving frame */
 
-    vdisk (p[i].x, v);
-    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT); //XFRAME
+    p[i].freq = local_to_observer_frame_disk (&p[i]);
+
+//OLD    vdisk (p[i].x, v);
+//OLD    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT);     //XFRAME
+
+
+
 
   }
 

@@ -9,6 +9,9 @@
  *
  * ###Notes###
  *
+ * These routines do not change the frequence of the photon 
+ * internally, because Python has not been written to 
+ * change the fraqencies back in all cases.
  *
  ***********************************************************/
 
@@ -27,7 +30,7 @@ observer_to_local_frame (p)
   WindPtr one;
   int ndom;
   double f;
-  double v[3],vel;
+  double v[3], vel;
 
   one = &wmain[p->grid];
   ndom = one->ndom;
@@ -46,11 +49,25 @@ local_to_observer_frame (p)
   WindPtr one;
   int ndom;
   double f;
-  double v[3],vel;
+  double v[3], vel;
 
   one = &wmain[p->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p, v);
+
+  vel = dot (p->lmn, v);
+  f = p->freq / (1. - vel / VLIGHT);
+  return (f);
+}
+
+double
+local_to_observer_frame_disk (p)
+     PhotPtr p;
+{
+  double f;
+  double v[3], vel;
+
+  vdisk (p->x, v);
 
   vel = dot (p->lmn, v);
   f = p->freq / (1. - vel / VLIGHT);

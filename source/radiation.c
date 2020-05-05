@@ -77,7 +77,7 @@ radiation (p, ds)
   int nconf;
   double p_in[3], p_out[3], dp_cyl[3];  //The initial and final momentum.
 //  double weight_of_packet, y;  //to do with augerion calcs, now deprecated
-  double v_inner[3], v_outer[3], v1, v2;
+//OLD  double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
@@ -99,8 +99,8 @@ radiation (p, ds)
      this could be improved, so we throw an error if the difference between v1 and v2 is large */
 
   /* calculate velocity at original position */
-  vwind_xyz (ndom, p, v_inner); // get velocity vector at new pos
-  v1 = dot (p->lmn, v_inner);   // get direction cosine
+//OLD  vwind_xyz (ndom, p, v_inner); // get velocity vector at new pos
+//OLD  v1 = dot (p->lmn, v_inner);   // get direction cosine
 
   /* compute the initial momentum of the photon */
 
@@ -114,8 +114,8 @@ radiation (p, ds)
 
   stuff_phot (p, &phot);        // copy photon ptr
   move_phot (&phot, ds);        // move it by ds
-  vwind_xyz (ndom, &phot, v_outer);     // get velocity vector at new pos
-  v2 = dot (phot.lmn, v_outer); // get direction cosine
+//OLD  vwind_xyz (ndom, &phot, v_outer);     // get velocity vector at new pos
+//OLD  v2 = dot (phot.lmn, v_outer); // get direction cosine
 
   /* calculate photon frequencies in rest frame of cell */
 

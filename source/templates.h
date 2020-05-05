@@ -570,6 +570,7 @@ void free_import(int coord_type, int ndom);
 /* frame.c */
 double observer_to_local_frame(PhotPtr p);
 double local_to_observer_frame(PhotPtr p);
+double local_to_observer_frame_disk(PhotPtr p);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
