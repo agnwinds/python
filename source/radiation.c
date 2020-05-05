@@ -84,7 +84,7 @@ radiation (p, ds)
   struct photon phot, phot_mid;
   int ndom, i;
 
-  double ftest;
+//OLD  double ftest;
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
@@ -119,19 +119,11 @@ radiation (p, ds)
 
   /* calculate photon frequencies in rest frame of cell */
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
+//OLD  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
+//OLD  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
 
-  ftest = observer_to_local_frame (p);
-  if (freq_inner != ftest)
-  {
-    Error ("Houston we have a problem  %e->%e\n", freq_inner, ftest);
-  }
-  ftest = observer_to_local_frame (&phot);
-  if (freq_outer != ftest)
-  {
-    Error ("Houston we have a problem  %e->%e\n", freq_outer, ftest);
-  }
+  freq_inner = observer_to_local_frame (&phot);
+  freq_outer = observer_to_local_frame (p);
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
