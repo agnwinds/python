@@ -386,12 +386,17 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
 
       vwind_xyz (ndom, &p[np], v);
-      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT); // XFRAME
       p[np].istat = 0;
       p[np].tau = p[np].nscat = p[np].nrscat = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon
 
-      /* Extra processing for revereration calculations */
+/* the old approach here did not follow our convention for changing from the obsserver to local frame XFRAME */
+//OLD      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT); // XFRAME
+
+      /* Make an in place transformation to the observe frame */
+      local_to_observer_frame (&p[np], &p[np]);
+
+      /* Extra processing for reveberation calculations */
       switch (geo.reverb)
       {                         // SWM 26-3-15: Added wind paths
       case REV_WIND:

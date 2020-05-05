@@ -548,7 +548,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   struct photon pp;
   int nres, esc_ptr, which_out;
   int n;
-  double v[3];
+//OLD  double v[3];
   double dot ();
   double test;
   int nnscat;
@@ -659,8 +659,11 @@ photo_gen_kpkt (p, weight, photstart, nphot)
        forward scattering of the distribution */
 
     ndom = wmain[icell].ndom;
-    vwind_xyz (ndom, &p[n], v);
-    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
+//OLD    vwind_xyz (ndom, &p[n], v);
+//OLD    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
+
+    /* Make an in-place transformation to the observer frame */
+    local_to_observer_frame (&p[n], &p[n]);
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;
@@ -725,7 +728,7 @@ photo_gen_matom (p, weight, photstart, nphot)
   struct photon pp;
   int nres;
   int n;
-  double v[3];
+//OLD  double v[3];
   double dot ();
   int emit_matom ();
   double test;
@@ -843,8 +846,12 @@ photo_gen_matom (p, weight, photstart, nphot)
        forward scattering of the distribution */
 
     ndom = wmain[icell].ndom;
-    vwind_xyz (ndom, &p[n], v);
-    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
+
+//OLD    vwind_xyz (ndom, &p[n], v);
+//OLD    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
+
+    /* Make an in-place transformation to the observer frame */
+    local_to_observer_frame (&p[n], &p[n]);
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;

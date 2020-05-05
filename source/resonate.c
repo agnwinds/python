@@ -1029,14 +1029,14 @@ scatter (p, nres, nnscat)
   double v[3];
   double z_prime[3];
   int which_out;
-  struct photon pold;
+  struct photon pold, phot_dummy;
   int i, n;
   double p_init[3], p_final[3], dp[3], dp_cyl[3];
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
   int m, llvl, ulvl;
-  double v_dop;
+//OLD  double v_dop;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   int ndom;
@@ -1057,9 +1057,11 @@ scatter (p, nres, nnscat)
     return (-1);
   }
 
-  vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
-  v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //XFRAME This is the photon frequency in the comoving frame
+//OLD  vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
+//OLD  v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
+//OLD  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //XFRAME This is the photon frequency in the comoving frame
+
+  freq_comoving = observer_to_local_frame (p, &phot_dummy);
 
 
   /* On entering this subroutine we know that a photon packet has been
@@ -1089,7 +1091,12 @@ scatter (p, nres, nnscat)
       /* It's a bb line - we can go straight to macro_gov since we know that
          we don't want a k-packet immediately. macro_gov now makes the decision
          regarding the treament (simple or full macro). */
-      //XFRAME may need to check, but I believe all the macro atom (including macro gov) should already be formulated in the cmf: i.e. provided that the photon was transformed to the cmf before this call (see above) then nothing should be needed here before going in - need to consider reverse transfer when coming back out though (likely in macro_gov?)
+      /*XFRAME may need to check, but I believe all the macro atom (including macro gov) should already be 
+         formulated in the cmf: i.e. provided that the photon was transformed to the cmf before this call 
+         (see above) then nothing should be needed here before going in - need to consider reverse 
+         transfer when coming back out though (likely in macro_gov?)
+       */
+
       macro_gov (p, nres, 1, &which_out);
     }
 
@@ -1270,7 +1277,9 @@ scatter (p, nres, nnscat)
       macro_gov (p, nres, 2, &which_out);       //ff always make a k-packet
     }
   }
-  //XFRAME need to look at what's happening at the end of macro_gov - likely need a transform there to get back to observer frame: probably currently does Doppler effect but that's all?
+  /*XFRAME need to look at what's happening at the end of macro_gov - likely need a transform 
+     there to get back to observer frame: probably currently does Doppler effect but that's all?
+   */
 
 
   /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
@@ -1290,8 +1299,11 @@ scatter (p, nres, nnscat)
   {
     p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
     compton_dir (p);            // Get a new direction using the KN formula
-    v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
-    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame  XFRAME
+
+//OLD    v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
+//OLD    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame  XFRAME
+
+    p->freq = local_to_observer_frame (p, &phot_dummy);
 
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
@@ -1318,6 +1330,7 @@ scatter (p, nres, nnscat)
 
 //OLD (We already calculated this)  vwind_xyz (ndom, p, v);       /* Get the velocity vector for the wind */
 
+  vwind_xyz (ndom, p, v);       //XFRAME had to put this in until doppler is understood
   if (*nres != -1)              //Only do this if its not an electron scatter, otherwise we have already dealt with this
     doppler (&pold, p, v, *nres);
 
