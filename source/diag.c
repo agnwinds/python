@@ -353,11 +353,19 @@ phase(0=inferior_conjunction)                   0.5
  **********************************************************/
 
 int
-save_extract_photons (n, p, pp, v)
+save_extract_photons (n, p, pp)
      int n;
      PhotPtr p, pp;
-     double *v;
 {
+  double v[3];
+  WindPtr one;
+  int ndom;
+
+  /* Calculate the local velocity of the wind at this position */
+  one = &wmain[p->grid];
+  ndom = one->ndom;
+  vwind_xyz (ndom, p, v);
+
   fprintf (epltptr,
            "EXTRACT %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
            n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],

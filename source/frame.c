@@ -118,23 +118,33 @@ local_to_observer_frame_disk (p_in, p_out)
  **********************************************************/
 
 int
-doppler (pin, pout, v, nres)
-     PhotPtr pin, pout;
-     double v[];
+doppler (p_in, p_out, nres)
+     PhotPtr p_in, p_out;
      int nres;
 
 {
   double dot ();
+  WindPtr one;
+  int ndom;
+  double v[3];
+
+  /* Calculate the local velocity of the wind at this position */
+  one = &wmain[p_in->grid];
+  ndom = one->ndom;
+  vwind_xyz (ndom, p_in, v);
+
+
+
 
   if (nres == -1)               //Electron scattering (SS)
   {                             /*It was a non-resonant scatter */
-    pout->freq = pin->freq * (1 - dot (v, pin->lmn) / VLIGHT) / (1 - dot (v, pout->lmn) / VLIGHT);
+    p_out->freq = p_in->freq * (1 - dot (v, p_in->lmn) / VLIGHT) / (1 - dot (v, p_out->lmn) / VLIGHT);
 
 
   }
   else if (nres > -1 && nres < nlines)
   {                             /* It was a resonant scatter. */
-    pout->freq = lin_ptr[nres]->freq / (1. - dot (v, pout->lmn) / VLIGHT);
+    p_out->freq = lin_ptr[nres]->freq / (1. - dot (v, p_out->lmn) / VLIGHT);
   }
   else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
     /* It was continuum emission - new comoving frequency has been chosen by
@@ -150,7 +160,7 @@ doppler (pin, pout, v, nres)
       Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
       Exit (0);
     }
-    pout->freq = pout->freq / (1. - dot (v, pout->lmn) / VLIGHT);
+    p_out->freq = p_out->freq / (1. - dot (v, p_out->lmn) / VLIGHT);
   }
 /* Now do one final check that nothing is awry.  This is another
  * check added by SS that should probably be deleted or done before this point.

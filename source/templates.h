@@ -122,7 +122,6 @@ int select_continuum_scattering_process(double kap_cont, double kap_es, double k
 double kappa_bf(PlasmaPtr xplasma, double freq, int macro_all);
 int kbf_need(double fmin, double fmax);
 double sobolev(WindPtr one, double x[], double den_ion, struct lines *lptr, double dvds);
-int doppler(PhotPtr pin, PhotPtr pout, double v[], int nres);
 int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
 int radiation(PhotPtr p, double ds);
@@ -266,7 +265,7 @@ int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
-int save_extract_photons(int n, PhotPtr p, PhotPtr pp, double *v);
+int save_extract_photons(int n, PhotPtr p, PhotPtr pp);
 int save_photons(PhotPtr p, char comment[]);
 int track_scatters(PhotPtr p, int nplasma, char *comment);
 /* sv.c */
@@ -571,6 +570,7 @@ void free_import(int coord_type, int ndom);
 double observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
 double local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
 double local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
+int doppler(PhotPtr p_in, PhotPtr p_out, int nres);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

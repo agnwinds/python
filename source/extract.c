@@ -89,12 +89,12 @@ extract (w, p, itype)
 {
   int n, mscat, mtopbot;
   struct photon pp;
-  double v[3];
+//OLD  double v[3];
   double length ();
   int vsub ();
   int yep;
   double xdiff[3];
-  int ndom;
+//OLD  int ndom;
 
 
   /* The next line selects the middle inclination angle for recording the absorbed energy */
@@ -154,16 +154,19 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
       if (itype == PTYPE_DISK)
       {
-        vdisk (pp.x, v);
-        doppler (p, &pp, v, -1);
+//OLD        vdisk (pp.x, v);
+//OLD        doppler (p, &pp, v, -1);
+        doppler (p, &pp, -1);
 
       }
       if (itype == PTYPE_WIND)
       {                         /* If the photon was scattered in the wind, 
                                    the frequency also must be shifted */
-        ndom = wmain[p->grid].ndom;
-        vwind_xyz (ndom, &pp, v);       /*  Get the velocity at the position of pp */
-        doppler (p, &pp, v, pp.nres);   /*  Doppler shift the photon -- test! */
+//OLD        ndom = wmain[p->grid].ndom;
+//OLD        vwind_xyz (ndom, &pp, v);       /*  Get the velocity at the position of pp */
+//OLD        doppler (p, &pp, v, pp.nres);   /*  Doppler shift the photon -- test! */
+
+        doppler (p, &pp, pp.nres);      /*  Doppler shift the photon -- test! */
 
 /*  Doppler shift the photon (as nonresonant scatter) to new direction */
 
@@ -171,7 +174,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
       if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
       {
-        save_extract_photons (n, p, &pp, v);
+        save_extract_photons (n, p, &pp);
       }
 
 /* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait

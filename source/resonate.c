@@ -948,7 +948,7 @@ scatter (p, nres, nnscat)
      int *nres;
      int *nnscat;
 {
-  double v[3];
+//OLd  double v[3];
   double z_prime[3];
   int which_out;
   struct photon pold, phot_dummy;
@@ -1252,11 +1252,13 @@ scatter (p, nres, nnscat)
 
 //OLD (We already calculated this)  vwind_xyz (ndom, p, v);       /* Get the velocity vector for the wind */
 
-  vwind_xyz (ndom, p, v);       //XFRAME had to put this in until doppler is understood
+//OLD  vwind_xyz (ndom, p, v);       //XFRAME had to put this in until doppler is understood
+//OLD  if (*nres != -1)              //Only do this if its not an electron scatter, otherwise we have already dealt with this
+//OLD    doppler (&pold, p, v, *nres);
+
+
   if (*nres != -1)              //Only do this if its not an electron scatter, otherwise we have already dealt with this
-    doppler (&pold, p, v, *nres);
-
-
+    doppler (&pold, p, *nres);
 
 /*Now calculate the momentum transfer.  What follows appears to be
 correct only if there was no energy absorbed at the scattering site.
