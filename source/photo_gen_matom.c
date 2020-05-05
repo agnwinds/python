@@ -660,7 +660,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     ndom = wmain[icell].ndom;
     vwind_xyz (ndom, &p[n], v);
-    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);  //XFRAME
+    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;
@@ -844,7 +844,7 @@ photo_gen_matom (p, weight, photstart, nphot)
 
     ndom = wmain[icell].ndom;
     vwind_xyz (ndom, &p[n], v);
-    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);  //XFRAME
+    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;

@@ -181,7 +181,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * then the photon frequency will be less. */
 
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);  //XFRAME
+  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
   freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
   dfreq = freq_outer - freq_inner;
 
@@ -228,7 +228,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /*Compute the angle averaged electron scattering cross section.  Note the es is always
      treated as a scattering event. */
 
-  kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill; //XFRAME In principle, lines like this need a transformation: kappa transforms
+  kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;   //XFRAME In principle, lines like this need a transformation: kappa transforms
 
 /* If in macro-atom mode, calculate the bf and ff opacities, becuase in macro-atom mode
  * everthing including bf is calculated as a scattering process.  The routine
@@ -294,7 +294,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * the photon to scatter.  The variable threshold is used for this. */
 
         *nres = select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma);
-           //XFRAME This call will depend on kap_cont, kap_es being consistently in the same frame
+        //XFRAME This call will depend on kap_cont, kap_es being consistently in the same frame
         *istat = P_SCAT;        //flag as scattering
         ds_current += (tau_scat - ttau) / (kap_cont);   //distance travelled
         ttau = tau_scat;
@@ -306,7 +306,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 /* increment tau by the continuum optical depth to this point */
         ttau += kap_cont * (ds - ds_current);
-           //XFRAME could also transform kap_cont here instead of above
+        //XFRAME could also transform kap_cont here instead of above
 
 
         ds_current = ds;        /* At this point ds_current is exactly the position of the resonance */
@@ -340,7 +340,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
           tau_sobolev = sobolev (one, p->x, dd, lin_ptr[nn], dvds);
-             //XFRAME I think tau_sobolev is invariant, but will depend on all the ingredients being in the same frame
+          //XFRAME I think tau_sobolev is invariant, but will depend on all the ingredients being in the same frame
 
 /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator calculation. SS March 2004 */
 
@@ -387,7 +387,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
                 bb_simple_heat (xplasma2, p, tau_sobolev, dvds, nn);
                 //XFRAME ultimately need to consider transformaions in estimators (?)
-                    
+
               }
             }
           }
@@ -529,7 +529,7 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   int ncont;
 
   //XFRAME think this works provided that all the incoming kappas are in the same frame. shouldn't matter which frame though really - i.e. just consistency
-     
+
   threshold = random_number (0.0, 1.0) * (kap_cont);
 
 
@@ -984,6 +984,7 @@ doppler (pin, pout, v, nres)
   return (0);
 
 }
+
 //XFRAME - end of doppler routine which needs to be updated
 
 
@@ -1088,7 +1089,7 @@ scatter (p, nres, nnscat)
       /* It's a bb line - we can go straight to macro_gov since we know that
          we don't want a k-packet immediately. macro_gov now makes the decision
          regarding the treament (simple or full macro). */
-          //XFRAME may need to check, but I believe all the macro atom (including macro gov) should already be formulated in the cmf: i.e. provided that the photon was transformed to the cmf before this call (see above) then nothing should be needed here before going in - need to consider reverse transfer when coming back out though (likely in macro_gov?)
+      //XFRAME may need to check, but I believe all the macro atom (including macro gov) should already be formulated in the cmf: i.e. provided that the photon was transformed to the cmf before this call (see above) then nothing should be needed here before going in - need to consider reverse transfer when coming back out though (likely in macro_gov?)
       macro_gov (p, nres, 1, &which_out);
     }
 
@@ -1269,9 +1270,9 @@ scatter (p, nres, nnscat)
       macro_gov (p, nres, 2, &which_out);       //ff always make a k-packet
     }
   }
- //XFRAME need to look at what's happening at the end of macro_gov - likely need a transform there to get back to observer frame: probably currently does Doppler effect but that's all?
+  //XFRAME need to look at what's happening at the end of macro_gov - likely need a transform there to get back to observer frame: probably currently does Doppler effect but that's all?
 
-     
+
   /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
 
   /* Set nres  correctly for the call to randvec */
