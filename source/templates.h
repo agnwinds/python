@@ -130,7 +130,7 @@ double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
-int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
+int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* setup_files.c */
 int init_log_and_windsave(int restart_stat);
@@ -463,7 +463,6 @@ int get_bl_and_agn_params(double lstar);
 /* setup_domains.c */
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
-void check_domain_boundaries(int ndom);
 int setup_windcone(void);
 /* setup_disk.c */
 double get_disk_params(void);
@@ -485,8 +484,8 @@ int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
 /* import.c */
-int import_set_wind_boundaries (int ndom);
 int import_wind(int ndom);
+int import_set_wind_boundaries(int ndom);
 int import_make_grid(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
 double import_rho(int ndom, double *x);

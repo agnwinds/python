@@ -209,7 +209,7 @@ main (argc, argv)
   fptr5 = fopen ("py_pcon_data.dat", "w");
 
   fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
-  fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_UV_x F_UV_y F_UV_z F_Xray_x F_Xray_y F_Xray_z rad_f_w rad_f_phi rad_f_z bf_f_w bf_f_phi bf_f_z\n");   //directional flux by band
+  fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x _es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n"); //directional flux by band
 
   fprintf (fptr3, "nions %i\n", nions);
   for (i = 0; i < nions; i++)
@@ -268,15 +268,17 @@ main (argc, argv)
       fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol); //output geometric things
       fprintf (fptr2, "%e ", plasmamain[nplasma].rho);  //density
       fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2]);   //directional flux by band
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2]);      //directional flux by band
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2]);        //directional flux by band
+      fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2], plasmamain[nplasma].F_vis[3]);  //directional flux by band
+      fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2], plasmamain[nplasma].F_UV[3]);      //directional flux by band
+      fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2], plasmamain[nplasma].F_Xray[3]);      //directional flux by band
       fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);      //electron scattering radiation force in the w(x) direction
       fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[1]);      //electron scattering radiation force in the phi(rotational) directionz direction
       fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[2]);      //electron scattering radiation force in the z direction
+      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[3]);      //sum of magnitude of electron scattering radiation force
       fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[0]);      //bound free scattering radiation force in the w(x) direction
       fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[1]);      //bound free scattering radiation force in the phi(rotational) direction
-      fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf[2]);    //bound free scattering radiation force in the z direction
+      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[2]);      //bound free scattering radiation force in the z direction
+      fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf[3]);    //sum of magnitude of bound free scattering radiation force 
       fprintf (fptr3, "%d %d ", i, j);  //output geometric things               
       for (ii = 0; ii < nions; ii++)
         fprintf (fptr3, "%e ", plasmamain[nplasma].density[ii]);

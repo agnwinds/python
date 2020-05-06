@@ -524,14 +524,12 @@ wind_check (www, n)
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
-    printf ("BOOM domain %i has coord type %i\n", ndom, zdom[ndom].coord_type);
     ndim = zdom[ndom].ndim;
     mdim = zdom[ndom].mdim;
     if (zdom[ndom].coord_type == RTHETA)
     {
       drmin = 1e99;
       dtmin = 1e99;
-      printf ("BOOM domain %i is RTHETA\n", ndom);
       for (i = 0; i < ndim; i++)
       {
         for (j = 0; j < mdim; j++)
@@ -557,7 +555,6 @@ wind_check (www, n)
     {
       dxmin = 1e99;
       dzmin = 1e99;
-      printf ("BOOM domain %i is CYLIND\n", ndom);
       for (i = 0; i < ndim; i++)
       {
         for (j = 0; j < mdim; j++)
@@ -582,7 +579,6 @@ wind_check (www, n)
     else if (zdom[ndom].coord_type == SPHERICAL)
     {
       drmin = 1e99;
-      printf ("BOOM domain %i is SPHERICAL ndmin=%i mdim=%i\n", ndom, ndim, mdim);
       for (i = 0; i < ndim; i++)
       {
         if (wmain[i].vol > 0.0)
