@@ -59,8 +59,10 @@ observer_to_local_frame (p_in, p_out)
   WindPtr one;
   int ndom;
   double f;
+  double x;
   double v[3], vel;
   double gamma;
+  int i;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -81,8 +83,19 @@ observer_to_local_frame (p_in, p_out)
 
 
   // beta=length(v)/VLIGHT;
+
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+
   f = p_out->freq = p_in->freq * gamma * (1. - vel / VLIGHT);
+
+  x = gamma * (VLIGHT - (gamma * vel / (gamma + 1)));
+
+  for (i = 0; i < 3; i++)
+  {
+    p_out->lmn[i] = f / p_in->freq * (p_in->lmn[i] - x * v[i]);
+  }
+
+  p_out->w *= (f / p_in->freq);
 
   return (f);
 }
@@ -91,8 +104,8 @@ observer_to_local_frame (p_in, p_out)
 
 /**********************************************************/
 /**
- * @brief      carries out the transformation of a all the quantities
- *      in a photon structure
+ * @brief      carries out the transformation of all the quantities
+ *      in a photon structure 
  *      from the local (or co-moving) frame to the observer (or global)
  *      frame
  *
@@ -125,8 +138,10 @@ local_to_observer_frame (p_in, p_out)
   WindPtr one;
   int ndom;
   double f;
+  double x;
   double v[3], vel;
   double gamma;
+  int i;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -144,6 +159,17 @@ local_to_observer_frame (p_in, p_out)
   }
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
   f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
+
+
+/* Need to worry about sign changes, etc. here */
+  x = gamma * (VLIGHT + (gamma * vel / (gamma + 1)));
+
+  for (i = 0; i < 3; i++)
+  {
+    p_out->lmn[i] = f / p_in->freq * (p_in->lmn[i] + x * v[i]);
+  }
+
+  p_out->w *= (f / p_in->freq);
 
   return (f);
 }
@@ -186,8 +212,10 @@ local_to_observer_frame_disk (p_in, p_out)
      PhotPtr p_in, p_out;
 {
   double f;
+  double x;
   double v[3], vel;
   double gamma;
+  int i;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -206,6 +234,17 @@ local_to_observer_frame_disk (p_in, p_out)
 
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
   f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
+
+/* Need to worry about sign changes, etc. here */
+  x = gamma * (VLIGHT + (gamma * vel / (gamma + 1)));
+
+  for (i = 0; i < 3; i++)
+  {
+    p_out->lmn[i] = f / p_in->freq * (p_in->lmn[i] + x * v[i]);
+  }
+
+  p_out->w *= (f / p_in->freq);
+
 
   return (f);
 }
@@ -231,7 +270,9 @@ local_to_observer_frame_disk (p_in, p_out)
  * or a nonresonant scatter.
  *
  * ### Notes ###
- * Called from scatter
+ * Called from scatter in resonate.c for a resonant transition  
+ * and in extract for disk or wind photons, because you need to 
+ * direct photons along a specific line of sight.  
  *
  **********************************************************/
 
