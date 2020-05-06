@@ -149,6 +149,12 @@ parse_command_line (argc, argv)
         Log ("Enabling advanced/diagnostic inputs (@ commands)\n");
         j = i;
       }
+      else if (strcmp (argv[i], "-v/c") == 0)
+      {
+        geo.rel_mode = REL_MODE_LINEAR;
+        Log ("Using only v/c corrections for Doppler shifts, etc.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;

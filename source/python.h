@@ -476,6 +476,11 @@ struct geometry
 
   int rt_mode;                  /* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
 
+#define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
+#define REL_MODE_FULL   1      /*Make full corrections for special relativity*/
+
+  int rel_mode;                 /* How doppler effects are treated */
+
   /* Define the choices for calculating the FB, see, e.g. integ_fb */
 
 #define FB_FULL         0       /* Calculate fb emissivity including energy associated with the threshold */

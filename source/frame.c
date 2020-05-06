@@ -60,6 +60,7 @@ observer_to_local_frame (p_in, p_out)
   int ndom;
   double f;
   double v[3], vel;
+  double gamma;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -70,7 +71,18 @@ observer_to_local_frame (p_in, p_out)
   vwind_xyz (ndom, p_in, v);
 
   vel = dot (p_in->lmn, v);
-  f = p_out->freq = p_in->freq * (1. - vel / VLIGHT);
+
+  if (geo.rel_mode == REL_MODE_LINEAR)
+  {
+    f = p_out->freq = p_in->freq * (1. - vel / VLIGHT);
+    return (f);
+  }
+
+
+
+  // beta=length(v)/VLIGHT;
+  gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+  f = p_out->freq = p_in->freq * gamma * (1. - vel / VLIGHT);
 
   return (f);
 }
@@ -114,6 +126,7 @@ local_to_observer_frame (p_in, p_out)
   int ndom;
   double f;
   double v[3], vel;
+  double gamma;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -124,7 +137,13 @@ local_to_observer_frame (p_in, p_out)
   vwind_xyz (ndom, p_in, v);
 
   vel = dot (p_in->lmn, v);
-  f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+  if (geo.rel_mode == REL_MODE_LINEAR)
+  {
+    f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+    return (f);
+  }
+  gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+  f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
 
   return (f);
 }
@@ -168,6 +187,7 @@ local_to_observer_frame_disk (p_in, p_out)
 {
   double f;
   double v[3], vel;
+  double gamma;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -178,7 +198,14 @@ local_to_observer_frame_disk (p_in, p_out)
   vel = dot (p_in->lmn, v);
 
 
-  f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+  if (geo.rel_mode == REL_MODE_LINEAR)
+  {
+    f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+    return (f);
+  }
+
+  gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+  f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
 
   return (f);
 }
