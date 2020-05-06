@@ -54,7 +54,7 @@ communicate_estimators_para ()
   /* The size of the helper array for doubles. We transmit 10 numbers 
      for each cell, plus three arrays, each of length NXBANDS */
 
-  plasma_double_helpers = (33 + 3 * NXBANDS) * NPLASMA;
+  plasma_double_helpers = (38 + 3 * NXBANDS) * NPLASMA;
 
   /* The size of the helper array for integers. We transmit 7 numbers 
      for each cell, plus one array of length NXBANDS */
