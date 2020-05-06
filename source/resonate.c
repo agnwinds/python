@@ -105,6 +105,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   PlasmaPtr xplasma, xplasma2;
   int ndom;
   double normal[3];
+  struct photon phot_dummy;
 
   one = &w[p->grid];            //pointer to the cell where the photon bundle is located.
 
@@ -153,7 +154,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /* Check to see that the velocity is monotonic across the cell
    * by calculating the velocity at the midpoint of the path
    *
-   * If it is not monitocinc, then reduce smax
+   * If it is not monitonic, then reduce smax
    */
   vc = VLIGHT;
   while (vc > VCHECK && smax > DFUDGE)
@@ -181,8 +182,17 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * then the photon frequency will be less. */
 
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
+//OLD  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
+//OLD  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
+/* ksl 2005 - In other parts of the code, we have been able to eliminate 
+   calculating the velocities in situations where we call new routines like
+   observer_to_local frame, as is done below, but we cannot do this in this
+   case because the velocities are used to decide whether the photon has 
+   gone so far that the direction of the velocity is reversed. 
+ */
+
+  freq_inner = observer_to_local_frame (p, &phot_dummy);
+  freq_outer = observer_to_local_frame (&phot, &phot_dummy);
   dfreq = freq_outer - freq_inner;
 
 
@@ -225,7 +235,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * are set by limit_lines()
  */
 
-  /*Compute the angle averaged electron scattering cross section.  Note the es is always
+  /*Compute the angle averaged electron scattering cross section.  Note electron scattering  is always
      treated as a scattering event. */
 
   kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;   //XFRAME In principle, lines like this need a transformation: kappa transforms

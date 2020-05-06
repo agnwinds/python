@@ -23,6 +23,35 @@
 #include "python.h"
 
 
+
+/**********************************************************/
+/**
+ * @brief      carries out the transformation of a all the quantities
+ *      in a photon structure
+ *      from the observer (or global) frame to the local (or co-moving)
+ *      frame
+ *
+ * @param [in] PhotPtr  p_in   The photon in the observer frame                   
+ * @param [out] PhotPtr  p_out   The photon in the local frame                  
+ *
+ * @return    The routine routines the frequency in the local frame
+ *
+ *
+ * @details
+ * The routine copies all of the quantities contain in the p_in to 
+ * p_out, obtains the velocity at that point in the wind, and then 
+ * performs an in place transformation from the * global to the local 
+ * frame of the photon allowing for special 
+ * relativity.
+ *
+ *
+ * ### Notes ###
+ *
+ * It p_in and p_out are the same then the transformation will
+ * be performed in place.
+ *
+ **********************************************************/
+
 double
 observer_to_local_frame (p_in, p_out)
      PhotPtr p_in, p_out;
@@ -48,6 +77,35 @@ observer_to_local_frame (p_in, p_out)
 
 
 
+/**********************************************************/
+/**
+ * @brief      carries out the transformation of a all the quantities
+ *      in a photon structure
+ *      from the local (or co-moving) frame to the observer (or global)
+ *      frame
+ *
+ * @param [in] PhotPtr  p_in   The photon in the local frame                   
+ * @param [out] PhotPtr  p_out   The photon in the global frame                  
+ *
+ * @return    The routine routines the frequency in the global frame
+ *
+ *
+ * @details
+ * The routine copies all of the quantities contain in the p_in to 
+ * p_out, obtains the velocity at that point in the wind, and then 
+ * performs an in place transformation from the local to the observer
+ * frame of the photon allowing for special 
+ * relativity.
+ *
+ *
+ * ### Notes ###
+ *
+ * It p_in and p_out are the same then the transformation will
+ * be performed in place.
+ *
+ **********************************************************/
+
+
 double
 local_to_observer_frame (p_in, p_out)
      PhotPtr p_in, p_out;
@@ -70,6 +128,39 @@ local_to_observer_frame (p_in, p_out)
 
   return (f);
 }
+
+
+
+/**********************************************************/
+/**
+ * @brief      carries out the transformation of a all the quantities
+ *      in a photon emitted from the surface of the disk
+ *      from the local (or co-moving) frame to the observer (or global)
+ *      frame
+ *
+ * @param [in] PhotPtr  p_in   The photon in the local frame                   
+ * @param [out] PhotPtr  p_out   The photon in the global frame                  
+ *
+ * @return    The routine routines the frequency in the global frame
+ *
+ *
+ * @details
+ * The routine copies all of the quantities contain in the p_in to 
+ * p_out, obtains the velocity at that point in the wind, and then 
+ * performs an in place transformation from the local to the observer
+ * frame of the photon allowing for special 
+ * relativity.
+ *
+ *
+ * ### Notes ###
+ *
+ * It p_in and p_out are the same then the transformation will
+ * be performed in place.  This is normally the way the 
+ * routine is used.   One could have omitted p_out in this case
+ * but to make the interface coisistent, both photon structures
+ * are included.  
+ *
+ **********************************************************/
 
 double
 local_to_observer_frame_disk (p_in, p_out)
@@ -95,7 +186,7 @@ local_to_observer_frame_disk (p_in, p_out)
 
 /**********************************************************/
 /**
- * @brief      calculate the  shift given the direction of the incoming
+ * @brief      calculate the doppler  shift given the direction of the incoming
  * 	and outgoing photons and the local  velocity of the wind
  *
  * @param [in] PhotPtr  pin   The pre-scattered  photon (used for its direction)
