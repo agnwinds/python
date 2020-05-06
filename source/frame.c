@@ -88,7 +88,7 @@ observer_to_local_frame (p_in, p_out)
 
   f = p_out->freq = p_in->freq * gamma * (1. - vel / VLIGHT);
 
-  x = gamma * (VLIGHT - (gamma * vel / (gamma + 1)));
+  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
 
   for (i = 0; i < 3; i++)
   {
@@ -162,7 +162,7 @@ local_to_observer_frame (p_in, p_out)
 
 
 /* Need to worry about sign changes, etc. here */
-  x = gamma * (VLIGHT + (gamma * vel / (gamma + 1)));
+  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
 
   for (i = 0; i < 3; i++)
   {
@@ -236,7 +236,7 @@ local_to_observer_frame_disk (p_in, p_out)
   f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
 
 /* Need to worry about sign changes, etc. here */
-  x = gamma * (VLIGHT + (gamma * vel / (gamma + 1)));
+  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
 
   for (i = 0; i < 3; i++)
   {
