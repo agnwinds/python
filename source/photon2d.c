@@ -789,15 +789,15 @@ walls (p, pold, normal)
       }
 
 
-      Log_silent ("ZZZZ 1 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1],
-                  pold->lmn[2]);
-      Log_silent ("ZZZZ 2 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+      Log ("ZZZZ 1 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1],
+           pold->lmn[2]);
+      Log ("ZZZZ 2 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
 
       stuff_phot (pold, p);
       move_phot (p, s - DFUDGE);
       /* This leaves the photon just outside the disk */
-      Log_silent ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-      Log_silent ("ZZZZ 4 %11.4e %11.4e %5d \n", s, DFUDGE, p->np);
+      Log ("ZZZZ 3 %11.4e %11.4e %11.4e %11.4e %11.4e %11.4e\n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+      Log ("ZZZZ 4 %11.4e %11.4e %5d \n", s, DFUDGE, p->np);
 
 
       /* Finally, we must calculate the normal to the disk at this point to be able to calculate the scattering direction */

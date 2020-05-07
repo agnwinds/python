@@ -284,6 +284,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   icell = 0;
   n = 0;                        /* Avoid 03 warning */
 
+
+  if (modes.save_photons)
+  {
+    save_photons (p, "Begin");
+  }
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
 
   while (istat == P_INWIND)
@@ -297,6 +302,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     pp.ds = 0;                  // EP 11-19: reinitialise for safety
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
+
+    if (modes.save_photons)
+    {
+      save_photons (&pp, "AfterTranslate");
+    }
 
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
        not yet eliminated it from translate. ?? 02jan ksl */
@@ -354,6 +364,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
          disk was heated by photons.
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position of the outer radius of the disk. */
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "HitDisk");
+      }
 
       rrr = sqrt (dot (pp.x, pp.x));
       kkk = 0;
