@@ -58,7 +58,6 @@ dvwind_ds (p)
   int ndom;
 
   ndom = wmain[p->grid].ndom;
-  printf ("at dvwind %e %e %e\n", p->x[0], p->x[1], p->x[2]);
 
   /* We want the change in velocity along the line of sight, but we
      need to be careful because of the fact that we have elected to

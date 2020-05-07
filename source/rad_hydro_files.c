@@ -330,9 +330,9 @@ main (argc, argv)
       {
         if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
         {
-          fhat[0] = sqrt (plasmamain[nplasma].F_vis[0]);
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_vis));
           fhat[1] = 0.0;
-          fhat[2] = sqrt (plasmamain[nplasma].F_vis[0]);
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_vis));
         }
         else
         {
@@ -351,9 +351,9 @@ main (argc, argv)
       {
         if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
         {
-          fhat[0] = sqrt (plasmamain[nplasma].F_UV[0]);
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_UV));
           fhat[1] = 0.0;
-          fhat[2] = sqrt (plasmamain[nplasma].F_UV[0]);
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_UV));
         }
         else
         {
@@ -372,9 +372,9 @@ main (argc, argv)
       {
         if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
         {
-          fhat[0] = sqrt (plasmamain[nplasma].F_Xray[0]);
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_Xray));
           fhat[1] = 0.0;
-          fhat[2] = sqrt (plasmamain[nplasma].F_Xray[0]);
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_Xray));
         }
         else
         {
