@@ -58,7 +58,7 @@ dvwind_ds (p)
   int ndom;
 
   ndom = wmain[p->grid].ndom;
-
+  printf ("at dvwind %e %e %e\n", p->x[0], p->x[1], p->x[2]);
 
   /* We want the change in velocity along the line of sight, but we
      need to be careful because of the fact that we have elected to
@@ -86,11 +86,9 @@ dvwind_ds (p)
     struct photon pnew;
     double v1[3], v2[3], diff[3];
     double ds;
-
     /* choose a small distance which is dependent on the cell size */
     vsub (pp.x, wmain[pp.grid].x, diff);
     ds = 0.001 * length (diff);
-
     /* calculate the velocity at the position of the photon */
     /* note we use model velocity, which could potentially be slow,
        but avoids interpolating (see #118) */
