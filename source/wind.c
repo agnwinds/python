@@ -586,7 +586,7 @@ wind_check (www, n)
         if (wmain[i].vol > 0.0)
         {
           drmin = fabs (wmain[i + 1].r - wmain[i].r);
-          if (drmin < delta || dtmin < delta)
+          if (drmin < delta)
           {
             Error ("wind_check: DFUDGE may be large in cell %d (%.1e)\n", i, drmin);
           }
