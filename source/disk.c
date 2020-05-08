@@ -351,15 +351,20 @@ struct plane diskplane, disktop, diskbottom;
  *
  * The z-height of a vertically extended disk is defined by
  * zdisk.  The outside edge of the disk is assumed to be
- * a cylinder at geo.diskrad
+ * a cylinder at geo.diskrad.  The routine does not say which
+ * surface of the disk has been hit (although for vertically
+ * extended disks this might be a good idea).
  *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
  * on the distance between the current position and footpoint
  * along a streamline (and these streamlines are defined in the
- * outgoing direction.
+ * outgoing direction).
  *
- *
+ * If the position of the photon is on the disk the routine returns
+ * 0 and it is up to the calling routine to interpret what to do
+ * in this situation.  For very large distances one may need to worry
+ * about round off errors if moving a photon to the disk position.
  **********************************************************/
 
 double
@@ -505,7 +510,7 @@ ds_to_disk (p, allow_negative)
   delta = fabs (fabs (p->x[2]) - zdisk (r_phot));
   if ((r_phot < geo.diskrad) && (delta < 1.0))
   {
-    Log_silent ("ZZXX photon %d at disk boundary already: %e \n", p->np, delta);
+//OLD    Log_silent ("ZZXX photon %d at disk boundary already: %e \n", p->np, delta);
     return (0);
   }
 
@@ -547,8 +552,8 @@ ds_to_disk (p, allow_negative)
        */
 
       location = 0;
-      Log_silent ("ZZXX  a %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-      Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
+//OLD      Log_silent ("ZZXX  a %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+//OLD      Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
 
 
       /* We certainly do not need to go further than
@@ -568,7 +573,7 @@ ds_to_disk (p, allow_negative)
       else
       {
         smax = 2 * geo.diskrad; /* this is a cheat */
-        Log ("ZZXX - Cheat %d\n", p->np);
+//OLD        Log ("ZZXX - Cheat %d\n", p->np);
       }
 
       /* For the minimum, we need to either to be inside the
@@ -598,8 +603,8 @@ ds_to_disk (p, allow_negative)
           smin = s_cyl;
         }
       }
-      Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
-      Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
+//OLD      Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
+//OLD      Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
     }
 
   }
@@ -615,8 +620,8 @@ ds_to_disk (p, allow_negative)
      * forward, but if you are moving towards the plane you want to go backwards
      */
 
-    Log_silent ("ZZXX  b %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-    Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
+//OLD    Log_silent ("ZZXX  b %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+//OLD    Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
 
     if (p->x[2] * p->lmn[2] > 0)
     {
@@ -675,13 +680,13 @@ ds_to_disk (p, allow_negative)
       }
     }
 
-    Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
-    Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
+//OLD    Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
+//OLD    Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
 
   }
 
   /* So now we should have smin and smax for all cases and we can calculate the
-     intersection with the disk,\
+     intersection with the disk.
    */
 
 
@@ -713,16 +718,16 @@ ds_to_disk (p, allow_negative)
   if ((smax - smin) > 0.)
   {
     s = zero_find (disk_height, 0.0, smax - smin, 1e-8);
-    Log_silent ("ZZXX Normally we expect this  smin %e < %e s_disk %e\n", smin, smax, s_disk);
+//OLD    Log_silent ("ZZXX Normally we expect this  smin %e < %e s_disk %e\n", smin, smax, s_disk);
   }
   else
   {
     s = zero_find (disk_height, smax - smin, 0.0, 1e-8);
-    Log_silent ("ZZXX This seems unusual       smin %e > smax %e s_disk%e\n", smin, smax, s_disk);
+//OLD    Log_silent ("ZZXX This seems unusual       smin %e > smax %e s_disk%e\n", smin, smax, s_disk);
   }
 
-  Log_silent ("ZZXX  %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-  Log_silent ("ZZXX  %d  %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot, zdisk (r_phot));
+//OLD  Log_silent ("ZZXX  %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+//OLD  Log_silent ("ZZXX  %d  %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot, zdisk (r_phot));
   if (s == smin || s == smax)
   {
     Log ("ZZXX Time to worry, at limit for %d %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot,
