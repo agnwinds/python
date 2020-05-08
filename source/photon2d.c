@@ -710,7 +710,8 @@ double xsouth[] = {
  * othewise changed it.
  *
  * The routine also calculates the normal to the surface that was hit, which is intended to
- * be used by trans_phot to redirect the photon.
+ * be used by trans_phot to redirect the photon (if it has hit the disk or the star and is to
+ * be scattered at that surface).
  *
  * ### Notes ###
  *
@@ -763,7 +764,14 @@ walls (p, pold, normal)
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     z = zdisk (rho);
     s = ds_to_disk (pold, 0);   /* The 0 imples that s cannot be negative */
-    if ((rho < geo.diskrad && fabs (p->x[2]) <= z) || p->ds > s)
+    if (s == 0 && p->x[2] * p->lmn[2] > 0)
+    {
+      /* The is the case where pold was at the disk surface and the proposed
+       * photon p is moving away from the disk surface
+       */
+      ;                         // Do nothing in this case
+    }
+    else if ((rho < geo.diskrad && fabs (p->x[2]) <= z) || p->ds > s)
     {
       /* This is the case where the proposed position is inside the disk  
        * or we have hit the disk along the path
