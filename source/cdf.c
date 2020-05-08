@@ -89,7 +89,7 @@ double *pdf_array;
 int
 cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
      CdfPtr cdf;
-     double (*func) (double);
+     double (*func) (double, void *);
      double xmin, xmax;
      double jump[];
      int njumps;
@@ -266,7 +266,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 
 double
 gen_array_from_func (func, xmin, xmax, pdfsteps)
-     double (*func) (double);
+     double (*func) (double, void *);
      double xmin, xmax;
      int pdfsteps;
 {
@@ -305,7 +305,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
     x = xmin + (n + 0.5) * xstep;       /*The next value of x - it is midway between points on the required cdf because we
                                            will be adding the new z value onto the cumlative total, we assume the function is best approximated over the
                                            whole rage from x[n] to x[n+1] by using the value of the function between the two */
-    if ((z = (*func) (x)) < 0 || z > VERY_BIG || sane_check (z))        //check the function return is sensible
+    if ((z = (*func) (x, NULL)) < 0 || z > VERY_BIG || sane_check (z))        //check the function return is sensible
     {
       Error ("pdf_gen_from_func: probability density %g < 0 at %g\n", z, x);
     }
@@ -320,7 +320,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
       Log ("pdf_gen_from_func: ZOWIE  n %d z %g pdf_array[n] %g x %g\n", n, z, pdf_array[n], x);
       for (m = 0; m < n; m += 100)
       {
-        z = (*func) (x);
+        z = (*func) (x, NULL);
         Log ("pdf_gen_from_func: zowie n %d x %g z %g pdf_array %g\n", m, x = xmin + (0.5 * m) * xstep, z, pdf_array[m]);
       }
     }

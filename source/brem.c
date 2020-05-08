@@ -72,10 +72,10 @@ integ_brem (double freq, void *params)
  **********************************************************/
 
 double
-brem_d (alpha)
-     double alpha;
+brem_d (double alpha, void *vparam)
 {
   double answer;
+  (void) vparam;
   answer = pow (alpha, geo.brem_alpha) * exp (-1.0 * alpha);
   return (answer);
 }
