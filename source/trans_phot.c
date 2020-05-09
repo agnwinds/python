@@ -559,9 +559,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      /* OK we are ready to continue the processing of a photon which has scattered.
-       * The next steps reinitialize parameters
-       so that the photon can continue throug the wind */
+      /* OK we have completed extract, if that had to be done, and need to 
+       * reinitialize parameters for the scattered photon so it can 
+       * can continue throug the wind */
 
       tau_scat = -log (1. - random_number (0.0, 1.0));
       istat = pp.istat = P_INWIND;
@@ -569,6 +569,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       stuff_phot (&pp, &pp_reposition_test);
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
+
+      /* reposition is a NOP for non-resonant scatters but nudges the photon forward for resonant scatters */
 
       reposition (&pp);
 
