@@ -162,6 +162,15 @@ walls (p, pold, normal)
      * we are inside the maximum radius of the disk and then lookng
      * comparing the z position of z to the height of the disk at
      * that point*/
+    rho = sqrt (pold->x[0] * pold->x[0] + pold->x[1] * pold->x[1]);
+    z = zdisk (rho);
+    if (z - fabs (pold->x[2]) > 1 && rho < geo.diskrad)
+    {
+      Error ("walls: %d The previous position %11.4e %11.4e %11.4e is inside the disk by %e\n", pold->np, pold->x[0], pold->x[1],
+             pold->x[2], z - fabs (pold->x[2]));
+
+    }
+
 
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     z = zdisk (rho);
@@ -194,8 +203,12 @@ walls (p, pold, normal)
 
       if (s_disk <= -1)         // -1 allows  for very small errors in the calculation of the distance to the disk
       {
-        Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk, correcting by  %11.4e \n",
-               pold->np, pold->x[0], pold->x[1], pold->x[2], s_disk);
+        Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk by %10.4e, correcting by  %11.4e \n",
+               pold->np, pold->x[0], pold->x[1], pold->x[2], z - fabs (pold->x[2]), s_disk);
+        if (modes.save_photons)
+        {
+          save_photons (pold, "DiskP");
+        }
       }
       else if (s_disk == VERY_BIG)
       {
