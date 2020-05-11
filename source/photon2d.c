@@ -100,7 +100,7 @@ translate (w, pp, tau_scat, tau, nres)
   }
   else
   {
-    istat = pp->istat = -1;     /* It's not in the wind and it's not in the grid.  Bummer! */
+    istat = pp->istat = P_ERROR;        /* It's not in the wind and it's not in the grid.  Bummer! */
     Error ("translate: Found photon that was not in wind or grid, istat %i\n", where_in_wind (pp->x, &ndomain));
   }
 

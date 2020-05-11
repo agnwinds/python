@@ -30,7 +30,7 @@ int sv_zero_r_ndom;
  *
  *  Gets mdot for this wind component, initialize the parameters needed to define a SV wind, and then request those
  *  parameters as inputs.   Calculate the normalization factor needed to convert the global mass loss rate to the
- *  mass loss rate per unite area.
+ *  mass loss rate per unit area.
  *
  * ###Notes###
  *
@@ -121,7 +121,6 @@ get_sv_wind_params (ndom)
 
   sdom = ndom;
 
-//  zdom[ndom].mdot_norm = qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
   zdom[ndom].mdot_norm = num_int (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
 
   return (0);
@@ -175,12 +174,12 @@ sv_velocity (x, v, ndom)
     ptest.x[0] = rzero;         // Define ptest to be the footpoint extended to xy plane
     ptest.x[1] = 0.0;
     ptest.x[2] = EPSILON;
-    ptest.lmn[0] = sin (theta); // 56d -- ptest direction is along stream line
+    ptest.lmn[0] = sin (theta); // ptest direction is along the stream line
     ptest.lmn[1] = 0.0;
     ptest.lmn[2] = cos (theta);
     s = ds_to_disk (&ptest, 1);
     move_phot (&ptest, s);      // Now move the test photon to  disk surface
-    vsub (ptest.x, xtest, xtest);       // Poloidal distance is just the distance beteen these two points.
+    vsub (ptest.x, xtest, xtest);       // Poloidal distance is just the distance between these two points.
     ldist = length (x);
   }
 

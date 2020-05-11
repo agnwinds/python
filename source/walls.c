@@ -161,7 +161,12 @@ walls (p, pold, normal)
     /* For a vertically extended disk these means checking whether
      * we are inside the maximum radius of the disk and then lookng
      * comparing the z position of z to the height of the disk at
-     * that point*/
+     * that point
+     *
+     * What we want to know is whether one hits the disk along
+     * the line of sight between pold and p.  
+     */
+
     rho = sqrt (pold->x[0] * pold->x[0] + pold->x[1] * pold->x[1]);
     z = zdisk (rho);
     if (z - fabs (pold->x[2]) > 1 && rho < geo.diskrad)
@@ -171,57 +176,38 @@ walls (p, pold, normal)
 
     }
 
+    if (pold->lmn[0] != p->lmn[0])
+    {
+      Error ("The assumption is that p and pold are travelling along the same line of sight\n");
+    }
+
+
+    /* Check if the new position (p) is inside the disk */
+
 
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     z = zdisk (rho);
+
+    if (rho < geo.diskrad && fabs (p->x[2]) <= z)
+    {
+      /* This is the case where the proposed photon is within the disk */
+
+      p->istat = P_HIT_DISK;
+    }
+
     s_disk = ds_to_disk (pold, 0);      /* The 0 imples that s cannot be negative */
 
-    if (s_disk == 0 && p->x[2] * p->lmn[2] > 0)
+    if (s_disk > 0 && p->ds > s_disk)
     {
-      /* The is the case where pold was at the disk surface and the proposed
-       * photon p is moving away from the disk surface
+      /* This is the case where the photon hits the disk along 
+         the line of sight between pold and p
        */
-
-
-      stuff_phot (pold, &phit);
-      move_phot (&phit, 10);    // Move the photon by 10 cm
-      s_disk = ds_to_disk (&phit, 0);   // Find the next boundary
-      s_disk += 10;
+      p->istat = P_HIT_DISK;
     }
-    /* So now we should have accounted for the case where p_old started 
-     * out in the disk
-     */
 
-    if ((rho < geo.diskrad && fabs (p->x[2]) <= z) || p->ds > s_disk)
+
+    if (p->istat == P_HIT_DISK)
     {
-      /* This is the case where the proposed position is inside the disk  
-       * or we have hit the disk along the path
-       * 
-       * 0 here means to return VERY_BIG if one has missed the disk, something
-       * that should not happen
-       */
-
-      if (s_disk <= -1)         // -1 allows  for very small errors in the calculation of the distance to the disk
-      {
-        Error ("walls: %d The previous position %11.4e %11.4e %11.4e was inside the disk by %10.4e, correcting by  %11.4e \n",
-               pold->np, pold->x[0], pold->x[1], pold->x[2], z - fabs (pold->x[2]), s_disk);
-        if (modes.save_photons)
-        {
-          save_photons (pold, "DiskP");
-        }
-      }
-      else if (s_disk == VERY_BIG)
-      {
-        Error ("walls: %d Should not miss disk at this position %11.4e %11.4e %11.4e (%11.4e/%11.4e %11.4e/%11.4e %11.4e) \n",
-               pold->np, pold->x[0], pold->x[1], pold->x[2], rho, geo.diskrad, fabs (p->x[2]), z, ds_to_disk (pold, 1));
-
-        if (modes.save_photons)
-        {
-          save_photons (pold, "Disk");
-        }
-
-      }
-
 
 
       stuff_phot (pold, p);
