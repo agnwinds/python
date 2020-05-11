@@ -89,7 +89,7 @@ walls (p, pold, normal)
   double xxx[3];
   double s_disk, s_star, z;
   double theta, phi;
-  struct photon phit;
+//OLD  struct photon phit;
 
   /* Check to see if the photon has hit the star. If so
    * put the photon at the star surface and use that position
