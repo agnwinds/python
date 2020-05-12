@@ -40,7 +40,6 @@ int phot_status(void);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
 int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
-double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
 int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
 int phot_gen_sum(char filename[], char mode[]);
 double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_final, double *f);
@@ -212,9 +211,6 @@ double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative);
 double disk_height(double s, void *params);
-int qdisk_init(void);
-int qdisk_save(char *diskfile, double ztot);
-int read_non_standard_disk_profile(char *tprofile);
 /* lines.c */
 double total_line_emission(WindPtr one, double f1, double f2);
 double lum_lines(WindPtr one, int nmin, int nmax);
@@ -436,6 +432,11 @@ double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
 /* matom_diag.c */
 int matom_emiss_report(void);
+/* disk_init.c */
+double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
+int qdisk_init(double rmin, double rmax, double m, double mdot);
+int qdisk_save(char *diskfile, double ztot);
+int read_non_standard_disk_profile(char *tprofile);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double q_ioniz_dere(int nion, double t_e);
@@ -463,7 +464,6 @@ int get_bl_and_agn_params(double lstar);
 /* setup_domains.c */
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
-void check_domain_boundaries(int ndom);
 int setup_windcone(void);
 /* setup_disk.c */
 double get_disk_params(void);
@@ -485,8 +485,8 @@ int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
 /* import.c */
-int import_set_wind_boundaries (int ndom);
 int import_wind(int ndom);
+int import_set_wind_boundaries(int ndom);
 int import_make_grid(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
 double import_rho(int ndom, double *x);

@@ -282,22 +282,31 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   istat = P_INWIND;
   tau = 0;
   icell = 0;
-
   n = 0;                        /* Avoid 03 warning */
 
+
+  if (modes.save_photons)
+  {
+    save_photons (p, "Begin");
+  }
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
 
   while (istat == P_INWIND)
   {
 
-    /* translate involves only a single shell (or alternatively a single tranfer in the windless region). istat as returned by
-       should either be 0 in which case the photon hit the other side of the shell without scattering or 1 in which case there
-       was a scattering event in the shell, 2 in which case the photon reached the outside edge of the grid and escaped, 3 in
-       which case it reach the inner edge and was reabsorbed. If the photon escapes then we leave the photon at the position
+    /* The call to translate below involves only a single cell (or alternatively a single tranfer in the windless region). istat as returned by
+       should either be P_INWIND in which case the photon hit the other side of the cell without scattering or P_SCAT in which case there
+       was a scattering event in the shell, P_ESCAPE in which case the photon reached the outside edge of the grid and escaped, P_STAR in
+       which case it reach the inner central object, etc. If the photon escapes then we leave the photon at the position
        of it's last scatter.  In most other cases though we store the final position of the photon. */
 
     pp.ds = 0;                  // EP 11-19: reinitialise for safety
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
+
+    if (modes.save_photons)
+    {
+      save_photons (&pp, "AfterTranslate");
+    }
 
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
        not yet eliminated it from translate. ?? 02jan ksl */
@@ -306,7 +315,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     istat = walls (&pp, p, normal);
     /* pp is where the photon is going, p is where it was  */
 
-    if (istat == -1)
+    if (istat == P_ERROR)
     {
       Error_silent ("trans_phot: Abnormal return from translate on photon %d\n", p->np);
       break;
@@ -355,6 +364,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
          disk was heated by photons.
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position of the outer radius of the disk. */
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "HitDisk");
+      }
 
       rrr = sqrt (dot (pp.x, pp.x));
       kkk = 0;
@@ -547,9 +560,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      /* OK we are ready to continue the processing of a photon which has scattered.
-       * The next steps reinitialize parameters
-       so that the photon can continue throug the wind */
+      /* OK we have completed extract, if that had to be done, and need to 
+       * reinitialize parameters for the scattered photon so it can 
+       * can continue throug the wind */
 
       tau_scat = -log (1. - random_number (0.0, 1.0));
       istat = pp.istat = P_INWIND;
@@ -557,6 +570,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       stuff_phot (&pp, &pp_reposition_test);
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
+
+      /* reposition is a NOP for non-resonant scatters but nudges the photon forward for resonant scatters */
+      stuff_phot (&pp, p);
 
       reposition (&pp);
 
@@ -573,7 +589,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (istat != p->istat)
       {
-        Log ("Status of %9d changed from %d to %d after reposition\n", p->np, p->istat, istat);
+        Log_silent ("tran_phot:Status of %9d changed from %d to %d after reposition\n", p->np, p->istat, istat);
       }
 
       /*
