@@ -411,7 +411,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (n < 0)
       {
         Error ("trans_phot: Trying to scatter a photon which is not in the wind\n");
-        Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid, pp.x[0], pp.x[1], pp.x[2]);
+        Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e (%8.2e)\n", pp.np, pp.grid, pp.x[0], pp.x[1], pp.x[2],
+               sqrt (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1] + pp.x[2] * pp.x[2]));
         Error ("trans_phot: This photon is effectively lost!\n");
         istat = pp.istat = p->istat = P_ERROR;
         stuff_phot (&pp, p);

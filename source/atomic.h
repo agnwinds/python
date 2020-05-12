@@ -86,6 +86,7 @@ typedef struct elements
   char name[20];                /* Element name */
   int z;                        /* Atomic number */
   int firstion;                 /* Index into struct ions  ion[firstion] is the lowest ionization state of this ion */
+  int lastion;                  /* Index into struct ions ion[lastion] is the higest ionization state of this ion */
   int nions;                    /* The number of ions actually read in from the data file for this element */
   double abun;                  /* Abundance */
   int istate_max;               /* highest ionization stage of element */
