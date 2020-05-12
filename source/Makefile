@@ -256,7 +256,7 @@ rhf_objects = rad_hydro_files.o get_atomicdata.o py_wind_sub.o windsave.o py_win
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
-		cooling.o import_calloc.o
+		cooling.o import_calloc.o walls.o
 
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
