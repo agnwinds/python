@@ -387,28 +387,6 @@ radiation (p, ds)
 /* Everything after this is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
 
-  xplasma->ntot++;
-
-/* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
- * and hence get an idea of how 'agny' or 'disky' the cell is. */
-/* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
- * number of photons.  Also used the PTYPE designations as one should as a matter of 
- * course
- */
-
-  if (p->origin == PTYPE_STAR)
-    xplasma->ntot_star++;
-  else if (p->origin == PTYPE_BL)
-    xplasma->ntot_bl++;
-  else if (p->origin == PTYPE_DISK)
-    xplasma->ntot_disk++;
-  else if (p->origin == PTYPE_WIND)
-    xplasma->ntot_wind++;
-  else if (p->origin == PTYPE_AGN)
-    xplasma->ntot_agn++;
-
-
-
   if (freq > xplasma->max_freq) // check if photon frequency exceeds maximum frequency - use doppler shifted frequency
     xplasma->max_freq = freq;   // set maximum frequency sen in the cell to the mean doppler shifted freq - see bug #391
 
@@ -862,6 +840,13 @@ pop_kappa_ff_array ()
 int nioniz_nplasma = -1;
 int nioniz_np = -1;
 
+/* A couple of external variables to improve the counting of photons
+   in a cell
+*/
+
+int plog_nplasma = -1;
+int plog_np = -1;
+
 int
 update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      PlasmaPtr xplasma;
@@ -981,6 +966,37 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      in the same way in macro atoms, so should instead be thought of as 
      'direct from source' and 'reprocessed' radiation */
 
+  if (xplasma->nplasma != plog_nplasma || p->np != plog_np)
+  {
+    xplasma->ntot++;
+
+    /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
+     * and hence get an idea of how 'agny' or 'disky' the cell is. */
+    /* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
+     * number of photons.  Also used the PTYPE designations as one should as a matter of 
+     * course
+     */
+
+    if (p->origin == PTYPE_STAR)
+      xplasma->ntot_star++;
+    else if (p->origin == PTYPE_BL)
+      xplasma->ntot_bl++;
+    else if (p->origin == PTYPE_DISK)
+      xplasma->ntot_disk++;
+    else if (p->origin == PTYPE_WIND)
+      xplasma->ntot_wind++;
+    else if (p->origin == PTYPE_AGN)
+      xplasma->ntot_agn++;
+    plog_nplasma = xplasma->nplasma;
+    plog_np = p->np;
+  }
+
+
+
+
+
+
+
   if (HEV * p->freq > 13.6)     // only record if above H ionization edge
   {
 
@@ -989,7 +1005,6 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      * EP 11-19: moving the number of ionizing photons counter into this
      * function so it will be incremented for both macro and non-macro modes
      */
-
     if (xplasma->nplasma != nioniz_nplasma || p->np != nioniz_np)
     {
       xplasma->nioniz++;

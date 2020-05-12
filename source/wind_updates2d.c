@@ -1122,18 +1122,17 @@ WindPtr (w);
         }
         Log ("\n");
       }
-      Log ("radial F_es %i %e \n", nshell, plasmamain[nshell].rad_force_es[3]);
-      Log ("radial F_bf %i %e \n", nshell, plasmamain[nshell].rad_force_bf[3]);
-      Log ("radial F_ff %i %e \n", nshell, plasmamain[nshell].rad_force_ff[3]);
+      Log ("radial F_es %i %e \n", nshell, plasmamain[nshell].rad_force_es[0]);
+      Log ("radial F_bf %i %e \n", nshell, plasmamain[nshell].rad_force_bf[0]);
+      Log ("radial F_ff %i %e \n", nshell, plasmamain[nshell].rad_force_ff[0]);
 
       Log ("Radial Visible flux %e \n", plasmamain[nshell].F_vis[0]);
       Log ("Radial UV      flux %e \n", plasmamain[nshell].F_UV[0]);
       Log ("Radial Xray    flux %e \n", plasmamain[nshell].F_Xray[0]);
 
-      Log ("Radial Xray    flux %e %e %e \n", plasmamain[nshell].F_Xray[0], plasmamain[nshell].F_Xray[1], plasmamain[nshell].F_Xray[2]);
 
 
-      Log ("Total Radial   flux %e \n", plasmamain[nshell].F_vis[3] + plasmamain[nshell].F_UV[3] + plasmamain[nshell].F_Xray[3]);
+      Log ("Total Radial   flux %e \n", plasmamain[nshell].F_vis[0] + plasmamain[nshell].F_UV[0] + plasmamain[nshell].F_Xray[0]);
 
     }
   }
