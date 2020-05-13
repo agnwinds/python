@@ -589,7 +589,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (istat != p->istat)
       {
-        Log_silent ("tran_phot:Status of %9d changed from %d to %d after reposition\n", p->np, p->istat, istat);
+        Error ("trans_phot:Status of %9d changed from %d to %d after reposition\n", p->np, p->istat, istat);
       }
 
       /*
