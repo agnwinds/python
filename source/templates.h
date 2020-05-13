@@ -129,7 +129,7 @@ double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
-int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
+int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* setup_files.c */
 int init_log_and_windsave(int restart_stat);

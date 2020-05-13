@@ -387,28 +387,6 @@ radiation (p, ds)
 /* Everything after this is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
 
-  xplasma->ntot++;
-
-/* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
- * and hence get an idea of how 'agny' or 'disky' the cell is. */
-/* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
- * number of photons.  Also used the PTYPE designations as one should as a matter of 
- * course
- */
-
-  if (p->origin == PTYPE_STAR)
-    xplasma->ntot_star++;
-  else if (p->origin == PTYPE_BL)
-    xplasma->ntot_bl++;
-  else if (p->origin == PTYPE_DISK)
-    xplasma->ntot_disk++;
-  else if (p->origin == PTYPE_WIND)
-    xplasma->ntot_wind++;
-  else if (p->origin == PTYPE_AGN)
-    xplasma->ntot_agn++;
-
-
-
   if (freq > xplasma->max_freq) // check if photon frequency exceeds maximum frequency - use doppler shifted frequency
     xplasma->max_freq = freq;   // set maximum frequency sen in the cell to the mean doppler shifted freq - see bug #391
 
@@ -425,7 +403,7 @@ radiation (p, ds)
   //Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
   freq_store = p->freq;         //Store the packets 'intrinsic' frequency
   p->freq = freq;               //Temporarily set the photon frequency to the mean doppler shifter frequency
-  update_banded_estimators (xplasma, p, ds, w_ave);     //Update estimators
+  update_banded_estimators (xplasma, p, ds, w_ave, ndom);       //Update estimators
   p->freq = freq_store;         //Set the photon frequency back
 
 
@@ -486,36 +464,74 @@ radiation (p, ds)
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path
 
+  /*Deal with the special case of a spherical geometry */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
+  }
+
+
 
   stuff_v (p->lmn, p_out);
   renorm (p_out, z * frac_ff / VLIGHT);
-  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
   for (i = 0; i < 3; i++)
   {
     xplasma->rad_force_ff[i] += dp_cyl[i];
   }
+  xplasma->rad_force_ff[3] += length (dp_cyl);
+
 
   stuff_v (p->lmn, p_out);
   renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
-  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
   for (i = 0; i < 3; i++)
   {
     xplasma->rad_force_bf[i] += dp_cyl[i];
   }
 
+  xplasma->rad_force_bf[3] += length (dp_cyl);
+
+
   stuff_v (p->lmn, p_out);
   renorm (p_out, w_ave * ds * klein_nishina (p->freq));
-  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
   for (i = 0; i < 3; i++)
   {
     xplasma->rad_force_es[i] += dp_cyl[i];
   }
+  xplasma->rad_force_es[3] += length (dp_cyl);
 
   return (0);
 }
@@ -824,12 +840,20 @@ pop_kappa_ff_array ()
 int nioniz_nplasma = -1;
 int nioniz_np = -1;
 
+/* A couple of external variables to improve the counting of photons
+   in a cell
+*/
+
+int plog_nplasma = -1;
+int plog_np = -1;
+
 int
-update_banded_estimators (xplasma, p, ds, w_ave)
+update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      PlasmaPtr xplasma;
      PhotPtr p;
      double ds;
      double w_ave;
+     int ndom;
 {
   int i;
   double flux[3];
@@ -870,15 +894,33 @@ update_banded_estimators (xplasma, p, ds, w_ave)
     flux[2] *= (-1);
 
 
+  /*Deal with the special case of a spherical geometry */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
+    flux[0] = dot (p_dir_cos, phot_mid.x);      //In the spherical geometry, the first comonent is the radial flux
+    flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
+  }
 
 /* We now update the fluxes in the three bands */
 
+
   if (p->freq < UV_low)
+  {
     vadd (xplasma->F_vis, flux, xplasma->F_vis);
+    xplasma->F_vis[3] += length (flux);
+  }
   else if (p->freq > UV_hi)
+  {
     vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
+    xplasma->F_Xray[3] += length (flux);
+  }
   else
+  {
     vadd (xplasma->F_UV, flux, xplasma->F_UV);
+    xplasma->F_UV[3] += length (flux);
+  }
 
 
   /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
@@ -924,6 +966,37 @@ update_banded_estimators (xplasma, p, ds, w_ave)
      in the same way in macro atoms, so should instead be thought of as 
      'direct from source' and 'reprocessed' radiation */
 
+  if (xplasma->nplasma != plog_nplasma || p->np != plog_np)
+  {
+    xplasma->ntot++;
+
+    /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
+     * and hence get an idea of how 'agny' or 'disky' the cell is. */
+    /* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
+     * number of photons.  Also used the PTYPE designations as one should as a matter of 
+     * course
+     */
+
+    if (p->origin == PTYPE_STAR)
+      xplasma->ntot_star++;
+    else if (p->origin == PTYPE_BL)
+      xplasma->ntot_bl++;
+    else if (p->origin == PTYPE_DISK)
+      xplasma->ntot_disk++;
+    else if (p->origin == PTYPE_WIND)
+      xplasma->ntot_wind++;
+    else if (p->origin == PTYPE_AGN)
+      xplasma->ntot_agn++;
+    plog_nplasma = xplasma->nplasma;
+    plog_np = p->np;
+  }
+
+
+
+
+
+
+
   if (HEV * p->freq > 13.6)     // only record if above H ionization edge
   {
 
@@ -932,7 +1005,6 @@ update_banded_estimators (xplasma, p, ds, w_ave)
      * EP 11-19: moving the number of ionizing photons counter into this
      * function so it will be incremented for both macro and non-macro modes
      */
-
     if (xplasma->nplasma != nioniz_nplasma || p->np != nioniz_np)
     {
       xplasma->nioniz++;
