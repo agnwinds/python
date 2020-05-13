@@ -39,7 +39,7 @@
  * with units ergs/s
  *
  * params is unused, but the function pointer num_int requires it. It is re-cast
- * to void * to avoid compiler warnings.
+ * to void  to avoid compiler warnings.
  *
  * ### Notes ###
  * 10/15 - Written by NSH
@@ -50,7 +50,7 @@ double
 integ_brem (double freq, void *params)
 {
   double answer;
-  (void *) params;
+  (void) params;
   answer = geo.const_agn * pow (freq, geo.brem_alpha) * exp ((-1.0 * PLANCK * freq) / (BOLTZMANN * geo.brem_temp));
   return (answer);
 }
@@ -74,7 +74,7 @@ integ_brem (double freq, void *params)
  * of randomly generated photons.
  *
  * params is unused, but the function pointer num_int requires it. It is re-cast
- * to void * to avoid compiler warnings.
+ * to void  to avoid compiler warnings.
  *
  * ### Notes ###
  * 10/15 - Written by NSH
@@ -85,7 +85,7 @@ double
 brem_d (double alpha, void *params)
 {
   double answer;
-  (void *) params;
+  (void) params;
   answer = pow (alpha, geo.brem_alpha) * exp (-1.0 * alpha);
   return (answer);
 }
