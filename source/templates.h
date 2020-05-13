@@ -5,7 +5,7 @@ double get_rand_exp(double alpha_min, double alpha_max);
 double integ_planck_d(double alphamin, double alphamax);
 int init_integ_planck_d(void);
 double planck_d(double alpha, void *params);
-double planck_d_2(double alpha);
+double planck_d_2 (double alpha, void *params);
 double emittance_bb(double freqmin, double freqmax, double t);
 double check_fmax(double fmax, double temp);
 /* get_atomicdata.c */
@@ -148,8 +148,8 @@ int spec_read(char filename[]);
 int extract(WindPtr w, PhotPtr p, int itype);
 int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
 /* cdf.c */
-int cdf_gen_from_func(CdfPtr cdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
-double gen_array_from_func(double (*func)(double), double xmin, double xmax, int pdfsteps);
+int cdf_gen_from_func(CdfPtr cdf, double (*func)(double, void *), double xmin, double xmax, int njumps, double jump[]);
+double gen_array_from_func(double (*func)(double, void *), double xmin, double xmax, int pdfsteps);
 int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin, double xmax);
 double cdf_get_rand(CdfPtr cdf);
 int cdf_limit(CdfPtr cdf, double xmin, double xmax);
@@ -169,7 +169,7 @@ double roche2_width_max(void);
 /* random.c */
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
-double vcos(double x);
+double vcos (double x, void *params);
 int init_rand(int seed);
 double random_number(double min, double max);
 /* stellar_wind.c */
@@ -549,7 +549,7 @@ int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
 /* brem.c */
 double integ_brem(double freq, void *params);
-double brem_d(double alpha);
+double brem_d (double alpha, void *params);
 double get_rand_brem(double freqmin, double freqmax);
 /* synonyms.c */
 int get_question_name_length(char question[]);
