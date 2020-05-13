@@ -415,7 +415,7 @@ ds_to_cone (cc, p)
 
 /**********************************************************/
 /**
- * @brief      Calculate the pathlenth along a line of sight defined by
+ * @brief      Calculate the path length along a line of sight defined by
  * 	a photon p to a sphere centered on the origin.
  *
  * @param [in] double  r   The radius of the sphere

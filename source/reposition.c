@@ -43,6 +43,7 @@ int
 reposition (PhotPtr p)
 {
   int n;
+  double s, s_disk, s_star;
 
   if (p->nres < 0)
     return (0);                 /* Do nothing for non-resonant scatters */
@@ -53,7 +54,23 @@ reposition (PhotPtr p)
     return (n);                 /* Photon was not in wind */
   }
 
-  move_phot (p, wmain[p->grid].dfudge);
+  s = wmain[p->grid].dfudge;
+
+//  if (geo.disk_type != DISK_NONE)
+//  {
+//    s_disk = ds_to_disk (p, 1); // Allow negative values
+//    if (s_disk > 0 && s_disk < s)
+//    {
+//      s = 0.1 * s_disk;
+//    }
+//  }
+//  s_star = ds_to_sphere (geo.rstar, p);
+//  if (s_star > 0 && s_star < s)
+//  {
+//    s = 0.1 * s_star;
+//  }
+
+  move_phot (p, s);
 
   return (0);
 }

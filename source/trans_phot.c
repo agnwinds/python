@@ -515,28 +515,34 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      /* The next if statement causes photons to be extracted during the creation of the detailed spectrum portion of the
-         program */
 
-      /* N.B. To use the anisotropic scattering option, extract needs to follow scatter.  This is because the reweighting
-         which occurs in extract needs the pdf for scattering to have been initialized. 02may ksl.  This seems to be OK at
-         present. */
+      /* Now extract photons if we are in detailed the detailed spectrum portion of the program */
+
+      /* N.B. To use the anisotropic scattering option, extract needs to follow scatter.  
+       *  This is because the reweighting which occurs in extract needs the pdf for scattering 
+       * to have been initialized.
+       */
 
       if (iextract)
       {
         stuff_phot (&pp, &pextract);
 
 
-        /* JM 1407 -- This next loop is required because in anisotropic scattering mode 2 we have normalised our rejection
-           method. This means that we have to adjust nnscat by this factor, since nnscat will be lower by a factor of
-           1/p_norm */
+        /* This next if statement iss required because in anisotropic scattering mode 2 
+         * we have normalised our rejection method. This means that we have to adjust nnscat by 
+         * this factor, since nnscat will be lower by a factor of
+         * 1/p_norm 
+         */
+
         if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
         {
           /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
              First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+
           tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
           /* then turn into a probability */
+
           p_norm = p_escape_from_tau (tau_norm);
 
         }
@@ -560,9 +566,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      /* OK we have completed extract, if that had to be done, and need to 
-       * reinitialize parameters for the scattered photon so it can 
-       * can continue throug the wind */
+      /* OK we have completed extract, if that had to be done, 
+       * need to reinitialize parameters for the scattered photon so it can 
+       * can continue throug the wind 
+       */
 
       tau_scat = -log (1. - random_number (0.0, 1.0));
       istat = pp.istat = P_INWIND;
