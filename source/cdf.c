@@ -67,7 +67,7 @@ double *pdf_array;
  * @brief      Generate a cumulative distrubution function (cdf) from a function
 
  * @param [in, out] CdfPtr  cdf    	A ptr to a cdf structure
- * @param [in] double *func  		The probablility density function to be integrated  to create the pdf
+ * @param [in] double *func  		The probablility density function to be integrated to create the pdf
  * @param [in] double xmin,xmax		The range over which the function is to be integrated
  * @param [in] int njumps			The number of points at which we want to force a break in the cdf
  * @param [in] double jump			an array of points in the x-corrdinates at which we want to force points
@@ -99,8 +99,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   int j, m, mm, n;
   int njump_min, njump_max;
   int icheck, pdfsteps;
-  int cdf_check (), calc_cdf_array ();
-  double gen_array_from_func (), delta;
+  double delta;
 
   njump_min = njump_max = 0;
 
@@ -251,6 +250,9 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
  * This is a routine which is called by cdf_gen_from_func which simply calculates the cumulative
  * distribution of the function in equally spaced steps between xmin and xmax.  The CDF is properly
  * normalized.
+ *
+ * The function to represent the PDF is required to have arguments double and void *, due to the GSL integrator used
+ * in num_int. As the void * parameter is unused, we pass NULL instead of an array of extra parameters.
  *
  * ### Notes ###
  *

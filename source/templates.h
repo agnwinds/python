@@ -548,7 +548,7 @@ int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
 /* brem.c */
 double integ_brem(double freq, void *params);
-double brem_d(double alpha, void *vparam);
+double brem_d (double alpha, void *params);
 double get_rand_brem(double freqmin, double freqmax);
 /* synonyms.c */
 int get_question_name_length(char question[]);
