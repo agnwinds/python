@@ -1276,6 +1276,7 @@ The rest of this is only needed during ionization cycles, before the wind itself
 if fixed.  
 */
 
+//XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 
   if (geo.pcycle == 0)
   {
     stuff_v (pold.lmn, p_init);

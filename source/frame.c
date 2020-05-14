@@ -276,6 +276,16 @@ local_to_observer_frame_disk (p_in, p_out)
  *
  **********************************************************/
 
+/* Notes
+   doppler is currently called in these 3 places
+
+extract.c:159:        doppler (p, &pp, -1);   This is just to Doppler shift a disk photon into the observer frame
+extract.c:169:        doppler (p, &pp, pp.nres);      This similar for a wind photon, the implication being that when
+                extract is called the photon has not been put in the local frame
+resonate.c:1271:    doppler (&pold, p, *nres)
+
+*/
+
 int
 doppler (p_in, p_out, nres)
      PhotPtr p_in, p_out;
