@@ -89,6 +89,7 @@ walls (p, pold, normal)
   double xxx[3];
   double s_disk, s_star, z;
   double theta, phi;
+  double xpath;
 //OLD  struct photon phit;
 
   /* Check to see if the photon has hit the star. If so
@@ -104,8 +105,11 @@ walls (p, pold, normal)
 
   r = dot (p->x, p->x);
   s_star = ds_to_sphere (geo.rstar, pold);
+  vsub (p->x, pold->x, xxx);
+  xpath = length (xxx);
 
-  if (r < geo.rstar_sq || p->ds > s_star)
+//OLD  if (r < geo.rstar_sq || p->ds > s_star)
+  if (r < geo.rstar_sq || xpath > s_star)
   {
     stuff_phot (pold, p);
     move_phot (p, s_star);

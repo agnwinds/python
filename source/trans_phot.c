@@ -196,7 +196,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
   if (n_lost_to_dfudge > 0)
     Error
-      ("trans_phot: %ld photons were lost due to DFUDGE (=%8.4e) pushing them outside of the wind after scatter\n",
+      ("trans_phot: %ld photons were lost due to DFUDGE (%8.4e) pushing them outside of the wind after scatter\n",
        n_lost_to_dfudge, DFUDGE);
 
   n_lost_to_dfudge = 0;         // reset the counter
@@ -267,7 +267,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   int kkk, n;
   double weight_min;
   struct photon pp, pextract;
-  struct photon pp_reposition_test;
+//OLD  struct photon pp_reposition_test;
   int nnscat;
   double p_norm, tau_norm;
   double x_dfudge_check[3];
@@ -277,6 +277,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
   tau_scat = -log (1. - random_number (0.0, 1.0));
+
+
+  /* This is temporary XXXX */
+
+  if (pp.ds != 0)
+  {
+    Error ("Why is ds not 0 %e for photon\n", pp.ds, pp.np);
+  }
 
   weight_min = EPSILON * pp.w;
   istat = P_INWIND;
@@ -294,13 +302,20 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   while (istat == P_INWIND)
   {
 
-    /* The call to translate below involves only a single cell (or alternatively a single tranfer in the windless region). istat as returned by
-       should either be P_INWIND in which case the photon hit the other side of the cell without scattering or P_SCAT in which case there
-       was a scattering event in the shell, P_ESCAPE in which case the photon reached the outside edge of the grid and escaped, P_STAR in
-       which case it reach the inner central object, etc. If the photon escapes then we leave the photon at the position
-       of it's last scatter.  In most other cases though we store the final position of the photon. */
+    /* The call to translate below involves only a single cell (or alternatively a single transfer 
+       in the windless region). 
 
-    pp.ds = 0;                  // EP 11-19: reinitialise for safety
+       istat as returned by should either be P_INWIND in which case the photon hit the other side 
+       of the cell without scattering or P_SCAT in which case there was a scattering event in the shell, 
+       P_ESCAPE in which case the photon reached the outside edge of the grid and escaped, P_STAR in
+       which case it reach the inner central object, etc. If the photon escapes then we leave the 
+       photon at the position of it's last scatter.  In most other cases though we store the final 
+       position of the photon. */
+
+/* Next line looks wrong. It implies that at every step we put pp.ds back to 0, which is
+   not conisistent with the definition of ds, as stated in python.h  ksl 200514 */
+//OLD    pp.ds = 0;                  // EP 11-19: reinitialise for safety
+
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
 
     if (modes.save_photons)
@@ -308,8 +323,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       save_photons (&pp, "AfterTranslate");
     }
 
-    /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have
-       not yet eliminated it from translate. ?? 02jan ksl */
 
     icell++;
     istat = walls (&pp, p, normal);
@@ -341,6 +354,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         randvcos (pp.lmn, normal);
         move_phot (&pp, DFUDGE);
         stuff_phot (&pp, p);
+        p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));
         istat = pp.istat = P_INWIND;    /* Set the status back to P_INWIND so the photon will continue */
         tau = 0;
@@ -351,7 +365,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         }
       }
       else
-      {                         /*Photons that hit the star are simply absorbed so this is the end of the line for this photon */
+      {                         /*In this case, photons that hit the star are simply absorbed 
+                                   so this is the end of the line. */
         stuff_phot (&pp, p);
         break;
       }
@@ -361,9 +376,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     {
       /* It hit the disk */
 
-      /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
-         disk was heated by photons.
-         Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position of the outer radius of the disk. */
+      /* Store the energy of the photon bundle into a disk structure so that one 
+         can determine later how much and where the disk was heated by photons.
+         Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position 
+         of the outer radius of the disk. */
+
       if (modes.save_photons)
       {
         save_photons (&pp, "HitDisk");
@@ -386,6 +403,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          */
         randvcos (pp.lmn, normal);
         stuff_phot (&pp, p);
+        p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));
         istat = pp.istat = P_INWIND;
         tau = 0;
@@ -396,7 +414,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         }
       }
       else
-      {                         /* Photons that hit the disk are to be absorbed so this is the end of the line for this photon */
+      {                         /* In this case, photons that hit the disk are to be absorbed 
+                                   so this is the end of the line. */
         stuff_phot (&pp, p);
         break;
       }
@@ -575,11 +594,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       istat = pp.istat = P_INWIND;
       tau = 0;
 
-      stuff_phot (&pp, &pp_reposition_test);
+//OLD      stuff_phot (&pp, &pp_reposition_test);
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
 
       /* reposition is a NOP for non-resonant scatters but nudges the photon forward for resonant scatters */
       stuff_phot (&pp, p);
+      p->ds = 0;
 
       reposition (&pp);
 
@@ -599,20 +619,24 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         Error ("trans_phot:Status of %9d changed from %d to %d after reposition\n", p->np, p->istat, istat);
       }
 
-      /*
-       * EP 1908 -- see issue #584 for a more complete description of the problem.
-       * This additional error checking was added due to reposition () pushing
-       * photons through the disc plane for a geometrically thin accretion disc,
-       * which would sometimes result in a simulation exiting. The purpose of
-       * this is to move a photon a reduced distance to ensure that it does not
-       * get pushed through the disc plane accidentally
-       */
+//OLD      /*
+//OLD       * EP 1908 -- see issue #584 for a more complete description of the problem.
+//OLD       * This additional error checking was added due to reposition () pushing
+//OLD       * photons through the disc plane for a geometrically thin accretion disc,
+//OLD       * which would sometimes result in a simulation exiting. The purpose of
+//OLD       * this is to move a photon a reduced distance to ensure that it does not
+//OLD       * get pushed through the disc plane accidentally
+//OLD       */
+
+      /*ksl - eliminated reposition_lost_photon from code, as this should not happen anymore.  If it
+         does then it needs to be investigated. */
 
       if (istat == P_REPOSITION_ERROR)
       {
-        reposition_lost_disk_photon (&pp_reposition_test);
-        stuff_phot (&pp_reposition_test, &pp);
-        istat = walls (&pp, p, normal);
+        Error ("Got reposition error for %d.  INVESTIGATE\n", p->np);
+//OLD        reposition_lost_disk_photon (&pp_reposition_test);
+//OLD        stuff_phot (&pp_reposition_test, &pp);
+//OLD        istat = walls (&pp, p, normal);
       }
 
       /* JM 1506 -- we don't throw errors here now, but we do keep a track
