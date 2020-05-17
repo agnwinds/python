@@ -598,8 +598,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
 
       /* reposition is a NOP for non-resonant scatters but nudges the photon forward for resonant scatters */
+      pp.ds = 0;
       stuff_phot (&pp, p);
-      p->ds = 0;
 
       reposition (&pp);
 
