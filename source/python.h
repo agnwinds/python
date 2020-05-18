@@ -886,10 +886,10 @@ typedef struct plasma
   double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
 
-  /* banded, directional fluxes */
-  double F_vis[3];
-  double F_UV[3];
-  double F_Xray[3];
+  /* banded, directional fluxes - last element is used for the sum of magnitude of (flux)*/
+  double F_vis[4];
+  double F_UV[4];
+  double F_Xray[4];
 
   /* The term direct here means from photons which have not been scattered. These are photons which have been
      created by the central object, or the disk, or in the simple case the wind, but which have not undergone
@@ -934,9 +934,9 @@ typedef struct plasma
                                  */
 
   double dmo_dt[3];             /*Radiative force of wind */
-  double rad_force_es[3];       /*Radiative force of wind */
-  double rad_force_ff[3];       /*Radiative force of wind */
-  double rad_force_bf[3];       /*Radiative force of wind */
+  double rad_force_es[4];       /*Radiative force of wind - 4th element is sum of magnitudes*/
+  double rad_force_ff[4];       /*Radiative force of wind - 4th element is sum of magnitudes*/
+  double rad_force_bf[4];       /*Radiative force of wind - 4th element is sum of magnitudes*/
 
 
 

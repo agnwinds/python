@@ -528,25 +528,27 @@ double wig_x, wig_y, wig_z;
 
 /**********************************************************/
 /**
- * @brief      locates the element in wmain associated with a postion
+ * @brief      locates the element in wmain associated with a position 
  *
  * @param [in] int  ndom   The domain number for the search
  * @param [in] double  x[]   The position
- * @return     where_in_grid normally  returns the element in wmain associated
- * with a position.  If the positions is in the grid (of one of the domains)
- * this will be a positive integer.  If the position is not in the grid of one
- * of the domains,
- * a negative number -1 will be returned if the position is inside athe grid,
- * -2 if it is outside the grid for that domain
- *  TODO: ??? this is confusing documentation
+ * @return     where_in_grid normally  returns the element of wmain 
+ * associated that position.  
+ * 
+ * If the positions is in the grid (of the domains) this will be 
+ * a positive integer.  If the position is not in the grid of the
+ * domain, a negative number will be returned.  The negative number
+ * will be -1 if the positionis inside the grid, or -2 if it is outside
+ * the grid.,
  *
  * @details
- *
- * ### Notes ###
- * where in grid is mainly a steering routine that calls other various
+
+ * where_in_grid is mainly a steering routine that calls other various
  * coordinate system specific routines.
  *
- * Where_in grid does not tell you whether the position is in the wind!.
+ * ### Notes ###
+ *
+ * Where_in grid does not tell you whether the position is in the wind!
  *
  * What one means by inside or outside the grid may well be different
  * for different coordinate systems.
