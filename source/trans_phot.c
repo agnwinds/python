@@ -85,7 +85,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int nphot;
   struct photon pp, pextract;
   int absorb_reflect;           /* this is a variable used to store geo.absorb_reflect during exxtract */
-  double p_norm, tau_norm;
+//OLD  double p_norm, tau_norm;
   int nreport;
   struct timeval timer_t0;
 
@@ -141,35 +141,35 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
       /* We increase weight to account for number of scatters. This is done because in extract we multiply by the escape
          probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
          equal to 1/nnscat */
-      if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
-      {
-        /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-           First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+//OLD      if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
+//OLD      {
+//OLD        /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
+//OLD           First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
 
-        tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
+//OLD        tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
-        /* then turn into a probability */
-        p_norm = p_escape_from_tau (tau_norm);
+//OLD        /* then turn into a probability */
+//OLD        p_norm = p_escape_from_tau (tau_norm);
 
-      }
-      else
-      {
-        p_norm = 1.0;
+//OLD      }
+//OLD      else
+//OLD      {
+//OLD        p_norm = 1.0;
 
-        /* throw an error if nnscat does not equal 1 */
-        if (pextract.nnscat != 1)
-          Error
-            ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
-             pextract.nnscat, nphot, geo.scatter_mode, pextract.nres, NLINES);
-      }
+//OLD        /* throw an error if nnscat does not equal 1 */
+//OLD        if (pextract.nnscat != 1)
+//OLD          Error
+//OLD            ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+//OLD             pextract.nnscat, nphot, geo.scatter_mode, pextract.nres, NLINES);
+//OLD      }
 
 
 
-      /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
-         probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
-         equal to 1/nnscat */
+//OLD      /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
+//OLD         probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
+//OLD         equal to 1/nnscat */
 
-      pextract.w *= p[nphot].nnscat / p_norm;
+//OLD      pextract.w *= p[nphot].nnscat / p_norm;
       extract (w, &pextract, pextract.origin);
 
 
@@ -269,7 +269,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   struct photon pp, pextract;
 //OLD  struct photon pp_reposition_test;
   int nnscat;
-  double p_norm, tau_norm;
+//OLD  double p_norm, tau_norm;
   double x_dfudge_check[3];
   int ndom;
   double normal[3];
@@ -545,42 +545,43 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (iextract)
       {
         stuff_phot (&pp, &pextract);
+        pextract.nnscat = 1;
 
 
-        /* This next if statement iss required because in anisotropic scattering mode 2 
-         * we have normalised our rejection method. This means that we have to adjust nnscat by 
-         * this factor, since nnscat will be lower by a factor of
-         * 1/p_norm 
-         */
+//OLD        /* This next if statement iss required because in anisotropic scattering mode 2 
+//OLD         * we have normalised our rejection method. This means that we have to adjust nnscat by 
+//OLD         * this factor, since nnscat will be lower by a factor of
+//OLD         * 1/p_norm 
+//OLD         */
 
-        if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
-        {
-          /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-             First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+//OLD        if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
+//OLD        {
+//OLD          /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
+//OLD             First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
 
-          tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
+//OLD          tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
-          /* then turn into a probability */
+//OLD          /* then turn into a probability */
 
-          p_norm = p_escape_from_tau (tau_norm);
+//OLD          p_norm = p_escape_from_tau (tau_norm);
 
-        }
-        else
-        {
-          p_norm = 1.0;
+//OLD        }
+//OLD        else
+//OLD        {
+//OLD          p_norm = 1.0;
 
-          /* nnscat is the quantity associated with this photon being extracted */
-          if (nnscat != 1)
-            Error
-              ("nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
-               nnscat, p->np, geo.scatter_mode, pextract.nres, NLINES);
-        }
+//OLD          /* nnscat is the quantity associated with this photon being extracted */
+//OLD          if (nnscat != 1)
+//OLD            Error
+//OLD              ("nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+//OLD               nnscat, p->np, geo.scatter_mode, pextract.nres, NLINES);
+//OLD        }
 
         /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the
            escape probability along a given direction, but we also need to divide the weight by the mean escape
            probability, which is equal to 1/nnscat */
 
-        pextract.w *= nnscat / p_norm;
+//OLD        pextract.w *= nnscat / p_norm;
         extract (w, &pextract, PTYPE_WIND);     // Treat as wind photon for purpose of extraction
       }
 
