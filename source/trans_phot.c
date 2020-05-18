@@ -129,10 +129,10 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
       // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
       // correct geo.absorb_reflect value as soon as the photons are extracted!
 
-      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
-      {
-        geo.absorb_reflect = BACK_RAD_ABSORB_AND_DESTROY;
-      }
+//      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
+//      {
+//        geo.absorb_reflect = BACK_RAD_ABSORB_AND_DESTROY;
+//      }
 
 
       stuff_phot (&p[nphot], &pextract);
@@ -173,11 +173,11 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
       extract (w, &pextract, pextract.origin);
 
 
-      /* Restore the correct disk illumination */
-      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
-      {
-        geo.absorb_reflect = BACK_RAD_SCATTER;
-      }
+//      /* Restore the correct disk illumination */
+//      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
+//      {
+//        geo.absorb_reflect = BACK_RAD_SCATTER;
+//      }
     }                           /* End of extract loop */
 
     p[nphot].np = nphot;
