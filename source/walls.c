@@ -89,6 +89,9 @@ walls (p, pold, normal)
   double xxx[3];
   double s_disk, s_star, z;
   double theta, phi;
+  double xpath;
+//OLD  double test1, test2;
+//OLD  int icompare1, icompare2, ireport;
 //OLD  struct photon phit;
 
   /* Check to see if the photon has hit the star. If so
@@ -104,11 +107,48 @@ walls (p, pold, normal)
 
   r = dot (p->x, p->x);
   s_star = ds_to_sphere (geo.rstar, pold);
+  vsub (p->x, pold->x, xxx);
+  xpath = length (xxx);
 
-  if (r < geo.rstar_sq || p->ds > s_star)
+//OLD  icompare1 = 0;
+//OLD  icompare2 = 0;
+//OLD  ireport = 0;
+
+//OLD  if (r < geo.rstar_sq || p->ds > s_star)
+//OLD    icompare1 = 1;
+//OLD  if (r < geo.rstar_sq || xpath > s_star)
+//OLD    icompare2 = 1;
+//OLD  if (icompare1 != icompare2)
+//OLD  {
+//OLD    ireport = 1;
+//OLD  }
+
+
+//OLD  if (r < geo.rstar_sq || p->ds > s_star)
+  if (r < geo.rstar_sq || (s_star < VERY_BIG && xpath > s_star))
   {
+
+//OLD    if (ireport)
+//OLD    {
+//OLD      test1 = sqrt (dot (pold->x, pold->x));
+//OLD      test2 = sqrt (dot (p->x, p->x));
+//OLD      Log ("XTEST 1 %d  r %e xpath %e  %e > %e\n", p->np, sqrt (r), xpath, p->ds, s_star);
+//OLD      Log ("XTEST 2 old %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e -- %10.3e \n",
+//OLD           pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1], pold->lmn[2], test1);
+//OLD      Log ("XTEST 3 new %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e -- %10.3e \n",
+//OLD           p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], test2);
+//OLD    }
+
     stuff_phot (pold, p);
     move_phot (p, s_star);
+
+
+//OLD    if (ireport)
+//OLD    {
+//OLD      Log ("XTEST 4 fin %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e -- %10.3e \n",
+//OLD           p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], test2);
+//OLD    }
+
     stuff_v (p->x, normal);
     return (p->istat = P_HIT_STAR);
   }
