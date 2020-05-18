@@ -22,14 +22,14 @@
  * @brief      A supervisory routine called to 
  * 	builds detailed spectra in the normal (extract) mode.
  *
- * @param [in, out] WindPtr  w   The entire wind
- * @param [in, out] PhotPtr  p   The photon to extract
- * @param [in, out] int  itype   An integer representing the type of photon 
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in] PhotPtr  p   The photon to extract
+ * @param [in] int  itype   An integer representing the type of photon 
  * for the purpose of being extracted.
  * @return     Always returns 0
  *
  * @details
- * extract is called when a photon begins it's flight and every time that photon
+ * extract is called when a photon begins its flight and every time that photon
  * scatters, unless the user has exercised the "live or die" option, in
  * which case it is not called.  
  *
@@ -44,7 +44,7 @@
  * * PTYPE_WIND->the photon being redirected arose in the wind,
  * 
  * extract uses the types to prepare the photon for extraction, including
- * doppler shifting the photon if is of PTYPE_WIND or PTYPE_STAR 
+ * doppler shifting the photon if is of PTYPE_WIND or PTYPE_DISK.
  * 
  * Usually, Python constructs a spectrum of all photons, but there are
  * advanced options which allone to restict the spectrum created to
@@ -89,12 +89,10 @@ extract (w, p, itype)
 {
   int n, mscat, mtopbot;
   struct photon pp;
-//OLD  double v[3];
   double length ();
   int vsub ();
   int yep;
   double xdiff[3];
-//OLD  int ndom;
 
 
   /* The next line selects the middle inclination angle for recording the absorbed energy */

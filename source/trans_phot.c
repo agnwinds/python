@@ -104,8 +104,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
-    /* This is just a watchdog method to tell the user the program is still running */
 
+    /* This is just a watchdog method to tell the user the program is still running */
     if (nphot % nreport == 0)
     {
       if (geo.ioniz_or_extract)
@@ -115,15 +115,14 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
         Log ("Spec. Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.pcycle + 1, geo.pcycles, basename, nphot, NPHOT,
              nphot * 100. / NPHOT);
     }
-
     Log_flush ();
 
     stuff_phot (&p[nphot], &pp);
     absorb_reflect = geo.absorb_reflect;
 
+
     /* The next if statement is executed if we are calculating the detailed spectrum and makes sure we always run extract on
        the original photon no matter where it was generated */
-
     if (iextract)
     {
       // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
