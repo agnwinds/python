@@ -209,7 +209,6 @@ main (argc, argv)
   fptr5 = fopen ("py_pcon_data.dat", "w");
 
   fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
-  fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_UV_x F_UV_y F_UV_z F_Xray_x F_Xray_y F_Xray_z rad_f_w rad_f_phi rad_f_z bf_f_w bf_f_phi bf_f_z\n");   //directional flux by band
 
   fprintf (fptr3, "nions %i\n", nions);
   for (i = 0; i < nions; i++)
@@ -243,6 +242,17 @@ main (argc, argv)
     domain = 0;
   }
 
+  if (zdom[domain].coord_type == SPHERICAL)
+  {
+    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_r F_UV_r F_Xray_r es_f_r bf_f_r\n");    //directional flux by band
+  }
+  else
+  {
+    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x _es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");       //directional flux by band
+  }
+
+
+
 
   for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
   {
@@ -268,15 +278,28 @@ main (argc, argv)
       fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol); //output geometric things
       fprintf (fptr2, "%e ", plasmamain[nplasma].rho);  //density
       fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2]);   //directional flux by band
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2]);      //directional flux by band
-      fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2]);        //directional flux by band
-      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);      //electron scattering radiation force in the w(x) direction
-      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[1]);      //electron scattering radiation force in the phi(rotational) directionz direction
-      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[2]);      //electron scattering radiation force in the z direction
-      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[0]);      //bound free scattering radiation force in the w(x) direction
-      fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[1]);      //bound free scattering radiation force in the phi(rotational) direction
-      fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf[2]);    //bound free scattering radiation force in the z direction
+      if (zdom[domain].coord_type == SPHERICAL)
+      {
+        fprintf (fptr2, "%e ", plasmamain[nplasma].F_vis[0]);   //directional flux by band
+        fprintf (fptr2, "%e ", plasmamain[nplasma].F_UV[0]);    //directional flux by band
+        fprintf (fptr2, "%e ", plasmamain[nplasma].F_Xray[0]);  //directional flux by band
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
+        fprintf (fptr2, "%e\n", plasmamain[nplasma].rad_force_bf[0]);   //bound free scattering radiation force in the w(x) direction          
+      }
+      else
+      {
+        fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2], plasmamain[nplasma].F_vis[3]);        //directional flux by band
+        fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2], plasmamain[nplasma].F_UV[3]);    //directional flux by band
+        fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2], plasmamain[nplasma].F_Xray[3]);    //directional flux by band
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[1]);    //electron scattering radiation force in the phi(rotational) directionz direction
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[2]);    //electron scattering radiation force in the z direction
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[3]);    //sum of magnitude of electron scattering radiation force
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[0]);    //bound free scattering radiation force in the w(x) direction
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[1]);    //bound free scattering radiation force in the phi(rotational) direction
+        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[2]);    //bound free scattering radiation force in the z direction
+        fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf[3]);  //sum of magnitude of bound free scattering radiation force 
+      }
       fprintf (fptr3, "%d %d ", i, j);  //output geometric things               
       for (ii = 0; ii < nions; ii++)
         fprintf (fptr3, "%e ", plasmamain[nplasma].density[ii]);
@@ -302,14 +325,23 @@ main (argc, argv)
       stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x); //place our test photon at the centre of the cell
       ptest.grid = nwind;       //We need our test photon to know where it is 
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
-
       //First for the optcial band (up to 4000AA)     
       if (length (plasmamain[nplasma].F_vis) > 0.0)     //Only makes sense if flux in this band is non-zero
       {
-        stuff_v (plasmamain[nplasma].F_vis, fhat);
+        if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
+        {
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_vis));
+          fhat[1] = 0.0;
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_vis));
+        }
+        else
+        {
+          stuff_v (plasmamain[nplasma].F_vis, fhat);
+        }
         renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
         stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
         t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
+
       }
       else
         t_opt = 0.0;            //Essentually a flag that there is no way of computing t (and hence M) in this cell.
@@ -317,7 +349,16 @@ main (argc, argv)
       //Now for the UV band (up to 4000AA->100AA)                                             
       if (length (plasmamain[nplasma].F_UV) > 0.0)      //Only makes sense if flux in this band is non-zero
       {
-        stuff_v (plasmamain[nplasma].F_UV, fhat);
+        if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
+        {
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_UV));
+          fhat[1] = 0.0;
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_UV));
+        }
+        else
+        {
+          stuff_v (plasmamain[nplasma].F_UV, fhat);
+        }
         renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
         stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
         t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
@@ -329,7 +370,16 @@ main (argc, argv)
       //And finally for the Xray band (up to 100AA and up)
       if (length (plasmamain[nplasma].F_Xray) > 0.0)    //Only makes sense if flux in this band is non-zero
       {
-        stuff_v (plasmamain[nplasma].F_Xray, fhat);
+        if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
+        {
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_Xray));
+          fhat[1] = 0.0;
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_Xray));
+        }
+        else
+        {
+          stuff_v (plasmamain[nplasma].F_Xray, fhat);
+        }
         renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
         stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
         t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
