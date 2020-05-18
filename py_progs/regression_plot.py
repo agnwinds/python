@@ -370,24 +370,44 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
         spec1=ascii.read(spec_name1)
         spec2=ascii.read(spec_name2)
 
-
         pylab.subplot(614)
         flux1=xsmooth(spec1['Created'],21)
         flux2=xsmooth(spec2['Created'],21)
         diff_created=flux2-flux1
         pylab.plot(spec1['Lambda'],flux1,label='Created1')
         pylab.plot(spec2['Lambda'],flux2,label='Created2')
+
+        flux1=xsmooth(spec1['Emitted'],21)
+        flux2=xsmooth(spec2['Emitted'],21)
+        diff_emitted=flux2-flux1
+        pylab.plot(spec1['Lambda'],flux1,label='Emitted1')
+        pylab.plot(spec2['Lambda'],flux2,label='Emitted2')
+
+        ymax=numpy.max(flux1)
+        ymin=numpy.min(flux1)
+        pylab.ylim(0.5*ymin,1.5*ymax)
+
         pylab.legend(loc='best')
         pylab.ylabel('Flux')
         pylab.tight_layout()
     # pylab.xlabel('Wavelength')
 
         pylab.subplot(615)
-        flux1=xsmooth(spec1['Emitted'],21)
-        flux2=xsmooth(spec2['Emitted'],21)
-        diff_emitted=flux2-flux1
-        pylab.plot(spec1['Lambda'],flux1,label='Emitted1')
-        pylab.plot(spec2['Lambda'],flux2,label='Emitted2')
+        spec_list=spec1.colnames[9:]
+        i=len(spec_list)//2
+        # print(i,spec_list[i])
+        name=spec_list[i]
+        # print(spec1.colnames[9:])
+
+        flux1=xsmooth(spec1[name],21)
+        flux2=xsmooth(spec2[name],21)
+        diff_spec=flux2-flux1
+        pylab.plot(spec1['Lambda'],flux1,label=name)
+        pylab.plot(spec2['Lambda'],flux2,label=name)
+
+
+
+
         pylab.legend(loc='best')
         pylab.ylabel('Flux')
         pylab.tight_layout()
@@ -397,13 +417,20 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
         pylab.title('Old (2) - New (1)')
         pylab.plot(spec1['Lambda'],diff_created,label='Created')
         pylab.plot(spec1['Lambda'],diff_emitted,label='Emitted')
+        pylab.plot(spec1['Lambda'],diff_spec,label=name)
         pylab.legend(loc='best')
         pylab.ylabel('Flux Difference')
         pylab.xlabel('Wavelength')
         pylab.tight_layout()
 
+
+
+
     else:
         print('Error: either %s or %s are missing' % (spec_name1,spec_name2))
+
+
+
 
 
     pylab.draw()
