@@ -133,6 +133,8 @@ extract (w, p, itype)
     }
 
     p->w *= p->nnscat / p_norm;
+
+    Log ("XXX  %d  %e %d  %e\n", p->np, p->w, p->nnscat, p_norm);
   }
 
 

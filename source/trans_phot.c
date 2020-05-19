@@ -545,7 +545,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (iextract)
       {
         stuff_phot (&pp, &pextract);
-        pextract.nnscat = 1;
+//TEST        pextract.nnscat = 1;
 
 
 //OLD        /* This next if statement iss required because in anisotropic scattering mode 2 
