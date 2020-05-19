@@ -408,7 +408,6 @@ the same resonance again */
       Error_silent ("Warning: extract_one: ignoring very high tau  %8.2e at %g\n", tau, pp->freq);
     else
     {
-      Log ("XXX %d %e %e f\n", pp->np, tau, pp->w);
       k = (pp->freq - xxspec[nspec].freqmin) / xxspec[nspec].dfreq;
 
       /* Force the frequency to be in range of that recorded in the spectrum */
@@ -441,6 +440,8 @@ the same resonance again */
 
       xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
       xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
+
+      Log ("XXX %d %e %e %d %d %e f\n", pp->np, tau, pp->w, nspec, k, xxspec[nspec].f[k]);
 
 
       /* If this photon was a wind photon, then also increment the "reflected" spectrum */
