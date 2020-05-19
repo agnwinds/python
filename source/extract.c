@@ -343,6 +343,7 @@ needs to reweight
       if (tau > 0.0)
         pp->w *= (1. - exp (-tau)) / tau;
       tau = 0.0;
+      Log ("XXX %d %e %e \n", pp->np, tau, pp->w);
     }
 
 /* But in any event we have to reposition wind photons so that they don't go through
@@ -407,6 +408,7 @@ the same resonance again */
       Error_silent ("Warning: extract_one: ignoring very high tau  %8.2e at %g\n", tau, pp->freq);
     else
     {
+      Log ("XXX %d %e %e f\n", pp->np, tau, pp->w);
       k = (pp->freq - xxspec[nspec].freqmin) / xxspec[nspec].dfreq;
 
       /* Force the frequency to be in range of that recorded in the spectrum */
