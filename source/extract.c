@@ -95,10 +95,51 @@ extract (w, p, itype)
   int yep;
   double xdiff[3];
   int ndom;
+  double p_norm, tau_norm;
 
 
   /* The next line selects the middle inclination angle for recording the absorbed energy */
   phot_history_spectrum = 0.5 * (MSPEC + nspectra);
+
+
+
+/* The next section was moved from trans_phot 200518 */
+
+  /* We increase weight to account for number of scatters. This is done because in extract we multiply by the escape
+     probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
+     equal to 1/nnscat */
+  if (itype == PTYPE_WIND)
+  {
+    if (geo.scatter_mode == SCATTER_MODE_THERMAL && p->nres <= NLINES && p->nres > -1)
+    {
+      /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
+         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+
+      tau_norm = sobolev (&wmain[p->grid], p->x, -1.0, lin_ptr[p->nres], wmain[p->grid].dvds_max);
+
+      /* then turn into a probability */
+      p_norm = p_escape_from_tau (tau_norm);
+
+    }
+    else
+    {
+      p_norm = 1.0;
+
+      /* throw an error if nnscat does not equal 1 */
+      if (p->nnscat != 1)
+        Error
+          ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+           p->nnscat, p->np, geo.scatter_mode, p->nres, NLINES);
+    }
+
+    p->w *= p->nnscat / p_norm;
+
+  }
+
+
+
+
+
 
   for (n = MSPEC; n < nspectra; n++)
   {
@@ -397,6 +438,7 @@ the same resonance again */
 
       xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
       xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
+
 
 
       /* If this photon was a wind photon, then also increment the "reflected" spectrum */

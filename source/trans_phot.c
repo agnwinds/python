@@ -85,7 +85,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int nphot;
   struct photon pp, pextract;
   int absorb_reflect;           /* this is a variable used to store geo.absorb_reflect during exxtract */
-  double p_norm, tau_norm;
   int nreport;
   struct timeval timer_t0;
 
@@ -126,59 +125,11 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
     if (iextract)
     {
-      // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
-      // correct geo.absorb_reflect value as soon as the photons are extracted!
-
-      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
-      {
-        geo.absorb_reflect = BACK_RAD_ABSORB_AND_DESTROY;
-      }
-
 
       stuff_phot (&p[nphot], &pextract);
-
-
-      /* We increase weight to account for number of scatters. This is done because in extract we multiply by the escape
-         probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
-         equal to 1/nnscat */
-      if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
-      {
-        /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-           First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
-
-        tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
-
-        /* then turn into a probability */
-        p_norm = p_escape_from_tau (tau_norm);
-
-      }
-      else
-      {
-        p_norm = 1.0;
-
-        /* throw an error if nnscat does not equal 1 */
-        if (pextract.nnscat != 1)
-          Error
-            ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
-             pextract.nnscat, nphot, geo.scatter_mode, pextract.nres, NLINES);
-      }
-
-
-
-      /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
-         probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
-         equal to 1/nnscat */
-
-      pextract.w *= p[nphot].nnscat / p_norm;
       extract (w, &pextract, pextract.origin);
 
-
-      /* Restore the correct disk illumination */
-      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
-      {
-        geo.absorb_reflect = BACK_RAD_SCATTER;
-      }
-    }                           /* End of extract loop */
+    }                           
 
     p[nphot].np = nphot;
 
@@ -267,9 +218,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   int kkk, n;
   double weight_min;
   struct photon pp, pextract;
-//OLD  struct photon pp_reposition_test;
   int nnscat;
-  double p_norm, tau_norm;
   double x_dfudge_check[3];
   int ndom;
   double normal[3];
@@ -279,12 +228,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   tau_scat = -log (1. - random_number (0.0, 1.0));
 
 
-  /* This is temporary XXXX */
-
-  if (pp.ds != 0)
-  {
-    Error ("Why is ds not 0 %e for photon\n", pp.ds, pp.np);
-  }
 
   weight_min = EPSILON * pp.w;
   istat = P_INWIND;
@@ -312,9 +255,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        photon at the position of it's last scatter.  In most other cases though we store the final 
        position of the photon. */
 
-/* Next line looks wrong. It implies that at every step we put pp.ds back to 0, which is
-   not conisistent with the definition of ds, as stated in python.h  ksl 200514 */
-//OLD    pp.ds = 0;                  // EP 11-19: reinitialise for safety
 
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
 
@@ -538,49 +478,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* Now extract photons if we are in detailed the detailed spectrum portion of the program */
 
       /* N.B. To use the anisotropic scattering option, extract needs to follow scatter.  
-       *  This is because the reweighting which occurs in extract needs the pdf for scattering 
+       * This is because the reweighting which occurs in extract needs the pdf for scattering 
        * to have been initialized.
        */
 
       if (iextract)
       {
         stuff_phot (&pp, &pextract);
-
-
-        /* This next if statement iss required because in anisotropic scattering mode 2 
-         * we have normalised our rejection method. This means that we have to adjust nnscat by 
-         * this factor, since nnscat will be lower by a factor of
-         * 1/p_norm 
-         */
-
-        if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
-        {
-          /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-             First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
-
-          tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
-
-          /* then turn into a probability */
-
-          p_norm = p_escape_from_tau (tau_norm);
-
-        }
-        else
-        {
-          p_norm = 1.0;
-
-          /* nnscat is the quantity associated with this photon being extracted */
-          if (nnscat != 1)
-            Error
-              ("nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
-               nnscat, p->np, geo.scatter_mode, pextract.nres, NLINES);
-        }
-
-        /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the
-           escape probability along a given direction, but we also need to divide the weight by the mean escape
-           probability, which is equal to 1/nnscat */
-
-        pextract.w *= nnscat / p_norm;
+        pextract.nnscat = nnscat;
         extract (w, &pextract, PTYPE_WIND);     // Treat as wind photon for purpose of extraction
       }
 
@@ -594,10 +499,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       istat = pp.istat = P_INWIND;
       tau = 0;
 
-//OLD      stuff_phot (&pp, &pp_reposition_test);
       stuff_v (pp.x, x_dfudge_check);   // this is a vector we use to see if dfudge moved the photon outside the wind cone
 
-      /* reposition is a NOP for non-resonant scatters but nudges the photon forward for resonant scatters */
       pp.ds = 0;
       stuff_phot (&pp, p);
 
@@ -619,14 +522,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         Error ("trans_phot:Status of %9d changed from %d to %d after reposition\n", p->np, p->istat, istat);
       }
 
-//OLD      /*
-//OLD       * EP 1908 -- see issue #584 for a more complete description of the problem.
-//OLD       * This additional error checking was added due to reposition () pushing
-//OLD       * photons through the disc plane for a geometrically thin accretion disc,
-//OLD       * which would sometimes result in a simulation exiting. The purpose of
-//OLD       * this is to move a photon a reduced distance to ensure that it does not
-//OLD       * get pushed through the disc plane accidentally
-//OLD       */
 
       /*ksl - eliminated reposition_lost_photon from code, as this should not happen anymore.  If it
          does then it needs to be investigated. */
@@ -634,9 +529,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (istat == P_REPOSITION_ERROR)
       {
         Error ("Got reposition error for %d.  INVESTIGATE\n", p->np);
-//OLD        reposition_lost_disk_photon (&pp_reposition_test);
-//OLD        stuff_phot (&pp_reposition_test, &pp);
-//OLD        istat = walls (&pp, p, normal);
       }
 
       /* JM 1506 -- we don't throw errors here now, but we do keep a track
