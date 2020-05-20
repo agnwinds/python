@@ -582,6 +582,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
            probability, which is equal to 1/nnscat */
 
 //OLD        pextract.w *= nnscat / p_norm;
+        pextract.nnscat = nnscat;
         extract (w, &pextract, PTYPE_WIND);     // Treat as wind photon for purpose of extraction
       }
 
