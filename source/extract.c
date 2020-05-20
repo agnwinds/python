@@ -134,7 +134,6 @@ extract (w, p, itype)
 
     p->w *= p->nnscat / p_norm;
 
-    Log ("XXX  %d  %e %d  %e\n", p->np, p->w, p->nnscat, p_norm);
   }
 
 
@@ -343,7 +342,6 @@ needs to reweight
       if (tau > 0.0)
         pp->w *= (1. - exp (-tau)) / tau;
       tau = 0.0;
-      Log ("XXX %d %e %e \n", pp->np, tau, pp->w);
     }
 
 /* But in any event we have to reposition wind photons so that they don't go through
@@ -441,7 +439,6 @@ the same resonance again */
       xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
       xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
 
-      Log ("XXX %d %e %e %d %d %e f\n", pp->np, tau, pp->w, nspec, k, xxspec[nspec].f[k]);
 
 
       /* If this photon was a wind photon, then also increment the "reflected" spectrum */
