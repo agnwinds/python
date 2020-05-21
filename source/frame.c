@@ -41,19 +41,17 @@
  *
  **********************************************************/
 
-int
+void
 check_frame (p, frame, msg)
      PhotPtr p;
      int frame;
      char *msg;
 {
   if (p->frame == frame)
-    return 0;
+    return;
 
   Error ("check_frame: %s", msg);
   Exit (1);
-
-  return 1;
 }
 
 
