@@ -24,6 +24,7 @@ link_directories(lib)
 
 # Define the executables
 add_executable(python
+        source/frame.c
         source/import_calloc.c
         source/rdpar_init.c
         source/bb.c

@@ -23,6 +23,39 @@
 #include "python.h"
 
 
+/**********************************************************/
+/**
+ * @brief  Check that a photon is in the desired frame.
+ *
+ * @param [in] PhotPtr  p      The photon whose frame is to be checked
+ * @param [in] frame    frame  The desired frame of the photon
+ * @param [in] char    *msg    A comment to print as an error message if the
+ *                             photon is in the incorrect frame
+ *
+ * @return  If in the correct frame 0, otherwise 1
+ *
+ * @details
+ *
+ * The purpose of this function is to avoid situations where photons are being
+ * transformed incorrectly between the local and observer frame.
+ *
+ **********************************************************/
+
+int
+check_frame (p, frame, msg)
+     PhotPtr p;
+     int frame;
+     char *msg;
+{
+  if (p->frame == frame)
+    return 0;
+
+  Error ("check_frame: %s", msg);
+  Exit (1);
+
+  return 1;
+}
+
 
 /**********************************************************/
 /**
@@ -31,17 +64,17 @@
  *      from the observer (or global) frame to the local (or co-moving)
  *      frame
  *
- * @param [in] PhotPtr  p_in   The photon in the observer frame                   
- * @param [out] PhotPtr  p_out   The photon in the local frame                  
+ * @param [in] PhotPtr  p_in   The photon in the observer frame
+ * @param [out] PhotPtr  p_out   The photon in the local frame
  *
  * @return    The routine routines the frequency in the local frame
  *
  *
  * @details
- * The routine copies all of the quantities contain in the p_in to 
- * p_out, obtains the velocity at that point in the wind, and then 
- * performs an in place transformation from the * global to the local 
- * frame of the photon allowing for special 
+ * The routine copies all of the quantities contain in the p_in to
+ * p_out, obtains the velocity at that point in the wind, and then
+ * performs an in place transformation from the * global to the local
+ * frame of the photon allowing for special
  * relativity.
  *
  *
@@ -63,6 +96,8 @@ observer_to_local_frame (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i;
+
+  check_frame (p_in, F_OBSERVER, "Photon expected in observer frame but is in local");
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -96,6 +131,7 @@ observer_to_local_frame (p_in, p_out)
   }
 
   p_out->w *= (f / p_in->freq);
+  p_out->frame = F_LOCAL;
 
   return (f);
 }
@@ -143,6 +179,8 @@ local_to_observer_frame (p_in, p_out)
   double gamma;
   int i;
 
+  check_frame (p_in, F_LOCAL, "Photon expected in local frame but is in observer");
+
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
 
@@ -170,6 +208,7 @@ local_to_observer_frame (p_in, p_out)
   }
 
   p_out->w *= (f / p_in->freq);
+  p_out->frame = F_OBSERVER;
 
   return (f);
 }
@@ -217,6 +256,8 @@ local_to_observer_frame_disk (p_in, p_out)
   double gamma;
   int i;
 
+  check_frame (p_in, F_LOCAL, "Photon expected in local frame but is in observer");
+
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
 
@@ -244,7 +285,7 @@ local_to_observer_frame_disk (p_in, p_out)
   }
 
   p_out->w *= (f / p_in->freq);
-
+  p_out->frame = F_OBSERVER;
 
   return (f);
 }
@@ -282,7 +323,6 @@ doppler (p_in, p_out, nres)
      int nres;
 
 {
-  double dot ();
   WindPtr one;
   int ndom;
   double v[3];
