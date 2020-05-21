@@ -44,6 +44,8 @@
  *
  **********************************************************/
 
+int ncheck_frame = 0;
+
 int
 check_frame (p, desired_frame, msg)
      PhotPtr p;
@@ -51,13 +53,23 @@ check_frame (p, desired_frame, msg)
      char *msg;
 {
   if (p->frame == desired_frame)
+  {
     return (0);
+  }
+  else if (ncheck_frame < 100)
+  {
+    Error ("check_frame: %s\n", msg);
+    ncheck_frame++;
 
-  Error ("check_frame: %s\n", msg);
-  if (modes.save_photons)
-    save_photons (p, "PhotonInIncorrectFrame");
+    if (modes.save_photons)
+      save_photons (p, "PhotonInIncorrectFrame");
 
-  return (1);
+    return (1);
+  }
+  else
+  {
+    return (0);
+  }
 }
 
 
@@ -72,7 +84,7 @@ check_frame (p, desired_frame, msg)
  * @param [in] PhotPtr  p_in   The photon in the observer frame
  * @param [out] PhotPtr  p_out   The photon in the local frame
  *
- * @return    The routine routines the frequency in the local frame
+ * @return    The routine returns 0, unless there was an error
  *
  *
  * @details
@@ -90,7 +102,7 @@ check_frame (p, desired_frame, msg)
  *
  **********************************************************/
 
-double
+int
 observer_to_local_frame (p_in, p_out)
      PhotPtr p_in, p_out;
 {
@@ -100,13 +112,13 @@ observer_to_local_frame (p_in, p_out)
   double x;
   double v[3], vel;
   double gamma;
-  int i;
+  int i, ierr;
   char msg[LINELENGTH];
 
 
   sprintf (msg, "observer_to_local_frame: Photon (%d) of type (%d) not in observer frame", p_in->np, p_in->istat);
 
-  check_frame (p_in, F_OBSERVER, msg);
+  ierr = check_frame (p_in, F_OBSERVER, msg);
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -121,7 +133,7 @@ observer_to_local_frame (p_in, p_out)
   if (geo.rel_mode == REL_MODE_LINEAR)
   {
     f = p_out->freq = p_in->freq * (1. - vel / VLIGHT);
-    return (f);
+    return (ierr);
   }
 
 
@@ -142,7 +154,7 @@ observer_to_local_frame (p_in, p_out)
   p_out->w *= (f / p_in->freq);
   p_out->frame = F_LOCAL;
 
-  return (f);
+  return (ierr);
 }
 
 
@@ -157,7 +169,7 @@ observer_to_local_frame (p_in, p_out)
  * @param [in] PhotPtr  p_in   The photon in the local frame                   
  * @param [out] PhotPtr  p_out   The photon in the global frame                  
  *
- * @return    The routine routines the frequency in the global frame
+ * @return    The routine returns 0 unless there was an error       
  *
  *
  * @details
@@ -176,7 +188,7 @@ observer_to_local_frame (p_in, p_out)
  **********************************************************/
 
 
-double
+int
 local_to_observer_frame (p_in, p_out)
      PhotPtr p_in, p_out;
 {
@@ -188,12 +200,13 @@ local_to_observer_frame (p_in, p_out)
   double gamma;
   int i;
   char msg[LINELENGTH];
+  int ierr;
 
 
   sprintf (msg, "local_to_observer_frame: Photon (%d) of type (%d) not_in_local_frame", p_in->np, p_in->istat);
 
 
-  check_frame (p_in, F_LOCAL, msg);
+  ierr = check_frame (p_in, F_LOCAL, msg);
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -207,7 +220,7 @@ local_to_observer_frame (p_in, p_out)
   if (geo.rel_mode == REL_MODE_LINEAR)
   {
     f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
-    return (f);
+    return (ierr);
   }
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
   f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
@@ -224,7 +237,7 @@ local_to_observer_frame (p_in, p_out)
   p_out->w *= (f / p_in->freq);
   p_out->frame = F_OBSERVER;
 
-  return (f);
+  return (ierr);
 }
 
 
@@ -239,7 +252,7 @@ local_to_observer_frame (p_in, p_out)
  * @param [in] PhotPtr  p_in   The photon in the local frame                   
  * @param [out] PhotPtr  p_out   The photon in the global frame                  
  *
- * @return    The routine routines the frequency in the global frame
+ * @return    The routine returns 0 unless the was an error         
  *
  *
  * @details
@@ -260,7 +273,7 @@ local_to_observer_frame (p_in, p_out)
  *
  **********************************************************/
 
-double
+int
 local_to_observer_frame_disk (p_in, p_out)
      PhotPtr p_in, p_out;
 {
@@ -270,9 +283,10 @@ local_to_observer_frame_disk (p_in, p_out)
   double gamma;
   int i;
   char msg[LINELENGTH];
+  int ierr;
 
   sprintf (msg, "local_to_observer_frame_disk: Photon (%d) of type (%d) not in local frame", p_in->np, p_in->istat);
-  check_frame (p_in, F_LOCAL, msg);
+  ierr = check_frame (p_in, F_LOCAL, msg);
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -286,7 +300,7 @@ local_to_observer_frame_disk (p_in, p_out)
   if (geo.rel_mode == REL_MODE_LINEAR)
   {
     f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
-    return (f);
+    return (ierr);
   }
 
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
@@ -303,7 +317,7 @@ local_to_observer_frame_disk (p_in, p_out)
   p_out->w *= (f / p_in->freq);
   p_out->frame = F_OBSERVER;
 
-  return (f);
+  return (ierr);
 }
 
 
@@ -316,7 +330,7 @@ local_to_observer_frame_disk (p_in, p_out)
  * @param [in,out] PhotPtr  pout   the scattered  photon (used for its direction)
  * @param [in] double  v[]   the velocity of the wind where the scatter occurred
  * @param [in] int  nres   either the number of the scatter
- * @return    Always returns 0
+ * @return    The routine returns 0 unless there was an error
  *
  * pout->freq is updated
  *
@@ -364,7 +378,6 @@ doppler (p_in, p_out, nres)
   if (nres == -1)               //Electron scattering (SS)
   {                             /*It was a non-resonant scatter */
     p_out->freq = p_in->freq * (1 - dot (v, p_in->lmn) / VLIGHT) / (1 - dot (v, p_out->lmn) / VLIGHT);
-
 
   }
   else if (nres > -1 && nres < nlines)

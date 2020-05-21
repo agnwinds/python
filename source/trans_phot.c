@@ -104,6 +104,12 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
 
+    check_frame (&p[nphot], F_OBSERVER, "trans_phot_start\n");
+    if (modes.save_photons)
+      save_photons (p, "trans_phot_start");
+
+
+
     /* This is just a watchdog method to tell the user the program is still running */
     if (nphot % nreport == 0)
     {
@@ -128,7 +134,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
       stuff_phot (&p[nphot], &pextract);
       extract (w, &pextract, pextract.origin);
 
-    }                           
+    }
 
     p[nphot].np = nphot;
 
@@ -222,6 +228,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   int ndom;
   double normal[3];
 
+  //XFRAME -- check frame of input photon
+
+  check_frame (p, F_OBSERVER, "trans_phot_single: Starting Error\n");
+
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
   tau_scat = -log (1. - random_number (0.0, 1.0));
@@ -237,7 +247,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   if (modes.save_photons)
   {
-    save_photons (p, "Begin");
+    save_photons (p, "trans_phot_single:Begin");
   }
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
 
@@ -364,6 +374,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     {                           /* Cause the photon to scatter and reinitilize */
 
 
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "MuchBeforesScat");
+      }
+
       pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x);
 
       if (n < 0)
@@ -417,7 +432,18 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       nnscat = 1;
       pp.nscat++;
 
+
+
+
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "BeforesScat");
+      }
       ierr = scatter (&pp, &current_nres, &nnscat);
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "AfterScat");
+      }
       if (ierr)
       {
         Error ("trans_phot: bad return from scatter %d at point 2\n", ierr);

@@ -843,6 +843,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
   for (i = istart; i < iend; i++)
   {
     p[i].origin = PTYPE_STAR;   // For BL photons this is corrected in photon_gen
+    p[i].frame = F_OBSERVER;    // Stellar photons are not redshifted
     p[i].w = weight;
     p[i].istat = p[i].nscat = p[i].nrscat = 0;
     p[i].grid = 0;
@@ -1051,7 +1052,10 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
     /* When given the same input photons the transformation is made in place */
-    local_to_observer_frame_disk (&p[i], &p[i]);
+    if (local_to_observer_frame_disk (&p[i], &p[i]))
+    {
+      Error ("photon_gen: Frame Error\n");
+    }
 
 //OLD    vdisk (p[i].x, v);
 //OLD    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT);     //XFRAME

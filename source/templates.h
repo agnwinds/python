@@ -569,9 +569,9 @@ void calloc_import(int coord_type, int ndom);
 void free_import(int coord_type, int ndom);
 /* frame.c */
 int check_frame(PhotPtr p, enum frame desired_frame, char *msg);
-double observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
-double local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
-double local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
+int observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
+int local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
+int local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
 int doppler(PhotPtr p_in, PhotPtr p_out, int nres);
 /* py_wind_sub.c */
 int zoom(int direction);

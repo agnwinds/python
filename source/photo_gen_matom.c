@@ -663,7 +663,10 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 //OLD    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
 
     /* Make an in-place transformation to the observer frame */
-    local_to_observer_frame (&p[n], &p[n]);
+    if (local_to_observer_frame (&p[n], &p[n]))
+    {
+      Error ("photo_gen_kpkt:Frame transformation error\n");
+    }
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;
@@ -851,7 +854,10 @@ photo_gen_matom (p, weight, photstart, nphot)
 //OLD    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
 
     /* Make an in-place transformation to the observer frame */
-    local_to_observer_frame (&p[n], &p[n]);
+    if (local_to_observer_frame (&p[n], &p[n]))
+    {
+      Error ("photo_gen_matom:Frame transformation error\n");
+    }
 
     p[n].istat = 0;
     p[n].tau = p[n].nscat = p[n].nrscat = 0;

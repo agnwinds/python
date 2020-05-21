@@ -191,8 +191,23 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
    gone so far that the direction of the velocity is reversed. 
  */
 
-  freq_inner = observer_to_local_frame (p, &phot_dummy);
-  freq_outer = observer_to_local_frame (&phot, &phot_dummy);
+  if (modes.save_photons)
+  {
+    save_photons (p, "calculate_ds");
+  }
+
+  if (observer_to_local_frame (p, &phot_dummy))
+  {
+    Error ("calculate_ds:observer to local frame error for p\n");
+  }
+  freq_inner = phot_dummy.freq;
+
+  if (observer_to_local_frame (&phot, &phot_dummy))
+  {
+    Error ("calculate_ds:observer to local frame error for phot\n");
+  }
+  freq_outer = phot_dummy.freq;
+
   dfreq = freq_outer - freq_inner;
 
 
@@ -979,8 +994,13 @@ scatter (p, nres, nnscat)
   xplasma = &plasmamain[one->nplasma];
   ndom = wmain[p->grid].ndom;
 
+  if (check_frame (p, F_OBSERVER, "BeginScatter(err)\n") && modes.save_photons)
+  {
+    save_photons (p, "BeginScatter(err)");
+  }
 
   stuff_phot (p, &pold);
+
   n = where_in_grid (ndom, pold.x);     // Find out where we are
 
   if (n < 0)
@@ -993,7 +1013,11 @@ scatter (p, nres, nnscat)
 //OLD  v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
 //OLD  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //XFRAME This is the photon frequency in the comoving frame
 
-  freq_comoving = observer_to_local_frame (p, &phot_dummy);
+  if (observer_to_local_frame (p, &phot_dummy))
+  {
+    Error ("scatter: observer to local frame error (begin)\n");
+  }
+  freq_comoving = phot_dummy.freq;
 
 
   /* On entering this subroutine we know that a photon packet has been
@@ -1229,13 +1253,20 @@ scatter (p, nres, nnscat)
 
   if (*nres == -1)              //Its an electron scatter
   {
+    //XFRAME - This is a bandaide because we have put in the local frequency
     p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
+    p->frame = F_LOCAL;         // Fix up for now
     compton_dir (p);            // Get a new direction using the KN formula
 
 //OLD    v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
 //OLD    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame  XFRAME
 
-    p->freq = local_to_observer_frame (p, &phot_dummy);
+    if (local_to_observer_frame (p, &phot_dummy))
+    {
+      Error ("scatter:local to observer frame error (a)\n");
+    }
+    p->freq = phot_dummy.freq;
+    p->frame = F_OBSERVER;
 
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
@@ -1267,14 +1298,25 @@ scatter (p, nres, nnscat)
 //OLD    doppler (&pold, p, v, *nres);
 
 
-  if (*nres != -1)              //Only do this if its not an electron scatter, otherwise we have already dealt with this
+  if (*nres != -1)
+  {                             //Only do this if its not an electron scatter, otherwise we have already dealt with this
+    if (check_frame (p, F_LOCAL, "BeforeDoppler") && modes.save_photons)
+    {
+      save_photons (p, "BeforeDoppler(err)");
+    }
     doppler (&pold, p, *nres);
+  }
 
 /*Now calculate the momentum transfer.  What follows appears to be
 correct only if there was no energy absorbed at the scattering site.
 The rest of this is only needed during ionization cycles, before the wind itself
 if fixed.  
 */
+
+  if (check_frame (p, F_OBSERVER, "EndScatter\n") && modes.save_photons)
+  {
+    save_photons (p, "EndScatter(err)");
+  }
 
 //XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 
 // ioniz_or_extract is True for ionization cycles, false for spectral cycles

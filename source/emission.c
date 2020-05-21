@@ -394,7 +394,10 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 //OLD      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT); // XFRAME
 
       /* Make an in place transformation to the observe frame */
-      local_to_observer_frame (&p[np], &p[np]);
+      if (local_to_observer_frame (&p[np], &p[np]))
+      {
+        Error ("photo_gen_wind: frame tranformation error\n");
+      }
 
       /* Extra processing for reveberation calculations */
       switch (geo.reverb)
