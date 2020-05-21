@@ -1277,7 +1277,8 @@ if fixed.
 */
 
 //XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 
-  if (geo.pcycle == 0)
+// ioniz_or_extract is True for ionization cycles, false for spectral cycles
+  if (geo.ioniz_or_extract)
   {
     stuff_v (pold.lmn, p_init);
     renorm (p_init, pold.w / VLIGHT);

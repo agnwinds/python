@@ -1273,6 +1273,11 @@ photon_checks (p, freqmin, freqmax, comment)
       p[nn].freq = freqmax;
       nnn++;
     }
+
+    if (check_frame (&p[nn], F_OBSERVER, "photon_checks: all photons shouuld be in OBSERVER frame\n"))
+    {
+      nnn++;
+    }
   }
 
   if (nnn == 0)

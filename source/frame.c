@@ -31,6 +31,8 @@
  * @param [in] frame    frame  The desired frame of the photon
  * @param [in] char    *msg    A comment to print as an error message if the
  *                             photon is in the incorrect frame
+ * @return 0 (False) if the photons is in the desired frame, 1 (True) if the
+ *  photon is NOT in the desired frame.
  *
  * @details
  *
@@ -42,18 +44,20 @@
  *
  **********************************************************/
 
-void
+int
 check_frame (p, desired_frame, msg)
      PhotPtr p;
      enum frame desired_frame;
      char *msg;
 {
   if (p->frame == desired_frame)
-    return;
+    return (0);
 
   Error ("check_frame: %s\n", msg);
   if (modes.save_photons)
     save_photons (p, "PhotonInIncorrectFrame");
+
+  return (1);
 }
 
 
@@ -97,8 +101,12 @@ observer_to_local_frame (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i;
+  char msg[LINELENGTH];
 
-  check_frame (p_in, F_OBSERVER, "Photon expected in observer frame but is in local");
+
+  sprintf (msg, "observer_to_local_frame: Photon (%d) of type (%d) not in observer frame", p_in->np, p_in->istat);
+
+  check_frame (p_in, F_OBSERVER, msg);
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -179,8 +187,13 @@ local_to_observer_frame (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i;
+  char msg[LINELENGTH];
 
-  check_frame (p_in, F_LOCAL, "Photon expected in local frame but is in observer");
+
+  sprintf (msg, "local_to_observer_frame: Photon (%d) of type (%d) not_in_local_frame", p_in->np, p_in->istat);
+
+
+  check_frame (p_in, F_LOCAL, msg);
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -256,8 +269,10 @@ local_to_observer_frame_disk (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i;
+  char msg[LINELENGTH];
 
-  check_frame (p_in, F_LOCAL, "Photon expected in local frame but is in observer");
+  sprintf (msg, "local_to_observer_frame_disk: Photon (%d) of type (%d) not in local frame", p_in->np, p_in->istat);
+  check_frame (p_in, F_LOCAL, msg);
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -381,6 +396,8 @@ doppler (p_in, p_out, nres)
     Error ("doppler: nres %d > NLINES + nphot_total %d\n", nres, NLINES + nphot_total);
     Exit (0);
   }
+
+  p_out->frame = F_OBSERVER;
 
   return (0);
 
