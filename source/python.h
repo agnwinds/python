@@ -1142,6 +1142,12 @@ typedef struct photon
     P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
+  enum frame
+  {
+    F_LOCAL = 0,
+    F_OBSERVER = 1
+  } frame;
+
   int nscat;                    /*Number of scatters for this photon */
   int nres;                     /*For line scattering, indicates the actual transition; 
                                    for continuum scattering, meaning 
