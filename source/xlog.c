@@ -163,8 +163,6 @@ Log_init (filename)
     Exit (0);
   }
 
-  atexit (Log_close);
-
   return (0);
 }
 

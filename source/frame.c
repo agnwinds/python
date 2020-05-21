@@ -32,27 +32,30 @@
  * @param [in] char    *msg    A comment to print as an error message if the
  *                             photon is in the incorrect frame
  *
- * @return  If in the correct frame 0, otherwise 1
- *
  * @details
  *
  * The purpose of this function is to avoid situations where photons are being
  * transformed incorrectly between the local and observer frame.
  *
+ * If the photon is in the incorrect frame and save_photons mode is enabled,
+ * the photon will be dumped to an external file.
+ *
  **********************************************************/
 
 void
-check_frame (p, frame, msg)
+check_frame (p, desired_frame, msg)
      PhotPtr p;
-     int frame;
+     enum frame desired_frame;
      char *msg;
 {
-  if (p->frame == frame)
+  if (p->frame == desired_frame)
     return;
 
-  Error ("check_frame: %s", msg);
-  Exit (1);
+  Error ("check_frame: %s\n", msg);
+  if (modes.save_photons)
+    save_photons (p, "PhotonInIncorrectFrame");
 }
+
 
 
 /**********************************************************/
