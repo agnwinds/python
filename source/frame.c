@@ -108,7 +108,7 @@ observer_to_local_frame (p_in, p_out)
 {
   WindPtr one;
   int ndom;
-  double f;
+  double f_out, f_in;
   double x;
   double v[3], vel;
   double gamma;
@@ -130,9 +130,11 @@ observer_to_local_frame (p_in, p_out)
 
   vel = dot (p_in->lmn, v);
 
+  f_in = p_in->freq;
+
   if (geo.rel_mode == REL_MODE_LINEAR)
   {
-    f = p_out->freq = p_in->freq * (1. - vel / VLIGHT);
+    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
     return (ierr);
   }
 
@@ -142,16 +144,16 @@ observer_to_local_frame (p_in, p_out)
 
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
-  f = p_out->freq = p_in->freq * gamma * (1. - vel / VLIGHT);
+  f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
 
   x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
 
   for (i = 0; i < 3; i++)
   {
-    p_out->lmn[i] = f / p_in->freq * (p_in->lmn[i] - x * v[i]);
+    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] - x * v[i]);
   }
 
-  p_out->w *= (f / p_in->freq);
+  p_out->w *= (f_out / f_in);
   p_out->frame = F_LOCAL;
 
   return (ierr);
@@ -194,7 +196,7 @@ local_to_observer_frame (p_in, p_out)
 {
   WindPtr one;
   int ndom;
-  double f;
+  double f_out, f_in;
   double x;
   double v[3], vel;
   double gamma;
@@ -216,14 +218,16 @@ local_to_observer_frame (p_in, p_out)
   ndom = one->ndom;
   vwind_xyz (ndom, p_in, v);
 
+  f_in = p_in->freq;
+
   vel = dot (p_in->lmn, v);
   if (geo.rel_mode == REL_MODE_LINEAR)
   {
-    f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
     return (ierr);
   }
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
-  f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
+  f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
 
 
 /* Need to worry about sign changes, etc. here */
@@ -231,10 +235,10 @@ local_to_observer_frame (p_in, p_out)
 
   for (i = 0; i < 3; i++)
   {
-    p_out->lmn[i] = f / p_in->freq * (p_in->lmn[i] + x * v[i]);
+    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] + x * v[i]);
   }
 
-  p_out->w *= (f / p_in->freq);
+  p_out->w *= (f_out / f_in);
   p_out->frame = F_OBSERVER;
 
   return (ierr);
@@ -277,7 +281,7 @@ int
 local_to_observer_frame_disk (p_in, p_out)
      PhotPtr p_in, p_out;
 {
-  double f;
+  double f_out, f_in;
   double x;
   double v[3], vel;
   double gamma;
@@ -296,122 +300,124 @@ local_to_observer_frame_disk (p_in, p_out)
   vdisk (p_in->x, v);
   vel = dot (p_in->lmn, v);
 
+  f_in = p_in->freq;
+
 
   if (geo.rel_mode == REL_MODE_LINEAR)
   {
-    f = p_out->freq = p_in->freq / (1. - vel / VLIGHT);
+    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
     return (ierr);
   }
 
   gamma = sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
-  f = p_out->freq = p_in->freq * gamma * (1. + vel / VLIGHT);
+  f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
 
 /* Need to worry about sign changes, etc. here */
   x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
 
   for (i = 0; i < 3; i++)
   {
-    p_out->lmn[i] = f / p_in->freq * (p_in->lmn[i] + x * v[i]);
+    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] + x * v[i]);
   }
 
-  p_out->w *= (f / p_in->freq);
+  p_out->w *= (f_out / f_in);
   p_out->frame = F_OBSERVER;
 
   return (ierr);
 }
 
 
-/**********************************************************/
-/**
- * @brief      calculate the doppler  shift given the direction of the incoming
- * 	and outgoing photons and the local  velocity of the wind
- *
- * @param [in] PhotPtr  pin   The pre-scattered  photon (used for its direction)
- * @param [in,out] PhotPtr  pout   the scattered  photon (used for its direction)
- * @param [in] double  v[]   the velocity of the wind where the scatter occurred
- * @param [in] int  nres   either the number of the scatter
- * @return    The routine returns 0 unless there was an error
- *
- * pout->freq is updated
- *
- * @details
- * Given the incoming and the outgoing photon direction,
- * doppler calculates the outgoing frequency (to first order in beta).
- * There are two basic cases, depending on whether it was a resonant
- * or a nonresonant scatter.
- *
- * ### Notes ###
- * Called from scatter in resonate.c for a resonant transition  
- * and in extract for disk or wind photons, because you need to 
- * direct photons along a specific line of sight.  
- *
- **********************************************************/
-
-/* Notes
-   doppler is currently called in these 3 places
-
-extract.c:159:        doppler (p, &pp, -1);   This is just to Doppler shift a disk photon into the observer frame
-extract.c:169:        doppler (p, &pp, pp.nres);      This similar for a wind photon, the implication being that when
-                extract is called the photon has not been put in the local frame
-resonate.c:1271:    doppler (&pold, p, *nres)
-
-*/
-
-int
-doppler (p_in, p_out, nres)
-     PhotPtr p_in, p_out;
-     int nres;
-
-{
-  WindPtr one;
-  int ndom;
-  double v[3];
-
-  /* Calculate the local velocity of the wind at this position */
-  one = &wmain[p_in->grid];
-  ndom = one->ndom;
-  vwind_xyz (ndom, p_in, v);
-
-
-
-
-  if (nres == -1)               //Electron scattering (SS)
-  {                             /*It was a non-resonant scatter */
-    p_out->freq = p_in->freq * (1 - dot (v, p_in->lmn) / VLIGHT) / (1 - dot (v, p_out->lmn) / VLIGHT);
-
-  }
-  else if (nres > -1 && nres < nlines)
-  {                             /* It was a resonant scatter. */
-    p_out->freq = lin_ptr[nres]->freq / (1. - dot (v, p_out->lmn) / VLIGHT);
-  }
-  else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
-    /* It was continuum emission - new comoving frequency has been chosen by
-       the matom/kpkt routine, but now need to convert in the same way
-       as for lines (SS) */
-  {
-    /*
-       If a 2-level atom run, one should never arrive here.
-       Just do a check that all is well - this can be removed eventually (SS)
-     */
-    if (geo.rt_mode == RT_MODE_2LEVEL)
-    {
-      Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
-      Exit (0);
-    }
-    p_out->freq = p_out->freq / (1. - dot (v, p_out->lmn) / VLIGHT);
-  }
-/* Now do one final check that nothing is awry.  This is another
- * check added by SS that should probably be deleted or done before this point.
- * I have made it fatal so that we will pay attention to it if it occurs. ksl */
-
-  else
-  {
-    Error ("doppler: nres %d > NLINES + nphot_total %d\n", nres, NLINES + nphot_total);
-    Exit (0);
-  }
-
-  p_out->frame = F_OBSERVER;
-
-  return (0);
-
-}
+//OLD  /**********************************************************/
+//OLD  /**
+//OLD   * @brief      calculate the doppler  shift given the direction of the incoming
+//OLD   *       and outgoing photons and the local  velocity of the wind
+//OLD   *
+//OLD   * @param [in] PhotPtr  pin   The pre-scattered  photon (used for its direction)
+//OLD   * @param [in,out] PhotPtr  pout   the scattered  photon (used for its direction)
+//OLD   * @param [in] double  v[]   the velocity of the wind where the scatter occurred
+//OLD   * @param [in] int  nres   either the number of the scatter
+//OLD   * @return    The routine returns 0 unless there was an error
+//OLD   *
+//OLD   * pout->freq is updated
+//OLD   *
+//OLD   * @details
+//OLD   * Given the incoming and the outgoing photon direction,
+//OLD   * doppler calculates the outgoing frequency (to first order in beta).
+//OLD   * There are two basic cases, depending on whether it was a resonant
+//OLD   * or a nonresonant scatter.
+//OLD   *
+//OLD   * ### Notes ###
+//OLD   * Called from scatter in resonate.c for a resonant transition  
+//OLD   * and in extract for disk or wind photons, because you need to 
+//OLD   * direct photons along a specific line of sight.  
+//OLD   *
+//OLD   **********************************************************/
+//OLD  
+//OLD  /* Notes
+//OLD     doppler is currently called in these 3 places
+//OLD  
+//OLD  extract.c:159:        doppler (p, &pp, -1);   This is just to Doppler shift a disk photon into the observer frame
+//OLD  extract.c:169:        doppler (p, &pp, pp.nres);      This similar for a wind photon, the implication being that when
+//OLD                  extract is called the photon has not been put in the local frame
+//OLD  resonate.c:1271:    doppler (&pold, p, *nres)
+//OLD  
+//OLD  */
+//OLD  
+//OLD  int
+//OLD  doppler (p_in, p_out, nres)
+//OLD       PhotPtr p_in, p_out;
+//OLD       int nres;
+//OLD  
+//OLD  {
+//OLD    WindPtr one;
+//OLD    int ndom;
+//OLD    double v[3];
+//OLD  
+//OLD    /* Calculate the local velocity of the wind at this position */
+//OLD    one = &wmain[p_in->grid];
+//OLD    ndom = one->ndom;
+//OLD    vwind_xyz (ndom, p_in, v);
+//OLD  
+//OLD  
+//OLD  
+//OLD  
+//OLD    if (nres == -1)               //Electron scattering (SS)
+//OLD    {                             /*It was a non-resonant scatter */
+//OLD      p_out->freq = p_in->freq * (1 - dot (v, p_in->lmn) / VLIGHT) / (1 - dot (v, p_out->lmn) / VLIGHT);
+//OLD  
+//OLD    }
+//OLD    else if (nres > -1 && nres < nlines)
+//OLD    {                             /* It was a resonant scatter. */
+//OLD      p_out->freq = lin_ptr[nres]->freq / (1. - dot (v, p_out->lmn) / VLIGHT);
+//OLD    }
+//OLD    else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
+//OLD      /* It was continuum emission - new comoving frequency has been chosen by
+//OLD         the matom/kpkt routine, but now need to convert in the same way
+//OLD         as for lines (SS) */
+//OLD    {
+//OLD      /*
+//OLD         If a 2-level atom run, one should never arrive here.
+//OLD         Just do a check that all is well - this can be removed eventually (SS)
+//OLD       */
+//OLD      if (geo.rt_mode == RT_MODE_2LEVEL)
+//OLD      {
+//OLD        Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
+//OLD        Exit (0);
+//OLD      }
+//OLD      p_out->freq = p_out->freq / (1. - dot (v, p_out->lmn) / VLIGHT);
+//OLD    }
+//OLD  /* Now do one final check that nothing is awry.  This is another
+//OLD   * check added by SS that should probably be deleted or done before this point.
+//OLD   * I have made it fatal so that we will pay attention to it if it occurs. ksl */
+//OLD  
+//OLD    else
+//OLD    {
+//OLD      Error ("doppler: nres %d > NLINES + nphot_total %d\n", nres, NLINES + nphot_total);
+//OLD      Exit (0);
+//OLD    }
+//OLD  
+//OLD    p_out->frame = F_OBSERVER;
+//OLD  
+//OLD    return (0);
+//OLD  
+//OLD  }

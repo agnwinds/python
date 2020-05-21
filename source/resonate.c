@@ -973,17 +973,15 @@ scatter (p, nres, nnscat)
      int *nres;
      int *nnscat;
 {
-//OLd  double v[3];
   double z_prime[3];
   int which_out;
-  struct photon pold, phot_dummy;
+  struct photon p_orig;
   int i, n;
   double p_init[3], p_final[3], dp[3], dp_cyl[3];
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
   int m, llvl, ulvl;
-//OLD  double v_dop;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   int ndom;
@@ -994,14 +992,16 @@ scatter (p, nres, nnscat)
   xplasma = &plasmamain[one->nplasma];
   ndom = wmain[p->grid].ndom;
 
+  /* Scatter assumes it has been passed a photon in the observer frame */
+
   if (check_frame (p, F_OBSERVER, "BeginScatter(err)\n") && modes.save_photons)
   {
     save_photons (p, "BeginScatter(err)");
   }
 
-  stuff_phot (p, &pold);
+  stuff_phot (p, &p_orig);
 
-  n = where_in_grid (ndom, pold.x);     // Find out where we are
+  n = where_in_grid (ndom, p->x);       // Find out where we are
 
   if (n < 0)
   {
@@ -1009,15 +1009,14 @@ scatter (p, nres, nnscat)
     return (-1);
   }
 
-//OLD  vwind_xyz (ndom, p, v);       //get the local velocity at the location of the photon
-//OLD  v_dop = dot (p->lmn, v);      //get the dot product of the photon direction with the wind, to get the doppler velocity
-//OLD  freq_comoving = p->freq * (1. - v_dop / VLIGHT);      //XFRAME This is the photon frequency in the comoving frame
 
-  if (observer_to_local_frame (p, &phot_dummy))
+  if (observer_to_local_frame (p, p))
   {
     Error ("scatter: observer to local frame error (begin)\n");
   }
-  freq_comoving = phot_dummy.freq;
+  freq_comoving = p->freq;
+
+  /* So p is now in the local, or co-moving frame */
 
 
   /* On entering this subroutine we know that a photon packet has been
@@ -1200,8 +1199,6 @@ scatter (p, nres, nnscat)
         xplasma->bf_simple_ionpool_in += p->w * (1 - prob_kpkt);
         p->w *= prob_kpkt;
 
-//OLD        /* record the amount of energy going into the simple ion ionization pool */
-//OLD        xplasma->bf_simple_ionpool_in += (p->w / prob_kpkt) - p->w;
         macro_gov (p, nres, 2, &which_out);     //routine to deal with kpkt
 #else
         /* This is the old apporach.  Process the BF photon for a simple atom.  In this
@@ -1233,16 +1230,21 @@ scatter (p, nres, nnscat)
       macro_gov (p, nres, 2, &which_out);       //ff always make a k-packet
     }
   }
-  /*XFRAME need to look at what's happening at the end of macro_gov - likely need a transform 
-     there to get back to observer frame: probably currently does Doppler effect but that's all?
+  /*XFRAME need to make sure that macro_gov leaves the photon in the Local frame. We will do all
+     of the transformations back to the observer frame here.
    */
 
 
   /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
 
-  /* Set nres  correctly for the call to randvec */
+  /* Set nres  correctly and make sure the frequency is correct
+     for a resonanant scatter. Note that nres may have changed especially for macro-atoms */
 
-  p->nres = *nres;              // Update the resonance number on a scatter
+  p->nres = *nres;
+  if (*nres > -1 && *nres < nlines)
+  {
+    p->freq = lin_ptr[*nres]->freq;
+  }
 
   /* SS July 04
      Next block is modified to include the thermal trapping model for anisotropic scattering.
@@ -1253,20 +1255,18 @@ scatter (p, nres, nnscat)
 
   if (*nres == -1)              //Its an electron scatter
   {
-    //XFRAME - This is a bandaide because we have put in the local frequency
-    p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
-    p->frame = F_LOCAL;         // Fix up for now
+
+// p is already in the local frame so the next two lines are unnecessary
+//OLD    p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
+//OLD    p->frame = F_LOCAL;         // Fix up for now
+
     compton_dir (p);            // Get a new direction using the KN formula
 
-//OLD    v_dop = dot (p->lmn, v);    // Find the dot product of the new direction with the wind velocity 
-//OLD    p->freq = p->freq / (1. - v_dop / VLIGHT);  //Transform back to the observer frame  XFRAME
 
-    if (local_to_observer_frame (p, &phot_dummy))
-    {
-      Error ("scatter:local to observer frame error (a)\n");
-    }
-    p->freq = phot_dummy.freq;
-    p->frame = F_OBSERVER;
+//OLD    if (local_to_observer_frame (p, p))
+//OLD    {
+//OLD      Error ("scatter:local to observer frame error (a)\n");
+//OLD    }
 
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
@@ -1289,23 +1289,20 @@ scatter (p, nres, nnscat)
   /* End of modification for thermal trapping model (SS July 04) */
 
 
+  /* Finally put everything back in the observer frame */
+
+  local_to_observer_frame (p, p);
 
 
-//OLD (We already calculated this)  vwind_xyz (ndom, p, v);       /* Get the velocity vector for the wind */
 
-//OLD  vwind_xyz (ndom, p, v);       //XFRAME had to put this in until doppler is understood
-//OLD  if (*nres != -1)              //Only do this if its not an electron scatter, otherwise we have already dealt with this
-//OLD    doppler (&pold, p, v, *nres);
-
-
-  if (*nres != -1)
-  {                             //Only do this if its not an electron scatter, otherwise we have already dealt with this
-    if (check_frame (p, F_LOCAL, "BeforeDoppler") && modes.save_photons)
-    {
-      save_photons (p, "BeforeDoppler(err)");
-    }
-    doppler (&pold, p, *nres);
-  }
+//OLD  if (*nres != -1)
+//OLD  {                             //Only do this if its not an electron scatter, otherwise we have already dealt with this
+//OLD    if (check_frame (p, F_LOCAL, "BeforeDoppler") && modes.save_photons)
+//OLD    {
+//OLD      save_photons (p, "BeforeDoppler(err)");
+//OLD    }
+//OLD    doppler (&p_orig, p, *nres);
+//OLD  }
 
 /*Now calculate the momentum transfer.  What follows appears to be
 correct only if there was no energy absorbed at the scattering site.
@@ -1322,17 +1319,17 @@ if fixed.
 // ioniz_or_extract is True for ionization cycles, false for spectral cycles
   if (geo.ioniz_or_extract)
   {
-    stuff_v (pold.lmn, p_init);
-    renorm (p_init, pold.w / VLIGHT);
+    stuff_v (p_orig.lmn, p_init);
+    renorm (p_init, p_orig.w / VLIGHT);
     stuff_v (p->lmn, p_final);
     renorm (p_final, p->w / VLIGHT);
     vsub (p_final, p_init, dp);
 
-    project_from_xyz_cyl (pold.x, dp, dp_cyl);
+    project_from_xyz_cyl (p_orig.x, dp, dp_cyl);
 
 
 
-    if (pold.x[2] < 0)
+    if (p_orig.x[2] < 0)
       dp_cyl[2] *= (-1);
     for (i = 0; i < 3; i++)
     {

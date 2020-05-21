@@ -379,19 +379,16 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       }
       p[np].nnscat = nnscat;
 
-      /* Photons are generated in the CMF and so must be Doppler shifted into 
-         the Lab Frame.  We only correct the frequency to first order for the velocity of the wind.,
-         We don not make adjust the direction for relativistic effects.
+      /* Photons are generated in the local and so must be Doppler shifted into 
+         the observer frame.  
        */
 
 
       vwind_xyz (ndom, &p[np], v);
       p[np].istat = 0;
+      p[np].frame = F_LOCAL;
       p[np].tau = p[np].nscat = p[np].nrscat = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon
-
-/* the old approach here did not follow our convention for changing from the obsserver to local frame XFRAME */
-//OLD      p[np].freq *= (1. + dot (v, p[np].lmn) / VLIGHT); // XFRAME
 
       /* Make an in place transformation to the observe frame */
       if (local_to_observer_frame (&p[np], &p[np]))

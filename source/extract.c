@@ -177,10 +177,19 @@ extract (w, p, itype)
 
 
 /* Create a photon pp to use here and in extract_one.  This assures we
- * have not modified p as part of extract
+ * have not modified p as part of extract.
+ *
+ * If it is a wind photon, it will have be in the observer frame in 
+ * a different direction so we need to put it into the local frame
+ * This needs to be done before we stuff the new direction in
  */
 
       stuff_phot (p, &pp);
+      if (itype == PTYPE_WIND)
+      {
+        observer_to_local_frame (&pp, &pp);
+      }
+
       stuff_v (xxspec[n].lmn, pp.lmn);  /* Stuff new photon direction into pp */
 
 /* 
@@ -195,7 +204,10 @@ one is odd. We do frequency here but weighting is carried out in  extract */
       {
 //OLD        vdisk (pp.x, v);
 //OLD        doppler (p, &pp, v, -1);
-        doppler (p, &pp, -1);
+        pp.freq = pp.freq_orig;
+        pp.frame = F_LOCAL;
+        local_to_observer_frame_disk (&pp, &pp);
+//OLD        doppler (p, &pp, -1);
 
       }
       if (itype == PTYPE_WIND)
@@ -205,9 +217,19 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 //OLD        vwind_xyz (ndom, &pp, v);       /*  Get the velocity at the position of pp */
 //OLD        doppler (p, &pp, v, pp.nres);   /*  Doppler shift the photon -- test! */
 
-        doppler (p, &pp, pp.nres);      /*  Doppler shift the photon -- test! */
+//OLD        doppler (p, &pp, pp.nres);      /*  Doppler shift the photon -- test! */
 
-/*  Doppler shift the photon (as nonresonant scatter) to new direction */
+
+
+/* XFRAME  Doppler shift the photon  to new direction.  In what follows
+   we make the assumption which seems explicit in the old doppler routine that we 
+   are in the observe frame
+ */
+        if (pp.nres > -1 && pp.nres < nlines)
+        {
+          pp.freq = lin_ptr[pp.nres]->freq;
+        }
+        local_to_observer_frame_disk (&pp, &pp);
 
       }
 
