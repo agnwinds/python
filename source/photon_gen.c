@@ -1052,6 +1052,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     /* Now Doppler shift this. Use convention of dividing when going from rest
        to moving frame */
 
+
     /* When given the same input photons the transformation is made in place */
     if (local_to_observer_frame_disk (&p[i], &p[i]))
     {

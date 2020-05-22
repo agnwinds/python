@@ -189,10 +189,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
    gone so far that the direction of the velocity is reversed. 
  */
 
-  if (modes.save_photons)
-  {
-    save_photons (p, "calculate_ds");
-  }
+//OLD  if (modes.save_photons)
+//OLD  {
+//OLD    save_photons (p, "calculate_ds");
+//OLD  }
 
   if (observer_to_local_frame (p, &phot_dummy))
   {
