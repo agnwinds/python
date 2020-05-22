@@ -950,6 +950,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   for (i = istart; i < iend; i++)
   {
     p[i].origin = PTYPE_DISK;   // identify this as a disk photon
+    p[i].frame = F_LOCAL;
     p[i].w = weight;
     p[i].istat = p[i].nscat = p[i].nrscat = 0;
     p[i].tau = 0;

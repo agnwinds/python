@@ -182,8 +182,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * then the photon frequency will be less. */
 
 
-//OLD  freq_inner = p->freq * (1. - v1 / VLIGHT);    //XFRAME
-//OLD  freq_outer = phot.freq * (1. - v2 / VLIGHT);  //XFRAME
 /* ksl 2005 - In other parts of the code, we have been able to eliminate 
    calculating the velocities in situations where we call new routines like
    observer_to_local frame, as is done below, but we cannot do this in this
@@ -253,7 +251,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /*Compute the angle averaged electron scattering cross section.  Note electron scattering  is always
      treated as a scattering event. */
 
-  kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;   //XFRAME In principle, lines like this need a transformation: kappa transforms
+  //XFRAME In principle, lines like this need a transformation: kappa transforms
+  kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
 
 /* If in macro-atom mode, calculate the bf and ff opacities, becuase in macro-atom mode
  * everthing including bf is calculated as a scattering process.  The routine
@@ -272,7 +271,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
     freq_av = freq_inner;
 
-    //(freq_inner + freq_outer) * 0.5;  //need to do better than this perhaps but okay for star - comoving frequency (SS)
+    // XFRAME need to do better than this perhaps but okay for star - comoving frequency (SS)
+    //(freq_inner + freq_outer) * 0.5;  
 
 
     kap_bf_tot = kappa_bf (xplasma, freq_av, 0);
@@ -1256,17 +1256,7 @@ scatter (p, nres, nnscat)
   if (*nres == -1)              //Its an electron scatter
   {
 
-// p is already in the local frame so the next two lines are unnecessary
-//OLD    p->freq = freq_comoving;    // The photon frequency in the electron rest frame 
-//OLD    p->frame = F_LOCAL;         // Fix up for now
-
     compton_dir (p);            // Get a new direction using the KN formula
-
-
-//OLD    if (local_to_observer_frame (p, p))
-//OLD    {
-//OLD      Error ("scatter:local to observer frame error (a)\n");
-//OLD    }
 
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
@@ -1294,15 +1284,6 @@ scatter (p, nres, nnscat)
   local_to_observer_frame (p, p);
 
 
-
-//OLD  if (*nres != -1)
-//OLD  {                             //Only do this if its not an electron scatter, otherwise we have already dealt with this
-//OLD    if (check_frame (p, F_LOCAL, "BeforeDoppler") && modes.save_photons)
-//OLD    {
-//OLD      save_photons (p, "BeforeDoppler(err)");
-//OLD    }
-//OLD    doppler (&p_orig, p, *nres);
-//OLD  }
 
 /*Now calculate the momentum transfer.  What follows appears to be
 correct only if there was no energy absorbed at the scattering site.

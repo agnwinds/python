@@ -202,24 +202,14 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
       if (itype == PTYPE_DISK)
       {
-//OLD        vdisk (pp.x, v);
-//OLD        doppler (p, &pp, v, -1);
         pp.freq = pp.freq_orig;
         pp.frame = F_LOCAL;
         local_to_observer_frame_disk (&pp, &pp);
-//OLD        doppler (p, &pp, -1);
 
       }
       if (itype == PTYPE_WIND)
       {                         /* If the photon was scattered in the wind, 
                                    the frequency also must be shifted */
-//OLD        ndom = wmain[p->grid].ndom;
-//OLD        vwind_xyz (ndom, &pp, v);       /*  Get the velocity at the position of pp */
-//OLD        doppler (p, &pp, v, pp.nres);   /*  Doppler shift the photon -- test! */
-
-//OLD        doppler (p, &pp, pp.nres);      /*  Doppler shift the photon -- test! */
-
-
 
 /* XFRAME  Doppler shift the photon  to new direction.  In what follows
    we make the assumption which seems explicit in the old doppler routine that we 
