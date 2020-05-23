@@ -572,13 +572,13 @@ make_spectra (restart_stat)
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
     /* TODAY */
-//OLD    if (modes.save_photons)
-//OLD    {
-//OLD      for (n = 0; n < NPHOT; n++)
-//OLD      {
-//OLD        save_photons (&p[n], "CREATE");
-//OLD      }
-//OLD    }
+    if (modes.save_photons)
+    {
+      for (n = 0; n < NPHOT; n++)
+      {
+        save_photons (&p[n], "CREATE");
+      }
+    }
 
     for (icheck = 0; icheck < NPHOT; icheck++)
     {
