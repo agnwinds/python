@@ -132,7 +132,7 @@ observer_to_local_frame (p_in, p_out)
 
   f_in = p_in->freq;
 
-  if (geo.rel_mode == REL_MODE_LINEAR)
+  if (rel_mode == REL_MODE_LINEAR)
   {
     f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
     return (ierr);
@@ -221,7 +221,7 @@ local_to_observer_frame (p_in, p_out)
   f_in = p_in->freq;
 
   vel = dot (p_in->lmn, v);
-  if (geo.rel_mode == REL_MODE_LINEAR)
+  if (rel_mode == REL_MODE_LINEAR)
   {
     f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
     return (ierr);
@@ -303,7 +303,7 @@ local_to_observer_frame_disk (p_in, p_out)
   f_in = p_in->freq;
 
 
-  if (geo.rel_mode == REL_MODE_LINEAR)
+  if (rel_mode == REL_MODE_LINEAR)
   {
     f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
     return (ierr);

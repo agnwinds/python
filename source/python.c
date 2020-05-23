@@ -110,7 +110,7 @@ main (argc, argv)
   time_max = -1;
   set_max_time (files.root, time_max);
 
-  geo.rel_mode = REL_MODE_FULL;
+  rel_mode = REL_MODE_FULL;
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To

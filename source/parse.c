@@ -151,7 +151,7 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-v/c") == 0)
       {
-        geo.rel_mode = REL_MODE_LINEAR;
+        rel_mode = REL_MODE_LINEAR;
         Log ("Using only linear v/c corrections for Doppler shifts, etc.\n");
         j = i;
       }
