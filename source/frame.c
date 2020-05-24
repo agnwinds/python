@@ -122,6 +122,7 @@ observer_to_local_frame (p_in, p_out)
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
+  p_out->frame = F_LOCAL;
 
   /* Calculate the local velocity of the wind at this position */
   one = &wmain[p_in->grid];
@@ -129,6 +130,7 @@ observer_to_local_frame (p_in, p_out)
   vwind_xyz (ndom, p_in, v);
 
   vel = dot (p_in->lmn, v);
+
 
   f_in = p_in->freq;
 
@@ -154,7 +156,6 @@ observer_to_local_frame (p_in, p_out)
   }
 
   p_out->w *= (f_out / f_in);
-  p_out->frame = F_LOCAL;
 
   return (ierr);
 }
@@ -212,6 +213,7 @@ local_to_observer_frame (p_in, p_out)
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
+  p_out->frame = F_OBSERVER;
 
   /* Calculate the local velocity of the wind at this position */
   one = &wmain[p_in->grid];
@@ -239,7 +241,6 @@ local_to_observer_frame (p_in, p_out)
   }
 
   p_out->w *= (f_out / f_in);
-  p_out->frame = F_OBSERVER;
 
   return (ierr);
 }
@@ -294,6 +295,7 @@ local_to_observer_frame_disk (p_in, p_out)
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
+  p_out->frame = F_OBSERVER;
 
 
   /* Calculate the local velocity of the disk at this position */
@@ -301,6 +303,7 @@ local_to_observer_frame_disk (p_in, p_out)
   vel = dot (p_in->lmn, v);
 
   f_in = p_in->freq;
+
 
 
   if (rel_mode == REL_MODE_LINEAR)
@@ -321,7 +324,6 @@ local_to_observer_frame_disk (p_in, p_out)
   }
 
   p_out->w *= (f_out / f_in);
-  p_out->frame = F_OBSERVER;
 
   return (ierr);
 }
