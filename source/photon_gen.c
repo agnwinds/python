@@ -189,7 +189,12 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   for (n = 0; n < NPHOT; n++)
   {
     p[n].w_orig = p[n].w;
-    p[n].freq_orig = p[n].freq;
+    if (fabs (p[n].freq_orig_loc - p[n].freq) > 0.5 * p[n].freq)
+    {
+      Error ("Photon_gen: photon (%d) from %d does not have an orignal frequency defined  orig %10.3e shifted %10.3e\n", n, p[n].origin,
+             p[n].freq_orig, p[n].freq);
+    }
+
     p[n].origin_orig = p[n].origin;
     p[n].np = n;
     p[n].ds = 0;
@@ -889,6 +894,9 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     }
 
     randvcos (p[i].lmn, p[i].x);
+
+    p[i].freq_orig_loc = p[i].freq;
+
   }
   return (0);
 }
@@ -1053,6 +1061,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
 
+    p[i].freq_orig_loc = p[i].freq;
+
     /* When given the same input photons the transformation is made in place */
     if (local_to_observer_frame_disk (&p[i], &p[i]))
     {
@@ -1061,7 +1071,6 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
 //OLD    vdisk (p[i].x, v);
 //OLD    p[i].freq /= (1. - dot (v, p[i].lmn) / VLIGHT);     //XFRAME
-
 
 
 

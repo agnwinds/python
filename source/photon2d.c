@@ -507,7 +507,7 @@ return and record an error */
 
   if (modes.save_photons)
   {
-    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, tau);
+    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, *tau);
   }
 
 

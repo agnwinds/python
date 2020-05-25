@@ -1120,11 +1120,11 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 
 typedef struct photon
 {
-  double x[3];                  /* The position of packet */
-  double lmn[3];                /* Direction cosines of the packet */
-  double freq, freq_orig;       /* current and original frequency of this packet */
-  double w, w_orig;             /* current and original weight of this packet */
-  double tau;                   /* optical depth of the photon since its creation or last interaction */
+  double x[3];                                  /* The position of packet */
+  double lmn[3];                                /* Direction cosines of the packet */
+  double freq, freq_orig,freq_orig_loc;         /* current, original frequency redshifted and unredshifted) of this packet */
+  double w, w_orig;                             /* current and original weight of this packet */
+  double tau;                                   /* optical depth of the photon since its creation or last interaction */
   enum istat_enum
   {
     P_INWIND = 0,               //in wind,
