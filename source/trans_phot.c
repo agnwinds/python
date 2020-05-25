@@ -438,7 +438,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (modes.save_photons)
       {
-        save_photons (&pp, "BeforesScat");
+        save_photons (&pp, "BeforeScat");
       }
       ierr = scatter (&pp, &current_nres, &nnscat);
       if (modes.save_photons)
