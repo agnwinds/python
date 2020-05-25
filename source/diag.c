@@ -66,6 +66,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -444,4 +445,44 @@ track_scatters (p, nplasma, comment)
   fflush (epltptr);
 
   return (0);
+}
+
+
+
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Write to the extra diagnostics file a special 
+ *   message for debugging
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format statement
+ * @return     The number of characters sucessfully written
+ *
+ *
+ * The intention that this routine would be used to log messages when one
+ * is trying to debug a problme where one is using the extra diagnostics file
+ * and that these lines would be removed from
+ * the code once the debugging was completed. 
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
+
+int
+Diag (char *format, ...)
+{
+  va_list ap, ap2;
+  int result;
+
+
+  va_start (ap, format);
+  va_copy (ap2, ap);
+  fprintf (epltptr, "DIAG ");
+  result = vfprintf (epltptr, format, ap2);
+  va_end (ap);
+  return (result);
 }
