@@ -1009,12 +1009,18 @@ scatter (p, nres, nnscat)
     return (-1);
   }
 
+  if (modes.save_photons)
+  {
+    save_photons (p, "ScatIn");
+  }
 
   if (observer_to_local_frame (p, p))
   {
     Error ("scatter: observer to local frame error (begin)\n");
   }
   freq_comoving = p->freq;
+
+
 
   /* So p is now in the local, or co-moving frame */
 
@@ -1291,9 +1297,9 @@ The rest of this is only needed during ionization cycles, before the wind itself
 if fixed.  
 */
 
-  if (check_frame (p, F_OBSERVER, "EndScatter\n") && modes.save_photons)
+  if (modes.save_photons)
   {
-    save_photons (p, "EndScatter(err)");
+    save_photons (p, "ExScatter");
   }
 
 //XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 

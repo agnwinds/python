@@ -83,6 +83,7 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
 	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
+        XDEBUG = True
 else
 # Use this for large runs
 	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
@@ -196,8 +197,12 @@ prototypes:
 
 python: startup python.o $(python_objects)
 	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-	cp $@ $(BIN)/py
-	mv $@ $(BIN)/py$(VERSION)
+	cp $@ $(BIN)/py 
+        ifdef XDEBUG
+	  mv $@ $(BIN)/py$(VERSION)_debug
+        else
+	  mv $@ $(BIN)/py$(VERSION)
+        endif
 	# Fix indenting, if necessary.
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 

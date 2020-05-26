@@ -263,6 +263,7 @@ int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 int save_extract_photons(int n, PhotPtr p, PhotPtr pp);
 int save_photons(PhotPtr p, char comment[]);
 int track_scatters(PhotPtr p, int nplasma, char *comment);
+int Diag(char *format, ...);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);
@@ -572,7 +573,6 @@ int check_frame(PhotPtr p, enum frame desired_frame, char *msg);
 int observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
-int doppler(PhotPtr p_in, PhotPtr p_out, int nres);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -219,7 +219,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
         {
           pp.freq = lin_ptr[pp.nres]->freq;
         }
-        local_to_observer_frame_disk (&pp, &pp);
+        local_to_observer_frame (&pp, &pp);
 
       }
 
@@ -237,8 +237,20 @@ one is odd. We do frequency here but weighting is carried out in  extract */
       }
 
       /* Now extract the photon */
+      if (modes.save_photons)
+      {
+        Diag ("BeforeExtract freq  %10.3e itype %d  nres %d\n", pp.freq, itype, pp.nres);
+        save_photons (&pp, "BeforeExtract");
+      }
+
 
       extract_one (w, &pp, itype, n);
+
+//OLD      if (modes.save_photons)
+//OLD      {
+//OLD        save_photons (&pp, "AfterExtract");
+//OLD      }
+
 
       /* Make sure phot_hist is on, for just one extraction */
 

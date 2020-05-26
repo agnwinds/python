@@ -265,6 +265,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        position of the photon. */
 
 
+    if (modes.save_photons)
+    {
+      save_photons (&pp, "BeforeTranslate");
+    }
+
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
 
     if (modes.save_photons)
@@ -374,10 +379,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     {                           /* Cause the photon to scatter and reinitilize */
 
 
-      if (modes.save_photons)
-      {
-        save_photons (&pp, "MuchBeforesScat");
-      }
 
       pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x);
 
@@ -437,7 +438,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (modes.save_photons)
       {
-        save_photons (&pp, "BeforesScat");
+        save_photons (&pp, "BeforeScat");
       }
       ierr = scatter (&pp, &current_nres, &nnscat);
       if (modes.save_photons)
