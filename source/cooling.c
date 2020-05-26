@@ -75,7 +75,12 @@ cooling (xxxplasma, t)
 
   xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
+  /* The charge exchange cooling */
+
+  xxxplasma->cool_ch_ex = total_ch_ex (&wmain[xxxplasma->nwind], t);
+
   /* we now call xtotal emission which computes the cooling rates for processes which can, in principle, make photons. */
+
 
   xxxplasma->cool_tot =
     xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
@@ -350,14 +355,14 @@ shock_heating (one)
 double
 wind_cooling ()
 {
-  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;
+  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab, cool_ch_ex;
   double nonthermal;
   int n;
   double x;
   int nplasma;
 
 
-  cool = lum_lines = cool_rr = lum_ff = cool_comp = 0;
+  cool = lum_lines = cool_rr = lum_ff = cool_comp = cool_ch_ex = 0;
   cool_dr = cool_di = cool_adiab = heat_adiab = 0;      //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   nonthermal = 0;
 
@@ -371,6 +376,7 @@ wind_cooling ()
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
+      cool_ch_ex += plasmamain[nplasma].cool_ch_ex;
       cool_comp += plasmamain[nplasma].cool_comp;       //1108 NSH Increment the compton luminosity for that cell.
       cool_dr += plasmamain[nplasma].cool_dr;   //1109 NSH Increment the DR luminosity for the cell.
       cool_di += plasmamain[nplasma].cool_di;   //1408 NSH Increment the DI luminosity for the cell.
@@ -419,6 +425,7 @@ wind_cooling ()
   geo.cool_comp = cool_comp;    //The compton luminosity
   geo.cool_dr = cool_dr;        //the DR luminosity
   geo.cool_di = cool_di;        //the DI luminosity 
+  geo.cool_ch_ex = cool_ch_ex;  //the DI luminosity 
   geo.cool_adiabatic = cool_adiab;
   geo.heat_adiabatic = heat_adiab;
   geo.heat_shock = nonthermal;

@@ -465,6 +465,28 @@ typedef struct gaunt_total
 
 Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
 
+
+
+#define MAX_CHARGE_EXCHANGE 100   //Space set aside for charge exchange parameters
+
+int n_charge_exchange;              //The actual number of scaled temperatures
+
+typedef struct charge_exchange
+{
+  int nion1;                     //The ion which will be ionized - normally hydrogen
+  int nion2;                     //The ion which will be recombining
+  double a,b,c,d;                //The parameters for the fit
+  double tmin;                  //The minimum temperature which the fit is valif for
+  double tmax;                  //The maximum temperature which the fit is valif for
+  double energy_defect;         //The energy defect for the reaction
+} Charge_exchange, *Charge_exchange_ptr;
+
+Charge_exchange  charge_exchange[MAX_CHARGE_EXCHANGE];     //Set up the structure
+
+double charge_exchange_rates[MAX_CHARGE_EXCHANGE]; //An array to store the actual rates for a given temperature
+
+
+
 /* a variable which controls whether to save a summary of atomic data
    this is defined in atomic.h, rather than the modes structure */
 int write_atomicdata;

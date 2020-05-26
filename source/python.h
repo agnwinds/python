@@ -542,6 +542,7 @@ struct geometry
   double cool_di;               /* 1409 NSH The direct ionization luminosity */
   double cool_dr;               /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double cool_adiabatic;        /*1209 NSH The cooling of the wind due to adiabatic expansion */
+  double cool_ch_ex;
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
   double heat_shock;            /*1806 - ksl - The amount of extra heating going into the wind due to shock heating. Added for FU Ori project */
 
@@ -559,6 +560,7 @@ struct geometry
   double cool_di_ioniz;         /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;
   double cool_adiabatic_ioniz;
+  double cool_ch_ex_ioniz;
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
 
   double f_matom, f_kpkt;       /*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
@@ -835,6 +837,7 @@ typedef struct plasma
                                                    and heat_photo. SS June 04. */
   double heat_photo, heat_z;    /*photoionization heating total and of metals */
   double heat_auger;            /* photoionization heating due to inner shell ionizations */
+  double heat_ch_ex;
   double abs_photo, abs_auger;  /* this is the energy absorbed from the photon due to these processes - different from 
                                    the heating rate because of the binding energy */
   double w;                     /*The dilution factor of the wind */
@@ -906,7 +909,7 @@ typedef struct plasma
   double cool_rr, cool_rr_metals;       /*fb luminosity & fb of metals metals */
   double lum_tot, lum_tot_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
-
+      double cool_ch_ex;
   double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
   double lum_rr_ioniz;
@@ -916,6 +919,7 @@ typedef struct plasma
   double cool_rr_ioniz, cool_rr_metals_ioniz;   /*fb luminosity & fb of metals metals */
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
+  double cool_ch_ex_ioniz;
 
   double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
 
