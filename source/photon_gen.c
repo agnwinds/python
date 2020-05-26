@@ -1064,7 +1064,6 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
 
-    Log ("FOO  %d  %10.3e\n", i, p[i].freq);
     p[i].freq_orig_loc = p[i].freq;
 
     /* When given the same input photons the transformation is made in place */
