@@ -647,7 +647,12 @@ int ierr_vwind = 0;
  * If we ever implement a real 3d coordinate system, one will need to look at
  * this routine again.
  *
+ * The routine checks to see whether the position for which the velocity is needed
+ * and if so short-circuits the calculation returning a stored value
+ *
  **********************************************************/
+
+double vwind_xyz_v[3], vwind_xyz_pos[3];
 
 int
 vwind_xyz (ndom, p, v)
@@ -661,6 +666,21 @@ vwind_xyz (ndom, p, v)
   double ctheta, stheta;
   double x, frac[4];
   int nn, nnn[4], nelem;
+
+
+  if (vwind_xyz_pos[0] == p->x[0] && vwind_xyz_pos[1] == p->x[1] && vwind_xyz_pos[2] == p->x[2])
+  {
+    v[0] = vwind_xyz_v[0];
+    v[1] = vwind_xyz_v[1];
+    v[2] = vwind_xyz_v[2];
+    return (0);
+  }
+  else
+  {
+    vwind_xyz_pos[0] = p->x[0];
+    vwind_xyz_pos[1] = p->x[1];
+    vwind_xyz_pos[2] = p->x[2];
+  }
 
 
 
@@ -696,8 +716,8 @@ vwind_xyz (ndom, p, v)
   if (rho == 0)
   {                             // Then we will not be able to project from a cylindrical ot a cartesian system
     Error ("vwind_xyz: Cannot determine an xyz velocity on z axis. Returnin 0,0,v[2]\n");
-    v[0] = v[1] = 0;
-    v[2] = vv[2];
+    vwind_xyz_v[0] = vwind_xyz_v[1] = v[0] = v[1] = 0;
+    vwind_xyz_v[2] = v[2] = vv[2];
     return (0);
   }
 
@@ -706,9 +726,9 @@ vwind_xyz (ndom, p, v)
 
   ctheta = p->x[0] / rho;
   stheta = p->x[1] / rho;
-  v[0] = vv[0] * ctheta - vv[1] * stheta;
-  v[1] = vv[0] * stheta + vv[1] * ctheta;
-  v[2] = vv[2];
+  vwind_xyz_v[0] = v[0] = vv[0] * ctheta - vv[1] * stheta;
+  vwind_xyz_v[1] = v[1] = vv[0] * stheta + vv[1] * ctheta;
+  vwind_xyz_v[2] = v[2] = vv[2];
 
   if (sane_check (v[0]) || sane_check (v[1]) || sane_check (v[2]))
   {
