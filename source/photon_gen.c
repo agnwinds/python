@@ -189,6 +189,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   for (n = 0; n < NPHOT; n++)
   {
     p[n].w_orig = p[n].w;
+    p[n].freq_orig = p[n].freq;
     if (fabs (p[n].freq_orig_loc - p[n].freq) > 0.5 * p[n].freq)
     {
       Error ("Photon_gen: photon (%d) from %d does not have an orignal frequency defined  orig %10.3e shifted %10.3e gen %10.3e\n", n,
