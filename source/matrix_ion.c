@@ -595,32 +595,26 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
 
 
-  for (mm = 0; mm < n_charge_exchange; mm++)
+  for (mm = 0; mm < nions; mm++)
   {
-    printf ("BLAH %i %i %e\n", charge_exchange[mm].nion1, charge_exchange[mm].nion2, charge_exchange[mm].a);
-    if (ion[charge_exchange[mm].nion1].z == 1)  //This is a recombination rate
+    if (ion[mm].z != 1 && ion[mm].istate != 0)  //Only compute for helium and up, and not for neutral species
     {
-//      printf ("BOOM1 %i %i %e %e %e\n", charge_exchange[mm].nion1, charge_exchange[mm].nion2, charge_exchange_rates[mm], xne, nh1);
-      ion_out = charge_exchange[mm].nion2;      //This is the ion that is being depopulated
-      rate_matrix[ion_out][ion_out] -= charge_exchange_rates[mm] * nh1; //This is the depopulation
-      rate_matrix[ion_out - 1][ion_out] += charge_exchange_rates[mm] * nh1;     //This is the population
-//     rate_matrix[0][0] -= charge_exchange_rates[mm] * nh1;     //This is the depopulation of neutral hydrogen
-//     rate_matrix[1][0] += charge_exchange_rates[mm] * nh1;     //This is the population of ionized hydrogen
-
+      rate_matrix[mm][mm] -= charge_exchange_recomb_rates[mm] * nh1;    //This is the depopulation
+      rate_matrix[mm - 1][mm] += charge_exchange_recomb_rates[mm] * nh1;        //This is the population
     }
-    else if (ion[charge_exchange[mm].nion2].z == 1)
-    {
-//      printf ("BOOM2 %i %i %e %e %e\n", charge_exchange[mm].nion1, charge_exchange[mm].nion2, charge_exchange_rates[mm], xne, nh2);
-
-      ion_out = charge_exchange[mm].nion1;      //This is the ion that is being depopulated
-      rate_matrix[ion_out][ion_out] -= charge_exchange_rates[mm] * nh2; //This is the depopulation
-      rate_matrix[ion_out + 1][ion_out] += charge_exchange_rates[mm] * nh2;     //This is the population 
-//      rate_matrix[0][1] -= charge_exchange_rates[mm] * nh2;     //This is the depopulation of neutral hydrogen
-//      rate_matrix[1][1] += charge_exchange_rates[mm] * nh2;     //This is the population of ionized hydrogen
-
-    }
-
   }
+
+
+  for (mm = 0; mm < n_charge_exchange; mm++)
+    if (ion[charge_exchange[mm].nion2].z == 1)  //A hydrogen recomb - metal ionization rate
+    {
+      ion_out = charge_exchange[mm].nion1;      //This is the ion that is being depopulated
+      rate_matrix[ion_out][ion_out] -= charge_exchange_ioniz_rates[mm] * nh2;   //This is the depopulation
+      rate_matrix[ion_out + 1][ion_out] += charge_exchange_ioniz_rates[mm] * nh2;       //This is the population 
+      //      rate_matrix[0][1] -= charge_exchange_rates[mm] * nh2;     //This is the depopulation of neutral hydrogen
+      //      rate_matrix[1][1] += charge_exchange_rates[mm] * nh2;     //This is the population of ionized hydrogen
+    }
+
 
 
 

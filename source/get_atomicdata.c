@@ -279,6 +279,8 @@ get_atomic_data (masterfile)
     ion[n].dere_di_flag = 0;    //Initialise to say this ion has no Dere DI rate data
     ion[n].nxderedi = -1;       //Initialise the pointer into the Dere DI rate structure
     ion[n].n_inner = 0;         //Initialise the pointer to say we have no inner shell ionization cross sections
+    ion[n].n_ch_ex = -1;        //Initialise the pointer to the charge exchange 
+
     for (i = 0; i < N_INNER; i++)
       ion[n].nxinner[i] = -1;   //Inintialise the inner shell pointer array
   }
@@ -2506,6 +2508,8 @@ would like to have simple lines for macro-ions */
             charge_exchange[n_charge_exchange].tmax = tmax;
             charge_exchange[n_charge_exchange].tmin = tmin;
             charge_exchange[n_charge_exchange].energy_defect = delta_E * EV2ERGS;
+            if (ion[charge_exchange[n_charge_exchange].nion1].z == 1)   //Only add this in if it is a recombination rate
+              ion[charge_exchange[n_charge_exchange].nion2].n_ch_ex = n_charge_exchange;
             n_charge_exchange++;
           }
           break;
@@ -2862,6 +2866,13 @@ or zero so that simple checks of true and false can be used for them */
       exit (0);
     }
   }
+
+  for (n = 0; n < nions; n++)
+  {
+    printf ("ION %i %i %i %i %i %i\n", n, ion[n].z, ion[n].istate, ion[n].n_ch_ex, charge_exchange[ion[n].n_ch_ex].nion1,
+            charge_exchange[ion[n].n_ch_ex].nion2);
+  }
+
 
   for (n = 0; n < nlevels; n++)
   {

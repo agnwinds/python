@@ -170,6 +170,7 @@ typedef struct ions
   int nxderedi;                 /* index into the dere direct ionization structure to give the location of the data for this ion */
   int nxinner[N_INNER];         /*index to each of the inner shell cross sections associtated with this ion */
   int n_inner;                  /*The number of inner shell cross section associated with this ion */
+  int n_ch_ex;                  /*The number of the charge exchange rate that applies to this ion*/
 
 }
 ion_dummy, *IonPtr;
@@ -483,7 +484,8 @@ typedef struct charge_exchange
 
 Charge_exchange  charge_exchange[MAX_CHARGE_EXCHANGE];     //Set up the structure
 
-double charge_exchange_rates[MAX_CHARGE_EXCHANGE]; //An array to store the actual rates for a given temperature
+double charge_exchange_recomb_rates[NIONS]; //An array to store the actual rates for a given temperature
+double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE]; //An array to store the actual rates for a given temperature
 
 
 
