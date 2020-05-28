@@ -548,11 +548,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   struct photon pp;
   int nres, esc_ptr, which_out;
   int n;
-//OLD  double v[3];
-  double dot ();
   double test;
   int nnscat;
-  double dvwind_ds (), sobolev ();
   int nplasma, ndom;
   int kpkt_mode;
   double fmin, fmax;
@@ -637,6 +634,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     get_random_location (icell, p[n].x);
 
     p[n].grid = icell;
+    p[n].frame = F_LOCAL;
 
     nnscat = 1;
     // Determine the direction of the photon

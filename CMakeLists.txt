@@ -83,8 +83,8 @@ set(PYTHON_SOURCE
         source/cylind_var.c source/cylindrical.c source/density.c
         source/diag.c source/dielectronic.c source/direct_ion.c source/disk.c
         source/disk_init.c source/emission.c source/estimators.c
-        source/extract.c source/get_atomicdata.c source/get_models.c
-        source/gradv.c source/gridwind.c source/homologous.c
+        source/extract.c source/frame.c source/get_atomicdata.c
+        source/get_models.c source/gradv.c source/gridwind.c source/homologous.c
         source/hydro_import.c source/import.c source/import_calloc.c
         source/import_cylindrical.c source/import_rtheta.c
         source/import_spherical.c source/ionization.c source/knigge.c
