@@ -790,7 +790,6 @@ vwind_xyz (ndom, p, v)
  * need to be "rotated" differently in different coordinate
  * systems
  *
- *
  **********************************************************/
 int wind_div_err = (-3);
 
