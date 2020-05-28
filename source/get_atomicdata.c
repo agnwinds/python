@@ -2871,11 +2871,7 @@ or zero so that simple checks of true and false can be used for them */
     }
   }
 
-  for (n = 0; n < nions; n++)
-  {
-    printf ("ION %i %i %i %i %i %i\n", n, ion[n].z, ion[n].istate, ion[n].n_ch_ex, charge_exchange[ion[n].n_ch_ex].nion1,
-            charge_exchange[ion[n].n_ch_ex].nion2);
-  }
+
 
 
   for (n = 0; n < nlevels; n++)

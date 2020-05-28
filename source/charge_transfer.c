@@ -94,7 +94,7 @@ compute_ch_trans_coeffs (double T)
     {
       charge_exchange_recomb_rates[n] = 0.0;    //Set the rate to zero
     }
-    printf ("BLAH %i %i %i %e\n", ion[n].z, ion[n].istate, ion[n].n_ch_ex, charge_exchange_recomb_rates[n]);
+    //   printf ("BLAH %i %i %i %e\n", ion[n].z, ion[n].istate, ion[n].n_ch_ex, charge_exchange_recomb_rates[n]);
   }
 
   //Now we make ionization rates - do it in a slightly different way
@@ -126,9 +126,9 @@ compute_ch_trans_coeffs (double T)
     {
       charge_exchange_ioniz_rates[n] = 0.0;     //Set the rate to zero          
     }
-    printf ("BLAH ioniz %i %i %e %e %e %e %e\n", ion[charge_exchange[n].nion1].z, ion[charge_exchange[n].nion1].istate,
-            charge_exchange_ioniz_rates[n], charge_exchange[n].delta_e_ovr_k, T, exp (-1. * charge_exchange[n].delta_e_ovr_k * 1e4 / T),
-            temp * charge_exchange[n].a * 1e-9);
+//    printf ("BLAH ioniz %i %i %e %e %e %e %e\n", ion[charge_exchange[n].nion1].z, ion[charge_exchange[n].nion1].istate,
+//            charge_exchange_ioniz_rates[n], charge_exchange[n].delta_e_ovr_k, T, exp (-1. * charge_exchange[n].delta_e_ovr_k * 1e4 / T),
+//            temp * charge_exchange[n].a * 1e-9);
   }
 
 
@@ -215,14 +215,14 @@ ch_ex_heat (one, t_e)
       if (ion[n].n_ch_ex < 0)   //We dont have a proper rate, so use the approximation
       {
         x += xplasma->vol * charge_exchange_recomb_rates[n] * nh1 * xplasma->density[n] * 2.86 * (ion[n].istate - 1) * EV2ERGS;
-        printf ("BOOM1 z %i istate %i rate %e defect %e nh1 %e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
-                2.86 * (ion[n].istate - 1) * EV2ERGS, nh1, xplasma->density[n], x);
+//        printf ("BOOM1 z %i istate %i rate %e defect %e nh1 %e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
+//                2.86 * (ion[n].istate - 1) * EV2ERGS, nh1, xplasma->density[n], x);
       }
       else
       {
         x += xplasma->vol * charge_exchange_recomb_rates[n] * nh1 * xplasma->density[n] * charge_exchange[ion[n].n_ch_ex].energy_defect;
-        printf ("BOOM2 z %i istate %i rate %e defect %e nh1 %e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
-                charge_exchange[ion[n].n_ch_ex].energy_defect / EV2ERGS, nh1, xplasma->density[n], x);
+//        printf ("BOOM2 z %i istate %i rate %e defect %e nh1 %e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
+//                charge_exchange[ion[n].n_ch_ex].energy_defect / EV2ERGS, nh1, xplasma->density[n], x);
       }
     }
   }
@@ -231,9 +231,9 @@ ch_ex_heat (one, t_e)
     {
       x +=
         xplasma->vol * charge_exchange_ioniz_rates[n] * nh2 * xplasma->density[charge_exchange[n].nion1] * charge_exchange[n].energy_defect;
-      printf ("BOOM3 z %i istate %i rate %e defect %e nh2 %e density %e x %e\n", ion[charge_exchange[n].nion1].z,
-              ion[charge_exchange[n].nion1].istate, charge_exchange_ioniz_rates[n], charge_exchange[n].energy_defect / EV2ERGS, nh2,
-              xplasma->density[charge_exchange[n].nion1], x);
+//      printf ("BOOM3 z %i istate %i rate %e defect %e nh2 %e density %e x %e\n", ion[charge_exchange[n].nion1].z,
+//              ion[charge_exchange[n].nion1].istate, charge_exchange_ioniz_rates[n], charge_exchange[n].energy_defect / EV2ERGS, nh2,
+//              xplasma->density[charge_exchange[n].nion1], x);
     }
   return (x);
 }
