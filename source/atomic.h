@@ -480,6 +480,8 @@ typedef struct charge_exchange
   double tmin;                  //The minimum temperature which the fit is valif for
   double tmax;                  //The maximum temperature which the fit is valif for
   double energy_defect;         //The energy defect for the reaction
+  double delta_e_ovr_k;         
+  
 } Charge_exchange, *Charge_exchange_ptr;
 
 Charge_exchange  charge_exchange[MAX_CHARGE_EXCHANGE];     //Set up the structure

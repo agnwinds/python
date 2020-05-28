@@ -146,6 +146,7 @@ get_atomic_data (masterfile)
   int type;                     //used in collision strength
   double a, b, c, d, tmax, delta_E;
   int z2, istate2;
+  double delta_E_ovr_k;
 
   /* define which files to read as data files */
 
@@ -439,6 +440,7 @@ get_atomic_data (masterfile)
     charge_exchange[n].tmin = -1e99;
     charge_exchange[n].tmax = 1e99;
     charge_exchange[n].energy_defect = 0.0;
+    charge_exchange[n].delta_e_ovr_k = 0.0;
   }
 
 
@@ -2480,8 +2482,9 @@ would like to have simple lines for macro-ions */
         case 'X':
           nparam =
             sscanf (aline,
-                    "%*s %d %d %d %d %le %le %le %le %le %le %le", &z, &istate, &z2, &istate2, &a, &b, &c, &d, &tmin, &tmax, &delta_E);
-          if (nparam != 11)
+                    "%*s %d %d %d %d %le %le %le %le %le %le %le %le", &z, &istate, &z2, &istate2, &a, &b, &c, &d, &tmin, &tmax, &delta_E,
+                    &delta_E_ovr_k);
+          if (nparam != 12)
           {
             Error ("Something wrong with charge exchange data\n");
             Error ("Get_atomic_data %s\n", aline);
@@ -2508,6 +2511,7 @@ would like to have simple lines for macro-ions */
             charge_exchange[n_charge_exchange].tmax = tmax;
             charge_exchange[n_charge_exchange].tmin = tmin;
             charge_exchange[n_charge_exchange].energy_defect = delta_E * EV2ERGS;
+            charge_exchange[n_charge_exchange].delta_e_ovr_k = delta_E_ovr_k;
             if (ion[charge_exchange[n_charge_exchange].nion1].z == 1)   //Only add this in if it is a recombination rate
               ion[charge_exchange[n_charge_exchange].nion2].n_ch_ex = n_charge_exchange;
             n_charge_exchange++;

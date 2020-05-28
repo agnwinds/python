@@ -39,6 +39,7 @@ compute_ch_trans_coeffs (double T)
 {
   int n, m;
   double temp;
+  double T_used;
 /*  for (n = 0; n < n_charge_exchange; n++)
   {
     if (T >= charge_exchange[n].tmin && T <= charge_exchange[n].tmax)
@@ -66,24 +67,34 @@ compute_ch_trans_coeffs (double T)
       else
       {
         m = ion[n].n_ch_ex;
-        if (T >= charge_exchange[m].tmin && T <= charge_exchange[m].tmax)
-        {
-          temp = charge_exchange[m].c * exp (charge_exchange[m].d * T / 1e4);
-          temp = temp + 1.0;
-          temp = temp * pow (T / 1e4, charge_exchange[m].b);
-          charge_exchange_recomb_rates[n] = temp * charge_exchange[m].a * 1e-9;
-        }
+        if (T < charge_exchange[m].tmin)
+          T_used = charge_exchange[m].tmin;
+        else if (T > charge_exchange[m].tmax)
+          T_used = charge_exchange[m].tmax;
         else
-        {
-          charge_exchange_recomb_rates[n] = 0.0;        //Set the rate to zero
-        }
+          T_used = T;
+//        if (T >= charge_exchange[m].tmin && T <= charge_exchange[m].tmax)
+
+//        {
+        temp = charge_exchange[m].c * exp (charge_exchange[m].d * T_used / 1e4);
+        temp = temp + 1.0;
+        temp = temp * pow (T_used / 1e4, charge_exchange[m].b);
+        charge_exchange_recomb_rates[n] = temp * charge_exchange[m].a * 1e-9;
+//          printf ("IN  TEMP %e %e %e ", T, charge_exchange[m].tmin, charge_exchange[m].tmax);
+//        }
+        //       else
+//        {
+//          charge_exchange_recomb_rates[n] = 0.0;        //Set the rate to zero
+//          printf ("OUT TEMP %e %e %e ", T, charge_exchange[m].tmin, charge_exchange[m].tmax);
+
+//        }
       }
     }
     else
     {
       charge_exchange_recomb_rates[n] = 0.0;    //Set the rate to zero
     }
-//    printf ("BLAH %i %i %e\n",ion[n].z, ion[n].istate,charge_exchange_recomb_rates[n]);
+    printf ("BLAH %i %i %i %e\n", ion[n].z, ion[n].istate, ion[n].n_ch_ex, charge_exchange_recomb_rates[n]);
   }
 
   //Now we make ionization rates - do it in a slightly different way
@@ -91,22 +102,33 @@ compute_ch_trans_coeffs (double T)
   {
     if (ion[charge_exchange[n].nion2].z == 1)   //The recombining ion is hydrogen so we have an ionization rate to make
     {
-      if (T >= charge_exchange[n].tmin && T <= charge_exchange[n].tmax)
-      {
-        temp = charge_exchange[n].c * exp (charge_exchange[n].d * T / 1e4);
-        temp = temp + 1.0;
-        temp = temp * pow (T / 1e4, charge_exchange[m].b);
-        charge_exchange_ioniz_rates[n] = temp * charge_exchange[n].a * 1e-9;
-      }
+//      if (T >= charge_exchange[n].tmin && T <= charge_exchange[n].tmax)
+//      {
+      if (T < charge_exchange[n].tmin)
+        T_used = charge_exchange[n].tmin;
+      else if (T > charge_exchange[n].tmax)
+        T_used = charge_exchange[n].tmax;
       else
-      {
-        charge_exchange_ioniz_rates[n] = 0.0;   //Set the rate to zero
-      }
+        T_used = T;
+
+      temp = charge_exchange[n].c * exp (charge_exchange[n].d * T_used / 1e4);
+      temp = temp + 1.0;
+      temp = temp * pow (T_used / 1e4, charge_exchange[n].b);
+      charge_exchange_ioniz_rates[n] = temp * charge_exchange[n].a * 1e-9;
+      charge_exchange_ioniz_rates[n] = charge_exchange_ioniz_rates[n] * exp (-1. * charge_exchange[n].delta_e_ovr_k * 1e4 / T);
+//      }
+//      else
+//      {
+//        charge_exchange_ioniz_rates[n] = 0.0;   //Set the rate to zero
+//      }
     }
     else
     {
       charge_exchange_ioniz_rates[n] = 0.0;     //Set the rate to zero          
     }
+    printf ("BLAH ioniz %i %i %e %e %e %e %e\n", ion[charge_exchange[n].nion1].z, ion[charge_exchange[n].nion1].istate,
+            charge_exchange_ioniz_rates[n], charge_exchange[n].delta_e_ovr_k, T, exp (-1. * charge_exchange[n].delta_e_ovr_k * 1e4 / T),
+            temp * charge_exchange[n].a * 1e-9);
   }
 
 
@@ -193,16 +215,14 @@ ch_ex_heat (one, t_e)
       if (ion[n].n_ch_ex < 0)   //We dont have a proper rate, so use the approximation
       {
         x += xplasma->vol * charge_exchange_recomb_rates[n] * nh1 * xplasma->density[n] * 2.86 * (ion[n].istate - 1) * EV2ERGS;
-        printf ("BOOM1 %i %i %e %e %e %e %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
+        printf ("BOOM1 z %i istate %i rate %e defect %e nh1 %e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
                 2.86 * (ion[n].istate - 1) * EV2ERGS, nh1, xplasma->density[n], x);
-
       }
       else
       {
         x += xplasma->vol * charge_exchange_recomb_rates[n] * nh1 * xplasma->density[n] * charge_exchange[ion[n].n_ch_ex].energy_defect;
-        printf ("BOOM2 z %i istate %i rate %e defect %e nh1%e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
+        printf ("BOOM2 z %i istate %i rate %e defect %e nh1 %e density %e x %e\n", ion[n].z, ion[n].istate, charge_exchange_recomb_rates[n],
                 charge_exchange[ion[n].n_ch_ex].energy_defect / EV2ERGS, nh1, xplasma->density[n], x);
-
       }
     }
   }
@@ -211,8 +231,9 @@ ch_ex_heat (one, t_e)
     {
       x +=
         xplasma->vol * charge_exchange_ioniz_rates[n] * nh2 * xplasma->density[charge_exchange[n].nion1] * charge_exchange[n].energy_defect;
-      printf ("BOOM3 %i %i defect %e %e %e %e\n", ion[charge_exchange[n].nion1].z, ion[charge_exchange[n].nion1].istate,
-              charge_exchange[n].energy_defect / EV2ERGS, nh2, xplasma->density[n], x);
+      printf ("BOOM3 z %i istate %i rate %e defect %e nh2 %e density %e x %e\n", ion[charge_exchange[n].nion1].z,
+              ion[charge_exchange[n].nion1].istate, charge_exchange_ioniz_rates[n], charge_exchange[n].energy_defect / EV2ERGS, nh2,
+              xplasma->density[charge_exchange[n].nion1], x);
     }
   return (x);
 }
