@@ -2477,7 +2477,24 @@ would like to have simple lines for macro-ions */
           }
           break;
 
+/**
+* @section Charge exchange recombination and ionization state
+* #This is electron yield data from Kingdon and Ferland (1996) -1996ApJS..106..205K
+* #It is processed by hand - so errors are possible!
+* #The typical data is below
+* @verbatim
+* #Label	Elem_1	Istate_1	Elem_2	Istate_2	a	b	c	d	Tmin	Tmax	delta_E	delta_E_ovr_K KF_ion	KF_level
+* ChEx	1	1	2	2	1.87E-06	2.06E+00	9.93E+00	-3.89E+00	6.00E+03	1.00E+05	1.10E+01	0.00E+00	He+	total
+*ChEx	1	1	2	3	1.00E-05	0.00E+00	0.00E+00	0.00E+00	1.00E+03	1.00E+07	-4.08E+01	0.00E+00	He+2	total
+* @endverbatim
+ * elem1, istat1, elem2, istate2 are the two ions - the first is ionizing the second is reombining
+ * a,b,c,d are the fit
+ * Tmin and tmax are the temperatures over which to fit 
+ * delta E is the energy defect used to compute heating
+ * deltaE/k is the boltzman factor used to comute the ionization rate - zero for most reconrds
+ * the last two comlumns just store info from K+F about levels etc.
 
+*/
 
         case 'X':
           nparam =
@@ -2512,7 +2529,7 @@ would like to have simple lines for macro-ions */
             charge_exchange[n_charge_exchange].tmin = tmin;
             charge_exchange[n_charge_exchange].energy_defect = delta_E * EV2ERGS;
             charge_exchange[n_charge_exchange].delta_e_ovr_k = delta_E_ovr_k;
-            if (ion[charge_exchange[n_charge_exchange].nion1].z == 1)   //Only add this in if it is a recombination rate
+            if (ion[charge_exchange[n_charge_exchange].nion1].z == 1)   //Assign *recombination* tates only to the televant ion. 
               ion[charge_exchange[n_charge_exchange].nion2].n_ch_ex = n_charge_exchange;
             n_charge_exchange++;
           }

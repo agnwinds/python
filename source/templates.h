@@ -568,9 +568,8 @@ double logg(double mass, double rwd);
 /* import_calloc.c */
 void calloc_import(int coord_type, int ndom);
 void free_import(int coord_type, int ndom);
-/* charge_transfer.c */
-int compute_ch_trans_coeffs(double T);
-double total_ch_ex(WindPtr one, double t_e);
+/* charge_exchange.c */
+int compute_ch_ex_coeffs(double T);
 double ch_ex_heat(WindPtr one, double t_e);
 /* py_wind_sub.c */
 int zoom(int direction);

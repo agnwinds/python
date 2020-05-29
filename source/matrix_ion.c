@@ -101,20 +101,14 @@ matrix_ion_populations (xplasma, mode)
     elem_dens[ion[mm].z] = elem_dens[ion[mm].z] + xplasma->density[mm];
   }
 
-  /* Dielectronic recombination, collisional ionization coefficients and three body recombination
-     rate coefficients depend only on electron temperature, calculate them now - they will not change
-     they are all stored in global arrays */
+  /* Dielectronic recombination, collisional ionization coefficients, three body recombination and
+     charge_exchange rate coefficients depend only on electron temperature, calculate them now - 
+     they will not change they are all stored in global arrays */
 
   compute_dr_coeffs (t_e);
   compute_di_coeffs (t_e);
   compute_qrecomb_coeffs (t_e);
-  compute_ch_trans_coeffs (t_e);
-
-
-
-
-
-
+  compute_ch_ex_coeffs (t_e);
 
   /* In the following loop, over all ions in the simulation, we compute the radiative recombination rates, and photionization
      rates OUT OF each ionization stage. The PI rates are calculated either using the modelled mean intensity in a cell, or
@@ -232,6 +226,13 @@ matrix_ion_populations (xplasma, mode)
   niterate = 0;
   while (niterate < MAXITERATIONS)
   {
+
+    /* In order to compute charge exchange reactions, we need the number density of neutral and ionized hydrogen
+       the current ethod of matrix solving does not allow is to link ions multiplicatively so we need to compute
+       these outside the loop. If hydrogen were not dominant - this could cause iddues since the ionization(recombination)
+       of a metal or helium via this process would cause an identical recombination(ionization) of hydrogen. The loop below
+       is a bit belt and braces, since one would almost always expect hydrogen to be ion=0 and 1  */
+
     for (nn = 0; nn < nions; nn++)
     {
       if (ion[nn].z == 1 && ion[nn].istate == 1)
@@ -243,9 +244,6 @@ matrix_ion_populations (xplasma, mode)
         nh2 = newden[nn] * elem_dens[ion[nn].z];
       }
     }
-
-
-
 
 
     populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne, nh1, nh2);
@@ -420,6 +418,9 @@ matrix_ion_populations (xplasma, mode)
 
   xplasma->ne = get_ne (xplasma->density);
 
+  xplasma->heat_ch_ex = ch_ex_heat (&wmain[xplasma->nwind], xplasma->t_e);      //Compute the charge exchange heating
+  xplasma->heat_tot += xplasma->heat_ch_ex;
+
   /*We now need to populate level densities in order to later calculate line emission (for example).
      We call partition functions to do this. At present, we do not have a method for accurately computing
      level populations for modelled mean intensities. We get around this by setting all level populations
@@ -444,6 +445,8 @@ matrix_ion_populations (xplasma, mode)
  * @param [in] double  rr_rates[nions] - vector of radiative recobination rates
  * @param [out] double  b_temp[nions] - the vector of total elemental densities that we also fill here
  * @param [in] double  xne - current electron density
+ * @param [in] double  nh1 - current neutral hydrogen density
+ * @param [in] double  nh2 - current ionized hydrogen density
  * @return - zero if successful
  *
  * @details
@@ -589,13 +592,9 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
   }
 
 
-
-
   /* Now we populate the elements relating to charge exchange recombination -  */
 
-
-
-  for (mm = 0; mm < nions; mm++)
+  for (mm = 0; mm < nions; mm++)        //This is a loop over ions - rates are computed for all ions.
   {
     if (ion[mm].z != 1 && ion[mm].istate != 0)  //Only compute for helium and up, and not for neutral species
     {
@@ -604,18 +603,15 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
     }
   }
 
+  /*And now charge exchange ionization - only a very small nummber of ions */
 
-  for (mm = 0; mm < n_charge_exchange; mm++)
+  for (mm = 0; mm < n_charge_exchange; mm++)    //We loop over the charge exchange rates - most will not be ionization
     if (ion[charge_exchange[mm].nion2].z == 1)  //A hydrogen recomb - metal ionization rate
     {
       ion_out = charge_exchange[mm].nion1;      //This is the ion that is being depopulated
       rate_matrix[ion_out][ion_out] -= charge_exchange_ioniz_rates[mm] * nh2;   //This is the depopulation
       rate_matrix[ion_out + 1][ion_out] += charge_exchange_ioniz_rates[mm] * nh2;       //This is the population 
-      //      rate_matrix[0][1] -= charge_exchange_rates[mm] * nh2;     //This is the depopulation of neutral hydrogen
-      //      rate_matrix[1][1] += charge_exchange_rates[mm] * nh2;     //This is the population of ionized hydrogen
     }
-
-
 
 
   for (mm = 0; mm < n_inner_tot; mm++)  //There mare be several rates for each ion, so we loop over all the rates

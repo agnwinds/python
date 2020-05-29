@@ -479,15 +479,16 @@ typedef struct charge_exchange
   double a,b,c,d;                //The parameters for the fit
   double tmin;                  //The minimum temperature which the fit is valif for
   double tmax;                  //The maximum temperature which the fit is valif for
-  double energy_defect;         //The energy defect for the reaction
-  double delta_e_ovr_k;         
+  double energy_defect;         //The energy defect for the reaction - used for heating
+  double delta_e_ovr_k;         //The boltzman factor for charge exchange ionization (only a few records have this)
   
 } Charge_exchange, *Charge_exchange_ptr;
 
 Charge_exchange  charge_exchange[MAX_CHARGE_EXCHANGE];     //Set up the structure
 
-double charge_exchange_recomb_rates[NIONS]; //An array to store the actual rates for a given temperature
-double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE]; //An array to store the actual rates for a given temperature
+double charge_exchange_recomb_rates[NIONS]; //An array to store the actual recombination rates for a given temperature - 
+//there is an estimated rate for ions without an actual rate, so we need to dimneions for ions.
+double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE]; //An array to store the actual ionization rates for a given temperature
 
 
 

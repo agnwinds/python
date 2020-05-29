@@ -300,8 +300,6 @@ WindPtr (w);
     else
       plasmamain[n].heat_shock = 0;
 
-    plasmamain[n].heat_ch_ex = ch_ex_heat (&w[nwind], plasmamain[n].t_e);
-
     /* Calculate the densities in various ways depending on the ioniz_mode */
 
     ion_abundances (&plasmamain[n], geo.ioniz_mode);
