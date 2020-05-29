@@ -186,6 +186,31 @@ disk. The minus sign in the terms associated with phase are to make this happen.
       x1 = 0;
     if (x2 > 180.)
       x2 = 180.;
+
+    /* There are problems near 90 deg which need to be dealt with for the
+       live or die mode.  These arise because in live or die, we normally
+       extract on both sides of the disk, that is to say if we want to
+       get the flux at 45d, we actually use bands at 45 and 135 degrees,
+       explicitly assuming that the program only deals with winds which are
+       biconical.  But if we choose 90 degrees for extraction we are extracing
+       basically from 88-92 degrees, not as in the case of 45, from 43-47, and 
+       133-137.
+     */
+
+    if (x1 < 90 && x2 > 90)
+    {
+      if (90 - x1 < x2 - 90)
+      {
+        x1 = 90;
+      }
+      else
+      {
+        x2 = 90;
+      }
+    }
+
+
+
     x1 = fabs (cos (x1 / RADIAN));
     x2 = fabs (cos (x2 / RADIAN));
     if (x1 > x2)
@@ -201,10 +226,13 @@ disk. The minus sign in the terms associated with phase are to make this happen.
     if (select_extract == 0)
     {
       xxspec[n].renorm = 1. / (xxspec[n].mmax - xxspec[n].mmin);
+
     }
     else
       xxspec[n].renorm = 1.;
     /* Completed initialization of variables for live or die */
+
+    Log ("XXX angle  %.3f -> %.3f %.3f -> %.3f\n", angle[n - MSPEC], x1, x2, xxspec[n].renorm);
 
     strcpy (dummy, "");
     sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
@@ -585,9 +613,10 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 
   Log ("Photons contributing to the various spectra\n");
-  Log ("Inwind   Scat    Esc     Star    >nscat    err    Absorb   Disk    sec    Adiab(matom)\n");
+  Log ("                     Inwind   Scat    Esc     Star    >nscat    err    Absorb   Disk    sec    Adiab(matom)\n");
   for (n = 0; n < nspectra; n++)
   {
+    Log ("%20s ", xxspec[n].name);
     for (i = 0; i < NSTAT; i++)
       Log (" %7d", xxspec[n].nphot[i]);
     Log ("\n");
