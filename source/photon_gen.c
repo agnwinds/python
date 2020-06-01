@@ -186,17 +186,23 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   }
 
 
+  /* XFRAME the error check below was not working properly for TDE models which
+     have very hight velocities involved, and so has been commented out.
+     But if there is any real doubt about whether freq_orig_loc has been
+     assigned it needs to be restored.  A better test would be possible if we knew that the intial
+     photon freqency was 0.  
+   */
   for (n = 0; n < NPHOT; n++)
   {
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
-    if (fabs (p[n].freq_orig_loc - p[n].freq) > 0.5 * p[n].freq)
-    {
-      Error ("Photon_gen: photon (%d) from %d does not have an orignal frequency defined  orig %10.3e shifted %10.3e gen %10.3e\n", n,
-             p[n].freq_orig_loc, p[n].freq_orig, p[n].freq_orig, p[n].freq);
-      p[n].freq_orig_loc = p[n].freq_orig;
-
-    }
+//    if (fabs (p[n].freq_orig_loc - p[n].freq) > 0.5 * p[n].freq)
+//    {
+//      Error ("Photon_gen: photon (%d) from %d does not have an orignal frequency defined  orig %10.3e shifted %10.3e gen %10.3e\n", n,
+//             p[n].freq_orig_loc, p[n].freq_orig, p[n].freq_orig, p[n].freq);
+//      p[n].freq_orig_loc = p[n].freq_orig;
+//
+//    }
 
     p[n].origin_orig = p[n].origin;
     p[n].np = n;
