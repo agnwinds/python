@@ -27,7 +27,7 @@ Wind.dim.in.x_or_r.direction               100
 Wind.dim.in.z_or_theta.direction           100
 
 ### Parameters associated with photon number, cycles,ionization and radiative transfer options
-Photons_per_cycle                          100000000
+Photons_per_cycle                          20000000
 Ionization_cycles                          20
 Spectrum_cycles                            10
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
