@@ -116,9 +116,11 @@ observer_to_local_frame (p_in, p_out)
   char msg[LINELENGTH];
 
 
-  sprintf (msg, "observer_to_local_frame: Photon (%d) of type (%d) not in observer frame", p_in->np, p_in->istat);
+//  sprintf (msg, "observer_to_local_frame: Photon (%d) of type (%d) not in observer frame", p_in->np, p_in->istat);
 
-  ierr = check_frame (p_in, F_OBSERVER, msg);
+//  ierr = check_frame (p_in, F_OBSERVER, msg);
+
+  ierr = 0;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -156,6 +158,8 @@ observer_to_local_frame (p_in, p_out)
   }
 
   p_out->w *= (f_out / f_in);
+
+
 
   return (ierr);
 }
@@ -206,10 +210,12 @@ local_to_observer_frame (p_in, p_out)
   int ierr;
 
 
-  sprintf (msg, "local_to_observer_frame: Photon (%d) of type (%d) not_in_local_frame", p_in->np, p_in->istat);
+//  sprintf (msg, "local_to_observer_frame: Photon (%d) of type (%d) not_in_local_frame", p_in->np, p_in->istat);
 
 
-  ierr = check_frame (p_in, F_LOCAL, msg);
+//  ierr = check_frame (p_in, F_LOCAL, msg);
+
+  ierr = 0;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -290,8 +296,9 @@ local_to_observer_frame_disk (p_in, p_out)
   char msg[LINELENGTH];
   int ierr;
 
-  sprintf (msg, "local_to_observer_frame_disk: Photon (%d) of type (%d) not in local frame", p_in->np, p_in->istat);
-  ierr = check_frame (p_in, F_LOCAL, msg);
+//  sprintf (msg, "local_to_observer_frame_disk: Photon (%d) of type (%d) not in local frame", p_in->np, p_in->istat);
+//  ierr = check_frame (p_in, F_LOCAL, msg);
+  ierr = 0;
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
