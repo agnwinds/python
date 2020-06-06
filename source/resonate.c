@@ -23,8 +23,8 @@
 #include "atomic.h"
 #include "python.h"
 
-struct photon cds_phot_old;
-double cds_v2_old, cds_dvds2_old;
+struct photon cds_phot_old_observer, cds_phot_old_loc;
+//OLD double cds_v2_old, cds_dvds2_old;
 
 
 /**********************************************************/
@@ -92,10 +92,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int n, nn, nstart, ndelt;
   double x;
   double ds_current, ds;
-  double v_inner[3], v_outer[3], v1, v2, dvds, dd;
-  double v_check[3], vch, vc;
+  double dvds, dd;
   double dvds1, dvds2;
-  struct photon phot, p_now;
+  struct photon p_start, p_stop, p_now;
   int init_dvds;
   double kap_bf_tot, kap_ff, kap_cont;
   double tau_sobolev;
@@ -105,7 +104,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   PlasmaPtr xplasma, xplasma2;
   int ndom;
   double normal[3];
-  struct photon phot_dummy;
+  double diff;
 
   one = &w[p->grid];            //pointer to the cell where the photon bundle is located.
 
@@ -126,87 +125,53 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   }
 
 
-/* Note that comp_phot compares the position and
- * direction of two photons.  If they are the same, then
- * it just takes v1 from the old value.  */
-
-  if (comp_phot (&cds_phot_old, p))
+  if (comp_phot (&cds_phot_old_observer, p))
   {
-    vwind_xyz (ndom, p, v_inner);
-    v1 = dot (p->lmn, v_inner);
+    observer_to_local_frame (p, &p_start);
   }
   else
   {
-    v1 = cds_v2_old;
+    stuff_phot (&cds_phot_old_loc, &p_start);
+//OLD  Log ("This helped  %d\n", p_start.np);
   }
 
-  /* Initialize two photon structures phot and p_now for internal work
-   * "phot"  will be a photon vector at the far edge of the cell, while p
-   * remains the photon at its current positon. p_now  is located
-   * at the midpoint between these tow positions.
+  stuff_phot (p, &p_stop);
+  move_phot (&p_stop, smax);
+  stuff_phot (&p_stop, &cds_phot_old_observer);
+  observer_to_local_frame (&p_stop, &p_stop);
+  stuff_phot (&p_stop, &cds_phot_old_loc);
+
+
+
+  /* At this point p_start and pstop are in the local frame 
+   * at the and p_stop is at the maximum distance it can 
+   * travel.  We want to check that the frequncy shift is 
+   * not too great along the path that a linear approximation
+   * to the change in frequency is not reasonable
    */
 
-  stuff_phot (p, &phot);
-  move_phot (&phot, smax);
-  vwind_xyz (ndom, &phot, v_outer);
-  v2 = dot (phot.lmn, v_outer);
 
-  /* Check to see that the velocity is monotonic across the cell
-   * by calculating the velocity at the midpoint of the path
-   *
-   * If it is not monitonic, then reduce smax
-   */
-  vc = VLIGHT;
-  while (vc > VCHECK && smax > DFUDGE)
+  diff = 1;
+#define  MAXDIFF  0.333e-4      /* The same as our old velocity requirement */
+
+  while (smax > DFUDGE)
   {
     stuff_phot (p, &p_now);
-    move_phot (&p_now, smax / 2.);
-    vwind_xyz (ndom, &p_now, v_check);
-    vch = dot (p_now.lmn, v_check);
-
-    vc = fabs (vch - 0.5 * (v1 + v2));
-
-    if (vc > VCHECK)
+    move_phot (&p_now, smax * 0.5);
+    observer_to_local_frame (&p_now, &p_now);
+    diff = fabs (p_now.freq - 0.5 * (p_start.freq + p_stop.freq)) / p_start.freq;
+    if (diff < MAXDIFF)
     {
-      stuff_phot (&p_now, &phot);
-      smax *= 0.5;
-      v2 = vch;
+      break;
     }
+    stuff_phot (&p_now, &p_stop);
+    smax *= 0.5;
+//OLD    Log ("Shorten %d %d %e %e\n", p_now.np, p_now.grid, smax, diff);
   }
 
+  freq_inner = p_start.freq;
+  freq_outer = p_stop.freq;
 
-/* This Doppler shift shifts the photon from the global to the local
- * frame of rest. Therefore multiply. See doppler notes for a discussion
- * The sign is  correct.  If the photon is moving in the same
- * direction as v, then in the rest frame of the ions,
- * then the photon frequency will be less. */
-
-
-/* ksl 2005 - In other parts of the code, we have been able to eliminate 
-   calculating the velocities in situations where we call new routines like
-   observer_to_local frame, as is done below, but we cannot do this in this
-   case because the velocities are used to decide whether the photon has 
-   gone so far that the direction of the velocity is reversed. 
- */
-
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "calculate_ds");
-//OLD  }
-
-  if (observer_to_local_frame (p, &phot_dummy))
-  {
-    Error ("calculate_ds:observer to local frame error for p\n");
-  }
-  freq_inner = phot_dummy.freq;
-
-  if (observer_to_local_frame (&phot, &phot_dummy))
-  {
-    Error ("calculate_ds:observer to local frame error for phot\n");
-  }
-  freq_outer = phot_dummy.freq;
-
-  dfreq = freq_outer - freq_inner;
 
 
 /* We use the doppler shifted frequency to compute the Klein-Nishina cross
@@ -216,6 +181,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * for every little path section between resonances */
 
   mean_freq = 0.5 * (freq_inner + freq_outer);
+  dfreq = freq_outer - freq_inner;
 
 
 
@@ -226,7 +192,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   if (fabs (dfreq) < EPSILON)
   {
-    Error ("calculate_ds: v same at both sides of cell %d\n", one->nwind);
+    Error ("calculate_ds: freq same at both sides of cell %d\n", one->nwind);
     x = -1;
     return (smax);              // This is not really the best thing to do, but it avoids disaster below
 
@@ -356,7 +322,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
           if (init_dvds == 0)
           {
             dvds1 = dvwind_ds (p);
-            dvds2 = dvwind_ds (&phot);
+            dvds2 = dvwind_ds (&p_stop);
             init_dvds = 1;
           }
 
@@ -494,8 +460,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   *tau = ttau;
 
-  stuff_phot (&phot, &cds_phot_old);    // Store the final photon position
-  cds_v2_old = v2;              // and the velocity along the line of sight
+//OLD   stuff_phot (&phot, &cds_phot_old);    // Store the final photon position
+
+//OLD   cds_v2_old = v2;              // and the velocity along the line of sight
 
   return (ds_current);
 }

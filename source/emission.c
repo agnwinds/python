@@ -233,7 +233,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int n, nn, np;
   int photstop;
   double xlum, xlumsum, lum;
-  double v[3];
+//OLD  double v[3];
   int icell, icell_old;
   int nplasma = 0;
   int nnscat;
@@ -384,7 +384,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        */
 
 
-      vwind_xyz (ndom, &p[np], v);
+//OLD      vwind_xyz (ndom, &p[np], v);
       p[np].istat = P_INWIND;
       p[np].freq_orig_loc = p[np].freq;
       p[np].frame = F_LOCAL;
