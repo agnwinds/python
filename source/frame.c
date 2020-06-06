@@ -58,7 +58,7 @@ check_frame (p, desired_frame, msg)
   }
   else if (ncheck_frame < 100)
   {
-    Error ("check_frame: %s\n", msg);
+    Error ("check_frame: %s :Photon (%s) of type (%d) not in frame %d\n", msg, p->np, p->istat, desired_frame);
     ncheck_frame++;
 
     if (modes.save_photons)
@@ -113,14 +113,10 @@ observer_to_local_frame (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i, ierr;
-  char msg[LINELENGTH];
 
 
-//  sprintf (msg, "observer_to_local_frame: Photon (%d) of type (%d) not in observer frame", p_in->np, p_in->istat);
 
-//  ierr = check_frame (p_in, F_OBSERVER, msg);
-
-  ierr = 0;
+  ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame");
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -158,8 +154,6 @@ observer_to_local_frame (p_in, p_out)
   }
 
   p_out->w *= (f_out / f_in);
-
-
 
   return (ierr);
 }
@@ -206,16 +200,12 @@ local_to_observer_frame (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i;
-  char msg[LINELENGTH];
   int ierr;
 
 
-//  sprintf (msg, "local_to_observer_frame: Photon (%d) of type (%d) not_in_local_frame", p_in->np, p_in->istat);
 
 
-//  ierr = check_frame (p_in, F_LOCAL, msg);
-
-  ierr = 0;
+  ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame");
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
@@ -293,12 +283,9 @@ local_to_observer_frame_disk (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i;
-  char msg[LINELENGTH];
   int ierr;
 
-//  sprintf (msg, "local_to_observer_frame_disk: Photon (%d) of type (%d) not in local frame", p_in->np, p_in->istat);
-//  ierr = check_frame (p_in, F_LOCAL, msg);
-  ierr = 0;
+  ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame_disk");
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
