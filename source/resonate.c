@@ -152,7 +152,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
   diff = 1;
-#define  MAXDIFF  0.333e-4      /* The same as our old velocity requirement */
+#define  MAXDIFF  VCHECK/VLIGHT /* The same as our old velocity requirement */
 
   while (smax > DFUDGE)
   {
