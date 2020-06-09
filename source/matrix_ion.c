@@ -593,13 +593,15 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
 
   /* Now we populate the elements relating to charge exchange recombination -  */
-
-  for (mm = 0; mm < nions; mm++)        //This is a loop over ions - rates are computed for all ions.
+  if (n_charge_exchange > 0)
   {
-    if (ion[mm].z != 1 && ion[mm].istate != 0)  //Only compute for helium and up, and not for neutral species
+    for (mm = 0; mm < nions; mm++)      //This is a loop over ions - rates are computed for all ions.
     {
-      rate_matrix[mm][mm] -= charge_exchange_recomb_rates[mm] * nh1;    //This is the depopulation
-      rate_matrix[mm - 1][mm] += charge_exchange_recomb_rates[mm] * nh1;        //This is the population
+      if (ion[mm].z != 1 && ion[mm].istate != 0)        //Only compute for helium and up, and not for neutral species
+      {
+        rate_matrix[mm][mm] -= charge_exchange_recomb_rates[mm] * nh1;  //This is the depopulation
+        rate_matrix[mm - 1][mm] += charge_exchange_recomb_rates[mm] * nh1;      //This is the population
+      }
     }
   }
 
