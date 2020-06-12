@@ -156,7 +156,8 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o \
-		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o
+		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o
+
 
 
 
@@ -178,7 +179,8 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c \
-		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c
+		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c
+
 
 #
 # kpar_source is now declared separately from python_source so that the file log.h
@@ -197,11 +199,11 @@ prototypes:
 
 python: startup python.o $(python_objects)
 	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-	cp $@ $(BIN)/py
+	cp $@ $(BIN)/py 
         ifdef XDEBUG
-	    mv $@ $(BIN)/py$(VERSION)_debug
+	  mv $@ $(BIN)/py$(VERSION)_debug
         else
-	    mv $@ $(BIN)/py$(VERSION)
+	  mv $@ $(BIN)/py$(VERSION)
         endif
 	# Fix indenting, if necessary.
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -224,7 +226,8 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
-		rdpar_init.o import_calloc.o walls.o charge_exchange.o
+		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o
+
 
 
 
@@ -263,6 +266,7 @@ rhf_objects = rad_hydro_files.o get_atomicdata.o py_wind_sub.o windsave.o py_win
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o
+
 
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
