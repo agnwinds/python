@@ -418,8 +418,11 @@ matrix_ion_populations (xplasma, mode)
 
   xplasma->ne = get_ne (xplasma->density);
 
-  xplasma->heat_ch_ex = ch_ex_heat (&wmain[xplasma->nwind], xplasma->t_e);      //Compute the charge exchange heating
-  xplasma->heat_tot += xplasma->heat_ch_ex;
+  if (n_charge_exchange > 0)
+  {
+    xplasma->heat_ch_ex = ch_ex_heat (&wmain[xplasma->nwind], xplasma->t_e);    //Compute the charge exchange heating
+    xplasma->heat_tot += xplasma->heat_ch_ex;
+  }
 
   /*We now need to populate level densities in order to later calculate line emission (for example).
      We call partition functions to do this. At present, we do not have a method for accurately computing
