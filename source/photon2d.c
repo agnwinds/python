@@ -155,13 +155,6 @@ translate_in_space (pp)
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
                                            From here on we should be in the grid  */
     ds += DFUDGE;               //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
-    /* XXX this is a test.  We check at the start whether we are in the grid */
-
-    if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
-    {
-    }
-
-    /* XXX this ends the test */
 
 
 
@@ -505,10 +498,10 @@ return and record an error */
 
   }
 
-  if (modes.save_photons)
-  {
-    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, *tau);
-  }
+//OLD  if (modes.save_photons)
+//OLD  {
+//OLD    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, *tau);
+//OLD  }
 
 
 /* At this point we now know how far the photon can travel in it's current grid cell */

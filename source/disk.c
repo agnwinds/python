@@ -611,8 +611,8 @@ ds_to_disk (p, allow_negative)
     }
     else if (r_disk > geo.diskrad && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
     {
-      /* This is the case that one is outside the pill box, and don't hit either
-         the disk or the edgest of the disk
+      /* This is the case that one is outside the pill box, and and the photon does not  hit either
+         the disk or the edges of the disk
        */
       return (VERY_BIG);
     }
@@ -626,8 +626,6 @@ ds_to_disk (p, allow_negative)
        */
 
       location = 0;
-//OLD      Log_silent ("ZZXX  a %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-//OLD      Log_silent ("ZZXX  %e > %e at %e \n", fabs (p->x[2]), zdisk (r_phot), r_phot);
 
 
       /* We certainly do not need to go further than
@@ -647,7 +645,6 @@ ds_to_disk (p, allow_negative)
       else
       {
         smax = 2 * geo.diskrad; /* this is a cheat */
-//OLD        Log ("ZZXX - Cheat %d\n", p->np);
       }
 
       /* For the minimum, we need to either to be inside the
@@ -677,8 +674,6 @@ ds_to_disk (p, allow_negative)
           smin = s_cyl;
         }
       }
-//OLD      Log_silent ("ZZXX  sdisk %e s_cyl %e s_top %e s_bot %e\n", s_disk, s_cyl, s_top, s_bot);
-//OLD      Log_silent ("ZZXX  smin %e smax %e for phot %d \n", smin, smax, p->np);
     }
 
   }
@@ -721,16 +716,12 @@ ds_to_disk (p, allow_negative)
   if ((smax - smin) > 0.)
   {
     s = zero_find (disk_height, 0.0, smax - smin, 1e-8);
-//OLD    Log_silent ("ZZXX Normally we expect this  smin %e < %e s_disk %e\n", smin, smax, s_disk);
   }
   else
   {
     s = zero_find (disk_height, smax - smin, 0.0, 1e-8);
-//OLD    Log_silent ("ZZXX This seems unusual       smin %e > smax %e s_disk%e\n", smin, smax, s_disk);
   }
 
-//OLD  Log_silent ("ZZXX  %d  %e %e %e %e %e %e\n", p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
-//OLD  Log_silent ("ZZXX  %d  %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot, zdisk (r_phot));
   if (s == smin || s == smax)
   {
     Log ("ZZXX Time to worry, at limit for %d %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot,
