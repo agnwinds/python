@@ -387,6 +387,10 @@ struct geometry
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
+#define DISK_MISSED 0
+#define DISK_HIT_TOP 1
+#define DISK_HIT_BOT 2
+#define DISK_HIT_EDGE  3
 
 #define DISK_NONE   0
 #define DISK_FLAT   1

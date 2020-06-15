@@ -87,6 +87,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int absorb_reflect;           /* this is a variable used to store geo.absorb_reflect during exxtract */
   int nreport;
   struct timeval timer_t0;
+  double rho;
 
   nreport = 100000;
   if (nreport < NPHOT / 100)
@@ -106,7 +107,18 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
     check_frame (&p[nphot], F_OBSERVER, "trans_phot_start\n");
     if (modes.save_photons)
-      save_photons (p, "trans_phot_start");
+    {
+      save_photons (&p[nphot], "trans_phot_start");
+      rho = sqrt (p[nphot].x[0] * p[nphot].x[0] + p[nphot].x[1] * p[nphot].x[1]);
+      if (fabs (p[nphot].x[2]) <= zdisk (rho))
+      {
+        Diag ("ZDISK %d  %e < = %e delta= %e\n", nphot, fabs (p[nphot].x[2]), rho, rho - fabs (p[nphot].x[2]));
+      }
+    }
+
+
+
+
 
 
 
@@ -227,6 +239,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double x_dfudge_check[3];
   int ndom;
   double normal[3];
+  double rho, dz;
 
   //XFRAME -- check frame of input photon
 
@@ -356,11 +369,45 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          * extract a photon to construct the detailed spectrum
          */
         randvcos (pp.lmn, normal);
+
+
+        if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+        {
+          rho = sqrt (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1]);
+          dz = (zdisk (rho) - fabs (pp.x[2]));
+          if (dz > 0)
+          {
+            //OLD        Error ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk, dz);
+            if (modes.save_photons)
+            {
+              Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), dz);
+            }
+            if (pp.x[2] > 0)
+            {
+              pp.x[2] += (dz + 1000.);
+            }
+
+            else
+            {
+              pp.x[2] -= (dz + 1000.);
+            }
+
+            if (zdisk (rho) > fabs (pp.x[2]))
+            {
+              if (modes.save_photons)
+              {
+                Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), zdisk (rho) - fabs (pp.x[2]));
+              }
+            }
+          }
+        }
         stuff_phot (&pp, p);
+
         p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));
         istat = pp.istat = P_INWIND;
         tau = 0;
+        stuff_phot (&pp, p);
         if (iextract)
         {
           stuff_phot (&pp, &pextract);
@@ -372,6 +419,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
                                    so this is the end of the line. */
         stuff_phot (&pp, p);
         break;
+      }
+
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "HitDisk");
       }
     }
 
