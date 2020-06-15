@@ -401,9 +401,11 @@ ds_to_disk (p, allow_negative, hit)
 
 
   if (geo.disk_type == DISK_NONE)
+  {
 
     *hit = DISK_MISSED;
-  return (VERY_BIG);            /* There is no disk! */
+    return (VERY_BIG);          /* There is no disk! */
+  }
 
 
   /*
