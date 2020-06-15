@@ -207,7 +207,7 @@ double gdisk(double mass, double mdot, double rmin);
 double geff(double g0, double x);
 double vdisk(double x[], double v[]);
 double zdisk(double r);
-double ds_to_disk(struct photon *p, int allow_negative);
+double ds_to_disk(struct photon *p, int allow_negative, int *hit);
 double disk_height(double s, void *params);
 /* lines.c */
 double total_line_emission(WindPtr one, double f1, double f2);

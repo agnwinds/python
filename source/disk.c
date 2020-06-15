@@ -368,9 +368,10 @@ struct plane diskplane, disktop, diskbottom;
  **********************************************************/
 
 double
-ds_to_disk (p, allow_negative)
+ds_to_disk (p, allow_negative, hit)
      struct photon *p;
      int allow_negative;
+     int *hit;
 {
 
   /*
@@ -400,7 +401,10 @@ ds_to_disk (p, allow_negative)
 
 
   if (geo.disk_type == DISK_NONE)
-    return (VERY_BIG);          /* There is no disk! */
+
+    *hit = DISK_MISSED;
+  return (VERY_BIG);            /* There is no disk! */
+
 
   /*
    * Initialize 3 structures that define the plane of the disk, and two
@@ -437,13 +441,25 @@ ds_to_disk (p, allow_negative)
   if (geo.disk_type == DISK_FLAT)
   {
     if (r_disk > geo.diskrad)
+    {
+      *hit = DISK_MISSED;
       return (VERY_BIG);
+    }
     else if (s_disk > 0 || allow_negative)
     {
+      if (p->x[2] > 0)
+      {
+        *hit = DISK_HIT_TOP;
+      }
+      else
+      {
+        *hit = DISK_HIT_BOT;
+      }
       return (s_disk);
     }
     else
     {
+      *hit = DISK_MISSED;
       return (VERY_BIG);
     }
   }
@@ -478,14 +494,18 @@ ds_to_disk (p, allow_negative)
      both of the cylinder boundaries.   
 
      In this case s_cyl will be the distance to the closest
-     intersection and z_cyl will be the distance to the further
+     intersection and s_cyl2 will be the distance to the further
      intersection.  
+
+     z_cyl and z_cyl2 are the zheights of the intersections with
+     the cylinders
    */
 
   s_cyl = ds_to_cylinder (geo.diskrad, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_cyl);
   z_cyl = phit.x[2];
+
   z_cyl2 = VERY_BIG;
   s_cyl2 = VERY_BIG;
   if (r_phot > geo.diskrad)
@@ -525,8 +545,13 @@ ds_to_disk (p, allow_negative)
      * photon back where it came from now allow it to go
      * forward.
      *  
-     * We will make the assumption that if you are moving away from the disk plane (z=0) you want to go
+     * We will make the assumption that if you are moving away from 
+     * the disk plane (z=0) you want to go
      * forward, but if you are moving towards the plane you want to go backwards
+     *
+     * Note that for all of these cases we are ultimately going to solve
+     * for where we hit the disk, and so what is done in this section
+     * is to resolve what the minimum and maximum distance possiblities are.
      */
 
 
@@ -593,13 +618,19 @@ ds_to_disk (p, allow_negative)
   {
     /*
      * This is the case where the photon location is outside 
-     * the disk
+     * the disk.  
+     *
+     * The strategy here is to first try to eliminate the 
+     * possibility that the photon hits the disk and 
+     * to return a large value.  Only if we cannot do this
+     * will we actually calculate the intersection.
      */
 
     if (s_disk < 0 && fabs (z_cyl) > disktop.x[2])
     {
       /* The photon is moving away from the disk and does not hit 
          the edge of the disk */
+      *hit = DISK_MISSED;
       return (VERY_BIG);
     }
     else if (s_cyl == VERY_BIG)
@@ -607,13 +638,22 @@ ds_to_disk (p, allow_negative)
       /* This is the case that one is outside the pill box, and 
          never even hit the cylinder that encloses the disk
        */
+      *hit = DISK_MISSED;
       return (VERY_BIG);
+    }
+    else if (r_disk > geo.diskrad && fabs (z_cyl) < disktop.x[2])
+    {
+      /* This is the case where one is outside the disk radius and the photon hits 
+         the outer edge of the disk */
+      *hit = DISK_HIT_EDGE;
+      return (s_cyl);
     }
     else if (r_disk > geo.diskrad && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
     {
       /* This is the case that one is outside the pill box, and and the photon does not  hit either
          the disk or the edges of the disk
        */
+      *hit = DISK_MISSED;
       return (VERY_BIG);
     }
     else
@@ -726,6 +766,15 @@ ds_to_disk (p, allow_negative)
   {
     Log ("ZZXX Time to worry, at limit for %d %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot,
          zdisk (r_phot));
+  }
+
+  if (p->x[2] > 0)
+  {
+    *hit = DISK_HIT_TOP;
+  }
+  else
+  {
+    *hit = DISK_HIT_BOT;
   }
 
 

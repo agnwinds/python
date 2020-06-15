@@ -141,7 +141,6 @@ translate_in_space (pp)
   double ds, delta, s, smax;
   int ndom, ndom_next;
   struct photon ptest;
-  int ifail;
 
   ds = ds_to_wind (pp, &ndom);
 
@@ -437,6 +436,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   int nplasma;
   int ndom, ndom_current;
   int inwind;
+  int hit_disk;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -477,7 +477,7 @@ return and record an error */
     s = ds_to_wind (p, &ndom_current);  /* smax is set to be the distance to edge of the wind */
     if (s < smax)
       smax = s;
-    s = ds_to_disk (p, 0);      /* the 0 implies ds_to_disk can not return a negative distance */
+    s = ds_to_disk (p, 0, &hit_disk);   /* the 0 implies ds_to_disk can not return a negative distance */
     if (s > 0 && s < smax)
       smax = s;
   }

@@ -90,6 +90,7 @@ walls (p, pold, normal)
   double s_disk, s_star, z;
   double theta, phi;
   double xpath;
+  int hit_disk;
 
   /* Check to see if the photon has hit the star. If so
    * put the photon at the star surface and use that position
@@ -209,7 +210,7 @@ walls (p, pold, normal)
       p->istat = P_HIT_DISK;
     }
 
-    s_disk = ds_to_disk (pold, 0);      /* The 0 imples that s cannot be negative */
+    s_disk = ds_to_disk (pold, 0, &hit_disk);   /* The 0 imples that s cannot be negative */
 
     if (s_disk > 0 && p->ds > s_disk)
     {
@@ -232,16 +233,26 @@ walls (p, pold, normal)
 
       /* Finally, we must calculate the normal to the disk at this point to be able to calculate the scattering direction */
 
-      theta = atan ((zdisk (rho * (1. + EPSILON)) - zdisk (rho)) / (EPSILON * rho));
-      phi = atan2 (p->x[0], p->x[1]);
+      phi = atan2 (p->x[1], p->x[0]);
 
-      normal[0] = (-cos (phi) * sin (theta));
-      normal[1] = (-sin (phi) * sin (theta));
-      normal[2] = cos (theta);
-
-      if (p->x[2] < 0)
+      if (hit_disk == DISK_HIT_EDGE)
       {
-        normal[2] *= -1;
+        normal[0] = cos (phi);
+        normal[1] = sin (phi);
+        normal[2] = 0;
+      }
+      else
+      {
+        theta = atan ((zdisk (rho * (1. + EPSILON)) - zdisk (rho)) / (EPSILON * rho));
+
+        normal[0] = (-cos (phi) * sin (theta));
+        normal[1] = (-sin (phi) * sin (theta));
+        normal[2] = cos (theta);
+
+        if (p->x[2] < 0)
+        {
+          normal[2] *= -1;
+        }
       }
 
       if (modes.save_photons)
