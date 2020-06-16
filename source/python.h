@@ -1128,6 +1128,8 @@ typedef struct photon
   double freq, freq_orig, freq_orig_loc;        /* current, original frequency redshifted and unredshifted) of this packet */
   double w, w_orig;                             /* current and original weight of this packet */
   double tau;                                   /* optical depth of the photon since its creation or last interaction */
+
+#define N_ISTAT 13 // number of entries in the istat_enum 
   enum istat_enum
   {
     P_INWIND = 0,               //in wind,
