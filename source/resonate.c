@@ -354,16 +354,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               /* The next line may be redundant.  */
               two = &w[where_in_grid (wmain[p_now.grid].ndom, p_now.x)];
 
-              if (lin_ptr[nn]->macro_info == 1 && geo.macro_simple == 0)
-              {
-/* The line is part of a macro atom so increment the estimator if desired */
-                if (geo.ioniz_or_extract == 1)
-                {
-                  bb_estimators_increment (two, p, tau_sobolev, dvds, nn);
-                  //XFRAME ultimately need to consider transformaions in estimators - eitger transform quantities before passing (p) or else in the incremenr routines (choose a principle and apply to all?)
-                }
-              }
-              else if (two->vol == 0)
+              if (two->vol == 0)
               {
                 /* See issue #389 - Sometimes DFUDGE pushes a photon into a cell with no volume.  Note that this
                  * should be very rare, so if this error occurs in significant numbers the problem should be
@@ -371,14 +362,27 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
                  */
                 Error ("calculate_ds: Macro atom problem when photon moved into cell with no volume\n");
               }
-              else
+              else if (geo.ioniz_or_extract == 1)
               {
-/* The line is from a simple ion. Record the heating contribution and move on. */
-                xplasma2 = &plasmamain[two->nplasma];
+                /* we only want to increment the BB estimators if we are in the ionization cycles (e.g. #730) */
 
-                bb_simple_heat (xplasma2, p, tau_sobolev, dvds, nn);
-                //XFRAME ultimately need to consider transformaions in estimators (?)
+                if (lin_ptr[nn]->macro_info == 1 && geo.macro_simple == 0)
+                {
+                  /* The line is part of a macro atom so increment the estimator if desired */
+                  bb_estimators_increment (two, p, tau_sobolev, dvds, nn);
+                  /* XFRAME ultimately need to consider transformaions in estimators
+                     either transform quantities before passing (p) or else in the increment 
+                     routines (choose a principle and apply to all?) */
+                }
+                else
+                {
+                  /* The line is from a simple ion. Record the heating contribution and move on. */
+                  xplasma2 = &plasmamain[two->nplasma];
 
+                  bb_simple_heat (xplasma2, p, tau_sobolev, dvds, nn);
+                  /* XFRAME ultimately need to consider transformaions in estimators */
+
+                }
               }
             }
           }
