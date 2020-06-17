@@ -102,7 +102,7 @@ bf_estimators_increment (one, p, ds)
   /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
      which also updates the ionization parameters and scattered and direct contributions */
 
-  update_banded_estimators (xplasma, p, ds, p->w);
+  update_banded_estimators (xplasma, p, ds, p->w, ndom);
 
   /* check that j and ave freq give sensible numbers */
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
@@ -171,6 +171,8 @@ bf_estimators_increment (one, p, ds)
         y = weight_of_packet * x * ds;
 
         exponential = y * exp (-(freq_av - ft) / BOLTZMANN / xplasma->t_e);
+
+        /* Increment the photoionization rate estimator */
 
         mplasma->gamma[config[llvl].bfu_indx_first + m] += y / freq_av;
 

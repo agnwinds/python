@@ -86,6 +86,7 @@ typedef struct elements
   char name[20];                /* Element name */
   int z;                        /* Atomic number */
   int firstion;                 /* Index into struct ions  ion[firstion] is the lowest ionization state of this ion */
+  int lastion;                  /* Index into struct ions ion[lastion] is the higest ionization state of this ion */
   int nions;                    /* The number of ions actually read in from the data file for this element */
   double abun;                  /* Abundance */
   int istate_max;               /* highest ionization stage of element */
@@ -231,7 +232,7 @@ typedef struct lines
   int macro_info;               /* Identifies whether line is to be treated using a Macro Atom approach.
                                    set to -1 (not known initially) 
                                    set to 0 if not a macro atom line  
-                                   set to 1 if a macro atom line  (ksl 04 apr)
+                                   set to 1 if a macro atom line  
                                    Note: program will exit if -1 before leaving get_atomicdata
                                  */
   double freq;                  /* The frequency of the resonance line */
@@ -295,10 +296,10 @@ Coll_stren coll_stren[NLINES];  //Set up the structure - we could in principle h
 
 int nxphot;                     /*The actual number of ions for which there are VFKY photoionization x-sections */
 double phot_freq_min;           /*The lowest frequency for which photoionization can occur */
-double inner_freq_min;          /*The lowest frequency for which inner shel ionization can take place */
+double inner_freq_min;          /*The lowest frequency for which inner shell ionization can take place */
 
-#define NCROSS 1500
-#define NTOP_PHOT 400           /* Maximum number of photoionisation processes. (SS) */
+#define NCROSS 2000             /* Maximum number of x-sections for a single photionization process */
+#define NTOP_PHOT 400           /* Maximum number of photoionisation processes.  */
 int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
 int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
@@ -335,36 +336,10 @@ typedef struct topbase_phot
 
 Topbase_phot phot_top[NLEVELS];
 TopPhotPtr phot_top_ptr[NLEVELS];       /* Pointers to phot_top in threshold frequency order - this */
+
 Topbase_phot inner_cross[N_INNER * NIONS];
 TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
 
-
-
-
-//Topbase_phot xphot_tab[NIONS];  /* Tabulated verner data - uses the same structure as topbase to simplify code.*/
-
-/* Photoionization crossections from Verner & Yakovlev - to be used for inner shell ionization and the Auger effect*/
-typedef struct innershell
-{
-  int nion;                     /* index to the appropriate ion in the structure ions, so for example, ion would
-                                   normally be 0 for neutral H, 1 for H+, 1 for He, 2 for He+ etc */
-  int nion_target;              /*Index to the ion that is made by
-                                   double ionization */
-  int z, istate;
-  int n, l;                     /*Quantum numbers of shell */
-  double freq_t;                /*Threshold freq */
-  double Sigma;                 /*cross section at edge */
-  double ya, P, yw, E_0;        /* Fit prarameters */
-  double yield;                 /*The Auger yield associated with this edge I.e. probability that following photoionization
-                                   an Auger electron is ejected making a double ionization */
-  double arad;                  /*Radiative recombination rate parameters */
-  double etarad;                /*         following Aldrovandi & Pequignot formula */
-  double adi, bdi, t0di, t1di;  /*Dielectronic recombination
-                                   parameters (A&P formula) */
-
-} Innershell, *InnershellPtr;
-
-Innershell augerion[NAUGER];
 
 
 /* This next is the electron yield data for inner shell ionization from Kaastra and Mewe */
@@ -439,7 +414,8 @@ int n_total_rr;
 typedef struct total_rr
 {
   int nion;                     //Internal cross reference to the ion that this refers to
-  double params[T_RR_PARAMS];   /*There are up to six parameters. If the last two are zero, we stillthe                                   data in the same way, but they have no effect - NB - 
+  double params[T_RR_PARAMS];   /*There are up to six parameters. If the last two are zero, we still
+                                   the data in the same way, but they have no effect - NB - 
                                    important to zero these! */
   /* NSH 23/7/2012 - This array will double up for Shull parameters */
   int type;                     /* NSH 23/7/2012 - What type of parampeters we have for this ion */

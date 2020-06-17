@@ -186,7 +186,7 @@ get_extra_diagnostics ()
   strcpy (answer, "no");
   modes.track_resonant_scatters = rdchoice ("@Diag.track_resonant_scatters(yes,no)", "1,0", answer);
 
-  if (modes.save_cell_stats || modes.save_photons || modes.save_extract_photons | modes.track_resonant_scatters)
+  if (modes.save_cell_stats || modes.save_photons || modes.save_extract_photons || modes.track_resonant_scatters)
   {
     modes.extra_diagnostics = 1;
   }
@@ -396,9 +396,11 @@ save_photons (p, comment)
   save_photon_number += 1;
 
   fprintf (epltptr,
-           "PHOTON %3d %3d %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %s \n",
-           geo.wcycle, p->np, p->freq, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
-           p->lmn[2], p->grid, p->istat, p->origin, p->nres, comment);
+           "PHOTON %3d %3d %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %3d %s \n",
+           geo.wcycle, p->np, p->freq, p->w, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+           p->lmn[2], p->grid, p->istat, p->origin, p->nscat, p->nres, comment);
+
+  fflush (epltptr);
 
   return (0);
 }
@@ -430,6 +432,8 @@ track_scatters (p, nplasma, comment)
 
   fprintf (epltptr, "Scattter %i %.2e %.2e %.2e  %i %e %e %i %s\n", p->np,
            p->x[0], p->x[1], p->x[2], p->grid, p->freq, p->w, nplasma, comment);
+
+  fflush (epltptr);
 
   return (0);
 }

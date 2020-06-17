@@ -326,9 +326,10 @@ line_summary (w, rootname, ochoice)
   int nline;
   double freq_search;
 
-  double d1, d2, z, energy, rb, tot, omega;
+  double d1, d2, z, q, energy, rb, tot, omega;
   int nplasma;
 
+  z = q = 0;
   iline = 0;
   lambda = 0;
   i_matom_search = 0;
@@ -439,13 +440,13 @@ line_summary (w, rootname, ochoice)
 
 
   rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
-  if (geo.line_mode == 0)
+  if (geo.line_mode == LINE_MODE_ABSORB)
     Log ("Pure_abs in line heating/cooling\n");
-  else if (geo.line_mode == 1)
+  else if (geo.line_mode == LINE_MODE_SCAT)
     Log ("Pure_scat_in line heating/cooling\n");
-  else if (geo.line_mode == 2)
+  else if (geo.line_mode == LINE_MODE_SINGLE_SCAT)
     Log ("Single scat for line heating/cooling\n");
-  else if (geo.line_mode == 3)
+  else if (geo.line_mode == LINE_MODE_ESC_PROB)
     Log ("Escape probabilities for line heating/cooling\n");
   else if (geo.line_mode == 4)
     Log ("No line transfer; diagnostic mode only\n");
@@ -475,18 +476,35 @@ line_summary (w, rootname, ochoice)
       nplasma = w[n].nplasma;
 
       if (lin_ptr[nline]->macro_info == 1)
-      {                         //If this is a matom line
+      {
+        /* If this is a matom line */
         d2 = den_config (&plasmamain[nplasma], lin_ptr[nline]->nconfigu);
+        d1 = den_config (&plasmamain[nplasma], lin_ptr[nline]->nconfigl);
       }
       else
-      {                         //If this is not a matom line
+      {
+        /* If this is not a matom line */
         two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
       }
-      x = (d2) * a21 (lin_ptr[nline]) * PLANCK * lin_ptr[nline]->freq * w[n].vol;
 
-      if (geo.line_mode != 4)
+
+      if (geo.line_mode == 4)
       {
-        x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
+        /* diagnostic mode that just returns n2 * A21 * vol * hnu */
+        x = (d2) * a21 (lin_ptr[nline]) * PLANCK * lin_ptr[nline]->freq * w[n].vol;
+      }
+      else
+      {
+        /* the below code is essentially duplicated from lum_lines() in lines.c, see #643 */
+        x = lin_ptr[nline]->gu / lin_ptr[nline]->gl * d1 - d2;
+        z = exp (-H_OVER_K * lin_ptr[nline]->freq / plasmamain[nplasma].t_e);
+        q = 1. - scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
+        x *= q * a21 (lin_ptr[nline]) * z / (1. - z);
+        x *= PLANCK * lin_ptr[nline]->freq * plasmamain[nplasma].vol;
+
+        /* Include effects of line trapping */
+        if (geo.line_mode == LINE_MODE_ESC_PROB)
+          x *= p_escape (lin_ptr[nline], &plasmamain[nplasma]);
       }
 
       tot += x;
@@ -534,6 +552,7 @@ line_summary (w, rootname, ochoice)
 
   return (0);
 }
+
 
 
 /**********************************************************/

@@ -60,12 +60,14 @@ radiation (p, ds)
 
   double freq, freq_store;
   double kappa_tot, frac_tot, frac_ff;
-  double frac_z, frac_comp;     /* frac_comp - the heating in the cell due to compton heating */
-  double frac_ind_comp;         /* frac_ind_comp - the heating due to induced compton heating */
+  double frac_z, frac_comp;     /* frac_comp - the heating in the cell due to Compton heating */
+  double frac_ind_comp;         /* frac_ind_comp - the heating due to induced Compton heating */
   double frac_auger;
   double frac_tot_abs, frac_auger_abs, z_abs;
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
+  double kappa_inner_ion[n_inner_tot];
+  double frac_inner_ion[n_inner_tot];
   double density, ft, tau, tau2;
   double energy_abs;
   int n, nion;
@@ -121,11 +123,11 @@ radiation (p, ds)
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
 
-  /* calculate free-free, compton and ind-compton opacities 
+  /* calculate free-free, Compton and ind-Compton opacities 
      note that we also call these with the average frequency along ds */
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);       /* Add ff opacity */
-  kappa_tot += frac_comp = kappa_comp (xplasma, freq);  /* Calculate compton opacity, 
+  kappa_tot += frac_comp = kappa_comp (xplasma, freq);  /* Calculate Compton opacity, 
                                                            store it in kappa_comp and also add it to kappa_tot, 
                                                            the total opacity for the photon path */
 
@@ -159,6 +161,11 @@ radiation (p, ds)
         kappa_ion[nion] = 0;
         frac_ion[nion] = 0;
       }
+      for (n = 0; n < n_inner_tot; n++)
+      {
+        kappa_inner_ion[n] = 0;
+        frac_inner_ion[n] = 0;
+      }
     }
 
     /* Next section is for photoionization with Topbase.  There may be more
@@ -173,7 +180,6 @@ radiation (p, ds)
     /* Next steps are a way to avoid the loop over photoionization x sections when it should not matter */
     if (DENSITY_PHOT_MIN > 0)
     {                           // Initialize during ionization cycles only
-
 
       /* Loop over all photoionization xsections */
       for (n = 0; n < nphot_total; n++)
@@ -257,7 +263,7 @@ radiation (p, ds)
       {
         for (n = 0; n < n_inner_tot; n++)
         {
-          if (ion[inner_cross[n].nion].phot_info != 1)
+          if (ion[inner_cross_ptr[n]->nion].phot_info != 1)
           {
             x_top_ptr = inner_cross_ptr[n];
             if (x_top_ptr->n_elec_yield != -1)  //Only any point in doing this if we know the energy of elecrons
@@ -300,8 +306,10 @@ radiation (p, ds)
                     {
                       frac_z += z;
                     }
-                    frac_ion[nion] += z;
-                    kappa_ion[nion] += x;
+//                    frac_ion[nion] += z;
+//                    kappa_ion[nion] += x;                    
+                    frac_inner_ion[n] += z;     //NSH We need to log the auger rate seperately - we do this by cross section
+                    kappa_inner_ion[n] += x;    //NSH and we also og the opacity by ion
                   }
                 }
               }
@@ -341,8 +349,8 @@ radiation (p, ds)
 
   }
 
-  /* Calculate the reduction in weight - compton scattering is not included, it is now included at scattering
-     however induced compton heating is not implemented at scattering, so it should remain here for the time being
+  /* Calculate the reduction in weight - Compton scattering is not included, it is now included at scattering
+     however induced Compton heating is not implemented at scattering, so it should remain here for the time being
      to maimtain consistency. */
 
   tau = (kappa_tot - frac_comp) * ds;
@@ -379,28 +387,6 @@ radiation (p, ds)
 /* Everything after this is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
 
-  xplasma->ntot++;
-
-/* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
- * and hence get an idea of how 'agny' or 'disky' the cell is. */
-/* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
- * number of photons.  Also used the PTYPE designations as one should as a matter of 
- * course
- */
-
-  if (p->origin == PTYPE_STAR)
-    xplasma->ntot_star++;
-  else if (p->origin == PTYPE_BL)
-    xplasma->ntot_bl++;
-  else if (p->origin == PTYPE_DISK)
-    xplasma->ntot_disk++;
-  else if (p->origin == PTYPE_WIND)
-    xplasma->ntot_wind++;
-  else if (p->origin == PTYPE_AGN)
-    xplasma->ntot_agn++;
-
-
-
   if (freq > xplasma->max_freq) // check if photon frequency exceeds maximum frequency - use doppler shifted frequency
     xplasma->max_freq = freq;   // set maximum frequency sen in the cell to the mean doppler shifted freq - see bug #391
 
@@ -417,7 +403,7 @@ radiation (p, ds)
   //Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
   freq_store = p->freq;         //Store the packets 'intrinsic' frequency
   p->freq = freq;               //Temporarily set the photon frequency to the mean doppler shifter frequency
-  update_banded_estimators (xplasma, p, ds, w_ave);     //Update estimators
+  update_banded_estimators (xplasma, p, ds, w_ave, ndom);       //Update estimators
   p->freq = freq_store;         //Set the photon frequency back
 
 
@@ -436,13 +422,13 @@ radiation (p, ds)
     xplasma->heat_tot += z * frac_ff;
     xplasma->abs_tot += z * frac_ff;    /* The energy absorbed from the photon field in this cell */
 
-    xplasma->heat_comp += z * frac_comp;        /* Calculate the heating in the cell due to compton heating */
-    xplasma->heat_tot += z * frac_comp; /* Add the compton heating to the total heating for the cell */
+    xplasma->heat_comp += z * frac_comp;        /* Calculate the heating in the cell due to Compton heating */
+    xplasma->heat_tot += z * frac_comp; /* Add the Compton heating to the total heating for the cell */
     xplasma->abs_tot += z * frac_comp;  /* The energy absorbed from the photon field in this cell */
     xplasma->abs_tot += z * frac_ind_comp;      /* The energy absorbed from the photon field in this cell */
 
-    xplasma->heat_tot += z * frac_ind_comp;     /* Calculate the heating in the celldue to induced compton heating */
-    xplasma->heat_ind_comp += z * frac_ind_comp;        /* Increment the induced compton heating counter for the cell */
+    xplasma->heat_tot += z * frac_ind_comp;     /* Calculate the heating in the cell due to induced Compton heating */
+    xplasma->heat_ind_comp += z * frac_ind_comp;        /* Increment the induced Compton heating counter for the cell */
     if (freq > phot_freq_min)
     {
       xplasma->abs_photo += z * frac_tot_abs;   //Here we store the energy absorbed from the photon flux - different from the heating by the binding energy
@@ -456,10 +442,6 @@ radiation (p, ds)
       xplasma->heat_auger += z * frac_auger;
       xplasma->heat_tot += z * frac_auger;      //All the inner shell opacities
 
-      /* Calculate the number of H ionizing photons, see #255 */
-      if (freq > (RYD2ERGS / PLANCK))
-        xplasma->nioniz++;
-
       q = (z) / (PLANCK * freq * xplasma->vol);
       /* So xplasma->ioniz for each species is just 
          (energy_abs)*kappa_h/kappa_tot / PLANCK*freq / volume
@@ -471,43 +453,85 @@ radiation (p, ds)
         xplasma->ioniz[nion] += kappa_ion[nion] * q;
         xplasma->heat_ion[nion] += frac_ion[nion] * z;
       }
-
+      for (n = 0; n < n_inner_tot; n++)
+      {
+        xplasma->heat_inner_ion[inner_cross_ptr[n]->nion] += frac_inner_ion[n] * z;     //This quantity is per ion - the ion number comes from the freq ordered cross section
+        xplasma->inner_ioniz[n] += kappa_inner_ion[n] * q;      //This is the number of ionizations from this innershell cross section - at this point, inner_ioniz is ordered by frequency                
+      }
     }
   }
 
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path
 
+  /*Deal with the special case of a spherical geometry */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
+  }
+
+
 
   stuff_v (p->lmn, p_out);
   renorm (p_out, z * frac_ff / VLIGHT);
-  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
   for (i = 0; i < 3; i++)
   {
     xplasma->rad_force_ff[i] += dp_cyl[i];
   }
+  xplasma->rad_force_ff[3] += length (dp_cyl);
+
 
   stuff_v (p->lmn, p_out);
   renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
-  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
   for (i = 0; i < 3; i++)
   {
     xplasma->rad_force_bf[i] += dp_cyl[i];
   }
 
+  xplasma->rad_force_bf[3] += length (dp_cyl);
+
+
   stuff_v (p->lmn, p_out);
   renorm (p_out, w_ave * ds * klein_nishina (p->freq));
-  project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-  if (p->x[2] < 0)
-    dp_cyl[2] *= (-1);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
   for (i = 0; i < 3; i++)
   {
     xplasma->rad_force_es[i] += dp_cyl[i];
   }
+  xplasma->rad_force_es[3] += length (dp_cyl);
 
   return (0);
 }
@@ -645,52 +669,6 @@ sigma_phot (x_ptr, freq)
 
 
 
-/**********************************************************/
-/** 
- * @brief      calculates the photionization crossection due to the transition 
- *  	associated with x_ptr at frequency freq (when the data is in the form of the Verner x-sections
- *
- * @param [in] struct innershell *  x_ptr   The stucture that contains information in the format of Verner for 
- * a particular ion level
- * @param [in] double  freq   The frequency where the x-section is calculated
- * @return     The photoinization x-section
- *
- * @details
- * Same as sigma_phot but using the older compilation from Verner that includes inner shells
- *
- * ### Notes ###
- * 
- * I (NSH) think this routine has been largely superceeded by the new inner shell formulation of auger ionization.
- * At some point we may wish to expunge the old augerion perts of python.
- *
- **********************************************************/
-
-double
-sigma_phot_verner (x_ptr, freq)
-     struct innershell *x_ptr;
-     double freq;
-{
-  double ft;
-  double y;
-  double f1, f2, f3;
-  double xsection;
-
-  ft = x_ptr->freq_t;           /* threshold frequency */
-
-  if (ft < freq)
-  {
-    y = freq / x_ptr->E_0 * HEV;
-
-    f1 = ((y - 1.0) * (y - 1.0)) + (x_ptr->yw * x_ptr->yw);
-    f2 = pow (y, 0.5 * x_ptr->P - 5.5 - x_ptr->l);
-    f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->P);
-    xsection = x_ptr->Sigma * f1 * f2 * f3;     // the photoinization xsection
-
-    return (xsection);
-  }
-  else
-    return (0.0);
-}
 
 
 
@@ -796,7 +774,7 @@ pop_kappa_ff_array ()
         sum += plasmamain[i].density[j] * (ion[j].istate - 1) * (ion[j].istate - 1) * gaunt;
         if (sane_check (sum))
         {
-          Error ("pop_kappa_ff_array:sane_check sum is %e this is a problem, possible in gaunt %3\n", sum, gaunt);
+          Error ("pop_kappa_ff_array:sane_check sum is %e this is a problem, possible in gaunt %e\n", sum, gaunt);
         }
       }
       else
@@ -834,9 +812,13 @@ pop_kappa_ff_array ()
  * in which the spectra are constructed are in geo.xfreq. This information
  * is used in different ways (or not at all) depending on the ionization mode.
  *
- * It also records the values of IP.
+ * It also records the various parameters intended to describe the radiation field, 
+ * including the IP.
  *
  * ### Notes ###
+ *
+ * The term direct refers to photons that have not been scattered by the wind.
+ * 
  * In non macro atom mode, w_ave
  * this is an average weight (passed as w_ave), but 
  * in macro atom mode weights are never reduced (so p->w 
@@ -848,14 +830,30 @@ pop_kappa_ff_array ()
  * to be called in all cases, though clearly it is only provides diagnostic
  * information in some of them.
  *
+ * 
  **********************************************************/
 
+
+/* A couple of external variables to improve the counting of ionizing
+   photons coming into a cell
+*/
+int nioniz_nplasma = -1;
+int nioniz_np = -1;
+
+/* A couple of external variables to improve the counting of photons
+   in a cell
+*/
+
+int plog_nplasma = -1;
+int plog_np = -1;
+
 int
-update_banded_estimators (xplasma, p, ds, w_ave)
+update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      PlasmaPtr xplasma;
      PhotPtr p;
      double ds;
      double w_ave;
+     int ndom;
 {
   int i;
   double flux[3];
@@ -863,6 +861,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   struct photon phot_mid;
 
   /*photon weight times distance in the shell is proportional to the mean intensity */
+
   xplasma->j += w_ave * ds;
 
   if (p->nscat == 0)
@@ -887,20 +886,41 @@ update_banded_estimators (xplasma, p, ds, w_ave)
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
   stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
+
   renorm (p_dir_cos, w_ave * ds);       //Renormnalise the direction into a flux element
   project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
 
   if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
 
+
+  /*Deal with the special case of a spherical geometry */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
+    flux[0] = dot (p_dir_cos, phot_mid.x);      //In the spherical geometry, the first comonent is the radial flux
+    flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
+  }
+
 /* We now update the fluxes in the three bands */
 
+
   if (p->freq < UV_low)
+  {
     vadd (xplasma->F_vis, flux, xplasma->F_vis);
-  else if (p->freq < UV_hi)
+    xplasma->F_vis[3] += length (flux);
+  }
+  else if (p->freq > UV_hi)
+  {
     vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
+    xplasma->F_Xray[3] += length (flux);
+  }
   else
+  {
     vadd (xplasma->F_UV, flux, xplasma->F_UV);
+    xplasma->F_UV[3] += length (flux);
+  }
 
 
   /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
@@ -946,8 +966,51 @@ update_banded_estimators (xplasma, p, ds, w_ave)
      in the same way in macro atoms, so should instead be thought of as 
      'direct from source' and 'reprocessed' radiation */
 
+  if (xplasma->nplasma != plog_nplasma || p->np != plog_np)
+  {
+    xplasma->ntot++;
+
+    /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
+     * and hence get an idea of how 'agny' or 'disky' the cell is. */
+    /* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
+     * number of photons.  Also used the PTYPE designations as one should as a matter of 
+     * course
+     */
+
+    if (p->origin == PTYPE_STAR)
+      xplasma->ntot_star++;
+    else if (p->origin == PTYPE_BL)
+      xplasma->ntot_bl++;
+    else if (p->origin == PTYPE_DISK)
+      xplasma->ntot_disk++;
+    else if (p->origin == PTYPE_WIND)
+      xplasma->ntot_wind++;
+    else if (p->origin == PTYPE_AGN)
+      xplasma->ntot_agn++;
+    plog_nplasma = xplasma->nplasma;
+    plog_np = p->np;
+  }
+
+
+
+
+
+
+
   if (HEV * p->freq > 13.6)     // only record if above H ionization edge
   {
+
+    /*
+     * Calculate the number of H ionizing photons, see #255
+     * EP 11-19: moving the number of ionizing photons counter into this
+     * function so it will be incremented for both macro and non-macro modes
+     */
+    if (xplasma->nplasma != nioniz_nplasma || p->np != nioniz_np)
+    {
+      xplasma->nioniz++;
+      nioniz_nplasma = xplasma->nplasma;
+      nioniz_np = p->np;
+    }
 
     /* IP needs to be radiation density in the cell. We sum contributions from
        each photon, then it is normalised in wind_update. */
@@ -1001,7 +1064,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
  * ### Notes ###
  * This subroutine was produced
  * when we started to use a spectral model to populate the upper state of a
- * two level atom, as well as to calculate induced compton heating. 
+ * two level atom, as well as to calculate induced Compton heating. 
  *
  * @bug   The routine refers to a mode 5, which does not appear to 
  * exist, or at least it is not one that is included in python.h
@@ -1026,7 +1089,7 @@ mean_intensity (xplasma, freq, mode)
 
 
 
-  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)   /*If we are using power law ionization, use PL estimators */
+  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL || geo.ioniz_mode == IONMODE_MATRIX_ESTIMATORS)    /*If we are using power law ionization, use PL estimators */
   {
     if (geo.spec_mod > 0)       /* do we have a spectral model yet */
     {
@@ -1061,7 +1124,7 @@ mean_intensity (xplasma, freq, mode)
               /* We have a spectral model, but it doesnt apply to the frequency 
                  in question. clearly this is a slightly odd situation, where last
                  time we didnt get a photon of this frequency, but this time we did. 
-                 Still this should only happen in very sparse cells, so induced compton 
+                 Still this should only happen in very sparse cells, so induced Compton 
                  is unlikely to be important in such cells. We generate a warning, just 
                  so we can see if this is happening a lot */
               J = 0.0;
@@ -1096,7 +1159,7 @@ mean_intensity (xplasma, freq, mode)
         J *= 1 / (exp (expo) - 1);
         J *= xplasma->w;
       }
-      else                      //A guess is not a good idea (i.e. we need the model for induced compton), so we return zero.
+      else                      //A guess is not a good idea (i.e. we need the model for induced Compton), so we return zero.
       {
         J = 0.0;
       }

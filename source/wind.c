@@ -267,10 +267,6 @@ model_velocity (ndom, x, v)
   {
     speed = homologous_velocity (ndom, x, v);
   }
-//OLD  else if (zdom[ndom].wind_type == YSO)
-//OLD  {
-//OLD    speed = yso_velocity (ndom, x, v);
-//OLD  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     speed = stellar_velocity (ndom, x, v);
@@ -409,10 +405,6 @@ model_rho (ndom, x)
   {
     rho = homologous_rho (ndom, x);
   }
-//OLD  else if (zdom[ndom].wind_type == YSO)
-//OLD  {
-//OLD    rho = yso_rho (ndom, x);
-//OLD  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     rho = stellar_rho (ndom, x);
@@ -436,8 +428,8 @@ model_rho (ndom, x)
 /** 
  * @brief      Simple checks of the wind structure for reasonability
  *
- * @param [in, out] WindPtr  www   The entire wind
- * @param [in, out] int  n   n >= 0  then an element of the array will be checked
+ * @param [in] WindPtr  www   The entire wind
+ * @param [in] int  n   n >= 0  then an element of the array will be checked
  * @return     Always returns 0
  *
  * @details
@@ -445,13 +437,14 @@ model_rho (ndom, x)
  * 
  * * wind_check(w,-1);  to check the entire structure
  * * wind_check(w,50);   to check element 50 of the structure
- * * wind_check(w[50],0) to check elemetn 50 of the structure
+ * * wind_check(w[50],0) to check element 50 of the structure
  *
  * ### Notes ###
  * 
- * These checks are so basic, just NaN (sane_checks), that they hardly 
- * seem worth doing.  One would think one would want to stop the
- * program if any of them failed.  But this does not take much time.
+ * These checks are basic, just NaN (sane_checks) and a check that
+ * the wind does not contain velocities that exceed the speed of light. 
+ * 
+ * The program will stop if any of the checks failed.
  *
  * The checks are made on the wind, without reference to domains
  *
@@ -463,6 +456,14 @@ wind_check (www, n)
      int n;
 {
   int i, j, k, istart, istop;
+  int ierr = 0;
+  int ndom, ndim, mdim;
+  double dxmin, dzmin;
+  double drmin, dtmin;
+  int outer_n, outer_m;
+  double delta;
+  double frac = 0.01;
+
   if (n < 0)
   {
     istart = 0;
@@ -476,19 +477,27 @@ wind_check (www, n)
 
   for (i = istart; i < istop; i++)
   {
+    if (length (www[i].v) > VLIGHT)
+    {
+      Error ("wind_check: greater than light speed velocity %e in wind element %d\n", length (www[i].v), i);
+      ierr++;
+    }
     for (j = 0; j < 3; j++)
     {
       if (sane_check (www[i].x[j]))
       {
         Error ("wind_check:sane_check www[%d].x[%d] %e\n", i, j, www[i].x[j]);
+        ierr++;
       }
       if (sane_check (www[i].xcen[j]))
       {
         Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i, j, www[i].xcen[j]);
+        ierr++;
       }
       if (sane_check (www[i].v[j]))
       {
         Error ("wind_check:sane_check www[%d].v[%d] %e\n", i, j, www[i].v[j]);
+        ierr++;
       }
     }
     for (j = 0; j < 3; j++)
@@ -498,9 +507,96 @@ wind_check (www, n)
         if (sane_check (www[i].v_grad[j][k]))
         {
           Error ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n", i, j, k, www[i].v_grad[j][k]);
+          ierr++;
         }
       }
 
+    }
+  }
+
+  if (ierr)
+  {
+    Error ("wind_check: Something is very seriously wrong with the wind.  %d problems Exiting\n", ierr);
+    Exit (0);
+  }
+
+
+/* Now perform some checks to ensure DFUDGE is unlikely to punch through any cells  */
+/* This versions does not change DFUDGE but simply logs places where problems might arise */
+
+
+  delta = frac * DFUDGE;
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+    ndim = zdom[ndom].ndim;
+    mdim = zdom[ndom].mdim;
+    if (zdom[ndom].coord_type == RTHETA)
+    {
+      drmin = 1e99;
+      dtmin = 1e99;
+      for (i = 0; i < ndim; i++)
+      {
+        for (j = 0; j < mdim; j++)
+        {
+          wind_ij_to_n (ndom, i, j, &n);
+          if (wmain[n].vol > 0.0)
+          {
+            wind_ij_to_n (ndom, i + 1, j, &outer_n);
+            wind_ij_to_n (ndom, i, j + 1, &outer_m);
+            drmin = fabs (wmain[outer_n].r - wmain[n].r);
+            dtmin = fabs (wmain[n].r * (wmain[outer_m].theta - wmain[n].theta) / RADIAN);
+            if (drmin < delta || dtmin < delta)
+            {
+              Error ("wind_check: DFUDGE may be large in cell %d %d (%.1e %.1e)\n", i, j, drmin, dtmin);
+            }
+          }
+        }
+      }
+    }
+    else if (zdom[ndom].coord_type == CYLIND || zdom[ndom].coord_type == CYLVAR)
+    {
+      dxmin = 1e99;
+      dzmin = 1e99;
+      for (i = 0; i < ndim; i++)
+      {
+        for (j = 0; j < mdim; j++)
+        {
+          wind_ij_to_n (ndom, i, j, &n);
+          if (wmain[n].vol > 0.0)
+          {
+            wind_ij_to_n (ndom, i + 1, j, &outer_n);
+            wind_ij_to_n (ndom, i, j + 1, &outer_m);
+            dxmin = fabs (wmain[outer_n].x[0] - wmain[n].x[0]);
+            dzmin = fabs (wmain[outer_m].x[2] - wmain[n].x[2]);
+
+            if (drmin < delta || dtmin < delta)
+            {
+              Error ("wind_check: DFUDGE may be large in cell %d %d (%.1e %.1e)\n", i, j, drmin, dtmin);
+            }
+          }
+        }
+      }
+    }
+    else if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      drmin = 1e99;
+      for (i = 0; i < ndim; i++)
+      {
+        if (wmain[i].vol > 0.0)
+        {
+          drmin = fabs (wmain[i + 1].r - wmain[i].r);
+          if (drmin < delta)
+          {
+            Error ("wind_check: DFUDGE may be large in cell %d (%.1e)\n", i, drmin);
+          }
+        }
+      }
+    }
+    else
+    {
+      Error ("wind_check: Disaster - unknown wind type\n");
+      Exit (0);
     }
   }
 

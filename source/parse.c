@@ -57,6 +57,7 @@ parse_command_line (argc, argv)
   int mkdir ();
   double time_max;
   char *fgets_rc;
+  double x;
 
   restart_stat = 0;
 
@@ -116,11 +117,12 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-e") == 0)
       {
-        if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
+        if (sscanf (argv[i + 1], "%lf", &x) != 1)
         {
           Error ("python: Expected max errors after -e switch\n");
           exit (1);
         }
+        max_errors = x;
         Log_quit_after_n_errors (max_errors);
         i++;
         j = i;
@@ -129,11 +131,12 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-e_write") == 0)
       {
-        if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
+        if (sscanf (argv[i + 1], "%lf", &x) != 1)
         {
           Error ("python: Expected max errors after -e switch\n");
           exit (1);
         }
+        max_errors = x;
         Log_print_max (max_errors);
         i++;
         j = i;
@@ -143,7 +146,7 @@ parse_command_line (argc, argv)
       else if (strcmp (argv[i], "-d") == 0)
       {
         modes.iadvanced = 1;
-        Log ("Enabling advanced/diagnositic inputs (@ commands)\n");
+        Log ("Enabling advanced/diagnostic inputs (@ commands)\n");
         j = i;
       }
       else if (strcmp (argv[i], "-f") == 0)
@@ -280,7 +283,7 @@ and the switches have the following meanings \n\
                 for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
                 is attempting to save the program outputs so that the program can be restarted with \n\
                 -r if that is desired. \n\
- -v n           Increase or decrease the amount of print out.  The default is 4.  Larger numbers increase  \n\
+ -v n           Increase or decrease the amount of print out.  The default is 5.  Larger numbers increase  \n\
                 the amount printed; smaller numbers decrease it.   \n\
  --dry-run      Create a new .pf file and stop \n\
  -i             Same as --dry-run \n\
@@ -293,13 +296,14 @@ These are largely diagnostic or for special cases. These include\n\
  -d             Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
                 Python will then query the user for information about what to do with a series of \n\
                 inputs beginning with @ \n\
- -e             Change the maximum number of errors before the program will quit\n\
- -e_write 	Change the maximum number of errors to print out before recording errors silently\n\
- -f             Invoke a fixed temperature mode, used for runs with Zeus \n\
- -z             Invoke a special mode for that causes Python to start with a run from Zeus\n\
- -p range       Invoke the photon logarithmic stepping algorithm which in some cases can result in a speed up\n\
+ -e             Change the maximum number of errors of one type (by default 100,000) before the program will quit\n\
+ -e_write 	Change the maximum number of errors of one type (by default 100) to print out before recording errors silently\n\
+ -f             Invoke a fixed temperature mode, used for runs with Zeus or Plutu \n\
+ -z             Invoke a special mode for that causes Python to start with a run from Zeus or Plutu\n\
+ -p [range]     Vary the number of photons in ionization cycles logarthmically building up to the final value\n\
                 Range is in powers of 10, the difference beween the number of photons in the first cycle \n\
-                compared to the last \n\
+                compared to the last. If range is missing, range is assumed to be 1, in which case the  \n\
+                number of photons will in the first cycle will be one order of magniude less than in the last cycle \n\
 \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\

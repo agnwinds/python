@@ -103,14 +103,22 @@ def read_diag(root):
                 t_r.append(eval(words[2]))
                 t_e.append(eval(words[4]))
                 hc.append(eval(words[8]))
-        t_r=numpy.array(t_r)
-        t_e=numpy.array(t_e)
-        hc=numpy.array(hc)
+
+        if len(t_r)>0:
+            t_r=numpy.array(t_r)
+            t_e=numpy.array(t_e)
+            hc=numpy.array(hc)
 
 
-        t_r=t_r/ncells
-        t_e=t_e/ncells
-        hc=hc/ncells
+            t_r=t_r/ncells
+            t_e=t_e/ncells
+            hc=hc/ncells
+        else:
+            t_r=[]
+            t_e=[]
+            hc=[]
+            print('Read diag file, but there is not evidence of ionization cycles')
+
 
         return converged,converging,t_r,t_e,hc
 
@@ -172,6 +180,7 @@ def plot_converged(root,converged,converging,t_r,t_e,hc):
     Make a plot of the convergence statistics in the diag directroy
     '''
 
+
     pylab.figure(1,(6,6))
     pylab.clf()
     pylab.plot(t_r,'--',label='t_r')
@@ -214,14 +223,20 @@ def check_completion(root):
 
     complete_message=[]
 
+    ion_time=0 # To handle the case where there were no ionization cycles
+
     if line.count('COMPLETE'):
         word=complete_string.split()
         message='%s ran to completion in %s s' % (root,word[5])
         complete_message.append(message)
-        word=ion_string.split()
-        message='%s ionization cycles were completed in %s s' % (word[8],word[5])
-        ion_time=eval(word[5])
+        try:
+            word=ion_string.split()
+            message='%s ionization cycles were completed in %s s' % (word[8],word[5])
+            ion_time=eval(word[5])
+        except:
+            message='There were no ionization cycles for this run'
         complete_message.append(message)
+
         try:
             word=spec_string.split()
             spec_time=eval(word[5])
@@ -265,7 +280,7 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complet
     Make an html file that collates all the results
     '''
 
-    string=xhtml.begin('Evaluation of how well the python run of %s succeeded' % root)
+    string=xhtml.begin('%s: How well did the Python run go?' % root)
 
     string+=xhtml.paragraph('Provide an overview of whether the run of %s has succeeded' % root)
 
@@ -273,8 +288,11 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complet
 
     string+=xhtml.hline()
     string+=xhtml.h2('Did the run converge?')
-    # print(xhtml.image('file:./diag_%s/convergence.png' % root))
-    string+=xhtml.image('file:./diag_%s/convergence.png' % root)
+
+    if os.path.isfile('./diag_%s/convergence.png' % root):
+        string+=xhtml.image('file:./diag_%s/convergence.png' % root)
+    else:
+        string+=xhtml.paragraph('There is no convergence plot. OK if no ionization cycles')
 
     string+=xhtml.paragraph(convergence_message)
 
@@ -290,10 +308,18 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complet
     # string+=xhtml.image('file:./diag_%s/%s_t_r.png' % (root,root))
     string+=xhtml.hline()
     string+=xhtml.h2('What do the total spectra look like (somewhat smoothed)?')
-    string+=xhtml.image('file:%s' % (spec_tot_plot))
+
+    if os.path.isfile(spec_tot_plot):
+        string+=xhtml.image('file:%s' % (spec_tot_plot))
+    else:
+        string+=xhtml.paragraph('There is no total spectrum plot. OK if no ionization cycles')
+
     string+=xhtml.hline()
     string+=xhtml.h2('What do the final spectra look like (somewhat smoothed)?')
-    string+=xhtml.image('file:%s' % (spec_plot))
+    if spec_plot != 'None':
+        string+=xhtml.image('file:%s' % (spec_plot))
+    else:
+        string+=xhtml.paragraph('There is no plot of a detailed spectrum, probably because detailed spectra were not created')
     string+=xhtml.hline()
 
     string+=xhtml.h2('Errors and Warnings')
@@ -366,28 +392,30 @@ def doit(root='ixvel',outputfile='out.txt'):
     for one in complete_message:
         print(one)
 
-    xdim=how_many_dimensions('%s.0.master.txt' % root)
+    xdim=how_many_dimensions('%s.master.txt' % root)
 
     if xdim==2:
-        converge_plot=plot_wind.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
-        te_plot=plot_wind.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
-        tr_plot=plot_wind.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
+        converge_plot=plot_wind.doit('%s.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
+        te_plot=plot_wind.doit('%s.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
+        tr_plot=plot_wind.doit('%s.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
     else:
-        converge_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
-        te_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
-        tr_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
+        converge_plot=plot_wind_1d.doit('%s.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
+        te_plot=plot_wind_1d.doit('%s.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
+        tr_plot=plot_wind_1d.doit('%s.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
 
 
     converged,converging,t_r,t_e,hc=read_diag(root)
 
-    if len(converged):
+    if len(converged)>1:
         plot_converged(root,converged,converging,t_r,t_e,hc)
+    else:
+        print('There were not enough cycles to plot the convergence by cycle')
 
     plot_tot.doit(root)
     spec_tot_plot=root+'.spec_tot.png'
 
-    plot_spec.do_all_angles(root,wmin=0,wmax=0)
-    spec_plot=root+'.png'
+    spec_plot=plot_spec.do_all_angles(root,wmin=0,wmax=0)
+    # spec_plot=root+'.png'
 
     errors=py_error(root)
      

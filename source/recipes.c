@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <math.h>
 #include <time.h>
 #include <gsl/gsl_integration.h>
@@ -22,7 +21,6 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_min.h>
-#include <gsl/gsl_errno.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -33,6 +31,7 @@
 /******************************
  * The next two routines were written by ksl.  They were not part of
    the recipes programs which I had but I think they are what was intended
+   TODO EP: I think these to functions are redundant now - we don't seem to use them
 ********************************/
 
 double *
@@ -155,7 +154,7 @@ num_int (func, a, b, eps)
 * @details
 * This routine finds the root  of the function func from a to b. It currently
 * uses the gsl implementation of the BRENT root finding scheme. This replaced the zbrent 
-* numerical recipie, and the call is intended to be indentical
+* numerical recipie, and the call is intended to be identical
 *
 * ### Notes ###
 *
@@ -204,6 +203,8 @@ zero_find (func, x_lo, x_hi, tol)
   while (status == GSL_CONTINUE && iter < max_iter);
 
   result = (x_lo + x_hi) / 2.0;
+
+  gsl_root_fsolver_free (s);
 
   return (result);
 }
@@ -279,6 +280,8 @@ func_minimiser (a, m, b, func, tol, xmin)
   }
   while (status == GSL_CONTINUE && iter < max_iter);
   *xmin = m;
+
+  gsl_min_fminimizer_free (s);
 
   return func (m, test);
 }

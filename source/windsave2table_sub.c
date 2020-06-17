@@ -50,26 +50,50 @@ do_windsave2table (root, ion_switch)
      char *root;
      int ion_switch;
 {
-  int ndom;
+  int ndom, i;
   char rootname[LINELENGTH];
+  int all[7] = { 0, 4, 5, 6, 7, 8, 9 };
 
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-    sprintf (rootname, "%s.%d", root, ndom);
+    if (geo.ndomain > 1)
+    {
+      sprintf (rootname, "%s.%d", root, ndom);
+    }
+    else
+    {
+      sprintf (rootname, "%s", root);
+    }
 
     create_master_table (ndom, rootname);
     create_heat_table (ndom, rootname);
-    create_ion_table (ndom, rootname, 1, ion_switch);
-    create_ion_table (ndom, rootname, 2, ion_switch);
-    create_ion_table (ndom, rootname, 6, ion_switch);
-    create_ion_table (ndom, rootname, 7, ion_switch);
-    create_ion_table (ndom, rootname, 8, ion_switch);
-    create_ion_table (ndom, rootname, 11, ion_switch);
-    create_ion_table (ndom, rootname, 14, ion_switch);
-    create_ion_table (ndom, rootname, 26, ion_switch);
     create_convergence_table (ndom, rootname);
+
+    if (ion_switch != 99)
+    {
+      create_ion_table (ndom, rootname, 1, ion_switch);
+      create_ion_table (ndom, rootname, 2, ion_switch);
+      create_ion_table (ndom, rootname, 6, ion_switch);
+      create_ion_table (ndom, rootname, 7, ion_switch);
+      create_ion_table (ndom, rootname, 8, ion_switch);
+      create_ion_table (ndom, rootname, 11, ion_switch);
+      create_ion_table (ndom, rootname, 14, ion_switch);
+      create_ion_table (ndom, rootname, 26, ion_switch);
+    }
+    else
+    {
+      for (i = 0; i < 7; i++)
+      {
+        create_ion_table (ndom, rootname, 1, all[i]);
+        create_ion_table (ndom, rootname, 2, all[i]);
+        create_ion_table (ndom, rootname, 6, all[i]);
+      }
+
+    }
+
+
   }
   return (0);
 }
@@ -122,7 +146,8 @@ create_master_table (ndom, rootname)
   char filename[132];
   double *c[50], *converge;
   char column_name[50][20];
-  char one_line[1024], start[132], one_value[20];
+  char one_line[1024], start[1024], one_value[20];
+  char name[132];               /* file name extension */
 
 
   int i, ii, jj;
@@ -153,19 +178,19 @@ create_master_table (ndom, rootname)
   c[4] = get_one (ndom, "t_r");
   strcpy (column_name[4], "t_r");
 
-  c[5] = get_ion (ndom, 1, 1, 0);
+  c[5] = get_ion (ndom, 1, 1, 0, name);
   strcpy (column_name[5], "h1");
 
-  c[6] = get_ion (ndom, 2, 2, 0);
+  c[6] = get_ion (ndom, 2, 2, 0, name);
   strcpy (column_name[6], "he2");
 
-  c[7] = get_ion (ndom, 6, 4, 0);
+  c[7] = get_ion (ndom, 6, 4, 0, name);
   strcpy (column_name[7], "c4");
 
-  c[8] = get_ion (ndom, 7, 5, 0);
+  c[8] = get_ion (ndom, 7, 5, 0, name);
   strcpy (column_name[8], "n5");
 
-  c[9] = get_ion (ndom, 8, 6, 0);
+  c[9] = get_ion (ndom, 8, 6, 0, name);
   strcpy (column_name[9], "o6");
 
   c[10] = get_one (ndom, "dmo_dt_x");
@@ -208,10 +233,11 @@ create_master_table (ndom, rootname)
   {
 
 
-    /* First assemble the header line
+    /*
+     * First assemble the header line
      */
 
-    sprintf (start, "%9s %9s %4s %6s %6s %8s %8s %8s ", "r", "rcen", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %9s %4s %6s %6s %9s %9s %9s ", "r", "rcen", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -228,8 +254,8 @@ create_master_table (ndom, rootname)
 
     for (i = 0; i < ndim2; i++)
     {
-      // This line is different from the two d case
-      sprintf (start, "%9.3e %9.3e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+      //This line is different from the two d case
+      sprintf (start, "%9.3e %9.3e %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].r, wmain[nstart + i].rcen, i, wmain[nstart + i].inwind,
                converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -248,7 +274,7 @@ create_master_table (ndom, rootname)
 
     /* First assemble the header line */
 
-    sprintf (start, "%8s %8s %8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "xcen", "zcen", "i", "j", "inwind", "converge", "v_x", "v_y",
+    sprintf (start, "%8s %8s %8s %8s %4s %4s %6s %8s %9s %9s %9s ", "x", "z", "xcen", "zcen", "i", "j", "inwind", "converge", "v_x", "v_y",
              "v_z");
     strcpy (one_line, start);
     n = 0;
@@ -268,7 +294,7 @@ create_master_table (ndom, rootname)
     {
       wind_n_to_ij (ndom, nstart + i, &ii, &jj);
       sprintf (start,
-               "%8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               "%8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].x[0], wmain[nstart + i].x[2], wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
                jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -282,13 +308,12 @@ create_master_table (ndom, rootname)
       fprintf (fptr, "%s\n", one_line);
     }
   }
-
   else if (zdom[ndom].coord_type == RTHETA)
   {
 
     /* First assemble the header line */
 
-    sprintf (start, "%8s %8s %8s %9s %8s %8s %8s %8s %4s %4s %6s %8s %8s %8s %8s ", "r", "theta", "r_cen", "theta_cen", "x", "z", "xcen",
+    sprintf (start, "%8s %8s %8s %9s %8s %8s %8s %8s %4s %4s %6s %8s %9s %9s %9s ", "r", "theta", "r_cen", "theta_cen", "x", "z", "xcen",
              "zcen", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
@@ -308,7 +333,7 @@ create_master_table (ndom, rootname)
     {
       wind_n_to_ij (ndom, nstart + i, &ii, &jj);
       sprintf (start,
-               "%8.2e %8.2e %8.2e %9.2e %8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               "%8.2e %8.2e %8.2e %9.2e %8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].r, wmain[nstart + i].theta, wmain[nstart + i].rcen, wmain[nstart + i].thetacen,
                wmain[nstart + i].x[0], wmain[nstart + i].x[2], wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
                jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
@@ -323,7 +348,6 @@ create_master_table (ndom, rootname)
       fprintf (fptr, "%s\n", one_line);
     }
   }
-
   else
   {
     printf ("Error: Cannot print out files for coordinate system type %d\n", zdom[ndom].coord_type);
@@ -366,7 +390,7 @@ create_heat_table (ndom, rootname)
   char filename[132];
   double *c[50], *converge;
   char column_name[50][20];
-  char one_line[1024], start[132], one_value[20];
+  char one_line[1024], start[1024], one_value[20];
 
 
   int i, ii, jj;
@@ -466,10 +490,11 @@ create_heat_table (ndom, rootname)
   {
 
 
-    /* First assemble the header line
+    /*
+     * First assemble the header line
      */
 
-    sprintf (start, "%9s %4s %6s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %4s %6s %6s %9s %9s %9s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -486,8 +511,8 @@ create_heat_table (ndom, rootname)
 
     for (i = 0; i < ndim2; i++)
     {
-      // This line is different from the two d case
-      sprintf (start, "%9.3e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+      //This line is different from the two d case
+      sprintf (start, "%9.3e %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].r, i, wmain[nstart + i].inwind,
                converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -506,7 +531,7 @@ create_heat_table (ndom, rootname)
 
     /* First assemble the header line */
 
-    sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%8s %8s %4s %4s %6s %8s %9s %9s %9s ", "x", "z", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -525,7 +550,7 @@ create_heat_table (ndom, rootname)
     {
       wind_n_to_ij (ndom, nstart + i, &ii, &jj);
       sprintf (start,
-               "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               "%8.2e %8.2e %4d %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
                jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -576,7 +601,7 @@ create_convergence_table (ndom, rootname)
   char filename[132];
   double *c[50], *converge;
   char column_name[50][20];
-  char one_line[1024], start[132], one_value[20];
+  char one_line[1024], start[1024], one_value[20];
 
 
   int i, ii, jj;
@@ -643,8 +668,14 @@ create_convergence_table (ndom, rootname)
   c[16] = get_one (ndom, "gain");
   strcpy (column_name[16], "gain");
 
+  c[17] = get_one (ndom, "macro_bf_in");
+  strcpy (column_name[17], "macro_bf_in");
+
+  c[18] = get_one (ndom, "macro_bf_out");
+  strcpy (column_name[18], "macro_bf_out");
+
   /* This should be the maxium number above +1 */
-  ncols = 17;
+  ncols = 19;
 
 
   converge = get_one (ndom, "converge");
@@ -660,10 +691,11 @@ create_convergence_table (ndom, rootname)
   {
 
 
-    /* First assemble the header line
+    /*
+     * First assemble the header line
      */
 
-    sprintf (start, "%9s %4s %6s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %4s %6s %6s %9s %9s %9s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -680,8 +712,8 @@ create_convergence_table (ndom, rootname)
 
     for (i = 0; i < ndim2; i++)
     {
-      // This line is different from the two d case
-      sprintf (start, "%9.3e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+      //This line is different from the two d case
+      sprintf (start, "%9.3e %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].r, i, wmain[nstart + i].inwind,
                converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -700,7 +732,7 @@ create_convergence_table (ndom, rootname)
 
     /* First assemble the header line */
 
-    sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%8s %8s %4s %4s %6s %8s %9s %9s %9s ", "x", "z", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -719,7 +751,7 @@ create_convergence_table (ndom, rootname)
     {
       wind_n_to_ij (ndom, nstart + i, &ii, &jj);
       sprintf (start,
-               "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               "%8.2e %8.2e %4d %4d %6d %8.0f %9.2e %9.2e %9.2e ",
                wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
                jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -765,22 +797,29 @@ int
 create_ion_table (ndom, rootname, iz, ion_switch)
      int ndom;
      char rootname[];
-     int iz;                    // Where z is the element
-     int ion_switch;            // Determines what is actually printed out
+     int iz;
+//Where z is the element
+     int ion_switch;
+//Determines what is actually printed out
 {
   char filename[132];
-  double *c[50];
+  double *c[100];
   int first_ion, number_ions;
   char element_name[20];
   int istate[50];
-  char one_line[1024], start[132], one_value[20];
+  char one_line[1024], start[1024], one_value[20];
   int nstart, ndim2;
+  char name[132];               /* Name of extension for a
+                                 * particular ion table */
 
 
   int i, ii, jj, n;
   FILE *fptr;
 
-/* First we actually need to determine what ions exits, but we will ignore this for now */
+  /*
+   * First we actually need to determine what ions exits, but we will
+   * ignore this for now
+   */
 
   i = 0;
   while (i < nelements)
@@ -797,24 +836,25 @@ create_ion_table (ndom, rootname, iz, ion_switch)
   number_ions = ele[i].nions;
   strcpy (element_name, ele[i].name);
 
-// Log ("element %d %d %s\n", first_ion, number_ions, element_name);
-
-/* Open the output file */
-
-  sprintf (filename, "%s.%s.txt", rootname, element_name);
-
-  fptr = fopen (filename, "w");
-
-
+  //Log("element %d %d %s\n", first_ion, number_ions, element_name);
 
   i = 0;
   while (i < number_ions)
   {
     istate[i] = ion[first_ion + i].istate;
 
-    c[i] = get_ion (ndom, iz, istate[i], ion_switch);
+    c[i] = get_ion (ndom, iz, istate[i], ion_switch, name);
     i++;
   }
+
+
+  /* Open the output file */
+
+  sprintf (filename, "%s.%s.%s.txt", rootname, element_name, name);
+
+  fptr = fopen (filename, "w");
+
+
 
   nstart = zdom[ndom].nstart;
   ndim2 = zdom[ndom].ndim2;
@@ -825,10 +865,12 @@ create_ion_table (ndom, rootname, iz, ion_switch)
   {
 
 
-    /* First assemble the header line
+    /*
+     * First assemble the header line
      */
 
     sprintf (start, "%8s %4s %6s ", "r", "i", "inwind");
+
     strcpy (one_line, start);
     n = 0;
     while (n < number_ions)
@@ -838,6 +880,8 @@ create_ion_table (ndom, rootname, iz, ion_switch)
 
       n++;
     }
+
+
     fprintf (fptr, "%s\n", one_line);
 
 
@@ -845,9 +889,10 @@ create_ion_table (ndom, rootname, iz, ion_switch)
 
     for (i = 0; i < ndim2; i++)
     {
-      // This line is different from the two d case
+      //This line is different from the two d case
       sprintf (start, "%8.2e %4d %6d ", wmain[nstart + i].r, i, wmain[nstart + i].inwind);
       strcpy (one_line, start);
+
       n = 0;
       while (n < number_ions)
       {
@@ -855,6 +900,8 @@ create_ion_table (ndom, rootname, iz, ion_switch)
         strcat (one_line, one_value);
         n++;
       }
+
+
       fprintf (fptr, "%s\n", one_line);
     }
   }
@@ -920,8 +967,9 @@ create_ion_table (ndom, rootname, iz, ion_switch)
  **********************************************************/
 
 double *
-get_ion (ndom, element, istate, iswitch)
+get_ion (ndom, element, istate, iswitch, name)
      int ndom, element, istate, iswitch;
+     char *name;
 {
   int nion, nelem;
   int n;
@@ -936,7 +984,7 @@ get_ion (ndom, element, istate, iswitch)
 
   x = (double *) calloc (sizeof (double), ndim2);
 
-/* Find the ion */
+  /* Find the ion */
 
   nion = 0;
   while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
@@ -964,18 +1012,52 @@ get_ion (ndom, element, istate, iswitch)
         x[n] = plasmamain[nplasma].density[nion];
         nh = rho2nh * plasmamain[nplasma].rho;
         x[n] /= (nh * ele[nelem].abun);
+        strcpy (name, "frac");
       }
       else if (iswitch == 1)
       {
         x[n] = plasmamain[nplasma].density[nion];
+        strcpy (name, "den");
       }
       else if (iswitch == 2)
       {
         x[n] = (double) plasmamain[nplasma].scatters[nion] / plasmamain[nplasma].vol;
+        strcpy (name, "scat");
       }
       else if (iswitch == 3)
       {
         x[n] = plasmamain[nplasma].xscatters[nion];
+        strcpy (name, "ion_frac");
+      }
+      else if (iswitch == 4)
+      {
+        x[n] = plasmamain[nplasma].ioniz[nion];
+        strcpy (name, "ioniz");
+      }
+      else if (iswitch == 5)
+      {
+        x[n] = plasmamain[nplasma].recomb[nion];
+        strcpy (name, "recomb");
+      }
+      else if (iswitch == 6)
+      {
+        x[n] = plasmamain[nplasma].heat_ion[nion];
+        strcpy (name, "heat");
+      }
+      else if (iswitch == 7)
+      {
+        x[n] = plasmamain[nplasma].cool_rr_ion[nion];
+        strcpy (name, "cool_rr");
+      }
+      else if (iswitch == 8)
+      {
+        x[n] = plasmamain[nplasma].lum_rr_ion[nion];
+        strcpy (name, "lum_rr");
+      }
+      else if (iswitch == 9)
+      {
+        x[n] = plasmamain[nplasma].cool_dr_ion[nion];
+        strcpy (name, "cool_dr");
       }
       else
       {
@@ -1073,7 +1155,6 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].dt_e_old;
       }
-
       else if (strcmp (variable_name, "converge") == 0)
       {
         x[n] = plasmamain[nplasma].converge_whole;
@@ -1182,8 +1263,14 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].gain;
       }
-
-
+      else if (strcmp (variable_name, "macro_bf_in") == 0)
+      {
+        x[n] = plasmamain[nplasma].bf_simple_ionpool_in;
+      }
+      else if (strcmp (variable_name, "macro_bf_out") == 0)
+      {
+        x[n] = plasmamain[nplasma].bf_simple_ionpool_out;
+      }
       else
       {
         Error ("get_one: Unknown variable %s\n", variable_name);

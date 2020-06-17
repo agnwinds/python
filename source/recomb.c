@@ -117,8 +117,8 @@ fb_topbase_partial (freq)
   else
   {
     Error
-      ("fb_topbase_partial: Did not understand cross-section type %i for ion %i. Setting multiplicity to zero!\n",
-       ion[nion].phot_info, nion);
+      ("fb_topbase_partial: Did not understand cross-section type %i for ion %i (z=%i, istate %i). Setting multiplicity to zero!\n",
+       ion[nion].phot_info, nion, ion[nion].z, ion[nion].istate);
     gn = 0.0;
   }
 
@@ -403,8 +403,12 @@ total_fb (one, t, f1, f2, fb_choice, mode)
   xplasma->cool_rr_metals = 0.0;
   xplasma->lum_rr_metals = 0.0;
 
+  /*
+   * This loop is now over nions - 1, to avoid out of bounds access and above
+   * the final ion there is nothing for it to recombine from.
+   */
 
-  for (nion = 0; nion < nions; nion++)
+  for (nion = 0; nion < nions - 1; nion++)
   {
     if (xplasma->density[nion] > DENSITY_PHOT_MIN)
     {
@@ -414,22 +418,20 @@ total_fb (one, t, f1, f2, fb_choice, mode)
         {
           total += xplasma->lum_rr_ion[nion] =
             xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
-          if (ion[nion].z > 3)
+          if (ion[nion].z > 2)
             xplasma->lum_rr_metals += xplasma->lum_rr_ion[nion];
         }
         else                    // we are calculating a cooling rate
         {
           total += xplasma->cool_rr_ion[nion] =
             xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
-          if (ion[nion].z > 3)
+          if (ion[nion].z > 2)
             xplasma->cool_rr_metals += xplasma->cool_rr_ion[nion];
-
         }
       }
       else if (mode == INNER_SHELL)     // at present we do not compute a luminosity from DR
         total += xplasma->cool_dr_ion[nion] =
           xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
-
     }
 
   }
@@ -468,11 +470,9 @@ double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
  * ### Notes ###
  *
  *
- * 	@bug This routine contains questions from Stuart in May 04 that have never been
- * 	addressed. Furthemore, the routine has a parameter delta which is used to decide
- * 	whether one is close enough in temperature to a previously generated DCF. This
- * 	is set to 500, which is probably OK if the temperatures are high, but in appropriate
- * 	if T is of order 1000 K.
+ * 	@bug This routine still assumes the possibility of jumps
+ *      even though this possibility has been removed from the cdf generation
+ *      routines.
  *
  **********************************************************/
 
@@ -499,8 +499,10 @@ one_fb (one, f1, f2)
     Exit (0);
   }
 
-/* Check if an apprpriate photon frequency has already been generated, and
-use that instead if possible --  57h */
+/* Check if an appropriate photon frequency has already been generated, 
+   and use that instead if possible 
+ */
+
   tt = xplasma->t_e;
   if (xphot->n < NSTORE && xphot->f1 == f1 && xphot->f2 == f2 && xphot->t == tt)
   {
@@ -509,7 +511,8 @@ use that instead if possible --  57h */
     return (freq);
   }
 
-  delta = 500;                  // Fudge factor to prevent generation of a CDF if t has changed only slightly
+  delta = tt / 100;             // Fudge factor to prevent generation of a CDF if t has changed only slightly
+
   /* Check to see if we have already generated a cdf */
   if (tt > (one_fb_te + delta) || tt < (one_fb_te - delta) || f1 != one_fb_f1 || f2 != one_fb_f2)
   {
@@ -644,6 +647,7 @@ use that instead if possible --  57h */
   xphot->t = tt;
   xphot->f1 = f1;
   xphot->f2 = f2;
+
   return (freq);
 }
 
@@ -686,7 +690,7 @@ num_recomb (xplasma, t_e, mode)
   for (nelem = 0; nelem < nelements; nelem++)
   {
     imin = ele[nelem].firstion;
-    imax = imin + ele[nelem].nions;
+    imax = ele[nelem].lastion;
     for (i = imin; i < imax; i++)
     {
       if (xplasma->density[i] > DENSITY_PHOT_MIN)
@@ -1577,13 +1581,10 @@ gs_rrate (nion, T)
  **********************************************************/
 
 int
-sort_and_compress (array_in, array_out, npts)
-     double *array_in, *array_out;
-     int npts;
+sort_and_compress (double *array_in, double *array_out, int npts)
 {
   double *values;
   int n, nfinal;
-  int compare_doubles ();
 
   values = calloc (sizeof (double), npts);
   for (n = 0; n < npts; n++)
@@ -1607,7 +1608,7 @@ sort_and_compress (array_in, array_out, npts)
     }
   }
 
-
+  free (values);
 
   return (nfinal);
 }
@@ -1654,13 +1655,20 @@ compare_doubles (const void *a, const void *b)
  * @param [in]     int nconf   the index into phot_top that identifies the continuum we wish to sample
  * @return freq    double freq the frequency of the packet to be emitted
  *
- * a scaled down version of one_fb for use with macro atom implementation. Objective is to select the 
+ * a scaled down version of one_fb for use with macro atom implementation. The objective is to select the 
  * emission frequency of a bound free photon that is to be generated by a specific continuum process
- * Prior to this routine, the macro atom routines always did this using an analytic hydrogenic approximation.
- * (SS/JM 1Aug2018)
  * 
  *
  * ###Notes###
+ * 
+ * To improve the overall speed of Python, the routine generates
+ * Mulitiple bf photons for a transition, and stores them in the 
+ * matomxphot structure.  (It is not entirely clear that this
+ * represents a signficant savings.)
+ *
+ * Prior to the creation of this routine, the macro atom routines always did 
+ * this using an analytic hydrogenic approximation.
+ * (SS/JM 1Aug2018)
 ***********************************************************/
 double
 matom_select_bf_freq (WindPtr one, int nconf)
@@ -1716,7 +1724,10 @@ matom_select_bf_freq (WindPtr one, int nconf)
   {
     freq = f1 + dfreq * n;      //The frequency of the array element we would make in the normal run of things
     fb_x[n] = freq;             //Set the next array element frequency
-    fb_y[n] = fb_topbase_partial (freq);        //should return proportional to the total emissivity from this SINGLE bf. Note we don't need to multiply by n_e or n_ion since we only want a CDF for one process: so these factors will scale out
+    fb_y[n] = fb_topbase_partial (freq);        /* should return proportional to the total emissivity from this SINGLE bf. 
+                                                   Note we don't need to multiply by n_e or n_ion since we only want a CDF 
+                                                   for one process: so these factors will scale out
+                                                 */
   }
 
 

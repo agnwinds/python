@@ -100,7 +100,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 84
+VERSION = 84e
 
 INDENT = yes
 
@@ -150,12 +150,12 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o setup_fil
 		matom.o estimators.o wind_sum.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o  \
 		agn.o shell_wind.o compton.o zeta.o dielectronic.o \
-		spectral_estimators.o matom_diag.o \
+		spectral_estimators.o matom_diag.o disk_init.o \
 		xlog.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
-		reverb.o paths.o setup.o run.o brem.o synonyms.o \
-		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o
+		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o \
+		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o
 
 
 
@@ -172,12 +172,12 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		matom.c estimators.c wind_sum.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c  \
 		agn.c shell_wind.c compton.c zeta.c dielectronic.c \
-		spectral_estimators.c matom_diag.c \
+		spectral_estimators.c matom_diag.c disk_init.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup_star_bh.c setup_domains.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
-		reverb.c paths.c setup.c run.c brem.c synonyms.c \
-		setup_reverb.c setup_line_transfer.c cv.c
+		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c \
+		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c
 
 #
 # kpar_source is now declared separately from python_source so that the file log.h
@@ -219,7 +219,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
-		rdpar_init.o
+		rdpar_init.o import_calloc.o walls.o
 
 
 
@@ -242,8 +242,21 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
-		cooling.o
+		cooling.o import_calloc.o walls.o
 
+rhf_objects = rad_hydro_files.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
+		emission.o recomb.o wind_util.o  \
+		cdf.o random.o recipes.o saha.o \
+		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
+		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
+		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
+		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
+		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
+		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
+		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		cooling.o import_calloc.o walls.o
 
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
@@ -256,9 +269,18 @@ windsave2table: $(table_objects)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
+
+rad_hydro_files: $(rhf_objects)
+	$(CC) $(CFLAGS) $(rhf_objects) $(LDFLAGS) -o rad_hydro_files
+	cp $@ $(BIN)
+	mv $@ $(BIN)/rad_hydro_files$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
+
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
-all: clean python windsave2table py_wind indent
+all: clean python windsave2table py_wind indent rad_hydro_files
 
 
 FILE = get_atomicdata.o atomic.o

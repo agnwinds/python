@@ -104,7 +104,7 @@ init_geo ()
   geo.tstar = 40000;
 
   geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
-  geo.line_mode = 3;            /* default is escape probabilites */
+  geo.line_mode = LINE_MODE_ESC_PROB;   /* default is escape probabilites */
 
   geo.star_radiation = TRUE;    /* 1 implies star will radiate */
   geo.disk_radiation = TRUE;    /* 1 implies disk will radiate */
@@ -121,7 +121,7 @@ init_geo ()
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
 
 
-  strcpy (geo.atomic_filename, "data/standard80");
+  strcpy (geo.atomic_filename, "data/standard80.dat");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype
@@ -361,7 +361,7 @@ init_observers ()
   for (n = 0; n < NSPEC; n++)
   {
     geo.phase[n] = 0.5;
-    geo.scat_select[n] = 1000;
+    geo.scat_select[n] = MAXSCAT;
     geo.top_bot_select[n] = 0;
   }
   geo.swavemin = 850;
@@ -621,7 +621,8 @@ init_ionization ()
 
 
   strcpy (answer, "matrix_bb");
-  geo.ioniz_mode = rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
+  geo.ioniz_mode =
+    rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow,matrix_est)", "0,3,1,4,2,8,9,10", answer);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
@@ -784,8 +785,6 @@ setup_dfudge ()
     }
   }
 
-
-
   delta = geo.rmax - rmin;
 
   if (delta < 1.e8)
@@ -801,7 +800,6 @@ setup_dfudge ()
     dfudge = geo.rmax / 1.e10;
   }
 
-  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
   return (dfudge);
 }
