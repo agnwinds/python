@@ -1,10 +1,14 @@
-#This is a standard atomic data set for a 20 level hydrogen model and 20 level helium atom
-#and lines/continua of other elements from the usual standard 73 set.
-#It be treated with or without the full macro atom formalism for hydrogen and helium only.
-#CNO processed abundances have been assumed, with He 2 x solar, C 0.5 x solar, N 7 x solar and O is 1 x solar
-#This is for a 2 Solar mass star at terminal main sequence https://ui.adsabs.harvard.edu/abs/2018ApJ...857..109G/abstract
-#first macro atom data is read in
-data/atomic_macro/h20_hetop_standard80cno_elem_ions.dat
+#
+# This is a standard atomic data set for a 20 level hydrogen model and 20 level helium atom
+# and lines/continua of other elements from the usual standard 73 set.
+# It be treated with or without the full macro atom formalism for hydrogen and helium only.
+# CNO processed abundances have been assumed, instead of solar, with He 2 x solar, C 0.5 x solar, N 7 x solar and
+# O is 1 x solar. This is for a 2 Solar mass star at terminal main sequence.
+# These approximate values were taken from https://ui.adsabs.harvard.edu/abs/2018ApJ...857..109G/abstract
+#
+# first macro atom data is read in
+#
+data/cno_processed_abun/h20_hetop_standard80_cno_abun_elem_ions.dat
 data/atomic_macro/h20_levels.dat
 data/atomic_macro/h20_lines.dat
 data/atomic_macro/h20_phot.dat

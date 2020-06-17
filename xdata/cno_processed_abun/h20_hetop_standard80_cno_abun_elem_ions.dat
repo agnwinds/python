@@ -1,5 +1,8 @@
 # Top level element/ion file for the 20 level H macro atom and He + all other simple
 # ions from standard73.
+# CNO processed abundances have been assumed, instead of solar, with He 2 x solar, C 0.5 x solar, N 7 x solar and
+# O is 1 x solar. This is for a 2 Solar mass star at terminal main sequence.
+# These approximate values were taken from https://ui.adsabs.harvard.edu/abs/2018ApJ...857..109G/abstract
 #
 # Elemental abundances from Verner, Barthel & Tytler 1994 A&AS, 108,287
 # Output format: Name z  Relative_abun atomic_weight
@@ -11,7 +14,7 @@ Element    2   He   11.68     4.002602
 #Element    3   Li    3.31     6.941000
 #Element    4   Be    1.42     9.012182
 #Element    5    B    2.88    10.811000
-Element    6    C    8.56    12.011000
+Element    6    C    7.86    12.011000
 Element    7    N    9.99    14.006740
 Element    8    O    8.93    15.999400
 #Element    9    F    4.48    18.998403
