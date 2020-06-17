@@ -214,7 +214,8 @@ calculate_ionization (restart_stat)
     /* Transport the photons through the wind */
     trans_phot (w, p, 0);
 
-    /* Determine how much energy was absorbed in the wind. first zero counters */
+    /* Determine how much energy was absorbed in the wind. first zero counters. 
+       There are counters for total energy absorbed and for each entry in the istat enum */
     z_abs_all = z_else = 0.0;
     for (nn = 0; nn < N_ISTAT; nn++)
     {
@@ -227,7 +228,8 @@ calculate_ionization (restart_stat)
     {
       z_abs_all += p[nn].w;
 
-      if (p[nn].istat < N_ISTAT && p[nn].istat > 0)
+      /* we want the istat to be >1 (not P_SCAT or P_INWIND) */
+      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
       {
         z_abs[p[nn].istat] += p[nn].w;
         nphot_istat[p[nn].istat]++;
