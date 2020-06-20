@@ -353,10 +353,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position 
          of the outer radius of the disk. */
 
-      if (modes.save_photons)
-      {
-        save_photons (&pp, "HitDisk");
-      }
 
       rho = sqrt (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1]);
       kkk = 0;
@@ -400,6 +396,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           }
         }
 
+
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "HitDisk");
+      }
 
 
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
