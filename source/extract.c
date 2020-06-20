@@ -137,6 +137,10 @@ extract (w, p, itype)
   {
     observer_to_local_frame (&p_in, &p_in);
   }
+  if (itype == PTYPE_DISK)
+  {
+    observer_to_local_frame_disk (&p_in, &p_in);
+  }
 
 
 
@@ -193,13 +197,12 @@ extract (w, p, itype)
 Need to frequency shift the disk photons as well as the wind 
 photons.    
 
-Note that split of functionality between this and extract 
-one is odd. We do frequency here but weighting is carried out in  extract */
+ */
 
       if (itype == PTYPE_DISK)
       {
-        pp.freq = pp.freq_orig;
-        pp.frame = F_LOCAL;
+//OLD        pp.freq = pp.freq_orig;
+//OLD        pp.frame = F_LOCAL;
         local_to_observer_frame_disk (&pp, &pp);
 
       }
@@ -211,10 +214,12 @@ one is odd. We do frequency here but weighting is carried out in  extract */
    we make the assumption which seems explicit in the old doppler routine that we 
    are in the observe frame
  */
-        if (pp.nres > -1 && pp.nres < nlines)
-        {
-          pp.freq = lin_ptr[pp.nres]->freq;
-        }
+//OLD Lines below look like belt and suspenders, but we should already be in the local
+//OLD and so we should trust.
+//OLD       if (pp.nres > -1 && pp.nres < nlines)
+//OLD        {
+//OLD          pp.freq = lin_ptr[pp.nres]->freq;
+//OLD        }
         local_to_observer_frame (&pp, &pp);
 
       }

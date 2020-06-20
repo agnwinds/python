@@ -29,7 +29,7 @@
  * is not random.
  *
  * The extract option is used
- * normaly during the spectral extraction cycles.
+ * normally during the spectral extraction cycles.
  * However, as an advanced option one can use the live or die
  * to construct the detailed spectrum.  One would not normally
  * want to do this, as many photons are "wasted" since they
@@ -397,10 +397,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         }
 
 
-      if (modes.save_photons)
-      {
-        save_photons (&pp, "HitDisk");
-      }
+        if (modes.save_photons)
+        {
+          save_photons (&pp, "HitDisk");
+        }
 
 
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
