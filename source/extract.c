@@ -83,13 +83,16 @@ extract (w, p, itype)
      int itype;
 {
   int n, mscat, mtopbot;
-  struct photon pp;
-  double length ();
-  int vsub ();
+  struct photon pp, p_in;
   int yep;
   double xdiff[3];
   double p_norm, tau_norm;
 
+
+
+  /* Make sure the input photon is not modified */
+
+  stuff_phot (p, &p_in);
 
 
 /* The next section was moved from trans_phot 200518 */
@@ -103,12 +106,12 @@ extract (w, p, itype)
 
   if (itype == PTYPE_WIND)
   {
-    if (geo.scatter_mode == SCATTER_MODE_THERMAL && p->nres <= NLINES && p->nres > -1)
+    if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
     {
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
          First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
 
-      tau_norm = sobolev (&wmain[p->grid], p->x, -1.0, lin_ptr[p->nres], wmain[p->grid].dvds_max);
+      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], wmain[p_in.grid].dvds_max);
 
       /* then turn into a probability */
       p_norm = p_escape_from_tau (tau_norm);
@@ -119,18 +122,21 @@ extract (w, p, itype)
       p_norm = 1.0;
 
       /* throw an error if nnscat does not equal 1 */
-      if (p->nnscat != 1)
+      if (p_in.nnscat != 1)
         Error
           ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
-           p->nnscat, p->np, geo.scatter_mode, p->nres, NLINES);
+           p_in.nnscat, p_in.np, geo.scatter_mode, p_in.nres, NLINES);
     }
 
-    p->w *= p->nnscat / p_norm;
+    p_in.w *= p_in.nnscat / p_norm;
 
   }
 
 
-
+  if (itype == PTYPE_WIND)
+  {
+    observer_to_local_frame (&p_in, &p_in);
+  }
 
 
 
@@ -143,7 +149,7 @@ extract (w, p, itype)
 
     yep = 1;                    // Start by assuming it is a good photon for extraction
 
-    if ((mscat = xxspec[n].nscat) > 999 || p->nscat == mscat || (mscat < 0 && p->nscat >= (-mscat)))
+    if ((mscat = xxspec[n].nscat) > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
       yep = 1;
     else
       yep = 0;
@@ -152,13 +158,13 @@ extract (w, p, itype)
     {
       if ((mtopbot = xxspec[n].top_bot) == 0)
         yep = 1;                // Then there are no positional parameters and we are done
-      else if (mtopbot == -1 && p->x[2] < 0)
+      else if (mtopbot == -1 && p_in.x[2] < 0)
         yep = 1;
-      else if (mtopbot == 1 && p->x[2] > 0)
+      else if (mtopbot == 1 && p_in.x[2] > 0)
         yep = 1;
       else if (mtopbot == 2)    // Then to count, the photom must originate within sn.r of sn.x
       {
-        vsub (p->x, xxspec[n].x, xdiff);
+        vsub (p_in.x, xxspec[n].x, xdiff);
         if (length (xdiff) > xxspec[n].r)
           yep = 0;
 
@@ -179,12 +185,7 @@ extract (w, p, itype)
  * This needs to be done before we stuff the new direction in
  */
 
-      stuff_phot (p, &pp);
-      if (itype == PTYPE_WIND)
-      {
-        observer_to_local_frame (&pp, &pp);
-      }
-
+      stuff_phot (&p_in, &pp);
       stuff_v (xxspec[n].lmn, pp.lmn);  /* Stuff new photon direction into pp */
 
 /* 
