@@ -225,11 +225,11 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
 
       /* Now extract the photon */
-      if (modes.save_photons)
-      {
-        Diag ("BeforeExtract freq  %10.3e itype %d  nres %d\n", pp.freq, itype, pp.nres);
-        save_photons (&pp, "BeforeExtract");
-      }
+//OLD      if (modes.save_photons)
+//OLD      {
+//OLD        Diag ("BeforeExtract freq  %10.3e itype %d  nres %d\n", pp.freq, itype, pp.nres);
+//OLD        save_photons (&pp, "BeforeExtract");
+//OLD      }
 
 
       extract_one (w, &pp, itype, n);
