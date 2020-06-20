@@ -1205,14 +1205,6 @@ PhotPtr photmain;               /* A pointer to all of the photons that have bee
 #define TAU_MIN 1e-6
 
 
-    /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
-     * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
-     * then photon histories will be attempted.
-     */
-
-#define MAX_PHOT_HIST	1000
-int n_phot_hist, phot_hist_on, phot_history_spectrum;
-struct photon xphot_hist[MAX_PHOT_HIST];
 
 struct basis
 {

@@ -68,11 +68,6 @@
  * spherical region.
  * ### Notes ###
  * 
- * @bug This routine as well as extract_one have options for tracking the photon
- * history.  The routines are in diag.c It is not clear that they have been used 
- * in a long time and so it may be worthwhile to remove them. Furthermore,
- * we have established a new mechanism save_phot for essentially this same
- * task.  This really should be consolidated. 
  *
  * @bug This is also commented in the text, but there is a rather bizarre separation
  * for where the photon frequency is updated and where the weight is update. The former is
@@ -94,10 +89,6 @@ extract (w, p, itype)
   int yep;
   double xdiff[3];
   double p_norm, tau_norm;
-
-
-  /* The next line selects the middle inclination angle for recording the absorbed energy */
-  phot_history_spectrum = 0.5 * (MSPEC + nspectra);
 
 
 
@@ -232,13 +223,6 @@ one is odd. We do frequency here but weighting is carried out in  extract */
         save_extract_photons (n, p, &pp);
       }
 
-/* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait
- * to actually initialize phot_hist because the photon bundle is reweighted in extract_one */
-
-      if (phot_history_spectrum == n)
-      {
-        phot_hist_on = 1;       // Start recording the history of the photon
-      }
 
       /* Now extract the photon */
       if (modes.save_photons)
@@ -255,10 +239,6 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 //OLD        save_photons (&pp, "AfterExtract");
 //OLD      }
 
-
-      /* Make sure phot_hist is on, for just one extraction */
-
-      phot_hist_on = 0;
 
     }
 
@@ -385,15 +365,6 @@ the same resonance again */
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
 
 
-/* 68b - 0902 - ksl If we are trying to track the history of this photon, we need to initialize the
- * phot_hist.  We had to do this here, because we have just reweighted the photon
- */
-
-  if (phot_hist_on)
-  {
-    phot_hist (pp, 0);          // Initialize the photon history
-  }
-
 /* Now we can actually extract the reweighted photon */
 
   while (istat == P_INWIND)
@@ -489,18 +460,6 @@ the same resonance again */
           stuff_v (xxspec[nspec].lmn, pstart.lmn);
           delay_dump_single (&pstart, nspec);   //Dump photon now weight has been modified by extraction
         }
-      }
-
-
-
-/* 68b -0902 - ksl - turn phot_history off and store the information in the appropriate locations in the PlasmaPtrs
- * The reason this is here is that we only summarizes the history if the photon actually got to the observer
- */
-
-      if (phot_hist_on)
-      {
-        phot_history_summarize ();
-        phot_hist_on = 0;
       }
 
 
