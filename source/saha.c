@@ -88,7 +88,7 @@ nebular_concentrations (xplasma, mode)
   {
     Error ("nebular_concentrations: Unknown mode %d\n", mode);
     Exit (EXIT_FAILURE);
-    return (EXIT_FAILURE);      // avoids compiler warnings about return being uninitialized
+    exit (EXIT_FAILURE);        // avoids compiler warnings about return being uninitialized
   }
 
 

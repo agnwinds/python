@@ -45,7 +45,7 @@ ion_abundances (PlasmaPtr xplasma, int mode)
   if (mode == IONMODE_ML93_FIXTE)
   {
     /* on-the-spot approximation using existing t_e.   This routine does not attempt
-    to match heating and cooling in the wind element! */
+       to match heating and cooling in the wind element! */
     if ((ireturn = nebular_concentrations (xplasma, NEBULARMODE_ML93)))
     {
       Error ("ionization_abundances: nebular_concentrations failed to converge\n");
@@ -98,7 +98,8 @@ ion_abundances (PlasmaPtr xplasma, int mode)
   else
   {
     Error ("ion_abundances: Could not calculate abundances for mode %d\n", mode);
-    Exit (0);
+    Exit (EXIT_FAILURE);
+    exit (EXIT_FAILURE);        // avoids compiler warnings about return being uninitialized
   }
 
   /* If we want the Auger effect deal with it now. Initially, this is
