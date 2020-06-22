@@ -7,6 +7,20 @@
  * @brief  Routines to modfify a wind structure to for example
  * change densities of certain ions
  *
+ *###Notes###
+ * At present this is just a prototype of a more general 
+ * purpose routine to paint sections of a windsavefile
+ * with new values.  At present the code just supports
+ * changing densities, although it would be fairly 
+ * straighfoward to extend to propeties like T_e
+ *
+ * At present the changes have to be hardcoded into 
+ * main, and the program lacks an interface to for
+ * example files of the tupe produced by windsave2table
+ * 
+ * The intent is to make the structure of this program
+ * like the inverse of windsave2table.
+ *
  ***********************************************************/
 
 #include <stdio.h>
@@ -27,22 +41,13 @@ char inroot[LINELENGTH], outroot[LINELENGTH];
  *
  * @param [in]  int  argc   the number of command line arguments
  * @param [in]  char *  argv[]   The command line arguments
- * @return      restart_stat   1 if restarting a previous model,
- * 0 in all other cases.
  *
- * Python has a fairly rich set of command line options, which
- * are parsed by this routine
- *
- * The routine also creates the diag folder, which is where most
- * of the log files are written
  *
  * ###Notes###
  *
  * The general purpose of each of the command line options
  * should be fairly obvious from reading the code.
  *
- * If changes to the command line interface are made they should
- * be described in the routine help
  *
  * Although this routine uses the standard Log and Error commands
  * the diag files have not been created yet and so this information
@@ -123,6 +128,28 @@ xparse_command_line (argc, argv)
 
 
 
+/**********************************************************/
+/**
+ * @brief      the main routine which carries out the effort
+ *
+ * @param [in]  int  argc   the number of command line arguments
+ * @param [in]  char *  argv[]   The command line arguments
+ *
+ *
+ * ###Notes###
+ *
+ * This routine oversees the effort.  The basic steps are
+ *
+ * - parse the command line to get the names of files
+ * - read the old windsave file
+ * - read the densities from in this case H
+ * - modify the densities
+ * - write out the new windsave file
+ *
+ *
+ **********************************************************/
+
+
 int
 main (argc, argv)
      int argc;
@@ -148,6 +175,8 @@ main (argc, argv)
 
   den = get_ion (0, 1, 1, 1, name);
 
+  /* Having gotten the densities, modify them */
+
   printf ("%d\n", zdom[0].ndim2);
 
 
@@ -156,6 +185,10 @@ main (argc, argv)
     printf ("%e\n", den[i]);
     den[i] *= 1e-6;
   }
+
+  /* Now paint the densities into the appropriatle
+     places in the plasma structure
+   */
 
 
   put_ion (0, 1, 1, den);
@@ -170,6 +203,22 @@ main (argc, argv)
   exit (0);
 
 }
+
+
+/**********************************************************/
+/**
+ * @brief      update a specific ion with new densities
+ *
+ * @param [in]  int ndom   the domain number
+ * @param [in]  int element the element(z) for which 
+ * @param [in]  int istate  the ion number
+ * @param [in]  double den  an array with the new densities
+ *
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 int
 put_ion (ndom, element, istate, den)
