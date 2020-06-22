@@ -288,7 +288,7 @@ rad_hydro_files: $(rhf_objects)
 
 
 
-modify_wind_objects = modify_wind.o windsave.o \
+modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		emission.o recomb.o wind_util.o  \
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
