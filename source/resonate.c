@@ -388,24 +388,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
           }
           /* Completed special calculations for the Macro Atom case */
 
-          /* 68b - 0902 - The next section is to track where absorption
-           * is taking place along the line of sight
-           * to the observer.  It is probably possibly to simplify
-           * some of what is happening here, as we
-           * have various photons real and imaginary in this subroutine.
-           * p, the orginal photon, phot the
-           * photon at the opposide edge of the cell and p_now the photon
-           * at its current position.  Some
-           * of these could be used to store information needed in phot_hist.
-           */
-
-          if (phot_hist_on)
-          {
-            p_now.tau = ttau;
-            p_now.nres = nn;
-            phot_hist (&p_now, 1);
-          }
-
 
         }
 

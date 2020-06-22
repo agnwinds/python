@@ -29,7 +29,7 @@
  * is not random.
  *
  * The extract option is used
- * normaly during the spectral extraction cycles.
+ * normally during the spectral extraction cycles.
  * However, as an advanced option one can use the live or die
  * to construct the detailed spectrum.  One would not normally
  * want to do this, as many photons are "wasted" since they
@@ -229,7 +229,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double tau_scat, tau;
   int istat;
   int ierr;
-  double rrr;
   int icell;
   int current_nres;
   int kkk, n;
@@ -342,20 +341,22 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     if (istat == P_HIT_DISK)
     {
       /* It hit the disk */
+      /* ZFRAME - this next section assumes that disk heating is supposed to be carried out
+         in the local frame of the disk.  That this is the correct thing to do needs to
+         be confirmed.
+       */
+
+
 
       /* Store the energy of the photon bundle into a disk structure so that one 
          can determine later how much and where the disk was heated by photons.
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position 
          of the outer radius of the disk. */
 
-      if (modes.save_photons)
-      {
-        save_photons (&pp, "HitDisk");
-      }
 
-      rrr = sqrt (dot (pp.x, pp.x));
+      rho = sqrt (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1]);
       kkk = 0;
-      while (rrr > qdisk.r[kkk] && kkk < NRINGS - 1)
+      while (rho > qdisk.r[kkk] && kkk < NRINGS - 1)
         kkk++;
       kkk--;                    /* So that the heating refers to the heating between kkk and kkk+1 */
       qdisk.nhit[kkk]++;
@@ -364,16 +365,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
       {
-        /* If we got here, the a new photon direction needs to be defined that will cause the photon
-         * to continue in the wind.  Since this is effectively a scattering event we also have to
-         * extract a photon to construct the detailed spectrum
-         */
-        randvcos (pp.lmn, normal);
-
 
         if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
         {
-          rho = sqrt (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1]);
           dz = (zdisk (rho) - fabs (pp.x[2]));
           if (dz > 0)
           {
@@ -401,6 +395,20 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
             }
           }
         }
+
+
+        if (modes.save_photons)
+        {
+          save_photons (&pp, "HitDisk");
+        }
+
+
+        /* If we got here, the a new photon direction needs to be defined that will cause the photon
+         * to continue in the wind.  Since this is effectively a scattering event we also have to
+         * extract a photon to construct the detailed spectrum
+         */
+        randvcos (pp.lmn, normal);
+
         stuff_phot (&pp, p);
 
         p->ds = 0;

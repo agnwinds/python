@@ -105,8 +105,6 @@ int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
 int stuff_phot(PhotPtr pin, PhotPtr pout);
 int move_phot(PhotPtr pp, double ds);
 int comp_phot(PhotPtr p1, PhotPtr p2);
-int phot_hist(PhotPtr p, int iswitch);
-int phot_history_summarize(void);
 double ds_to_cone(ConePtr cc, struct photon *p);
 double ds_to_sphere(double r, struct photon *p);
 double ds_to_sphere2(double x[], double r, struct photon *p);
@@ -575,6 +573,7 @@ double ch_ex_heat(WindPtr one, double t_e);
 int check_frame(PhotPtr p, enum frame desired_frame, char *msg);
 int observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
+int observer_to_local_frame_disk(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
 /* py_wind_sub.c */
 int zoom(int direction);
