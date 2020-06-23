@@ -30,10 +30,11 @@
 
 #include "atomic.h"
 #include "python.h"
+#include "import.h"
 
 
-char inroot[LINELENGTH], outroot[LINELENGTH];
-
+char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH];
+int model_flag;
 
 /**********************************************************/
 /**
@@ -68,7 +69,9 @@ xparse_command_line (argc, argv)
 
 
   sprintf (outroot, "%s", "new");
+  printf ("BOOM argc=%i\n", argc);
 
+  model_flag = 0;
 
   if (argc == 1)
   {
@@ -98,6 +101,19 @@ xparse_command_line (argc, argv)
         i++;
         j = i;
 
+      }
+      if (strcmp (argv[i], "-model_file") == 0)
+      {
+        if (sscanf (argv[i + 1], "%s", dummy) != 1)
+        {
+          printf ("python: Expected a model file containing density, velocity and temperature after -model_file switch\n");
+          exit (0);
+        }
+        get_root (model_file, dummy);
+        i++;
+        j = i;
+        printf ("got a model file %s\n", model_file);
+        model_flag = 1;
       }
       else if (strcmp (argv[i], "--dry-run") == 0)
       {
@@ -159,8 +175,11 @@ main (argc, argv)
   double *den;
   char name[LINELENGTH];        /* file name extension */
   char infile[LINELENGTH], outfile[LINELENGTH];
-  int i;
   int put_ion ();
+  int apply_model ();
+  int ndom;
+
+  ndom = 0;
 
   Log_set_verbosity (3);
   xparse_command_line (argc, argv);
@@ -173,26 +192,32 @@ main (argc, argv)
 
   wind_read (infile);
 
-  den = get_ion (0, 1, 1, 1, name);
+  if (model_flag)
+  {
+    apply_model (ndom, model_file);
+  }
+
+
+//  den = get_ion (0, 1, 1, 1, name);
 
   /* Having gotten the densities, modify them */
 
-  printf ("%d\n", zdom[0].ndim2);
+//  printf ("%d\n", zdom[0].ndim2);
 
 
-  for (i = 0; i < zdom[0].ndim2; i++)
-  {
-    printf ("%e\n", den[i]);
-    den[i] *= 1e-6;
-  }
+//  for (i = 0; i < zdom[0].ndim2; i++)
+//  {
+//    printf ("%e\n", den[i]);
+//    den[i] *= 1e-6;
+//  }
 
   /* Now paint the densities into the appropriatle
      places in the plasma structure
    */
 
 
-  put_ion (0, 1, 1, den);
-
+//  put_ion (0, 1, 1, den);
+  printf ("outputting to %s\n", outfile);
 
 
   wind_save (outfile);
@@ -234,7 +259,7 @@ put_ion (ndom, element, istate, den)
 
   for (i = 0; i < zdom[0].ndim2; i++)
   {
-    printf ("%e\n", den[i]);
+//    printf ("%e\n", den[i]);
   }
   nstart = zdom[ndom].nstart;
   ndim2 = zdom[ndom].ndim2;
@@ -257,4 +282,55 @@ put_ion (ndom, element, istate, den)
 
   return (0);
 
+}
+
+
+int
+apply_model (ndom, filename)
+     int ndom;
+     char *filename;
+{
+  int ndim, mdim;
+  int nstart, n, nion, nplasma;
+
+  printf ("We have been given a model file - we will be using this for new densities in domain 0\n");
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
+  printf ("Current dimensions are %i %i\n", ndim, mdim);
+  import_wind2 (ndom, model_file);
+  printf ("Model dimensions are %i %i\n", imported_model[ndom].ndim, imported_model[ndom].mdim);
+  if (ndim == imported_model[ndom].ndim && mdim == imported_model[ndom].mdim)
+  {
+    printf ("The model dimensions match the current file - proceeding\n");
+    if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      printf ("We have a spherical model\n");
+      nstart = zdom[ndom].nstart;
+      for (n = 0; n < ndim; n++)
+      {
+        wmain[n].v[0] = imported_model[ndom].v_r[n];    //we need a value for v_r for all cells including ghosts
+        if (wmain[n].inwind > -1)
+        {
+          for (nion = 0; nion < nions; nion++)  //Change the absolute number densities, fractions remain the same
+          {
+            nplasma = wmain[n].nplasma;
+            plasmamain[nplasma].density[nion] =
+              plasmamain[nplasma].density[nion] * (imported_model[ndom].mass_rho[n] / plasmamain[nplasma].rho);
+          }
+          plasmamain[nplasma].rho = imported_model[ndom].mass_rho[n];
+          if (imported_model[ndom].init_temperature == FALSE)
+          {
+            plasmamain[nplasma].t_e = imported_model[ndom].t_e[n];
+            plasmamain[nplasma].t_r = imported_model[ndom].t_r[n];
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    printf ("The model doesnt match the current windsave aborting\n");
+    exit (0);
+  }
+  return (0);
 }
