@@ -30,10 +30,11 @@
 
 #include "atomic.h"
 #include "python.h"
+#include "import.h"
 
 
-char inroot[LINELENGTH], outroot[LINELENGTH];
-
+char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH];
+int model_flag;
 
 /**********************************************************/
 /**
@@ -68,7 +69,9 @@ xparse_command_line (argc, argv)
 
 
   sprintf (outroot, "%s", "new");
+  printf ("BOOM argc=%i\n", argc);
 
+  model_flag = 0;
 
   if (argc == 1)
   {
@@ -98,6 +101,19 @@ xparse_command_line (argc, argv)
         i++;
         j = i;
 
+      }
+      if (strcmp (argv[i], "-model_file") == 0)
+      {
+        if (sscanf (argv[i + 1], "%s", dummy) != 1)
+        {
+          printf ("python: Expected a model file containing density, velocity and temperature after -model_file switch\n");
+          exit (0);
+        }
+        get_root (model_file, dummy);
+        i++;
+        j = i;
+        printf ("got a model file %s\n", model_file);
+        model_flag = 1;
       }
       else if (strcmp (argv[i], "--dry-run") == 0)
       {
@@ -161,6 +177,10 @@ main (argc, argv)
   char infile[LINELENGTH], outfile[LINELENGTH];
   int i;
   int put_ion ();
+  int ndim, mdim;
+  int ndom;
+
+  ndom = 0;
 
   Log_set_verbosity (3);
   xparse_command_line (argc, argv);
@@ -172,6 +192,26 @@ main (argc, argv)
   printf ("Reading %s and writing to %s\n", infile, outfile);
 
   wind_read (infile);
+
+  if (model_flag)
+  {
+    printf ("We have been given a model file - we will be using this for new densities in domain 0\n");
+    ndim = zdom[ndom].ndim;
+    mdim = zdom[ndom].mdim;
+    printf ("Current dimensions are %i %i\n", ndim, mdim);
+    import_wind2 (ndom, model_file);
+    printf ("Model dimensions are %i %i\n", imported_model[ndom].ndim, imported_model[ndom].mdim);
+    if (ndim == imported_model[ndom].ndim && mdim == imported_model[ndom].mdim)
+    {
+      printf ("THe model dimensions match the current file - proceeding\n");
+    }
+    else
+    {
+      printf ("The model doesnt match the current windsave aborting\n");
+      exit (0);
+    }
+  }
+
 
   den = get_ion (0, 1, 1, 1, name);
 
