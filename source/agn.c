@@ -436,7 +436,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       p[i].freq = one_continuum (spectype, -1., -1., freqmin, freqmax); //A continuum (model) photon - we use t=g=-1 to flag that this is not a normal model
     }
 
-    p[i].freq_orig_loc = p[i].freq;
 
     if (p[i].freq < freqmin || freqmax < p[i].freq)     //A check to see that we havent made a photon out of range.
     {

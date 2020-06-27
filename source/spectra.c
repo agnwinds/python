@@ -232,7 +232,6 @@ disk. The minus sign in the terms associated with phase are to make this happen.
       xxspec[n].renorm = 1.;
     /* Completed initialization of variables for live or die */
 
-//OLD    Log ("XXX angle  %.3f -> %.3f %.3f -> %.3f\n", angle[n - MSPEC], x1, x2, xxspec[n].renorm);
 
     strcpy (dummy, "");
     sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
@@ -391,6 +390,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     }
 
     /* lines to work out where we are in a normal spectrum with linear spacing */
+
     k = (p[nphot].freq - freqmin) / dfreq;
     if (k < 0)
     {
@@ -419,6 +419,8 @@ spectrum_create (p, f1, f2, nangle, select_extract)
         nhigh = nhigh + 1;
       k_orig = NWAVE - 1;
     }
+
+    /* Having worked out what spectral bins to increment, we now actually increment the variious spectra */
 
     xxspec[SPEC_CREATED].f[k_orig] += p[nphot].w_orig;  /* created spectrum with original weights and wavelengths */
     xxspec[SPEC_CREATED].lf[k1_orig] += p[nphot].w_orig;        /* logarithmic created spectrum */
@@ -548,6 +550,10 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       nstat[i]++;
   }
 
+  /* At this point all of the spectra have been incremented and so we performe a simple check on the number of
+     photons were lost and then we print out some statistics having to do with the number of 
+     scatters each photon has undergone.
+   */
 
   if ((nlow / nphot > 0.05) || (nhigh / nphot > 0.05))
   {
@@ -598,17 +604,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       Log ("\n");
   }
   Log ("\n");
-
-
-  /* Now subsample the matrix which contains the positions where photons
-     last scattered and print the results to the screen.  Photons which are never
-     in the grid end up in cell 0,0
-
-     In this instance subsampling means to actually do sums, such that all of
-     the photons that scattered in the wind are counted in a courser grid.
-
-   */
-
 
 
 

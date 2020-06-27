@@ -384,9 +384,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        */
 
 
-//OLD      vwind_xyz (ndom, &p[np], v);
       p[np].istat = P_INWIND;
-      p[np].freq_orig_loc = p[np].freq;
       p[np].frame = F_LOCAL;
       p[np].tau = p[np].nscat = p[np].nrscat = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon
