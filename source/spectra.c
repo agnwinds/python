@@ -289,8 +289,6 @@ disk. The minus sign in the terms associated with phase are to make this happen.
  *  	cycles and for detailed spectra in the Live or Die option).
  *
  * @param [in] PhotPtr  p   A flight of photons
- * @param [in] double  f1   The minimum frequncy in the spectrum
- * @param [in] double  f2   The maximum frequency in the spectrum
  * @param [in] int  nangle  The number of different angles and phases for which to create detailed spectra
  * @param [in] int  select_extract   Parameter to select whether to use the Live or Die (0) or extract option
  * @return     Always returns 0
@@ -306,13 +304,15 @@ disk. The minus sign in the terms associated with phase are to make this happen.
  * ### Notes ###
  * Summing up of the spectra in the "extract" option is done in extract.c
  *
+ * spectrum_init has to be called prior to spectrum_create to set
+ * up the frequency limits, etc. of the spectra.
+ *
  *
  **********************************************************/
 
 int
-spectrum_create (p, f1, f2, nangle, select_extract)
+spectrum_create (p, nangle, select_extract)
      PhotPtr p;
-     double f1, f2;
      int nangle;
      int select_extract;
 
@@ -329,20 +329,22 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   int iwind;                    // Variable defining whether this is a wind photon
   int max_scat, max_res;
 
-  freqmin = f1;
-  freqmax = f2;
-  dfreq = (freqmax - freqmin) / NWAVE;
+
+  /* Setup frequency boundaries, etc using values set in spectrum_int */
+
+  freqmin = xxspec[SPEC_CREATED].freqmin;
+  freqmax = xxspec[SPEC_CREATED].freqmax;
+  dfreq = xxspec[SPEC_CREATED].dfreq;
+
+
+  lfreqmin = xxspec[SPEC_CREATED].lfreqmin;
+  lfreqmax = xxspec[SPEC_CREATED].lfreqmax;
+  ldfreq = xxspec[SPEC_CREATED].ldfreq;
+
   nspec = nangle + MSPEC;
   nlow = 0.0;                   // variable to store the number of photons that have frequencies which are too low
   nhigh = 0.0;                  // variable to store the number of photons that have frequencies which are too high
   delta = 0.0;                  // fractional frequency error allowod
-
-
-/* Lines to set up a logarithmic spectrum */
-
-  lfreqmin = log10 (freqmin);
-  lfreqmax = log10 (freqmax);
-  ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
@@ -519,13 +521,14 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     }
     else if (i == P_HIT_STAR || i == P_HIT_DISK)
     {
-      xxspec[SPEC_HITSURF].f[k] += p[nphot].w;  /*absorbed spectrum */
-      xxspec[SPEC_HITSURF].lf[k1] += p[nphot].w;        /*logarithmic absorbed spectrum */
-      if (iwind)
-      {
-        xxspec[SPEC_HITSURF].f_wind[k] += p[nphot].w;   /* emitted spectrum */
-        xxspec[SPEC_HITSURF].lf_wind[k1] += p[nphot].w; /* logarithmic emitted spectrum */
-      }
+//OLD Removed as part of effort related to #739, unclear if last line should be moved also
+//OLD      xxspec[SPEC_HITSURF].f[k] += p[nphot].w;  /*absorbed spectrum */
+//OLD      xxspec[SPEC_HITSURF].lf[k1] += p[nphot].w;        /*logarithmic absorbed spectrum */
+//OLD      if (iwind)
+//OLD      {
+//OLD        xxspec[SPEC_HITSURF].f_wind[k] += p[nphot].w;   /* emitted spectrum */
+//OLD        xxspec[SPEC_HITSURF].lf_wind[k1] += p[nphot].w; /* logarithmic emitted spectrum */
+//OLD      }
       xxspec[SPEC_HITSURF].nphot[i]++;
     }
 
@@ -618,6 +621,94 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
   }
 
+
+  return (0);
+
+}
+
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      add a single photon to a specific spectrum
+ * on the fly  
+ *
+ * @param [in] PhoPtr p  A single photon
+ * @param [in] int spec_id  The spectrum to be incremented   
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * This routine allows a spectrum to be incremented during 
+ * during its flight through the wind.  It is necessary
+ * for example if one wishes to record when a photon
+ * hits the disk (and is reflectd).
+ *
+ * ### Notes ###
+ * The routine assumes one wants to use the current 
+ * frequency/weight of the photon.  If for certain spectra
+ * one wants to record the original frequency or weight
+ * some additional logic is required.  
+ *
+ * If spectra are accumulated during the flight of photons
+ * through the plasma one needs to avoid double counting
+ * in spectrum_create
+ *
+ **********************************************************/
+
+
+int
+spec_add_one (p, spec_type)
+     PhotPtr p;
+     int spec_type;
+{
+  int k;
+  int iwind;
+  double freq;
+
+  freq = p->freq;
+
+  /*
+   * Determine whether this is a wind photon, that is was it created in the
+   * wind or scattered by the wind
+   */
+
+  iwind = 0;
+  if (p->origin == PTYPE_WIND || p->origin == PTYPE_WIND_MATOM || p->nscat > 0)
+  {
+    iwind = 1;
+  }
+
+
+
+  k = (freq - xxspec[spec_type].freqmin) / xxspec[spec_type].dfreq;
+
+  if (k > NWAVE - 1)
+    k = NWAVE - 1;
+  else if (k < 0)
+    k = 0;
+
+  xxspec[spec_type].f[k] += p->w;
+
+  if (iwind)
+  {
+    xxspec[SPEC_SCATTERED].f_wind[k] += p->w;   /* emitted spectrum */
+  }
+
+  k = (log10 (freq) - xxspec[spec_type].lfreqmin) / xxspec[spec_type].ldfreq;
+
+  if (k > NWAVE - 1)
+    k = NWAVE - 1;
+  else if (k < 0)
+    k = 0;
+
+  xxspec[spec_type].lf[k] += p->w;
+  if (iwind)
+  {
+    xxspec[SPEC_SCATTERED].lf_wind[k] += p->w;  /* logarithmic emitted spectrum */
+  }
 
   return (0);
 
@@ -837,6 +928,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   return (0);
 
 }
+
 
 
 

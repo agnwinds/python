@@ -307,12 +307,15 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     if (istat == P_HIT_STAR)
     {                           /* It hit the star */
       geo.lum_star_back += pp.w;
+      spec_add_one (&pp, SPEC_HITSURF);
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
       {
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
          * to continue in the wind.  Since this is effectively a scattering event we also have to
          * extract a photon to construct the detailed spectrum
          */
+
+
         randvcos (pp.lmn, normal);
         move_phot (&pp, DFUDGE);
         stuff_phot (&pp, p);
@@ -397,6 +400,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         {
           save_photons (&pp, "HitDisk");
         }
+
+
+        spec_add_one (&pp, SPEC_HITSURF);
+
 
 
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
