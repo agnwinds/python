@@ -1190,7 +1190,6 @@ scatter (p, nres, nnscat)
     }
 
 
-    spec_add_one (p, SPEC_CREATED);     //Add photons which have interacted to the creared spectrum
 
   }
   /*XFRAME need to make sure that macro_gov leaves the photon in the Local frame. We will do all
@@ -1239,6 +1238,13 @@ scatter (p, nres, nnscat)
   local_to_observer_frame (p, p);
 
 
+  /* If we are in macro-atom mode, add the photon to the created wind spectrum.  For simple
+     atoms the wind spectrum is constructed in sectra.c */
+
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    spec_add_one (p, SPEC_CWIND);
+  }
 
 /*Now calculate the momentum transfer.  What follows appears to be
 correct only if there was no energy absorbed at the scattering site.
@@ -1253,6 +1259,7 @@ if fixed.
 
 //XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 
 // ioniz_or_extract is True for ionization cycles, false for spectral cycles
+
   if (geo.ioniz_or_extract)
   {
     stuff_v (p_orig.lmn, p_init);

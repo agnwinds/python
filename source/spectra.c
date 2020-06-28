@@ -148,6 +148,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
   }
 
   strcpy (xxspec[SPEC_CREATED].name, "Created");
+  strcpy (xxspec[SPEC_CWIND].name, "WCreated");
   strcpy (xxspec[SPEC_EMITTED].name, "Emitted");
   strcpy (xxspec[SPEC_CENSRC].name, "CenSrc");
   strcpy (xxspec[SPEC_DISK].name, "Disk");
@@ -317,7 +318,7 @@ spectrum_create (p, nangle, select_extract)
      int select_extract;
 
 {
-  int nphot, i, j, k, k1, n;
+  int nphot, istat, j, k, k1, n;
   int nspec, spectype;
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;
@@ -422,19 +423,30 @@ spectrum_create (p, nangle, select_extract)
       k_orig = NWAVE - 1;
     }
 
-    /* Having worked out what spectral bins to increment, we now actually increment the variious spectra */
+    /* Having worked out what spectral bins to increment, we now actually increment the various spectra */
+    istat = p[nphot].istat;
 
-    xxspec[SPEC_CREATED].f[k_orig] += p[nphot].w_orig;  /* created spectrum with original weights and wavelengths */
-    xxspec[SPEC_CREATED].lf[k1_orig] += p[nphot].w_orig;        /* logarithmic created spectrum */
+    if (iwind)
+    {
+      xxspec[SPEC_CWIND].f[k_orig] += p[nphot].w_orig;  /* created spectrum with original weights and wavelengths */
+      xxspec[SPEC_CWIND].lf[k1_orig] += p[nphot].w_orig;        /* logarithmic created spectrum */
+      xxspec[SPEC_CWIND].nphot[istat]++;
+    }
+    else
+    {
+      xxspec[SPEC_CREATED].f[k_orig] += p[nphot].w_orig;        /* created spectrum with original weights and wavelengths */
+      xxspec[SPEC_CREATED].lf[k1_orig] += p[nphot].w_orig;      /* logarithmic created spectrum */
+      xxspec[SPEC_CREATED].nphot[istat]++;
+    }
+
     if (iwind)
     {
       xxspec[SPEC_CREATED].f_wind[k_orig] += p[nphot].w_orig;
       xxspec[SPEC_CREATED].lf_wind[k1_orig] += p[nphot].w_orig;
     }
 
-    if ((i = p[nphot].istat) == P_ESCAPE)
+    if (istat == P_ESCAPE)
     {
-      xxspec[SPEC_CREATED].nphot[i]++;
       xxspec[SPEC_EMITTED].f[k] += p[nphot].w;  /* emitted spectrum */
       xxspec[SPEC_EMITTED].lf[k1] += p[nphot].w;        /* logarithmic emitted spectrum */
       if (iwind)
@@ -442,7 +454,7 @@ spectrum_create (p, nangle, select_extract)
         xxspec[SPEC_EMITTED].f_wind[k] += p[nphot].w;   /* emitted spectrum */
         xxspec[SPEC_EMITTED].lf_wind[k1] += p[nphot].w; /* logarithmic emitted spectrum */
       }
-      xxspec[SPEC_EMITTED].nphot[i]++;
+      xxspec[SPEC_EMITTED].nphot[istat]++;
       spectype = p[nphot].origin;
 
       /* When a photon that originated for example in the BL which has a type of PTYPE_BL is scattered in the wind by 
@@ -461,7 +473,7 @@ spectrum_create (p, nangle, select_extract)
           xxspec[SPEC_CENSRC].f_wind[k] += p[nphot].w;  /* emitted spectrum */
           xxspec[SPEC_CENSRC].lf_wind[k1] += p[nphot].w;        /* logarithmic emitted spectrum */
         }
-        xxspec[SPEC_CENSRC].nphot[i]++;
+        xxspec[SPEC_CENSRC].nphot[istat]++;
       }
       else if (spectype == PTYPE_DISK)  // Then it was a disk photon
       {
@@ -472,7 +484,7 @@ spectrum_create (p, nangle, select_extract)
           xxspec[SPEC_DISK].f_wind[k] += p[nphot].w;    /* emitted spectrum */
           xxspec[SPEC_DISK].lf_wind[k1] += p[nphot].w;  /* logarithmic emitted spectrum */
         }
-        xxspec[SPEC_DISK].nphot[i]++;
+        xxspec[SPEC_DISK].nphot[istat]++;
       }
       else if (spectype == PTYPE_WIND)
       {
@@ -483,7 +495,7 @@ spectrum_create (p, nangle, select_extract)
           xxspec[SPEC_WIND].f_wind[k] += p[nphot].w;    /* emitted spectrum */
           xxspec[SPEC_WIND].lf_wind[k1] += p[nphot].w;  /* logarithmic emitted spectrum */
         }
-        xxspec[SPEC_WIND].nphot[i]++;
+        xxspec[SPEC_WIND].nphot[istat]++;
       }
       else
       {
@@ -519,7 +531,7 @@ spectrum_create (p, nangle, select_extract)
         }
       }
     }
-    else if (i == P_HIT_STAR || i == P_HIT_DISK)
+    else if (istat == P_HIT_STAR || istat == P_HIT_DISK)
     {
 //OLD Removed as part of effort related to #739, unclear if last line should be moved also
 //OLD      xxspec[SPEC_HITSURF].f[k] += p[nphot].w;  /*absorbed spectrum */
@@ -529,7 +541,7 @@ spectrum_create (p, nangle, select_extract)
 //OLD        xxspec[SPEC_HITSURF].f_wind[k] += p[nphot].w;   /* emitted spectrum */
 //OLD        xxspec[SPEC_HITSURF].lf_wind[k1] += p[nphot].w; /* logarithmic emitted spectrum */
 //OLD      }
-      xxspec[SPEC_HITSURF].nphot[i]++;
+      xxspec[SPEC_HITSURF].nphot[istat]++;
     }
 
     if (p[nphot].nscat > 0 || p[nphot].nrscat > 0)
@@ -541,16 +553,16 @@ spectrum_create (p, nangle, select_extract)
         xxspec[SPEC_SCATTERED].f_wind[k] += p[nphot].w; /* emitted spectrum */
         xxspec[SPEC_SCATTERED].lf_wind[k1] += p[nphot].w;       /* logarithmic emitted spectrum */
       }
-      if (i < 0 || i > NSTAT - 1)
+      if (istat < 0 || istat > NSTAT - 1)
         xxspec[SPEC_SCATTERED].nphot[NSTAT - 1]++;
       else
-        xxspec[SPEC_SCATTERED].nphot[i]++;      /* scattering spectrum */
+        xxspec[SPEC_SCATTERED].nphot[istat]++;  /* scattering spectrum */
     }
 
-    if (i < 0 || i > NSTAT - 1)
+    if (istat < 0 || istat > NSTAT - 1)
       nstat[NSTAT - 1]++;
     else
-      nstat[i]++;
+      nstat[istat]++;
   }
 
   /* At this point all of the spectra have been incremented and so we performe a simple check on the number of
@@ -571,39 +583,39 @@ spectrum_create (p, nangle, select_extract)
 
   max_scat = max_res = 0;
 
-  for (i = 1; i < MAXSCAT; i++)
+  for (j = 1; j < MAXSCAT; j++)
   {
-    if (nscat[i] > 0)
+    if (nscat[j] > 0)
     {
-      max_scat = i;
+      max_scat = j;
     }
-    if (nres[i] > max_res)
+    if (nres[j] > max_res)
     {
-      max_res = i;
+      max_res = j;
     }
   }
 
   Log ("\nNo. of photons which have scattered n times.     The max number of scatters seen was %d\n", max_scat);
 
-  for (i = 0; i <= max_scat; i++)
+  for (j = 0; j <= max_scat; j++)
   {
-    Log ("%6d", nscat[i]);
-    if ((i % 10) == 9)
+    Log ("%6d", nscat[j]);
+    if ((j % 10) == 9)
       Log ("\n");
   }
 
   Log ("\nNumber of photons resonantly scattering n times.  The max number of scatters seen was %d\n", max_res);
-  for (i = 0; i <= max_res; i++)
+  for (j = 0; j <= max_res; j++)
   {
-    Log ("%6d", nres[i]);
-    if ((i % 10) == 9)
+    Log ("%6d", nres[j]);
+    if ((j % 10) == 9)
       Log ("\n");
   }
   Log ("\nNo of photons and their fates\n!!PhotFate: ");
-  for (i = 0; i < NSTAT; i++)
+  for (j = 0; j < NSTAT; j++)
   {
-    Log ("%6d", nstat[i]);
-    if ((i % 10) == 9)
+    Log ("%6d", nstat[j]);
+    if ((j % 10) == 9)
       Log ("\n");
   }
   Log ("\n");
@@ -615,8 +627,8 @@ spectrum_create (p, nangle, select_extract)
   for (n = 0; n < nspectra; n++)
   {
     Log ("%20s ", xxspec[n].name);
-    for (i = 0; i < NSTAT; i++)
-      Log (" %7d", xxspec[n].nphot[i]);
+    for (j = 0; j < NSTAT; j++)
+      Log (" %7d", xxspec[n].nphot[j]);
     Log ("\n");
 
   }
@@ -831,12 +843,12 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
 
 
   /* Write the rest of the header for the spectrum file */
-  /* JM 1411 -- Removed comment line for column headers, see #122 */
-  fprintf (fptr, "# \nFreq.        Lambda  ");
+
+  fprintf (fptr, "# \nFreq.        Lambda    ");
 
   for (n = nspecmin; n <= nspecmax; n++)
   {
-    fprintf (fptr, " %8s", xxspec[n].name);
+    fprintf (fptr, " %-10s", xxspec[n].name);
   }
 
 
@@ -845,6 +857,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
 
   /* Ignore the end bins because they include all photons outside the frequency range and there may be some
      as a result of the fact that the bb function generate some IR photons */
+
   dd = 4. * PI * (D_SOURCE * PC) * (D_SOURCE * PC);
 
   if (loglin == 0)              /* Then were are writing out the linear version of the spectra */
@@ -854,7 +867,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
     for (i = 1; i < NWAVE - 1; i++)
     {
       freq = freqmin + i * dfreq;
-      fprintf (fptr, "%-8e %.3f ", freq, VLIGHT * 1e8 / freq);
+      fprintf (fptr, "%-8e %9.3f ", freq, VLIGHT * 1e8 / freq);
       for (n = nspecmin; n <= nspecmax; n++)
       {
         x = xxspec[n].f[i] * xxspec[n].renorm;

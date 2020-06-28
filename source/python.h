@@ -1236,15 +1236,16 @@ int nspectra;                   /* After create_spectrum, the number of elements
                                    general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
                                    while elements higher than this will contain spectra as seen by different observers */
 
-#define MSPEC               7   /* The number of standard spectra - i.e. not user defined angles */
-#define SPEC_CREATED        0   /* The spectrum of the original weight before transmission through the wind */
-#define SPEC_EMITTED        1   /* The emitted spectrum - i.e. photons with their weights changed by transmission through the wind */
-#define SPEC_CENSRC         2   /* The emitted spectrum from photons emitted from the central source (if there is one) */
-#define SPEC_DISK           3   /* The emitted spectrum from photons emitted from the disk (if there is one) */
-#define SPEC_WIND           4   /* The emitted spectrum from photons emitted from the wind itself */
-#define SPEC_HITSURF        5   /* The spectrum for photons which hit the a surface and were absorbed - should be zero for when reflection
+#define MSPEC               8   /* The number of standard spectra - i.e. not user defined angles */
+#define SPEC_CREATED        0   /* The spectrum of from external sources with  weights before transmission through the wind */
+#define SPEC_CWIND          1   /* The spectrum created in the wind with rheir original weights*/
+#define SPEC_EMITTED        2   /* The emitted spectrum - i.e. photons with their weights changed by transmission through the wind */
+#define SPEC_CENSRC         3   /* The emitted spectrum from photons emitted from the central source (if there is one) */
+#define SPEC_DISK           4   /* The emitted spectrum from photons emitted from the disk (if there is one) */
+#define SPEC_WIND           5   /* The emitted spectrum from photons emitted from the wind itself */
+#define SPEC_HITSURF        6   /* The spectrum for photons which hit the a surface and were absorbed - should be zero for when reflection
                                  * is turned on */
-#define SPEC_SCATTERED      6   /* The spectrum of photons which were scattered at least once in the wind - the weight used is the final
+#define SPEC_SCATTERED      7   /* The spectrum of photons which were scattered at least once in the wind - the weight used is the final
                                  * weight after transmission through the wind */
 
 int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
