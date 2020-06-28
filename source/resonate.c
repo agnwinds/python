@@ -1188,6 +1188,10 @@ scatter (p, nres, nnscat)
     {                           /* This is a ff event (SS). */
       macro_gov (p, nres, 2, &which_out);       //ff always make a k-packet
     }
+
+
+    spec_add_one (p, SPEC_CREATED);     //Add photons which have interacted to the creared spectrum
+
   }
   /*XFRAME need to make sure that macro_gov leaves the photon in the Local frame. We will do all
      of the transformations back to the observer frame here.
