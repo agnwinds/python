@@ -218,7 +218,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		radiation.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
@@ -243,7 +243,7 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		radiation.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
@@ -258,7 +258,7 @@ rhf_objects = rad_hydro_files.o get_atomicdata.o py_wind_sub.o windsave.o py_win
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		radiation.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \

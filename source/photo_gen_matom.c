@@ -812,7 +812,6 @@ photo_gen_matom (p, weight, photstart, nphot)
 
     p[n].freq = pp.freq;
     p[n].nres = nres;
-    p[n].freq_orig_loc = p[n].freq;
     p[n].frame = F_LOCAL;
 
 
