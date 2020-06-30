@@ -36,7 +36,7 @@
 
 
 char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH];
-int model_flag;
+int model_flag, ksl_flag;
 
 /**********************************************************/
 /**
@@ -71,9 +71,8 @@ xparse_command_line (argc, argv)
 
 
   sprintf (outroot, "%s", "new");
-  printf ("BOOM argc=%i\n", argc);
 
-  model_flag = 0;
+  model_flag = ksl_flag = 0;
 
   if (argc == 1)
   {
@@ -116,6 +115,11 @@ xparse_command_line (argc, argv)
         j = i;
         printf ("got a model file %s\n", model_file);
         model_flag = 1;
+      }
+      else if (strcmp (argv[i], "-ksl") == 0)
+      {
+        printf ("Carrying out a simple hard wired ion modification\n");
+        ksl_flag = 1;
       }
       else if (strcmp (argv[i], "--dry-run") == 0)
       {
@@ -180,6 +184,7 @@ main (argc, argv)
   int put_ion ();
   int apply_model ();
   int ndom;
+  int i;
 
   ndom = 0;
 
@@ -198,27 +203,27 @@ main (argc, argv)
   {
     apply_model (ndom, model_file);
   }
+  if (ksl_flag)
+  {
+    den = get_ion (0, 1, 1, 1, name);
 
+    /* Having gotten the densities, modify them */
 
-//  den = get_ion (0, 1, 1, 1, name);
+    printf ("%d\n", zdom[0].ndim2);
 
-  /* Having gotten the densities, modify them */
+    for (i = 0; i < zdom[0].ndim2; i++)
+    {
+      printf ("%e\n", den[i]);
+      den[i] *= 1e-6;
+    }
 
-//  printf ("%d\n", zdom[0].ndim2);
-
-
-//  for (i = 0; i < zdom[0].ndim2; i++)
-//  {
-//    printf ("%e\n", den[i]);
-//    den[i] *= 1e-6;
-//  }
-
-  /* Now paint the densities into the appropriatle
-     places in the plasma structure
-   */
-
-
-//  put_ion (0, 1, 1, den);
+    /* Now paint the densities into the appropriatle
+       places in the plasma structure
+     */
+    put_ion (0, 1, 1, den);
+  }
+  
+  
   printf ("outputting to %s\n", outfile);
 
 
