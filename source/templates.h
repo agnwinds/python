@@ -483,6 +483,7 @@ double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
 /* import.c */
 int import_wind(int ndom);
+int import_wind2(int ndom, char *filename);
 int import_set_wind_boundaries(int ndom);
 int import_make_grid(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
