@@ -21,6 +21,8 @@
  * The intent is to make the structure of this program
  * like the inverse of windsave2table.
  *
+ * The initial commit that KSL write is 1485d5f6669704dde55e437f5c0cb061ec202653
+ *
  ***********************************************************/
 
 #include <stdio.h>
