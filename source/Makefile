@@ -301,7 +301,7 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
-		get_atomicdata.o
+		get_atomicdata.o spectra.o
 
 
 modify_wind:  $(modify_wind_objects)
