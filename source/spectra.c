@@ -426,7 +426,7 @@ spectrum_create (p, nangle, select_extract)
     /* Having worked out what spectral bins to increment, we now actually increment the various spectra */
     istat = p[nphot].istat;
 
-    if (iwind)
+    if (p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)
     {
       xxspec[SPEC_CWIND].f[k_orig] += p[nphot].w_orig;  /* created spectrum with original weights and wavelengths */
       xxspec[SPEC_CWIND].lf[k1_orig] += p[nphot].w_orig;        /* logarithmic created spectrum */

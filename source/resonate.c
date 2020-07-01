@@ -1241,7 +1241,7 @@ scatter (p, nres, nnscat)
   /* If we are in macro-atom mode, add the photon to the created wind spectrum.  For simple
      atoms the wind spectrum is constructed in sectra.c */
 
-  if (geo.rt_mode == RT_MODE_MACRO)
+  if (geo.rt_mode == RT_MODE_MACRO && *nres != -1)
   {
     spec_add_one (p, SPEC_CWIND);
   }
