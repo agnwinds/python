@@ -1243,6 +1243,7 @@ scatter (p, nres, nnscat)
 
   if (geo.rt_mode == RT_MODE_MACRO && *nres != -1)
   {
+    p->nmacro++;
     spec_add_one (p, SPEC_CWIND);
   }
 

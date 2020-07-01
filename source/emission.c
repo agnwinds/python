@@ -386,7 +386,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
       p[np].istat = P_INWIND;
       p[np].frame = F_LOCAL;
-      p[np].tau = p[np].nscat = p[np].nrscat = 0;
+      p[np].tau = p[np].nscat = p[np].nrscat = p[np].nmacro = 0;
       p[np].origin = PTYPE_WIND;        // A wind photon
 
       /* Make an in place transformation to the observe frame */

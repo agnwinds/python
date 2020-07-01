@@ -1154,6 +1154,9 @@ typedef struct photon
   } frame;
 
   int nscat;                    /*Number of scatters for this photon */
+  int nrscat;                   /* number of resonance scatterings */
+  int nmacro;                   /* number of macro atom interactions */
+
   int nres;                     /*For line scattering, indicates the actual transition; 
                                    for continuum scattering, meaning 
                                    depends on matom vs non-matom. See headers of emission.c 
@@ -1162,7 +1165,6 @@ typedef struct photon
                                    anisotropic scattering to carry the number of
                                    scattering to "extract" when needed for wind
                                    generated photons SS05. */
-  int nrscat;                   /* number of resonance scatterings */
   int grid;                     /*grid position of the photon in the wind, if
                                    the photon is in the wind.  If the photon is not
                                    in the wind, then -1 implies inside the wind cone and  
