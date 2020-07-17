@@ -154,7 +154,7 @@ main (argc, argv)
 
   struct photon ptest;          //We need a test photon structure in order to compute t
 
-  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fopen ();        /*This is the file to communicate with zeus */
+  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fptr6, *fopen ();        /*This is the file to communicate with zeus */
 
 
 
@@ -207,6 +207,7 @@ main (argc, argv)
   fptr3 = fopen ("py_ion_data.dat", "w");
   fptr4 = fopen ("py_spec_data.dat", "w");
   fptr5 = fopen ("py_pcon_data.dat", "w");
+  fptr6 = fopen ("py_debug_data.dat", "w");
 
   fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
 
@@ -231,6 +232,9 @@ main (argc, argv)
     fprintf (fptr4, "nplasma %i\n", NPLASMA);
 
   fprintf (fptr5, "nplasma %i\n", NPLASMA);
+
+  fprintf (fptr6, "i j rcen thetacen v_th dvdr \n");
+
   printf ("Set up files\n");
 
   if (geo.hydro_domain_number > 0)
@@ -325,6 +329,9 @@ main (argc, argv)
       stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x); //place our test photon at the centre of the cell
       ptest.grid = nwind;       //We need our test photon to know where it is 
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
+      kappa_es = THOMPSON / MPROT;
+
+      printf ("BOOM %e\n", kappa_es);
       //First for the optcial band (up to 4000AA)     
       if (length (plasmamain[nplasma].F_vis) > 0.0)     //Only makes sense if flux in this band is non-zero
       {
@@ -389,6 +396,8 @@ main (argc, argv)
 
       fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
+
+      fprintf (fptr6, "%d %d %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds (&ptest))); //output geometric things
     }
   }
   fclose (fptr);
@@ -396,9 +405,5 @@ main (argc, argv)
   fclose (fptr3);
   fclose (fptr4);
   fclose (fptr5);
-
-
-
-
   exit (0);
 }
