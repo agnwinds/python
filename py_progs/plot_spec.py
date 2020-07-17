@@ -359,7 +359,11 @@ def do_mosaic(rootname='sv',smooth=21,wmin=850,wmax=1850,fmax=0,fig_no=1, title=
 
 
     fig=pylab.figure(fig_no)
-    fig.set_figheight(3*nspectra)
+    if nspectra>1:
+        fig.set_figheight(3*nspectra)
+    else:
+        fig.set_figheight(6)
+
     fig.set_figwidth(9)
 
     pylab.clf()

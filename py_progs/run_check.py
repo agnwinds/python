@@ -332,7 +332,10 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,nspectr
     string+=xhtml.hline()
     string+=xhtml.h2('What do the final spectra look like (somewhat smoothed)?')
     if spec_plot != 'None':
-        string+=xhtml.image('file:%s' % (spec_plot),width=800,height=nspectra*200)
+        if nspectra==1:
+            string+=xhtml.image('file:%s' % (spec_plot),width=900,height=600)
+        else:
+            string+=xhtml.image('file:%s' % (spec_plot),width=900,height=nspectra*300)
         string+=xhtml.paragraph(spec_plot_description)
     else:
         string+=xhtml.paragraph('There is no plot of a detailed spectrum, probably because detailed spectra were not created')
@@ -430,7 +433,13 @@ def doit(root='ixvel',outputfile='out.txt'):
     plot_tot.doit(root)
     spec_tot_plot=root+'.spec_tot.png'
 
-    spec_plot,nspectra=plot_spec.do_mosaic(root,wmin=0,wmax=0)
+    try:
+        spec_plot,nspectra=plot_spec.do_mosaic(root,wmin=0,wmax=0)
+    except:
+        print('Could not consturct detailed spectrum plot')
+        spec_plot='none'
+        nspectra=0
+
     # spec_plot=root+'.png'
 
     errors=py_error(root)
