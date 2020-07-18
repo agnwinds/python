@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  get_atomicdata.c
+/** @file atomicdata.c
  * @author ksl
  * @date   March, 2018
  *
