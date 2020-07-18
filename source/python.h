@@ -826,7 +826,13 @@ typedef struct plasma
 
   double kpkt_abs;              /* k-packet equivalent of matom_abs. (SS) */
 
-  int *kbf_use;                 /* List of the indices of the photoionization processes to be used for kappa_bf. (SS) */
+  /* kbf_use and kbf_nuse are set by the routine kbf_need, and they provide indices into the photoinization processes
+   * that are "significant" in a plasma cell, based on the density of a particular ion in a cell and the x-section 
+   * at the photoinization edge.  This process was introduced as a means to speed the program up by ignoring those
+   * bf processes that would contribute negligibly to the bf opacity
+  */
+
+  int *kbf_use;                 /* List of the indices of the photoionization processes to be used for kappa_bf.  */
   int kbf_nuse;                 /* Total number of photoionization processes to be used for kappa_bf. (SS) */
 
 /* End of macro information */

@@ -138,9 +138,7 @@ get_atomic_data (masterfile)
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;    //Temporary storage for gaunt factors
   int n_elec_yield_tot;         //The number of inner shell cross sections with matching electron yield arrays
   int inner_no_e_yield;         //The number of inner shell cross sections with no yields
-//  int n_fluor_yield_tot;        //The number of inner shell cross sections with matching fluorescent photon yield arrays
   double I, Ea;                 //The ionization energy and mean electron energy for electron yields
-//  double energy;                //The energy of inner shell fluorescent photons
   int c_l, c_u;                 //Chianti level indicators
   double en, gf, hlt, sp;       //Parameters in collision strangth file
   int type;                     //used in collision strength
@@ -148,324 +146,20 @@ get_atomic_data (masterfile)
   int z2, istate2;
   double delta_E_ovr_k;
 
-  /* define which files to read as data files */
 
+  /* Initialize the atomic data structures and various counters */
+  init_atomic_data ();
 
-/* Allocate structures for storage of data */
-
-  if (ele != NULL)
-  {
-    free (ele);
-  }
-  ele = (ElemPtr) calloc (sizeof (ele_dummy), NELEMENTS);
-
-  if (ele == NULL)
-  {
-    Error ("There is a problem in allocating memory for the element structure\n");
-    exit (0);
-  }
-  else
-  {
-    Log_silent
-      ("Allocated %10d bytes for each of %6d elements of   elements totaling %10.0f Mb \n",
-       sizeof (ele_dummy), NELEMENTS, 1.e-6 * NELEMENTS * sizeof (ele_dummy));
-  }
-
-
-  if (ion != NULL)
-  {
-    free (ion);
-  }
-  ion = (IonPtr) calloc (sizeof (ion_dummy), NIONS);
-
-  if (ion == NULL)
-  {
-    Error ("There is a problem in allocating memory for the ion structure\n");
-    exit (0);
-  }
-  else
-  {
-    Log_silent
-      ("Allocated %10d bytes for each of %6d elements of       ions totaling %10.1f Mb \n",
-       sizeof (ion_dummy), NIONS, 1.e-6 * NIONS * sizeof (ion_dummy));
-  }
-
-
-
-  if (config != NULL)
-  {
-    free (config);
-  }
-  config = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
-
-  if (config == NULL)
-  {
-    Error ("There is a problem in allocating memory for the config structure\n");
-    exit (0);
-  }
-  else
-  {
-    Log_silent
-      ("Allocated %10d bytes for each of %6d elements of     config totaling %10.1f Mb \n",
-       sizeof (config_dummy), NLEVELS, 1.e-6 * NLEVELS * sizeof (config_dummy));
-  }
-
-
-
-
-  if (line != NULL)
-  {
-    free (line);
-  }
-  line = (LinePtr) calloc (sizeof (line_dummy), NLINES);
-
-  if (line == NULL)
-  {
-    Error ("There is a problem in allocating memory for the line structure\n");
-    exit (0);
-  }
-  else
-  {
-    Log_silent
-      ("Allocated %10d bytes for each of %6d elements of       line totaling %10.1f Mb \n",
-       sizeof (line_dummy), NLINES, 1.e-6 * NLINES * sizeof (line_dummy));
-  }
-
-
-
-  /* Initialize variables */
-
-
-
-  phot_freq_min = VERY_BIG;
-  inner_freq_min = VERY_BIG;
-
-  for (n = 0; n < NELEMENTS; n++)
-  {
-    strcpy (ele[n].name, "none");
-    ele[n].z = (-1);
-    ele[n].abun = (-1);
-    ele[n].firstion = (-1);
-    ele[n].nions = (-1);
-    ele[n].istate_max = (-1);
-  }
-
+  n_elec_yield_tot = 0;         //Counter for electron yield
+  gstmin = 0.0;
+  gstmax = 1e99;
+  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;     //Added counter for DR/
   for (n = 0; n < NIONS; n++)
   {
     simple_line_ignore[n] = 0;  // diagnostic counter for how many lines ignored
-    ion[n].z = (-1);
-    ion[n].istate = (-1);
-    ion[n].nelem = (-1);
-    ion[n].ip = (-1);
-    ion[n].g = (-1);
-    ion[n].nmax = (-1);
-    ion[n].firstlevel = (-1);
-    ion[n].nlevels = (-1);
-    ion[n].first_nlte_level = (-1);
-    ion[n].first_levden = (-1);
-    ion[n].nlte = (-1);
-    ion[n].phot_info = (-1);
-    ion[n].macro_info = (-1);   //Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-    ion[n].ntop_first = 0;      // The fact that ntop_first and ntop  are initialized to 0 and not -1 is important
-    ion[n].ntop_ground = 0;     //NSH 0312 initialize the new pointer for GS cross sections
-    ion[n].ntop = 0;
-    ion[n].nxphot = (-1);
-    ion[n].lev_type = (-1);     // Initialise to indicate we don't know what types of configurations will be read
-    ion[n].drflag = 0;          //Initialise to indicate as far as we know, there are no dielectronic recombination parameters associated with this ion.
-    ion[n].total_rrflag = 0;    //Initialise to say this ion has no Badnell total recombination data
-    ion[n].nxtotalrr = -1;      //Initialise the pointer into the bad_t_rr structure.
-    ion[n].bad_gs_rr_t_flag = 0;        //Initialise to say this ion has no Badnell ground state recombination data
-    ion[n].bad_gs_rr_r_flag = 0;        //Initialise to say this ion has no Badnell ground state recombination data
-    ion[n].nxbadgsrr = -1;      //Initialise the pointer into the bad_gs_rr structure.
-    ion[n].dere_di_flag = 0;    //Initialise to say this ion has no Dere DI rate data
-    ion[n].nxderedi = -1;       //Initialise the pointer into the Dere DI rate structure
-    ion[n].n_inner = 0;         //Initialise the pointer to say we have no inner shell ionization cross sections
-    ion[n].n_ch_ex = -1;        //Initialise the pointer to the charge exchange 
-
-    for (i = 0; i < N_INNER; i++)
-      ion[n].nxinner[i] = -1;   //Inintialise the inner shell pointer array
   }
-
-  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;     //Added counter for DR//
-  n_elec_yield_tot = 0;         //Counter for electron yield
-  //  n_fluor_yield_tot = 0;     and fluorescent photon yields
-
-  /*This initializes the top_phot array - it is used for all ionization processes so some elements
-     are only used in some circumstances
-   */
-
-  for (n = 0; n < NLEVELS; n++)
-  {
-    phot_top[n].nlev = (-1);
-    phot_top[n].uplev = (-1);
-    phot_top[n].nion = (-1);    //the ion to which this cross section belongs
-    phot_top[n].n_elec_yield = -1;      //pointer to the electron yield array (for inner shell)
-//    phot_top[n].n_fluor_yield = -1;     //pointer to the fluorescent photon yield (for inner shell)
-    phot_top[n].n = -1;         //pointer to shell (inner shell)
-    phot_top[n].l = -1;         //pointer to l subshell (inner shell only)
-    phot_top[n].z = (-1);       //atomic number
-    phot_top[n].np = (-1);      //number of points in the fit
-    phot_top[n].macro_info = (-1);      //Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-    for (j = 0; j < NCROSS; j++)        //initialise the crooss sectiond
-    {
-      phot_top[n].freq[j] = (-1);
-      phot_top[n].x[j] = (-1);
-    }
-    phot_top[n].f = (-1);       //last frequency
-    phot_top[n].sigma = 0.0;    //last cross section
-  }
-
-
-  for (n = 0; n < NIONS * N_INNER; n++) //Initialise atomic arrasy with dimension NIONS*NINNER
-  {
-    inner_cross[n].nlev = (-1);
-    inner_cross[n].uplev = (-1);
-    inner_cross[n].nion = inner_elec_yield[n].nion = inner_fluor_yield[n].nion = (-1);
-    inner_cross[n].n_elec_yield = -1;
-//    inner_cross[n].n_fluor_yield = -1;
-    inner_cross[n].n = inner_elec_yield[n].n = inner_fluor_yield[n].n = (-1);
-    inner_cross[n].l = inner_elec_yield[n].l = inner_fluor_yield[n].l = (-1);
-    inner_cross[n].z = inner_elec_yield[n].z = inner_fluor_yield[n].z = (-1);
-    inner_elec_yield[n].I = inner_elec_yield[n].Ea = 0.0;
-    inner_fluor_yield[n].freq = inner_fluor_yield[n].yield = 0.0;
-    for (j = 0; j < 10; j++)
-      inner_elec_yield[n].prob[j] = 0.0;
-    inner_cross[n].np = (-1);
-    inner_cross[n].macro_info = (-1);   //Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-    for (j = 0; j < NCROSS; j++)
-    {
-      inner_cross[n].freq[j] = (-1);
-      inner_cross[n].x[j] = (-1);
-    }
-    inner_cross[n].f = (-1);
-    inner_cross[n].sigma = 0.0;
-  }
-
-
-
-
-  for (i = 0; i < NLEVELS; i++)
-  {
-    config[i].n_bbu_jump = 0;   // initialising the number of jumps from each level to 0. (SS)
-    config[i].n_bbd_jump = 0;
-    config[i].n_bfu_jump = 0;
-    config[i].n_bfd_jump = 0;
-  }
-
-  for (n = 0; n < NLINES; n++)
-  {
-    line[n].freq = -1;
-    line[n].f = 0;
-    line[n].nion = -1;
-    line[n].gl = line[n].gu = 0;
-    line[n].el = line[n].eu = 0.0;
-    line[n].macro_info = -1;
-    line[n].coll_index = -999;
-  }
-
-/* The following lines initialise the dielectronic recombination structure */
-  for (n = 0; n < NIONS; n++)
-  {
-    drecomb[n].nion = -1;
-    drecomb[n].nparam = -1;     //the number of parameters - it varies from ion to ion
-    for (n1 = 0; n1 < MAX_DR_PARAMS; n1++)
-    {
-      drecomb[n].c[n1] = 0.0;
-      drecomb[n].e[n1] = 0.0;
-    }
-  }
-
-
-/* The following lines initialise the badnell total radiative recombination rate structure */
-  for (n = 0; n < NIONS; n++)
-  {
-    total_rr[n].nion = -1;
-    for (n1 = 0; n1 < T_RR_PARAMS; n1++)
-    {
-      total_rr[n].params[n1] = 0.0;
-    }
-
-  }
-
-
-/* The following lines initialise the badnell total radiative recombination rate structure */
-  for (n = 0; n < NIONS; n++)
-  {
-    bad_gs_rr[n].nion = -1;
-    for (n1 = 0; n1 < BAD_GS_RR_PARAMS; n1++)
-    {
-      bad_gs_rr[n].temps[n1] = 0.0;
-      bad_gs_rr[n].rates[n1] = 0.0;
-    }
-
-  }
-  gstmin = 0.0;
-  gstmax = 1e99;
-
-
-/* The following lines initialise the dere direct ionization rate struture */
-  for (n = 0; n < NIONS; n++)
-  {
-    dere_di_rate[n].nion = -1;
-    dere_di_rate[n].xi = 0.0;
-    dere_di_rate[n].min_temp = 1e99;
-    for (n1 = 0; n1 < DERE_DI_PARAMS; n1++)
-    {
-      dere_di_rate[n].temps[n1] = 0.0;
-      dere_di_rate[n].rates[n1] = 0.0;
-    }
-
-  }
-
-
-
-
-/* The following lines initialise the Sutherland gaunt factors */
-  gaunt_n_gsqrd = 0;            //The number of sets of scaled temperatures we have data for
-  for (n = 0; n < MAX_GAUNT_N_GSQRD; n++)
-  {
-    gaunt_total[n].log_gsqrd = 0.0;
-    gaunt_total[n].gff = 0.0;
-    gaunt_total[n].s1 = 0.0;
-    gaunt_total[n].s2 = 0.0;
-    gaunt_total[n].s3 = 0.0;
-  }
-
-/* The following lines initialise the Sutherland gaunt factors */
-  n_charge_exchange = 0;        //The number of sets of scaled temperatures we have data for
-  for (n = 0; n < MAX_CHARGE_EXCHANGE; n++)
-  {
-    charge_exchange[n].nion1 = charge_exchange[n].nion2 = -1;
-    charge_exchange[n].a = charge_exchange[n].b = charge_exchange[n].c = charge_exchange[n].d = 0.0;
-    charge_exchange[n].tmin = -1e99;
-    charge_exchange[n].tmax = 1e99;
-    charge_exchange[n].energy_defect = 0.0;
-    charge_exchange[n].delta_e_ovr_k = 0.0;
-  }
-
-
-/* The following lines initialise the collision strengths */
   n_coll_stren = 0;             //The number of data sets
-  cstren_no_line = 0;           // counter to track how many times we don't find a matching line 
-  for (n = 0; n < NLINES; n++)
-  {
-    coll_stren[n].n = -1;       //Internal index
-    coll_stren[n].lower = -1;   //The lower energy level - this is in Chianti notation and is currently unused
-    coll_stren[n].upper = -1;   //The upper energy level - this is in Chianti notation and is currently unused
-    coll_stren[n].energy = 0.0; //The energy of the transition
-    coll_stren[n].gf = 0.0;
-    coll_stren[n].hi_t_lim = 0.0;       //The high temerature limit
-    coll_stren[n].n_points = 0.0;       //The number of points in the splie fit
-    coll_stren[n].type = -1;    //The type of fit, this defines how one computes the scaled temperature and scaled coll strength
-    coll_stren[n].scaling_param = 0.0;  //The scaling parameter C used in the Burgess and Tully calculations
-    for (n1 = 0; n1 < N_COLL_STREN_PTS; n1++)
-    {
-      coll_stren[n].sct[n1] = 0.0;      //The scaled temperature points in the fit
-      coll_stren[n].scups[n1] = 0.0;
-    }
-  }
-
-
+  cstren_no_line = 0;           // counter to track how many times we don't find a matching line
 
   choice = 'x';                 /* Start by assuming you cannot determine what kind of line it is */
   nelements = 0;
@@ -476,6 +170,7 @@ get_atomic_data (masterfile)
   nlines = nlines_simple = nlines_macro = 0;
   lineno = 0;
   nxphot = 0;
+
 /*mflag is set initially to 1, in order to establish that
 macro-lines need to be read in before any "simple" lines.  This
 is so that we can assure that the first lines in the line array
@@ -526,55 +221,56 @@ structure does not have this property! */
                                    properly deal with blank lines */
 
         if (sscanf (aline, "%s", word) == 0 || strlen (word) == 0)
-          choice = 'c';         /*It's a a blank line, treated like a comment */
+          choice = 'c';         /*A blank line, treated like a comment */
         else if (strncmp (word, "!", 1) == 0)
-          choice = 'c';
+          choice = 'c';         /* ! are also treated as  a comment */
         else if (strncmp (word, "#", 1) == 0)
-          choice = 'c';         /* It's a comment */
-        else if (strncmp (word, "CSTREN", 6) == 0)      //collision strengths
-          choice = 'C';
+          choice = 'c';         /* # is treated as  a comment */
+        else if (strncmp (word, "CSTREN", 6) == 0)
+          choice = 'C';         /* It's a collision strength line */
         else if (strncmp (word, "Element", 5) == 0)
-          choice = 'e';
+          choice = 'e';         /* an element */
         else if (strncmp (word, "Ion", 3) == 0)
-          choice = 'i';
+          choice = 'i';         /* An ion */
         else if (strncmp (word, "LevTop", 6) == 0)
-          choice = 'N';
-        else if (strncmp (word, "LevMacro", 8) == 0)    // This indicated leves for a Macro Atom (SS)
-          choice = 'N';
-        else if (strncmp (word, "Level", 3) == 0)       // There are various records of this type
-          choice = 'n';
-        else if (strncmp (word, "Phot", 4) == 0)        // There are various records of this type
-          choice = 'w';         // Macro Atom Phots are a subset of these (SS)
+          choice = 'N';         /* A Level in TopBase format */
+        else if (strncmp (word, "LevMacro", 8) == 0)
+          choice = 'N';         /* A level for a Macro Atom */
+        else if (strncmp (word, "Level", 3) == 0)
+          choice = 'n';         /* A level for a simple ion */
+        else if (strncmp (word, "Phot", 4) == 0)
+          choice = 'w';         /* A record for starting a photionization x-section. Atom Phots are a subset of these */
         else if (strncmp (word, "Line", 4) == 0)
-          choice = 'r';
-        else if (strncmp (word, "LinMacro", 8) == 0)    //This indicates lines for a Macro Atom (SS)
-          choice = 'r';
+          choice = 'r';         /* A simple atom line */
+        else if (strncmp (word, "LinMacro", 8) == 0)
+          choice = 'r';         /* A line for a Macro Atom */
         else if (strncmp (word, "Frac", 4) == 0)
           choice = 'f';         /*ground state fractions */
         else if (strncmp (word, "InnerVYS", 8) == 0)
-          choice = 'I';         /*Its a set of inner shell photoionization cross sections */
-        else if (strncmp (word, "DR_BADNL", 8) == 0)    /* It's a badnell type dielectronic recombination file */
-          choice = 'D';
-        else if (strncmp (word, "DR_SHULL", 8) == 0)    /*its a schull type dielectronic recombination */
-          choice = 'S';
-        else if (strncmp (word, "RR_BADNL", 8) == 0)    /*Its a badnell type line in the total RR file */
-          choice = 'T';
-        else if (strncmp (word, "DI_DERE", 7) == 0)     /*Its a data file giving direct ionization rates from Dere (2007) */
-          choice = 'd';
-        else if (strncmp (word, "RR_SHULL", 8) == 0)    /*Its a shull type line in the total RR file */
-          choice = 's';
-        else if (strncmp (word, "BAD_GS_RR", 9) == 0)   /*Its a badnell resolved ground state RR file */
-          choice = 'G';
-        else if (strncmp (word, "FF_GAUNT", 8) == 0)    /*Its a data file giving the temperature averaged gaunt factors from Sutherland (1998) */
+          choice = 'I';         /*a set of inner shell photoionization cross sections */
+        else if (strncmp (word, "DR_BADNL", 8) == 0)
+          choice = 'D';         /* a Badnell type dielectronic recombination file */
+        else if (strncmp (word, "DR_SHULL", 8) == 0)
+          choice = 'S';         /* A Shull-type  dielectronic recombination */
+        else if (strncmp (word, "RR_BADNL", 8) == 0)
+          choice = 'T';         /*Its a Badnell type line in the total RR file */
+        else if (strncmp (word, "DI_DERE", 7) == 0)
+          choice = 'd';         /*Its a data file giving direct ionization rates from Dere (2007) */
+        else if (strncmp (word, "RR_SHULL", 8) == 0)
+          choice = 's';         /*Its a Shull type line in the total RR file */
+        else if (strncmp (word, "BAD_GS_RR", 9) == 0)
+          choice = 'G';         /*Its a Badnell resolved ground state RR file */
+        else if (strncmp (word, "FF_GAUNT", 8) == 0)
           choice = 'g';
-        else if (strncmp (word, "Kelecyield", 10) == 0) /*Electron yield from inner shell ionization fro Kaastra and Mewe */
-          choice = 'K';
-        else if (strncmp (word, "ChEx", 4) == 0)        /*Charge exchange */
-          choice = 'X';
-//        else if (strncmp (word, "Kphotyield", 10) == 0) /*Floruescent photon yield from IS ionization from Kaastra and Mewe */
-//          choice = 'F';
-        else if (strncmp (word, "*", 1) == 0);  /* It's a continuation so record type remains same */
-
+        /*Its a data file giving the temperature averaged gaunt factors from Sutherland (1998) */
+        else if (strncmp (word, "Kelecyield", 10) == 0)
+          choice = 'K';         /*Electron yield from inner shell ionization fro Kaastra and Mewe */
+        else if (strncmp (word, "ChEx", 4) == 0)
+          choice = 'X';         /*Charge exchange */
+//        else if (strncmp (word, "Kphotyield", 10) == 0) 
+//          choice = 'F';           /*Floruescent photon yield from IS ionization from Kaastra and Mewe */
+        else if (strncmp (word, "*", 1) == 0);
+        /* It's a continuation so record type remains same */
         else
           choice = 'z';         /* Who knows what it is */
 
