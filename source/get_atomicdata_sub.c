@@ -58,7 +58,7 @@ atomicdata2file ()
   fprintf (fptr, "# Element Data:\n");
   for (nelem = 0; nelem < nelements; nelem++)
   {
-    fprintf (fptr, "Element %2d %5s firstion %2d nions %2d\n", nelem, ele[nelem].name, ele[nelem].firstion, ele[nelem].nions);
+    fprintf (fptr, "Element %2d %5s firstion %4d nions %2d\n", nelem, ele[nelem].name, ele[nelem].firstion, ele[nelem].nions);
   }
 
   /* Write the ion array */
@@ -66,14 +66,14 @@ atomicdata2file ()
   for (n = 0; n < nions; n++)
   {
     fprintf (fptr,
-             "Ion %3d z %3d istate %3d firstlevel %3d nlevels %3d potential %8.3g\n",
+             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g\n",
              n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS);
   }
 
   /* Write the excitation level data */
   fprintf (fptr, "# Excitation levels: There are %d levels\n", nlevels);
   for (n = 0; n < nlevels; n++)
-    fprintf (fptr, "Levels n %5d z %2d istate %2d q %.1f g %3.0f ex %8.3g  bb %2d %2d bf %2d %2d\n", n,
+    fprintf (fptr, "Level n %5d z %2d istate %2d q %.1f g %3.0f ex %8.3g  bb %2d %2d bf %2d %2d\n", n,
              config[n].z, config[n].istate, config[n].q_num, config[n].g, config[n].ex,
              config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump, config[n].n_bfd_jump);
 
@@ -92,8 +92,8 @@ atomicdata2file ()
   fprintf (fptr, "# Photoionization data: There are %d edges\n", ntop_phot + nxphot);
   for (n = 0; n < ntop_phot + nxphot; n++)
   {
-    fprintf (fptr, "Phot n %5d z %2d istate %3d sigma %8.2e freq[0] %8.2e nlev %2d uplev %2d macro %2d  %2d %2d use %2d\n",
-             n, phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0],
+    fprintf (fptr, "Phot n %5d z %2d istate %3d sigma %8.2e freq[0] %8.2e nlev %5d uplev %2d macro %2d  %2d %2d use %2d\n",
+             n, phot_top[n].z, phot_top[n].istate, phot_top[n].x[0], phot_top[n].freq[0],
              phot_top[n].nlev, phot_top[n].uplev, phot_top[n].macro_info, phot_top[n].down_index, phot_top[n].up_index, phot_top[n].use);
   }
 
