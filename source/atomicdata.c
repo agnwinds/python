@@ -145,6 +145,7 @@ get_atomic_data (masterfile)
   double a, b, c, d, tmax, delta_E;
   int z2, istate2;
   double delta_E_ovr_k;
+  int ierr;
 
 
   /* Initialize the atomic data structures and various counters */
@@ -564,7 +565,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 
           if (lev_type == 1 && ilv > ion[n].n_lte_max)
           {
-            Error ("get_atomic_data: macro level %d ge %d for z %d  istate %d\n", ilv, ion[n].n_lte_max, ion[n].z, ion[n].istate);
+            Error ("get_atomic_data: macro level %3d ge %3d for z %3d  istate %3d\n", ilv, ion[n].n_lte_max, ion[n].z, ion[n].istate);
             //exit(0);
             break;
           }
@@ -1139,7 +1140,7 @@ described as macro-levels. */
             sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &islp, &ilv, &exx, &np);
             for (n = 0; n < np; n++)
             {
-              //Read the topbase photoionization records
+              //Read the cross-sections                     
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {
                 Error ("Get_atomic_data: Problem reading Vfky photoionization record\n");
@@ -2467,7 +2468,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   if (cstren_no_line > 0)
     Error ("Ignored %d collision strengths with no matching line transition\n", cstren_no_line);
   if (inner_no_e_yield > 0)
-    Error ("Ignoring %d inner shell cross sections because no matching yields\n", inner_no_e_yield);
+    Error ("Ignored %d inner shell cross sections because no matching yields\n", inner_no_e_yield);
 
 
 
@@ -2531,7 +2532,7 @@ a total emission oscillator strength for the level....really ought to be radiati
  so the check is avoided by checking tte macro_info flag SS
 */
 
-
+  ierr = 0;
 
   for (n = 0; n < nlines; n++)
   {
@@ -2579,8 +2580,8 @@ or zero so that simple checks of true and false can be used for them */
   {
     if (ion[n].macro_info == -1)
     {
-      Error ("Ion %d for element %s and ion %d is of unknown type\n", n, ion[n].z, ion[n].istate);
-      exit (0);
+      Error ("Ion %d for element %d and ion %d is of unknown type\n", n, ion[n].z, ion[n].istate);
+      ierr = 1;
     }
   }
 
@@ -2591,8 +2592,8 @@ or zero so that simple checks of true and false can be used for them */
   {
     if (config[n].macro_info == -1)
     {
-      Error ("Level %d for element %s and ion %d is of unknown type\n", n, config[n].z, config[n].istate);
-      exit (0);
+      Error ("Level %d for element %d and ion %d is of unknown type\n", n, config[n].z, config[n].istate);
+      ierr = 1;
     }
   }
 
@@ -2600,8 +2601,8 @@ or zero so that simple checks of true and false can be used for them */
   {
     if (line[n].macro_info == -1)
     {
-      Error ("Level %d for element %s and ion %d is of unknown type\n", n, line[n].z, line[n].istate);
-      exit (0);
+      Error ("Level %d for element %d and ion %d is of unknown type\n", n, line[n].z, line[n].istate);
+      ierr = 1;
     }
   }
 
@@ -2609,9 +2610,15 @@ or zero so that simple checks of true and false can be used for them */
   {
     if (phot_top[n].macro_info == -1)
     {
-      Error ("Photoionization cross-section %d for element %s and ion %d is of unknown type\n", n, phot_top[n].z, phot_top[n].istate);
-      exit (0);
+      Error ("Photoionization cross-section %d for element %d and ion %d is of unknown type\n", n, phot_top[n].z, phot_top[n].istate);
+      ierr = 1;
     }
+    if (phot_top[n].nlev < 0)
+    {
+      Error ("Photoionization cross-section %d for element %d and ion %d has no lower level\n", n, phot_top[n].z, phot_top[n].istate);
+      ierr = 1;
+    }
+
   }
 
 /* Finally evaluate how close we are to limits set in the structures */
@@ -2643,11 +2650,17 @@ or zero so that simple checks of true and false can be used for them */
 
 /* Now, write the data to a file so you can check it later if you wish */
 /* this is controlled by one of the -d flag modes, defined in atomic.h */
-  if (write_atomicdata)
+  if (write_atomicdata || ierr)
   {
     atomicdata2file ();
 
   }                             // end of if statement based on modes.write_atomicdata
+
+  if (ierr)
+  {
+    Error ("atomicdata: Exiting because of inconsistencies in atomic data\n");
+    exit (0);
+  }
 
 
 

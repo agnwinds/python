@@ -66,14 +66,14 @@ atomicdata2file ()
   for (n = 0; n < nions; n++)
   {
     fprintf (fptr,
-             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g\n",
-             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS);
+             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  phot_info %3d\n",
+             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].phot_info);
   }
 
   /* Write the excitation level data */
   fprintf (fptr, "# Excitation levels: There are %d levels\n", nlevels);
   for (n = 0; n < nlevels; n++)
-    fprintf (fptr, "Level n %5d z %2d istate %2d q %.1f g %3.0f ex %8.3g  bb %2d %2d bf %2d %2d\n", n,
+    fprintf (fptr, "Level n %5d z %2d istate %2d q %.1f g %4.0f ex %8.3g  bb %2d %2d bf %2d %2d\n", n,
              config[n].z, config[n].istate, config[n].q_num, config[n].g, config[n].ex,
              config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump, config[n].n_bfd_jump);
 
