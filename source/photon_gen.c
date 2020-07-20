@@ -845,7 +845,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     p[i].origin = PTYPE_STAR;   // For BL photons this is corrected in photon_gen
     p[i].frame = F_OBSERVER;    // Stellar photons are not redshifted
     p[i].w = weight;
-    p[i].istat = p[i].nscat = p[i].nrscat = 0;
+    p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;
     p[i].grid = 0;
     p[i].tau = 0.0;
     p[i].nres = -1;             // It's a continuum photon
@@ -954,7 +954,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].origin = PTYPE_DISK;   // identify this as a disk photon
     p[i].frame = F_LOCAL;
     p[i].w = weight;
-    p[i].istat = p[i].nscat = p[i].nrscat = 0;
+    p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;
     p[i].tau = 0;
     p[i].nres = -1;             // It's a continuum photon
     p[i].nnscat = 1;

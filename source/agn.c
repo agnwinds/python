@@ -404,7 +404,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   {
     p[i].origin = PTYPE_AGN;    // For BL photons this is corrected in photon_gen 
     p[i].w = weight;            //Set the weight
-    p[i].istat = p[i].nscat = p[i].nrscat = 0;  //Initialise status, number of scatters and number of resonant scatters
+    p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;    //Initialise status, number of scatters and number of resonant scatters
     p[i].grid = 0;              //Set the grid number to zero 
     p[i].tau = 0.0;             //Set the opacity seen by the photon to zero
     p[i].nres = -1;             // It's a continuum photon - so it is not made in a resonance

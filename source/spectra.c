@@ -426,7 +426,7 @@ spectrum_create (p, nangle, select_extract)
     /* Having worked out what spectral bins to increment, we now actually increment the various spectra */
     istat = p[nphot].istat;
 
-    if (iwind)
+    if (p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)
     {
       xxspec[SPEC_CWIND].f[k_orig] += p[nphot].w_orig;  /* created spectrum with original weights and wavelengths */
       xxspec[SPEC_CWIND].lf[k1_orig] += p[nphot].w_orig;        /* logarithmic created spectrum */
@@ -464,7 +464,7 @@ spectrum_create (p, nangle, select_extract)
       if (spectype >= 10)
         spectype -= 10;
 
-      if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)      // Then it came from the bl or the star
+      if (p[nphot].nmacro == 0 && (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN))    // Then it came from the bl or the star
       {
         xxspec[SPEC_CENSRC].f[k] += p[nphot].w; /* emitted star (+bl) spectrum */
         xxspec[SPEC_CENSRC].lf[k1] += p[nphot].w;       /* logarithmic emitted star (+bl) spectrum */
@@ -475,7 +475,7 @@ spectrum_create (p, nangle, select_extract)
         }
         xxspec[SPEC_CENSRC].nphot[istat]++;
       }
-      else if (spectype == PTYPE_DISK)  // Then it was a disk photon
+      else if (p[nphot].nmacro == 0 && spectype == PTYPE_DISK)  // Then it was a disk photon
       {
         xxspec[SPEC_DISK].f[k] += p[nphot].w;   /* transmitted disk spectrum */
         xxspec[SPEC_DISK].lf[k1] += p[nphot].w; /* logarithmic transmitted disk spectrum */
@@ -486,8 +486,9 @@ spectrum_create (p, nangle, select_extract)
         }
         xxspec[SPEC_DISK].nphot[istat]++;
       }
-      else if (spectype == PTYPE_WIND)
+      else if (spectype == PTYPE_WIND || p[nphot].nmacro > 0)
       {
+        /* In macro atom mode a photon is regarded as being in the wind if it has had a macro atom interaction */
         xxspec[SPEC_WIND].f[k] += p[nphot].w;   /* wind spectrum */
         xxspec[SPEC_WIND].lf[k1] += p[nphot].w; /* logarithmic wind spectrum */
         if (iwind)
