@@ -1160,6 +1160,11 @@ described as macro-levels. */
                 {
                   /* Then there is a match */
                   phot_top[nphot_total].nlev = ion[nion].firstlevel;    // ground state
+                  if (phot_top[nphot_total].nlev == -1)
+                  {
+                    Error ("get_atomicdata: Connecting a photoionization x-section to non-existent level z %3d istate %3d ex %8.3g\n", z,
+                           istate, exx);
+                  }
                   phot_top[nphot_total].nion = nion;
                   phot_top[nphot_total].z = z;
                   phot_top[nphot_total].istate = istate;
@@ -2659,7 +2664,7 @@ or zero so that simple checks of true and false can be used for them */
   if (ierr)
   {
     Error ("atomicdata: Exiting because of inconsistencies in atomic data\n");
-    exit (0);
+    Exit (0);
   }
 
 
