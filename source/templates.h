@@ -8,8 +8,11 @@ double planck_d(double alpha, void *params);
 double planck_d_2(double alpha, void *params);
 double emittance_bb(double freqmin, double freqmax, double t);
 double check_fmax(double fmax, double temp);
-/* get_atomicdata.c */
+/* atomicdata.c */
 int get_atomic_data(char masterfile[]);
+/* atomicdata_init.c */
+int init_atomic_data(void);
+/* atomicdata_sub.c */
 int atomicdata2file(void);
 int index_lines(void);
 int index_phot_top(void);
