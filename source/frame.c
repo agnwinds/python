@@ -403,3 +403,58 @@ local_to_observer_frame_disk (p_in, p_out)
 
   return (ierr);
 }
+
+/**********************************************************/
+/**
+ * @brief      calculate the distance a photon will travel
+ *      in the local frame given a distance in the observer
+ *      frame
+ *
+ * @param [in] PhotPtr  p        The photon in the observer frame                
+ * @param [in] double   ds_obs   The distance from a starting point
+                                 for the photon to travel
+ *
+ * @return    The distance in the co-moving or local frame         
+ *
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+double
+observer_to_local_frame_ds(p,ds_obs) 
+    PhotPtr p;
+    double ds_obs;
+{
+  WindPtr one;
+  int ndom;
+  double v[3], vel;
+  double gamma;
+
+  if (rel_mode == REL_MODE_LINEAR)
+  {
+    return (ds_obs);
+  }
+  
+  /* Calculate the local velocity of the wind at this position */
+  one = &wmain[p->grid];
+  ndom = one->ndom;
+  vwind_xyz (ndom, p, v);
+  vel = dot (p->lmn, v);
+
+  gamma = 1./sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+
+
+  ds_cmf=gamma*(1+dot(p->lmn),v)/VLIGHT)* ds_obs;
+
+
+  return(ds_cmf)
+
+
+
+}
+
