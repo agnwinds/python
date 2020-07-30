@@ -426,35 +426,35 @@ local_to_observer_frame_disk (p_in, p_out)
  **********************************************************/
 
 double
-observer_to_local_frame_ds(p,ds_obs) 
-    PhotPtr p;
-    double ds_obs;
+observer_to_local_frame_ds (p, ds_obs)
+     PhotPtr p;
+     double ds_obs;
 {
   WindPtr one;
   int ndom;
   double v[3], vel;
   double gamma;
+  double ds_cmf;
 
   if (rel_mode == REL_MODE_LINEAR)
   {
     return (ds_obs);
   }
-  
+
   /* Calculate the local velocity of the wind at this position */
   one = &wmain[p->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p, v);
   vel = dot (p->lmn, v);
 
-  gamma = 1./sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+  gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
 
-  ds_cmf=gamma*(1+dot(p->lmn),v)/VLIGHT)* ds_obs;
+  ds_cmf = gamma * (1 + dot (p->lmn, v) / VLIGHT) * ds_obs;
 
 
-  return(ds_cmf)
+  return (ds_cmf);
 
 
 
 }
-
