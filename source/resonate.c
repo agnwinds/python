@@ -608,6 +608,15 @@ kappa_bf (xplasma, freq, macro_all)
 
       nconf = phot_top[n].nlev; //Returning lower level = correct (SS)
 
+      //XXX For Debugging
+      if (nconf < 0)
+      {
+        Error ("kappa_bf: nconf %d for phot_top %d for ion %d of z %d and istate %d\n", nconf, n, phot_top[n].nion, phot_top[n].z,
+               phot_top[n].istate);
+        continue;
+      }
+      //XXX For Debugging
+
       density = den_config (xplasma, nconf);    //Need to check what this does (SS)
 
 
@@ -637,7 +646,7 @@ kappa_bf (xplasma, freq, macro_all)
  *
  * The purpose of this routine is to speed up calculations by idenfifying which
  * bound-free x-sections are important enough to be included when calculationg the
- * bound-fee opacity, and which an be ignored because the denisty of the particular
+ * bound-fee opacity, and which an be ignored because the density of the particular
  * ion is so low it will not contribute.
  *
  * For each cell, the routine determines what bf transitons are important
@@ -662,7 +671,7 @@ kappa_bf (xplasma, freq, macro_all)
  *
  * ### Notes ###
  * The dimensionalty of kbf_use is currently set to NTOP_PHOT, which is large enough
- * to store evey transition if necessary.
+ * to store every transition if necessary.
  *
  **********************************************************/
 
@@ -707,6 +716,15 @@ kbf_need (fmin, fmax)
         else
         {
           nconf = phot_top[n].nlev;     //Returning lower level = correct (SS)
+
+          // XXX This if for debugging 
+          if (nconf < 0)
+          {
+            Error ("kbf_need: nconf %d for phot_top %d for ion %d of z %d and istate %d\n", nconf, n, nion, phot_top[n].z,
+                   phot_top[n].istate);
+          }
+          // XXX This if for debugging 
+
           density = den_config (xplasma, nconf);
         }
 
