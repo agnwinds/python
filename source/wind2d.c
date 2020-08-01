@@ -44,7 +44,7 @@ define_wind ()
   int i, j, n;
   int nn;
   double rrstar;
-  double x[3];
+  double x[3], v[3];
   double mdotbase, mdotwind, rr;
   int ierr;
   int n_vol, n_inwind, n_part;
@@ -52,6 +52,7 @@ define_wind ()
   int nwind, ndom;
   int nstart, ndim, mdim;
   int nplasma;
+  struct photon phot;
 
   WindPtr w;
 
@@ -158,6 +159,7 @@ define_wind ()
       if (zdom[ndom].wind_type != IMPORT)
       {
         model_velocity (ndom, w[n].x, w[n].v);
+        w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
       }
       model_vgrad (ndom, w[n].x, w[n].v_grad);
     }
@@ -274,16 +276,15 @@ define_wind ()
     }
   }
 
-
-
-  /* Allocate space for the plasma array.  To save space, this structure is sized 
+  /* At this point the wind structure is defined.  Now 
+   * Allocate space for the plasma array.  To save space, this structure is sized 
    * to contain only those cells which are in the wind. */
 
   calloc_plasma (NPLASMA);
   calloc_dyn_plasma (NPLASMA);
   create_maps ();               /* Populate the maps between plasmamain & wmain */
 
-  /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = RT_MODE_MACRO. see #138  */
+  /* If in macro atom mode, allocate structures to hold macro atom information see #138  */
 
   if (geo.rt_mode == RT_MODE_MACRO)
   {
@@ -292,21 +293,42 @@ define_wind ()
   }
 
 
-/* 06may -- At this point we have calculated the volumes of all of the cells and it should
-be optional which variables beyond here are moved to structures othere than Wind */
+/* Now intialize the plasma structure.  Note that a few of the variables in the
+   plasma structure are similar to those in the wind.  However one should not assume
+   the are the same, since the plasma structure contains values at the centers of 
+   cells.  Also properties of the plasma structure are ususually, though not necessarily
+   always, CMF quantities. 
+ */
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
 
+  // XFRAME - There are changes here to convert plasma densities and volumes to co-moving frame
   for (n = 0; n < NPLASMA; n++)
   {
     nwind = plasmamain[n].nwind;
     ndom = wmain[nwind].ndom;
     stuff_v (w[nwind].xcen, x);
 
-    /* Next two lines allow for clumping */
-    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
-    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
+    /* Volumes and densities generated here are normally intended to be CMF quantities, and 
+       allow for clumping) */
+
+    if (rel_mode == REL_MODE_FULL)
+    {
+      stuff_v (x, phot.x);
+      vwind_xyz (ndom, &phot, v);
+      plasmamain[n].xgamma = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
+    }
+    else
+    {
+      plasmamain[n].xgamma = 1.;
+    }
+
+//OLD    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
+//OLD    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
+
+    plasmamain[n].rho = model_rho (ndom, x) / (zdom[ndom].fill * plasmamain[n].xgamma);
+    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill * plasmamain[n].xgamma;  // Copy volumes
 
     /* This is where we initialise the spectral models for the wind. */
 
