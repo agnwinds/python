@@ -299,7 +299,7 @@ int current_domain;             // This integer is used by py_wind only
  * global information including how ionization calculations are caried out. 
  *
  * Information that is domain specific should be placed directly in the domain
- * structure.  ksl
+ * structure.  
  */
 
 #define SYSTEM_TYPE_STAR   0
@@ -784,7 +784,7 @@ typedef struct wind
   enum inwind_enum
   { W_IN_DISK = -5, W_IN_STAR = -4, W_IGNORE = -2, W_NOT_INWIND = -1,
     W_ALL_INWIND = 0, W_PART_INWIND = 1, W_NOT_ASSIGNED = -999
-  } inwind;
+  } inwind;                      /* Basic information on the nature of a particular cell. */
   Wind_Paths_Ptr paths, *line_paths;    // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
