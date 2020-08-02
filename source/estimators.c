@@ -103,6 +103,8 @@ bf_estimators_increment (one, p, ds)
      which also updates the ionization parameters and scattered and direct contributions */
 
   update_banded_estimators (xplasma, p, ds, p->w, ndom);
+  update_flux_estimators (xplasma, p, ds, p->w, ndom);
+
 
   /* check that j and ave freq give sensible numbers */
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))

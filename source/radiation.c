@@ -406,6 +406,7 @@ radiation (p, ds)
   freq_store = p->freq;         //Store the packets 'intrinsic' frequency
   p->freq = freq;               //Temporarily set the photon frequency to the mean doppler shifter frequency
   update_banded_estimators (xplasma, p, ds, w_ave, ndom);       //Update estimators
+  update_flux_estimators (xplasma, p, ds, w_ave, ndom); //Update estimators
   p->freq = freq_store;         //Set the photon frequency back
 
 

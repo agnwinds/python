@@ -52,11 +52,12 @@
  * is used).
  *
  * This routine is called from bf_estimators in macro_atom modes
- * and from radiation (above).  Although the historical documentation
+ * and from radiation.  Although the historical documentation
  * suggests it is only called for certain ionization modes, it appears
  * to be called in all cases, though clearly it is only provides diagnostic
  * information in some of them.
  *
+ * XFRAME - update_banded_estimators takes CMF inputs
  * 
  **********************************************************/
 
@@ -83,9 +84,6 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      int ndom;
 {
   int i;
-  double flux[3];
-  double p_dir_cos[3];
-  struct photon phot_mid;
 
   /*photon weight times distance in the shell is proportional to the mean intensity */
 
@@ -106,49 +104,6 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   xplasma->mean_ds += ds;
   xplasma->n_ds++;
   xplasma->ave_freq += p->freq * w_ave * ds;
-
-
-/* The lines below compute the flux element of this photon */
-
-  stuff_phot (p, &phot_mid);    // copy photon ptr
-  move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
-  stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
-
-  renorm (p_dir_cos, w_ave * ds);       //Renormalise the direction into a flux element
-  project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
-
-  if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
-    flux[2] *= (-1);
-
-
-  /*Deal with the special case of a spherical geometry */
-
-  if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
-    flux[0] = dot (p_dir_cos, phot_mid.x);      //In the spherical geometry, the first comonent is the radial flux
-    flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
-  }
-
-/* We now update the fluxes in the three bands */
-
-
-  if (p->freq < UV_low)
-  {
-    vadd (xplasma->F_vis, flux, xplasma->F_vis);
-    xplasma->F_vis[3] += length (flux);
-  }
-  else if (p->freq > UV_hi)
-  {
-    vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
-    xplasma->F_Xray[3] += length (flux);
-  }
-  else
-  {
-    vadd (xplasma->F_UV, flux, xplasma->F_UV);
-    xplasma->F_UV[3] += length (flux);
-  }
-
 
   /* The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
      nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
@@ -264,3 +219,99 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   return (0);
 }
 
+/**********************************************************/
+/** 
+ * @brief      updates the estimators for calculating
+ * the radiative force on each Plasma Cell
+ * spectra in each Plasma cell
+ *
+ * @param [in,out] PlasmaPtr  xplasma   PlasmaPtr for the cell of interest
+ * @param [in] PhotPtr  p   Photon pointer
+ * @param [in] double  ds   ds travelled
+ * @param [in] double  w_ave   the weight of the photon in the cell. 
+ *
+ * @return  Always returns 0
+ *
+ *
+ *
+ * @details
+ *
+ * 
+ *
+ * ### Notes ###
+ *
+ * 
+ * In non macro atom mode, w_ave
+ * this is an average weight (passed as w_ave), but 
+ * in macro atom mode weights are never reduced (so p->w 
+ * is used).
+ *
+ * This routine is called from bf_estimators in macro_atom modes
+ * and from radiation.  Although the historical documentation
+ * suggests it is only called for certain ionization modes, it appears
+ * to be called in all cases, though clearly it is only provides diagnostic
+ * information in some of them.
+ *
+ *
+ * XFRAME The flux estimators are/need to be  constructed in the Obsever frame
+ * 
+ **********************************************************/
+
+
+
+int
+update_flux_estimators (xplasma, p, ds, w_ave, ndom)
+     PlasmaPtr xplasma;
+     PhotPtr p;
+     double ds;
+     double w_ave;
+     int ndom;
+{
+  double flux[3];
+  double p_dir_cos[3];
+  struct photon phot_mid;
+
+/* The lines below compute the flux element of this photon */
+
+  stuff_phot (p, &phot_mid);    // copy photon ptr
+  move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
+  stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
+
+  renorm (p_dir_cos, w_ave * ds);       //Renormalise the direction into a flux element
+  project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
+
+  if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+    flux[2] *= (-1);
+
+
+  /*Deal with the special case of a spherical geometry */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
+    flux[0] = dot (p_dir_cos, phot_mid.x);      //In the spherical geometry, the first comonent is the radial flux
+    flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
+  }
+
+/* We now update the fluxes in the three bands */
+
+
+  if (p->freq < UV_low)
+  {
+    vadd (xplasma->F_vis, flux, xplasma->F_vis);
+    xplasma->F_vis[3] += length (flux);
+  }
+  else if (p->freq > UV_hi)
+  {
+    vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
+    xplasma->F_Xray[3] += length (flux);
+  }
+  else
+  {
+    vadd (xplasma->F_UV, flux, xplasma->F_UV);
+    xplasma->F_UV[3] += length (flux);
+  }
+
+
+  return (0);
+}

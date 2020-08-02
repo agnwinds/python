@@ -894,7 +894,7 @@ typedef struct plasma
   double fmin_mod[NXBANDS];     /* Minimum freqneucy that the model should be applied for */
   double fmax_mod[NXBANDS];     /* Maximum frequency that the model should be applied for */
 
-  /* banded, directional fluxes - last element is used for the sum of magnitude of (flux)*/
+  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux)*/
   double F_vis[4];
   double F_UV[4];
   double F_Xray[4];
