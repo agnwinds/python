@@ -142,7 +142,7 @@ foo: foo.o signal.o time.o
 # note that the kpar_source is now separate from this
 python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o \
-		trans_phot.o phot_util.o resonate.o radiation.o \
+		trans_phot.o phot_util.o resonate.o radiation.o estimators_simple.o\
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
@@ -165,7 +165,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 # Problems ocurr due to the prototypes that are generated.  ksl 160705
 python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c photon2d.c photon_gen.c parse.c \
 		saha.c spectra.c wind2d.c wind.c  vvector.c recipes.c \
-		trans_phot.c phot_util.c resonate.c radiation.c setup_files.c \
+		trans_phot.c phot_util.c resonate.c radiation.c estimators_simple.c setup_files.c \
 		wind_updates2d.c windsave.c extract.c cdf.c roche.c random.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
@@ -220,7 +220,7 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
+		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
@@ -245,7 +245,7 @@ table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_in
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
+		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
@@ -260,7 +260,7 @@ rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o 
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
+		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
@@ -295,7 +295,7 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
-		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o density.o \
 		matom.o estimators.o photon2d.o cylindrical.o rtheta.o spherical.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
