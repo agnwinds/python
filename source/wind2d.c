@@ -316,6 +316,7 @@ define_wind ()
     if (rel_mode == REL_MODE_FULL)
     {
       stuff_v (x, phot.x);
+      /* XFRAME use here if vwind_xyz is correct */
       vwind_xyz (ndom, &phot, v);
       plasmamain[n].xgamma = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
     }
@@ -635,11 +636,11 @@ int ierr_vwind = 0;
 /**********************************************************/
 /**
  * @brief      finds the velocity vector v for the wind in cartesian
- * 	coordinates at the position of the photon p.
+ * 	coordinates at the position of the photon p in the Observer frame.
  *
  * @param [in] int  ndom   The domain of interest
  * @param [in] PhotPtr  p   A photon
- * @param [out] double  v[]   The velocity at the postion given by phtoon???
+ * @param [out] double  v[]   The velocity at the position given by the photon
  * @return     0 	on successful completion, or a negative number if
  * photon position is not in the in the grid for the domain of interest.
  *
@@ -671,6 +672,9 @@ int ierr_vwind = 0;
  *
  * The routine checks to see whether the position for which the velocity is needed
  * and if so short-circuits the calculation returning a stored value
+ *
+ * XFRAME vwind_xyz expects the photon position to be in the Observer frame
+ * It returns the velocity in the Observer frame.
  *
  **********************************************************/
 
@@ -856,7 +860,8 @@ wind_div_v ()
     }
 
 
-
+    /* XFRAME - Divergence is calculated here.  Probably needs do be CMF divergence, but note
+       we only need the divergence in plasma cells, so not clear why this is not part of plasmamain */
 
     /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
        in positive and negative directions and evaluate the difference in velocities. Dividing this by
@@ -924,6 +929,7 @@ wind_div_v ()
  * and then intepolates to find the density at a specific position
  *
  * ### Notes ###
+ * XFRAME As written,subroutine rho accesses the plasma ptr, and there rho is in CMF frame.
  *
  **********************************************************/
 
@@ -1005,7 +1011,7 @@ mdot_wind (w, z, rmax)
      double z;                  // The height (usually small) above the disk at which mdot will be calculated
      double rmax;               // The radius at which mdot will be calculated
 {
-  struct photon p;              //needed because vwind_xyz has a call which involves a photon
+  struct photon p;             
   double r, dr, rmin;
   double theta, dtheta;
   double den, rho ();
@@ -1035,7 +1041,9 @@ mdot_wind (w, z, rmax)
   for (r = dr / 2; r < rmax; r += dr)
   {
     p.x[0] = x[0] = r;
+    /* XFRAME IN calculating mdot we actually want Observer frame, but rho uses Plasma variables wheich are in CMF */
     den = rho (w, x);
+    /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * r * dr * den * v[2];
   }
@@ -1055,6 +1063,7 @@ mdot_wind (w, z, rmax)
     q[0] = sin (theta);
     q[2] = cos (theta);
     den = rho (w, x);
+    /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * rmax * rmax * sin (theta) * dtheta * den * dot (v, q);
   }

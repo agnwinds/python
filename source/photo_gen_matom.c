@@ -527,13 +527,17 @@ get_matom_f (mode)
  * @param [in] double  weight   the photon weight
  * @param [in] int  photstart   The first element of the photon stucure to be populated
  * @param [in] int  nphot   the number of photons to be generated
- * @return int nphot  When it finishes it should have generated nphot photons from k-packet elliminations.
+ * @return int nphot  The number of photon packets that were generated from k-packet elliminations.
  *
  * @details produces photon packets to account for creating of r-packets by k-packets in the spectrum calculation. 
  * It should only be used once the total energy emitted in this way in the wavelength range in question is well known
  * (calculated in the ionization cycles). This routine is closely related to photo_gen_wind from which much of the code 
  * has been copied.
  *
+ * XFRAME Photons are generated at a position in the Observer frame.  
+ * The weight of the photon should th weight expected in the local 
+ * frame since photon is first created in a generated in a local 
+ * rest frame, and then Doppler shifted to the Observer frame
  **********************************************************/
 
 int
@@ -653,12 +657,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     p[n].nnscat = nnscat;
 
-    /* The next two lines correct the frequency to first order, but do not result in
-       forward scattering of the distribution */
 
     ndom = wmain[icell].ndom;
-//OLD    vwind_xyz (ndom, &p[n], v);
-//OLD    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
 
     /* Make an in-place transformation to the observer frame */
     if (local_to_observer_frame (&p[n], &p[n]))

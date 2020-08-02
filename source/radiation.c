@@ -889,7 +889,7 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
   stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
 
-  renorm (p_dir_cos, w_ave * ds);       //Renormnalise the direction into a flux element
+  renorm (p_dir_cos, w_ave * ds);       //Renormalise the direction into a flux element
   project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
 
   if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
@@ -925,7 +925,7 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   }
 
 
-  /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
+  /* The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
      nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
      going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
      will be i=nxfreq-1 */
