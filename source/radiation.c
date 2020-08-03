@@ -45,6 +45,9 @@ int iicount = 0;
  * but that is just given by (w(0)-w(smax))/kappa_tot.)  The routine calculates the number of ionizations per
  * unit volume.
  * 	
+ * XFRAME Inputs to radiation are assumed to be in the observer frame.  kappas are calculated
+ * in the CMF frame, as elsewhere.  Where tau is calculted from kappa ds, one needs to
+ * account for the difference in length in the two frames
  *
  **********************************************************/
 
@@ -59,7 +62,10 @@ radiation (p, ds)
   PlasmaPtr xplasma;
 
   double freq, freq_store;
-  double kappa_tot, frac_tot, frac_ff;
+  double kappa_tot, kappa_tot_obs, frac_tot, frac_ff;
+  /* XFRAME variables named frak are very pooorly named; they are actually opaciites due to individual
+     processes, not fractions of anything
+   */
   double frac_z, frac_comp;     /* frac_comp - the heating in the cell due to Compton heating */
   double frac_ind_comp;         /* frac_ind_comp - the heating due to induced Compton heating */
   double frac_auger;
@@ -329,7 +335,9 @@ radiation (p, ds)
 
 
 
-  tau = kappa_tot * ds;
+  kappa_tot_obs = kappa_tot / observer_to_local_frame_ds (p, 1);
+  tau = kappa_tot_obs * ds;
+
   w_in = p->w;
 
   if (sane_check (tau))
@@ -355,7 +363,8 @@ radiation (p, ds)
      however induced Compton heating is not implemented at scattering, so it should remain here for the time being
      to maimtain consistency. */
 
-  tau = (kappa_tot - frac_comp) * ds;
+//  tau = (kappa_tot - frac_comp) * ds;
+  tau = kappa_tot_obs * (1. - frac_comp / kappa_tot) * ds;
 
   if (sane_check (tau))
   {

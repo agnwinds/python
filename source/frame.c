@@ -450,7 +450,7 @@ observer_to_local_frame_ds (p, ds_obs)
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
 
-  ds_cmf = gamma * (1 + dot (p->lmn, v) / VLIGHT) * ds_obs;
+  ds_cmf = gamma * (1 - dot (p->lmn, v) / VLIGHT) * ds_obs;
 
 
   return (ds_cmf);

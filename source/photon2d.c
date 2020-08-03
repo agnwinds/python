@@ -540,6 +540,8 @@ The choice of SMAX_FRAC can affect execution time.*/
    things up If the photon is going to scatter in this cell, radiation also reduces
    the weight of the photon due to continuum absorption, e.g. free free */
 
+/* XFRAME - flux estimators needs to go here, but need different variables, or to incoporate mofe logig into flux_estimators */
+
   if (geo.rt_mode == RT_MODE_MACRO)
   {                             // Macro-method
     /* In the macro-method, b-f and other continuum processes do not reduce the photon
