@@ -52,7 +52,6 @@ define_wind ()
   int nwind, ndom;
   int nstart, ndim, mdim;
   int nplasma;
-  struct photon phot;
 
   WindPtr w;
 
@@ -159,14 +158,33 @@ define_wind ()
       if (zdom[ndom].wind_type != IMPORT)
       {
         model_velocity (ndom, w[n].x, w[n].v);
-        w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
       }
       model_vgrad (ndom, w[n].x, w[n].v_grad);
     }
 
   }
 
+  /* wind_complete calculates one-d arrays that contain edges and centers of the grid cells */
+
   wind_complete (w);
+
+  /* XFRAME - Calculate gammas for wind cells, and make volumes co-moving volumes */
+
+  for (n = 0; n < NDIM2; n++)
+  {
+    if (rel_mode == REL_MODE_FULL)
+    {
+      w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
+      model_velocity (w[n].ndom, w[n].xcen, v);
+      w[n].xgamma_cen = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
+      w[n].vol *= w[n].xgamma_cen;
+
+    }
+    else
+    {
+      w[n].xgamma = w[n].xgamma_cen = 1.;
+    }
+  }
 
   /* Now determine the valid volumes of each cell and also determine whether the cells are in all
      or partially in the wind.
@@ -296,40 +314,32 @@ define_wind ()
 /* Now intialize the plasma structure.  Note that a few of the variables in the
    plasma structure are similar to those in the wind.  However one should not assume
    the are the same, since the plasma structure contains values at the centers of 
-   cells.  Also properties of the plasma structure are ususually, though not necessarily
-   always, CMF quantities. 
+   cells.  Properties of the plasma structure are ususually, though not necessarily
+   always, CMF quantities.  
  */
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
 
-  // XFRAME - There are changes here to convert plasma densities and volumes to co-moving frame
+/* XFRAME - Convert plasma densities co-moving frame, gammas and volume have
+   already been calculated and are just copied. For the v/c case, xgammas have
+   been set to 1, so denisties will be unchanged */
+
+
   for (n = 0; n < NPLASMA; n++)
   {
     nwind = plasmamain[n].nwind;
     ndom = wmain[nwind].ndom;
     stuff_v (w[nwind].xcen, x);
-
-    /* Volumes and densities generated here are normally intended to be CMF quantities, and 
-       allow for clumping) */
-
-    if (rel_mode == REL_MODE_FULL)
-    {
-      stuff_v (x, phot.x);
-      /* XFRAME use here if vwind_xyz is correct */
-      vwind_xyz (ndom, &phot, v);
-      plasmamain[n].xgamma = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
-    }
-    else
-    {
-      plasmamain[n].xgamma = 1.;
-    }
+    plasmamain[n].xgamma = wmain[nwind].xgamma_cen;
 
 //OLD    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
 //OLD    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
 
+
     plasmamain[n].rho = model_rho (ndom, x) / (zdom[ndom].fill * plasmamain[n].xgamma);
-    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill * plasmamain[n].xgamma;  // Copy volumes
+    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
+
 
     /* This is where we initialise the spectral models for the wind. */
 
@@ -1011,7 +1021,7 @@ mdot_wind (w, z, rmax)
      double z;                  // The height (usually small) above the disk at which mdot will be calculated
      double rmax;               // The radius at which mdot will be calculated
 {
-  struct photon p;             
+  struct photon p;
   double r, dr, rmin;
   double theta, dtheta;
   double den, rho ();
