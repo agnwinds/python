@@ -337,7 +337,7 @@ radiation (p, ds)
 
   kappa_tot_obs = kappa_tot / observer_to_local_frame_ds (p, 1);
   tau = kappa_tot_obs * ds;
-
+  
   w_in = p->w;
 
   if (sane_check (tau))

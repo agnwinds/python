@@ -86,13 +86,20 @@ bf_estimators_increment (one, p, ds)
   PlasmaPtr xplasma;
   MacroPtr mplasma;
 
+  /* XFRAME -- cleanest thing to do here might be to simply transform the photon 
+     at the start of this routine, and also ds, both to CMF 
+     they will always enter together, so we can also create a number w * ds */
+  /* this would be: ds_cmf = observer_to_local_frame_ds (p, ds); */
+  /* for photons: observer_to_local_frame (&p, &phot_dummy) - needs dummy photon variable */
+  /* XFRAME -- might need to consider performance (number of times we calc gamma) */
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   mplasma = &macromain[xplasma->nplasma];
   ndom = one->ndom;
 
-
+  /* XFRAME this may need to be co-moving frame for certain quantities */
+  /* XFRAME this should be made consistent with radiation () */
   freq_av = p->freq;
   // the continuum neglect variation of frequency along path and
   // take as a single "average" value.  
@@ -113,7 +120,7 @@ bf_estimators_increment (one, p, ds)
 
   /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
      which also updates the ionization parameters and scattered and direct contributions */
-
+  /* XFRAME this should be made consistent with radiation () */
   update_banded_estimators (xplasma, p, ds, p->w, ndom);
   update_flux_estimators (xplasma, p, ds, p->w, ndom);
 
@@ -162,7 +169,7 @@ bf_estimators_increment (one, p, ds)
           density = 0.0;
         }
 
-
+        //kap_bf[nn] = x = sigma_phot(&phot_top[n], freq)*density*zdom[ndom].fill 
         x = kap_bf[nn] / (density * zdom[ndom].fill);   //this is the cross section
 
         /* Now identify which of the BF processes from this level this is. */
