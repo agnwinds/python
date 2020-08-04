@@ -61,7 +61,8 @@ radiation (p, ds)
   WindPtr one;
   PlasmaPtr xplasma;
 
-  double freq, freq_store;
+
+  double freq;
   double kappa_tot, kappa_tot_obs, frac_tot, frac_ff;
   /* XFRAME variables named frak are very pooorly named; they are actually opaciites due to individual
      processes, not fractions of anything
@@ -75,7 +76,7 @@ radiation (p, ds)
   double kappa_inner_ion[n_inner_tot];
   double frac_inner_ion[n_inner_tot];
   double density, ft, tau, tau2;
-  double energy_abs;
+  double energy_abs, energy_abs_cmf;
   int n, nion;
   double q, x, z;
   double w_ave, w_in, w_out;
@@ -85,8 +86,9 @@ radiation (p, ds)
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
-  struct photon phot, phot_mid, phot_dummy;
+  struct photon phot, phot_cmf, phot_mid, phot_mid_cmf, p_cmf;
   int ndom, i;
+  double ds_cmf, w_ave_cmf;
 
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
@@ -114,24 +116,38 @@ radiation (p, ds)
 
   stuff_phot (p, &phot);        // copy photon ptr
   move_phot (&phot, ds);        // move it by ds
+  stuff_phot (p, &phot_mid);
+  move_phot (&phot_mid, ds / 2.);
+
+
 
   /* calculate photon frequencies in rest frame of cell */
 
 
-  if (observer_to_local_frame (&phot, &phot_dummy))
+  if (observer_to_local_frame (&phot, &phot_cmf))
   {
     Error ("radiation: observer to local frame error\n");
   }
-  freq_inner = phot_dummy.freq;
 
-  if (observer_to_local_frame (p, &phot_dummy))
+  if (observer_to_local_frame (p, &p_cmf))
   {
     Error ("radiation: observer to local frame error\n");
   }
-  freq_outer = phot_dummy.freq;
+
+  if (observer_to_local_frame (&phot_mid, &phot_mid_cmf))
+  {
+    Error ("radiation: observer to local frame error\n");
+  }
+
+
+
+  freq_inner = p_cmf.freq;
+  freq_outer = phot_cmf.freq;
+
 
   /* take the average of the frequencies at original position and original+ds */
-  freq = 0.5 * (freq_inner + freq_outer);
+  phot_mid_cmf.freq = freq = 0.5 * (freq_inner + freq_outer);
+  phot_mid.freq = 0.5 * (p->freq + phot.freq);
 
   /* calculate free-free, Compton and induced-Compton opacities 
      note that we also call these with the average frequency along ds */
@@ -359,6 +375,10 @@ radiation (p, ds)
 
   }
 
+  /* ZFRAME - We probably should change the name of freq to be phot_mid.freq everywhere */
+
+  energy_abs_cmf = energy_abs * phot_mid_cmf.freq / phot_mid.freq;
+
   /* Calculate the reduction in weight - Compton scattering is not included, it is now included at scattering
      however induced Compton heating is not implemented at scattering, so it should remain here for the time being
      to maimtain consistency. */
@@ -386,6 +406,9 @@ radiation (p, ds)
     w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
   }
 
+  phot_mid.w = w_ave;
+  phot_mid_cmf.w = w_ave_cmf = w_ave * phot_mid_cmf.freq / phot_mid.freq;
+
 
   if (sane_check (p->w))
   {
@@ -412,11 +435,14 @@ radiation (p, ds)
 
 
   //Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
-  freq_store = p->freq;         //Store the packets 'intrinsic' frequency
-  p->freq = freq;               //Temporarily set the photon frequency to the mean doppler shifter frequency
-  update_banded_estimators (xplasma, p, ds, w_ave, ndom);       //Update estimators
-  update_flux_estimators (xplasma, p, ds, w_ave, ndom); //Update estimators
-  p->freq = freq_store;         //Set the photon frequency back
+  /* XFRAME update_banded_estimators requires photon freq and ds and w_ave in cmf frame */
+  /* At this point we could have just have easily changed the call, and incorportate w_ave_cmf into
+     phot_mid_cmf */
+
+
+  ds_cmf = observer_to_local_frame_ds (&phot_mid, ds);
+  update_banded_estimators (xplasma, &phot_mid_cmf, ds_cmf, w_ave_cmf, ndom);   //Update estimators
+  update_flux_estimators (xplasma, &phot_mid, ds, w_ave, ndom); //Update estimators
 
 
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
@@ -429,7 +455,9 @@ radiation (p, ds)
 
     //If statement added 01mar18 ksl to correct problem of zero divide
     //  in odd situations where no continuum opacity
-    z = (energy_abs) / kappa_tot;
+    // XFRAME - We use the cmf value of the energy aborbed since everything is supposed to be in CMF frame
+
+    z = (energy_abs_cmf) / kappa_tot;
     xplasma->heat_ff += z * frac_ff;
     xplasma->heat_tot += z * frac_ff;
     xplasma->abs_tot += z * frac_ff;    /* The energy absorbed from the photon field in this cell */
@@ -472,6 +500,8 @@ radiation (p, ds)
       }
     }
   }
+
+  /* XFRAME  - This part needs to be broken out into a separate routine */
 
   stuff_phot (p, &phot_mid);    // copy photon ptr
   move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path
