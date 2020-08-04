@@ -410,7 +410,7 @@ local_to_observer_frame_disk (p_in, p_out)
  *      in the local frame given a distance in the observer
  *      frame
  *
- * @param [in] PhotPtr  p        The photon in the observer frame                
+ * @param [in] PhotPtr  p_obs    The photon in the observer frame                
  * @param [in] double   ds_obs   The distance from a starting point
                                  for the photon to travel
  *
@@ -426,8 +426,8 @@ local_to_observer_frame_disk (p_in, p_out)
  **********************************************************/
 
 double
-observer_to_local_frame_ds (p, ds_obs)
-     PhotPtr p;
+observer_to_local_frame_ds (p_obs, ds_obs)
+     PhotPtr p_obs;
      double ds_obs;
 {
   WindPtr one;
@@ -442,18 +442,77 @@ observer_to_local_frame_ds (p, ds_obs)
   }
 
   /* Calculate the local velocity of the wind at this position */
-  one = &wmain[p->grid];
+  one = &wmain[p_obs->grid];
   ndom = one->ndom;
-  vwind_xyz (ndom, p, v);
-  vel = dot (p->lmn, v);
+  vwind_xyz (ndom, p_obs, v);
+  vel = dot (p_obs->lmn, v);
 
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
+  ds_cmf = ds_obs;
 
-  ds_cmf = gamma * (1 - dot (p->lmn, v) / VLIGHT) * ds_obs;
+
+  ds_cmf *= gamma * (1 - dot (p_obs->lmn, v) / VLIGHT);
 
 
   return (ds_cmf);
+
+
+
+}
+
+/**********************************************************/
+/**
+ * @brief      calculate the distance a photon will travel
+ *      in the observer frame given a distance in the local
+ *      frame
+ *
+ * @param [in] PhotPtr  p_obs    The photon in the observer frame                
+ * @param [in] double   ds_cmf   The distance from a starting point
+                                 for the photon to travel
+ *
+ * @return    The distance in the observer frame         
+ *
+ *
+ * @details
+ *
+ * Note that the photon MUST BE in the observer frame here. 
+ *
+ *
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+double
+local_to_observer_frame_ds (p_obs, ds_cmf)
+     PhotPtr p_obs;
+     double ds_cmf;
+{
+  WindPtr one;
+  int ndom;
+  double v[3], vel;
+  double gamma;
+  double ds_obs;
+
+  if (rel_mode == REL_MODE_LINEAR)
+  {
+    return (ds_cmf);
+  }
+
+  /* Calculate the local velocity of the wind at this position */
+  one = &wmain[p_obs->grid];
+  ndom = one->ndom;
+  vwind_xyz (ndom, p_obs, v);
+  vel = dot (p_obs->lmn, v);
+
+  gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+
+  ds_obs = ds_cmf;
+  ds_obs /= gamma * (1 - dot (p_obs->lmn, v) / VLIGHT);
+
+
+  return (ds_obs);
 
 
 

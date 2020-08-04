@@ -431,7 +431,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 {
 
   int n;
-  double smax, s, ds_current;
+  double smax, s, ds_current, ds_cmf;
   int istat;
   int nplasma;
   int ndom, ndom_current;
@@ -440,6 +440,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 
   WindPtr one;
   PlasmaPtr xplasma;
+  struct photon phot_mid, phot_mid_cmf; // Photon at the midpt of its path in the cell
 
 
 /* First verify that the photon is in the grid, and if not
@@ -553,24 +554,34 @@ The choice of SMAX_FRAC can affect execution time.*/
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
 
+    /* XFRAME next lines to prefare for bf_estimator_call */
+    stuff_phot (p, &phot_mid);
+    move_phot (&phot_mid, 0.5 * ds_current);
+    observer_to_local_frame (&phot_mid, &phot_mid_cmf);
+    ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
+
     if (geo.ioniz_or_extract == 1)
     {
       xplasma->ntot++;          // EP 11-19: Moved so only increments during ionisation cycles
 
       /* For an ionization cycle */
       /* XFRAME -- we are assuming that p and ds_current are observer frame values */
-      bf_estimators_increment (one, p, ds_current);
+//OLD      bf_estimators_increment (one, p, ds_current);
+      bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
 
       /*photon weight times distance in the shell is proportional to the mean intensity */
-      xplasma->j += p->w * ds_current;
+//OLD      xplasma->j += p->w * ds_current;
+      xplasma->j += phot_mid_cmf.w * ds_cmf;
 
       /* frequency weighted by the weights and distance in the shell.  See eqn 2 ML93 */
-      xplasma->ave_freq += p->freq * p->w * ds_current;
+//OLD      xplasma->ave_freq += p->freq * p->w * ds_current;
+      xplasma->ave_freq += phot_mid_cmf.freq * phot_mid_cmf.w * ds_cmf;
 
     }
   }
   else
   {
+// XFRAME as long as radiation needs both obs and cmf frame data we cannot eonvert to cmf
     radiation (p, ds_current);
   }
 
