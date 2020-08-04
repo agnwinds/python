@@ -53,6 +53,18 @@ double temp_ext_rad;            //radiation temperature passed externally
  * 
  * The bound-free estimators are described in section 3.3.3.1 Matthews Phd Thesis.
  *
+ * XFRAME As currently written bf_esimators_increment expects p
+ * to contain the local frame frequency, and if bf_estimators are in 
+ * the local frame, ds should be in the local frame as well.  if that is the
+ * case, the rest of the routine is unchanged.  
+ * 
+ * Alternatively, one could calculated ds_cmf here, and gain everyghing
+ * would be unchanged, on the grounds that always want to transfer ds in
+ * the observer frame.  
+ *
+ * Alternatively, one could work throughout the routine converting the
+ * kappas by a factor.  These cannot be pushed down to the underlying
+ * routines because photons are not passed to them.
  **********************************************************/
 
 int
@@ -103,6 +115,8 @@ bf_estimators_increment (one, p, ds)
      which also updates the ionization parameters and scattered and direct contributions */
 
   update_banded_estimators (xplasma, p, ds, p->w, ndom);
+  update_flux_estimators (xplasma, p, ds, p->w, ndom);
+
 
   /* check that j and ave freq give sensible numbers */
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))

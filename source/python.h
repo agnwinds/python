@@ -299,7 +299,7 @@ int current_domain;             // This integer is used by py_wind only
  * global information including how ionization calculations are caried out. 
  *
  * Information that is domain specific should be placed directly in the domain
- * structure.  ksl
+ * structure.  
  */
 
 #define SYSTEM_TYPE_STAR   0
@@ -778,12 +778,13 @@ typedef struct wind
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
                                    where the volume is the volume that is actually filled with material. */
+  double xgamma;                /* 1./sqrt(1-beta**2) at x */
   double dfudge;                /* A number which defines a push through distance for this cell, which replaces the
                                    global variable DFUDGE in many instances */
   enum inwind_enum
   { W_IN_DISK = -5, W_IN_STAR = -4, W_IGNORE = -2, W_NOT_INWIND = -1,
     W_ALL_INWIND = 0, W_PART_INWIND = 1, W_NOT_ASSIGNED = -999
-  } inwind;
+  } inwind;                      /* Basic information on the nature of a particular cell. */
   Wind_Paths_Ptr paths, *line_paths;    // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
@@ -791,28 +792,24 @@ wind_dummy, *WindPtr;
 WindPtr wmain;
 
 /* Plasma is a structure that contains information about the properties of the
-plasma in regions of the geometry that are actually included n the wind */
-
-/* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
-/* ksl - It would probably make more sense to define these in the same ways that bands are done for the generation of photons, or to
- * do both the same way at least.  Choosing to do this in two different ways makes the program confusing. The structure that has
- * the photon generation is called xband */
-/* 78 - 1407 - NSH - changed several elements (initially those of size nions) in the plasma array to by dynamically allocated.
-They are now pointers in the array. */
+ * plasma in regions of the geometry that are actually included in the wind 
+ * Note that a number of the arrays are dynamically allocated.
+ */
 
 
 typedef struct plasma
 {
-  int nwind;                    /*A cross reference to the corresponding cell in the  wind structure */
-  int nplasma;                  /*A self reference to this  in the plasma structure */
-  double ne;                    /* electron density in the shell */
-  double rho;                   /*density at the center of the cell. For clumped models, this is rho of the clump */
-  double vol;                   /* volume of this cell (more specifically the volume  that is filled with material
-                                   which can differe from the valid volume of the cell due to clumping. */
-  double *density;              /*The number density of a specific ion.  This needs to correspond
-                                   to the ion order obtained by get_atomic_data. 78 - changed to dynamic allocation */
-  double *partition;            /*The partition function for each  ion. 78 - changed to dynamic allocation */
-  double *levden;               /*The number density (occupation number?) of a specific level */
+  int nwind;                    /* A cross reference to the corresponding cell in the  wind structure */
+  int nplasma;                  /* A self reference to this  in the plasma structure */
+  double ne;                    /* Electron density in the shell (CMF) */
+  double rho;                   /* Density at the center of the cell. (CMF) For clumped models, this is rho of the clump */
+  double vol;                   /* Volume of this cell in CMF frame (more specifically the volume  that is filled with material
+                                   which can differs from the valid volume of the cell due to clumping. */
+  double xgamma;                /* 1./sqrt(1-beta**2) at center of cell */
+  double *density;              /* The number density of a specific ion in the CMF.  The order of the ions is
+                                   the same as read in by the atomic data routines. */
+  double *partition;            /* The partition function for each  ion.  */
+  double *levden;               /* The number density (occupation number?) of a specific level */
 
   double kappa_ff_factor;       /* Multiplicative factor for calculating the FF heating for a photon. */
 
@@ -869,8 +866,8 @@ typedef struct plasma
   int nscat_es;                 /* The number of electrons scatters in the cell */
   int nscat_res;                /* The number of resonant line scatters in the cell */
 
-  double mean_ds;               /* NSH 6/9/12 Added to allow a check that a thin shell is really optically thin */
-  int n_ds;                     /* NSH 6/9/12 Added to allow the mean ds to be computed */
+  double mean_ds;               /* Mean photon path length in a cell. */
+  int n_ds;                     /* Number of times a path lengh was added; needed to compute mean_ds */
   int nrad;                     /* Total number of photons created within the cell */
   int nioniz;                   /* Total number of photon passages by photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
@@ -891,13 +888,13 @@ typedef struct plasma
   double *cool_dr_ion;
   double j, ave_freq;           /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
-  double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
-  double fmin[NXBANDS];         /* the minimum frequency photon seen in a band - this is incremented during photon flight */
-  double fmax[NXBANDS];         /* the maximum frequency photon seen in a band - this is incremented during photon flight */
-  double fmin_mod[NXBANDS];     /* the minimum freqneucy that the model should be applied for */
-  double fmax_mod[NXBANDS];     /* the maximum frequency that the model should be applied for */
+  double xj[NXBANDS], xave_freq[NXBANDS];       /* Frequency limited versions of j and ave_freq */
+  double fmin[NXBANDS];         /* Minimum frequency photon seen in a band - this is incremented during photon flight */
+  double fmax[NXBANDS];         /* Maximum frequency photon seen in a band - this is incremented during photon flight */
+  double fmin_mod[NXBANDS];     /* Minimum freqneucy that the model should be applied for */
+  double fmax_mod[NXBANDS];     /* Maximum frequency that the model should be applied for */
 
-  /* banded, directional fluxes - last element is used for the sum of magnitude of (flux)*/
+  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux)*/
   double F_vis[4];
   double F_UV[4];
   double F_Xray[4];
@@ -906,11 +903,11 @@ typedef struct plasma
      created by the central object, or the disk, or in the simple case the wind, but which have not undergone
      any kind of interaction which would change their direction
    */
-  double j_direct, j_scatt;     /* 1309 NSH mean intensity due to direct photons and scattered photons */
-  double ip_direct, ip_scatt;   /* 1309 NSH mean intensity due to direct photons and scattered photons */
-  double xsd_freq[NXBANDS];     /* 1208 NSH the standard deviation of the frequency in the band */
-  int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
-  double max_freq;              /* 1208 NSH The maximum frequency photon seen in this cell */
+  double j_direct, j_scatt;     /* Mean intensity due to direct photons and scattered photons */
+  double ip_direct, ip_scatt;   /* Mean intensity due to direct photons and scattered photons */
+  double xsd_freq[NXBANDS];     /* The standard deviation of the frequency in the band */
+  int nxtot[NXBANDS];           /* The total number of photon passages in frequency bands */
+  double max_freq;              /*  The maximum frequency photon seen in this cell */
   double cool_tot;              /*The total cooling in a cell */
   /* The total luminosity of all processes in the cell, basically the emissivity of the cell times it volume. Not the same 
      as what escapes the cell, since photons can interact within the cell and lose weight or even be destroyed */

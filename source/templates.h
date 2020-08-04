@@ -129,8 +129,10 @@ double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
-int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
+/* estimators_simple.c */
+int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
+int update_flux_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 /* setup_files.c */
 int init_log_and_windsave(int restart_stat);
 int setup_created_files(void);
@@ -580,6 +582,7 @@ int observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
 int observer_to_local_frame_disk(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
+double observer_to_local_frame_ds(PhotPtr p, double ds_obs);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

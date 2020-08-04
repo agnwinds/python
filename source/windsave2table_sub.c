@@ -788,7 +788,7 @@ create_convergence_table (ndom, rootname)
  *
  * ### Notes ###
  *
- * The routine calls get_ion_density mulitiple times, once for
+ * The routine calls get_ion mulitiple times, once for
  * each ion of an atom
  *
  **********************************************************/

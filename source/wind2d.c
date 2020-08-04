@@ -44,7 +44,7 @@ define_wind ()
   int i, j, n;
   int nn;
   double rrstar;
-  double x[3];
+  double x[3], v[3];
   double mdotbase, mdotwind, rr;
   int ierr;
   int n_vol, n_inwind, n_part;
@@ -52,6 +52,7 @@ define_wind ()
   int nwind, ndom;
   int nstart, ndim, mdim;
   int nplasma;
+  struct photon phot;
 
   WindPtr w;
 
@@ -158,6 +159,7 @@ define_wind ()
       if (zdom[ndom].wind_type != IMPORT)
       {
         model_velocity (ndom, w[n].x, w[n].v);
+        w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
       }
       model_vgrad (ndom, w[n].x, w[n].v_grad);
     }
@@ -274,16 +276,15 @@ define_wind ()
     }
   }
 
-
-
-  /* Allocate space for the plasma array.  To save space, this structure is sized 
+  /* At this point the wind structure is defined.  Now 
+   * Allocate space for the plasma array.  To save space, this structure is sized 
    * to contain only those cells which are in the wind. */
 
   calloc_plasma (NPLASMA);
   calloc_dyn_plasma (NPLASMA);
   create_maps ();               /* Populate the maps between plasmamain & wmain */
 
-  /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = RT_MODE_MACRO. see #138  */
+  /* If in macro atom mode, allocate structures to hold macro atom information see #138  */
 
   if (geo.rt_mode == RT_MODE_MACRO)
   {
@@ -292,21 +293,43 @@ define_wind ()
   }
 
 
-/* 06may -- At this point we have calculated the volumes of all of the cells and it should
-be optional which variables beyond here are moved to structures othere than Wind */
+/* Now intialize the plasma structure.  Note that a few of the variables in the
+   plasma structure are similar to those in the wind.  However one should not assume
+   the are the same, since the plasma structure contains values at the centers of 
+   cells.  Also properties of the plasma structure are ususually, though not necessarily
+   always, CMF quantities. 
+ */
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
 
+  // XFRAME - There are changes here to convert plasma densities and volumes to co-moving frame
   for (n = 0; n < NPLASMA; n++)
   {
     nwind = plasmamain[n].nwind;
     ndom = wmain[nwind].ndom;
     stuff_v (w[nwind].xcen, x);
 
-    /* Next two lines allow for clumping */
-    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
-    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
+    /* Volumes and densities generated here are normally intended to be CMF quantities, and 
+       allow for clumping) */
+
+    if (rel_mode == REL_MODE_FULL)
+    {
+      stuff_v (x, phot.x);
+      /* XFRAME use here if vwind_xyz is correct */
+      vwind_xyz (ndom, &phot, v);
+      plasmamain[n].xgamma = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
+    }
+    else
+    {
+      plasmamain[n].xgamma = 1.;
+    }
+
+//OLD    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
+//OLD    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
+
+    plasmamain[n].rho = model_rho (ndom, x) / (zdom[ndom].fill * plasmamain[n].xgamma);
+    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill * plasmamain[n].xgamma;  // Copy volumes
 
     /* This is where we initialise the spectral models for the wind. */
 
@@ -613,11 +636,11 @@ int ierr_vwind = 0;
 /**********************************************************/
 /**
  * @brief      finds the velocity vector v for the wind in cartesian
- * 	coordinates at the position of the photon p.
+ * 	coordinates at the position of the photon p in the Observer frame.
  *
  * @param [in] int  ndom   The domain of interest
  * @param [in] PhotPtr  p   A photon
- * @param [out] double  v[]   The velocity at the postion given by phtoon???
+ * @param [out] double  v[]   The velocity at the position given by the photon
  * @return     0 	on successful completion, or a negative number if
  * photon position is not in the in the grid for the domain of interest.
  *
@@ -649,6 +672,9 @@ int ierr_vwind = 0;
  *
  * The routine checks to see whether the position for which the velocity is needed
  * and if so short-circuits the calculation returning a stored value
+ *
+ * XFRAME vwind_xyz expects the photon position to be in the Observer frame
+ * It returns the velocity in the Observer frame.
  *
  **********************************************************/
 
@@ -834,7 +860,8 @@ wind_div_v ()
     }
 
 
-
+    /* XFRAME - Divergence is calculated here.  Probably needs do be CMF divergence, but note
+       we only need the divergence in plasma cells, so not clear why this is not part of plasmamain */
 
     /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
        in positive and negative directions and evaluate the difference in velocities. Dividing this by
@@ -902,6 +929,7 @@ wind_div_v ()
  * and then intepolates to find the density at a specific position
  *
  * ### Notes ###
+ * XFRAME As written,subroutine rho accesses the plasma ptr, and there rho is in CMF frame.
  *
  **********************************************************/
 
@@ -983,7 +1011,7 @@ mdot_wind (w, z, rmax)
      double z;                  // The height (usually small) above the disk at which mdot will be calculated
      double rmax;               // The radius at which mdot will be calculated
 {
-  struct photon p;              //needed because vwind_xyz has a call which involves a photon
+  struct photon p;             
   double r, dr, rmin;
   double theta, dtheta;
   double den, rho ();
@@ -1013,7 +1041,9 @@ mdot_wind (w, z, rmax)
   for (r = dr / 2; r < rmax; r += dr)
   {
     p.x[0] = x[0] = r;
+    /* XFRAME IN calculating mdot we actually want Observer frame, but rho uses Plasma variables wheich are in CMF */
     den = rho (w, x);
+    /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * r * dr * den * v[2];
   }
@@ -1033,6 +1063,7 @@ mdot_wind (w, z, rmax)
     q[0] = sin (theta);
     q[2] = cos (theta);
     den = rho (w, x);
+    /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * rmax * rmax * sin (theta) * dtheta * den * dot (v, q);
   }
