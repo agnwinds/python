@@ -337,10 +337,16 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
  *
  * @details
  *
+ * In non-macro mode, w_ave is an average weight but in macro mode weights are
+ * never reduced, so p->w is used instead.
+ *
  * ### Notes ###
  *
+ * This code in this function was originally in radiation but was moved to
+ * here to try and simplify radiation().
+ *
  * XFRAME this function will calculate the force estimators in the observer
- * frame.
+ * frame and requires quantities in the observer frame.
  *
  **********************************************************/
 
@@ -385,7 +391,7 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
   renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
   if (zdom[ndom].coord_type == SPHERICAL)
   {
-    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first component is the radial component
     dp_cyl[1] = dp_cyl[2] = 0.0;
   }
   else
@@ -405,7 +411,7 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
   renorm (p_out, w_ave * ds * klein_nishina (p->freq));
   if (zdom[ndom].coord_type == SPHERICAL)
   {
-    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first comonent is the radial component
+    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first component is the radial component
     dp_cyl[1] = dp_cyl[2] = 0.0;
   }
   else
