@@ -175,7 +175,8 @@ q_ioniz_dere (nion, t_e)
  * state being recombined into.
  *
  * ### Notes ###
- * ??? NOTES ???
+ *
+ * XFRAME this function requires the quantities to be in the CMF
  *
  **********************************************************/
 

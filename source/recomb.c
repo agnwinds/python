@@ -371,6 +371,10 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  *
  * Question: What is preventing us from calculating a dielectronic emission rate?
  *
+ * XFRAME total free bound emission in this function is calculated CMF. If called in
+ * the cooling routines then this is left in the CMF. If called in the photon
+ * generation routines, this is converted to the observer frame.
+ * 
  **********************************************************/
 
 double

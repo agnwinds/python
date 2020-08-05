@@ -43,6 +43,10 @@
  * @bug It is not exactly clear why two routines total_line_emission
  * and lum_lines is needed, as lum_lines appears to be called
  * only from total_line_emission.  ksl - 180509
+ * 
+ * XFRAME total line emission in this function is calculated CMF. If called in
+ * the cooling routines then this is left in the CMF. If called in the photon
+ * generation routines, this is converted to the observer frame.
  *
  **********************************************************/
 
@@ -94,6 +98,8 @@ total_line_emission (one, f1, f2)
  * ### Notes ###
  * The individual line luminosities are stored in lin_ptr[n]->pow
  *
+ * XFRAME the quantities given to this function MUST be in the CMF.
+ *
  **********************************************************/
 
 double
@@ -128,7 +134,7 @@ lum_lines (one, nmin, nmax)
       z = exp (-H_OVER_K * lin_ptr[n]->freq / t_e);
 
 
-//Next lines required if want to use escape probabilities
+      //Next lines required if want to use escape probabilities
 
       q = 1. - scattering_fraction (lin_ptr[n], xplasma);
 
@@ -155,7 +161,9 @@ lum_lines (one, nmin, nmax)
       }
     }
     else
+    {
       lin_ptr[n]->pow = 0;
+    }
   }
 
 

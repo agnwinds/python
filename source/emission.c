@@ -118,6 +118,7 @@ wind_luminosity (f1, f2)
  * Comment:  Compton cooling is not included here because this
  * does not result in new photons.
  *
+ * XFRAME the luminosities calculated are all in the observer frame
  *
  **********************************************************/
 
@@ -145,7 +146,8 @@ total_emission (one, f1, f2)
   {
     if (geo.rt_mode == RT_MODE_MACRO)   //Switch for macro atoms (SS)
     {
-      xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);     //outer shellrecombinations
+      /* XFRAME the luminosities are divided by gamma to convert to the observer frame */
+      xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL) / xplasma->xgamma;     //outer shellrecombinations
 
       /*
        *The first term here is the fb cooling due to macro ions and the second gives
@@ -158,25 +160,23 @@ total_emission (one, f1, f2)
        * also be removed.
        * (SS)
        */
-      xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
+      xplasma->lum_lines = total_bb_cooling (xplasma, t_e) / xplasma->xgamma;
       xplasma->lum_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
-      xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      xplasma->lum_ff = total_free (one, t_e, f1, f2) / xplasma->xgamma;
       xplasma->lum_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
-      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      /* We compute the radiative recombination luminosirty - this is not the same as the rr cooling rate and
-         so is stored in a seperate variable */
-      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);  //outer shell recombinations
-
-
-
+      /* XFRAME the luminosities are divided by gamma to convert to the observer frame */
+      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2) / xplasma->xgamma;
+      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2) / xplasma->xgamma;
+      /* We compute the radiative recombination luminosity - this is not the same as the rr cooling rate and
+         so is stored in a separate variable */
+      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL) / xplasma->xgamma;  //outer shell recombinations
     }
   }
 
@@ -209,7 +209,7 @@ total_emission (one, f1, f2)
  *
  * The routine first generates a random number which is used to determine
  * in which wind cell  should be generated, and then  determines the
- * type of photon to generate.  Once this is doen the routine cycles thourhg
+ * type of photon to generate.  Once this is done the routine cycles through
  * the PlasmaCells generatating all of the photons for each cell at once.
  *
  *
@@ -233,7 +233,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int n, nn, np;
   int photstop;
   double xlum, xlumsum, lum;
-//OLD  double v[3];
   int icell, icell_old;
   int nplasma = 0;
   int nnscat;
@@ -432,11 +431,13 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
  * @return     The frequency of the transition
  *
  * @details
- * The routine geneerates a random number and uses this to select
+ * The routine generates a random number and uses this to select
  * the transition that was excited
  *
  * ### Notes ###
  *
+ * XFRAME This function requires quantities to be in the CMF
+ * 
  **********************************************************/
 
 double
@@ -461,6 +462,11 @@ one_line (one, nres)
     Error ("one_line: no lines %d %d\n", nline_min, nline_max);
     return (0);
   }
+
+  /*
+   * XFRAME both xplasma->lum_lines (in wind_cooling()) and lin_ptr->pow (in lum_lines())
+   * are calculated in the CMF
+   */
 
   xlum = xplasma->lum_lines * random_number (0.0, 1.0);
 
@@ -508,7 +514,11 @@ one_line (one, nres)
  * from the atomic data files.  If it is, then the gaunt factor determined
  * using data from Sutherland (1998).  If not, the gaunt factor is set
  * to 1.
- *
+ * 
+ * XFRAME total free free emission in this function is calculated CMF. If called in
+ * the cooling routines then this is left in the CMF. If called in the photon
+ * generation routines, this is converted to the observer frame.
+ * 
  **********************************************************/
 
 double

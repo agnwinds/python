@@ -156,6 +156,8 @@ kappa_ind_comp (xplasma, freq)
  * to multiply by the total integrated mean indensity times the Thormpson
  * cross section.
  *
+ * XFRAME this function requires the quantities to be in the CMF
+ *
  **********************************************************/
 
 double

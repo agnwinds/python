@@ -636,6 +636,10 @@ mc_estimator_normalise (n)
  * could include non-macro ions, but that should not matter since
  * since nbfu_jumps will be zero for these.
  *
+ * XFRAME total free bound emission in this function is calculated CMF. If called in
+ * the cooling routines then this is left in the CMF. If called in the photon
+ * generation routines, this is converted to the observer frame.
+ * 
  **********************************************************/
 
 double
@@ -712,6 +716,9 @@ total_fb_matoms (xplasma, t_e, f1, f2)
  * (due to collisions) for both macro atoms and simple ions. 
  *  It is used by the heating/cooling calculation to get the temperature.
  *
+ * XFRAME total bound-bound emission in this function is calculated CMF. If called in
+ * the cooling routines then this is left in the CMF. If called in the photon
+ * generation routines, this is converted to the observer frame.
  *
  **********************************************************/
 
