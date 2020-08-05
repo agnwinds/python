@@ -746,7 +746,7 @@ kbf_need (fmin, fmax)
 int sobolev_error_counter = 0;
 /**********************************************************/
 /**
- * @brief      calculates tau in the sobolev approxmation for a resonance, given the
+ * @brief      calculates tau in the sobolev approximation for a resonance, given the
  * conditions in the wind and the direction of the photon.
  *
  * It does not modify any of the variables that are passed to it, including for example
@@ -780,7 +780,7 @@ sobolev (one, x, den_ion, lptr, dvds)
      double dvds;
 {
   double tau, xden_ion, tau_x_dvds, levden_upper;
-  double two_level_atom (), d1, d2;
+  double d1, d2;
   int nion;
   double d_hold;
   int nplasma;
@@ -814,7 +814,7 @@ ion which was done above in calculate ds.  It was made necessary by a change in 
 calls to two_level atom
 */
     /* XFRAME  This seems to be to get level populations, and would seem to require CMF
-       regardless of whether the original imputs to sobolev were in Observer or CMF
+       regardless of whether the original inputs to sobolev were in Observer or CMF
      */
 
     d_hold = xplasma->density[nion];    // Store the density of this ion in the cell

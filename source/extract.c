@@ -313,7 +313,7 @@ extract_one (w, pp, itype, nspec)
 
   stuff_phot (pp, &pstart);
 
-/* Reweight the photons. Note that photons have already been frequency shifted prior 
+/* Re-weight the photons. Note that photons have already been frequency shifted prior
 to entering extract */
 
   if (itype == PTYPE_STAR || itype == PTYPE_BL)
@@ -342,7 +342,7 @@ needs to reweight
 
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {
-
+      // XFRAME we need to establish what to do about dv/ds
       dvds = dvwind_ds (pp);
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);

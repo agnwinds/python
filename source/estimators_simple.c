@@ -314,3 +314,117 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 
   return (0);
 }
+
+
+
+
+/**********************************************************/
+/**
+ * @brief Updates the estimators for calculating the radiation force.
+ *
+ * @param[in] PlasmaPtr xplasma  PlasmaPtr for the cell of interest
+ * @param[in] PhotPtr p  Photon pointer at the start of its path in the observer frame
+ * @param[in] PhotPtr phot_mid  Photon pointer at the midpoint in the observer frame
+ * @param[in] double ds  The path length travelled in the observer frame
+ * @param[in] int ndom  The domain of interest
+ * @param[in] double w_ave  The average weight along the photon's path
+ * @param[in] double z  The absorbed energy fraction
+ * @param[in] double frac_ff  The fractional contribution for free free opacity
+ * @param[in] double frac_auger The fractional contribution to opacity from Auger ionization
+ * @param[in] double frac_tot The fractional contribution
+ *
+ * @return Always return 0
+ *
+ * @details
+ *
+ * In non-macro mode, w_ave is an average weight but in macro mode weights are
+ * never reduced, so p->w is used instead.
+ *
+ * ### Notes ###
+ *
+ * This code in this function was originally in radiation but was moved to
+ * here to try and simplify radiation().
+ *
+ * XFRAME this function will calculate the force estimators in the observer
+ * frame and requires quantities in the observer frame.
+ *
+ **********************************************************/
+
+
+int
+update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac_auger, frac_tot)
+     PlasmaPtr xplasma;
+     PhotPtr p, phot_mid;
+     double ds, w_ave, z, frac_ff, frac_tot, frac_auger;
+     int ndom;
+{
+  int i;
+  double p_out[3], dp_cyl[3];
+
+  /*Deal with the special case of a spherical geometry */
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    renorm (phot_mid->x, 1);    //Create a unit vector in the direction of the photon from the origin
+  }
+
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, z * frac_ff / VLIGHT);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first component is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid->x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_ff[i] += dp_cyl[i];
+  }
+  xplasma->rad_force_ff[3] += length (dp_cyl);
+
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first component is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid->x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_bf[i] += dp_cyl[i];
+  }
+
+  xplasma->rad_force_bf[3] += length (dp_cyl);
+
+  stuff_v (p->lmn, p_out);
+  renorm (p_out, w_ave * ds * klein_nishina (p->freq));
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    dp_cyl[0] = dot (p_out, phot_mid->x);       //In the spherical geometry, the first component is the radial component
+    dp_cyl[1] = dp_cyl[2] = 0.0;
+  }
+  else
+  {
+    project_from_xyz_cyl (phot_mid->x, p_out, dp_cyl);
+    if (p->x[2] < 0)
+      dp_cyl[2] *= (-1);
+  }
+  for (i = 0; i < 3; i++)
+  {
+    xplasma->rad_force_es[i] += dp_cyl[i];
+  }
+  xplasma->rad_force_es[3] += length (dp_cyl);
+
+  return 0;
+}
