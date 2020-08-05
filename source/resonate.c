@@ -334,7 +334,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
           tau_sobolev = sobolev (one, p->x, dd, lin_ptr[nn], dvds);
 
-          //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using observer here 
+          //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using observer here
+          /* XFRAME -- possible inconsistency with what actually happens in the Sobolev routine here, plus
+             oustanding questions about how to get dv/ds */ 
 
 
           ttau += tau_sobolev;

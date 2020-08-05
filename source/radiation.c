@@ -374,7 +374,7 @@ radiation (p, ds)
 
   }
 
-  /* ZFRAME - We probably should change the name of freq to be phot_mid.freq everywhere */
+  /* XFRAME - We probably should change the name of freq to be phot_mid.freq everywhere */
 
   energy_abs_cmf = energy_abs_obs * phot_mid_cmf.freq / phot_mid.freq;
 

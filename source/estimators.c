@@ -387,11 +387,12 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
 
   /* Okay now know which estimator we wish to increment so do it. */
-
+  /* XFRAME This needs to be a CMF "weight" -- or more accurately, energy */ 
   weight_of_packet = p->w;
   dvds = fabs (dvds);           //make sure that it is positive
 
-
+  /* XFRAME -- this currently uses dvds - which relies on a linear relationship
+     between dv/ds and dnu/ds */
   if (tau_sobolev > 0.00001)
   {
     y = weight_of_packet * (1. - exp (-tau_sobolev)) / tau_sobolev / dvds;
@@ -412,6 +413,8 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   }
 
   /* Record contribution to energy absorbed by macro atoms. */
+  /* XFRAME -- we want the weight (energy) here to be a CMF value, since the emissivity 
+     will be calculated directly from this */
 
   mplasma->matom_abs[line_ptr->nconfigu] += weight_of_packet * (1. - exp (-tau_sobolev));
 
@@ -466,9 +469,19 @@ mc_estimator_normalise (n)
   mplasma = &macromain[xplasma->nplasma];
 
   /* All the estimators need the volume so get that first. */
-  /* JM 1507 - we use cell volume for all the estimators here */
+  /* JM 1507 - we use cell volume, rather than the filled volume for all the estimators here */
+  
+  /* XFRAME -- one->vol contains the CMF volume. This converts it to 
+     observer frame volume, or perhaps more correctly, it calculates the
+     Lorentz invariant quantity (Delta V Delta t). Because Delta t_obs == 1 
+     in the code, (Delta V Delta t) == (Delta V_obs * 1.0). 
+     Note, this is also equivalent to multiplying Delta V_cmf by Delta t_cmf,
+     which is Delta t_obs / gamma, i.e. 1.0/gamma. All other quantities that
+     have been incremented should have been done so with CMF values.
+  */
 
-  volume = one->vol;
+  volume = one->vol / one->xgamma_cen;
+
 
   /* bf estimators. During the mc calculation the quantity stored
      was weight * cross-section * path-length / frequency.
