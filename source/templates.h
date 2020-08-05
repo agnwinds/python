@@ -132,7 +132,8 @@ double pop_kappa_ff_array(void);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* estimators_simple.c */
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
-int update_flux_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
+int update_flux_estimators(PlasmaPtr xplasma, PhotPtr phot_mid, double ds_obs, double w_ave, int ndom);
+int update_force_estimators(PlasmaPtr xplasma, PhotPtr p, PhotPtr phot_mid, double ds, double w_ave, int ndom, double z, double frac_ff, double frac_auger, double frac_tot);
 /* setup_files.c */
 int init_log_and_windsave(int restart_stat);
 int setup_created_files(void);
@@ -582,7 +583,8 @@ int observer_to_local_frame(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame(PhotPtr p_in, PhotPtr p_out);
 int observer_to_local_frame_disk(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
-double observer_to_local_frame_ds(PhotPtr p, double ds_obs);
+double observer_to_local_frame_ds(PhotPtr p_obs, double ds_obs);
+double local_to_observer_frame_ds(PhotPtr p_obs, double ds_cmf);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

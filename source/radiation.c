@@ -76,13 +76,12 @@ radiation (p, ds)
   double kappa_inner_ion[n_inner_tot];
   double frac_inner_ion[n_inner_tot];
   double density, ft, tau, tau2;
-  double energy_abs, energy_abs_cmf;
+  double energy_abs_obs, energy_abs_cmf;
   int n, nion;
-  double q, x, z;
-  double w_ave, w_in, w_out;
-  double den_config ();
+  double q, x, z, z_obs;
+  double w_ave_obs, w_in, w_out;
   int nconf;
-  double p_in[3], p_out[3], dp_cyl[3];  //The initial and final momentum.
+  double p_in[3];               //The initial and final momentum.
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
@@ -353,7 +352,7 @@ radiation (p, ds)
 
   kappa_tot_obs = kappa_tot / observer_to_local_frame_ds (p, 1);
   tau = kappa_tot_obs * ds;
-  
+
   w_in = p->w;
 
   if (sane_check (tau))
@@ -365,19 +364,19 @@ radiation (p, ds)
   if (tau > 0.0001)
   {                             /* Need differentiate between thick and thin cases */
     x = exp (-tau);
-    energy_abs = w_in * (1. - x);
+    energy_abs_obs = w_in * (1. - x);
 
   }
   else
   {
     tau2 = tau * tau;
-    energy_abs = w_in * (tau - 0.5 * tau2);
+    energy_abs_obs = w_in * (tau - 0.5 * tau2);
 
   }
 
   /* ZFRAME - We probably should change the name of freq to be phot_mid.freq everywhere */
 
-  energy_abs_cmf = energy_abs * phot_mid_cmf.freq / phot_mid.freq;
+  energy_abs_cmf = energy_abs_obs * phot_mid_cmf.freq / phot_mid.freq;
 
   /* Calculate the reduction in weight - Compton scattering is not included, it is now included at scattering
      however induced Compton heating is not implemented at scattering, so it should remain here for the time being
@@ -397,17 +396,17 @@ radiation (p, ds)
   {                             /* Need differentiate between thick and thin cases */
     x = exp (-tau);
     p->w = w_out = w_in * x;
-    w_ave = (w_in - w_out) / tau;
+    w_ave_obs = (w_in - w_out) / tau;
   }
   else
   {
     tau2 = tau * tau;
     p->w = w_out = w_in * (1. - tau + 0.5 * tau2);      /*Calculate to second order */
-    w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
+    w_ave_obs = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
   }
 
-  phot_mid.w = w_ave;
-  phot_mid_cmf.w = w_ave_cmf = w_ave * phot_mid_cmf.freq / phot_mid.freq;
+  phot_mid.w = w_ave_obs;
+  phot_mid_cmf.w = w_ave_cmf = w_ave_obs * phot_mid_cmf.freq / phot_mid.freq;
 
 
   if (sane_check (p->w))
@@ -426,7 +425,7 @@ radiation (p, ds)
 
   if (modes.save_cell_stats && ncstat > 0)
   {
-    save_photon_stats (one, p, ds, w_ave);      // save photon statistics (extra diagnostics)
+    save_photon_stats (one, p, ds, w_ave_obs);  // save photon statistics (extra diagnostics)
   }
 
 
@@ -442,7 +441,7 @@ radiation (p, ds)
 
   ds_cmf = observer_to_local_frame_ds (&phot_mid, ds);
   update_banded_estimators (xplasma, &phot_mid_cmf, ds_cmf, w_ave_cmf, ndom);   //Update estimators
-  update_flux_estimators (xplasma, &phot_mid, ds, w_ave, ndom); //Update estimators
+  update_flux_estimators (xplasma, &phot_mid, ds, w_ave_obs, ndom);     //Update estimators
 
 
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
@@ -501,79 +500,8 @@ radiation (p, ds)
     }
   }
 
-  /* XFRAME  - This part needs to be broken out into a separate routine */
-
-  stuff_phot (p, &phot_mid);    // copy photon ptr
-  move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path
-
-  /*Deal with the special case of a spherical geometry */
-
-  if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
-  }
-
-
-
-  stuff_v (p->lmn, p_out);
-  renorm (p_out, z * frac_ff / VLIGHT);
-  if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
-    dp_cyl[1] = dp_cyl[2] = 0.0;
-  }
-  else
-  {
-    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-    if (p->x[2] < 0)
-      dp_cyl[2] *= (-1);
-  }
-  for (i = 0; i < 3; i++)
-  {
-    xplasma->rad_force_ff[i] += dp_cyl[i];
-  }
-  xplasma->rad_force_ff[3] += length (dp_cyl);
-
-
-  stuff_v (p->lmn, p_out);
-  renorm (p_out, (z * (frac_tot + frac_auger)) / VLIGHT);
-  if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
-    dp_cyl[1] = dp_cyl[2] = 0.0;
-  }
-  else
-  {
-    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-    if (p->x[2] < 0)
-      dp_cyl[2] *= (-1);
-  }
-  for (i = 0; i < 3; i++)
-  {
-    xplasma->rad_force_bf[i] += dp_cyl[i];
-  }
-
-  xplasma->rad_force_bf[3] += length (dp_cyl);
-
-
-  stuff_v (p->lmn, p_out);
-  renorm (p_out, w_ave * ds * klein_nishina (p->freq));
-  if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    dp_cyl[0] = dot (p_out, phot_mid.x);        //In the spherical geometry, the first comonent is the radial component
-    dp_cyl[1] = dp_cyl[2] = 0.0;
-  }
-  else
-  {
-    project_from_xyz_cyl (phot_mid.x, p_out, dp_cyl);
-    if (p->x[2] < 0)
-      dp_cyl[2] *= (-1);
-  }
-  for (i = 0; i < 3; i++)
-  {
-    xplasma->rad_force_es[i] += dp_cyl[i];
-  }
-  xplasma->rad_force_es[3] += length (dp_cyl);
+  z_obs = z * p_cmf.freq / p->freq;
+  update_force_estimators (xplasma, p, &phot_mid, ds, w_ave_obs, ndom, z_obs, frac_ff, frac_auger, frac_tot);
 
   return (0);
 }
