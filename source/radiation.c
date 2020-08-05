@@ -86,7 +86,7 @@ radiation (p, ds)
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot, phot_cmf, phot_mid, phot_mid_cmf, p_cmf;
-  int ndom, i;
+  int ndom;
   double ds_cmf, w_ave_cmf;
 
 

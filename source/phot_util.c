@@ -106,6 +106,9 @@ move_phot (pp, ds)
      PhotPtr pp;
      double ds;
 {
+  int ierr;
+
+  ierr = check_frame (pp, F_OBSERVER, "move_phot");
 
   pp->x[0] += pp->lmn[0] * ds;
   pp->x[1] += pp->lmn[1] * ds;
@@ -113,7 +116,7 @@ move_phot (pp, ds)
 
   pp->ds += ds;
   pp->path += fabs (ds);
-  return (0);
+  return (ierr);
 }
 
 

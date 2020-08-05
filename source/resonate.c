@@ -23,7 +23,7 @@
 #include "atomic.h"
 #include "python.h"
 
-struct photon cds_phot_old_observer, cds_phot_old_loc;
+//OLD struct photon cds_phot_old_observer, cds_phot_old_loc;
 
 
 /**********************************************************/
@@ -96,6 +96,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   double dvds, dd;
   double dvds1, dvds2;
   struct photon p_start, p_stop, p_now;
+  struct photon p_start_cmf, p_stop_cmf, p_now_cmf;
   int init_dvds;
   double kap_bf_tot, kap_ff, kap_cont, kap_cont_obs;
   double tau_sobolev;
@@ -131,24 +132,30 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      frequencies at the ends of the paths, but we do not want photon direction to change to CMF frame
    */
 
-  if (comp_phot (&cds_phot_old_observer, p))
-  {
-    observer_to_local_frame (p, &p_start);
-  }
-  else
-  {
-    stuff_phot (&cds_phot_old_loc, &p_start);
-  }
+/*  ksl I have removed storing and retrieving old values, as it is not obvious this much of a speed
+    More lines would need to be added if it does help
+*/
+//OLD  if (comp_phot (&cds_phot_old_observer, p))
+//OLD  {
+//OLD    observer_to_local_frame (p, &p_start_cmf);
+//OLD  }
+//OLD  else
+//OLD  {
+//OLD    stuff_phot (&cds_phot_old_loc, &p_start_cmf);
+//OLD  }
+
+  stuff_phot (p, &p_start);
+  observer_to_local_frame (&p_start, &p_start_cmf);
 
   stuff_phot (p, &p_stop);
   move_phot (&p_stop, smax);
-  stuff_phot (&p_stop, &cds_phot_old_observer);
-  observer_to_local_frame (&p_stop, &p_stop);
-  stuff_phot (&p_stop, &cds_phot_old_loc);
+//OLD  stuff_phot (&p_stop, &cds_phot_old_observer);
+  observer_to_local_frame (&p_stop, &p_stop_cmf);
+//OLD  stuff_phot (&p_stop_cmf, &cds_phot_old_loc);
 
 
 
-  /* At this point p_start and pstop are in the local frame 
+  /* At this point p_start_cmf and pstop_cmf are in the local frame 
    * at the and p_stop is at the maximum distance it can 
    * travel.  We want to check that the frequncy shift is 
    * not too great along the path that a linear approximation
@@ -163,18 +170,19 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   {
     stuff_phot (p, &p_now);
     move_phot (&p_now, smax * 0.5);
-    observer_to_local_frame (&p_now, &p_now);
-    diff = fabs (p_now.freq - 0.5 * (p_start.freq + p_stop.freq)) / p_start.freq;
+    observer_to_local_frame (&p_now, &p_now_cmf);
+    diff = fabs (p_now_cmf.freq - 0.5 * (p_start_cmf.freq + p_stop_cmf.freq)) / p_start_cmf.freq;
     if (diff < MAXDIFF)
     {
       break;
     }
     stuff_phot (&p_now, &p_stop);
+    stuff_phot (&p_now_cmf, &p_stop_cmf);
     smax *= 0.5;
   }
 
-  freq_inner = p_start.freq;
-  freq_outer = p_stop.freq;
+  freq_inner = p_start_cmf.freq;
+  freq_outer = p_stop_cmf.freq;
 
 
 
@@ -332,11 +340,13 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
 
-          tau_sobolev = sobolev (one, p->x, dd, lin_ptr[nn], dvds);
+          /* sobolev does not use x, unless dd is les than 0 */
+          tau_sobolev = sobolev (one, p_now.x, dd, lin_ptr[nn], dvds);
+
 
           //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using observer here
           /* XFRAME -- possible inconsistency with what actually happens in the Sobolev routine here, plus
-             oustanding questions about how to get dv/ds */ 
+             oustanding questions about how to get dv/ds. Currently dv/ds is the observer frame dv/ds */
 
 
           ttau += tau_sobolev;
