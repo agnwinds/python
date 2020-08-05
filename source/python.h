@@ -777,8 +777,11 @@ typedef struct wind
   double dvds_max, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
-                                   where the volume is the volume that is actually filled with material. */
-  double xgamma;                /* 1./sqrt(1-beta**2) at x */
+                                   where the volume is the volume that is actually filled with material. 
+                                   The vol that is stored here after the progam has intialized itself is the
+                                   CMF volume.
+                                 */
+  double xgamma,xgamma_cen;     /* 1./sqrt(1-beta**2) at x at edge and center of cell*/
   double dfudge;                /* A number which defines a push through distance for this cell, which replaces the
                                    global variable DFUDGE in many instances */
   enum inwind_enum
@@ -804,7 +807,7 @@ typedef struct plasma
   double ne;                    /* Electron density in the shell (CMF) */
   double rho;                   /* Density at the center of the cell. (CMF) For clumped models, this is rho of the clump */
   double vol;                   /* Volume of this cell in CMF frame (more specifically the volume  that is filled with material
-                                   which can differs from the valid volume of the cell due to clumping. */
+                                   which can differs from the valid volume of the cell due to clumping.) */
   double xgamma;                /* 1./sqrt(1-beta**2) at center of cell */
   double *density;              /* The number density of a specific ion in the CMF.  The order of the ions is
                                    the same as read in by the atomic data routines. */

@@ -24,9 +24,9 @@
  * spectra in each Plasma cell
  *
  * @param [in,out] PlasmaPtr  xplasma   PlasmaPtr for the cell of interest
- * @param [in] PhotPtr  p   Photon pointer
- * @param [in] double  ds   ds travelled
- * @param [in] double  w_ave   the weight of the photon in the cell. 
+ * @param [in] PhotPtr  p   Photon pointer in CMF frame
+ * @param [in] double  ds   ds travelled in CMF frame
+ * @param [in] double  w_ave   the weight of the photon in CMF frame 
  *
  * @return  Always returns 0
  *
@@ -58,6 +58,7 @@
  * information in some of them.
  *
  * XFRAME - update_banded_estimators takes CMF inputs
+ * The photon frequency and number are used.
  * 
  **********************************************************/
 
@@ -226,9 +227,9 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
  * spectra in each Plasma cell
  *
  * @param [in,out] PlasmaPtr  xplasma   PlasmaPtr for the cell of interest
- * @param [in] PhotPtr  p   Photon pointer
- * @param [in] double  ds   ds travelled
- * @param [in] double  w_ave   the weight of the photon in the cell. 
+ * @param [in] PhotPtr  phot_mid   Photon pointer at midpt in Observer frame
+ * @param [in] double  ds   ds travelled in Observer frame
+ * @param [in] double  w_ave   the weight of the photon in Observer frame
  *
  * @return  Always returns 0
  *
@@ -253,34 +254,32 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
  * information in some of them.
  *
  *
- * XFRAME The flux estimators are/need to be  constructed in the Obsever frame
+ * XFRAME The flux estimators are/need to be constructed in the Observer frame
+ * Inputs are required in the Observer frame
  * 
  **********************************************************/
 
 
 
 int
-update_flux_estimators (xplasma, p, ds, w_ave, ndom)
+update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
      PlasmaPtr xplasma;
-     PhotPtr p;
-     double ds;
+     PhotPtr phot_mid;
+     double ds_obs;
      double w_ave;
      int ndom;
 {
   double flux[3];
   double p_dir_cos[3];
-  struct photon phot_mid;
 
 /* The lines below compute the flux element of this photon */
 
-  stuff_phot (p, &phot_mid);    // copy photon ptr
-  move_phot (&phot_mid, ds / 2.);       // get the location of the photon mid-path 
-  stuff_v (p->lmn, p_dir_cos);  //Get the direction of the photon packet
+  stuff_v (phot_mid->lmn, p_dir_cos);   //Get the direction of the photon packet
 
-  renorm (p_dir_cos, w_ave * ds);       //Renormalise the direction into a flux element
-  project_from_xyz_cyl (phot_mid.x, p_dir_cos, flux);   //Go from a direction cosine into a cartesian vector
+  renorm (p_dir_cos, w_ave * ds_obs);   //Renormalise the direction into a flux element
+  project_from_xyz_cyl (phot_mid->x, p_dir_cos, flux);  //Go from a direction cosine into a cartesian vector
 
-  if (p->x[2] < 0)              //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
 
 
@@ -288,20 +287,20 @@ update_flux_estimators (xplasma, p, ds, w_ave, ndom)
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
-    renorm (phot_mid.x, 1);     //Create a unit vector in the direction of the photon from the origin
-    flux[0] = dot (p_dir_cos, phot_mid.x);      //In the spherical geometry, the first comonent is the radial flux
+    renorm (phot_mid->x, 1);    //Create a unit vector in the direction of the photon from the origin
+    flux[0] = dot (p_dir_cos, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
     flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
   }
 
 /* We now update the fluxes in the three bands */
 
 
-  if (p->freq < UV_low)
+  if (phot_mid->freq < UV_low)
   {
     vadd (xplasma->F_vis, flux, xplasma->F_vis);
     xplasma->F_vis[3] += length (flux);
   }
-  else if (p->freq > UV_hi)
+  else if (phot_mid->freq > UV_hi)
   {
     vadd (xplasma->F_Xray, flux, xplasma->F_Xray);
     xplasma->F_Xray[3] += length (flux);

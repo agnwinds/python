@@ -234,6 +234,9 @@ usually analytic expressions
  * This routine is used to set up the grid of velocities at the corners of
  * grid cells.  It is not used later on.
  *
+ * The routine works for imported models as well, even in the case
+ * the model velocity is actually one of the inputs.
+ *
  **********************************************************/
 
 double
@@ -300,13 +303,16 @@ model_velocity (ndom, x, v)
  *
  * @details
  * 
- * The routien calls model_velocity multiple times to calculate the velocity
+ * The routine calls model_velocity multiple times to calculate the velocity
  * gradient tensor at a particular position.
  *
  * ### Notes ###
  *
  * This routine is normally used only during the initialization
  * of the wind
+ *
+ * Since the routine calls model_velocity directly, and not vwind_xyz
+ * it can be called before wmain.v has been populated.
  *
  **********************************************************/
 

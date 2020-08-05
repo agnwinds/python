@@ -400,24 +400,24 @@ int translate_in_wind_failure = 0;
  * @param [in, out] PhotPtr  p   A photon
  * @param [in] double  tau_scat   The depth at which the photon will scatter
  * @param [out] double *  tau   The tau of a resonance
- * @param [out] int *  nres   The resonaance which caused the photon to stop
+ * @param [out] int *  nres   The resonance which caused the photon to stop
  * @return     A status indicated whether the photon has stopped for a scattering
- * even of for some other teason
+ * even of for some other reason
  *
  * @details
  * It calculates and updates the final position of the photon p, the optical depth tau after
- * 	having translated the photon, and, if the photon is scattered, the number of the resonance
- * 	responsible for scattering (or absorbing) the photon bundle.
+ * having translated the photon, and, if the photon is scattered, the number of the resonance
+ * responsible for scattering (or absorbing) the photon bundle.
  *
- * 	These last two quantities are calculated in ds_calculate and simply passed back.
- *
- * 	translate_in_wind returns that status directly to the calling routine.
+ * In the simple atom case, the weight of the photon is also reduced as a result
+ * of continuum absorption, so that what is returned final weight of the photon
+ * in the observer frame..
  *
  * ### Notes ###
  *
  * In addition to moving the photon, the routine also updates some values
- * having to do with the radiation filed both in and out of macro atom
- * mode.
+ * having to do with the radiation field via calls to radiation (simple atoms)
+ * or update_bf_estimators (macro-atoms)
  *
  **********************************************************/
 int
@@ -431,7 +431,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 {
 
   int n;
-  double smax, s, ds_current;
+  double smax, s, ds_current, ds_cmf;
   int istat;
   int nplasma;
   int ndom, ndom_current;
@@ -440,6 +440,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 
   WindPtr one;
   PlasmaPtr xplasma;
+  struct photon phot_mid, phot_mid_cmf; // Photon at the midpt of its path in the cell
 
 
 /* First verify that the photon is in the grid, and if not
@@ -536,40 +537,54 @@ The choice of SMAX_FRAC can affect execution time.*/
 
 
 
-/* OK now we increment the radiation field in the cell, translate the photon and wrap
-   things up If the photon is going to scatter in this cell, radiation also reduces
-   the weight of the photon due to continuum absorption, e.g. free free */
+/* We now increment the radiation field in the cell, translate the photon and wrap
+   things up.  For simple atoms, the routine radiation also reduces
+   the weight of the photon due to continuum absorption, e.g. free free.
+   */
 
 /* XFRAME - flux estimators needs to go here, but need different variables, or to incoporate mofe logig into flux_estimators */
 
   if (geo.rt_mode == RT_MODE_MACRO)
-  {                             // Macro-method
+  {
     /* In the macro-method, b-f and other continuum processes do not reduce the photon
        weight, but are treated as as scattering processes.  Therefore most of what was in
-       subroutine radiation can be avoided.
+       subroutine radiation for the simple atom case can be avoided.  
      */
 
     one = &w[p->grid];
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
 
+    /* XFRAME next lines to prefare for bf_estimator_call */
+    stuff_phot (p, &phot_mid);
+    move_phot (&phot_mid, 0.5 * ds_current);
+    observer_to_local_frame (&phot_mid, &phot_mid_cmf);
+    ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
+
     if (geo.ioniz_or_extract == 1)
     {
       xplasma->ntot++;          // EP 11-19: Moved so only increments during ionisation cycles
 
       /* For an ionization cycle */
-      bf_estimators_increment (one, p, ds_current);
+      /* XFRAME -- we are assuming that p and ds_current are observer frame values */
+//OLD      bf_estimators_increment (one, p, ds_current);
+      bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
 
       /*photon weight times distance in the shell is proportional to the mean intensity */
-      xplasma->j += p->w * ds_current;
+//OLD      xplasma->j += p->w * ds_current;
+      xplasma->j += phot_mid_cmf.w * ds_cmf;
 
       /* frequency weighted by the weights and distance in the shell.  See eqn 2 ML93 */
-      xplasma->ave_freq += p->freq * p->w * ds_current;
+//OLD      xplasma->ave_freq += p->freq * p->w * ds_current;
+      xplasma->ave_freq += phot_mid_cmf.freq * phot_mid_cmf.w * ds_cmf;
 
     }
   }
   else
   {
+/* XFRAME as long as radiation needs both obs and cmf frame data we cannot eonvert to cmf
+   Also, because in radiation we split opacities by process, we cannot simply pass along
+   tau. */
     radiation (p, ds_current);
   }
 
