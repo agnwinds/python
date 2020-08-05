@@ -147,7 +147,7 @@ total_emission (one, f1, f2)
     if (geo.rt_mode == RT_MODE_MACRO)   //Switch for macro atoms (SS)
     {
       /* XFRAME the luminosities are divided by gamma to convert to the observer frame */
-      xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL) / xplasma->xgamma;     //outer shellrecombinations
+      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL)) / xplasma->xgamma;     //outer shellrecombinations
 
       /*
        *The first term here is the fb cooling due to macro ions and the second gives
