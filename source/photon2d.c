@@ -565,19 +565,9 @@ The choice of SMAX_FRAC can affect execution time.*/
     {
       xplasma->ntot++;          // EP 11-19: Moved so only increments during ionisation cycles
 
-      /* For an ionization cycle */
+      /* Increment the bound-free estimators for macro-atoms */
       /* XFRAME -- we are assuming that p and ds_current are observer frame values */
-//OLD      bf_estimators_increment (one, p, ds_current);
       bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
-
-      /*photon weight times distance in the shell is proportional to the mean intensity */
-//OLD      xplasma->j += p->w * ds_current;
-      xplasma->j += phot_mid_cmf.w * ds_cmf;
-
-      /* frequency weighted by the weights and distance in the shell.  See eqn 2 ML93 */
-//OLD      xplasma->ave_freq += p->freq * p->w * ds_current;
-      xplasma->ave_freq += phot_mid_cmf.freq * phot_mid_cmf.w * ds_cmf;
-
     }
   }
   else
