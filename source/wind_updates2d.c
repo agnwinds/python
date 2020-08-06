@@ -61,7 +61,7 @@ wind_update (w)
 WindPtr (w);
 {
   int n, i, j, ii;
-  double trad, nh;
+  double nh;
 
   /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double wtest, xsum, psum, fsum, lsum, csum, icsum, ausum, chexsum;
@@ -188,96 +188,8 @@ WindPtr (w);
          n, w[nwind].ndom, volume, w[nwind].rcen, w[nwind].thetacen, plasmamain[n].ntot);
     }
 
-    if (plasmamain[n].ntot > 0)
-    {
-      wtest = plasmamain[n].ave_freq;
-      plasmamain[n].ave_freq /= plasmamain[n].j;        /* Normalization to frequency moment */
-      if (sane_check (plasmamain[n].ave_freq))
-      {
-        Error ("wind_update:sane_check %d ave_freq %e j %e ntot %d\n", n, wtest, plasmamain[n].j, plasmamain[n].ntot);
-      }
-
-      plasmamain[n].j /= (4. * PI * volume);
-      plasmamain[n].j_direct /= (4. * PI * volume);
-      plasmamain[n].j_scatt /= (4. * PI * volume);
-
-      plasmamain[n].t_r_old = plasmamain[n].t_r;        // Store the previous t_r in t_r_old immediately before recalculating
-      trad = plasmamain[n].t_r = PLANCK * plasmamain[n].ave_freq / (BOLTZMANN * 3.832);
-      plasmamain[n].w = PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad * trad);
-
-
-      if (plasmamain[n].w > 1e10)
-      {
-        Error ("wind_update: Huge w %8.2e in cell %d trad %10.2e j %8.2e\n", plasmamain[n].w, n, trad, plasmamain[n].j);
-      }
-      if (sane_check (trad) || sane_check (plasmamain[n].w))
-      {
-        Error ("wind_update:sane_check %d trad %8.2e w %8.2g\n", n, trad, plasmamain[n].w);
-        Error ("wind_update: ave_freq %8.2e j %8.2e\n", plasmamain[n].ave_freq, plasmamain[n].j);
-        Exit (0);
-      }
-    }
-    else
-    {                           /* It is not clear what to do with no photons in a cell */
-
-      plasmamain[n].j = plasmamain[n].j_direct = plasmamain[n].j_scatt = 0;
-      trad = plasmamain[n].t_r;
-      plasmamain[n].t_e *= 0.7;
-      if (plasmamain[n].t_e < MIN_TEMP)
-        plasmamain[n].t_e = MIN_TEMP;
-      plasmamain[n].w = 0;
-    }
-
-
-    /* Calculate the frequency banded j and ave_freq variables */
-
-    for (i = 0; i < geo.nxfreq; i++)
-    {                           /*loop over number of bands */
-      if (plasmamain[n].nxtot[i] > 0)
-      {                         /*Check we actually have some photons in the cell in this band */
-
-        plasmamain[n].xave_freq[i] /= plasmamain[n].xj[i];      /*Normalise the average frequency */
-        plasmamain[n].xsd_freq[i] /= plasmamain[n].xj[i];       /*Normalise the mean square frequency */
-        plasmamain[n].xsd_freq[i] = sqrt (plasmamain[n].xsd_freq[i] - (plasmamain[n].xave_freq[i] * plasmamain[n].xave_freq[i]));       /*Compute standard deviation */
-        plasmamain[n].xj[i] /= (4 * PI * volume);       /*Convert to radiation density */
-
-      }
-      else
-      {
-        plasmamain[n].xj[i] = 0;        /*If no photons, set both radiation estimators to zero */
-        plasmamain[n].xave_freq[i] = 0;
-        plasmamain[n].xsd_freq[i] = 0;  /*NSH 120815 and also the SD ???? */
-      }
-    }
-
-/* 1108 NSH End of loop */
-
-
-
-    nh = plasmamain[n].rho * rho2nh;
-
-/* 1110 NSH Normalise IP, which at this point should be
- * the number of photons in a cell by dividing by volume
- * and number density of hydrogen in the cell
- * */
-
-    plasmamain[n].ip /= (VLIGHT * volume * nh);
-    plasmamain[n].ip_direct /= (VLIGHT * volume * nh);
-    plasmamain[n].ip_scatt /= (VLIGHT * volume * nh);
-
-/* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
-
-    plasmamain[n].xi *= 4. * PI;
-    plasmamain[n].xi /= (volume * nh);
-    for (i = 0; i < 4; i++)
-    {
-      plasmamain[n].rad_force_es[i] = plasmamain[n].rad_force_es[i] * (volume * plasmamain[n].ne) / (volume * VLIGHT);
-/* Normalise the computed flux in cells by band */
-      plasmamain[n].F_vis[i] = plasmamain[n].F_vis[i] / volume;
-      plasmamain[n].F_UV[i] = plasmamain[n].F_UV[i] / volume;
-      plasmamain[n].F_Xray[i] = plasmamain[n].F_Xray[i] / volume;
-    }
-
+    /* this routine normalises the unbanded and banded estimators for simple atoms in this cell */
+    normalise_simple_estimators (&plasmamain[n]);
 
     /* If geo.adiabatic is true, then calculate the adiabatic cooling using the current, i.e
      * previous value of t_e.  Note that this may not be  best way to determine the cooling.

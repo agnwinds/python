@@ -134,6 +134,7 @@ double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 int update_flux_estimators(PlasmaPtr xplasma, PhotPtr phot_mid, double ds_obs, double w_ave, int ndom);
 int update_force_estimators(PlasmaPtr xplasma, PhotPtr p, PhotPtr phot_mid, double ds, double w_ave, int ndom, double z, double frac_ff, double frac_auger, double frac_tot);
+int normalise_simple_estimators(PlasmaPtr xplasma);
 /* setup_files.c */
 int init_log_and_windsave(int restart_stat);
 int setup_created_files(void);
