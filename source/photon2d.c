@@ -563,8 +563,6 @@ The choice of SMAX_FRAC can affect execution time.*/
 
     if (geo.ioniz_or_extract == 1)
     {
-      xplasma->ntot++;          // EP 11-19: Moved so only increments during ionisation cycles
-
       /* Increment the bound-free estimators for macro-atoms */
       /* XFRAME -- we are assuming that p and ds_current are observer frame values */
       bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
