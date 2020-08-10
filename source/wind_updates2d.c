@@ -61,16 +61,17 @@ wind_update (w)
 WindPtr (w);
 {
   int n, i, j, ii;
-  double nh;
+//OLD  double nh;
 
   /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
-  double wtest, xsum, psum, fsum, lsum, csum, icsum, ausum, chexsum;
+//OLD  double wtest, xsum, psum, fsum, lsum, csum, icsum, ausum, chexsum;
+  double xsum, psum, fsum, lsum, csum, icsum, ausum, chexsum;
   double cool_sum, lum_sum, rad_sum;    //1706 - the total cooling and luminosity of the wind
   double apsum, aausum, abstot; //Absorbed photon energy from PI and auger
   double c_rec, n_rec, o_rec, fe_rec;   //1701- NSH more outputs to show cooling from a few other elements
   double c_lum, n_lum, o_lum, fe_lum;   //1708- NSH and luminosities as well
   double cool_dr_metals;
-  int nn;                       //1701 - loop variable to compute recomb cooling
+  int nn;
 
   double volume;
   double vol;

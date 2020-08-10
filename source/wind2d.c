@@ -168,24 +168,6 @@ define_wind ()
 
   wind_complete (w);
 
-  /* XFRAME - Calculate gammas for wind cells, and make volumes co-moving volumes */
-
-  for (n = 0; n < NDIM2; n++)
-  {
-    if (rel_mode == REL_MODE_FULL)
-    {
-      w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
-      model_velocity (w[n].ndom, w[n].xcen, v);
-      w[n].xgamma_cen = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
-      w[n].vol *= w[n].xgamma_cen;
-
-    }
-    else
-    {
-      w[n].xgamma = w[n].xgamma_cen = 1.;
-    }
-  }
-
   /* Now determine the valid volumes of each cell and also determine whether the cells are in all
      or partially in the wind.
    */
@@ -226,6 +208,24 @@ define_wind ()
   }
 
 
+
+  /* XFRAME - Calculate gammas for wind cells, and make volumes co-moving volumes */
+
+  for (n = 0; n < NDIM2; n++)
+  {
+    if (rel_mode == REL_MODE_FULL)
+    {
+      w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
+      model_velocity (w[n].ndom, w[n].xcen, v);
+      w[n].xgamma_cen = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
+      w[n].vol *= w[n].xgamma_cen;
+
+    }
+    else
+    {
+      w[n].xgamma = w[n].xgamma_cen = 1.;
+    }
+  }
 
 
 /* The routines above have established the volumes of the cells that are in the wind
