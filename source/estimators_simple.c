@@ -457,12 +457,16 @@ normalise_simple_estimators (xplasma)
      PlasmaPtr xplasma;
 {
   int i, nwind;
-  double trad, volume, nh, wtest;
+  double radiation_temperature, nh, wtest;
+  double volume_cmf, volume_obs;
+  double electron_density_obs;
 
   nwind = xplasma->nwind;
 
   /* XFRAME -- this needs to be the correct volume, or more correctly, the correct Delta V Delta t */
-  volume = wmain[nwind].vol;
+  volume_cmf = wmain[nwind].vol;
+  volume_obs = volume_cmf / wmain[nwind].xgamma_cen;
+  electron_density_obs = xplasma->ne / wmain[nwind].xgamma_cen; // Mihalas & Mihalas p146
 
   if (xplasma->ntot > 0)
   {
@@ -473,37 +477,35 @@ normalise_simple_estimators (xplasma)
       Error ("normalise_simple_estimators:sane_check %d ave_freq %e j %e ntot %d\n", xplasma->nplasma, wtest, xplasma->j, xplasma->ntot);
     }
 
-    xplasma->j /= (4. * PI * volume);
-    xplasma->j_direct /= (4. * PI * volume);
-    xplasma->j_scatt /= (4. * PI * volume);
+    xplasma->j /= (4. * PI * volume_cmf);
+    xplasma->j_direct /= (4. * PI * volume_cmf);
+    xplasma->j_scatt /= (4. * PI * volume_cmf);
 
     xplasma->t_r_old = xplasma->t_r;    // Store the previous t_r in t_r_old immediately before recalculating
-    trad = xplasma->t_r = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
-    xplasma->w = PI * xplasma->j / (STEFAN_BOLTZMANN * trad * trad * trad * trad);
-
+    radiation_temperature = xplasma->t_r = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
+    xplasma->w =
+      PI * xplasma->j / (STEFAN_BOLTZMANN * radiation_temperature * radiation_temperature * radiation_temperature * radiation_temperature);
 
     if (xplasma->w > 1e10)
     {
-      Error ("normalise_simple_estimators: Huge w %8.2e in cell %d trad %10.2e j %8.2e\n", xplasma->w, xplasma->nplasma, trad, xplasma->j);
+      Error ("normalise_simple_estimators: Huge w %8.2e in cell %d trad %10.2e j %8.2e\n", xplasma->w, xplasma->nplasma,
+             radiation_temperature, xplasma->j);
     }
-    if (sane_check (trad) || sane_check (xplasma->w))
+    if (sane_check (radiation_temperature) || sane_check (xplasma->w))
     {
-      Error ("normalise_simple_estimators:sane_check %d trad %8.2e w %8.2g\n", xplasma->nplasma, trad, xplasma->w);
+      Error ("normalise_simple_estimators:sane_check %d trad %8.2e w %8.2g\n", xplasma->nplasma, radiation_temperature, xplasma->w);
       Error ("normalise_simple_estimators: ave_freq %8.2e j %8.2e\n", xplasma->ave_freq, xplasma->j);
       Exit (0);
     }
   }
   else
   {                             /* It is not clear what to do with no photons in a cell */
-
     xplasma->j = xplasma->j_direct = xplasma->j_scatt = 0;
-    trad = xplasma->t_r;
     xplasma->t_e *= 0.7;
     if (xplasma->t_e < MIN_TEMP)
       xplasma->t_e = MIN_TEMP;
     xplasma->w = 0;
   }
-
 
   /* Calculate the frequency banded j and ave_freq variables */
 
@@ -511,12 +513,10 @@ normalise_simple_estimators (xplasma)
   {                             /*loop over number of bands */
     if (xplasma->nxtot[i] > 0)
     {                           /*Check we actually have some photons in the cell in this band */
-
       xplasma->xave_freq[i] /= xplasma->xj[i];  /*Normalise the average frequency */
       xplasma->xsd_freq[i] /= xplasma->xj[i];   /*Normalise the mean square frequency */
       xplasma->xsd_freq[i] = sqrt (xplasma->xsd_freq[i] - (xplasma->xave_freq[i] * xplasma->xave_freq[i]));     /*Compute standard deviation */
-      xplasma->xj[i] /= (4 * PI * volume);      /*Convert to radiation density */
-
+      xplasma->xj[i] /= (4 * PI * volume_cmf);  /*Convert to radiation density */
     }
     else
     {
@@ -526,30 +526,39 @@ normalise_simple_estimators (xplasma)
     }
   }
 
-/* 1108 NSH End of loop */
+  /* 1108 NSH End of loop */
 
   nh = xplasma->rho * rho2nh;
 
-/* 1110 NSH Normalise IP, which at this point should be
- * the number of photons in a cell by dividing by volume
- * and number density of hydrogen in the cell
- * */
+  /* 1110 NSH Normalise IP, which at this point should be
+   * the number of photons in a cell by dividing by volume
+   * and number density of hydrogen in the cell
+   */
 
-  xplasma->ip /= (VLIGHT * volume * nh);
-  xplasma->ip_direct /= (VLIGHT * volume * nh);
-  xplasma->ip_scatt /= (VLIGHT * volume * nh);
+  xplasma->ip /= (VLIGHT * volume_cmf * nh);
+  xplasma->ip_direct /= (VLIGHT * volume_cmf * nh);
+  xplasma->ip_scatt /= (VLIGHT * volume_cmf * nh);
 
-/* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
+  /* 1510 NSH Normalise xi, which at this point should be the luminosity of
+   * ionizing photons in a cell (just the sum of photon weights)
+   */
 
   xplasma->xi *= 4. * PI;
-  xplasma->xi /= (volume * nh);
+  xplasma->xi /= (volume_cmf * nh);
+
+  /*
+   * XFRAME -- the radiation force and flux estimators are all observer frame
+   * quantities and hence need to be normalised with observer frame volumes
+   * and densities
+   */
+
   for (i = 0; i < 4; i++)
   {
-    xplasma->rad_force_es[i] = xplasma->rad_force_es[i] * (volume * xplasma->ne) / (volume * VLIGHT);
-/* Normalise the computed flux in cells by band */
-    xplasma->F_vis[i] = xplasma->F_vis[i] / volume;
-    xplasma->F_UV[i] = xplasma->F_UV[i] / volume;
-    xplasma->F_Xray[i] = xplasma->F_Xray[i] / volume;
+    xplasma->rad_force_es[i] *= (volume_obs * electron_density_obs) / (volume_obs * VLIGHT);
+    xplasma->F_vis[i] /= volume_obs;
+    xplasma->F_UV[i] /= volume_obs;
+    xplasma->F_Xray[i] /= volume_obs;
   }
+
   return (0);
 }
