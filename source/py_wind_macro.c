@@ -54,7 +54,7 @@ xadiabatic_cooling_summary (w, rootname, ochoice)
   for (n = 0; n < NDIM2; n++)
   {
     aaa[n] = 0;
-    if (w[n].vol > 0.0)
+    if (w[n].inwind >= 0)
     {
       t_e = plasmamain[w[n].nplasma].t_e;
       num_recomb (&plasmamain[w[n].nplasma], t_e, 1);
@@ -563,7 +563,7 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
   for (n = 0; n < NDIM2; n++)
   {
     aaa[n] = 0;
-    if (w[n].vol > 0.0)
+    if (w[n].inwind >= 0)
     {
       xden = -1;
 
@@ -756,7 +756,7 @@ level_emissoverview (nlev, w, rootname, ochoice)
     aaa[n] = 0;
     nplasma = w[n].nplasma;
 
-    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (w[n].inwind >= 0 && plasmamain[nplasma].ne > 1.0)
     {
       if (nlev != 0)
       {
@@ -859,7 +859,7 @@ level_escapeoverview (nlev, w, rootname, ochoice)
     aaa[n] = 0;
     nplasma = w[n].nplasma;
 
-    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (w[n].inwind >= 0 && plasmamain[nplasma].ne > 1.0)
     {
       xplasma = &plasmamain[nplasma];
       aaa[n] = p_escape (lin_ptr[nline], xplasma);
@@ -952,7 +952,7 @@ level_tauoverview (nlev, w, rootname, ochoice)
     aaa[n] = 0;
     nplasma = w[n].nplasma;
 
-    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (w[n].inwind >= 0 && plasmamain[nplasma].ne > 1.0)
     {
       xplasma = &plasmamain[nplasma];
       one = &wmain[xplasma->nwind];

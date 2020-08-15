@@ -1005,7 +1005,7 @@ get_ion (ndom, element, istate, iswitch, name)
   {
     x[n] = 0;
     nplasma = wmain[nstart + n].nplasma;
-    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].rho > 0.0)
+    if (wmain[nstart + n].inwind >= 0 && plasmamain[nplasma].rho > 0.0)
     {
       if (iswitch == 0)
       {
@@ -1114,7 +1114,7 @@ get_one (ndom, variable_name)
   for (n = 0; n < ndim2; n++)
   {
     x[n] = 0;
-    if (wmain[n + nstart].vol > 0.0)
+    if (wmain[n + nstart].inwind >= 0)
     {
       nplasma = wmain[n + nstart].nplasma;
 
