@@ -557,7 +557,7 @@ total_free (one, t_e, f1, f2)
   }
 
 
-  if (gaunt_n_gsqrd == 0)       //Maintain old behaviour because atomic data files do not include gaunt factor.
+  if (gaunt_n_gsqrd == 0)       //fallback soln if atomic data files do not include gaunt factor.
   {
     g_ff_h = g_ff_he = 1.0;
     if (nelements > 1)
@@ -574,15 +574,11 @@ total_free (one, t_e, f1, f2)
     sum = 0.0;
     for (nion = 0; nion < nions; nion++)
     {
-      if (ion[nion].istate != 1)        //The neutral ion does not contribute
+      if (ion[nion].istate != 1)        //neutral ions do not contribute
       {
         gsqrd = ((ion[nion].istate - 1) * (ion[nion].istate - 1) * RYD2ERGS) / (BOLTZMANN * t_e);
         gaunt = gaunt_ff (gsqrd);
         sum += xplasma->density[nion] * (ion[nion].istate - 1) * (ion[nion].istate - 1) * gaunt;
-      }
-      else
-      {
-        sum += 0.0;
       }
     }
     x = BREMS_CONSTANT * xplasma->ne * (sum) / H_OVER_K;

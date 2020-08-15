@@ -322,7 +322,7 @@ int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
 double matom_emit_in_line_prob(WindPtr one, struct lines *line_ptr_emit);
-/* estimators.c */
+/* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
 int mc_estimator_normalise(int n);

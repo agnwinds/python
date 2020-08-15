@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  estimators.c
+/** @file  estimators_macro.c
  * @author Stuart Sim, James Matthews
  * @date   January, 2018
  *
@@ -208,7 +208,7 @@ bf_estimators_increment (one, p, ds)
            recombination is included here. (SS, Apr 04) */
         if (density > DENSITY_PHOT_MIN)
         {
-          x = sigma_phot (&phot_top[n], freq_av);     
+          x = sigma_phot (&phot_top[n], freq_av);
           weight_of_packet = p->w;
           y = weight_of_packet * x * ds;
 
@@ -369,7 +369,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
 
   /* Okay now know which estimator we wish to increment so do it. */
-  /* XFRAME This needs to be a CMF "weight" -- or more accurately, energy */ 
+  /* XFRAME This needs to be a CMF "weight" -- or more accurately, energy */
   weight_of_packet = p->w;
   dvds = fabs (dvds);           //make sure that it is positive
 
@@ -438,7 +438,7 @@ mc_estimator_normalise (n)
      int n;
 
 {
-  double volume;
+  double invariant_volume_time;
   int i, j, nlev_upper;
   double stimfac, line_freq, stat_weight_ratio;
   double heat_contribution, lower_density, upper_density;
@@ -452,7 +452,7 @@ mc_estimator_normalise (n)
 
   /* All the estimators need the volume so get that first. */
   /* JM 1507 - we use cell volume, rather than the filled volume for all the estimators here */
-  
+
   /* XFRAME -- one->vol contains the CMF volume. This converts it to 
      observer frame volume, or perhaps more correctly, it calculates the
      Lorentz invariant quantity (Delta V Delta t). Because Delta t_obs == 1 
@@ -460,9 +460,9 @@ mc_estimator_normalise (n)
      Note, this is also equivalent to multiplying Delta V_cmf by Delta t_cmf,
      which is Delta t_obs / gamma, i.e. 1.0/gamma. All other quantities that
      have been incremented should have been done so with CMF values.
-  */
+   */
 
-  volume = one->vol / one->xgamma_cen;
+  invariant_volume_time = one->vol / one->xgamma_cen;
 
 
   /* bf estimators. During the mc calculation the quantity stored
@@ -488,9 +488,9 @@ mc_estimator_normalise (n)
     for (j = 0; j < config[i].n_bfu_jump; j++)
     {
 
-      mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / PLANCK / volume;        //normalise
+      mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / PLANCK / invariant_volume_time; //normalise
       mplasma->gamma[config[i].bfu_indx_first + j] = 0.0;       //re-initialise for next iteration
-      mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / PLANCK / volume;    //normalise
+      mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / PLANCK / invariant_volume_time;     //normalise
       mplasma->gamma_e[config[i].bfu_indx_first + j] = 0.0;     //re-initialise for next iteration
 
       /* For the stimulated recombination parts we need the the
@@ -501,11 +501,11 @@ mc_estimator_normalise (n)
       stat_weight_ratio = config[phot_top[config[i].bfu_jump[j]].uplev].g / config[i].g;
 
       mplasma->alpha_st_old[config[i].bfu_indx_first + j] =
-        mplasma->alpha_st[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / volume;
+        mplasma->alpha_st[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / invariant_volume_time;
       mplasma->alpha_st[config[i].bfu_indx_first + j] = 0.0;
 
       mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] =
-        mplasma->alpha_st_e[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / volume;
+        mplasma->alpha_st_e[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / invariant_volume_time;
       mplasma->alpha_st_e[config[i].bfu_indx_first + j] = 0.0;
 
       /* For continuua whose edges lie beyond freqmin assume that gamma
@@ -577,7 +577,7 @@ mc_estimator_normalise (n)
 
       /* normalise jbar. Note that this uses the cell volume rather than the filled volume */
       mplasma->jbar_old[config[i].bbu_indx_first + j] =
-        mplasma->jbar[config[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / volume / line_freq;
+        mplasma->jbar[config[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / invariant_volume_time / line_freq;
 
       mplasma->jbar[config[i].bbu_indx_first + j] = 0.0;
     }

@@ -63,18 +63,15 @@
  **********************************************************/
 
 
-/* A couple of external variables to improve the counting of ionizing
-   photons coming into a cell
-*/
-int nioniz_nplasma = -1;
-int nioniz_np = -1;
-
-/* A couple of external variables to improve the counting of photons
-   in a cell
+/* External variables to prevent double counting of photons
+   photons coming into a cell, in total and if they 
+   are ionizing photons
 */
 
-int plog_nplasma = -1;
-int plog_np = -1;
+int previous_nioniz_nplasma = -1;
+int previous_nioniz_np = -1;
+int previous_nplasma = -1;
+int previous_np = -1;
 
 int
 update_banded_estimators (xplasma, p, ds, w_ave, ndom)
@@ -136,29 +133,14 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
     }
   }
 
-  /* NSH 131213 slight change to the line computing IP, we now split out direct and scattered - this was 
-     mainly for the progha_13 work, but is of general interest */
-  /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
-   * this may well end up not being correct, since the same photon could be counted 
-   * several times if it is rattling around.... */
 
-  /* 1401 JM -- Similarly to the above routines, this is another bit of code added to radiation
-     which originally did not get called in macro atom mode. */
+  /* Increment counters which show the number of times a photon bundle of a certain type
+     has passed through the cell.  Makde sure the photon is not counted multiple
+     times in a single passage */
 
-  /* NSH had implemented a scattered and direct contribution to the IP. This doesn't really work 
-     in the same way in macro atoms, so should instead be thought of as 
-     'direct from source' and 'reprocessed' radiation */
-
-  if (xplasma->nplasma != plog_nplasma || p->np != plog_np)
+  if (xplasma->nplasma != previous_nplasma || p->np != previous_np)
   {
     xplasma->ntot++;
-
-    /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
-     * and hence get an idea of how 'agny' or 'disky' the cell is. */
-    /* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
-     * number of photons.  Also used the PTYPE designations as one should as a matter of 
-     * course
-     */
 
     if (p->origin == PTYPE_STAR)
       xplasma->ntot_star++;
@@ -170,29 +152,25 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
       xplasma->ntot_wind++;
     else if (p->origin == PTYPE_AGN)
       xplasma->ntot_agn++;
-    plog_nplasma = xplasma->nplasma;
-    plog_np = p->np;
+    previous_nplasma = xplasma->nplasma;
+    previous_np = p->np;
   }
 
 
-
-
-
-
+  /*
+   * Calculate the number of H ionizing photons, see #255
+   * EP 11-19: moving the number of ionizing photons counter into this
+   * function so it will be incremented for both macro and non-macro modes
+   */
 
   if (HEV * p->freq > 13.6)     // only record if above H ionization edge
   {
 
-    /*
-     * Calculate the number of H ionizing photons, see #255
-     * EP 11-19: moving the number of ionizing photons counter into this
-     * function so it will be incremented for both macro and non-macro modes
-     */
-    if (xplasma->nplasma != nioniz_nplasma || p->np != nioniz_np)
+    if (xplasma->nplasma != previous_nioniz_nplasma || p->np != previous_nioniz_np)
     {
       xplasma->nioniz++;
-      nioniz_nplasma = xplasma->nplasma;
-      nioniz_np = p->np;
+      previous_nioniz_nplasma = xplasma->nplasma;
+      previous_nioniz_np = p->np;
     }
 
     /* IP needs to be radiation density in the cell. We sum contributions from
@@ -447,6 +425,15 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
  *
  * ### Notes ###
  *
+ * Currently wmain[].vol is the total volume in the cmf frame.
+ * Most estimateors are calculated in the cmf frame, but delta_t_cmf
+ * is given by delta_t_obs/gamma, that is 
+ *
+ *  V delta t = V/gamma
+ *
+ * is the factor by which most of the estimators are normalized.  This is 
+ * equivalent to the volume in the observer frame, but that is not stored.
+ *
  * XFRAME this function will calculate the force estimators in the observer
  * frame and requires quantities in the observer frame.
  *
@@ -458,15 +445,13 @@ normalise_simple_estimators (xplasma)
 {
   int i, nwind;
   double radiation_temperature, nh, wtest;
-  double volume_cmf, volume_obs;
+  double volume_obs, invariant_volume_time;
   double electron_density_obs;
 
   nwind = xplasma->nwind;
 
   /* XFRAME -- this needs to be the correct volume, or more correctly, the correct Delta V Delta t */
-  volume_cmf = wmain[nwind].vol;
-  volume_obs = volume_cmf / wmain[nwind].xgamma_cen;
-  electron_density_obs = xplasma->ne / wmain[nwind].xgamma_cen; // Mihalas & Mihalas p146
+  invariant_volume_time = wmain[nwind].vol / wmain[nwind].xgamma_cen;
 
   if (xplasma->ntot > 0)
   {
@@ -477,9 +462,9 @@ normalise_simple_estimators (xplasma)
       Error ("normalise_simple_estimators:sane_check %d ave_freq %e j %e ntot %d\n", xplasma->nplasma, wtest, xplasma->j, xplasma->ntot);
     }
 
-    xplasma->j /= (4. * PI * volume_cmf);
-    xplasma->j_direct /= (4. * PI * volume_cmf);
-    xplasma->j_scatt /= (4. * PI * volume_cmf);
+    xplasma->j /= (4. * PI * invariant_volume_time);
+    xplasma->j_direct /= (4. * PI * invariant_volume_time);
+    xplasma->j_scatt /= (4. * PI * invariant_volume_time);
 
     xplasma->t_r_old = xplasma->t_r;    // Store the previous t_r in t_r_old immediately before recalculating
     radiation_temperature = xplasma->t_r = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
@@ -516,7 +501,7 @@ normalise_simple_estimators (xplasma)
       xplasma->xave_freq[i] /= xplasma->xj[i];  /*Normalise the average frequency */
       xplasma->xsd_freq[i] /= xplasma->xj[i];   /*Normalise the mean square frequency */
       xplasma->xsd_freq[i] = sqrt (xplasma->xsd_freq[i] - (xplasma->xave_freq[i] * xplasma->xave_freq[i]));     /*Compute standard deviation */
-      xplasma->xj[i] /= (4 * PI * volume_cmf);  /*Convert to radiation density */
+      xplasma->xj[i] /= (4 * PI * invariant_volume_time);       /*Convert to radiation density */
     }
     else
     {
@@ -526,31 +511,33 @@ normalise_simple_estimators (xplasma)
     }
   }
 
-  /* End of loop */
 
-  nh = xplasma->rho * rho2nh;
 
   /* 1110 NSH Normalise IP, which at this point should be
    * the number of photons in a cell by dividing by volume
    * and number density of hydrogen in the cell
    */
 
-  xplasma->ip /= (VLIGHT * volume_cmf * nh);
-  xplasma->ip_direct /= (VLIGHT * volume_cmf * nh);
-  xplasma->ip_scatt /= (VLIGHT * volume_cmf * nh);
+  nh = xplasma->rho * rho2nh;
+  xplasma->ip /= (VLIGHT * invariant_volume_time * nh);
+  xplasma->ip_direct /= (VLIGHT * invariant_volume_time * nh);
+  xplasma->ip_scatt /= (VLIGHT * invariant_volume_time * nh);
 
   /* 1510 NSH Normalise xi, which at this point should be the luminosity of
    * ionizing photons in a cell (just the sum of photon weights)
    */
 
   xplasma->xi *= 4. * PI;
-  xplasma->xi /= (volume_cmf * nh);
+  xplasma->xi /= (invariant_volume_time * nh);
 
   /*
    * XFRAME -- the radiation force and flux estimators are all observer frame
    * quantities and hence need to be normalised with observer frame volumes
    * and densities
    */
+
+  electron_density_obs = xplasma->ne / wmain[nwind].xgamma_cen; // Mihalas & Mihalas p146
+  volume_obs = wmain[nwind].vol / wmain[nwind].xgamma_cen;
 
   for (i = 0; i < 4; i++)
   {
