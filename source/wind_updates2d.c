@@ -720,7 +720,7 @@ WindPtr (w);
   {
     for (nwind = zdom[geo.hydro_domain_number].nstart; nwind < zdom[geo.hydro_domain_number].nstop; nwind++)
     {
-      if (wmain[nwind].vol > 0.0)
+      if (wmain[nwind].inwind >= 0)
       {
         nplasma = wmain[nwind].nplasma;
         wind_n_to_ij (geo.hydro_domain_number, plasmamain[nplasma].nwind, &i, &j);

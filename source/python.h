@@ -870,7 +870,7 @@ typedef struct plasma
   int nscat_res;                /* The number of resonant line scatters in the cell */
 
   double mean_ds;               /* Mean photon path length in a cell. */
-  int n_ds;                     /* Number of times a path lengh was added; needed to compute mean_ds */
+  int n_ds;                     /* Number of times a path lengyh was added; needed to compute mean_ds */
   int nrad;                     /* Total number of photons created within the cell */
   int nioniz;                   /* Total number of photon passages by photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
