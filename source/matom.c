@@ -934,7 +934,7 @@ kpkt (p, nres, escape, mode)
 
     /* 57+ -- This might be modified later since we "know" that xplasma cannot be for a grid with zero
        volume.  Recall however that vol is part of the windPtr */
-    if (one->vol > 0)
+    if (one->inwind >= 0)
     {
       cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne; // JM 1411 - changed to use filled volume
       cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;

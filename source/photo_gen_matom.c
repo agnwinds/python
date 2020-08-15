@@ -587,7 +587,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     icell = 0;
     while (xlumsum < xlum)
     {
-      if (wmain[icell].vol > 0.0)
+      if (wmain[icell].inwind >= 0)
       {
         nplasma = wmain[icell].nplasma;
         xlumsum += plasmamain[nplasma].kpkt_emiss;
@@ -756,7 +756,7 @@ photo_gen_matom (p, weight, photstart, nphot)
     upper = 0;
     while (xlumsum < xlum)
     {
-      if (wmain[icell].vol > 0.0)
+      if (wmain[icell].inwind >= 0)
       {
         nplasma = wmain[icell].nplasma;
         xlumsum += macromain[nplasma].matom_emiss[upper];

@@ -455,7 +455,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         break;
       }
 
-      /* 1506 JM -- If the next errors reoccur, see Issue #154 for discussion */
+      /* 1506 JM -- If the next error reoccurs, see Issue #154 for discussion */
 
       if (wmain[n].nplasma == NPLASMA)
       {
@@ -468,7 +468,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      if (wmain[n].vol <= 0)
+      if (wmain[n].inwind < 0)
       {
         Error ("trans_phot: Trying to scatter a photon in a cell with no wind volume\n");
         Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid, pp.x[0], pp.x[1], pp.x[2]);

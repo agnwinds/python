@@ -260,7 +260,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   }
 
-  if (one->vol == 0)
+  if (one->inwind < 0)
   {
     kap_bf_tot = kap_ff = 0.0;
     Error_silent ("ds_calculate vol = 0: cell %d position %g %g %g\n", p->grid, p->x[0], p->x[1], p->x[2]);
@@ -368,7 +368,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               /* The next line may be redundant.  */
               two = &w[where_in_grid (wmain[p_now.grid].ndom, p_now.x)];
 
-              if (two->vol == 0)
+              if (two->inwind < 0)
               {
                 /* See issue #389 - Sometimes DFUDGE pushes a photon into a cell with no volume.  Note that this
                  * should be very rare, so if this error occurs in significant numbers the problem should be

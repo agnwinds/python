@@ -68,7 +68,7 @@ wind_luminosity (f1, f2)
   for (n = 0; n < NDIM2; n++)
   {
 
-    if (wmain[n].vol > 0.0)
+    if (wmain[n].inwind >= 0)
     {
       nplasma = wmain[n].nplasma;
       lum += x = total_emission (&wmain[n], f1, f2);
@@ -147,7 +147,7 @@ total_emission (one, f1, f2)
     if (geo.rt_mode == RT_MODE_MACRO)   //Switch for macro atoms (SS)
     {
       /* XFRAME the luminosities are divided by gamma to convert to the observer frame */
-      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL)) / xplasma->xgamma;     //outer shellrecombinations
+      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL)) / xplasma->xgamma; //outer shellrecombinations
 
       /*
        *The first term here is the fb cooling due to macro ions and the second gives
@@ -176,7 +176,7 @@ total_emission (one, f1, f2)
       xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2) / xplasma->xgamma;
       /* We compute the radiative recombination luminosity - this is not the same as the rr cooling rate and
          so is stored in a separate variable */
-      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL) / xplasma->xgamma;  //outer shell recombinations
+      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL) / xplasma->xgamma;        //outer shell recombinations
     }
   }
 
@@ -268,7 +268,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     {
 
 
-      if (wmain[icell].vol > 0.0)
+      if (wmain[icell].inwind >= 0)
       {
         nplasma = wmain[icell].nplasma;
         /*increment the xlumsum by the lum_tot (the band limited luminosity in this cell */

@@ -369,7 +369,7 @@ wind_cooling ()
   for (n = 0; n < NDIM2; n++)
   {
 
-    if (wmain[n].vol > 0.0)
+    if (wmain[n].inwind >= 0)
     {
       nplasma = wmain[n].nplasma;
       cool += x = cooling (&plasmamain[nplasma], plasmamain[nplasma].t_e);
