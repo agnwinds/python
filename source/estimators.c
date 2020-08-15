@@ -47,24 +47,19 @@ double temp_ext_rad;            //radiation temperature passed externally
  *
  * ### Notes ###
  * The estimators are not normalised by this routine.
- *        This routine also computes the total heating rate due
- *        to simple ions.  Therefore the routine needs to be called
- *        even for the simple non-macro atom case.
+ *
+ * This routine also computes the total heating rate due
+ * to simple ions.  Therefore the routine update_banded_esitmators is called
+ * even for the simple non-macro atom case.
  * 
  * The bound-free estimators are described in section 3.3.3.1 Matthews Phd Thesis.
  *
  * XFRAME As currently written bf_esimators_increment expects p
- * to contain the local frame frequency, and if bf_estimators are in 
- * the local frame, ds should be in the local frame as well.  if that is the
- * case, the rest of the routine is unchanged.  
+ * to be a co-moving frame photon and ds to be a co-moving frame path length
  * 
- * Alternatively, one could calculated ds_cmf here, and gain everyghing
- * would be unchanged, on the grounds that always want to transfer ds in
- * the observer frame.  
- *
- * Alternatively, one could work throughout the routine converting the
- * kappas by a factor.  These cannot be pushed down to the underlying
- * routines because photons are not passed to them.
+ * With this cohoice bf_estimators did not need to be modified to properly
+ * handle calculations in the co-moving frame.
+ * 
  **********************************************************/
 
 int
@@ -86,36 +81,21 @@ bf_estimators_increment (one, p, ds)
   PlasmaPtr xplasma;
   MacroPtr mplasma;
 
-  /* XFRAME -- cleanest thing to do here might be to simply transform the photon 
-     at the start of this routine, and also ds, both to CMF 
-     they will always enter together, so we can also create a number w * ds */
-  /* this would be: ds_cmf = observer_to_local_frame_ds (p, ds); */
-  /* for photons: observer_to_local_frame (&p, &phot_dummy) - needs dummy photon variable */
-  /* XFRAME -- might need to consider performance (number of times we calc gamma) */
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   mplasma = &macromain[xplasma->nplasma];
   ndom = one->ndom;
 
-  /* XFRAME this may need to be co-moving frame for certain quantities */
-  /* XFRAME this should be made consistent with radiation () */
   freq_av = p->freq;
-  // the continuum neglect variation of frequency along path and
-  // take as a single "average" value.  
 
   if (p->freq > xplasma->max_freq)      // check if photon frequency exceeds maximum frequency
     xplasma->max_freq = p->freq;
 
-
-  /* JM -- 1310 -- check if the user requires extra diagnostics and
-     has provided a file diag_cells.dat to store photons stats for cells they have specified
-   */
   if (modes.save_cell_stats && ncstat > 0)
   {
     save_photon_stats (one, p, ds, p->w);       // save photon statistics (extra diagnostics)
   }
-
 
 
   /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
@@ -203,16 +183,18 @@ bf_estimators_increment (one, p, ds)
 
         mplasma->alpha_st_e[config[llvl].bfu_indx_first + m] += exponential / ft;
 
-        /* Now record the contribution to the energy absorbed by macro atoms. */
-        /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
+        /* Now record the contribution to the energy absorbed by macro atoms allowing
+           for the filling factor. */
+
         yy = y * den_config (xplasma, llvl) * zdom[ndom].fill;
 
         mplasma->matom_abs[phot_top[n].uplev] += abs_cont = yy * ft / freq_av;
 
         xplasma->kpkt_abs += yy - abs_cont;
 
-        /* the following is just a check that flags packets that appear to travel a 
+        /* Check for packets that appear to travelling  
            suspiciously large optical depth in the continuum */
+
         if ((yy / weight_of_packet) > 50)
         {
           Log ("bf_estimator_increment: A packet survived an optical depth of %g\n", yy / weight_of_packet);
@@ -226,7 +208,7 @@ bf_estimators_increment (one, p, ds)
            recombination is included here. (SS, Apr 04) */
         if (density > DENSITY_PHOT_MIN)
         {
-          x = sigma_phot (&phot_top[n], freq_av);       //this is the cross section
+          x = sigma_phot (&phot_top[n], freq_av);     
           weight_of_packet = p->w;
           y = weight_of_packet * x * ds;
 

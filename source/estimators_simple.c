@@ -526,7 +526,7 @@ normalise_simple_estimators (xplasma)
     }
   }
 
-  /* 1108 NSH End of loop */
+  /* End of loop */
 
   nh = xplasma->rho * rho2nh;
 

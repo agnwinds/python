@@ -889,8 +889,7 @@ typedef struct plasma
                                    by this ion via recombination. */
 
   double *cool_dr_ion;
-  double j, ave_freq;           /*Respectively mean intensity, intensity_averaged frequency, 
-                                   luminosity and absorbed luminosity of shell */
+  double j, ave_freq;           /* Mean (angle-averaged) total intensity, intensity-averaged frequency */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* Frequency limited versions of j and ave_freq */
   double fmin[NXBANDS];         /* Minimum frequency photon seen in a band - this is incremented during photon flight */
   double fmax[NXBANDS];         /* Maximum frequency photon seen in a band - this is incremented during photon flight */
