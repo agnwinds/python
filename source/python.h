@@ -30,7 +30,9 @@ within python */
 #define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
 #define REL_MODE_FULL   1      /*Make full corrections for special relativity*/
 
-  int rel_mode;                 /* How doppler effects are treated */
+int rel_mode;                 /* How doppler effects are treated */
+
+
 
 
 
@@ -322,9 +324,16 @@ int current_domain;             // This integer is used by py_wind only
 #define FALSE 0
 
 
+#define OBS_FRAME 0
+#define CMF_FRAME 1
+
+
+
 
 struct geometry
 {
+    int frame; //XFRAME this says what frame things like density and volumes are measured in
+    
   int system_type;              /* See allowed types above. system_type should only be used for setp */
   int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
