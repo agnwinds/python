@@ -219,13 +219,15 @@ define_wind ()
       model_velocity (w[n].ndom, w[n].xcen, v);
       w[n].xgamma_cen = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
       w[n].vol *= w[n].xgamma_cen;
-
+      geo.frame = CMF_FRAME;    //relevant quantities in the windsave will by in co-moving frame
     }
     else
     {
       w[n].xgamma = w[n].xgamma_cen = 1.;
+      geo.frame = OBS_FRAME;    //relevant quantities are defined in the observer faems
     }
   }
+  printf ("BOOM frame=%i\n", geo.frame);
 
 
 /* The routines above have established the volumes of the cells that are in the wind
