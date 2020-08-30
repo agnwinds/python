@@ -1126,7 +1126,7 @@ get_fb (t, nion, narray, fb_choice, mode)
  *
  * @details
  *
- * The routine preforms a numberical integration over the partial emissivities
+ * The routine performs a numerical integration over the partial emissivities
  *
  *
  * ### Notes ###
