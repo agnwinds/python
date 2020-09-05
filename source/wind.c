@@ -358,6 +358,8 @@ model_vgrad (ndom, x, v_grad)
       dv[j] /= ds;
 
     stuff_v (dv, &v_grad[i][0]);
+    //XFRAME
+    Log ("model_vgrad:check x %f %f %f dv %10.2e %10.2e %10.2e\n", x[0], x[1], x[2], dv[0], dv[1], dv[2]);
   }
 
   return (0);
