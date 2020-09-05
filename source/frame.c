@@ -517,3 +517,127 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
 
 
 }
+
+/**********************************************************/
+/**
+ * @brief      calculate a velocity in the local frame given
+ *      a velocity in the observer frame
+ *      
+ *
+ * @param [in] double   *v_obs       A velocity in the observer frame                
+ * @param [in] double   *v           The velocity of the local frame as 
+ *                                   measured in the observers frame
+ * @param [out] double  *v_cmf       The peculiar velocity in the local frame
+ *
+ * @return    The speed in the local frame               
+ *
+ *
+ * @details
+ * This uses the standard special relativitistic velocity addition
+ * law to calculate a peculiar velocity in the local frame.
+ *
+ *
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+double
+observer_to_local_frame_velocity (v_obs, v, v_cmf)
+     double *v_obs;
+     double *v;
+     double *v_cmf;
+{
+  double gamma, c1, c2;
+  double a[3], b[3];
+  double vdotv;
+
+  if (rel_mode == REL_MODE_LINEAR)
+  {
+    vsub (v_obs, v, v_cmf);
+    return (length (v_cmf));
+  }
+
+  gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+
+  vdotv = dot (v_obs, v) / (VLIGHT * VLIGHT);
+
+  c1 = 1. / (1 - vdotv);
+  c2 = (gamma / (1 + gamma) * vdotv);
+
+  rescale (v_obs, 1. / gamma, a);
+  vsub (a, v, a);
+  rescale (v, c2, b);
+  vadd (a, b, a);
+  rescale (a, c1, v_cmf);
+
+/*  The transformation formula is
+   v_cmf=c1*(v_obs/xgamma-v+c2*v);
+*/
+  return length (v_cmf);
+
+
+}
+
+/**********************************************************/
+/**
+ * @brief      calculate a velocity in the observer frame
+ *      a velocity in the local frame
+ *      
+ *
+ * @param [in] double   *v_cmf       A peculiar velocity in the local frame                
+ * @param [in] double   *v           The velocity of the local frame in
+ *                                   the observers frame
+ * @param [out] double  *v_obs       The velocity in the global frame
+ *
+ * @return    The speed in the observer frame               
+ *
+ *
+ * @details
+ * This uses the standard special relativitistic velocity addition
+ * law to calculate a velocity in the observer frame from a "peculiar"
+ * velocity in the local frame.
+ *
+ *
+ *
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+double
+local_to_observer_frame_velocity (v_cmf, v, v_obs)
+     double *v_cmf;
+     double *v;
+     double *v_obs;
+{
+  double gamma, c1, c2;
+  double a[3], b[3];
+  double vdotv;
+
+  if (rel_mode == REL_MODE_LINEAR)
+  {
+    vadd (v_cmf, v, v_obs);
+    return (length (v_obs));
+  }
+
+  gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+
+  vdotv = dot (v_obs, v) / (VLIGHT * VLIGHT);
+
+  c1 = 1. / (1 + vdotv);
+  c2 = (gamma / (1 + gamma) * vdotv);
+
+  rescale (v_cmf, 1. / gamma, a);
+  vadd (a, v, a);
+  rescale (v, c2, b);
+  vadd (a, b, a);
+  rescale (a, c1, v_obs);
+
+/*  The transformation formula is
+   v_obs=c1*(v+v_cmf/xgamma+c2*v)
+*/
+  return length (v_obs);
+
+
+}

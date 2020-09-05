@@ -84,6 +84,7 @@ int wind_check(WindPtr www, int n);
 double dot(double a[], double b[]);
 double length(double a[]);
 int renorm(double a[], double scalar);
+int rescale(double a[], double scalar, double b[]);
 int cross(double a[], double b[], double c[]);
 int vmove(double u[], double lmn[], double s, double result[]);
 int vsub(double u[], double v[], double result[]);
@@ -586,6 +587,8 @@ int observer_to_local_frame_disk(PhotPtr p_in, PhotPtr p_out);
 int local_to_observer_frame_disk(PhotPtr p_in, PhotPtr p_out);
 double observer_to_local_frame_ds(PhotPtr p_obs, double ds_obs);
 double local_to_observer_frame_ds(PhotPtr p_obs, double ds_cmf);
+double observer_to_local_frame_velocity(double *v_obs, double *v, double *v_cmf);
+double local_to_observer_frame_velocity(double *v_cmf, double *v, double *v_obs);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

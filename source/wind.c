@@ -224,7 +224,7 @@ usually analytic expressions
  * 
  * This is a convenience function that allows one to obtain the velocity at
  * any point in space for a given domain. The routine uses the domain number
- * to decide what velocity law is appriate.  For models which are defined from 
+ * to decide what velocity law is appropriate.  For models which are defined from 
  * a set of parametric equations the velocity will sill be calculated. For models
  * that are read in as a grid, the models will be interpolated from the imported
  * grid
@@ -237,6 +237,7 @@ usually analytic expressions
  * The routine works for imported models as well, even in the case
  * the model velocity is actually one of the inputs.
  *
+ * This routine calculates velocities in the observer frame.
  **********************************************************/
 
 double
@@ -298,7 +299,7 @@ model_velocity (ndom, x, v)
  *
  * @param [in] int  ndom   The domain of interest
  * @param [in] double  x[]   A position in the domain
- * @param [out] double  v_grad[][3]   The velocity gradient tensor at the postion
+ * @param [out] double  v_grad[][3]   The velocity gradient tensor at the position
  * @return   Always returns 0  
  *
  * @details
@@ -347,9 +348,15 @@ model_vgrad (ndom, x, v_grad)
       Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
     }
 
-    vsub (v1, v0, dv);
+//OLD    vsub (v1, v0, dv);
+    /* XFRAME this changes results in the velecity gradient tensor being calculated
+       in the co-moving frame, unless rel_mode is REL_MODE_LINEAR */
+
+    observer_to_local_frame_velocity (v1, v0, dv);
+
     for (j = 0; j < 3; j++)
       dv[j] /= ds;
+
     stuff_v (dv, &v_grad[i][0]);
   }
 
