@@ -766,8 +766,14 @@ ds_to_disk (p, allow_negative, hit)
 
   if (s == smin || s == smax)
   {
-    Log ("ZZXX Time to worry, at limit for %d %d smin %e smax %e s %e r_phot %e zdisk %e\n", p->np, location, smin, smax, s, r_phot,
-         zdisk (r_phot));
+    Log ("ZZXX Time to worry, at limit for %d loc %d smin %e smax %e s %e r_phot %e z_phot %e zdisk %e\n",
+         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot));
+    if (modes.save_photons)
+    {
+      save_photons (p, "ZZXX");
+      Diag ("ZZXX Time to worry, at limit for %d loc %d smin %e smax %e s %e r_phot %e z_phot %e zdisk %e\n",
+            p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot));
+    }
   }
 
   if (p->x[2] > 0)
