@@ -362,6 +362,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       geo.lum_disk_back = qdisk.heat[kkk] += pp.w;
       qdisk.ave_freq[kkk] += pp.w * pp.freq;
 
+      if (modes.save_photons && rho > geo.diskrad)
+      {
+        Diag ("trans_phot: Photon %d hit disk at %.3e \n", pp.np, rho);
+        save_photons (p, "BeforeHitDisk");
+        save_photons (&pp, "AfterHitDisk");
+
+      }
+
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
       {
 
