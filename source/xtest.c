@@ -53,32 +53,29 @@
 
 int
 xtest ()
-     
 {
-    struct photon p;
-    double s; 
-    int allow_negative;
-    int hit;
+  struct photon p;
+  double s;
+  int allow_negative;
+  int hit;
+  // -333708682.51580548, -3464297957.5598879, 916107434.79302168}, lmn = {-0.3821131382229368, -0.85766764329168899, 0.28692653993169387
 // -3.337e+08 -3.464e+09  9.161e+08
 // -3.821e-01 -8.577e-01  2.869e-01
-    p.x[0]=-3.337e+08;              
-    p.x[1]=-3.464e+09;             
-    p.x[2]= 9.161e+08;              
-    p.lmn[0]=-3.821e-01;          
-    p.lmn[1]=-8.577e-01;            
-    p.lmn[2]= 2.869e-01;           
+  p.x[0] = -333708682.51580548;
+  p.x[1] = -3464297957.5598879;
+  p.x[2] = 916107434.79302168;
+  p.lmn[0] = -0.3821131382229368;
+  p.lmn[1] = -0.85766764329168899;
+  p.lmn[2] = 0.28692653993169387;
 
-    allow_negative=1;
+  allow_negative = 1;
 
-    s=ds_to_disk(&p,allow_negative,&hit);
+  s = ds_to_disk (&p, allow_negative, &hit);
 
-    Log("s %e\n", s);
+  Log ("s %e\n", s);
 
 
 
-    exit(0);
+  exit (0);
 
 }
-
-
-
