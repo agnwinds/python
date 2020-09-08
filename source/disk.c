@@ -386,7 +386,7 @@ ds_to_disk (p, allow_negative, hit)
   double s_disk, s_top, s_bot, s_cyl, s_cyl2, s;
   double z_cyl, z_cyl2;
 
-  double r_disk, r_top, r_bot;
+  double r_disk, r_top, r_bot, r_hit;
   //rho at various positions
   double r_phot;
   //rho of the photon
@@ -766,8 +766,13 @@ ds_to_disk (p, allow_negative, hit)
 
   if (s == smin || s == smax)
   {
-    Log ("ZZXX Time to worry, at limit for %d loc %d smin %e smax %e s %e r_phot %e z_phot %e zdisk %e\n",
-         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot));
+    stuff_phot (p, &phit);
+    move_phot (&phit, s);
+    r_hit = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+
+
+    Log ("ZZXX At limit for %d loc %d smin %e smax %e s %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
+         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
     if (modes.save_photons)
     {
       save_photons (p, "ZZXX");
