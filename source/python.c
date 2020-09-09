@@ -110,7 +110,8 @@ main (argc, argv)
   time_max = -1;
   set_max_time (files.root, time_max);
 
-  rel_mode = REL_MODE_FULL;
+  rel_mode = REL_MODE_LINEAR;
+  run_xtest = FALSE;
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -665,6 +666,14 @@ main (argc, argv)
   qdisk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot);        /* Initialize a disk qdisk to store the information about photons impinging on the disk */
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
+
+  /* Allow for the possibility of running a special diagnostic mode in
+     a stand alone routine xtest. This will happen with the command line
+     option -xtest.  */
+  if (run_xtest)
+  {
+    xtest ();
+  }
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
   geo.ioniz_or_extract = 1;     //SS July 04 - want to compute MC estimators during ionization cycles

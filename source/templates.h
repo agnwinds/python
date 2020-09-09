@@ -563,6 +563,8 @@ int are_synonym_lists_valid(void);
 int is_input_line_synonym_for_question(char question[], char input_line[]);
 /* walls.c */
 int walls(PhotPtr p, PhotPtr pold, double *normal);
+/* xtest.c */
+int xtest(void);
 /* setup_reverb.c */
 int get_meta_params(void);
 /* setup_line_transfer.c */

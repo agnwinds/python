@@ -34,6 +34,8 @@ int rel_mode;                 /* How doppler effects are treated */
 
 
 
+  int run_xtest;               /* Variable if TRUE causes a special test mode to be run */
+
 
 
 /* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there

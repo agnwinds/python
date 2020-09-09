@@ -155,10 +155,10 @@ parse_command_line (argc, argv)
         Log ("Using only full special relativity for Doppler shifts, etc.\n");
         j = i;
       }
-      else if (strcmp (argv[i], "-classic") == 0)
+      else if (strcmp (argv[i], "-xtest") == 0)
       {
-        rel_mode = REL_MODE_LINEAR;
-        Log ("Using only full special relativity for Doppler shifts, etc.\n");
+        run_xtest = TRUE;
+        Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
       else if (strcmp (argv[i], "-f") == 0)
