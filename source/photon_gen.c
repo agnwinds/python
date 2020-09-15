@@ -110,7 +110,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     {                           // The reinitialization is required
       xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON);
     }
-    /* The weight of each photon is designed so that all of the photons add up to the
+    /* The weight of each photon is designed §so that all of the photons add up to the
        luminosity of the photosphere.  This implies that photons must be generated in such
        a way that it mimics the energy distribution of the star. */
 
@@ -388,10 +388,13 @@ iwind = -1 	Don't generate any wind photons at all
     geo.f_wind = geo.lum_wind = 0.0;
 
   if (iwind == 1 || (iwind == 0))
-  {                             /* Then find the luminosity and flux of the wind */
-    geo.lum_wind = wind_luminosity (0.0, VERY_BIG);
+  {
+    /* Then find the luminosity of the wind, and the energy emerging in the simulation time step */
+    /* XFRAME -- the latter includes a factor of dt_cmf = 1.0 / gamma in each wind cell so is 
+       called with a different mode */
+    geo.lum_wind = wind_luminosity (0.0, VERY_BIG, MODE_LUMINOSITY);
     xxxpdfwind = 1;             // Turn on the portion of the line luminosity routine which creates pdfs
-    geo.f_wind = wind_luminosity (f1, f2);
+    geo.f_wind = wind_luminosity (f1, f2, MODE_ENERGY);
     xxxpdfwind = 0;             // Turn off the portion of the line luminosity routine which creates pdfs
   }
 

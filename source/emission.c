@@ -22,8 +22,9 @@
  * @brief      calculate the luminosity of the entire
  * wind between freqencies f1 and f2
  *
- * @param [in out] double  f1   The minimum frequency 
- * @param [in out] double  f2   The maximum frequency
+ * @param [in out] double  f1         The minimum frequency 
+ * @param [in out] double  f2         The maximum frequency
+ * @param [in]     int     mode       integer telling us whether we want an 0: energy (lum * dt_cmf) or 1: luminosity
  * @return     The luminosity of the entire wind
  *
  * @details
@@ -55,33 +56,45 @@
  **********************************************************/
 
 double
-wind_luminosity (f1, f2)
+wind_luminosity (f1, f2, mode)
      double f1, f2;             /* freqmin and freqmax */
+     int mode;
 {
-  double lum, lum_lines, lum_rr, lum_ff;
+  double lum, lum_lines, lum_rr, lum_ff, factor;
   int n;
   double x;
   int nplasma;
 
 
-  lum = lum_lines = lum_rr = lum_ff = 0.0;
+  lum = lum_lines = lum_rr = lum_ff = factor = 0.0;
   for (n = 0; n < NDIM2; n++)
   {
 
     if (wmain[n].inwind >= 0)
     {
       nplasma = wmain[n].nplasma;
-      lum += x = total_emission (&wmain[n], f1, f2);
-      lum_lines += plasmamain[nplasma].lum_lines;
-      lum_rr += plasmamain[nplasma].lum_rr;
-      lum_ff += plasmamain[nplasma].lum_ff;
+
+      /* XFRAME -- we need to decide whether we want this to really be a luminosity,
+         or an energy based on the mode supplied */
+      if (mode == MODE_ENERGY)
+        factor = 1.0 / plasmamain[n].xgamma;    /* this is dt_cmf */
+      else if (mode == MODE_LUMINOSITY)
+        factor = 1.0;
+
+      lum += x = total_emission (&wmain[n], f1, f2) * factor;
+      lum_lines += plasmamain[nplasma].lum_lines * factor;
+      lum_rr += plasmamain[nplasma].lum_rr * factor;
+      lum_ff += plasmamain[nplasma].lum_ff * factor;
     }
   }
 
-
-  geo.lum_lines = lum_lines;
-  geo.lum_rr = lum_rr;
-  geo.lum_ff = lum_ff;
+  /* only copy to geo if we are really calculating luminosities */
+  if (mode == MODE_LUMINOSITY)
+  {
+    geo.lum_lines = lum_lines;
+    geo.lum_rr = lum_rr;
+    geo.lum_ff = lum_ff;
+  }
 
   return (lum);
 }
@@ -146,8 +159,8 @@ total_emission (one, f1, f2)
   {
     if (geo.rt_mode == RT_MODE_MACRO)   //Switch for macro atoms (SS)
     {
-      /* XFRAME the luminosities are divided by gamma to convert to the observer frame */
-      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL)) / xplasma->xgamma; //outer shellrecombinations
+      /* XFRAME these are co-moving frame luminosities  */
+      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL));   //outer shellrecombinations
 
       /*
        *The first term here is the fb cooling due to macro ions and the second gives
@@ -160,30 +173,28 @@ total_emission (one, f1, f2)
        * also be removed.
        * (SS)
        */
-      xplasma->lum_lines = total_bb_cooling (xplasma, t_e) / xplasma->xgamma;
+      xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
       xplasma->lum_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
-      xplasma->lum_ff = total_free (one, t_e, f1, f2) / xplasma->xgamma;
+      xplasma->lum_ff = total_free (one, t_e, f1, f2);
       xplasma->lum_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      /* XFRAME the luminosities are divided by gamma to convert to the observer frame */
-      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2) / xplasma->xgamma;
-      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2) / xplasma->xgamma;
+      /* XFRAME these are co-moving frame luminosities */
+      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
       /* We compute the radiative recombination luminosity - this is not the same as the rr cooling rate and
          so is stored in a separate variable */
-      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL) / xplasma->xgamma;        //outer shell recombinations
+      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);  //outer shell recombinations
     }
   }
 
 
   return (xplasma->lum_tot);
-
-
 }
 
 
@@ -232,13 +243,14 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 {
   int n, nn, np;
   int photstop;
-  double xlum, xlumsum, lum;
+  double xlum, xlumsum, lum, dt_cmf;
   int icell, icell_old;
   int nplasma = 0;
   int nnscat;
   int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
 
+  dt_cmf = 0.0;
   for (n = 0; n < NPLASMA; n++)
   {
     for (nn = 0; nn < 3; nn++)
@@ -271,8 +283,11 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       if (wmain[icell].inwind >= 0)
       {
         nplasma = wmain[icell].nplasma;
-        /*increment the xlumsum by the lum_tot (the band limited luminosity in this cell */
-        xlumsum += plasmamain[nplasma].lum_tot;
+        /* increment the xlumsum by the lum_tot */
+        /* this is the band limited energy that emerges from this cell in the simulation time step */
+        /* XFRAME -- this is L_cmf * delta_t_cmf = L_cmf / gamma */
+        dt_cmf = 1.0 / plasmamain[nplasma].xgamma;
+        xlumsum += plasmamain[nplasma].lum_tot * dt_cmf;
       }
       icell++;
     }
@@ -288,6 +303,8 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
     /*Determine the type of photon this photon will be and increment ptype, which stores the total number of
      * each photon type to be made in each cell */
+    /* XFRAME -- we don't need to account for time dilation here, 
+       because all processes are in the same cell */
 
     lum = plasmamain[nplasma].lum_tot;
     xlum = lum * random_number (0.0, 1.0);

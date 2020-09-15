@@ -199,8 +199,8 @@ main (argc, argv)
 
 
   cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
-  lum_sum = wind_luminosity (0.0, VERY_BIG);    /*and we also call wind_luminosity to get the luminosities */
-
+  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_LUMINOSITY);   /*and we also call wind_luminosity to get the luminosities */
+  /* XFRAME -- need to check this is what is required here (luminosity rather than energy) */
 
   fptr = fopen ("py_heatcool.dat", "w");
   fptr2 = fopen ("py_driving.dat", "w");
