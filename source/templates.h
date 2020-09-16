@@ -230,7 +230,7 @@ double one_continuum(int spectype, double t, double g, double freqmin, double fr
 double emittance_continuum(int spectype, double freqmin, double freqmax, double t, double g);
 double model_int(double lambda, void *params);
 /* emission.c */
-double wind_luminosity(double f1, double f2);
+double wind_luminosity(double f1, double f2, int mode);
 double total_emission(WindPtr one, double f1, double f2);
 int photo_gen_wind(PhotPtr p, double weight, double freqmin, double freqmax, int photstart, int nphot);
 double one_line(WindPtr one, int *nres);

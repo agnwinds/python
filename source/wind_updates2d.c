@@ -620,10 +620,10 @@ WindPtr (w);
 
   /* Check the balance between the absorbed and the emitted flux */
 
-  //NSH 0717 - first we need to ensure the cooling and luminosities reflect the current temperature
+  /* NSH 0717 - ensure the cooling and luminosities reflect the current temperature */
 
-  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
-  lum_sum = wind_luminosity (0.0, VERY_BIG);    /*and we also call wind_luminosity to get the luminosities */
+  cool_sum = wind_cooling ();   /* We call wind_cooling here to obtain an up to date set of cooling rates */
+  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_LUMINOSITY);   /* and we also call wind_luminosity to get the luminosities */
 
 
 
@@ -838,10 +838,10 @@ WindPtr (w);
      lum_sum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
 
 
-  rad_sum = wind_luminosity (xband.f1[0], xband.f2[xband.nbands - 1]);  /*and we also call wind_luminosity to get the luminosities */
+  rad_sum = wind_luminosity (xband.f1[0], xband.f2[xband.nbands - 1], MODE_LUMINOSITY); /*and we also call wind_luminosity to get the luminosities */
 
   Log
-    ("!!wind_update: Rad  luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
+    ("!!wind_update: Rad luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
      rad_sum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
 
   Log

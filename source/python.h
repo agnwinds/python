@@ -1135,7 +1135,9 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      // matrix solver spectral model
 #define NEBULARMODE_MATRIX_ESTIMATORS 10        // matrix solver spectral model
 
-
+// modes for the wind_luminosity routine 
+#define MODE_ENERGY 0
+#define MODE_LUMINOSITY 1
 
 typedef struct photon
 {
