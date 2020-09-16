@@ -77,7 +77,7 @@ wind_luminosity (f1, f2, mode)
       /* XFRAME -- we need to decide whether we want this to really be a luminosity,
          or an energy based on the mode supplied */
       if (mode == MODE_ENERGY)
-        factor = 1.0 / plasmamain[n].xgamma;    /* this is dt_cmf */
+        factor = 1.0 / plasmamain[nplasma].xgamma;    /* this is dt_cmf */
       else if (mode == MODE_LUMINOSITY)
         factor = 1.0;
 
