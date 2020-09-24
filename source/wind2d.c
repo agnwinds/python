@@ -820,6 +820,13 @@ vwind_xyz (ndom, p, v)
  *
  * ### Notes ###
  *
+ * XFRAME  updates to  put the divergence of V in the cmf frame
+ * The current version of this routine uses legacy code for classic mode
+ * but new code (see get_div_v_in_cmf_frame in wind.c) for our new mode.
+ * The legacy code should be deleted eventually.
+ *
+ * The comment below only applies to the legacy code.
+ *
  * Because the routine calls vwind_xyz, one must have previously
  * populated w[].v.  Also as a result of this fact, the routine
  * is not tightly tied to any particular wind model.
@@ -852,63 +859,72 @@ wind_div_v ()
     stuff_v (wmain[icell].xcen, x_zero);        /*Gget the centre of the current cell in the loop */
     ndom = wmain[icell].ndom;
 
-//    delta = 0.01 * x_zero[2];   //delta is the distance across which we measure e.g. dv_x/dx
-
-    if (x_zero[1] != 0)
+    if (rel_mode == REL_MODE_FULL)
     {
-      delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], fmin (wmain[icell].x[1] - x_zero[1], wmain[icell].x[2] - x_zero[2])));
+      wmain[icell].div_v = div = get_div_v_in_cmf_frame (ndom, x_zero);
     }
+
     else
     {
-      delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], wmain[icell].x[2] - x_zero[2]));
+
+//    delta = 0.01 * x_zero[2];   //delta is the distance across which we measure e.g. dv_x/dx
+
+      if (x_zero[1] != 0)
+      {
+        delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], fmin (wmain[icell].x[1] - x_zero[1], wmain[icell].x[2] - x_zero[2])));
+      }
+      else
+      {
+        delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], wmain[icell].x[2] - x_zero[2]));
+      }
+      delta = delta * scaling;
+
+
+      if (delta == 0)
+      {
+        Error ("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n", icell);
+        delta = wmain[icell].dfudge;
+      }
+
+
+      /* XFRAME - Divergence is calculated here.  Probably needs do be CMF divergence, but note
+         we only need the divergence in plasma cells, so not clear why this is not part of plasmamain */
+
+      /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
+         in positive and negative directions and evaluate the difference in velocities. Dividing this by
+         delta gives the value of dv_x/dx, and the sum of these gives the divergence. If issues arise
+         see bug report #70. */
+
+
+      /* Calculate dv_x/dx at this position */
+      stuff_v (x_zero, ppp.x);
+      ppp.x[0] += 0.5 * delta;
+      vwind_xyz (ndom, &ppp, v2);
+      ppp.x[0] -= delta;
+      vwind_xyz (ndom, &ppp, v1);
+      div = xxx[0] = (v2[0] - v1[0]) / delta;
+
+      /* Calculate dv_y/dy */
+      stuff_v (x_zero, ppp.x);
+      ppp.x[1] += 0.5 * delta;
+      vwind_xyz (ndom, &ppp, v2);
+      ppp.x[1] -= delta;
+      vwind_xyz (ndom, &ppp, v1);
+      div += xxx[1] = (v2[1] - v1[1]) / delta;
+
+
+      /* Calculate dv_z/dz */
+      stuff_v (x_zero, ppp.x);
+      ppp.x[2] += 0.5 * delta;
+      vwind_xyz (ndom, &ppp, v2);
+      ppp.x[2] -= delta;
+      vwind_xyz (ndom, &ppp, v1);
+      div += xxx[2] = (v2[2] - v1[2]) / delta;
+
+
+      /* we have now evaluated the divergence, so can store in the wind pointer */
+      wmain[icell].div_v = div;
     }
-    delta = delta * scaling;
-
-
-    if (delta == 0)
-    {
-      Error ("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n", icell);
-      delta = wmain[icell].dfudge;
-    }
-
-
-    /* XFRAME - Divergence is calculated here.  Probably needs do be CMF divergence, but note
-       we only need the divergence in plasma cells, so not clear why this is not part of plasmamain */
-
-    /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
-       in positive and negative directions and evaluate the difference in velocities. Dividing this by
-       delta gives the value of dv_x/dx, and the sum of these gives the divergence. If issues arise
-       see bug report #70. */
-
-
-    /* Calculate dv_x/dx at this position */
-    stuff_v (x_zero, ppp.x);
-    ppp.x[0] += 0.5 * delta;
-    vwind_xyz (ndom, &ppp, v2);
-    ppp.x[0] -= delta;
-    vwind_xyz (ndom, &ppp, v1);
-    div = xxx[0] = (v2[0] - v1[0]) / delta;
-
-    /* Calculate dv_y/dy */
-    stuff_v (x_zero, ppp.x);
-    ppp.x[1] += 0.5 * delta;
-    vwind_xyz (ndom, &ppp, v2);
-    ppp.x[1] -= delta;
-    vwind_xyz (ndom, &ppp, v1);
-    div += xxx[1] = (v2[1] - v1[1]) / delta;
-
-
-    /* Calculate dv_z/dz */
-    stuff_v (x_zero, ppp.x);
-    ppp.x[2] += 0.5 * delta;
-    vwind_xyz (ndom, &ppp, v2);
-    ppp.x[2] -= delta;
-    vwind_xyz (ndom, &ppp, v1);
-    div += xxx[2] = (v2[2] - v1[2]) / delta;
-
-
-    /* we have now evaluated the divergence, so can store in the wind pointer */
-    wmain[icell].div_v = div;
 
     if (div < 0 && (wind_div_err < 0 || wmain[icell].inwind == W_ALL_INWIND))
     {

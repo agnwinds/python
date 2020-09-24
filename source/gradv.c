@@ -20,7 +20,8 @@
 /**********************************************************/
 /**
  * @brief      find the gradient velocity vector v, dv_ds for a photon
- * at a certain postion travelling in a certain direction
+ * at a certain position travelling in a certain direction in the cmf
+ * frame.
  *
  * @param [in] PhotPtr  p   A photon
  * @return     dvds    on successful completion
@@ -82,8 +83,11 @@ dvwind_ds (p)
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
+    /* XFRAME -- ADD code for spherical coords since this is calculated on the fly.
+       Note that it is not clear why we cannot fix the code so an exception does 
+       not have to be made for spherical coordiantes. */
     struct photon pnew;
-    double v1[3], v2[3], diff[3];
+    double v1[3], v2[3], dv[3], diff[3];
     double ds;
     /* choose a small distance which is dependent on the cell size */
     vsub (pp.x, wmain[pp.grid].x, diff);
@@ -100,7 +104,15 @@ dvwind_ds (p)
     model_velocity (ndom, pnew.x, v2);
 
     /* calculate the relevant gradient */
-    dvds = fabs (dot (v1, pp.lmn) - dot (v2, pp.lmn)) / ds;
+    if (rel_mode == REL_MODE_FULL)
+    {
+      observer_to_local_frame_velocity (v2, v1, dv);
+      dvds = length (dv) / ds;
+    }
+    else
+    {
+      dvds = fabs (dot (v1, pp.lmn) - dot (v2, pp.lmn)) / ds;
+    }
   }
 
   else                          // for non spherical coords we interpolate on v_grad

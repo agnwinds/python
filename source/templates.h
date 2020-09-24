@@ -78,6 +78,7 @@ int check_grid(void);
 int where_in_wind(double x[], int *ndomain);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);
+double get_div_v_in_cmf_frame(int ndom, double *x);
 double model_rho(int ndom, double x[]);
 int wind_check(WindPtr www, int n);
 /* vvector.c */

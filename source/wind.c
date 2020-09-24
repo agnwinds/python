@@ -372,6 +372,76 @@ model_vgrad (ndom, x, v_grad)
 
 /**********************************************************/
 /** 
+ * @brief      calculate  the diverernce of  the velocity at positions 
+ * in the flow based on  the analytic wind models and imported models.  
+ *
+ * @param [in] int  ndom   The domain of interest
+ * @param [in] double  x[]   A position in the domain
+ * @return   Always returns the divergence of the velocity in the co-moving
+ * frame
+ *
+ * @details
+ * 
+ * The routine calls model_velocity multiple times to calculate the velocity
+ * divergence at a particular postion
+ *
+ * ### Notes ###
+ *
+ * This routine is normally used only during the initialization
+ * of the wind
+ *
+ * Since the routine calls model_velocity directly, and not vwind_xyz
+ * it can be called before wmain.v has been populated.
+ *
+ * XFRAME get_div_v_in_cmf_frame is new code for CMF
+ *
+ **********************************************************/
+
+double
+get_div_v_in_cmf_frame (ndom, x)
+     int ndom;
+     double *x;
+{
+  int i;
+  double dx[3], dv[3];
+  double v0[3], v1[3];
+  double ds;
+  double div_v = 0;
+
+  model_velocity (ndom, x, v0);
+
+  ds = 0.001 * length (x);
+  if (ds < 1.e7)
+    ds = 1.e7;
+
+
+  for (i = 0; i < 3; i++)
+  {
+    stuff_v (x, dx);
+    dx[i] += ds;
+
+
+    model_velocity (ndom, dx, v1);
+
+    if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
+    {
+      Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
+    }
+
+    observer_to_local_frame_velocity (v1, v0, dv);
+
+    div_v += dv[i];
+  }
+
+
+  return (div_v);
+
+}
+
+
+
+/**********************************************************/
+/** 
  * @brief      calculate the density of the wind in from the flow based on the
  * analytic or imported wind models.
  *

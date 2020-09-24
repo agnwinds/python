@@ -780,17 +780,17 @@ typedef struct wind
   double dtheta, dr;            /* widths of bins, used in hydro import mode */
   struct cone wcone;            /* cone structure that defines the bottom edge of the cell in 
                                    CYLVAR coordinates */
-  double v[3];                  /*velocity at inner vertex of cell.  For 2d coordinate systems this
+  double v[3];                  /*velocity at inner vertex of cell in the observer frame.  For 2d coordinate systems this
                                    is defined in the xz plane */
-  double v_grad[3][3];          /*velocity gradient tensor  at the inner vertex of the cell NEW */
-  double div_v;                 /*Divergence of v at center of cell */
+  double v_grad[3][3];          /*velocity gradient tensor  at the inner vertex of the cell in the co-moving frame*/
+  double div_v;                 /*Divergence of v at center of cell in the co-moving frame*/
   double dvds_ave;              /* Average value of dvds */
   double dvds_max, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
                                    where the volume is the volume that is actually filled with material. 
-                                   The vol that is stored here after the progam has intialized itself is the
-                                   CMF volume.
+                                   The vol that is stored here after the progam has initialized itself is the
+                                   co-moving frame volume.
                                  */
   double xgamma,xgamma_cen;     /* 1./sqrt(1-beta**2) at x at edge and center of cell*/
   double dfudge;                /* A number which defines a push through distance for this cell, which replaces the
@@ -855,8 +855,8 @@ typedef struct plasma
   double heat_tot, heat_tot_old;        /* heating from all sources */
   double abs_tot;
   double heat_lines, heat_ff;
-  double heat_comp;             /* 1108 NSH The compton heating for the cell */
-  double heat_ind_comp;         /* 1205 NSH The induced compton heatingfor the cell */
+  double heat_comp;             /* The compton heating for the cell */
+  double heat_ind_comp;         /* The induced compton heatingfor the cell */
   double heat_lines_macro, heat_photo_macro;    /* bb and bf heating due to macro atoms. Subset of heat_lines 
                                                    and heat_photo. SS June 04. */
   double heat_photo, heat_z;    /*photoionization heating total and of metals */
@@ -941,14 +941,14 @@ typedef struct plasma
   double cool_rr_ioniz, cool_rr_metals_ioniz;   /*fb luminosity & fb of metals metals */
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
-  double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
+  double heat_shock;            /* An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
 
   /* JM 1807 -- these routines are for the BF_SIMPLE_EMISSIVITY_APPROACH
      they allow one to inspect the net flow of energy into and from the simple ion 
      ionization pool */
   double bf_simple_ionpool_in, bf_simple_ionpool_out;
 
-  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to 
+  double comp_nujnu;            /* The integral of alpha(nu)nuj(nu) used to 
                                    compute compton cooling-  only needs computing once per cycle 
                                  */
 
@@ -1339,7 +1339,7 @@ typedef struct Cdf
   double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
                                    of the CDF to sample */
   double x1, x2;                /* limits if they exist on what is returned */
-  double norm;                  //The scaling factor which would renormalize the CDF
+  double norm;                  /* The scaling factor which would renormalize the CDF */
   int ncdf;                     /* Size of this CDF */
 }
  *CdfPtr, cdf_dummy;
@@ -1430,7 +1430,7 @@ int nfb;                        // Actual number of freqency intervals calculate
 
 
 
-#include "version.h"            /*54f -- Added so that version can be read directly */
+#include "version.h"            /* Added so that version can be read directly */
 #include "templates.h"
 #include "recipes.h"
 
@@ -1446,7 +1446,7 @@ double kap_bf[NLEVELS];
 
 // 12jun nsh - some commands to enable photon logging in given cells. There is also a pointer in the geo
 
-FILE *pstatptr;                 //NSH 120601 - pointer to a diagnostic file that will contain photon data for given cells
+FILE *pstatptr;                 // pointer to a diagnostic file that will contain photon data for given cells
 int cell_phot_stats;            //1=do  it, 0=dont do it
 #define  NCSTAT 10              //The maximum number of cells we are going to log
 int ncstat;                     // the actual number we are going to log
