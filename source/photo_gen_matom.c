@@ -729,13 +729,11 @@ photo_gen_matom (p, weight, photstart, nphot)
   struct photon pp;
   int nres;
   int n;
-//OLD  double v[3];
   double dot ();
   int emit_matom ();
   double test;
   int upper;
   int nnscat;
-  double dvwind_ds (), sobolev ();
   int nplasma;
   int ndom;
 

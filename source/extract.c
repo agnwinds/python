@@ -340,7 +340,7 @@ needs to reweight
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {
       // XFRAME we need to establish what to do about dv/ds
-      dvds = dvwind_ds (pp);
+      dvds = dvwind_ds_cmf (pp);
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
       if (tau > 0.0)

@@ -777,7 +777,7 @@ WindPtr (w);
           stuff_v (plasmamain[nplasma].F_vis, fhat);
           renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
           stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
-          t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
+          t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
         }
         else
           t_opt = 0.0;          //Essentually a flag that there is no way of computing t (and hence M) in this cell.
@@ -788,7 +788,7 @@ WindPtr (w);
           stuff_v (plasmamain[nplasma].F_UV, fhat);
           renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
           stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
-          t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
+          t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
         }
         else
           t_UV = 0.0;           //Essentually a flag that there is no way of computing t (and hence M) in this cell.
@@ -800,7 +800,7 @@ WindPtr (w);
           stuff_v (plasmamain[nplasma].F_Xray, fhat);
           renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
           stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
-          t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds (&ptest));
+          t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
         }
         else
           t_Xray = 0.0;         //Essentually a flag that there is no way of computing t (and hence M) in this cell.                

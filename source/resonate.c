@@ -34,29 +34,30 @@
  * @param [in] WindPtr  w   the entire wind structure
  * @param [in] PhotPtr  p   A photon (bundle)
  * @param [in] double  tau_scat   the optical depth at which the photon
- * will scatter
+ *                          will scatter
  * @param [in,out] double *  tau   Initially the current optical depth for
- * the photon; finally the optical depth at the distance the photon can be
- * moved.
+ *                          the photon; finally the optical depth 
+ *                          at the distance the photon can be
+ *                          moved.
  * @param [out] int *  nres   the number of the resonance, -1 if it was electron 
- * scatttering, -2 if it was ff, -99 if the
- * distance is not limited by some kind of scatter.
+ *                          scatttering, -2 if it was ff, -99 if the
+ *                          distance is not limited by some kind of scatter.
  * @param [in] double  smax   the maximum distance the photon can
- * travel in the cell
+ *                          travel in the cell
  * @param [out] int *  istat   A flag indicating whether the
- * photon should scatter if it travels the distance estimated, 0 if no, TAU_SCAT if yes.
- * @return     The distance the photon can travel
+ *                          photon should scatter if it travels the distance estimated, 0 if no, TAU_SCAT if yes.
+ * @return                  The distance the photon can travel
  *
  * calculate_ds finds the distance the photon can travel subject to a
- * number of conditions, which include reach a distance where tau is the
- * distance where a scatter can occur, or a maximum distance set to ensure
- * we do not cross into another cell, or indeed to go so far that one is
- * not sure that the velocity can be approximated as a linear function of
- * distance.
+ * number of conditions. The possibilites include: 
+ * * reaching a distance where tau = tau_scat.
+ * * reaching a maximum distance smax set set to ensure we do not cross into another cell, 
+ *              or indeed to go so far that one is
+ *              not sure that the velocity can be approximated as a linear function of
+ *              distance.
  *
  * The routine returns the distance that the photon can travel subject to
- * these conditions and information about why the photon was halted at the
- * distance it was halted.
+ * these conditions and information about why the photon stopped there 
  *
  * @details
  *
@@ -68,10 +69,6 @@
  * can travel before hitting the edge of the
  * shell should be calculated outside of this routine.
  *
- * 180519 - ksl - I modified the behavior ot this routine so that nres
- * indicates that a scattering event is not limiting the maximum
- * distance.  nres is now -99 if there was no scatter, instead of
- * -1
  *
  * XFRAME calculate_ds retruns ds in the observer frame, 
  * but continuum opacities are calculated in the CMF frame 
@@ -132,26 +129,13 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      frequencies at the ends of the paths, but we do not want photon direction to change to CMF frame
    */
 
-/*  ksl I have removed storing and retrieving old values, as it is not obvious this much of a speed
-    More lines would need to be added if it does help
-*/
-//OLD  if (comp_phot (&cds_phot_old_observer, p))
-//OLD  {
-//OLD    observer_to_local_frame (p, &p_start_cmf);
-//OLD  }
-//OLD  else
-//OLD  {
-//OLD    stuff_phot (&cds_phot_old_loc, &p_start_cmf);
-//OLD  }
 
   stuff_phot (p, &p_start);
   observer_to_local_frame (&p_start, &p_start_cmf);
 
   stuff_phot (p, &p_stop);
   move_phot (&p_stop, smax);
-//OLD  stuff_phot (&p_stop, &cds_phot_old_observer);
   observer_to_local_frame (&p_stop, &p_stop_cmf);
-//OLD  stuff_phot (&p_stop_cmf, &cds_phot_old_loc);
 
 
 
@@ -326,13 +310,13 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
         if (dd > LDEN_MIN)
         {
 /* If we have reached this point then we have to initalize dvds1 and dvds2.
- * Otherwise there is no need to do this, especially as dvwind_ds is an
+ * Otherwise there is no need to do this, especially as dvwind_ds_cmf is an
  * expensive calculation time wise */
 
           if (init_dvds == 0)
           {
-            dvds1 = dvwind_ds (p);
-            dvds2 = dvwind_ds (&p_stop);
+            dvds1 = dvwind_ds_cmf (p);
+            dvds2 = dvwind_ds_cmf (&p_stop);
             init_dvds = 1;
           }
 

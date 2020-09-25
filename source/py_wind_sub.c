@@ -1985,7 +1985,7 @@ dvds_summary (w, rootname, ochoice)
         stuff_v (w[n].xcen, p.x);
 
         p.lmn[ichoice - 1] = 1.0;
-        aaa[n] = dvwind_ds (&p);
+        aaa[n] = dvwind_ds_cmf (&p);
 
       }
     }
@@ -3676,7 +3676,7 @@ get_los_dvds (w, rootname, ochoice)
         move_phot (&ptest, ds);
 
         if (vchoice == 0)
-          dvds = dvwind_ds (&p);
+          dvds = dvwind_ds_cmf (&p);
 
         /* next choice is for turning off rotational velocity */
         else if (vchoice == 1)

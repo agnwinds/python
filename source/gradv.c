@@ -44,7 +44,7 @@
  **********************************************************/
 
 double
-dvwind_ds (p)
+dvwind_ds_cmf (p)
      PhotPtr p;
 {
   double v_grad[3][3];
@@ -154,7 +154,7 @@ dvwind_ds (p)
 
   if (sane_check (dvds))
   {
-    Error ("dvwind_ds: sane_check %f\n", dvds);
+    Error ("dvwind_ds_cmf: sane_check %f\n", dvds);
   }
 
   return (dvds);

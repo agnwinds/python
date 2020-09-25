@@ -292,7 +292,7 @@ double zero_emit(double t);
 /* levels.c */
 int levels(PlasmaPtr xplasma, int mode);
 /* gradv.c */
-double dvwind_ds(PhotPtr p);
+double dvwind_ds_cmf(PhotPtr p);
 int dvds_ave(void);
 /* reposition.c */
 int reposition(PhotPtr p);
