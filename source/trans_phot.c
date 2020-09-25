@@ -121,7 +121,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
     /* This is just a watchdog method to tell the user the program is still running */
     if (nphot % nreport == 0)
     {
-      if (geo.ioniz_or_extract)
+      if (geo.ioniz_or_extract == CYCLE_IONIZ)
         Log (" Ion. Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle + 1, geo.wcycles, basename, nphot, NPHOT,
              nphot * 100. / NPHOT);
       else
@@ -489,7 +489,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
       /* Add path lengths for reverberation mapping */
-      if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM) && geo.ioniz_or_extract && geo.wcycle == geo.wcycles - 1)
+      if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM) && geo.ioniz_or_extract == CYCLE_IONIZ && geo.wcycle == geo.wcycles - 1)
       {
         wind_paths_add_phot (&wmain[n], &pp);
       }

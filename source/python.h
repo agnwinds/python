@@ -447,6 +447,8 @@ struct geometry
                                    populations are computed as for minor ions. By default it is set to
                                    0 initially and then set to 1 the first time that
                                    Monte Carlo estimators are normalised. */
+#define CYCLE_IONIZ    1
+#define CYCLE_EXTRACT  0
   int ioniz_or_extract;         /* Set to 1 (true) during ionization cycles, set to 0 (false) during calculation of
                                    detailed spectrum.  Originally introduced by SS in July04 as he added
                                    macro atoms.  Name changed by ksl (57h) since this variable can be used more

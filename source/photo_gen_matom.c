@@ -88,7 +88,7 @@ get_kpkt_heating_f ()
 
     if (shock_kpkt_luminosity > 0)
     {
-      if (geo.ioniz_or_extract)
+      if (geo.ioniz_or_extract == CYCLE_IONIZ)
         plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
       else
         plasmamain[n].kpkt_abs += shock_kpkt_luminosity;
@@ -561,7 +561,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   photstop = photstart + nphot;
   Log ("photo_gen_kpkt  creates nphot %5d photons from %5d to %5d, weight %8.4e \n", nphot, photstart, photstop, weight);
 
-  if (geo.ioniz_or_extract)
+  if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
     /* we are in the ionization cycles, so use all frequencies. kpkt_mode should allow all processes */
     fmin = xband.f1[0];

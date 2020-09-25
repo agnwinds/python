@@ -676,12 +676,9 @@ main (argc, argv)
   }
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
-  geo.ioniz_or_extract = 1;     //SS July 04 - want to compute MC estimators during ionization cycles
-  //1 simply implies we are in the ionization section of the code
-  //and allows routines to act accordinaly.
-/* 67 -ksl- geo.wycle will start at zero unless we are completing an old run */
 
-/* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
+  geo.ioniz_or_extract = CYCLE_IONIZ;
+
   calculate_ionization (restart_stat);
 
 /* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
@@ -703,7 +700,7 @@ main (argc, argv)
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
 
-  geo.ioniz_or_extract = 0;
+  geo.ioniz_or_extract = CYCLE_EXTRACT;
 
 
 /* Next step speeds up extraction stage */

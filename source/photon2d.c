@@ -561,10 +561,10 @@ The choice of SMAX_FRAC can affect execution time.*/
     observer_to_local_frame (&phot_mid, &phot_mid_cmf);
     ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
 
-    if (geo.ioniz_or_extract == 1)
+    if (geo.ioniz_or_extract == CYCLE_IONIZ)
     {
       /* Increment the bound-free estimators for macro-atoms */
-      /* XFRAME -- we are assuming that p and ds_current are observer frame values */
+      /* XFRAME -- Need to transfer cmf frame values */
       bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
     }
   }

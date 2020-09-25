@@ -90,7 +90,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int n, nn, nstart, ndelt;
   double x;
   double ds_current, ds;
-  double dvds, dd;
+  double dvds, density_cmf;
   double dvds1, dvds2;
   struct photon p_start, p_stop, p_now;
   struct photon p_start_cmf, p_stop_cmf, p_now_cmf;
@@ -303,11 +303,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
         stuff_phot (p, &p_now);
         move_phot (&p_now, ds_current); // So p_now contains the current position of the photon
 
-        // XFRAME - extra factor of gamma to convert to observer frame density, because dvds is observer frame 
 
-        dd = xplasma->xgamma * get_ion_density (ndom, p_now.x, kkk);
+        density_cmf = get_ion_density (ndom, p_now.x, kkk);
 
-        if (dd > LDEN_MIN)
+        if (density_cmf > LDEN_MIN)
         {
 /* If we have reached this point then we have to initalize dvds1 and dvds2.
  * Otherwise there is no need to do this, especially as dvwind_ds_cmf is an
@@ -324,15 +323,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
 
-          /* sobolev does not use x, unless dd is les than 0 */
-          tau_sobolev = sobolev (one, p_now.x, dd, lin_ptr[nn], dvds);
+          /* sobolev does not use x, unless density_cmf is les than 0 */
+          //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using cmf  here
 
-
-          //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using observer here
-          /* XFRAME -- possible inconsistency with what actually happens in the Sobolev routine here, plus
-             oustanding questions about how to get dv/ds. Currently dv/ds is the observer frame dv/ds */
-
-
+          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[nn], dvds);
           ttau += tau_sobolev;
 
 
@@ -360,7 +354,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
                  */
                 Error ("calculate_ds: Macro atom problem when photon moved into cell with no volume\n");
               }
-              else if (geo.ioniz_or_extract == 1)
+              else if (geo.ioniz_or_extract == CYCLE_IONIZ)
               {
                 /* we only want to increment the BB estimators if we are in the ionization cycles (e.g. #730) */
 
@@ -1275,7 +1269,7 @@ if fixed.
 //XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 
 // ioniz_or_extract is True for ionization cycles, false for spectral cycles
 
-  if (geo.ioniz_or_extract)
+  if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
     stuff_v (p_orig.lmn, p_init);
     renorm (p_init, p_orig.w / VLIGHT);

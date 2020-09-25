@@ -179,8 +179,8 @@ radiation (p, ds)
   if (freq > phot_freq_min)
 
   {
-    if (geo.ioniz_or_extract)
-    {                           // Initialize during ionization cycles only
+    if (geo.ioniz_or_extract == CYCLE_IONIZ)
+    {
       for (nion = 0; nion < nions; nion++)
       {
         kappa_ion[nion] = 0;
@@ -259,8 +259,8 @@ radiation (p, ds)
             kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
 
 
-            if (geo.ioniz_or_extract)
-            {                   // Calculate during ionization cycles only
+            if (geo.ioniz_or_extract == CYCLE_IONIZ)
+            {
 
               //This is the heating effect - i.e. the absorbed photon energy less the binding energy of the lost electron
               frac_tot += z = x * (freq_xs - ft) / freq_xs;
@@ -414,8 +414,8 @@ radiation (p, ds)
     Error ("Radiation:sane_check photon weight is %e for tau %e\n", p->w, tau);
   }
 
-  if (geo.ioniz_or_extract == 0)
-    return (0);                 // 57h -- ksl -- 060715
+  if (geo.ioniz_or_extract == CYCLE_EXTRACT)
+    return (0);
 
 /* Everything after this is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
@@ -440,8 +440,8 @@ radiation (p, ds)
 
 
   ds_cmf = observer_to_local_frame_ds (&phot_mid, ds);
-  update_banded_estimators (xplasma, &phot_mid_cmf, ds_cmf, w_ave_cmf, ndom);   //Update estimators
-  update_flux_estimators (xplasma, &phot_mid, ds, w_ave_obs, ndom);     //Update estimators
+  update_banded_estimators (xplasma, &phot_mid_cmf, ds_cmf, w_ave_cmf, ndom);
+  update_flux_estimators (xplasma, &phot_mid, ds, w_ave_obs, ndom);
 
 
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))

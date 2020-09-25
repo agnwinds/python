@@ -125,8 +125,8 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
                computation of the k-packet emissivity needed for the final spectrum calculation. */
             *which_out = 1;
 
-            //SWM - If reverb is on, and this is the last ionisation cycle, then track the photon path
-            if (geo.reverb == REV_MATOM && geo.ioniz_or_extract && geo.fraction_converged > geo.reverb_fraction_converged)
+            //If reverb is on, and this is the last ionisation cycle, then track the photon path
+            if (geo.reverb == REV_MATOM && geo.ioniz_or_extract == CYCLE_IONIZ && geo.fraction_converged > geo.reverb_fraction_converged)
             {
               line_paths_add_phot (&(wmain[p->grid]), p, nres);
             }
