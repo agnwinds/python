@@ -89,12 +89,12 @@ bf_estimators_increment (one, p, ds)
 
   freq_av = p->freq;
 
-  if (p->freq > xplasma->max_freq)      // check if photon frequency exceeds maximum frequency
+  if (p->freq > xplasma->max_freq)
     xplasma->max_freq = p->freq;
 
   if (modes.save_cell_stats && ncstat > 0)
   {
-    save_photon_stats (one, p, ds, p->w);       // save photon statistics (extra diagnostics)
+    save_photon_stats (one, p, ds, p->w);
   }
 
 
@@ -110,7 +110,6 @@ bf_estimators_increment (one, p, ds)
   {
     Error ("bf_estimators_increment:sane_check Problem with j %g or ave_freq %g\n", xplasma->j, xplasma->ave_freq);
   }
-
 
 
 
@@ -140,16 +139,15 @@ bf_estimators_increment (one, p, ds)
     if (kap_bf[nn] > 0.0 && (freq_av > ft))     // does the photon cause bf heating?
     {
 
-      if (phot_top[n].macro_info == 1 && geo.macro_simple == 0) // it is a macro atom
+      if (phot_top[n].macro_info == TRUE && geo.macro_simple == 0)      // it is a macro atom
       {
-        /* quick check that we don't have a VFKY cross-section here */
-        if (ion[phot_top[n].nion].phot_info == 0)
-        {
-          Error ("bf_estimators_increment: Vfky cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
-          density = 0.0;
-        }
+//OLD        /* quick check that we don't have a VFKY cross-section here */
+//OLD        if (ion[phot_top[n].nion].phot_info == 0)
+//OLD        {
+//OLD          Error ("bf_estimators_increment: Vfky cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
+//OLD          density = 0.0;
+//OLD        }
 
-        //kap_bf[nn] = x = sigma_phot(&phot_top[n], freq)*density*zdom[ndom].fill 
         x = kap_bf[nn] / (density * zdom[ndom].fill);   //this is the cross section
 
         /* Now identify which of the BF processes from this level this is. */
@@ -344,7 +342,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
   line_ptr = lin_ptr[nn];
 
-  if (line_ptr->macro_info == 0 || geo.macro_simple == 1)
+  if (line_ptr->macro_info == FALSE || geo.macro_simple == 1)
     return (-1);
 
   /* Start by identifying which estimator we want. Get lower level of
@@ -604,7 +602,7 @@ mc_estimator_normalise (n)
 
   /* Now that we have estimators, set the flag to use them for the level populations */
 
-  geo.macro_ioniz_mode = 1;
+  geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
 
   return (0);
 }

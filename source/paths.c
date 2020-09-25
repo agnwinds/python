@@ -443,7 +443,7 @@ line_paths_gen_phot (WindPtr wind, PhotPtr pp, int nres)
     //         wind->nwind, sqrt(wind->x[0]*wind->x[0] + wind->x[1]*wind->x[1]), wind->x[2]);
     simple_paths_gen_phot (pp);
   }
-  else if (nres < 0 || nres >= nlines || lin_ptr[nres]->macro_info == 0)
+  else if (nres < 0 || nres >= nlines || lin_ptr[nres]->macro_info == FALSE)
   {                             //If this line is invalid, continuum or non-matom then default to wind
     pp->path = r_draw_from_path_histogram (wind->paths);
   }

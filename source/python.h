@@ -434,33 +434,31 @@ struct geometry
                                    if SYSTEM_TYPE_PREVIOUS it is an old run     */
   int star_radiation, disk_radiation;   /* 1 means consider radiation from star, disk,  bl, and/or wind */
   int bl_radiation, wind_radiation, agn_radiation;
-  int search_light_radiation;   /* 1605 - ksl - Added to implement 1d testing */
+
   int matom_radiation;          /* Added by SS Jun 2004: for use in macro atom computations of detailed spectra
                                    - 1 means use emissivities for BOTH macro atom levels and kpkts. 0 means don't
                                    (which is correct for the ionization cycles. */
   int ioniz_mode;               /* describes the type of ionization calculation which will
                                    be carried out.  The various ioniz_modes are defined by #defines IONMODE_MATRIX_BB
                                    etc.  See the documentation in this file for what these mean. */
-  int macro_ioniz_mode;         /* Added by SS Apr04 to control the use of macro atom populations and
-                                   ionization fractions. If it is set to 1 then macro atom populations
-                                   computed from estimators are used. If set to 0 then the macro atom
-                                   populations are computed as for minor ions. By default it is set to
-                                   0 initially and then set to 1 the first time that
+#define MACRO_IONIZ_MODE_NO_ESTIMATORS  0
+#define MACRO_IONIZ_MODE_ESTIMATORS     1
+  int macro_ioniz_mode;         /* Controls the use of macro atom populations and
+                                   ionization fractions. If it is set to MACRO_IONIZ_MODE_ESTIMATOR then macro atom populations
+                                   computed from estimators are used. If set to MACRO_IONIZ_MODE_NO_ESTIMATORS then the macro atom
+                                   populations are computed as for simple ions. By default it is set to
+                                   MACRO_IONIZ_MODE_NO_ESTIMATORS initially and then set to  MACRO_IONIZ_MODE_ESTIMATORS the first time that
                                    Monte Carlo estimators are normalised. */
 #define CYCLE_IONIZ    1
 #define CYCLE_EXTRACT  0
-  int ioniz_or_extract;         /* Set to 1 (true) during ionization cycles, set to 0 (false) during calculation of
-                                   detailed spectrum.  Originally introduced by SS in July04 as he added
-                                   macro atoms.  Name changed by ksl (57h) since this variable can be used more
-                                   generally to speed up the extract portion of the calculation.
+  int ioniz_or_extract;         /* Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
+                                   detailed spectrum.  
                                  */
   int macro_simple;             /* Added by SS May04 for diagnostics. As default this is set to 0. A full
                                    Macro Atom calculation is performed in that case. If it is set to 1 it means
                                    that although Macro Atom data has been read in, all lines/continua are treated
                                    using the simplified two-level approximation. Such a calculation should reproduce
                                    the same results as pre-Macro Atom versions of the code. */
-  int partition_mode;           /* Diagnostic to force the partition function to be calculated in
-                                   a specific way. */
 
 #define LINE_MODE_ABSORB      0
 #define LINE_MODE_SCAT        1

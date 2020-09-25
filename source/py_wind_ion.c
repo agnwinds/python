@@ -457,7 +457,7 @@ line_summary (w, rootname, ochoice)
   }
 
   strcpy (name, "");
-  if (lin_ptr[nline]->macro_info == 1)
+  if (lin_ptr[nline]->macro_info == TRUE)
   {
     sprintf (name, "%d Luminosity %d (%s) ion %d fractions\n", nline, element, ele[nelem].name, istate);
   }
@@ -475,7 +475,7 @@ line_summary (w, rootname, ochoice)
     {
       nplasma = w[n].nplasma;
 
-      if (lin_ptr[nline]->macro_info == 1)
+      if (lin_ptr[nline]->macro_info == TRUE)
       {
         /* If this is a matom line */
         d2 = den_config (&plasmamain[nplasma], lin_ptr[nline]->nconfigu);
@@ -541,7 +541,7 @@ line_summary (w, rootname, ochoice)
     strcat (choice, ele[nelem].name);
     sprintf (iname, "%d", istate);
     strcat (choice, iname);
-    if (lin_ptr[nline]->macro_info == 1)
+    if (lin_ptr[nline]->macro_info == TRUE)
     {
       sprintf (iname, ".%d-%d", lin_ptr[nline]->levu, lin_ptr[nline]->levl);
       strcat (choice, iname);

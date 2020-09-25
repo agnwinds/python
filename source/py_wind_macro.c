@@ -410,11 +410,11 @@ depcoef_overview (icell)
     xdummy = &pdum;
 
     copy_plasma (x, xdummy);
-    geo.macro_ioniz_mode = 0;
+    geo.macro_ioniz_mode = MACRO_IONIZ_MODE_NO_ESTIMATORS;
 
     partition_functions (xdummy, NEBULARMODE_TE);
     saha (xdummy, xdummy->ne, xdummy->t_e);
-    geo.macro_ioniz_mode = 1;
+    geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
   }
   else
   {
@@ -571,12 +571,12 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
       xdummy = &pdum;
 
       copy_plasma (xplasma, xdummy);
-      geo.macro_ioniz_mode = 0;
+      geo.macro_ioniz_mode = MACRO_IONIZ_MODE_NO_ESTIMATORS;
 
       partition_functions (xdummy, NEBULARMODE_TE);
       saha (xdummy, xdummy->ne, xdummy->t_e);
 
-      geo.macro_ioniz_mode = 1;
+      geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
 
       p = &config[nconfig];
       xden = den_config (xplasma, nconfig);
@@ -679,7 +679,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
   xdummy = &pdum;
 
   copy_plasma (xplasma, xdummy);
-  geo.macro_ioniz_mode = 0;
+  geo.macro_ioniz_mode = MACRO_IONIZ_MODE_NO_ESTIMATORS;
 
   Log ("# Level, Pops, Dep coefs\n");
   if (ochoice)
@@ -699,7 +699,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
     partition_functions (xdummy, NEBULARMODE_TE);
     saha (xdummy, xdummy->ne, xdummy->t_e);
 
-    geo.macro_ioniz_mode = 1;
+    geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
 
     //p = &config[i];
     xden = den_config (xplasma, i);

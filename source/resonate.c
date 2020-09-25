@@ -358,7 +358,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               {
                 /* we only want to increment the BB estimators if we are in the ionization cycles (e.g. #730) */
 
-                if (lin_ptr[nn]->macro_info == 1 && geo.macro_simple == 0)
+                if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == 0)
                 {
                   /* The line is part of a macro atom so increment the estimator if desired */
                   bb_estimators_increment (two, p, tau_sobolev, dvds, nn);
@@ -606,7 +606,7 @@ kappa_bf (xplasma, freq, macro_all)
       density = den_config (xplasma, nconf);    //Need to check what this does (SS)
 
 
-      if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == 1)
+      if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == TRUE)
       {
 
         /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
@@ -717,7 +717,7 @@ kbf_need (fmin, fmax)
         tau_test = phot_top[n].x[0] * density * SMAX_FRAC * length (one->xcen);
 
 
-        if (tau_test > 1.e-6 || phot_top[n].macro_info == 1)
+        if (tau_test > 1.e-6 || phot_top[n].macro_info == TRUE)
         {
           /* Store the bf transition and increment nuse */
           xplasma->kbf_use[nuse] = n;
@@ -789,7 +789,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     Error ("Sobolev: Surprise tau = VERY_BIG as dvds is 0\n");
   }
 
-  else if (lptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
+  else if (lptr->macro_info == TRUE && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
   {
     // macro atom case SS
     d1 = den_config (xplasma, lptr->nconfigl);
@@ -1044,7 +1044,7 @@ scatter (p, nres, nnscat)
          a k-packet is based only on the frequency of the scattered packet.
          (SS) */
 
-      if (phot_top[*nres - NLINES - 1].macro_info == 1 && geo.macro_simple == 0)
+      if (phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == 0)
       {
         /* Macro ion case (SS) This is the case bound free interaction for a 
            xsection that is part of a macro atom (and we have not defaulted 
@@ -1121,7 +1121,7 @@ scatter (p, nres, nnscat)
 
         /* This ends the calculation for dealing with free-bound absorption of a macro atom */
       }
-      else if (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1)
+      else if (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == 1)
       {
         /* Simple ion case.  It's a bf interaction in a calculation involving macro-atoms, 
            but this photoionization x-section is is associated with one of the levels
