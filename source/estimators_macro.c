@@ -12,6 +12,12 @@
  *         <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1256805.svg" 
  *         alt="DOI"></a>
  *         \endhtmlonly
+ *
+ * #Notes
+ * This file includes both the routines to accumulate the data 
+ * for creating the estimator during ionization cycles, but
+ * also the routine mormalize_macro_estimators, which does
+ * the normalization
  ***********************************************************/
 
 #include <stdio.h>
@@ -873,7 +879,6 @@ macro_bf_heating (xplasma, t_e)
  * @param [out] PlasmaPtrxplasma 
  * @param [in] PhotPtr  p   the packet
  * @param [in] double  tau_sobolev   optical depth of line
- * @param [in] double  dvds   velocity gradient
  * @param [in] int  nn   the label for the line in question
  * @return  0 on success
  *
@@ -882,14 +887,21 @@ macro_bf_heating (xplasma, t_e)
  * resonance with the line and records the heating contribution 
  * from that line and packet
  *
+ * #Notes
+ *
+ * The heating contribution is modelled on the macro atom bb estimator 
+ * calculations for the radiative excitation rate. This (energy) excitation
+ * rate is multiplied by the destruction probability to get the heating. 
+ * The destruction probability is obtained following the discussion in KSL's notes
+ * on Python.
+ *
  **********************************************************/
 
 int
-bb_simple_heat (xplasma, p, tau_sobolev, dvds, nn)
+bb_simple_heat (xplasma, p, tau_sobolev, nn)
      PlasmaPtr xplasma;
      PhotPtr p;
      double tau_sobolev;
-     double dvds;
      int nn;
 
 {
@@ -898,20 +910,11 @@ bb_simple_heat (xplasma, p, tau_sobolev, dvds, nn)
   struct lines *line_ptr;
   double electron_temperature;
   double rad_rate, coll_rate, normalisation;
-  double d1, d2;                //densities of lower and upper level
-  double b12 ();
-
-  /* The heating contribution is modelled on the macro atom bb estimator 
-     calculations for the radiative excitation rate. This (energy) excitation
-     rate is multiplied by the destruction probability to get the heating. 
-     The destruction probability is obtained following the discussion in KSL's notes
-     on Python. */
 
 
   weight_of_packet = p->w;
   line_ptr = lin_ptr[nn];
   electron_temperature = xplasma->t_e;
-  two_level_atom (line_ptr, xplasma, &d1, &d2); //get level densities
 
   rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
 

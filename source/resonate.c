@@ -368,8 +368,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
                   /* The line is from a simple ion. Record the heating contribution and move on. */
                   xplasma2 = &plasmamain[two->nplasma];
 
-                  bb_simple_heat (xplasma2, &p_now_cmf, tau_sobolev, dvds_cmf, nn);
-                  /* XFRAME ultimately need to consider transformaions in estimators */
+                  bb_simple_heat (xplasma2, &p_now_cmf, tau_sobolev, nn);
 
                 }
               }
