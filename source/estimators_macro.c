@@ -57,7 +57,7 @@ double temp_ext_rad;            //radiation temperature passed externally
  * XFRAME As currently written bf_esimators_increment expects p
  * to be a co-moving frame photon and ds to be a co-moving frame path length
  * 
- * With this cohoice bf_estimators did not need to be modified to properly
+ * With this choice bf_estimators did not need to be modified to properly
  * handle calculations in the co-moving frame.
  * 
  **********************************************************/

@@ -90,7 +90,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int n, nn, nstart, ndelt;
   double x;
   double ds_current, ds;
-  double dvds, density_cmf;
+  double dvds_cmf, density_cmf;
   double dvds1, dvds2;
   struct photon p_start, p_stop, p_now;
   struct photon p_start_cmf, p_stop_cmf, p_now_cmf;
@@ -319,14 +319,14 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
             init_dvds = 1;
           }
 
-          dvds = (1. - x) * dvds1 + x * dvds2;
+          dvds_cmf = (1. - x) * dvds1 + x * dvds2;
 
 
 
           /* sobolev does not use x, unless density_cmf is les than 0 */
           //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using cmf  here
 
-          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[nn], dvds);
+          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[nn], dvds_cmf);
           ttau += tau_sobolev;
 
 
@@ -356,22 +356,19 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               }
               else if (geo.ioniz_or_extract == CYCLE_IONIZ)
               {
-                /* we only want to increment the BB estimators if we are in the ionization cycles (e.g. #730) */
-
+                observer_to_local_frame (&p_now, &p_now_cmf);
                 if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == 0)
                 {
-                  /* The line is part of a macro atom so increment the estimator if desired */
-                  bb_estimators_increment (two, p, tau_sobolev, dvds, nn);
-                  /* XFRAME ultimately need to consider transformaions in estimators
-                     either transform quantities before passing (p) or else in the increment 
-                     routines (choose a principle and apply to all?) */
+                  /* XFRAME all variables transmtted to bb_estimators_increment should be cmf 
+                     quantities */
+                  bb_estimators_increment (two, &p_now_cmf, tau_sobolev, dvds_cmf, nn);
                 }
                 else
                 {
                   /* The line is from a simple ion. Record the heating contribution and move on. */
                   xplasma2 = &plasmamain[two->nplasma];
 
-                  bb_simple_heat (xplasma2, p, tau_sobolev, dvds, nn);
+                  bb_simple_heat (xplasma2, &p_now_cmf, tau_sobolev, dvds_cmf, nn);
                   /* XFRAME ultimately need to consider transformaions in estimators */
 
                 }

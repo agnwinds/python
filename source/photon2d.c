@@ -555,7 +555,7 @@ The choice of SMAX_FRAC can affect execution time.*/
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
 
-    /* XFRAME next lines to prefare for bf_estimator_call */
+    /* XFRAME next lines to prepare for bf_estimator_call */
     stuff_phot (p, &phot_mid);
     move_phot (&phot_mid, 0.5 * ds_current);
     observer_to_local_frame (&phot_mid, &phot_mid_cmf);
