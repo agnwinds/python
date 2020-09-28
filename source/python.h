@@ -22,24 +22,16 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 #include "log.h"
 #include "strict.h"
 
-/* In python_43 the assignment of the WindPtr size has been moved from a fixed
-value determined by values in python.h to a values which are adjustable from
-within python */
 
 
 #define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
-#define REL_MODE_FULL   1      /*Make full corrections for special relativity*/
+#define REL_MODE_FULL   1      /*Make full corrections for special relativity including co-moving frame effects*/
 
-int rel_mode;                 /* How doppler effects are treated */
+int rel_mode;                 /* How doppler effects and co-moving frames are  */
 
-
-
-  int run_xtest;               /* Variable if TRUE causes a special test mode to be run */
+int run_xtest;               /* Variable if TRUE causes a special test mode to be run */
 
 
-
-/* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
-are certain times we want to loop over everything.  The situation with NPLASMA is similar */
 
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
