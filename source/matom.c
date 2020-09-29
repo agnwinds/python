@@ -659,7 +659,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
-  if (cont_ptr->macro_info == TRUE && geo.macro_simple == 0)
+  if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
   {
     alpha_sp_value = alpha_sp_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }
@@ -829,7 +829,7 @@ kpkt (p, nres, escape, mode)
       cont_ptr = &phot_top[i];
       ulvl = cont_ptr->uplev;
 
-      if (cont_ptr->macro_info == TRUE && geo.macro_simple == 0)
+      if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {
         upper_density = den_config (xplasma, ulvl);
         /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
@@ -864,7 +864,7 @@ kpkt (p, nres, escape, mode)
 
       cooling_normalisation += cooling_bf[i];
 
-      if (cont_ptr->macro_info == TRUE && geo.macro_simple == 0)
+      if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {
         /* Include collisional ionization as a cooling term in macro atoms. Don't include
            for simple ions for now.  SS */
@@ -888,7 +888,7 @@ kpkt (p, nres, escape, mode)
     for (i = 0; i < nlines; i++)
     {
       line_ptr = &line[i];
-      if (line_ptr->macro_info == TRUE && geo.macro_simple == 0)
+      if (line_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {                         //It's a macro atom line and so the density of the upper level is stored
         cooling_bb[i] = mplasma->cooling_bb[i] =
           den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * PLANCK;
@@ -1100,7 +1100,7 @@ kpkt (p, nres, escape, mode)
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
 #if BF_SIMPLE_EMISSIVITY_APPROACH
-        if (phot_top[i].macro_info == FALSE || geo.macro_simple == 1)
+        if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
         {
           upweight_factor = xplasma->recomb_simple_upweight[i];
           p->w *= upweight_factor;
@@ -1132,7 +1132,7 @@ kpkt (p, nres, escape, mode)
       if (destruction_choice < mplasma->cooling_bb[i])
       {                         //This is the bb collision which removes the k-packet
         *nres = line[i].where_in_list;  //label for bb process 
-        if (line[i].macro_info == TRUE && geo.macro_simple == 0)        //line is for a macro atom
+        if (line[i].macro_info == TRUE && geo.macro_simple == FALSE)    //line is for a macro atom
         {
 
           /* escape = 0 flag returned to tell macro_gov that

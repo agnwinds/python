@@ -135,24 +135,11 @@ bf_estimators_increment (one, p, ds)
       llvl = 0;                 // shouldn't ever be used 
     }
 
-
-    /* JM130729 Bugfix 31: This if loop causes the else statement for simple ions to be 
-     * entered in macro atom mode- it appeared to be introduced sometime between 58 and 68.
-     *
-     * if (kap_bf[nn] > 0.0 && (freq_av > ft) && phot_top[n].macro_info == 1
-     *          && geo.macro_simple == 0)
-     */
     if (kap_bf[nn] > 0.0 && (freq_av > ft))     // does the photon cause bf heating?
     {
 
-      if (phot_top[n].macro_info == TRUE && geo.macro_simple == 0)      // it is a macro atom
+      if (phot_top[n].macro_info == TRUE && geo.macro_simple == FALSE)  // it is a macro atom
       {
-//OLD        /* quick check that we don't have a VFKY cross-section here */
-//OLD        if (ion[phot_top[n].nion].phot_info == 0)
-//OLD        {
-//OLD          Error ("bf_estimators_increment: Vfky cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
-//OLD          density = 0.0;
-//OLD        }
 
         x = kap_bf[nn] / (density * zdom[ndom].fill);   //this is the cross section
 
@@ -342,13 +329,9 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   mplasma = &macromain[xplasma->nplasma];
 
 
-  /* 04apr ksl: Start by checking that this was a macro-line */
-  /* There should now be a diversion in place before this routine is called
-     to identify macro/simple ions. But I'll leave the check here too - backup (SS, Apr04). */
-
   line_ptr = lin_ptr[nn];
 
-  if (line_ptr->macro_info == FALSE || geo.macro_simple == 1)
+  if (line_ptr->macro_info == FALSE || geo.macro_simple == TRUE)
     return (-1);
 
   /* Start by identifying which estimator we want. Get lower level of
@@ -660,9 +643,9 @@ total_fb_matoms (xplasma, t_e, f1, f2)
   t_e_store = xplasma->t_e;     //store the temperature - will put it back at the end
   xplasma->t_e = t_e;           //for use in calls to alpha_sp below
 
-  total = 0;                    // initialise
+  total = 0;
 
-  if (geo.macro_simple == 0)    //allow for "only-simple" calculations (SS May04)
+  if (geo.macro_simple == FALSE)        //allow for "only-simple" calculations (SS May04)
   {
     for (i = 0; i < nlte_levels; i++)
     {
@@ -736,7 +719,7 @@ total_bb_cooling (xplasma, t_e)
   for (i = 0; i < nlines; i++)
   {
     line_ptr = &line[i];
-    if (line_ptr->macro_info == 1 && geo.macro_simple == 0)
+    if (line_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
     {                           //This is a line from a macro atom for which we know
       //the upper and lower level populations
       lower_density = den_config (xplasma, line_ptr->nconfigl);
@@ -801,7 +784,7 @@ macro_bb_heating (xplasma, t_e)
   for (i = 0; i < nlines; i++)
   {
     line_ptr = &line[i];
-    if (line_ptr->macro_info == 1 && geo.macro_simple == 0)
+    if (line_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
     {                           //This is a line from a macro atom for which we know
       //the upper and lower level populations
       upper_density = den_config (xplasma, line_ptr->nconfigu);
@@ -1227,13 +1210,12 @@ get_alpha_st (cont_ptr, xplasma)
   }
 
 
-//  alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
   alpha_st_value = num_int (alpha_st_integrand, fthresh, flast, 1e-4);
 
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
-  if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
+  if (cont_ptr->macro_info == 1 && geo.macro_simple == FALSE)
   {
     alpha_st_value = alpha_st_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }
@@ -1329,7 +1311,7 @@ get_alpha_st_e (cont_ptr, xplasma)
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
-  if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
+  if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
   {
     alpha_st_e_value = alpha_st_e_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }

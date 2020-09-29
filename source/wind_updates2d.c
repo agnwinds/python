@@ -171,7 +171,7 @@ WindPtr (w);
        terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
 
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)  //test for macro atoms
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
     {
       mc_estimator_normalise (nwind);
       macromain[n].kpkt_rates_known = -1;
@@ -1210,7 +1210,7 @@ wind_rad_init ()
 
     for (i = 0; i < ntop_phot; i++)
     {
-      if ((geo.macro_simple == 0 && phot_top[i].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
+      if ((geo.macro_simple == FALSE && phot_top[i].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
       {
         plasmamain[n].recomb_simple[i] = 0.0;
         plasmamain[n].recomb_simple_upweight[i] = 1.0;

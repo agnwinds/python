@@ -817,7 +817,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
       fb_xtop = &phot_top[n];   /*Externally transmited to fb_topbase_partial */
       /* We don't want to include fb transitions associated with macro atoms here
          - they are separated out for now. (SS, Apr 04). "If" statement added. */
-      if (fb_xtop->macro_info == FALSE || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)
+      if (fb_xtop->macro_info == FALSE || geo.macro_simple == TRUE || geo.rt_mode == RT_MODE_2LEVEL)
       {
         x += fb_topbase_partial (freq);
       }
@@ -1200,7 +1200,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
     /* Adding an if statement here so that photoionization that's part of a macro atom is
        not included here (these will be dealt with elsewhere). (SS, Apr04) */
-    if (fb_xtop->macro_info == FALSE || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL) //Macro atom check. (SS)
+    if (fb_xtop->macro_info == FALSE || geo.macro_simple == TRUE || geo.rt_mode == RT_MODE_2LEVEL)      //Macro atom check. (SS)
     {
       fthresh = fb_xtop->freq[0];
       fmax = fb_xtop->freq[fb_xtop->np - 1];    // Argues that this should be part of structure
@@ -1308,7 +1308,7 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
 
       /* Adding an if statement here so that photoionization that's part of a macro atom is
          not included here (these will be dealt with elsewhere). (SS, Apr04) */
-      if (fb_xtop->macro_info == FALSE || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)       //Macro atom check. (SS)
+      if (fb_xtop->macro_info == FALSE || geo.macro_simple == TRUE || geo.rt_mode == RT_MODE_2LEVEL)    //Macro atom check. (SS)
       {
         fthresh = fb_xtop->freq[0];
         fmax = fb_xtop->freq[fb_xtop->np - 1];  // Argues that this should be part of structure

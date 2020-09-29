@@ -446,11 +446,11 @@ struct geometry
   int ioniz_or_extract;         /* Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
                                    detailed spectrum.  
                                  */
-  int macro_simple;             /* Added by SS May04 for diagnostics. As default this is set to 0. A full
-                                   Macro Atom calculation is performed in that case. If it is set to 1 it means
+  int macro_simple;             /* As default this is set to FALSE, in which case a full
+                                   Macro Atom calculation is performed. If it is set to TRUE it means
                                    that although Macro Atom data has been read in, all lines/continua are treated
                                    using the simplified two-level approximation. Such a calculation should reproduce
-                                   the same results as pre-Macro Atom versions of the code. */
+                                   similar results to the simple atom case.                 */
 
 #define LINE_MODE_ABSORB      0
 #define LINE_MODE_SCAT        1

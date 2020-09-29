@@ -269,7 +269,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
 
   //Check and exit if this routine is called for a macro atom, since this should never happen
 
-  if (line_ptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
+  if (line_ptr->macro_info == TRUE && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
   {
     Error ("Calling two_level_atom for macro atom line. Abort.\n");
     Exit (0);
@@ -520,16 +520,6 @@ scattering_fraction (line_ptr, xplasma)
 }
 
 
-/* p_escape approximates the escape probability based on dvds
-
-   History:
-   98dec        ksl     Coded
-   99jan        ksl     Added code so that it shortcircuits if
-   asked to claculate the same escape probability
-
-	06may	ksl	57+ -- Modify for plasma structue
-  1411 JM -- changed to use the sobolev function to calculate tau.
- */
 
 struct lines *pe_line_ptr;
 double pe_ne, pe_te, pe_dd, pe_dvds, pe_w, pe_tr;
@@ -564,17 +554,16 @@ p_escape (line_ptr, xplasma)
   double w, tr;                 /* the radiative weight, and radiation tempeature */
   WindPtr one;
 
-//Populate variable from previous calling structure
   ne = xplasma->ne;
   te = xplasma->t_e;
-  tr = xplasma->t_r;            //JM1308 in pre 76b versions this was incorrectly set to xplasma->t_e
+  tr = xplasma->t_r;
   w = xplasma->w;
+
   dd = xplasma->density[line_ptr->nion];
 
   one = &wmain[xplasma->nwind];
   dvds = one->dvds_ave;
 
-// Band-aid to prevent divide by zero in calculation of tau below
   if (dvds <= 0.0)
   {
     Error ("Warning: p_escape: dvds <=0 \n");
@@ -583,11 +572,8 @@ p_escape (line_ptr, xplasma)
   if (pe_line_ptr != line_ptr || pe_ne != ne || pe_te != te || pe_dd != dd || pe_dvds != dvds || pe_w != w || pe_tr != tr)
   {
 
-    /* JM 1411 -- we used to have duplicated code here, but
-       now we call the sobolev function itself */
     tau = sobolev (one, one->x, dd, line_ptr, dvds);
 
-    /* JM 1408 -- moved calculation of p_escape to subroutine below */
     escape = p_escape_from_tau (tau);
 
 
@@ -612,14 +598,14 @@ p_escape (line_ptr, xplasma)
 /**********************************************************/
 /**
  * @brief      Given an optical depth estimate the escape
- * probility
+ * probability
  *
  * @param [in] double  tau   An optical depth
  * @return     The escape probability
  *
  * @details
  * p_escape_from_tau calculates the probability of escape
- *   given an actual tau. It simple returns the equation
+ *   given an actual tau. It simply returns the equation
  *
  *   (1. - exp (-tau)) / tau;
  *
@@ -630,7 +616,6 @@ p_escape (line_ptr, xplasma)
  *
  *
  * ### Notes ###
- *  1408 JM  Moved here to avoid code duplication
  *
  **********************************************************/
 
@@ -640,11 +625,10 @@ p_escape_from_tau (tau)
 {
   double escape;
 
-  /* TAU_MIN is defined in python.h
-     this is to stop numerical problems when tau is low */
+  /* TAU_MIN is defined in python.h */
+
   if (tau < TAU_MIN)
     escape = 1.;
-
   else if (tau < 10.0)
     escape = (1. - exp (-tau)) / tau;
 

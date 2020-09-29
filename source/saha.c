@@ -485,7 +485,7 @@ lucy (xplasma)
     {
 
       /* if the ion is being treated by macro_pops then use the populations just computed */
-      if ((ion[nion].macro_info == TRUE) && (geo.macro_simple == 0) && (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_ESTIMATORS))
+      if ((ion[nion].macro_info == TRUE) && (geo.macro_simple == FALSE) && (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_ESTIMATORS))
       {
         newden[nion] = xplasma->density[nion];
       }
@@ -520,7 +520,7 @@ lucy (xplasma)
   for (nion = 0; nion < nions; nion++)
   {
     /* If statement added here to suppress interference with macro populations (SS Apr 04) */
-    if (ion[nion].macro_info == FALSE || geo.macro_ioniz_mode == MACRO_IONIZ_MODE_NO_ESTIMATORS || geo.macro_simple == 1)
+    if (ion[nion].macro_info == FALSE || geo.macro_ioniz_mode == MACRO_IONIZ_MODE_NO_ESTIMATORS || geo.macro_simple == TRUE)
     {
       xplasma->density[nion] = newden[nion];
     }

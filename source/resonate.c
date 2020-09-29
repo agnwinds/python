@@ -357,7 +357,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               else if (geo.ioniz_or_extract == CYCLE_IONIZ)
               {
                 observer_to_local_frame (&p_now, &p_now_cmf);
-                if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == 0)
+                if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == FALSE)
                 {
                   /* XFRAME all variables transmtted to bb_estimators_increment should be cmf 
                      quantities */
@@ -785,7 +785,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     Error ("Sobolev: Surprise tau = VERY_BIG as dvds is 0\n");
   }
 
-  else if (lptr->macro_info == TRUE && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
+  else if (lptr->macro_info == TRUE && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
   {
     // macro atom case SS
     d1 = den_config (xplasma, lptr->nconfigl);
@@ -874,7 +874,6 @@ calls to two_level atom
 
     else
     {
-      //  Error ("sobolev: continuing by setting tau to zero\n");
       return (0.0);
     }
   }
@@ -1040,7 +1039,7 @@ scatter (p, nres, nnscat)
          a k-packet is based only on the frequency of the scattered packet.
          (SS) */
 
-      if (phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == 0)
+      if (phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == FALSE)
       {
         /* Macro ion case (SS) This is the case bound free interaction for a 
            xsection that is part of a macro atom (and we have not defaulted 
@@ -1117,7 +1116,7 @@ scatter (p, nres, nnscat)
 
         /* This ends the calculation for dealing with free-bound absorption of a macro atom */
       }
-      else if (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == 1)
+      else if (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE)
       {
         /* Simple ion case.  It's a bf interaction in a calculation involving macro-atoms, 
            but this photoionization x-section is is associated with one of the levels
