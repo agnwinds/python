@@ -1,4 +1,4 @@
-# Python
+# Python 3
 
 Python is a (confusingly named) Monte Carlo radiative transfer code which uses the Sobolev approximation.
 It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham and Edward Parkinson.
@@ -12,7 +12,7 @@ Documentation of input parameters is hosted on [ReadTheDocs](http://agnwinds.rea
 
 ## Travis Build Status
 
-[![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
+[![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python3)
 
 ## Installation
 
@@ -29,7 +29,7 @@ If you anticipate contributing to development we suggest Forking the repository 
 Once you have the files, you need to cd to the new directory and set your environment variables
     
     $ export PYTHON = /path/to/python/
-    $ cd $PYTHON 
+    $ cd $PYTHON 3
     $ ./configure
     $ make install  (or better make install 2>&1 | tee today.txt)
     $ make clean
@@ -63,7 +63,7 @@ Those users interested in the current version of Python should not need to do th
 
 To run python you need to add the following to your $PATH variable:
 
-    $PYTHON/bin
+    $PYTHON 3/bin
 
 You can then setup your symbolic links by running 
 
