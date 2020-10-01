@@ -331,16 +331,18 @@ model_vgrad (ndom, x, v_grad)
 
   model_velocity (ndom, x, v0);
 
-
+  /* get a small distance, 1/1000th of the cell distance from origin */
   ds = 0.001 * length (x);
   if (ds < 1.e7)
     ds = 1.e7;
 
   for (i = 0; i < 3; i++)
   {
+    /* first create a vector dx, which is the position x but moved ds in direction i */
     stuff_v (x, dx);
     dx[i] += ds;
 
+    /* calculate the velocity at position dx */
     model_velocity (ndom, dx, v1);
 
     if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
@@ -348,8 +350,8 @@ model_vgrad (ndom, x, v_grad)
       Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
     }
 
-//OLD    vsub (v1, v0, dv);
-    /* XFRAME this changes results in the velecity gradient tensor being calculated
+    //OLD    vsub (v1, v0, dv);
+    /* XFRAME this change results in the velecity gradient tensor being calculated
        in the co-moving frame, unless rel_mode is REL_MODE_LINEAR */
 
     observer_to_local_frame_velocity (v1, v0, dv);
@@ -358,7 +360,7 @@ model_vgrad (ndom, x, v_grad)
       dv[j] /= ds;
 
     stuff_v (dv, &v_grad[i][0]);
-    //XFRAME
+    //XFRAME -- this check can be removed once we are happy this has been done correctly
     Log ("model_vgrad:check x %f %f %f dv %10.2e %10.2e %10.2e\n", x[0], x[1], x[2], dv[0], dv[1], dv[2]);
   }
 
@@ -403,39 +405,18 @@ get_div_v_in_cmf_frame (ndom, x)
      double *x;
 {
   int i;
-  double dx[3], dv[3];
-  double v0[3], v1[3];
-  double ds;
+  double v[3][3];
   double div_v = 0;
+  
+  model_vgrad (ndom, x, v);
 
-  model_velocity (ndom, x, v0);
-
-  ds = 0.001 * length (x);
-  if (ds < 1.e7)
-    ds = 1.e7;
-
-
+  /* the trace of the velocity gradient tensor is the divergence */
   for (i = 0; i < 3; i++)
   {
-    stuff_v (x, dx);
-    dx[i] += ds;
-
-
-    model_velocity (ndom, dx, v1);
-
-    if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
-    {
-      Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
-    }
-
-    observer_to_local_frame_velocity (v1, v0, dv);
-
-    div_v += dv[i];
+    div_v += v[i][i];
   }
 
-
   return (div_v);
-
 }
 
 
