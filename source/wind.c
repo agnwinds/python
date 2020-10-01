@@ -403,39 +403,18 @@ get_div_v_in_cmf_frame (ndom, x)
      double *x;
 {
   int i;
-  double dx[3], dv[3];
-  double v0[3], v1[3];
-  double ds;
+  double v[3][3];
   double div_v = 0;
+  
+  model_vgrad (ndom, x, v);
 
-  model_velocity (ndom, x, v0);
-
-  ds = 0.001 * length (x);
-  if (ds < 1.e7)
-    ds = 1.e7;
-
-
+  /* the trace of the velocity gradient tensor is the divergence */
   for (i = 0; i < 3; i++)
   {
-    stuff_v (x, dx);
-    dx[i] += ds;
-
-
-    model_velocity (ndom, dx, v1);
-
-    if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
-    {
-      Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
-    }
-
-    observer_to_local_frame_velocity (v1, v0, dv);
-
-    div_v += dv[i];
+    div_v += v[i][i];
   }
 
-
   return (div_v);
-
 }
 
 
