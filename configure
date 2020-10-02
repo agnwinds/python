@@ -37,7 +37,7 @@ then
  		sed -i -e 's/mpicc/gcc/' Makefile
  		printf "Done.\n"
 	else
-		printf "failed.\nNo gcc or mpicc installed. You need a C compiler!\n"
+		printf "failed.\nNo gcc or mpicc is installed. You need atleast  a C compiler!\n"
 	fi
 else 
 	cp Makefile.in Makefile
