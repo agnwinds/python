@@ -392,9 +392,9 @@ iwind = -1 	Don't generate any wind photons at all
     /* Then find the luminosity of the wind, and the energy emerging in the simulation time step */
     /* XFRAME -- the latter includes a factor of dt_cmf = 1.0 / gamma in each wind cell so is 
        called with a different mode */
-    geo.lum_wind = wind_luminosity (0.0, VERY_BIG, MODE_LUMINOSITY);
+    geo.lum_wind = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
     xxxpdfwind = 1;             // Turn on the portion of the line luminosity routine which creates pdfs
-    geo.f_wind = wind_luminosity (f1, f2, MODE_ENERGY);
+    geo.f_wind = wind_luminosity (f1, f2, MODE_OBSERVER_FRAME_TIME);
     xxxpdfwind = 0;             // Turn off the portion of the line luminosity routine which creates pdfs
   }
 

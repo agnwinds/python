@@ -623,7 +623,7 @@ WindPtr (w);
   /* NSH 0717 - ensure the cooling and luminosities reflect the current temperature */
 
   cool_sum = wind_cooling ();   /* We call wind_cooling here to obtain an up to date set of cooling rates */
-  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_LUMINOSITY);   /* and we also call wind_luminosity to get the luminosities */
+  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /* and we also call wind_luminosity to get the luminosities */
 
 
 
@@ -838,7 +838,7 @@ WindPtr (w);
      lum_sum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
 
 
-  rad_sum = wind_luminosity (xband.f1[0], xband.f2[xband.nbands - 1], MODE_LUMINOSITY); /*and we also call wind_luminosity to get the luminosities */
+  rad_sum = wind_luminosity (xband.f1[0], xband.f2[xband.nbands - 1], MODE_CMF_TIME);
 
   Log
     ("!!wind_update: Rad luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
