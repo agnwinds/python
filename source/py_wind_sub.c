@@ -2988,7 +2988,7 @@ heatcool_summary (w, rootname, ochoice)
   char filename[LINELENGTH];
   float x;
 
-  x = wind_luminosity (0.0, VERY_BIG, MODE_LUMINOSITY);
+  x = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
 
   for (n = 0; n < NDIM2; n++)
   {

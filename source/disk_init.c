@@ -62,15 +62,16 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
      double rmin, rmax, m, mdot, freqmin, freqmax, *ftot;
      int ioniz_or_final;
 {
-  double t, tref, teff (), tdisk ();
-  double log_g, gref, geff (), gdisk ();
-  double dr, r;
+  double t, tref;
+  double log_g, gref;
+  double v, dr, r;
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
   double q1;
   int nrings, i, icheck;
   int spectype;
   double emit, emittance_bb (), emittance_continuum ();
+  double factor;
 
   /* Calculate the reference temperature and luminosity of the disk */
   tref = tdisk (m, mdot, rmin);
@@ -138,6 +139,16 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     dr = exp (logr + logdr) - r;
     t = teff (tref, (r + 0.5 * dr) / rmin);
     log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
+    v = sqrt (GRAV * geo.mstar / r);
+    v /= VLIGHT;
+    if (rel_mode == REL_MODE_FULL)
+    {
+      factor = sqrt (1. - v * v);
+    }
+    else
+    {
+      factor = 1.0;
+    }
 
     if (spectype > -1)
     {
@@ -148,7 +159,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       emit = emittance_bb (freqmin, freqmax, t);
 
     }
-    (*ftot) += emit * (2. * r + dr) * dr;
+    (*ftot) += emit * (2. * r + dr) * dr * factor;
   }
 
   (*ftot) *= q1;
@@ -179,6 +190,16 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     dr = exp (logr + logdr) - r;
     t = teff (tref, (r + 0.5 * dr) / rmin);
     log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
+    v = sqrt (GRAV * geo.mstar / r);
+    v /= VLIGHT;
+    if (rel_mode == REL_MODE_FULL)
+    {
+      factor = sqrt (1. - v * v);
+    }
+    else
+    {
+      factor = 1.0;
+    }
 
     if (spectype > -1)
     {
@@ -189,7 +210,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       emit = emittance_bb (freqmin, freqmax, t);
     }
 
-    f += q1 * emit * (2. * r + dr) * dr;
+    f += q1 * emit * (2. * r + dr) * dr * factor;
     i++;
     /* EPSILON to assure that roundoffs don't affect result of if statement */
     if (f / (*ftot) * (NRINGS - 1) >= nrings)

@@ -209,7 +209,7 @@ define_wind ()
 
 
 
-  /* XFRAME - Calculate gammas for wind cells, and make volumes co-moving volumes */
+  /* Calculate gammas for wind cells, and make volumes co-moving volumes */
 
   for (n = 0; n < NDIM2; n++)
   {
@@ -323,9 +323,9 @@ define_wind ()
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
 
-/* XFRAME - Convert plasma densities co-moving frame, gammas and volume have
-   already been calculated and are just copied. For the v/c case, xgammas have
-   been set to 1, so denisties will be unchanged */
+/* Convert plasma densities  to the co-moving frame. Gammas and volume have
+   already been calculated and are just copied. For the "classic" case, xgammas have
+   been set to 1, so densities will be unchanged */
 
 
   for (n = 0; n < NPLASMA; n++)
@@ -334,9 +334,6 @@ define_wind ()
     ndom = wmain[nwind].ndom;
     stuff_v (w[nwind].xcen, x);
     plasmamain[n].xgamma = wmain[nwind].xgamma_cen;
-
-//OLD    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
-//OLD    plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
 
 
     plasmamain[n].rho = model_rho (ndom, x) / (zdom[ndom].fill * plasmamain[n].xgamma);
@@ -685,7 +682,7 @@ int ierr_vwind = 0;
  * The routine checks to see whether the position for which the velocity is needed
  * and if so short-circuits the calculation returning a stored value
  *
- * XFRAME vwind_xyz expects the photon position to be in the Observer frame
+ * vwind_xyz expects the photon position to be in the Observer frame
  * It returns the velocity in the Observer frame.
  *
  **********************************************************/
@@ -816,13 +813,20 @@ vwind_xyz (ndom, p, v)
  *
  * @details
  * This is one of the initialization routines for the wind.
- * The divergence of velocity of the wind is used to calculated PdV cooling of a grid cell
+ * The divergence of velocity of the wind is used to calculated 
+ * PdV cooling of a grid cell
  *
  * ### Notes ###
  *
- * XFRAME  updates to  put the divergence of V in the cmf frame
- * The current version of this routine uses legacy code for classic mode
- * but new code (see get_div_v_in_cmf_frame in wind.c) for our new mode.
+ * This version of this routine uses legacy code for to calulated the divergence
+ * in classic mode, but simply calls a new routine get_div_v_in_cmf_frame
+ * to calculate the divergence in the co-moving frame which is the proper
+ * thing to do when special relativity is taken into account.
+ *
+ * The divergence, like othe scalar quantities, does not
+ * need to be "rotated" differently in different coordinate
+ * systems
+ *
  * The legacy code should be deleted eventually.
  *
  * The comment below only applies to the legacy code.
@@ -830,10 +834,6 @@ vwind_xyz (ndom, p, v)
  * Because the routine calls vwind_xyz, one must have previously
  * populated w[].v.  Also as a result of this fact, the routine
  * is not tightly tied to any particular wind model.
- *
- * The divergence, like othe scalar quantities, does not
- * need to be "rotated" differently in different coordinate
- * systems
  *
  **********************************************************/
 int wind_div_err = (-3);
@@ -864,10 +864,9 @@ wind_div_v ()
       wmain[icell].div_v = div = get_div_v_in_cmf_frame (ndom, x_zero);
     }
 
-    else
+    else                        // Use the old legacy code  which calculates the divergence in the observer frame
     {
 
-//    delta = 0.01 * x_zero[2];   //delta is the distance across which we measure e.g. dv_x/dx
 
       if (x_zero[1] != 0)
       {
@@ -886,9 +885,6 @@ wind_div_v ()
         delta = wmain[icell].dfudge;
       }
 
-
-      /* XFRAME - Divergence is calculated here.  Probably needs do be CMF divergence, but note
-         we only need the divergence in plasma cells, so not clear why this is not part of plasmamain */
 
       /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
          in positive and negative directions and evaluate the difference in velocities. Dividing this by
@@ -922,7 +918,6 @@ wind_div_v ()
       div += xxx[2] = (v2[2] - v1[2]) / delta;
 
 
-      /* we have now evaluated the divergence, so can store in the wind pointer */
       wmain[icell].div_v = div;
     }
 
@@ -954,10 +949,10 @@ wind_div_v ()
  *
  * @details
  * The routine first determines what domain the position is located in,
- * and then intepolates to find the density at a specific position
+ * and then interpolates to find the density at a specific position
  *
  * ### Notes ###
- * XFRAME As written,subroutine rho accesses the plasma ptr, and there rho is in CMF frame.
+ *
  *
  **********************************************************/
 
@@ -1053,7 +1048,6 @@ mdot_wind (w, z, rmax)
 
 /* Calculate the mass loss rate immediately above the disk */
 
-  /* Check that everything is defined sensibly */
   rmin = geo.rstar;
 
   if (rmax <= rmin)
@@ -1069,8 +1063,12 @@ mdot_wind (w, z, rmax)
   for (r = dr / 2; r < rmax; r += dr)
   {
     p.x[0] = x[0] = r;
-    /* XFRAME IN calculating mdot we actually want Observer frame, but rho uses Plasma variables wheich are in CMF */
+    /* XFRAME IN calculating mdot we actually want Observer frame, but rho uses Plasma variables wheich are in CMF. 
+       This is still and issue */
     den = rho (w, x);
+    // if (rel_mode==REL_MODE_FULL) {
+    // }
+    //
     /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * r * dr * den * v[2];
@@ -1091,7 +1089,6 @@ mdot_wind (w, z, rmax)
     q[0] = sin (theta);
     q[2] = cos (theta);
     den = rho (w, x);
-    /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * rmax * rmax * sin (theta) * dtheta * den * dot (v, q);
   }
