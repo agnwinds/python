@@ -236,7 +236,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double normal[3];
   double rho, dz;
 
-  //XFRAME -- check frame of input photon
 
   check_frame (p, F_OBSERVER, "trans_phot_single: Starting Error\n");
 

@@ -534,9 +534,9 @@ get_matom_f (mode)
  * (calculated in the ionization cycles). This routine is closely related to photo_gen_wind from which much of the code 
  * has been copied.
  *
- * XFRAME Photons are generated at a position in the Observer frame.  
- * The weight of the photon should th weight expected in the local 
- * frame since photon is first created in a generated in a local 
+ * Photons are generated at a position in the Observer frame.  
+ * The weight of the photon should is the weight expected in the local 
+ * frame since photon is first created in thea local 
  * rest frame, and then Doppler shifted to the Observer frame
  **********************************************************/
 
@@ -848,8 +848,6 @@ photo_gen_matom (p, weight, photstart, nphot)
 
     ndom = wmain[icell].ndom;
 
-//OLD    vwind_xyz (ndom, &p[n], v);
-//OLD    p[n].freq /= (1. - dot (v, p[n].lmn) / VLIGHT);     //XFRAME
 
     /* Make an in-place transformation to the observer frame */
     if (local_to_observer_frame (&p[n], &p[n]))

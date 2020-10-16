@@ -371,9 +371,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  *
  * Question: What is preventing us from calculating a dielectronic emission rate?
  *
- * XFRAME total free bound emission in this function is calculated CMF. If called in
- * the cooling routines then this is left in the CMF. If called in the photon
- * generation routines, this is converted to the observer frame.
+ * Total free bound emission in this function is calculated in the CMF. 
  * 
  **********************************************************/
 
@@ -395,9 +393,8 @@ total_fb (one, t, f1, f2, fb_choice, mode)
   if (t < 100. || f2 < f1)
     t = 100.;                   /* Set the temperature to 100 K so that if there are free electrons emission by this process continues */
 
-// Initialize the free_bound structures if that is necessary
   if (mode == OUTER_SHELL)
-    init_freebound (100., 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas NSH 1706 -
+    init_freebound (100., 1.e9, f1, f2);
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities

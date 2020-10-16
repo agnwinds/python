@@ -57,7 +57,7 @@
  * to be called in all cases, though clearly it is only provides diagnostic
  * information in some of them.
  *
- * XFRAME - update_banded_estimators takes CMF inputs
+ * update_banded_estimators takes CMF inputs
  * The photon frequency and number are used.
  * 
  **********************************************************/
@@ -232,8 +232,8 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
  * information in some of them.
  *
  *
- * XFRAME The flux estimators are/need to be constructed in the Observer frame
- * Inputs are required in the Observer frame
+ * The flux estimators are constructed in the Observer frame
+ * As a result, inputs are also expected to be in the Observer frame
  * 
  **********************************************************/
 
@@ -261,7 +261,6 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
     flux[2] *= (-1);
 
 
-  /*Deal with the special case of a spherical geometry */
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
@@ -270,7 +269,6 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
     flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
   }
 
-/* We now update the fluxes in the three bands */
 
 
   if (phot_mid->freq < UV_low)
@@ -320,11 +318,8 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
  *
  * ### Notes ###
  *
- * This code in this function was originally in radiation but was moved to
- * here to try and simplify radiation().
- *
- * XFRAME this function will calculate the force estimators in the observer
- * frame and requires quantities in the observer frame.
+ * We calculate the force estimators in the observer
+ * frame and thus require input quantities in the observer frame.
  *
  **********************************************************/
 
@@ -434,8 +429,8 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
  * is the factor by which most of the estimators are normalized.  This is 
  * equivalent to the volume in the observer frame, but that is not stored.
  *
- * XFRAME this function will calculate the force estimators in the observer
- * frame and requires quantities in the observer frame.
+ * This function calculates the force estimators in the observer
+ * frame and thus requires quantities in the observer frame.
  *
  **********************************************************/
 
@@ -450,7 +445,6 @@ normalise_simple_estimators (xplasma)
 
   nwind = xplasma->nwind;
 
-  /* XFRAME -- this needs to be the correct volume, or more correctly, the correct Delta V Delta t */
   invariant_volume_time = wmain[nwind].vol / wmain[nwind].xgamma_cen;
 
   if (xplasma->ntot > 0)
@@ -531,8 +525,8 @@ normalise_simple_estimators (xplasma)
   xplasma->xi /= (invariant_volume_time * nh);
 
   /*
-   * XFRAME -- the radiation force and flux estimators are all observer frame
-   * quantities and hence need to be normalised with observer frame volumes
+   * The radiation force and flux estimators are all observer frame
+   * quantities and hence are normalised with observer frame volumes
    * and densities
    */
 

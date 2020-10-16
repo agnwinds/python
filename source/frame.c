@@ -140,8 +140,6 @@ observer_to_local_frame (p_in, p_out)
 
 
 
-  // beta=length(v)/VLIGHT;
-  /* XFRAME -- question here about whether we want to calculate gamma every time here */
   gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
 
   f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);

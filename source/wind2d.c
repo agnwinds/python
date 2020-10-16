@@ -1063,13 +1063,7 @@ mdot_wind (w, z, rmax)
   for (r = dr / 2; r < rmax; r += dr)
   {
     p.x[0] = x[0] = r;
-    /* XFRAME IN calculating mdot we actually want Observer frame, but rho uses Plasma variables wheich are in CMF. 
-       This is still and issue */
     den = rho (w, x);
-    // if (rel_mode==REL_MODE_FULL) {
-    // }
-    //
-    /* XFRAME - call to vwind_xyz here is correct.  We calculate mass loss in Observer frame */
     vwind_xyz (ndom, &p, v);
     mdot += 2 * PI * r * dr * den * v[2];
   }

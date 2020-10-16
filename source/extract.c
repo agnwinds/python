@@ -278,12 +278,6 @@ extract_one (w, pp, itype, nspec)
   tau = 0;
   icell = 0;
 
-/* 
-
-Need to frequency shift the disk photons as well as the wind 
-photons.    
-
- */
 
   if (itype == PTYPE_DISK)
   {
@@ -291,13 +285,7 @@ photons.
 
   }
   if (itype == PTYPE_WIND)
-  {                             /* If the photon was scattered in the wind, 
-                                   the frequency also must be shifted */
-
-/* XFRAME  Doppler shift the photon  to new direction.  In what follows
-   we make the assumption which seems explicit in the old doppler routine that we 
-   are in the observe frame
- */
+  {
     local_to_observer_frame (pp, pp);
 
   }
@@ -339,7 +327,6 @@ needs to reweight
 
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {
-      // XFRAME we need to establish what to do about dv/ds
       dvds = dvwind_ds_cmf (pp);
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);

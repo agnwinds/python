@@ -56,7 +56,7 @@
  *              not sure that the velocity can be approximated as a linear function of
  *              distance.
  *
- * The routine returns the distance that the photon can travel subject to
+ * The routine returns the distance that the photon can travel in the observer frame subject to
  * these conditions and information about why the photon stopped there 
  *
  * @details
@@ -69,10 +69,6 @@
  * can travel before hitting the edge of the
  * shell should be calculated outside of this routine.
  *
- *
- * XFRAME calculate_ds retruns ds in the observer frame, 
- * but continuum opacities are calculated in the CMF frame 
- * so allowances need to made for this in calculating optical depths
  **********************************************************/
 double
 calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
@@ -233,9 +229,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   if (geo.rt_mode == RT_MODE_MACRO)
   {
 
-    /* XFRAME -- Not directly related to frames, by why did we set freq_av to freq_inner. Seems wrong */
-    // XFRAME need to do better than this perhaps but okay for star - comoving frequency (SS)
-    //(freq_inner + freq_outer) * 0.5;  
+    /* Not directly related to frames, by why did we set freq_av to freq_inner. Seems wrong.
+       This is now issue #777. */
 
     freq_av = freq_inner;
 
@@ -251,7 +246,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   }
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity in CMF frame
-  kap_cont_obs = kap_cont / observer_to_local_frame_ds (p, 1.); // XFRAME Multiply by scale factor to get to observer frame
+  kap_cont_obs = kap_cont / observer_to_local_frame_ds (p, 1.); // Multiply by scale factor to get to observer frame
 
 
 
@@ -324,7 +319,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
           /* sobolev does not use x, unless density_cmf is les than 0 */
-          //XFRAME tau_sobolev is invariant, but all inputs must be in the same frame, using cmf  here
+          // tau_sobolev is invariant, but all inputs must be in the same frame, using cmf  here
 
           tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[nn], dvds_cmf);
           ttau += tau_sobolev;
@@ -359,8 +354,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
                 observer_to_local_frame (&p_now, &p_now_cmf);
                 if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == FALSE)
                 {
-                  /* XFRAME all variables transmtted to bb_estimators_increment should be cmf 
-                     quantities */
                   bb_estimators_increment (two, &p_now_cmf, tau_sobolev, dvds_cmf, nn);
                 }
                 else
@@ -412,7 +405,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   if (ttau + kap_cont_obs * (smax - ds_current) > tau_scat)
   {
     *nres = select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma);
-    //XFRAME as above -- need consistency of frames for kappas
 
     /* A scattering event has occurred in the shell  and we
      * remain in the same shell */
@@ -488,7 +480,6 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   double run_tot;
   int ncont;
 
-  //XFRAME think this works provided that all the incoming kappas are in the same frame. shouldn't matter which frame though really - i.e. just consistency
 
   threshold = random_number (0.0, 1.0) * (kap_cont);
 
@@ -543,7 +534,7 @@ Just do a check that all is well - this can be removed eventually (SS)
  *
  * @details
  *
- * The routine calculates the bf 
+ * The routine calculates the bf opacity in the CMF.
  *
  * ### Notes ###
  * The routine allows for clumping, reducing kappa_bf by the filling
@@ -568,7 +559,6 @@ kappa_bf (xplasma, freq, macro_all)
   int nn;
   int ndom;
 
-  //XFRAME this will be giving a cmf kappa, I think - provided that level populations are densities in cmf (should be)
 
   kap_bf_tot = 0;
 
@@ -590,14 +580,6 @@ kappa_bf (xplasma, freq, macro_all)
 
       nconf = phot_top[n].nlev; //Returning lower level = correct (SS)
 
-      //XXX For Debugging
-      if (nconf < 0)
-      {
-        Error ("kappa_bf: nconf %d for phot_top %d for ion %d of z %d and istate %d\n", nconf, n, phot_top[n].nion, phot_top[n].z,
-               phot_top[n].istate);
-        continue;
-      }
-      //XXX For Debugging
 
       density = den_config (xplasma, nconf);    //Need to check what this does (SS)
 
@@ -672,7 +654,6 @@ kbf_need (fmin, fmax)
   PlasmaPtr xplasma;
   WindPtr one;
   int nplasma, nion;
-  //XFRAME this will be giving a cmf kappa, I think - provided that level populations are densities in cmf (should be)
 
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)       // Loop over all the cells in the wind
@@ -799,9 +780,6 @@ sobolev (one, x, den_ion, lptr, dvds)
 ion which was done above in calculate ds.  It was made necessary by a change in the
 calls to two_level atom
 */
-    /* XFRAME  This seems to be to get level populations, and would seem to require CMF
-       regardless of whether the original inputs to sobolev were in Observer or CMF
-     */
 
     d_hold = xplasma->density[nion];    // Store the density of this ion in the cell
 
@@ -1008,11 +986,6 @@ scatter (p, nres, nnscat)
       /* It's a bb line - we can go straight to macro_gov since we know that
          we don't want a k-packet immediately. macro_gov now makes the decision
          regarding the treament (simple or full macro). */
-      /*XFRAME may need to check, but I believe all the macro atom (including macro gov) should already be 
-         formulated in the cmf: i.e. provided that the photon was transformed to the cmf before this call 
-         (see above) then nothing should be needed here before going in - need to consider reverse 
-         transfer when coming back out though (likely in macro_gov?)
-       */
 
       macro_gov (p, nres, 1, &which_out);
     }
@@ -1195,9 +1168,6 @@ scatter (p, nres, nnscat)
 
 
   }
-  /*XFRAME need to make sure that macro_gov leaves the photon in the Local frame. We will do all
-     of the transformations back to the observer frame here.
-   */
 
 
   /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
@@ -1261,8 +1231,6 @@ if fixed.
 //OLD    save_photons (p, "ExScatter");
 //OLD  }
 
-//XFRAME - Is this  the correct way to calculate the momentum transfer allowing for CMF calculation ? 
-// ioniz_or_extract is True for ionization cycles, false for spectral cycles
 
   if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {

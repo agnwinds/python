@@ -389,9 +389,8 @@ iwind = -1 	Don't generate any wind photons at all
 
   if (iwind == 1 || (iwind == 0))
   {
-    /* Then find the luminosity of the wind, and the energy emerging in the simulation time step */
-    /* XFRAME -- the latter includes a factor of dt_cmf = 1.0 / gamma in each wind cell so is 
-       called with a different mode */
+    /* Find the luminosity of the wind in the CMF, and the energy emerging in the simulation time step */
+
     geo.lum_wind = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
     xxxpdfwind = 1;             // Turn on the portion of the line luminosity routine which creates pdfs
     geo.f_wind = wind_luminosity (f1, f2, MODE_OBSERVER_FRAME_TIME);
@@ -418,7 +417,7 @@ iwind = -1 	Don't generate any wind photons at all
     geo.f_kpkt = get_kpkt_f (); /* This returns the specific luminosity
                                    in the spectral band of interest */
 
-    matom_emiss_report ();      // Log the macro atom level emissivites
+    matom_emiss_report ();
   }
 
   geo.f_tot = geo.f_star + geo.f_disk + geo.f_bl + geo.f_wind + geo.f_kpkt + geo.f_matom + geo.f_agn;
@@ -443,7 +442,7 @@ iwind = -1 	Don't generate any wind photons at all
 
 /**********************************************************/
 /**
- * @brief    Logs information about total and band limited
+ * @brief    Log information about total and band limited
  * luminosities
  *
  * @return     Always returns 0

@@ -60,11 +60,8 @@ double temp_ext_rad;            //radiation temperature passed externally
  * 
  * The bound-free estimators are described in section 3.3.3.1 Matthews Phd Thesis.
  *
- * XFRAME As currently written bf_esimators_increment expects p
+ * bf_esimators_increment expects p
  * to be a co-moving frame photon and ds to be a co-moving frame path length
- * 
- * With this choice bf_estimators did not need to be modified to properly
- * handle calculations in the co-moving frame.
  * 
  **********************************************************/
 
@@ -104,9 +101,6 @@ bf_estimators_increment (one, p, ds)
   }
 
 
-  /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
-     which also updates the ionization parameters and scattered and direct contributions */
-  /* XFRAME this should be made consistent with radiation () */
   update_banded_estimators (xplasma, p, ds, p->w, ndom);
   update_flux_estimators (xplasma, p, ds, p->w, ndom);
 
@@ -355,18 +349,14 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   }
 
 
-  /* Okay now know which estimator we wish to increment so do it. */
-  /* XFRAME This needs to be a CMF "weight" -- or more accurately, energy */
   weight_of_packet = p->w;
-  dvds = fabs (dvds);           //make sure that it is positive
+  dvds = fabs (dvds);
 
-  /* XFRAME -- this currently uses dvds - which relies on a linear relationship
-     between dv/ds and dnu/ds */
   if (tau_sobolev > 0.00001)
   {
     y = weight_of_packet * (1. - exp (-tau_sobolev)) / tau_sobolev / dvds;
   }
-  else                          //To avoid tau_sobolev = 0
+  else
   {
     y = weight_of_packet / dvds;
   }
@@ -382,8 +372,6 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   }
 
   /* Record contribution to energy absorbed by macro atoms. */
-  /* XFRAME -- we want the weight (energy) here to be a CMF value, since the emissivity 
-     will be calculated directly from this */
 
   mplasma->matom_abs[line_ptr->nconfigu] += weight_of_packet * (1. - exp (-tau_sobolev));
 
@@ -437,10 +425,8 @@ mc_estimator_normalise (n)
   xplasma = &plasmamain[one->nplasma];
   mplasma = &macromain[xplasma->nplasma];
 
-  /* All the estimators need the volume so get that first. */
-  /* JM 1507 - we use cell volume, rather than the filled volume for all the estimators here */
 
-  /* XFRAME -- one->vol contains the CMF volume. This converts it to 
+  /* one->vol contains the CMF volume. This converts it to 
      observer frame volume, or perhaps more correctly, it calculates the
      Lorentz invariant quantity (Delta V Delta t). Because Delta t_obs == 1 
      in the code, (Delta V Delta t) == (Delta V_obs * 1.0). 
@@ -614,13 +600,11 @@ mc_estimator_normalise (n)
  *
  * ### Notes ###
  * 
- * KSL: This routine loops over nlte_levels, which in principle
+ * This routine loops over nlte_levels, which in principle
  * could include non-macro ions, but that should not matter since
  * since nbfu_jumps will be zero for these.
  *
- * XFRAME total free bound emission in this function is calculated CMF. If called in
- * the cooling routines then this is left in the CMF. If called in the photon
- * generation routines, this is converted to the observer frame.
+ * free bound emission in this function is calculated CMF. 
  * 
  **********************************************************/
 
@@ -698,7 +682,7 @@ total_fb_matoms (xplasma, t_e, f1, f2)
  * (due to collisions) for both macro atoms and simple ions. 
  *  It is used by the heating/cooling calculation to get the temperature.
  *
- * XFRAME total bound-bound emission in this function is calculated CMF. If called in
+ * Total bound-bound emission in this function is calculated CMF. If called in
  * the cooling routines then this is left in the CMF. If called in the photon
  * generation routines, this is converted to the observer frame.
  *

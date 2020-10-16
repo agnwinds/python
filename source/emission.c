@@ -90,8 +90,6 @@ wind_luminosity (f1, f2, mode)
     {
       nplasma = wmain[n].nplasma;
 
-      /* XFRAME -- we need to decide whether we want this to really be a luminosity,
-         or an energy based on the mode supplied */
       if (mode == MODE_OBSERVER_FRAME_TIME)
         factor = 1.0 / plasmamain[nplasma].xgamma;      /* this is dt_cmf */
       else if (mode == MODE_CMF_TIME)
@@ -147,7 +145,6 @@ wind_luminosity (f1, f2, mode)
  * Comment:  Compton cooling is not included here because this
  * does not result in new photons.
  *
- * XFRAME the luminosities calculated are all in the observer frame
  *
  **********************************************************/
 
@@ -173,9 +170,8 @@ total_emission (one, f1, f2)
   }
   else
   {
-    if (geo.rt_mode == RT_MODE_MACRO)   //Switch for macro atoms (SS)
+    if (geo.rt_mode == RT_MODE_MACRO)
     {
-      /* XFRAME these are co-moving frame luminosities  */
       xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL));   //outer shellrecombinations
 
       /*
@@ -200,7 +196,6 @@ total_emission (one, f1, f2)
     }
     else                        //default (non-macro atoms) (SS)
     {
-      /* XFRAME these are co-moving frame luminosities */
       xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
       xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
       /* We compute the radiative recombination luminosity - this is not the same as the rr cooling rate and
@@ -468,7 +463,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
  *
  * ### Notes ###
  *
- * XFRAME This function requires quantities to be in the CMF
  * 
  **********************************************************/
 
@@ -495,10 +489,6 @@ one_line (one, nres)
     return (0);
   }
 
-  /*
-   * XFRAME both xplasma->lum_lines (in wind_cooling()) and lin_ptr->pow (in lum_lines())
-   * are calculated in the CMF
-   */
 
   xlum = xplasma->lum_lines * random_number (0.0, 1.0);
 
@@ -547,9 +537,7 @@ one_line (one, nres)
  * using data from Sutherland (1998).  If not, the gaunt factor is set
  * to 1.
  * 
- * XFRAME total free free emission in this function is calculated CMF. If called in
- * the cooling routines then this is left in the CMF. If called in the photon
- * generation routines, this is converted to the observer frame.
+ * Total free free emission in this function is calculated CMF. 
  * 
  **********************************************************/
 
@@ -619,7 +607,6 @@ total_free (one, t_e, f1, f2)
   /* JM 1604 -- The reason why this is proportional to t_e**1/2,
      rather than t_e**(-1/2) as in equation 40 of LK02 is because
      one gets an extra factor of (k*t_e/h) when one does the integral */
-  /* XFRAME  Is this correct here, or does it need to be adjusted for time in the CMF frame */
   x *= sqrt (t_e) * xplasma->vol;
   x *= (exp (-H_OVER_K * f1 / t_e) - exp (-H_OVER_K * f2 / t_e));
   return (x);

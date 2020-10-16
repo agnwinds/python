@@ -79,13 +79,10 @@ dvwind_ds_cmf (p)
      For the moment, I've adopted an on the fly method for spherical coordinates.
      This should be improved by figuring out out how the velocity gradient
      tensor ought to be rotated in order to give the right answer for spherical
-     coordinates */
+     coordinates. */
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
-    /* XFRAME -- ADD code for spherical coords since this is calculated on the fly.
-       Note that it is not clear why we cannot fix the code so an exception does 
-       not have to be made for spherical coordiantes. */
     struct photon pnew;
     double v1[3], v2[3], dv[3], diff[3];
     double ds;

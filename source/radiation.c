@@ -45,7 +45,7 @@ int iicount = 0;
  * but that is just given by (w(0)-w(smax))/kappa_tot.)  The routine calculates the number of ionizations per
  * unit volume.
  * 	
- * XFRAME Inputs to radiation are assumed to be in the observer frame.  kappas are calculated
+ * Inputs to radiation are assumed to be in the observer frame.  kappas are calculated
  * in the CMF frame, as elsewhere.  Where tau is calculted from kappa ds, one needs to
  * account for the difference in length in the two frames
  *
@@ -64,7 +64,7 @@ radiation (p, ds)
 
   double freq;
   double kappa_tot, kappa_tot_obs, frac_tot, frac_ff;
-  /* XFRAME variables named frak are very pooorly named; they are actually opaciites due to individual
+  /* Variables named frak are very pooorly named; they are actually opaciites due to individual
      processes, not fractions of anything
    */
   double frac_z, frac_comp;     /* frac_comp - the heating in the cell due to Compton heating */
@@ -374,7 +374,6 @@ radiation (p, ds)
 
   }
 
-  /* XFRAME - We probably should change the name of freq to be phot_mid.freq everywhere */
 
   energy_abs_cmf = energy_abs_obs * phot_mid_cmf.freq / phot_mid.freq;
 
@@ -417,7 +416,7 @@ radiation (p, ds)
   if (geo.ioniz_or_extract == CYCLE_EXTRACT)
     return (0);
 
-/* Everything after this is only needed for ionization calculations */
+/* Everything after this point is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
 
   if (freq > xplasma->max_freq) // check if photon frequency exceeds maximum frequency - use doppler shifted frequency
@@ -433,10 +432,8 @@ radiation (p, ds)
      which also updates the ionization parameters and scattered and direct contributions */
 
 
-  //Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
-  /* XFRAME update_banded_estimators requires photon freq and ds and w_ave in cmf frame */
-  /* At this point we could have just have easily changed the call, and incorportate w_ave_cmf into
-     phot_mid_cmf */
+  /*Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
+   * Update_banded_estimators requires photon freq and ds and w_ave in cmf frame */
 
 
   ds_cmf = observer_to_local_frame_ds (&phot_mid, ds);
@@ -452,9 +449,7 @@ radiation (p, ds)
   if (kappa_tot > 0)
   {
 
-    //If statement added 01mar18 ksl to correct problem of zero divide
-    //  in odd situations where no continuum opacity
-    // XFRAME - We use the cmf value of the energy aborbed since everything is supposed to be in CMF frame
+    // We use the cmf value of the energy aborbed since everything is supposed to be in CMF frame
 
     z = (energy_abs_cmf) / kappa_tot;
     xplasma->heat_ff += z * frac_ff;

@@ -350,9 +350,6 @@ model_vgrad (ndom, x, v_grad)
       Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
     }
 
-    //OLD    vsub (v1, v0, dv);
-    /* XFRAME this change results in the velecity gradient tensor being calculated
-       in the co-moving frame, unless rel_mode is REL_MODE_LINEAR */
 
     observer_to_local_frame_velocity (v1, v0, dv);
 
@@ -360,8 +357,6 @@ model_vgrad (ndom, x, v_grad)
       dv[j] /= ds;
 
     stuff_v (dv, v_grad[i]);
-    //XFRAME -- this check can be removed once we are happy this has been done correctly
-    Log ("model_vgrad:check x %f %f %f dv %10.2e %10.2e %10.2e\n", x[0], x[1], x[2], dv[0], dv[1], dv[2]);
   }
 
   return (0);
@@ -395,8 +390,6 @@ model_vgrad (ndom, x, v_grad)
  * Since the routine calls model_velocity directly, and not vwind_xyz
  * it can be called before wmain.v has been populated.
  *
- * XFRAME get_div_v_in_cmf_frame is new code for CMF
- *
  **********************************************************/
 
 double
@@ -407,7 +400,7 @@ get_div_v_in_cmf_frame (ndom, x)
   int i;
   double v[3][3];
   double div_v = 0;
-  
+
   model_vgrad (ndom, x, v);
 
   /* the trace of the velocity gradient tensor is the divergence */

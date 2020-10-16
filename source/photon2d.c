@@ -542,7 +542,6 @@ The choice of SMAX_FRAC can affect execution time.*/
    the weight of the photon due to continuum absorption, e.g. free free.
    */
 
-/* XFRAME - flux estimators needs to go here, but need different variables, or to incoporate mofe logig into flux_estimators */
 
   if (geo.rt_mode == RT_MODE_MACRO)
   {
@@ -555,7 +554,7 @@ The choice of SMAX_FRAC can affect execution time.*/
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
 
-    /* XFRAME next lines to prepare for bf_estimator_call */
+    /* Provide inputs to bf_estimators in the local frame  */
     stuff_phot (p, &phot_mid);
     move_phot (&phot_mid, 0.5 * ds_current);
     observer_to_local_frame (&phot_mid, &phot_mid_cmf);
@@ -563,16 +562,11 @@ The choice of SMAX_FRAC can affect execution time.*/
 
     if (geo.ioniz_or_extract == CYCLE_IONIZ)
     {
-      /* Increment the bound-free estimators for macro-atoms */
-      /* XFRAME -- Need to transfer cmf frame values */
       bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
     }
   }
   else
   {
-/* XFRAME as long as radiation needs both obs and cmf frame data we cannot eonvert to cmf
-   Also, because in radiation we split opacities by process, we cannot simply pass along
-   tau. */
     radiation (p, ds_current);
   }
 

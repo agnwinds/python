@@ -44,7 +44,7 @@
  * and lum_lines is needed, as lum_lines appears to be called
  * only from total_line_emission.  ksl - 180509
  * 
- * XFRAME total line emission in this function is calculated CMF. If called in
+ * Total line emission in this function is calculated CMF. If called in
  * the cooling routines then this is left in the CMF. If called in the photon
  * generation routines, this is converted to the observer frame.
  *
@@ -98,13 +98,13 @@ total_line_emission (one, f1, f2)
  * ### Notes ###
  * The individual line luminosities are stored in lin_ptr[n]->pow
  *
- * XFRAME the quantities given to this function MUST be in the CMF.
+ * This is a co-moving frame calculation.                            
  *
  **********************************************************/
 
 double
 lum_lines (one, nmin, nmax)
-     WindPtr one;               /* WindPtr to a specific cell in the wind */
+     WindPtr one;
      int nmin, nmax;            /* The min and max index in lptr array for which the power is to be calculated */
 {
   int n;
@@ -172,45 +172,6 @@ lum_lines (one, nmin, nmax)
 
 
 
-/*
-   two_level_atom(line_ptr,ne,te,w,tr,dd,d1,d2) calculates the ratio
-   n2/n1 and gives the individual densities for the states of a two level
-   atom.
-
-   Description:
-   In the two level approximation,
-
-   n2 / n1 = ( c12 + g2/g1 c*c / (2 h nu * nu * nu )  * A21 J12) /
-   (c21 + A21 + c*c / (2 h nu * nu * nu )  * A21 J21)
-
-   In the on-the-spot approx. we assume,.
-
-   J21= W  (2 h nu * nu * nu )  / (exp (h nu / k T(rad)) -1)
-
-   and this is what is calulated here
-
-   History:
-	98Aug	ksl	Coded and debugged
-	99jan	ksl	Tried to improve speed by assuring that it does not
-			calculate exactly the same atom twice in a row
-	00nov	ksl	Adopted a very simple radiated domininated model for
-			transitions from excited state to excited state.
-			This is essentially a modified LTE approach.  Currently
-			at least there is no collisional correction for either
-			level, although it would be easy to add for the excited
-			level.  The difficulty here is that one does not readily
-			have all of the level information at hand.
-	01dec	ksl	Modified calling scheme and added partionion functions
-	06may	ksl	57+ -- Modified to use plasma structue
-	07mar	ksl	58c -- Tried to address problems associated with our
-			inconsistent treatment of level populations for two
-			level atoms, This is at best a bandaide.
-	14jul	nsh	78 -- changed to allow the use of a computed model for
-			the mean intensity in a cell to calualate influence of radiation
-			on the upper state population of a two level atom.
- */
-
-
 struct lines *old_line_ptr;
 double old_ne, old_te, old_w, old_tr, old_dd;
 double old_d1, old_d2, old_n2_over_n1;
@@ -259,7 +220,6 @@ two_level_atom (line_ptr, xplasma, d1, d2)
   double n1_over_ng;
   double n2_over_ng;
   double z;
-  double exp ();
   int gg;
   double xw;
   double ne, te, w, tr, dd;
@@ -267,7 +227,6 @@ two_level_atom (line_ptr, xplasma, d1, d2)
   double J;                     //Model of the specific intensity
 
 
-  //Check and exit if this routine is called for a macro atom, since this should never happen
 
   if (line_ptr->macro_info == TRUE && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
   {

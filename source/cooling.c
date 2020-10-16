@@ -25,7 +25,7 @@
  * @return     The total amount of cooling in a plasma cell,
  *
  * @details
- * The routine calculates cooling of a wind cell, storing the results
+ * The routine calculates cooling of a wind cell in the CMF, storing the results
  * of various different processes in various parameters of the plasma
  * cell.
  *
@@ -34,7 +34,6 @@
  * include calls to total_fb, and to total_fb in this routine.  This makes
  * it difficult to understand whether something is being counted twice.
  *
- * XFRAME this function requires the quantities to be calculated in the CMF
  *
  **********************************************************/
 double
@@ -109,7 +108,7 @@ cooling (xxxplasma, t)
  *
  * ### Notes ###
  *
- * It returns the total cooling, but also stores the luminosity due
+ * It returns the total cooling in the CMF, and also cooling due
  * to various types of emission, e.g ff and  lines into the
  * Plasma cells. The fb cooling calculated here is *not* equal to
  * the fb luminosity and so this value is stored in cool_rr.
@@ -119,7 +118,6 @@ cooling (xxxplasma, t)
  * that were called were not changed. This needs to be fixed for
  * consistency
  *
- * XFRAME this function requires the quantities to be calculated in the CMF
  *
  **********************************************************/
 
