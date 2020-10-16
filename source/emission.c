@@ -812,14 +812,6 @@ gaunt_ff (gsquared)
     return (1.0);
   }
 
-//OLD  for (i = 0; i < gaunt_n_gsqrd; i++)   /*first find the pair of parameter arrays that bracket our temperature */
-//OLD  {
-//OLD    if (gaunt_total[i].log_gsqrd <= log_g2 && gaunt_total[i + 1].log_gsqrd > log_g2)
-//OLD    {
-//OLD      index = i;                /* the array to use */
-//OLD      delta = log_g2 - gaunt_total[index].log_gsqrd;
-//OLD    }
-//OLD  }
 
   i = 0;
   while (gaunt_total[i].log_gsqrd < log_g2)
@@ -830,7 +822,7 @@ gaunt_ff (gsquared)
   index = i - 1;
   delta = log_g2 - gaunt_total[index].log_gsqrd;
 
-  /* The outherland interpolation data is a spline fit to the gaunt function. */
+  /* The Southerland interpolation data is a spline fit to the gaunt function. */
 
   gaunt = gaunt_total[index].gff + delta * (gaunt_total[index].s1 + delta * (gaunt_total[index].s2 + gaunt_total[index].s3));
   return (gaunt);

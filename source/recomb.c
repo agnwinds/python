@@ -893,7 +893,6 @@ init_freebound (t1, t2, f1, f2)
   double xinteg_fb ();
   int nput;
 
-//OLD  Log ("init_freebound %10.3e %10.3e %10.3e %10.3e\n", t1, t2, f1, f2);
 
 
   if (nfb == 0)
@@ -939,7 +938,6 @@ been calculated for these conditions, and if so simply return.
   while ((freebound[i].f1 != f1 || freebound[i].f2 != f2) && i < nfb)
   {
 
-//OLD    Log ("init_freebound: test: %d %10.3e %10.3e Want  %10.3e %10.3e\n", i, freebound[i].f1, freebound[i].f2, f1, f2);
     i++;
   }
 

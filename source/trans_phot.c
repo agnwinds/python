@@ -377,7 +377,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           dz = (zdisk (rho) - fabs (pp.x[2]));
           if (dz > 0)
           {
-            //OLD        Error ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk, dz);
             if (modes.save_photons)
             {
               Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), dz);

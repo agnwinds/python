@@ -937,7 +937,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   double t, r, z, theta, phi;
   int nring;
   double north[3];
-//OLD  double v[3];
+
   if ((iend = istart + nphot) > NPHOT)
   {
     Error ("photo_gen_disk: iend %d > NPHOT %d\n", iend, NPHOT);

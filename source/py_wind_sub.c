@@ -405,7 +405,6 @@ shock_heating_summary (w, rootname, ochoice)
   double tot;
   double shock_heating ();
   char filename[LINELENGTH];
-//OLD  double t_e;
 
 
 
@@ -2053,26 +2052,6 @@ IP_summary (w, rootname, ochoice)
   int n;
   char filename[LINELENGTH];
   int nplasma;
-
-//OLD Ferland IP has been deleted 180516
-//OLD  for (n = 0; n < NDIM2; n++)
-//OLD  {
-//OLD    aaa[n] = 0;
-//OLD    if (w[n].inwind >= 0)
-//OLD    {
-//OLD      nplasma = w[n].nplasma;
-//OLD      aaa[n] = ((plasmamain[nplasma].ferland_ip));
-//OLD    }
-//OLD  }
-//OLD  display ("Ionization parameter (Ferland)");
-
-//OLD  if (ochoice)
-//OLD  {
-//OLD    strcpy (filename, rootname);
-//OLD    strcat (filename, ".f_IP");
-//OLD    write_array (filename, ochoice);
-//OLD
-//OLD  }
 
   for (n = 0; n < NDIM2; n++)
   {

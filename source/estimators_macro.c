@@ -292,11 +292,6 @@ bf_estimators_increment (one, p, ds)
  *
  * ### Notes ###
  * The estimators are not normalised by this routine
- * For the moment, the increment to the estimator is taken to be
- * weight * (1 - exp(-tau))/ tau / dvds
- * This is slightly different from what I do in my code (not
- * accurate to v/c corrections). If calculations where accuracy to
- * order v/c is needed then this routine should be improved.
  *
  **********************************************************/
 
