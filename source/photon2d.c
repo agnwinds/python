@@ -141,7 +141,6 @@ translate_in_space (pp)
   double ds, delta, s, smax;
   int ndom, ndom_next;
   struct photon ptest;
-  int ifail;
 
   ds = ds_to_wind (pp, &ndom);
 
@@ -155,13 +154,6 @@ translate_in_space (pp)
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
                                            From here on we should be in the grid  */
     ds += DFUDGE;               //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
-    /* XXX this is a test.  We check at the start whether we are in the grid */
-
-    if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
-    {
-    }
-
-    /* XXX this ends the test */
 
 
 
@@ -444,6 +436,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   int nplasma;
   int ndom, ndom_current;
   int inwind;
+  int hit_disk;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -484,7 +477,7 @@ return and record an error */
     s = ds_to_wind (p, &ndom_current);  /* smax is set to be the distance to edge of the wind */
     if (s < smax)
       smax = s;
-    s = ds_to_disk (p, 0);      /* the 0 implies ds_to_disk can not return a negative distance */
+    s = ds_to_disk (p, 0, &hit_disk);   /* the 0 implies ds_to_disk can not return a negative distance */
     if (s > 0 && s < smax)
       smax = s;
   }
@@ -504,6 +497,11 @@ return and record an error */
     return (p->istat);
 
   }
+
+//OLD  if (modes.save_photons)
+//OLD  {
+//OLD    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, *tau);
+//OLD  }
 
 
 /* At this point we now know how far the photon can travel in it's current grid cell */
@@ -555,17 +553,8 @@ The choice of SMAX_FRAC can affect execution time.*/
 
     if (geo.ioniz_or_extract == 1)
     {
-      xplasma->ntot++;          // EP 11-19: Moved so only increments during ionisation cycles
-
-      /* For an ionization cycle */
+      /* Increment the bound-free estimators for macro-atoms */
       bf_estimators_increment (one, p, ds_current);
-
-      /*photon weight times distance in the shell is proportional to the mean intensity */
-      xplasma->j += p->w * ds_current;
-
-      /* frequency weighted by the weights and distance in the shell.  See eqn 2 ML93 */
-      xplasma->ave_freq += p->freq * p->w * ds_current;
-
     }
   }
   else

@@ -124,8 +124,8 @@ typedef struct ions
                                    the same as first_nlte_level  (Name changed 080810 -- 62 */
   int nlte;                     /* Actual number of nlte levels for this ion */
   int phot_info;                /*-1 means there are no photoionization cross sections for this ion, 
-				 0  means the photoionization is given on an ion basis (e.g. for the 
-					ground state using VFKY and the xphot structure
+				   0  means the photoionization is given on an ion basis (e.g. for the 
+				   ground state using VFKY and the xphot structure
 				   1 means photoionization is given on a level basis, using topbase value
                                    Topbase photoinization trumps VFKY photoionization
 				  */
@@ -170,6 +170,7 @@ typedef struct ions
   int nxderedi;                 /* index into the dere direct ionization structure to give the location of the data for this ion */
   int nxinner[N_INNER];         /*index to each of the inner shell cross sections associtated with this ion */
   int n_inner;                  /*The number of inner shell cross section associated with this ion */
+  int n_ch_ex;                  /*The number of the charge exchange rate that applies to this ion*/
 
 }
 ion_dummy, *IonPtr;
@@ -319,7 +320,7 @@ typedef struct topbase_phot
   int n_elec_yield;             /*Index to the electron yield array - only used for inner shell ionizations */
 //  int n_fluor_yield;            /*Inder to the fluorescent photon yield array - only used for inner shell ionizations */
   int macro_info;               /* Identifies whether line is to be treated using a Macro Atom approach.
-                                   set to -1 initially
+ u                                 set to -1 initially
                                    set to 0 if not a macro atom line  
                                    set to 1 if a macro atom line  (ksl 04 apr)
                                    Note: Program will exit before leaving get_atomicdata if not initallized to 0 or 1
@@ -464,6 +465,32 @@ typedef struct gaunt_total
 } Gaunt_total, *Gaunt_totalptr;
 
 Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
+
+
+
+#define MAX_CHARGE_EXCHANGE 100   //Space set aside for charge exchange parameters
+
+int n_charge_exchange;              //The actual number of scaled temperatures
+
+typedef struct charge_exchange
+{
+  int nion1;                     //The ion which will be ionized - normally hydrogen
+  int nion2;                     //The ion which will be recombining
+  double a,b,c,d;                //The parameters for the fit
+  double tmin;                  //The minimum temperature which the fit is valif for
+  double tmax;                  //The maximum temperature which the fit is valif for
+  double energy_defect;         //The energy defect for the reaction - used for heating
+  double delta_e_ovr_k;         //The boltzman factor for charge exchange ionization (only a few records have this)
+  
+} Charge_exchange, *Charge_exchange_ptr;
+
+Charge_exchange  charge_exchange[MAX_CHARGE_EXCHANGE];     //Set up the structure
+
+double charge_exchange_recomb_rates[NIONS]; //An array to store the actual recombination rates for a given temperature - 
+//there is an estimated rate for ions without an actual rate, so we need to dimneions for ions.
+double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE]; //An array to store the actual ionization rates for a given temperature
+
+
 
 /* a variable which controls whether to save a summary of atomic data
    this is defined in atomic.h, rather than the modes structure */

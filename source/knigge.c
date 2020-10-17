@@ -115,14 +115,15 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
   rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
   rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
 
+  // zdom[ndom].wind_thetamin = atan (1. / zdom[ndom].kn_dratio); (OLD)
+  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min/zdom[ndom].kn_dratio); /*units of r_min and d are now consistent (RG) correcting bug #760 */
+  // zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar)); (OLD)
+  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max/zdom[ndom].kn_dratio); /*units of r_max and d are now consistent (RG) correcting bug #760. Now using r_max and not disk radius */
   zdom[ndom].wind_rho_min *= geo.rstar;
   zdom[ndom].wind_rho_max *= geo.rstar;
-  zdom[ndom].wind_thetamin = atan (1. / zdom[ndom].kn_dratio);
 
-/* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is
-in units of WD radii */
-
-  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
+  /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is in units of WD radii. Subsequent calculations
+     need to be checked for similar issues to those raised in bug #760 (RG) */
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
@@ -220,6 +221,7 @@ kn_velocity (ndom, x, v)
   struct photon ptest;
   double xtest[3];
   double s;
+  int hit_disk;
 
   DomainPtr one_dom;
 
@@ -261,7 +263,7 @@ kn_velocity (ndom, x, v)
     ptest.lmn[0] = sin (theta); // ptest direction is along the stream line
     ptest.lmn[1] = 0.0;
     ptest.lmn[2] = cos (theta);
-    s = ds_to_disk (&ptest, 1);
+    s = ds_to_disk (&ptest, 1, &hit_disk);
     move_phot (&ptest, s);      // Now move the test photon to  disk surface
     vsub (ptest.x, xtest, xtest);       // Poloidal distance is just the distance between these two points.
     ldist = length (xtest);
@@ -363,7 +365,7 @@ kn_rho (ndom, x)
   double v[3], rho;
   struct photon ptest;
   double s, theta;
-//  double xtest[3];
+  int hit_disk;
 
   DomainPtr one_dom;
 
@@ -384,26 +386,13 @@ kn_rho (ndom, x)
   {
     theta = atan (rzero / dd);
 
-//OLD    ptest.x[0] = rzero;
-//OLD    ptest.x[1] = 0.0;
-//OLD    ptest.x[2] = EPSILON;
-//OLD    ptest.lmn[0] = cos (theta);
-//OLD    ptest.lmn[1] = 0.0;
-//OLD    ptest.lmn[2] = sin (theta);
-//OLD    s = ds_to_disk (&ptest, 1);
-//OLD    move_phot (&ptest, s);      // Now test photon is at disk surface
-//OLD    rzero = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
-
-//    xtest[0] = r;               // Define xtest in the +xz plane
-//    xtest[1] = 0;
-//    xtest[2] = fabs (x[2]);
     ptest.x[0] = rzero;         // Define ptest at the intersection of the streamline and x axis
     ptest.x[1] = 0.0;
     ptest.x[2] = EPSILON;
     ptest.lmn[0] = sin (theta); // lmn is along the streamline toward xtest
     ptest.lmn[1] = 0.0;
     ptest.lmn[2] = cos (theta);
-    s = ds_to_disk (&ptest, 1);
+    s = ds_to_disk (&ptest, 1, &hit_disk);
     move_phot (&ptest, s);      // Now test photon is at disk surface
 //    vsub (ptest.x, xtest, xtest);
 //    ldist = length (xtest);

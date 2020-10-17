@@ -110,6 +110,8 @@ main (argc, argv)
   time_max = -1;
   set_max_time (files.root, time_max);
 
+  rel_mode = REL_MODE_LINEAR;
+
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
      get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */
@@ -412,6 +414,22 @@ main (argc, argv)
   else
     Log ("There is no BH \n");
 
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    if (nlevels_macro == 0)
+    {
+      Error ("THIS IS A MACROATOM CALCULATION WITH NO MACROLEVELS\n");
+    }
+    else
+    {
+      Log ("This is a macro-atom calculation\n");
+    }
+  }
+  else
+  {
+    Log ("This is a simple atom calculation\n");
+  }
+
   /* Describe the spectra which will be extracted and the way it will be extracted */
 
   /* First initialise things to semi-reasonable values */
@@ -619,10 +637,6 @@ main (argc, argv)
   }
 
 
-
-
-  /* Start with photon history off */
-  phot_hist_on = 0;
 
   /* If required, read in a non-standard disk temperature profile */
   if (geo.disk_tprofile == 1)

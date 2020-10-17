@@ -76,13 +76,12 @@ radiation (p, ds)
   double den_config ();
   int nconf;
   double p_in[3], p_out[3], dp_cyl[3];  //The initial and final momentum.
-//  double weight_of_packet, y;  //to do with augerion calcs, now deprecated
-  double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
-  struct photon phot, phot_mid;
+  struct photon phot, phot_mid, phot_dummy;
   int ndom, i;
+
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
@@ -96,9 +95,6 @@ radiation (p, ds)
      We currently take the average of this frequency along ds. In principle
      this could be improved, so we throw an error if the difference between v1 and v2 is large */
 
-  /* calculate velocity at original position */
-  vwind_xyz (ndom, p, v_inner); // get velocity vector at new pos
-  v1 = dot (p->lmn, v_inner);   // get direction cosine
 
   /* compute the initial momentum of the photon */
 
@@ -112,18 +108,26 @@ radiation (p, ds)
 
   stuff_phot (p, &phot);        // copy photon ptr
   move_phot (&phot, ds);        // move it by ds
-  vwind_xyz (ndom, &phot, v_outer);     // get velocity vector at new pos
-  v2 = dot (phot.lmn, v_outer); // get direction cosine
 
   /* calculate photon frequencies in rest frame of cell */
 
-  freq_inner = p->freq * (1. - v1 / VLIGHT);
-  freq_outer = phot.freq * (1. - v2 / VLIGHT);
+
+  if (observer_to_local_frame (&phot, &phot_dummy))
+  {
+    Error ("radiation: observer to local frame error\n");
+  }
+  freq_inner = phot_dummy.freq;
+
+  if (observer_to_local_frame (p, &phot_dummy))
+  {
+    Error ("radiation: observer to local frame error\n");
+  }
+  freq_outer = phot_dummy.freq;
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
 
-  /* calculate free-free, Compton and ind-Compton opacities 
+  /* calculate free-free, Compton and induced-Compton opacities 
      note that we also call these with the average frequency along ds */
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);       /* Add ff opacity */
@@ -306,8 +310,6 @@ radiation (p, ds)
                     {
                       frac_z += z;
                     }
-//                    frac_ion[nion] += z;
-//                    kappa_ion[nion] += x;                    
                     frac_inner_ion[n] += z;     //NSH We need to log the auger rate seperately - we do this by cross section
                     kappa_inner_ion[n] += x;    //NSH and we also og the opacity by ion
                   }

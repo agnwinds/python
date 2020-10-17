@@ -29,7 +29,7 @@
  * is not random.
  *
  * The extract option is used
- * normaly during the spectral extraction cycles.
+ * normally during the spectral extraction cycles.
  * However, as an advanced option one can use the live or die
  * to construct the detailed spectrum.  One would not normally
  * want to do this, as many photons are "wasted" since they
@@ -87,6 +87,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int absorb_reflect;           /* this is a variable used to store geo.absorb_reflect during exxtract */
   int nreport;
   struct timeval timer_t0;
+  double rho;
 
   nreport = 100000;
   if (nreport < NPHOT / 100)
@@ -103,8 +104,21 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
-    /* This is just a watchdog method to tell the user the program is still running */
 
+    check_frame (&p[nphot], F_OBSERVER, "trans_phot_start\n");
+    if (modes.save_photons)
+    {
+      save_photons (&p[nphot], "trans_phot_start");
+      rho = sqrt (p[nphot].x[0] * p[nphot].x[0] + p[nphot].x[1] * p[nphot].x[1]);
+      if (fabs (p[nphot].x[2]) <= zdisk (rho))
+      {
+        Diag ("ZDISK %d  %e < = %e delta= %e\n", nphot, fabs (p[nphot].x[2]), rho, rho - fabs (p[nphot].x[2]));
+      }
+    }
+
+
+
+    /* This is just a watchdog method to tell the user the program is still running */
     if (nphot % nreport == 0)
     {
       if (geo.ioniz_or_extract)
@@ -114,22 +128,21 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
         Log ("Spec. Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.pcycle + 1, geo.pcycles, basename, nphot, NPHOT,
              nphot * 100. / NPHOT);
     }
-
     Log_flush ();
 
     stuff_phot (&p[nphot], &pp);
     absorb_reflect = geo.absorb_reflect;
 
+
     /* The next if statement is executed if we are calculating the detailed spectrum and makes sure we always run extract on
        the original photon no matter where it was generated */
-
     if (iextract)
     {
 
       stuff_phot (&p[nphot], &pextract);
       extract (w, &pextract, pextract.origin);
 
-    }                           
+    }
 
     p[nphot].np = nphot;
 
@@ -212,7 +225,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double tau_scat, tau;
   int istat;
   int ierr;
-  double rrr;
   int icell;
   int current_nres;
   int kkk, n;
@@ -222,6 +234,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double x_dfudge_check[3];
   int ndom;
   double normal[3];
+  double rho, dz;
+
+  //XFRAME -- check frame of input photon
+
+  check_frame (p, F_OBSERVER, "trans_phot_single: Starting Error\n");
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
@@ -238,7 +255,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   if (modes.save_photons)
   {
-    save_photons (p, "Begin");
+    save_photons (p, "trans_phot_single:Begin");
   }
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
 
@@ -255,6 +272,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        photon at the position of it's last scatter.  In most other cases though we store the final 
        position of the photon. */
 
+
+    if (modes.save_photons)
+    {
+      save_photons (&pp, "BeforeTranslate");
+    }
 
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
 
@@ -285,12 +307,15 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     if (istat == P_HIT_STAR)
     {                           /* It hit the star */
       geo.lum_star_back += pp.w;
+      spec_add_one (&pp, SPEC_HITSURF);
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
       {
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
          * to continue in the wind.  Since this is effectively a scattering event we also have to
          * extract a photon to construct the detailed spectrum
          */
+
+
         randvcos (pp.lmn, normal);
         move_phot (&pp, DFUDGE);
         stuff_phot (&pp, p);
@@ -315,20 +340,22 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     if (istat == P_HIT_DISK)
     {
       /* It hit the disk */
+      /* ZFRAME - this next section assumes that disk heating is supposed to be carried out
+         in the local frame of the disk.  That this is the correct thing to do needs to
+         be confirmed.
+       */
+
+
 
       /* Store the energy of the photon bundle into a disk structure so that one 
          can determine later how much and where the disk was heated by photons.
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position 
          of the outer radius of the disk. */
 
-      if (modes.save_photons)
-      {
-        save_photons (&pp, "HitDisk");
-      }
 
-      rrr = sqrt (dot (pp.x, pp.x));
+      rho = sqrt (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1]);
       kkk = 0;
-      while (rrr > qdisk.r[kkk] && kkk < NRINGS - 1)
+      while (rho > qdisk.r[kkk] && kkk < NRINGS - 1)
         kkk++;
       kkk--;                    /* So that the heating refers to the heating between kkk and kkk+1 */
       qdisk.nhit[kkk]++;
@@ -337,16 +364,61 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
       {
+
+        if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+        {
+          dz = (zdisk (rho) - fabs (pp.x[2]));
+          if (dz > 0)
+          {
+            //OLD        Error ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk, dz);
+            if (modes.save_photons)
+            {
+              Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), dz);
+            }
+            if (pp.x[2] > 0)
+            {
+              pp.x[2] += (dz + 1000.);
+            }
+
+            else
+            {
+              pp.x[2] -= (dz + 1000.);
+            }
+
+            if (zdisk (rho) > fabs (pp.x[2]))
+            {
+              if (modes.save_photons)
+              {
+                Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), zdisk (rho) - fabs (pp.x[2]));
+              }
+            }
+          }
+        }
+
+
+        if (modes.save_photons)
+        {
+          save_photons (&pp, "HitDisk");
+        }
+
+
+        spec_add_one (&pp, SPEC_HITSURF);
+
+
+
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
          * to continue in the wind.  Since this is effectively a scattering event we also have to
          * extract a photon to construct the detailed spectrum
          */
         randvcos (pp.lmn, normal);
+
         stuff_phot (&pp, p);
+
         p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));
         istat = pp.istat = P_INWIND;
         tau = 0;
+        stuff_phot (&pp, p);
         if (iextract)
         {
           stuff_phot (&pp, &pextract);
@@ -359,10 +431,15 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         stuff_phot (&pp, p);
         break;
       }
+
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "HitDisk");
+      }
     }
 
     if (istat == P_SCAT)
-    {                           /* Cause the photon to scatter and reinitilize */
+    {                           /* Cause the photon to scatter and reinitialize */
 
 
       pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x);
@@ -418,7 +495,18 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       nnscat = 1;
       pp.nscat++;
 
+
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "BeforeScat");
+      }
+
       ierr = scatter (&pp, &current_nres, &nnscat);
+
+      if (modes.save_photons)
+      {
+        save_photons (&pp, "AfterScat");
+      }
       if (ierr)
       {
         Error ("trans_phot: bad return from scatter %d at point 2\n", ierr);
@@ -428,12 +516,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* SS June 04: During the spectrum calculation cycles, photons are thrown away when they interact with macro atoms or
          become k-packets. This is done by setting their weight to zero (effectively they have been absorbed into either
          excitation energy or thermal energy). Since they now have no weight there is no need to follow them further. */
-      /* 54b-ksl ??? Stuart do you really mean the comment above; it's not obvious to me since if true why does one need to
-         calculate the progression of photons through the wind at all??? Also how is this enforced; where is pp.w set to a
-         low value. */
-      /* JM 1504 -- This is correct. It's one of the odd things about combining the macro-atom approach with our way of doing
-         'spectral cycles'. If photons activate macro-atoms they are destroyed, but we counter this by generating photons
-         from deactivating macro-atoms with the already calculated emissivities. */
 
       if (geo.matom_radiation == 1 && geo.rt_mode == RT_MODE_MACRO && pp.w < weight_min)
         /* Flag for the spectrum calculations in a macro atom calculation SS */

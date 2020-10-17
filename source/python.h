@@ -27,6 +27,10 @@ value determined by values in python.h to a values which are adjustable from
 within python */
 
 
+#define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
+#define REL_MODE_FULL   1      /*Make full corrections for special relativity*/
+
+  int rel_mode;                 /* How doppler effects are treated */
 
 
 
@@ -383,6 +387,10 @@ struct geometry
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
+#define DISK_MISSED 0
+#define DISK_HIT_TOP 1
+#define DISK_HIT_BOT 2
+#define DISK_HIT_EDGE  3
 
 #define DISK_NONE   0
 #define DISK_FLAT   1
@@ -475,6 +483,7 @@ struct geometry
 #define RT_MODE_MACRO   2
 
   int rt_mode;                  /* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
+
 
   /* Define the choices for calculating the FB, see, e.g. integ_fb */
 
@@ -817,7 +826,13 @@ typedef struct plasma
 
   double kpkt_abs;              /* k-packet equivalent of matom_abs. (SS) */
 
-  int *kbf_use;                 /* List of the indices of the photoionization processes to be used for kappa_bf. (SS) */
+  /* kbf_use and kbf_nuse are set by the routine kbf_need, and they provide indices into the photoinization processes
+   * that are "significant" in a plasma cell, based on the density of a particular ion in a cell and the x-section 
+   * at the photoinization edge.  This process was introduced as a means to speed the program up by ignoring those
+   * bf processes that would contribute negligibly to the bf opacity
+  */
+
+  int *kbf_use;                 /* List of the indices of the photoionization processes to be used for kappa_bf.  */
   int kbf_nuse;                 /* Total number of photoionization processes to be used for kappa_bf. (SS) */
 
 /* End of macro information */
@@ -835,6 +850,7 @@ typedef struct plasma
                                                    and heat_photo. SS June 04. */
   double heat_photo, heat_z;    /*photoionization heating total and of metals */
   double heat_auger;            /* photoionization heating due to inner shell ionizations */
+  double heat_ch_ex;
   double abs_photo, abs_auger;  /* this is the energy absorbed from the photon due to these processes - different from 
                                    the heating rate because of the binding energy */
   double w;                     /*The dilution factor of the wind */
@@ -906,7 +922,6 @@ typedef struct plasma
   double cool_rr, cool_rr_metals;       /*fb luminosity & fb of metals metals */
   double lum_tot, lum_tot_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
-
   double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
   double lum_rr_ioniz;
@@ -916,7 +931,6 @@ typedef struct plasma
   double cool_rr_ioniz, cool_rr_metals_ioniz;   /*fb luminosity & fb of metals metals */
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
-
   double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
 
   /* JM 1807 -- these routines are for the BF_SIMPLE_EMISSIVITY_APPROACH
@@ -1115,11 +1129,13 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 
 typedef struct photon
 {
-  double x[3];                  /* The position of packet */
-  double lmn[3];                /* Direction cosines of the packet */
-  double freq, freq_orig;       /* current and original frequency of this packet */
-  double w, w_orig;             /* current and original weight of this packet */
-  double tau;                   /* optical depth of the photon since its creation or last interaction */
+  double x[3];                                  /* The position of packet */
+  double lmn[3];                                /* Direction cosines of the packet */
+  double freq, freq_orig;        /* current, original frequency (redshifted) of this packet */
+  double w, w_orig;                             /* current and original weight of this packet */
+  double tau;                                   /* optical depth of the photon since its creation or last interaction */
+
+#define N_ISTAT 13 // number of entries in the istat_enum 
   enum istat_enum
   {
     P_INWIND = 0,               //in wind,
@@ -1137,7 +1153,16 @@ typedef struct photon
     P_REPOSITION_ERROR = 12     //A photon passed through the disk due to dfudge pushing it through incorrectly
   } istat;                      /*status of photon. */
 
+  enum frame
+  {
+    F_LOCAL = 0,
+    F_OBSERVER = 1
+  } frame;
+
   int nscat;                    /*Number of scatters for this photon */
+  int nrscat;                   /* number of resonance scatterings */
+  int nmacro;                   /* number of macro atom interactions */
+
   int nres;                     /*For line scattering, indicates the actual transition; 
                                    for continuum scattering, meaning 
                                    depends on matom vs non-matom. See headers of emission.c 
@@ -1146,7 +1171,6 @@ typedef struct photon
                                    anisotropic scattering to carry the number of
                                    scattering to "extract" when needed for wind
                                    generated photons SS05. */
-  int nrscat;                   /* number of resonance scatterings */
   int grid;                     /*grid position of the photon in the wind, if
                                    the photon is in the wind.  If the photon is not
                                    in the wind, then -1 implies inside the wind cone and  
@@ -1189,14 +1213,6 @@ PhotPtr photmain;               /* A pointer to all of the photons that have bee
 #define TAU_MIN 1e-6
 
 
-    /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
-     * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
-     * then photon histories will be attempted.
-     */
-
-#define MAX_PHOT_HIST	1000
-int n_phot_hist, phot_hist_on, phot_history_spectrum;
-struct photon xphot_hist[MAX_PHOT_HIST];
 
 struct basis
 {
@@ -1228,15 +1244,16 @@ int nspectra;                   /* After create_spectrum, the number of elements
                                    general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
                                    while elements higher than this will contain spectra as seen by different observers */
 
-#define MSPEC               7   /* The number of standard spectra - i.e. not user defined angles */
-#define SPEC_CREATED        0   /* The spectrum of the original weight before transmission through the wind */
-#define SPEC_EMITTED        1   /* The emitted spectrum - i.e. photons with their weights changed by transmission through the wind */
-#define SPEC_CENSRC         2   /* The emitted spectrum from photons emitted from the central source (if there is one) */
-#define SPEC_DISK           3   /* The emitted spectrum from photons emitted from the disk (if there is one) */
-#define SPEC_WIND           4   /* The emitted spectrum from photons emitted from the wind itself */
-#define SPEC_HITSURF        5   /* The spectrum for photons which hit the a surface and were absorbed - should be zero for when reflection
+#define MSPEC               8   /* The number of standard spectra - i.e. not user defined angles */
+#define SPEC_CREATED        0   /* The spectrum of from external sources with  weights before transmission through the wind */
+#define SPEC_CWIND          1   /* The spectrum created in the wind with rheir original weights*/
+#define SPEC_EMITTED        2   /* The emitted spectrum - i.e. photons with their weights changed by transmission through the wind */
+#define SPEC_CENSRC         3   /* The emitted spectrum from photons emitted from the central source (if there is one) */
+#define SPEC_DISK           4   /* The emitted spectrum from photons emitted from the disk (if there is one) */
+#define SPEC_WIND           5   /* The emitted spectrum from photons emitted from the wind itself */
+#define SPEC_HITSURF        6   /* The spectrum for photons which hit the a surface and were absorbed - should be zero for when reflection
                                  * is turned on */
-#define SPEC_SCATTERED      6   /* The spectrum of photons which were scattered at least once in the wind - the weight used is the final
+#define SPEC_SCATTERED      7   /* The spectrum of photons which were scattered at least once in the wind - the weight used is the final
                                  * weight after transmission through the wind */
 
 int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
