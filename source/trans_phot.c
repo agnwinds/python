@@ -121,7 +121,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
     /* This is just a watchdog method to tell the user the program is still running */
     if (nphot % nreport == 0)
     {
-      if (geo.ioniz_or_extract)
+      if (geo.ioniz_or_extract == CYCLE_IONIZ)
         Log (" Ion. Cycle %d/%d of %s : Photon %10d of %10d or %6.1f per cent \n", geo.wcycle + 1, geo.wcycles, basename, nphot, NPHOT,
              nphot * 100. / NPHOT);
       else
@@ -236,7 +236,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double normal[3];
   double rho, dz;
 
-  //XFRAME -- check frame of input photon
 
   check_frame (p, F_OBSERVER, "trans_phot_single: Starting Error\n");
 
@@ -378,7 +377,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           dz = (zdisk (rho) - fabs (pp.x[2]));
           if (dz > 0)
           {
-            //OLD        Error ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk, dz);
             if (modes.save_photons)
             {
               Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), dz);
@@ -463,7 +461,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         break;
       }
 
-      /* 1506 JM -- If the next errors reoccur, see Issue #154 for discussion */
+      /* 1506 JM -- If the next error reoccurs, see Issue #154 for discussion */
 
       if (wmain[n].nplasma == NPLASMA)
       {
@@ -476,7 +474,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      if (wmain[n].vol <= 0)
+      if (wmain[n].inwind < 0)
       {
         Error ("trans_phot: Trying to scatter a photon in a cell with no wind volume\n");
         Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid, pp.x[0], pp.x[1], pp.x[2]);
@@ -489,7 +487,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
       /* Add path lengths for reverberation mapping */
-      if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM) && geo.ioniz_or_extract && geo.wcycle == geo.wcycles - 1)
+      if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM) && geo.ioniz_or_extract == CYCLE_IONIZ && geo.wcycle == geo.wcycles - 1)
       {
         wind_paths_add_phot (&wmain[n], &pp);
       }
