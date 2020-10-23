@@ -159,6 +159,7 @@ define_wind ()
       {
         model_velocity (ndom, w[n].x, w[n].v);
       }
+      Log ("XXY vgrad %d\n", n);
       model_vgrad (ndom, w[n].x, w[n].v_grad);
     }
 
@@ -842,10 +843,12 @@ int
 wind_div_v ()
 {
   int icell;
-  double x_zero[3], v2[3], v1[3];
-  struct photon ppp;
-  double div, delta;
-  double xxx[3];
+//OLD  double x_zero[3], v2[3], v1[3];
+  double x_zero[3];
+//OLD  struct photon ppp;
+  double div;
+//OLD double delta;
+//OLD  double xxx[3];
   int ndom;
   double scaling;
 
@@ -859,67 +862,69 @@ wind_div_v ()
     stuff_v (wmain[icell].xcen, x_zero);        /*Gget the centre of the current cell in the loop */
     ndom = wmain[icell].ndom;
 
-    if (rel_mode == REL_MODE_FULL)
-    {
-      wmain[icell].div_v = div = get_div_v_in_cmf_frame (ndom, x_zero);
-    }
-
-    else                        // Use the old legacy code  which calculates the divergence in the observer frame
-    {
-
-
-      if (x_zero[1] != 0)
-      {
-        delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], fmin (wmain[icell].x[1] - x_zero[1], wmain[icell].x[2] - x_zero[2])));
-      }
-      else
-      {
-        delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], wmain[icell].x[2] - x_zero[2]));
-      }
-      delta = delta * scaling;
-
-
-      if (delta == 0)
-      {
-        Error ("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n", icell);
-        delta = wmain[icell].dfudge;
-      }
-
-
-      /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
-         in positive and negative directions and evaluate the difference in velocities. Dividing this by
-         delta gives the value of dv_x/dx, and the sum of these gives the divergence. If issues arise
-         see bug report #70. */
+//OLD    if (rel_mode == REL_MODE_FULL)
+//    {
+    wmain[icell].div_v = div = get_div_v_in_cmf_frame (ndom, x_zero);
+    Log ("XXY div %d %e\n", icell, div);
+//OLD    }
+//OLD
+//OLD    else                        // Use the old legacy code  which calculates the divergence in the observer frame
+//OLD    {
+//OLD
+//OLD
+    //OLD     if (x_zero[1] != 0)
+//OLD      {
+//OLD        delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], fmin (wmain[icell].x[1] - x_zero[1], wmain[icell].x[2] - x_zero[2])));
+//OLD      }
+//OLD      else
+//OLD      {
+//OLD        delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], wmain[icell].x[2] - x_zero[2]));
+//OLD      }
+//OLD      delta = delta * scaling;
+//OLD
+//OLD
+//OLD      if (delta == 0)
+//OLD      {
+//OLD        Error ("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n", icell);
+//OLD        delta = wmain[icell].dfudge;
+//OLD      }
 
 
-      /* Calculate dv_x/dx at this position */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[0] += 0.5 * delta;
-      vwind_xyz (ndom, &ppp, v2);
-      ppp.x[0] -= delta;
-      vwind_xyz (ndom, &ppp, v1);
-      div = xxx[0] = (v2[0] - v1[0]) / delta;
-
-      /* Calculate dv_y/dy */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[1] += 0.5 * delta;
-      vwind_xyz (ndom, &ppp, v2);
-      ppp.x[1] -= delta;
-      vwind_xyz (ndom, &ppp, v1);
-      div += xxx[1] = (v2[1] - v1[1]) / delta;
-
-
-      /* Calculate dv_z/dz */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[2] += 0.5 * delta;
-      vwind_xyz (ndom, &ppp, v2);
-      ppp.x[2] -= delta;
-      vwind_xyz (ndom, &ppp, v1);
-      div += xxx[2] = (v2[2] - v1[2]) / delta;
+//OLD      /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
+//OLD         in positive and negative directions and evaluate the difference in velocities. Dividing this by
+//OLD         delta gives the value of dv_x/dx, and the sum of these gives the divergence. If issues arise
+//OLD         see bug report #70. */
+//OLD
+//OLD
+//OLD      /* Calculate dv_x/dx at this position */
+//OLD      stuff_v (x_zero, ppp.x);
+//OLD      ppp.x[0] += 0.5 * delta;
+//OLD      vwind_xyz (ndom, &ppp, v2);
+//OLD      ppp.x[0] -= delta;
+//OLD      vwind_xyz (ndom, &ppp, v1);
+//OLD      div = xxx[0] = (v2[0] - v1[0]) / delta;
+//OLD
+//OLD      /* Calculate dv_y/dy */
+//OLD      stuff_v (x_zero, ppp.x);
+//OLD      ppp.x[1] += 0.5 * delta;
+//OLD      vwind_xyz (ndom, &ppp, v2);
+//OLD      ppp.x[1] -= delta;
+//OLD      vwind_xyz (ndom, &ppp, v1);
+//OLD      div += xxx[1] = (v2[1] - v1[1]) / delta;
 
 
-      wmain[icell].div_v = div;
-    }
+//OLD      /* Calculate dv_z/dz */
+//OLD      stuff_v (x_zero, ppp.x);
+//OLD      ppp.x[2] += 0.5 * delta;
+//OLD      vwind_xyz (ndom, &ppp, v2);
+//OLD      ppp.x[2] -= delta;
+//OLD      vwind_xyz (ndom, &ppp, v1);
+//OLD      div += xxx[2] = (v2[2] - v1[2]) / delta;
+
+
+//OLD      wmain[icell].div_v = div;
+//OLD      Log ("XXY div %d %e\n", icell, div);
+//OLD    }
 
     if (div < 0 && (wind_div_err < 0 || wmain[icell].inwind == W_ALL_INWIND))
     {

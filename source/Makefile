@@ -155,7 +155,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		xlog.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
-		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
+		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o derivative.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o
 
 
@@ -178,7 +178,7 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup_star_bh.c setup_domains.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
-		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c \
+		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c derivative.c \
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c
 
 
@@ -311,6 +311,10 @@ modify_wind:  $(modify_wind_objects)
 	cp $@ $(BIN)                                                               
 	mv $@ $(BIN)/modify_wind$(VERSION)                                         
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
+
+derivative: derivative.c
+	$(CC) $(CFLAGS) derivative.c $(LDFLAGS)  -o   dtest             
+        
 
 
 # The next line runs recompiles all of the routines after first cleaning the directory

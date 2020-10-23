@@ -352,12 +352,17 @@ model_vgrad (ndom, x, v_grad)
 
 
     observer_to_local_frame_velocity (v1, v0, dv);
+    Log ("XXX %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e \n", x[0], x[1], x[2], v1[0], v1[1],
+         v1[2], v0[0], v0[1], v0[2], dv[0], dv[1], dv[2]);
+
 
     for (j = 0; j < 3; j++)
       dv[j] /= ds;
 
+
     stuff_v (dv, v_grad[i]);
   }
+
 
   return (0);
 
@@ -401,6 +406,7 @@ get_div_v_in_cmf_frame (ndom, x)
   double v[3][3];
   double div_v = 0;
 
+  Log ("XXY div\n");
   model_vgrad (ndom, x, v);
 
   /* the trace of the velocity gradient tensor is the divergence */
@@ -408,6 +414,7 @@ get_div_v_in_cmf_frame (ndom, x)
   {
     div_v += v[i][i];
   }
+  Log ("XXY div  %e\n", div_v);
 
   return (div_v);
 }

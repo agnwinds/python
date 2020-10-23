@@ -566,6 +566,10 @@ int is_input_line_synonym_for_question(char question[], char input_line[]);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* xtest.c */
 int xtest(void);
+/* derivative.c */
+double f(double x, void *params);
+int get_derivative(void);
+int xmodel_vgrad(double ds_fraction, int ndom, double x[], double v_grad[][3]);
 /* setup_reverb.c */
 int get_meta_params(void);
 /* setup_line_transfer.c */
