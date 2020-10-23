@@ -285,6 +285,11 @@ model_velocity (ndom, x, v)
     Exit (0);
   }
 
+  if (speed > 0.99 * VLIGHT)
+  {
+    rescale (v, 0.99 * VLIGHT / speed, v);
+  }
+
   return (speed);
 }
 
@@ -312,6 +317,10 @@ model_velocity (ndom, x, v)
  * This routine is normally used only during the initialization
  * of the wind
  *
+ * This uses a symmetric calculation of the derivative but does 
+ * not adaptively adjust the length of the steps to check the
+ * accuracy of the calculation.  See issue #782
+ *
  * Since the routine calls model_velocity directly, and not vwind_xyz
  * it can be called before wmain.v has been populated.
  *
@@ -323,13 +332,12 @@ model_vgrad (ndom, x, v_grad)
      int ndom;
 {
 
-  double v0[3], v1[3];
-  double dx[3], dv[3];
+  double v_forward[3], v_reverse[3];
+  double dx_forward[3], dx_reverse[3];
+  double dv[3];
   double ds;
   int i, j;
-  int vsub (), stuff_v ();
 
-  model_velocity (ndom, x, v0);
 
   /* get a small distance, 1/1000th of the cell distance from origin */
   ds = 0.001 * length (x);
@@ -338,34 +346,37 @@ model_vgrad (ndom, x, v_grad)
 
   for (i = 0; i < 3; i++)
   {
-    /* first create a vector dx, which is the position x but moved ds in direction i */
-    stuff_v (x, dx);
-    dx[i] += ds;
-
-    /* calculate the velocity at position dx */
-    model_velocity (ndom, dx, v1);
-
-    if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
-    {
-      Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
-    }
+    /* first create vectors  which are offset by +-ds  */
+    stuff_v (x, dx_forward);
+    dx_forward[i] += ds;
+    stuff_v (x, dx_reverse);
+    dx_reverse[i] -= ds;
 
 
-    observer_to_local_frame_velocity (v1, v0, dv);
-    Log ("XXX %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e \n", x[0], x[1], x[2], v1[0], v1[1],
-         v1[2], v0[0], v0[1], v0[2], dv[0], dv[1], dv[2]);
+    /* calculate the velocity at these positions */
+    model_velocity (ndom, dx_reverse, v_reverse);
+    model_velocity (ndom, dx_forward, v_forward);
+
+
+
+    observer_to_local_frame_velocity (v_forward, v_reverse, dv);
+    Log ("XXX %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e \n", x[0], x[1], x[2],
+         v_reverse[0], v_reverse[1], v_reverse[2], v_forward[0], v_forward[1], v_forward[2], dv[0], dv[1], dv[2]);
 
 
     for (j = 0; j < 3; j++)
-      dv[j] /= ds;
+      dv[j] /= 2 * ds;
+
+    if (sane_check (dv[0]) || sane_check (dv[1]) || sane_check (dv[2]))
+    {
+      Log ("XXX %12.4e %12.4e %12.4e %12.4e\n", dv[0], dv[1], dv[2]);
+    }
 
 
     stuff_v (dv, v_grad[i]);
   }
 
-
   return (0);
-
 
 
 }
