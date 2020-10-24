@@ -299,18 +299,19 @@ model_velocity (ndom, x, v)
 
 /**********************************************************/
 /** 
- * @brief      calculate  the velocity gradient at positions in the flow based on
- * the analytic wind models and imported models.  
+ * @brief      calculate  the co-moving frame velocity gradient at 
+ * positions in the flow based on the analytic wind models and imported models.  
  *
- * @param [in] int  ndom   The domain of interest
- * @param [in] double  x[]   A position in the domain
+ * @param [in]  int  ndom   The domain of interest
+ * @param [in]  double  x[]   A position in the domain
  * @param [out] double  v_grad[][3]   The velocity gradient tensor at the position
  * @return   Always returns 0  
  *
  * @details
  * 
  * The routine calls model_velocity multiple times to calculate the velocity
- * gradient tensor at a particular position.
+ * gradient tensor in the co-moving frame at a particular position (in the
+ * observer frame..
  *
  * ### Notes ###
  *
@@ -332,26 +333,44 @@ model_vgrad (ndom, x, v_grad)
      int ndom;
 {
 
-  double v_forward[3], v_reverse[3];
+  double v[3], v_forward[3], v_reverse[3];
   double dx_forward[3], dx_reverse[3];
   double dv[3];
   double ds;
   int i, j;
+  double zero_vector[3], dx[3], dx_obs[3];
+
+  zero_vector[0] = zero_vector[1] = zero_vector[2] = 0.0;
 
 
-  /* get a small distance, 1/1000th of the cell distance from origin */
-  ds = 0.001 * length (x);
-  if (ds < 1.e7)
-    ds = 1.e7;
+
+
+  ds = 0.00001 * length (x);
+  if (ds == 0)
+  {
+    stuff_v (zero_vector, v_grad[0]);
+    stuff_v (zero_vector, v_grad[1]);
+    stuff_v (zero_vector, v_grad[1]);
+    return (0);
+  }
+
+  if (ds < 1.e6)
+    ds = 1.e6;
+
+  model_velocity (ndom, x, v);
 
   for (i = 0; i < 3; i++)
   {
-    /* first create vectors  which are offset by +-ds  */
-    stuff_v (x, dx_forward);
-    dx_forward[i] += ds;
-    stuff_v (x, dx_reverse);
-    dx_reverse[i] -= ds;
+    /* first create vectors  which are offset by +-ds.  Note that
+       we want the observer frame velocities at a point which is ds away
+       in the cmf frame.  To do this, we have to find out how far away
+       that point would be in the observer frame. */
 
+    stuff_v (zero_vector, dx);
+    dx[i] = ds;
+    local_to_observer_frame_ruler_transform (v, dx, dx_obs);
+    vadd (x, dx_obs, dx_forward);
+    vsub (x, dx_obs, dx_reverse);
 
     /* calculate the velocity at these positions */
     model_velocity (ndom, dx_reverse, v_reverse);
@@ -360,8 +379,6 @@ model_vgrad (ndom, x, v_grad)
 
 
     observer_to_local_frame_velocity (v_forward, v_reverse, dv);
-    Log ("XXX %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e \n", x[0], x[1], x[2],
-         v_reverse[0], v_reverse[1], v_reverse[2], v_forward[0], v_forward[1], v_forward[2], dv[0], dv[1], dv[2]);
 
 
     for (j = 0; j < 3; j++)
@@ -369,7 +386,7 @@ model_vgrad (ndom, x, v_grad)
 
     if (sane_check (dv[0]) || sane_check (dv[1]) || sane_check (dv[2]))
     {
-      Log ("XXX %12.4e %12.4e %12.4e %12.4e\n", dv[0], dv[1], dv[2]);
+      Error ("model_vgrad: x %12.4e %12.4e %12.4e dv %12.4e %12.4e %12.4e %12.4e\n", x[0], x[1], x[2], dv[0], dv[1], dv[2]);
     }
 
 
@@ -417,7 +434,6 @@ get_div_v_in_cmf_frame (ndom, x)
   double v[3][3];
   double div_v = 0;
 
-  Log ("XXY div\n");
   model_vgrad (ndom, x, v);
 
   /* the trace of the velocity gradient tensor is the divergence */
@@ -425,7 +441,6 @@ get_div_v_in_cmf_frame (ndom, x)
   {
     div_v += v[i][i];
   }
-  Log ("XXY div  %e\n", div_v);
 
   return (div_v);
 }

@@ -597,6 +597,8 @@ double observer_to_local_frame_ds(PhotPtr p_obs, double ds_obs);
 double local_to_observer_frame_ds(PhotPtr p_obs, double ds_cmf);
 double observer_to_local_frame_velocity(double *v_obs, double *v, double *v_cmf);
 double local_to_observer_frame_velocity(double *v_cmf, double *v, double *v_obs);
+int local_to_observer_frame_ruler_transform(double v[], double dx_cmf[], double dx_obs[]);
+int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double dx_cmf[]);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
