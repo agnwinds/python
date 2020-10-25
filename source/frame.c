@@ -364,6 +364,9 @@ local_to_observer_frame_disk (p_in, p_out)
   double gamma;
   int i;
   int ierr;
+  struct photon phot_dummy;
+
+  stuff_phot (p_in, &phot_dummy);
 
   ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame_disk");
 
@@ -398,6 +401,12 @@ local_to_observer_frame_disk (p_in, p_out)
   }
 
   p_out->w *= (f_out / f_in);
+
+  if (length (p_out->lmn) < 0.999 || length (p_out->lmn) > 1.001)
+  {
+    Error ("local_to_observer_frame_disk:  %11.4e -> %11.4e -> %11.4e \n", length (phot_dummy.lmn), length (p_in->lmn),
+           length (p_out->lmn));
+  }
 
   return (ierr);
 }
