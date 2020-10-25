@@ -54,65 +54,38 @@
 int
 xtest ()
 {
-  double x[] = { 4.4300e+11, 0.0000e+00, 6.0384e+16 };
-  double v_grad[3][3];
-  int i;
-  int j;
-  double ds_fraction;
+  struct photon p;
+  double s;
+  int allow_negative;
+  int hit;
+  // -333708682.51580548, -3464297957.5598879, 916107434.79302168}, lmn = {-0.3821131382229368, -0.85766764329168899, 0.28692653993169387
+// -3.337e+08 -3.464e+09  9.161e+08
+// -3.821e-01 -8.577e-01  2.869e-01
+  p.x[0] = -333708682.51580548;
+  p.x[1] = -3464297957.5598879;
+  p.x[2] = 916107434.79302168;
+  p.lmn[0] = -0.3821131382229368;
+  p.lmn[1] = -0.85766764329168899;
+  p.lmn[2] = 0.28692653993169387;
+
+//  ([-3236723814.5135012, -5445429831.4690027, -946014556.8735044],
+//  [-0.83113545374973818, -0.44527507240102326, -0.9559565373701183])
+
+  p.x[0] = -3236723814.5135012;
+  p.x[1] = -5445429831.4690027;
+  p.x[2] = -946014556.8735044;
+  p.lmn[0] = -0.83113545374973818;
+  p.lmn[1] = -0.44527507240102326;
+  p.lmn[2] = -0.9559565373701183;
+
+  allow_negative = 1;
+
+  s = ds_to_disk (&p, allow_negative, &hit);
+
+  Log ("s %e\n", s);
 
 
 
-  get_derivative ();
-
-  rel_mode = REL_MODE_LINEAR;
-  model_vgrad (1, x, v_grad);
-  Log ("\n OLD Linear\n");
-  for (i = 0; i < 3; i++)
-  {
-    Log ("Results %11.4e %11.4e %11.4e \n", v_grad[i][0], v_grad[i][1], v_grad[i][2]);
-  }
-
-  rel_mode = REL_MODE_FULL;
-  Log ("\n OLD Full  \n");
-  model_vgrad (1, x, v_grad);
-  for (i = 0; i < 3; i++)
-  {
-    Log ("Results %11.4e %11.4e %11.4e \n", v_grad[i][0], v_grad[i][1], v_grad[i][2]);
-  }
-
-
-  ds_fraction = 0.01;
-
-  for (j = 0; j <= 10; j++)
-  {
-
-    ds_fraction /= 10;
-
-    Log ("ds_fraction: %10.3e\n", ds_fraction);
-
-    rel_mode = REL_MODE_LINEAR;
-    Log ("\n NEW Linear\n");
-    xmodel_vgrad (ds_fraction, 1, x, v_grad);
-    for (i = 0; i < 3; i++)
-    {
-      Log ("Results %11.4e %11.4e %11.4e \n", v_grad[i][0], v_grad[i][1], v_grad[i][2]);
-    }
-
-
-    rel_mode = REL_MODE_FULL;
-    Log ("\n NEW Full\n");
-    xmodel_vgrad (ds_fraction, 1, x, v_grad);
-    for (i = 0; i < 3; i++)
-    {
-      Log ("Results %11.4e %11.4e %11.4e \n", v_grad[i][0], v_grad[i][1], v_grad[i][2]);
-    }
-
-  }
-
-
-
-  Exit (0);
-
-  return (0);
+  exit (0);
 
 }
