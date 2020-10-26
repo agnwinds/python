@@ -253,10 +253,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   /* Next section is really to allow one to follow a specific photon for diagnositic purposes
      This may be useful more generally but it should at least be commented out one diagnositcs
      are complete */
-  if (geo.wcycle == 1 && p->np == 5474)
-  {
-    Log ("Hello: Starting photon  %d in cycle %d we want to follow\n", p->np, geo.wcycle);
-  }
+//OLD if (geo.wcycle == 1 && p->np == 5474)
+//OLD  {
+//OLD     Log ("Hello: Starting photon  %d in cycle %d we want to follow\n", p->np, geo.wcycle);
+//OLD   }
 
 
   if (modes.save_photons)
