@@ -336,7 +336,7 @@ model_vgrad (ndom, x, v_grad)
   double v[3], v_forward[3], v_reverse[3];
   double dx_forward[3], dx_reverse[3];
   double dv[3];
-  double ds;
+  double ds_cmf;
   int i, j;
   double zero_vector[3], dx[3], dx_obs[3];
 
@@ -345,8 +345,8 @@ model_vgrad (ndom, x, v_grad)
 
 
 
-  ds = 0.00001 * length (x);
-  if (ds == 0)
+  ds_cmf = 0.00001 * length (x);
+  if (ds_cmf == 0)
   {
     stuff_v (zero_vector, v_grad[0]);
     stuff_v (zero_vector, v_grad[1]);
@@ -354,8 +354,8 @@ model_vgrad (ndom, x, v_grad)
     return (0);
   }
 
-  if (ds < 1.e6)
-    ds = 1.e6;
+  if (ds_cmf < 1.e6)
+    ds_cmf = 1.e6;
 
   model_velocity (ndom, x, v);
 
@@ -367,7 +367,7 @@ model_vgrad (ndom, x, v_grad)
        that point would be in the observer frame. */
 
     stuff_v (zero_vector, dx);
-    dx[i] = ds;
+    dx[i] = ds_cmf;
     local_to_observer_frame_ruler_transform (v, dx, dx_obs);
     vadd (x, dx_obs, dx_forward);
     vsub (x, dx_obs, dx_reverse);
@@ -382,7 +382,7 @@ model_vgrad (ndom, x, v_grad)
 
 
     for (j = 0; j < 3; j++)
-      dv[j] /= 2 * ds;
+      dv[j] /= 2 * ds_cmf;
 
     if (sane_check (dv[0]) || sane_check (dv[1]) || sane_check (dv[2]))
     {
