@@ -259,11 +259,9 @@ main (argc, argv)
 
   for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
   {
-    printf ("nwind=%i\n", nwind);
     if (wmain[nwind].vol > 0.0)
     {
       nplasma = wmain[nwind].nplasma;
-      printf ("Doing cell %i\n", nplasma);
       wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
       i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
       vol = wmain[plasmamain[nplasma].nwind].vol;
@@ -330,7 +328,6 @@ main (argc, argv)
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
       kappa_es = THOMPSON / MPROT;
 
-      printf ("BOOM %e\n", kappa_es);
       //First for the optcial band (up to 4000AA)     
       if (length (plasmamain[nplasma].F_vis) > 0.0)     //Only makes sense if flux in this band is non-zero
       {
@@ -396,7 +393,7 @@ main (argc, argv)
       fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
 
-      fprintf (fptr6, "%d %d %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds (&ptest))); //output geometric things
+      fprintf (fptr6, "%d %d %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)));     //output geometric things
     }
   }
   fclose (fptr);
