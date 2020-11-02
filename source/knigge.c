@@ -42,14 +42,29 @@ double kn_lambda;
  * 	description of the wind
  *
  * @param [in] int  ndom   The domain number
- * @return     Alwasys returns 0
+ * @return     Always returns 0
  *
  *
  * ###Notes###
  *
+ * The KWD model implemenented in Python follows that of KWD97 (ApJ,486,445), with
+ * some modifications.  
+ * 
+ * * We allow  the wind to start
+ *   and stop at a distance wind_rho_min*r_star and wind_rho_max*rstar, not simply at 
+ *   r_star and r_disk, and 
+ * * we allow for the velocity at the base to be kn_v_zero*v_sound at the base of the wind, not
+ *   simply v_sound.
+ *
  * The routine first obtains wind_mdot and then the various parameters
  * required for the KWD model.   It then integrates the mass loss rate per unit area over
  * the region occupied by the wind to normalize the mass loss rate.
+ *
+ * There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
+ * used but in later papers, e.g KD97 d in WD radii was used.   This is more natural and is used in
+ * Python.
+ *
+ * To repeat, kn_dratio is the distance to the focus point in stellar radii!
  *
  * @bug There may weel be errors associated with a vertically extended disk that need tobe addressed
  *
@@ -60,7 +75,8 @@ get_knigge_wind_params (ndom)
      int ndom;
 {
   double dmin;
-  double disktheta, test;
+  double disktheta;
+  double rmin, rmax;
 
 
   Log ("Creating KWD wind in domain %d\n", ndom);
@@ -70,31 +86,20 @@ get_knigge_wind_params (ndom)
   zdom[ndom].wind_mdot *= MSOL / YR;
 
 
-  /* Initialize the various parameters to something reasonable */
+  /* Initialize parameters of the KWD model */
 
-  zdom[ndom].kn_r_scale = 7e10; /*Accleration length scale for wind */
+  zdom[ndom].kn_r_scale = 7e10; /*Acceleration length scale for wind */
   zdom[ndom].kn_alpha = 1.5;    /* Accleration scale exponent for wind */
   zdom[ndom].kn_v_infinity = 3; /* Final speed of wind in units of escape velocity */
   zdom[ndom].kn_lambda = 0.0;   /* Mass loss rate exponent */
-  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the WD
-                                                                           radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is
-                                                                           approximate */
-  zdom[ndom].kn_v_zero = 1.0;   /* Parameter which
-                                   can use to muliply the initial velocity of wind so that it
-                                   is greater or less than the sound speed. This is not part of the standard KWD model */
+  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the stellar
+                                                                           radius. The value set here is for the minimum collimation, see KWD95.  
+                                                                         */
+  zdom[ndom].kn_v_zero = 1.0;   /* The velocity at the base of the wind will be kn_v_zero times the sound speed. */
   zdom[ndom].wind_rho_min = 1;  /* Innner and outer edges of the wind in stellar radii. These
                                    parameters were added to allow one to create models similar to those 
                                    used in the YSO paper (Sim+05)  */
   zdom[ndom].wind_rho_max = geo.diskrad / geo.rstar;
-
-
-/* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
-used but in later papers, e.g KD97 d in WD radii was used.   This is more natural and is used here.
-but one should remember that this differs from KWD95.
-
-To repeat, kn_dratio is the distance to the focus point in stellar radii!
-
-*/
 
   rddoub ("KWD.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
 
@@ -115,38 +120,28 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
   rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
   rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
 
-  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min / zdom[ndom].kn_dratio);     /*units of r_min and d are now consistent (RG) correcting bug #760 */
-  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max / zdom[ndom].kn_dratio);     /*units of r_max and d are now consistent (RG) correcting bug #760. Now using r_max and not disk radius */
+  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min / zdom[ndom].kn_dratio);     /* Corrected as a result of  #760 */
+  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max / zdom[ndom].kn_dratio);     /* Corrected as a result of  #760 */
   zdom[ndom].wind_rho_min *= geo.rstar;
   zdom[ndom].wind_rho_max *= geo.rstar;
+  zdom[ndom].rmin = zdom[ndom].wind_rho_min;
 
-  /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is in units of WD radii. Subsequent calculations
-     need to be checked for similar issues to those raised in bug #760 (RG) */
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
-    zdom[ndom].wind_thetamax = atan (geo.diskrad / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
-  }
+    zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rho_min))));
+    zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rho_max))));
 
-
-  zdom[ndom].rmin = zdom[ndom].wind_rho_min;
-
-  /* The change in the boundary of the wind (as corner of disk -- see above)
-     means that wind_rho_max nees to be redefined so that it is used correctly
-     to compute the boundary of the wind elsewhere. */
-
-  // XXX Next lines for a vertically extended disk supercede definitions above and look wrong
-  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-  {
-    zdom[ndom].wind_rho_max = geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
+    zdom[ndom].wind_rho_min = zdom[ndom].wind_rho_min - (zdisk (zdom[ndom].wind_rho_min) * tan (zdom[ndom].wind_thetamin));
+    zdom[ndom].wind_rho_max = zdom[ndom].wind_rho_max - (zdisk (zdom[ndom].wind_rho_max) * tan (zdom[ndom].wind_thetamax));
   }
 
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
+  if (modes.adjust_grid == FALSE)
   {
     zdom[ndom].xlog_scale = geo.rstar;
     zdom[ndom].zlog_scale = geo.rstar;
@@ -155,21 +150,21 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
 
 /*Now calculate the normalization factor for the wind*/
 
-  test = geo.rstar;
+  rmin = zdom[ndom].wind_rho_min;
+  rmax = zdom[ndom].wind_rho_max;
 
   /* For non-flat disk some streamlines are missing (SS). */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     disktheta = atan (zdisk (geo.diskrad) / geo.diskrad);
-    test =
+    rmin =
       zdom[ndom].kn_dratio * geo.rstar * sin (zdom[ndom].wind_thetamin) *
       cos (disktheta) / sin ((PI / 2.) - zdom[ndom].wind_thetamin - disktheta);
   }
 
   kn_lambda = zdom[ndom].kn_lambda;
-//  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
-  zdom[ndom].mdot_norm = num_int (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+  zdom[ndom].mdot_norm = num_int (kn_wind_mdot_integral, rmin, rmax, 1e-6);
 
   return (0);
 }

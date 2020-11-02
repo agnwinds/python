@@ -220,23 +220,21 @@ typedef struct domain
 
   /* The next few structures define the boundaries of an emission region */
   struct cone windcone[2];      /* The cones that define the boundary of winds like SV or kwd */
-  struct plane windplane[2];    /* Planes which define the top and bottom of a layer */
-  double rho_min, rho_max;      /* These are used for the inner and outer boundary of a pillbox */
+  struct plane windplane[2];    /* Planes which define the top and bottom of the wind */
+  double rho_min, rho_max;      /* The values defining inner and outer cylinders that bound the wind */
 
   double wind_x[NDIM_MAX], wind_z[NDIM_MAX];    /* These define the edges of the cells in the x and z directions */
   double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];      /* These define the midpoints of the cells in the x and z directions */
 
   ConePtr cones_rtheta;         /*A ptr to the cones that define boundaries of cells in the theta direction 
                                    when rtheta coords  are being used */
-/* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
- * locating the appropriate cell, for example by cylvar_where_in_grid
+/* Next two lines are for cyl_var coordinates.  They are used primarily for locating where a position is 
+ * is in a grid with cyl_var ooordinates  See cylvar_where in grid
  */
 
   double wind_z_var[NDIM_MAX][NDIM_MAX];
   double wind_midz_var[NDIM_MAX][NDIM_MAX];
 
-
-/* Since in principle we can mix and match arbitrarily the next parameters now have to be part of the domain structure */
 
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
