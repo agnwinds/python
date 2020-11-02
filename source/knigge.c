@@ -51,7 +51,7 @@ double kn_lambda;
  * some modifications.  
  * 
  * * We allow  the wind to start
- *   and stop at a distance wind_rho_min*r_star and wind_rho_max*rstar, not simply at 
+ *   and stop at a distance wind_rmin_at_disk_;ane*r_star and wind_rmax_at_disk_plane*rstar, not simply at 
  *   r_star and r_disk, and 
  * * we allow for the velocity at the base to be kn_v_zero*v_sound at the base of the wind, not
  *   simply v_sound.
@@ -96,10 +96,10 @@ get_knigge_wind_params (ndom)
                                                                            radius. The value set here is for the minimum collimation, see KWD95.  
                                                                          */
   zdom[ndom].kn_v_zero = 1.0;   /* The velocity at the base of the wind will be kn_v_zero times the sound speed. */
-  zdom[ndom].wind_rho_min = 1;  /* Innner and outer edges of the wind in stellar radii. These
-                                   parameters were added to allow one to create models similar to those 
-                                   used in the YSO paper (Sim+05)  */
-  zdom[ndom].wind_rho_max = geo.diskrad / geo.rstar;
+  zdom[ndom].wind_rmin_at_disk_plane = 1;       /* Innner and outer edges of the wind in stellar radii. These
+                                                   parameters were added to allow one to create models similar to those 
+                                                   used in the YSO paper (Sim+05)  */
+  zdom[ndom].wind_rmax_at_disk_plane = geo.diskrad / geo.rstar;
 
   rddoub ("KWD.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
 
@@ -117,14 +117,14 @@ get_knigge_wind_params (ndom)
   rddoub ("KWD.acceleration_exponent", &zdom[ndom].kn_alpha);   /* Accleration scale exponent */
   rddoub ("KWD.v_zero(multiple_of_sound_speed_at_base)", &zdom[ndom].kn_v_zero);
 
-  rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
-  rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
+  rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rmin_at_disk_plane);
+  rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rmax_at_disk_plane);
 
-  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min / zdom[ndom].kn_dratio);     /* Corrected as a result of  #760 */
-  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max / zdom[ndom].kn_dratio);     /* Corrected as a result of  #760 */
-  zdom[ndom].wind_rho_min *= geo.rstar;
-  zdom[ndom].wind_rho_max *= geo.rstar;
-  zdom[ndom].rmin = zdom[ndom].wind_rho_min;
+  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rmin_at_disk_plane / zdom[ndom].kn_dratio);  /* Corrected as a result of  #760 */
+  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rmax_at_disk_plane / zdom[ndom].kn_dratio);  /* Corrected as a result of  #760 */
+  zdom[ndom].wind_rmin_at_disk_plane *= geo.rstar;
+  zdom[ndom].wind_rmax_at_disk_plane *= geo.rstar;
+  zdom[ndom].rmin = zdom[ndom].wind_rmin_at_disk_plane;
 
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer
@@ -132,11 +132,15 @@ get_knigge_wind_params (ndom)
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
-    zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rho_min))));
-    zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rho_max))));
+    zdom[ndom].wind_thetamin =
+      atan (zdom[ndom].wind_rmin_at_disk_plane / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rmin_at_disk_plane))));
+    zdom[ndom].wind_thetamax =
+      atan (zdom[ndom].wind_rmax_at_disk_plane / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rmax_at_disk_plane))));
 
-    zdom[ndom].wind_rho_min = zdom[ndom].wind_rho_min - (zdisk (zdom[ndom].wind_rho_min) * tan (zdom[ndom].wind_thetamin));
-    zdom[ndom].wind_rho_max = zdom[ndom].wind_rho_max - (zdisk (zdom[ndom].wind_rho_max) * tan (zdom[ndom].wind_thetamax));
+    zdom[ndom].wind_rmin_at_disk_plane =
+      zdom[ndom].wind_rmin_at_disk_plane - (zdisk (zdom[ndom].wind_rmin_at_disk_plane) * tan (zdom[ndom].wind_thetamin));
+    zdom[ndom].wind_rmax_at_disk_plane =
+      zdom[ndom].wind_rmax_at_disk_plane - (zdisk (zdom[ndom].wind_rmax_at_disk_plane) * tan (zdom[ndom].wind_thetamax));
   }
 
 
@@ -150,8 +154,8 @@ get_knigge_wind_params (ndom)
 
 /*Now calculate the normalization factor for the wind*/
 
-  rmin = zdom[ndom].wind_rho_min;
-  rmax = zdom[ndom].wind_rho_max;
+  rmin = zdom[ndom].wind_rmin_at_disk_plane;
+  rmax = zdom[ndom].wind_rmax_at_disk_plane;
 
   /* For non-flat disk some streamlines are missing (SS). */
 

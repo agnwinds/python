@@ -240,7 +240,7 @@ typedef struct domain
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
   double rmin, rmax;            /*Spherical extent of the wind */
   double zmin, zmax;            /* Vertical extent of the wind, often the same as rmax */
-  double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
+  double wind_rmin_at_disk_plane, wind_rmax_at_disk_plane;    /*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
 

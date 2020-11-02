@@ -87,8 +87,8 @@ get_corona_params (ndom)
    * compared to the horizontal size then one needs to include both */
   zdom[ndom].rmax = sqrt (zdom[ndom].corona_rmax * zdom[ndom].corona_rmax + zdom[ndom].corona_zmax * zdom[ndom].corona_zmax);
   zdom[ndom].zmax = zdom[ndom].corona_zmax;
-  zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
-  zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
+  zdom[ndom].wind_rmin_at_disk_plane = zdom[ndom].corona_rmin;
+  zdom[ndom].wind_rmax_at_disk_plane = zdom[ndom].corona_rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 0.0;
 
@@ -124,8 +124,8 @@ get_corona_params (ndom)
   }
 
 
-  zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
-  zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
+  zdom[ndom].wind_rmin_at_disk_plane = zdom[ndom].corona_rmin;
+  zdom[ndom].wind_rmax_at_disk_plane = zdom[ndom].corona_rmax;
   zdom[ndom].wind_thetamin = 0;
   zdom[ndom].wind_thetamax = 0;
 

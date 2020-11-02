@@ -77,8 +77,8 @@ get_stellar_wind_params (ndom)
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 
   /* define the the variables that determine the gridding */
-  zdom[ndom].wind_rho_min = 0;
-  zdom[ndom].wind_rho_max = zdom[ndom].rho_max = zdom[ndom].rmax;
+  zdom[ndom].wind_rmin_at_disk_plane = 0;
+  zdom[ndom].wind_rmax_at_disk_plane = zdom[ndom].rho_max = zdom[ndom].rmax;
   zdom[ndom].zmax = zdom[ndom].rmax;
 
 
