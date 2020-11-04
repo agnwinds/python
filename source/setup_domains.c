@@ -346,7 +346,7 @@ get_wind_params (ndom)
  * The routine cycles through all of the existing domains, and
  * uses variables which have been read in or entered previously.
  *
- * The input variables that are used are typicall, wind_rmin_at_disk_plane, wind_rmax_at_disk_plane
+ * The input variables that are used are typicall, wind_rhomin_at_disk, wind_rhomax_at_disk
  * and wind_thetamin and max.  They are defined in routines like,
  * get_sv_parameters.
  *
@@ -378,7 +378,7 @@ setup_windcone ()
     if (zdom[ndom].wind_thetamin > 0.0)
     {
       zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
-      zdom[ndom].windcone[0].z = (-zdom[ndom].wind_rmin_at_disk_plane / tan (zdom[ndom].wind_thetamin));
+      zdom[ndom].windcone[0].z = (-zdom[ndom].wind_rhomin_at_disk / tan (zdom[ndom].wind_thetamin));
     }
     else
     {
@@ -390,7 +390,7 @@ setup_windcone ()
     if (zdom[ndom].wind_thetamax > 0.0)
     {
       zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
-      zdom[ndom].windcone[1].z = (-zdom[ndom].wind_rmax_at_disk_plane / tan (zdom[ndom].wind_thetamax));
+      zdom[ndom].windcone[1].z = (-zdom[ndom].wind_rhomax_at_disk / tan (zdom[ndom].wind_thetamax));
     }
     else
     {

@@ -299,8 +299,8 @@ import_cylindrical_setup_boundaries (int ndom)
     }
   }
 
-  zdom[ndom].wind_rmin_at_disk_plane = zdom[ndom].rho_min = rho_min;
-  zdom[ndom].wind_rmax_at_disk_plane = zdom[ndom].rho_max = rho_max;
+  zdom[ndom].wind_rhomin_at_disk = zdom[ndom].rho_min = rho_min;
+  zdom[ndom].wind_rhomax_at_disk = zdom[ndom].rho_max = rho_max;
   zdom[ndom].zmax = zmax;
   zdom[ndom].zmin = zmin;
 
