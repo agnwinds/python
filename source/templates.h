@@ -471,6 +471,7 @@ int get_bl_and_agn_params(double lstar);
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int setup_windcone(void);
+int init_windcone(double r, double z, double dzdr, int allow_negative_dzdr, ConePtr one_windcone);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */
@@ -567,10 +568,6 @@ int is_input_line_synonym_for_question(char question[], char input_line[]);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* xtest.c */
 int xtest(void);
-/* derivative.c */
-double f(double x, void *params);
-int get_derivative(void);
-int xmodel_vgrad(double ds_fraction, int ndom, double x[], double v_grad[][3]);
 /* setup_reverb.c */
 int get_meta_params(void);
 /* setup_line_transfer.c */

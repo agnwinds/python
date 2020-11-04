@@ -371,32 +371,112 @@ int
 setup_windcone ()
 {
   int ndom;
+  double dzdr, z;
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-    if (zdom[ndom].wind_thetamin > 0.0)
-    {
-      zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
-      zdom[ndom].windcone[0].z = (-zdom[ndom].wind_rhomin_at_disk / tan (zdom[ndom].wind_thetamin));
-    }
-    else
-    {
-      zdom[ndom].windcone[0].dzdr = VERY_BIG;
-      zdom[ndom].windcone[0].z = -VERY_BIG;;
-    }
+//OLD    if (zdom[ndom].wind_thetamin > 0.0)
+//OLD    {
+//OLD      zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
+//OLD      zdom[ndom].windcone[0].z = (-zdom[ndom].wind_rhomin_at_disk / tan (zdom[ndom].wind_thetamin));
+//OLD    }
+//OLD    else
+//OLD    {
+//OLD      zdom[ndom].windcone[0].dzdr = VERY_BIG;
+//OLD      zdom[ndom].windcone[0].z = -VERY_BIG;;
+//OLD    }
 
 
-    if (zdom[ndom].wind_thetamax > 0.0)
-    {
-      zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
-      zdom[ndom].windcone[1].z = (-zdom[ndom].wind_rhomax_at_disk / tan (zdom[ndom].wind_thetamax));
-    }
-    else
-    {
-      zdom[ndom].windcone[1].dzdr = VERY_BIG;
-      zdom[ndom].windcone[1].z = -VERY_BIG;;
-    }
+//OLD    if (zdom[ndom].wind_thetamax > 0.0)
+//OLD    {
+//OLD      zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
+//OLD      zdom[ndom].windcone[1].z = (-zdom[ndom].wind_rhomax_at_disk / tan (zdom[ndom].wind_thetamax));
+//OLD    }
+//OLD    else
+//OLD    {
+//OLD      zdom[ndom].windcone[1].dzdr = VERY_BIG;
+//OLD      zdom[ndom].windcone[1].z = -VERY_BIG;;
+//OLD     }
+
+
+    dzdr = 1. / tan (zdom[ndom].wind_thetamin);
+//    init_windcone (zdom[ndom].wind_rmin_at_disk, 0.0, dzdr, FALSE, &zdom[ndom].windcone[0]);
+    z = zdisk (zdom[ndom].wind_rhomin_at_disk);
+    init_windcone (zdom[ndom].wind_rhomin_at_disk, z, dzdr, FALSE, &zdom[ndom].windcone[0]);
+
+    dzdr = 1. / tan (zdom[ndom].wind_thetamax);
+    z = zdisk (zdom[ndom].wind_rhomax_at_disk);
+    init_windcone (zdom[ndom].wind_rhomax_at_disk, z, dzdr, FALSE, &zdom[ndom].windcone[1]);
+
   }
   return (0);
+}
+
+
+
+
+/***********************************************************/
+/** 
+ * @brief      initialize a windcone structure 
+ * 
+ * @param [in] double r  rho position where the windcone structure is being defined
+ * @param [in] double z  the z position (not necessarily zero where the cone 
+ *                     being defined.
+ * @param [in] double dzdr the slope of the cone measured by dzdr
+ * @param [in] int allow_negative_dzdr  A switch which allows windcones to be defined
+ *                     with negative dz_dr, that is to say which causes the cone
+ *                     to intersect the z axis above z 
+ * @param [out] ConePtr one_windcone  A pointer to the wind cone structe being 
+ *                       initilized.
+ *
+ * @return     Returns 0 for the normal case, 1 in special cases where the
+ *             cone the z axis at a posiition
+ *             greater than z.  
+ *
+ * @details
+ *
+ * windcones are surfaces of revolution, cones that are defined by where they enconter
+ * the z axis and a slope.  They are used to set boundaries of certain types of
+ * domains and in setting up certain types of coordinate systems.
+ * 
+ * ### Notes ###
+ *
+ * The allow_nagative_dz_dr is used because their are circumstances 
+ * e.g for a KWD model, where one really does not want to define 
+ * a cone that converges to a point along the positive z axix. (Very
+ * likely this will be an error if a windcone of this type is created..)
+ * 
+ *
+ **********************************************************/
+
+
+int
+init_windcone (r, z, dzdr, allow_negative_dzdr, one_windcone)
+     double r, z, dzdr;
+     int allow_negative_dzdr;
+     ConePtr one_windcone;
+
+{
+
+  Log ("test: %f %f %f %d\n", r, z, dzdr, allow_negative_dzdr);
+
+  if (dzdr == 0 || (allow_negative_dzdr == FALSE && dzdr < 0))
+  {
+    Log ("Why am I here\n");
+    one_windcone->dzdr = VERY_BIG;
+    one_windcone->z = -VERY_BIG;
+    if (dzdr == 0)
+      return (0);
+    else
+      return (1);
+
+  }
+
+  one_windcone->z = z - dzdr * r;
+  one_windcone->dzdr = dzdr;
+
+  return (0);
+
+
 }
