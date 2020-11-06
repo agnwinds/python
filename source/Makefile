@@ -26,7 +26,7 @@ ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
 	COMPILER_VERSION := $(shell $(CC) -v 2>&1 | head -1 )
 else
 	COMPILER_VERSION := $(shell expr `gcc -dumpversion`)
-	XVERSION:= $(shell expr `gcc -dumpversion`)
+	XVERSION:= gcc $(shell expr `gcc -dumpversion`)
 endif
 
 
@@ -132,8 +132,7 @@ startup:
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
-	@echo 'Gotcha Sports Fans'
-	echo 'Compiler  $(XVERSION)'
+	@echo 'Compiler is really  $(XVERSION)'
 
 
 # indent:
