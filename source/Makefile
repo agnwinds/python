@@ -127,12 +127,12 @@ INDENT = yes
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
+	@echo 'Compiler is really  $(XVERSION)'
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
 	@echo 'MPI_FLAG=' $(MPI_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
-	@echo 'Compiler is really  $(XVERSION)'
 
 
 # indent:
