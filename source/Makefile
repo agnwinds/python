@@ -44,7 +44,7 @@ ifeq (mpicc, $(CC))
 	# check what underlying compiler mpi is using, and the version
 	# we'll use this to print to the user and also to do some checks
 	MPI_COMPILER := $(shell mpicc --showme:command)
-	# COMPILER_VERSION := $(shell expr `'$(CC)' -dumpversion`)
+	COMPILER_VERSION := $(shell expr `'$(CC)' -dumpversion`)
 	COMPILER_PRINT_STRING = Compiling with mpicc wrapper, for compiler $(MPI_COMPILER) $(COMPILER_VERSION)
 
 	# if it's gcc we want to check if the version is 4.8 or later
