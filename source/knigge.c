@@ -247,14 +247,16 @@ kn_velocity (ndom, x, v)
  * by the base velocity at this radial distance and we want the
  * velocity to change depending on the poloidal distance from this
  * point.  We do not adjust the angle of the outflow in any way.
+ *
+ * It the streanline does not hit the disk (which can happen because
+ * we want the velocity everywhere even in regions outside the wind)
+ * use the value one would get for a glat disk.
  */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
 
-    xtest[0] = r;               // Define xtest in the +z plane
-    xtest[1] = 0;
-    xtest[2] = fabs (x[2]);
+    init_dummy_phot (&ptest);
     ptest.x[0] = rzero;         // Define ptest to be the footpoint extended to xy plane
     ptest.x[1] = 0.0;
     ptest.x[2] = EPSILON;
@@ -262,10 +264,16 @@ kn_velocity (ndom, x, v)
     ptest.lmn[1] = 0.0;
     ptest.lmn[2] = cos (theta);
     s = ds_to_disk (&ptest, 1, &hit_disk);
-    move_phot (&ptest, s);      // Now move the test photon to  disk surface
-    vsub (ptest.x, xtest, xtest);       // Poloidal distance is just the distance between these two points.
-    ldist = length (xtest);
-    rzero = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
+    if (hit_disk)
+    {
+      move_phot (&ptest, s);    // Now move the test photon to  disk surface
+      xtest[0] = r;             // Define xtest in the +z plane
+      xtest[1] = 0;
+      xtest[2] = fabs (x[2]);
+      vsub (ptest.x, xtest, xtest);     // Poloidal distance is just the distance between these two points.
+      ldist = length (xtest);
+      rzero = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
+    }
   }
 
 
@@ -384,6 +392,7 @@ kn_rho (ndom, x)
   {
     theta = atan (rzero / dd);
 
+    init_dummy_phot (&ptest);
     ptest.x[0] = rzero;         // Define ptest at the intersection of the streamline and x axis
     ptest.x[1] = 0.0;
     ptest.x[2] = EPSILON;

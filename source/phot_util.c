@@ -25,6 +25,41 @@
 int init_stuff_phot = 0;
 size_t sizeofphot;
 
+/**********************************************************/
+/**
+ * @brief      Simply initialize some of the variables in a 
+ *             single photon used for some special purpose 
+ *             calculation
+ *
+ *
+ * @param [in] PhotPtr  p   The photon bundle to be intialized
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+
+int
+init_dummy_phot (p)
+     PhotPtr p;
+{
+  p->x[0] = p->x[1] = p->x[2] = 0.0;
+  p->lmn[0] = p->lmn[1] = 0;
+  p->lmn[2] = 1;
+  p->freq = p->freq_orig = 0.0;
+  p->frame = F_OBSERVER;
+  p->origin = p->origin_orig = PTYPE_DUMMY;
+  p->np = -1;
+  p->tau = p->ds = 0;
+
+  return (0);
+
+
+}
+
 
 /**********************************************************/
 /**
