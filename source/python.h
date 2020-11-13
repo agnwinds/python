@@ -1190,7 +1190,8 @@ typedef struct photon
     PTYPE_BL_MATOM = 11,
     PTYPE_DISK_MATOM = 12,
     PTYPE_WIND_MATOM = 13,
-    PTYPE_AGN_MATOM = 14
+    PTYPE_AGN_MATOM = 14,
+    PTYPE_DUMMY = -1    
   } origin, origin_orig;        /* Where this photon originated.  If the photon has
                                    scattered its "origin" may be changed to "wind". */
   /* note that we add 10 to origin when processed by a macro-atom
