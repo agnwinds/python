@@ -236,7 +236,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     /* Not directly related to frames, by why did we set freq_av to freq_inner. Seems wrong.
        This is now issue #777. */
 
-    freq_av = freq_inner;
+    freq_av = 0.5 * (freq_inner * freq_outer);
 
     kap_bf_tot = kappa_bf (xplasma, freq_av, 0);
     kap_ff = kappa_ff (xplasma, freq_av);
