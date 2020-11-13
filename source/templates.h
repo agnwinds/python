@@ -108,6 +108,7 @@ double func_minimiser(double a, double m, double b, double (*func)(double, void 
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
 /* phot_util.c */
+int init_dummy_phot(PhotPtr p);
 int stuff_phot(PhotPtr pin, PhotPtr pout);
 int move_phot(PhotPtr pp, double ds);
 int comp_phot(PhotPtr p1, PhotPtr p2);
@@ -567,10 +568,6 @@ int is_input_line_synonym_for_question(char question[], char input_line[]);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* xtest.c */
 int xtest(void);
-/* derivative.c */
-double f(double x, void *params);
-int get_derivative(void);
-int xmodel_vgrad(double ds_fraction, int ndom, double x[], double v_grad[][3]);
 /* setup_reverb.c */
 int get_meta_params(void);
 /* setup_line_transfer.c */
