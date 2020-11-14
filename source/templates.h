@@ -472,6 +472,7 @@ int get_bl_and_agn_params(double lstar);
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int setup_windcone(void);
+int init_windcone(double r, double z, double dzdr, int allow_negative_dzdr, ConePtr one_windcone);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */

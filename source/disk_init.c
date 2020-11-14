@@ -45,7 +45,7 @@
  * the band limited luminosity of the disk.  Additionally, it divides
  * the disk in the rings of the same band-limited luminosity, so that
  * equal numbers of photons can be generated from each ring.  (The
- * reason the disk has to be initilaized mulitple times is because
+ * reason the disk has to be initilized mulitple times is because
  * the rings are different for different freqency intervals.)
  *
  * ### Notes ###
@@ -53,6 +53,9 @@
  * in the disk structure.
  * The positional parameters x and v are at the edge of the ring,
  * but many of the other parameters (like temperature) are at the mid point.
+ *
+ * The calculation of the disk rings (which depends on the area) does not make
+ * any allowances for a vertical disk structure.
  *
  *
  **********************************************************/
@@ -117,9 +120,9 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   /* Now establish the type of spectrum to create */
 
   if (ioniz_or_final == 1)
-    spectype = geo.disk_spectype;       /* type for final spectrum */
+    spectype = geo.disk_spectype;
   else
-    spectype = geo.disk_ion_spectype;   /*type for ionization calculation */
+    spectype = geo.disk_ion_spectype;
 
 /* Next compute the band limited luminosity ftot */
 
