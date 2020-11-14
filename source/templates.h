@@ -108,6 +108,7 @@ double func_minimiser(double a, double m, double b, double (*func)(double, void 
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
 /* phot_util.c */
+int init_dummy_phot(PhotPtr p);
 int stuff_phot(PhotPtr pin, PhotPtr pout);
 int move_phot(PhotPtr pp, double ds);
 int comp_phot(PhotPtr p1, PhotPtr p2);
