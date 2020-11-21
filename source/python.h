@@ -119,7 +119,7 @@ int NPHOT;                      /* The number of photon bundles created, defined
 
 /* Definitions of spectral types, which are all negative because when
  * one reads a spectrum from a list of models these are numbered beginning
- * with zero, see the discussion in get_models.c   080518 - ksl - 60a
+ * with zero, see the discussion in get_models.c   080518 
  */
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
@@ -411,7 +411,7 @@ struct geometry
 
 #define DISK_TPROFILE_STANDARD          0       // This is a standard Shakura-Sunyaev disk. The profile depends on mstar and mdot_disk
 #define DISK_TPROFILE_READIN            1       // Here the temperature profile for the disk is simply read in as a function of radius
-//OLD #define DISK_TPROFILE_YSO               2       // The so-called YSO option was created for the YSO case
+
   int disk_tprofile;            /* This is an variable used to specify a standard accretion disk (0) or
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
@@ -497,7 +497,8 @@ struct geometry
 #define OUTER_SHELL  1
 #define INNER_SHELL  2
 
-  /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
+  /* The frequency bands used a boundaries for accumulating coarse spectral information about the spectrum of photons
+     in a cell. */
 
 #define  NXBANDS 20             /* the maximum number of bands (frequency intervals that can be defined for
                                    storing coarse spectra for each plasma cell */
@@ -892,10 +893,11 @@ typedef struct plasma
   double *cool_dr_ion;
   double j, ave_freq;           /* Mean (angle-averaged) total intensity, intensity-averaged frequency */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* Frequency limited versions of j and ave_freq */
-  double fmin[NXBANDS];         /* Minimum frequency photon seen in a band - this is incremented during photon flight */
-  double fmax[NXBANDS];         /* Maximum frequency photon seen in a band - this is incremented during photon flight */
-  double fmin_mod[NXBANDS];     /* Minimum freqneucy that the model should be applied for */
-  double fmax_mod[NXBANDS];     /* Maximum frequency that the model should be applied for */
+  double fmin[NXBANDS], fmax[NXBANDS];          /* Minimum (Maximum) frequency photon observed in a band - 
+                                                   this is incremented during photon flight */
+  double fmin_mod[NXBANDS], fmax_mod[NXBANDS];  /* Minimum (Maximum) frequency of the band-limited model 
+                                                   after allowing possibility that the observed limit, 
+                                                   is primarily due to photon statistics. See epectral_estimators.c*/
 
   /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux)*/
   double F_vis[4];

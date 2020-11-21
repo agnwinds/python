@@ -652,14 +652,12 @@ WindPtr (w);
     ausum += plasmamain[nplasma].heat_auger;
     fsum += plasmamain[nplasma].heat_ff;
     lsum += plasmamain[nplasma].heat_lines;
-    csum += plasmamain[nplasma].heat_comp;      //1108 NSH Increment the compton heating counter
-    icsum += plasmamain[nplasma].heat_ind_comp; //1205 NSH Increment the induced compton heating counter
+    csum += plasmamain[nplasma].heat_comp;
+    icsum += plasmamain[nplasma].heat_ind_comp;
     apsum += plasmamain[nplasma].abs_photo;
     aausum += plasmamain[nplasma].abs_auger;
     chexsum += plasmamain[nplasma].heat_ch_ex;
 
-    /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
-       cycles in the windsavefile even if the spectral cycles are run */
 
     plasmamain[nplasma].cool_tot_ioniz = plasmamain[nplasma].cool_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
@@ -677,8 +675,6 @@ WindPtr (w);
 
 
 
-  /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
-     cycles in the windsavefile even if the spectral cycles are run */
   geo.lum_ff_ioniz = geo.lum_ff;
   geo.cool_rr_ioniz = geo.cool_rr;
   geo.lum_rr_ioniz = geo.lum_rr;
@@ -853,7 +849,6 @@ WindPtr (w);
 #endif
 
 
-  /* Print out some diagnostics of the changes in the wind update */
 
   if (modes.zeus_connect == 1 || modes.fixed_temp == 1) //There is no point in computing temperature changes, because we have fixed them!
   {
@@ -954,14 +949,13 @@ WindPtr (w);
          geo.alpha_agn, agn_ip, plasmamain[nshell].ip,
          plasmamain[nshell].xi, w[n].r, w[n].vol, plasmamain[nshell].mean_ds / plasmamain[nshell].n_ds);
 
-      /* 1108 NSH Added commands to report compton heating */
       Log
         ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e auger %8.2e charge_ex %8.2e )\n",
          xsum / w[n].vol, psum / w[n].vol, fsum / w[n].vol, csum / w[n].vol, icsum / w[n].vol, lsum / w[n].vol, ausum / w[n].vol,
          chexsum / w[n].vol);
 
 
-      /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
+      /* Report all cooling mechanisms, including those that do not generate photons. */
       Log
         ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
          cool_sum / w[n].vol, geo.cool_rr / w[n].vol,
@@ -1045,8 +1039,6 @@ WindPtr (w);
       Log ("Radial UV      flux %e \n", plasmamain[nshell].F_UV[0]);
       Log ("Radial Xray    flux %e \n", plasmamain[nshell].F_Xray[0]);
 
-
-
       Log ("Total Radial   flux %e \n", plasmamain[nshell].F_vis[0] + plasmamain[nshell].F_UV[0] + plasmamain[nshell].F_Xray[0]);
 
     }
@@ -1069,7 +1061,7 @@ WindPtr (w);
  *
  * @details
  * The routine is called at the beginning of each ionization calculation
- * cycle.  It should zero all heating and radiation induced cooling in the wind array.  Since
+ * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
  * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
  * cooling terms are also rezeroed there as well.
  *
@@ -1088,29 +1080,29 @@ wind_rad_init ()
   for (n = 0; n < NPLASMA; n++)
   {
     plasmamain[n].j = plasmamain[n].ave_freq = plasmamain[n].ntot = 0;
-    plasmamain[n].j_direct = plasmamain[n].j_scatt = 0.0;       //NSH 1309 zero j banded by number of scatters
+    plasmamain[n].j_direct = plasmamain[n].j_scatt = 0.0;
     plasmamain[n].ip = 0.0;
     plasmamain[n].xi = 0.0;
 
     plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
     plasmamain[n].mean_ds = 0.0;
     plasmamain[n].n_ds = 0;
-    plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;       //NSH 15/4/11 counters to see where photons come from
+    plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;
     plasmamain[n].ntot_star = plasmamain[n].ntot_bl = plasmamain[n].ntot_wind = 0;
     plasmamain[n].heat_tot = plasmamain[n].heat_ff = plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
     plasmamain[n].abs_tot = plasmamain[n].abs_auger = plasmamain[n].abs_photo = 0.0;
 
     plasmamain[n].heat_z = 0.0;
-    plasmamain[n].max_freq = 0.0;       //NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
+    plasmamain[n].max_freq = 0.0;
     plasmamain[n].cool_tot = plasmamain[n].lum_tot = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
     plasmamain[n].cool_rr = plasmamain[n].cool_rr_metals = plasmamain[n].lum_rr = 0.0;
     plasmamain[n].nrad = plasmamain[n].nioniz = 0;
-    plasmamain[n].comp_nujnu = -1e99;   //1701 NSH Zero the integrated specific intensity for the cell
-    plasmamain[n].cool_comp = 0.0;      //1108 NSH Zero the compton luminosity for the cell
-    plasmamain[n].heat_comp = 0.0;      //1108 NSH Zero the compton heating for the cell
-    plasmamain[n].heat_ind_comp = 0.0;  //1108 NSH Zero the induced compton heating for the cell
-    plasmamain[n].heat_auger = 0.0;     //1108 NSH Zero the auger heating for the cell
-    plasmamain[n].heat_ch_ex = 0.0;     //1108 NSH Zero the charge_exchange heating for the cell
+    plasmamain[n].comp_nujnu = -1e99;
+    plasmamain[n].cool_comp = 0.0;
+    plasmamain[n].heat_comp = 0.0;
+    plasmamain[n].heat_ind_comp = 0.0;
+    plasmamain[n].heat_auger = 0.0;
+    plasmamain[n].heat_ch_ex = 0.0;
 
     /* zero the counters that record the flow into and out of the 
        ionization pool in indivisible packet mode */
@@ -1118,31 +1110,30 @@ wind_rad_init ()
     plasmamain[n].bf_simple_ionpool_in = 0.0;
 
     for (i = 0; i < 3; i++)
-      plasmamain[n].dmo_dt[i] = 0.0;    //Zero the radiation force calculation
+      plasmamain[n].dmo_dt[i] = 0.0;
     for (i = 0; i < 4; i++)
-      plasmamain[n].rad_force_es[i] = 0.0;      //Zero the radiation force calculation
+      plasmamain[n].rad_force_es[i] = 0.0;
     for (i = 0; i < 4; i++)
-      plasmamain[n].rad_force_ff[i] = 0.0;      //Zero the radiation force calculation
+      plasmamain[n].rad_force_ff[i] = 0.0;
     for (i = 0; i < 4; i++)
-      plasmamain[n].rad_force_bf[i] = 0.0;      //Zero the radiation force calculation
+      plasmamain[n].rad_force_bf[i] = 0.0;
 
 
     if (geo.rt_mode == RT_MODE_MACRO)
       macromain[n].kpkt_rates_known = -1;
 
-/* 1108 NSH Loop to zero the frequency banded radiation estimators */
-/* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
+/* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell*/
+
     for (i = 0; i < geo.nxfreq; i++)
     {
       plasmamain[n].xj[i] = plasmamain[n].xave_freq[i] = plasmamain[n].nxtot[i] = 0;
-      plasmamain[n].xsd_freq[i] = 0.0;  /* NSH 120815 Zero the standard deviation counter */
+      plasmamain[n].xsd_freq[i] = 0.0;
       plasmamain[n].fmin[i] = geo.xfreq[i + 1]; /* Set the minium frequency to the max frequency in the band */
       plasmamain[n].fmax[i] = geo.xfreq[i];     /* Set the maximum frequency to the min frequency in the band */
     }
 
     for (i = 0; i < 4; i++)
       plasmamain[n].F_vis[i] = plasmamain[n].F_UV[i] = plasmamain[n].F_Xray[i] = 0.0;
-
 
 
     for (i = 0; i < nions; i++)
@@ -1163,35 +1154,28 @@ wind_rad_init ()
 //      plasmamain[n].gamma_inshl[i] = 0.0;
 //    }
 
-    /* Next blocks added by SS Mar 2004 to zero the Macro Atom estimators. */
-
-    /* 57h -- 0608 -- These sections actually involve enough calculations that
-       they are noticeable in term sof the overall speed.  One would if possible
-       like to avoid this section, since it requires the creation of macromain,
-       even though macromain is not used -- ksl */
+    /* Zero the Macro Atom estimators. */
 
 
-    for (i = 0; i < nlevels_macro; i++) //57h
+    for (i = 0; i < nlevels_macro; i++)
     {
       for (njump = 0; njump < config[i].n_bbu_jump; njump++)
       {
-        macromain[n].jbar[config[i].bbu_indx_first + njump] = 0.0;      // mean intensity
+        macromain[n].jbar[config[i].bbu_indx_first + njump] = 0.0;
       }
       for (njump = 0; njump < config[i].n_bfu_jump; njump++)
       {
         macromain[n].gamma[config[i].bfu_indx_first + njump] = 0.0;
         macromain[n].gamma_e[config[i].bfu_indx_first + njump] = 0.0;
-        macromain[n].alpha_st[config[i].bfd_indx_first + njump] = 0.0;  //stimulated recombination
+        macromain[n].alpha_st[config[i].bfd_indx_first + njump] = 0.0;
         macromain[n].alpha_st_e[config[i].bfd_indx_first + njump] = 0.0;
       }
 
 
-      /* Next block to set spontaneous recombination rates for next iteration. (SS July 04) */
       for (njump = 0; njump < config[i].n_bfd_jump; njump++)
       {
         if (plasmamain[n].t_e > 1.0)
         {
-          //04Jul--ksl-modified these calls to reflect changed alpha_sp
           macromain[n].recomb_sp[config[i].bfd_indx_first + njump] = alpha_sp (&phot_top[config[i].bfd_jump[njump]], &plasmamain[n], 0);
           macromain[n].recomb_sp_e[config[i].bfd_indx_first + njump] = alpha_sp (&phot_top[config[i].bfd_jump[njump]], &plasmamain[n], 2);
         }
@@ -1220,10 +1204,9 @@ wind_rad_init ()
     }
 
 
-    //zero the emissivities that are needed for the spectral synthesis step.
     plasmamain[n].kpkt_emiss = 0.0;
     plasmamain[n].kpkt_abs = 0.0;
-    for (i = 0; i < nlevels_macro; i++) //57h
+    for (i = 0; i < nlevels_macro; i++)
     {
       macromain[n].matom_abs[i] = 0.0;
 
@@ -1231,7 +1214,6 @@ wind_rad_init ()
 
     }
 
-    /* End of added material. */
   }
 
 
