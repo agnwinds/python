@@ -1586,7 +1586,7 @@ get_one_array_element (ndom, variable_name, array_dim)
 
         if (strcmp (variable_name, "xj") == 0)
         {
-          x[m] = plasmamain[nplasma].xj[n];
+          x[m] = plasmamain[nplasma].xj[j];
         }
         else
         {
