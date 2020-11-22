@@ -1531,8 +1531,10 @@ get_one (ndom, variable_name)
  *
  * @param [in] int  ndom   The domain in question
  * @param [in] char  variable_name[]   The name of the variable
- * @param [in] int  ielem  The element of the array to retrieve
- * @return     The values in the plasma pointer for this variable. A double
+ * @param [in] int  array_dim  The number of element in the array
+ * @param [out] *double  xval An array containing the requested values
+ * @return  Always returns 0   
+ *  The values in the plasma pointer for this variable. A double
  * 	will be returned even if the PlasmaPtr variable is an integer
  *      The reults are a 1-d array, where the various array elements
  *      have effectively been concatenated
@@ -1542,22 +1544,34 @@ get_one (ndom, variable_name)
  *
  * An  array element here means a one element of a 1d array
  *
- * The routine performes a simple tranlation of the character name
+ * The routine performes a simple translation of the character name
  * to a variable in the PlasmaPtr.
+ * 
+ * The values in the plasma pointer for this variable. A double
+ * will be returned even if the PlasmaPtr variable is an integer
+ * The reults are a 1-d array, where the various array elements
+ * have effectively been concatenated
  *
  * ### Notes ###
+ * This was written to get information about crude fits to the 
+ * spectra in a cell, where one wants to create a single astropy
+ * table that contains all, for example, photons in each band. One
+ * would only use it in a situation, where making a separate column
+ * for each band would create a table that is too wide, for normal use
+ * or when one does not know before hand, how many elements are in the
+ * array.
+
  * Only selected variables are returned, but new variables are easy
  * to add using the template of the other variables
  *
  **********************************************************/
 
-//OLD double *
 int
-get_one_array_element (ndom, variable_name, array_dim, x)
+get_one_array_element (ndom, variable_name, array_dim, xval)
      int ndom;
      char variable_name[];
      int array_dim;
-     double x[];
+     double xval[];
 {
   int j, n;
   int nplasma;
@@ -1568,8 +1582,6 @@ get_one_array_element (ndom, variable_name, array_dim, x)
   /* In order for a routine to return an array, one must
      declare it as static */
 
-//OLD #define GET_ONE_ARRAY_SIZE  1000000
-//OLD   static double x[GET_ONE_ARRAY_SIZE];
 
   nstart = zdom[ndom].nstart;
   ndim2 = zdom[ndom].ndim2;
@@ -1580,7 +1592,7 @@ get_one_array_element (ndom, variable_name, array_dim, x)
   {
     for (n = 0; n < ndim2; n++)
     {
-      x[m] = 0;
+      xval[m] = 0;
       if (wmain[n + nstart].inwind >= 0)
       {
         nplasma = wmain[n + nstart].nplasma;
@@ -1588,55 +1600,55 @@ get_one_array_element (ndom, variable_name, array_dim, x)
 
         if (strcmp (variable_name, "xj") == 0)
         {
-          x[m] = plasmamain[nplasma].xj[j];
+          xval[m] = plasmamain[nplasma].xj[j];
         }
         else if (strcmp (variable_name, "xave_freq") == 0)
         {
-          x[m] = plasmamain[nplasma].xave_freq[j];
+          xval[m] = plasmamain[nplasma].xave_freq[j];
         }
         else if (strcmp (variable_name, "fmin") == 0)
         {
-          x[m] = plasmamain[nplasma].fmin[j];
+          xval[m] = plasmamain[nplasma].fmin[j];
         }
         else if (strcmp (variable_name, "fmax") == 0)
         {
-          x[m] = plasmamain[nplasma].fmax[j];
+          xval[m] = plasmamain[nplasma].fmax[j];
         }
         else if (strcmp (variable_name, "fmin_mod") == 0)
         {
-          x[m] = plasmamain[nplasma].fmin_mod[j];
+          xval[m] = plasmamain[nplasma].fmin_mod[j];
         }
         else if (strcmp (variable_name, "fmax_mod") == 0)
         {
-          x[m] = plasmamain[nplasma].fmax_mod[j];
+          xval[m] = plasmamain[nplasma].fmax_mod[j];
         }
         else if (strcmp (variable_name, "xsd_freq") == 0)
         {
-          x[m] = plasmamain[nplasma].xsd_freq[j];
+          xval[m] = plasmamain[nplasma].xsd_freq[j];
         }
         else if (strcmp (variable_name, "nxtot") == 0)
         {
-          x[m] = plasmamain[nplasma].nxtot[j];
+          xval[m] = plasmamain[nplasma].nxtot[j];
         }
         else if (strcmp (variable_name, "spec_mod_type") == 0)
         {
-          x[m] = plasmamain[nplasma].spec_mod_type[j];
+          xval[m] = plasmamain[nplasma].spec_mod_type[j];
         }
         else if (strcmp (variable_name, "pl_alpha") == 0)
         {
-          x[m] = plasmamain[nplasma].pl_alpha[j];
+          xval[m] = plasmamain[nplasma].pl_alpha[j];
         }
         else if (strcmp (variable_name, "pl_log_w") == 0)
         {
-          x[m] = plasmamain[nplasma].pl_log_w[j];
+          xval[m] = plasmamain[nplasma].pl_log_w[j];
         }
         else if (strcmp (variable_name, "exp_temp") == 0)
         {
-          x[m] = plasmamain[nplasma].exp_temp[j];
+          xval[m] = plasmamain[nplasma].exp_temp[j];
         }
         else if (strcmp (variable_name, "exp_w") == 0)
         {
-          x[m] = plasmamain[nplasma].exp_w[j];
+          xval[m] = plasmamain[nplasma].exp_w[j];
         }
         else
         {
@@ -1647,12 +1659,6 @@ get_one_array_element (ndom, variable_name, array_dim, x)
     }
   }
 
-//OLD  if (m > GET_ONE_ARRAY_SIZE)
-//OLD  {
-//OLD    Error ("get_one_array_element: m (%d) > than static size (%d) of array\n", m, GET_ONE_ARRAY_SIZE);
-//OLD  }
-
-//OLD  return (x);
   return (0);
 
 }
@@ -1732,59 +1738,46 @@ create_spec_table (ndom, rootname)
     c[i] = (double *) calloc (sizeof (double), ndim2 * nxfreq);
   }
 
-//OLD  c[0] = get_one_array_element (ndom, "nxtot", nxfreq);
   get_one_array_element (ndom, "nxtot", nxfreq, c[0]);
   strcpy (column_name[0], "nxtot");
 
-//OLD  c[1] = get_one_array_element (ndom, "xj", nxfreq);
   get_one_array_element (ndom, "xj", nxfreq, c[1]);
   strcpy (column_name[1], "xj");
 
-//OLD  c[2] = get_one_array_element (ndom, "xave_freq", nxfreq);
   get_one_array_element (ndom, "xave_freq", nxfreq, c[2]);
   strcpy (column_name[2], "xave_freq");
 
-//OLD  c[3] = get_one_array_element (ndom, "xsd_freq", nxfreq);
   get_one_array_element (ndom, "xsd_freq", nxfreq, c[3]);
   strcpy (column_name[3], "xsd_freq");
 
-//OLD  c[4] = get_one_array_element (ndom, "fmin", nxfreq);
   get_one_array_element (ndom, "fmin", nxfreq, c[4]);
   strcpy (column_name[4], "fmin");
 
-//OLD  c[5] = get_one_array_element (ndom, "fmax", nxfreq);
   get_one_array_element (ndom, "fmax", nxfreq, c[5]);
   strcpy (column_name[5], "fmax");
 
-//OLD  c[6] = get_one_array_element (ndom, "fmin_mod", nxfreq);
   get_one_array_element (ndom, "fmin_mod", nxfreq, c[6]);
   strcpy (column_name[6], "fmin_mod");
 
-//OLD  c[7] = get_one_array_element (ndom, "fmax_mod", nxfreq);
   get_one_array_element (ndom, "fmax_mod", nxfreq, c[7]);
   strcpy (column_name[7], "fmax_mod");
 
-//OLD  c[8] = get_one_array_element (ndom, "spec_mod_type", nxfreq);
   get_one_array_element (ndom, "spec_mod_type", nxfreq, c[8]);
   strcpy (column_name[8], "spec_mod_type");
 
-//OLD  c[9] = get_one_array_element (ndom, "pl_alpha", nxfreq);
   get_one_array_element (ndom, "pl_alpha", nxfreq, c[9]);
   strcpy (column_name[9], "pl_alpha");
 
-//OLD  c[10] = get_one_array_element (ndom, "pl_log_w", nxfreq);
   get_one_array_element (ndom, "pl_log_w", nxfreq, c[10]);
   strcpy (column_name[10], "pl_log_w");
 
-//OLD  c[11] = get_one_array_element (ndom, "exp_temp", nxfreq);
   get_one_array_element (ndom, "exp_temp", nxfreq, c[11]);
   strcpy (column_name[11], "exp_temp");
 
-//OLD  c[12] = get_one_array_element (ndom, "exp_w", nxfreq);
   get_one_array_element (ndom, "exp_w", nxfreq, c[12]);
   strcpy (column_name[12], "exp_w");
 
-  /* This should be the maxium number above +1 */
+  /* This should be the maximum number above +1 */
   ncols = 13;
 
 
@@ -1794,7 +1787,6 @@ create_spec_table (ndom, rootname)
 
 
   nstart = zdom[ndom].nstart;
-//OLD  ndim2 = zdom[ndom].ndim2;
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
@@ -1882,7 +1874,6 @@ create_spec_table (ndom, rootname)
         }
         fprintf (fptr, "%s\n", one_line);
         j++;
-        //OLD printf ("%d\n", j);
       }
     }
   }
