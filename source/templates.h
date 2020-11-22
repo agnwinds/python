@@ -493,6 +493,8 @@ int create_velocity_gradient_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
+int get_one_array_element(int ndom, char variable_name[], int array_dim, double x[]);
+int create_spec_table(int ndom, char rootname[]);
 /* import.c */
 int import_wind(int ndom);
 int import_wind2(int ndom, char *filename);
@@ -683,3 +685,5 @@ int create_velocity_gradient_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
+int get_one_array_element(int ndom, char variable_name[], int array_dim, double x[]);
+int create_spec_table(int ndom, char rootname[]);

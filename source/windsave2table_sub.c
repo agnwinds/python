@@ -71,6 +71,7 @@ do_windsave2table (root, ion_switch)
     create_heat_table (ndom, rootname);
     create_convergence_table (ndom, rootname);
     create_velocity_gradient_table (ndom, rootname);
+    create_spec_table (ndom, rootname);
 
     if (ion_switch != 99)
     {
@@ -1522,4 +1523,412 @@ get_one (ndom, variable_name)
 
   return (x);
 
+}
+
+/**********************************************************/
+/**
+ * @brief      Get a simple array element from the PlasmaPtr array
+ *
+ * @param [in] int  ndom   The domain in question
+ * @param [in] char  variable_name[]   The name of the variable
+ * @param [in] int  array_dim  The number of element in the array
+ * @param [out] *double  xval An array containing the requested values
+ * @return  Always returns 0   
+ *  The values in the plasma pointer for this variable. A double
+ * 	will be returned even if the PlasmaPtr variable is an integer
+ *      The reults are a 1-d array, where the various array elements
+ *      have effectively been concatenated
+ *
+ *
+ * @details
+ *
+ * An  array element here means a one element of a 1d array
+ *
+ * The routine performes a simple translation of the character name
+ * to a variable in the PlasmaPtr.
+ * 
+ * The values in the plasma pointer for this variable. A double
+ * will be returned even if the PlasmaPtr variable is an integer
+ * The reults are a 1-d array, where the various array elements
+ * have effectively been concatenated
+ *
+ * ### Notes ###
+ * This was written to get information about crude fits to the 
+ * spectra in a cell, where one wants to create a single astropy
+ * table that contains all, for example, photons in each band. One
+ * would only use it in a situation, where making a separate column
+ * for each band would create a table that is too wide, for normal use
+ * or when one does not know before hand, how many elements are in the
+ * array.
+
+ * Only selected variables are returned, but new variables are easy
+ * to add using the template of the other variables
+ *
+ **********************************************************/
+
+int
+get_one_array_element (ndom, variable_name, array_dim, xval)
+     int ndom;
+     char variable_name[];
+     int array_dim;
+     double xval[];
+{
+  int j, n;
+  int nplasma;
+  int ndim2;
+  int nstart;
+  int m;
+
+  /* In order for a routine to return an array, one must
+     declare it as static */
+
+
+  nstart = zdom[ndom].nstart;
+  ndim2 = zdom[ndom].ndim2;
+
+
+  m = 0;
+  for (j = 0; j < array_dim; j++)
+  {
+    for (n = 0; n < ndim2; n++)
+    {
+      xval[m] = 0;
+      if (wmain[n + nstart].inwind >= 0)
+      {
+        nplasma = wmain[n + nstart].nplasma;
+
+
+        if (strcmp (variable_name, "xj") == 0)
+        {
+          xval[m] = plasmamain[nplasma].xj[j];
+        }
+        else if (strcmp (variable_name, "xave_freq") == 0)
+        {
+          xval[m] = plasmamain[nplasma].xave_freq[j];
+        }
+        else if (strcmp (variable_name, "fmin") == 0)
+        {
+          xval[m] = plasmamain[nplasma].fmin[j];
+        }
+        else if (strcmp (variable_name, "fmax") == 0)
+        {
+          xval[m] = plasmamain[nplasma].fmax[j];
+        }
+        else if (strcmp (variable_name, "fmin_mod") == 0)
+        {
+          xval[m] = plasmamain[nplasma].fmin_mod[j];
+        }
+        else if (strcmp (variable_name, "fmax_mod") == 0)
+        {
+          xval[m] = plasmamain[nplasma].fmax_mod[j];
+        }
+        else if (strcmp (variable_name, "xsd_freq") == 0)
+        {
+          xval[m] = plasmamain[nplasma].xsd_freq[j];
+        }
+        else if (strcmp (variable_name, "nxtot") == 0)
+        {
+          xval[m] = plasmamain[nplasma].nxtot[j];
+        }
+        else if (strcmp (variable_name, "spec_mod_type") == 0)
+        {
+          xval[m] = plasmamain[nplasma].spec_mod_type[j];
+        }
+        else if (strcmp (variable_name, "pl_alpha") == 0)
+        {
+          xval[m] = plasmamain[nplasma].pl_alpha[j];
+        }
+        else if (strcmp (variable_name, "pl_log_w") == 0)
+        {
+          xval[m] = plasmamain[nplasma].pl_log_w[j];
+        }
+        else if (strcmp (variable_name, "exp_temp") == 0)
+        {
+          xval[m] = plasmamain[nplasma].exp_temp[j];
+        }
+        else if (strcmp (variable_name, "exp_w") == 0)
+        {
+          xval[m] = plasmamain[nplasma].exp_w[j];
+        }
+        else
+        {
+          Error ("get_on_array_elemente: Unknown variable %s\n", variable_name);
+        }
+      }
+      m++;
+    }
+  }
+
+  return (0);
+
+}
+
+
+
+/**********************************************************/
+/**
+ * @brief      writes specific  variables associated with
+ * model spectrua of a windsaave
+ * which are intended to be of general interest to
+ * file which has the format of an astropy table
+ *
+ * 	It is intended to be easily modifible.
+ *
+ * @param [in] int  ndom   A domain number
+ * @param [in] char  rootname   The rootname of the master file
+ * @return   Always returns 0
+ *
+ * @details
+ *
+ * The master table is contains basic information for each
+ * cell in the wind, such as the electron density, the density,
+ * the ionization parameter, and the radiative and electron temperature
+ *
+ * The routine takes data directly from wmain, and then calls
+ * get_one or get_ion multiple times to fet info from the Plasma
+ * structure.
+ *
+ * It then writes the data to an ascii file which can be read as
+ * an  astropy table
+ *
+ * ### Notes ###
+ * To add a variable one just needs to define the column_name
+ * and send the appropriate call to either get_one or get_ion.
+ *
+ * There is some duplicated code in the routine that pertains
+ * to whether one is dealing with a spherecial or a 2d coordinate
+ * system.  It should be possible to delete this
+ *
+ **********************************************************/
+
+int
+create_spec_table (ndom, rootname)
+     int ndom;
+     char rootname[];
+{
+  char filename[132];
+  double *c[50], *converge;
+  char column_name[50][20];
+  char one_line[1024], start[1024], one_value[20];
+//  char name[132];               /* file name extension */
+
+  int nxfreq;
+
+
+  int i, ii, jj;
+  int nstart, ndim2;
+  int n, ncols;
+  int nx;
+  int j;
+  FILE *fptr;
+
+  nxfreq = geo.nxfreq;
+  ndim2 = zdom[ndom].ndim2;
+
+  strcpy (filename, rootname);
+  strcat (filename, ".spec.txt");
+
+
+  fptr = fopen (filename, "w");
+
+  /* Get the variables that one needs */
+
+  for (i = 0; i < 50; i++)
+  {
+    c[i] = (double *) calloc (sizeof (double), ndim2 * nxfreq);
+  }
+
+  get_one_array_element (ndom, "nxtot", nxfreq, c[0]);
+  strcpy (column_name[0], "nxtot");
+
+  get_one_array_element (ndom, "xj", nxfreq, c[1]);
+  strcpy (column_name[1], "xj");
+
+  get_one_array_element (ndom, "xave_freq", nxfreq, c[2]);
+  strcpy (column_name[2], "xave_freq");
+
+  get_one_array_element (ndom, "xsd_freq", nxfreq, c[3]);
+  strcpy (column_name[3], "xsd_freq");
+
+  get_one_array_element (ndom, "fmin", nxfreq, c[4]);
+  strcpy (column_name[4], "fmin");
+
+  get_one_array_element (ndom, "fmax", nxfreq, c[5]);
+  strcpy (column_name[5], "fmax");
+
+  get_one_array_element (ndom, "fmin_mod", nxfreq, c[6]);
+  strcpy (column_name[6], "fmin_mod");
+
+  get_one_array_element (ndom, "fmax_mod", nxfreq, c[7]);
+  strcpy (column_name[7], "fmax_mod");
+
+  get_one_array_element (ndom, "spec_mod_type", nxfreq, c[8]);
+  strcpy (column_name[8], "spec_mod_type");
+
+  get_one_array_element (ndom, "pl_alpha", nxfreq, c[9]);
+  strcpy (column_name[9], "pl_alpha");
+
+  get_one_array_element (ndom, "pl_log_w", nxfreq, c[10]);
+  strcpy (column_name[10], "pl_log_w");
+
+  get_one_array_element (ndom, "exp_temp", nxfreq, c[11]);
+  strcpy (column_name[11], "exp_temp");
+
+  get_one_array_element (ndom, "exp_w", nxfreq, c[12]);
+  strcpy (column_name[12], "exp_w");
+
+  /* This should be the maximum number above +1 */
+  ncols = 13;
+
+
+  converge = get_one (ndom, "converge");
+
+  /* At this point oll of the data has been collected */
+
+
+  nstart = zdom[ndom].nstart;
+
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+
+
+    /*
+     * First assemble the header line
+     */
+
+    sprintf (start, "%9s %9s %4s %6s %6s %9s  ", "r", "rcen", "i", "inwind", "converge", "nband");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
+    {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
+
+
+    /* Now assemble the lines of the table */
+
+    j = 0;
+    for (nx = 0; nx < nxfreq; nx++)
+    {
+
+      for (i = 0; i < ndim2; i++)
+      {
+        //This line is different from the two d case
+        sprintf (start, "%9.3e %9.3e %4d %6d %8.0f %6d ",
+                 wmain[nstart + i].r, wmain[nstart + i].rcen, i, wmain[nstart + i].inwind, converge[i], nx);
+        strcpy (one_line, start);
+        n = 0;
+        while (n < ncols)
+        {
+          sprintf (one_value, "%9.2e ", c[n][j]);
+          strcat (one_line, one_value);
+          n++;
+        }
+        fprintf (fptr, "%s\n", one_line);
+        j++;
+      }
+    }
+  }
+  else if (zdom[ndom].coord_type == CYLIND)
+  {
+
+    /* First assemble the header line */
+
+    sprintf (start, "%8s %8s %8s %8s %4s %4s %6s %8s %6s ", "x", "z", "xcen", "zcen", "i", "j", "inwind", "converge", "nband");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
+    {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
+
+
+    /* Now assemble the lines of the table */
+
+    j = 0;
+    for (nx = 0; nx < nxfreq; nx++)
+    {
+      for (i = 0; i < ndim2; i++)
+      {
+        wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+        sprintf (start,
+                 "%8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %6d  ",
+                 wmain[nstart + i].x[0], wmain[nstart + i].x[2], wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
+                 jj, wmain[nstart + i].inwind, converge[i], nx);
+        strcpy (one_line, start);
+        n = 0;
+        while (n < ncols)
+        {
+          sprintf (one_value, "%9.2e ", c[n][j]);
+          strcat (one_line, one_value);
+          n++;
+        }
+        fprintf (fptr, "%s\n", one_line);
+        j++;
+      }
+    }
+  }
+  else if (zdom[ndom].coord_type == RTHETA)
+  {
+
+    /* First assemble the header line */
+
+    sprintf (start, "%8s %8s %8s %9s %8s %8s %8s %8s %4s %4s %6s %8s %6s ", "r", "theta", "r_cen", "theta_cen", "x", "z", "xcen",
+             "zcen", "i", "j", "inwind", "converge", "nband");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
+    {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
+
+
+    /* Now assemble the lines of the table */
+
+    j = 0;
+    for (nx = 0; nx < nxfreq; nx++)
+    {
+      for (i = 0; i < ndim2; i++)
+      {
+        wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+        sprintf (start,
+                 "%8.2e %8.2e %8.2e %9.2e %8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %6d ",
+                 wmain[nstart + i].r, wmain[nstart + i].theta, wmain[nstart + i].rcen, wmain[nstart + i].thetacen,
+                 wmain[nstart + i].x[0], wmain[nstart + i].x[2], wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
+                 jj, wmain[nstart + i].inwind, converge[i], nx);
+        strcpy (one_line, start);
+        n = 0;
+        while (n < ncols)
+        {
+          sprintf (one_value, "%9.2e ", c[n][j]);
+          strcat (one_line, one_value);
+          n++;
+        }
+        fprintf (fptr, "%s\n", one_line);
+        j++;
+      }
+    }
+  }
+  else
+  {
+    printf ("Error: Cannot print out files for coordinate system type %d\n", zdom[ndom].coord_type);
+  }
+
+
+  fclose (fptr);
+
+  return (0);
 }
