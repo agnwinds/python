@@ -1580,7 +1580,7 @@ get_one_array_element (ndom, variable_name, array_dim, x)
   {
     for (n = 0; n < ndim2; n++)
     {
-      x[n] = 0;
+      x[m] = 0;
       if (wmain[n + nstart].inwind >= 0)
       {
         nplasma = wmain[n + nstart].nplasma;
