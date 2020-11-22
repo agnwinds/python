@@ -1559,15 +1559,19 @@ get_one_array_element (ndom, variable_name, array_dim)
 {
   int j, n;
   int nplasma;
-  double *x;
+//  double *x;
   int ndim2;
   int nstart;
   int m;
 
+#define GET_ONE_ARRAY_SIZE  1000000
+
+  static double x[GET_ONE_ARRAY_SIZE];
+
   nstart = zdom[ndom].nstart;
   ndim2 = zdom[ndom].ndim2;
 
-  x = (double *) calloc (sizeof (double), ndim2 * array_dim);
+  // x = (double *) calloc (sizeof (double), ndim2 * array_dim);
 
   m = 0;
   for (j = 0; j < array_dim; j++)
@@ -1591,6 +1595,11 @@ get_one_array_element (ndom, variable_name, array_dim)
       }
       m++;
     }
+  }
+
+  if (m > GET_ONE_ARRAY_SIZE)
+  {
+    Error ("get_one_array_element: m (%d) > than static size (%d) of array\n", m, GET_ONE_ARRAY_SIZE);
   }
 
   return (x);
@@ -1768,7 +1777,7 @@ create_spec_table (ndom, rootname)
         }
         fprintf (fptr, "%s\n", one_line);
         j++;
-        printf ("%d\n", j);
+        //OLD printf ("%d\n", j);
       }
     }
   }
