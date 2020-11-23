@@ -407,8 +407,8 @@ wind_cooling ()
       if (x < 0)
         Error ("wind_cooling: xtotal emission %8.4e is < 0!\n", x);
 
-      if (recipes_error != 0)
-        Error ("wind_cooling: Received recipes error on cell %d\n", n);
+//OLD      if (recipes_error != 0)
+//OLD        Error ("wind_cooling: Received recipes error on cell %d\n", n);
     }
   }
 
