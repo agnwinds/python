@@ -376,32 +376,7 @@ setup_windcone ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-//OLD    if (zdom[ndom].wind_thetamin > 0.0)
-//OLD    {
-//OLD      zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
-//OLD      zdom[ndom].windcone[0].z = (-zdom[ndom].wind_rhomin_at_disk / tan (zdom[ndom].wind_thetamin));
-//OLD    }
-//OLD    else
-//OLD    {
-//OLD      zdom[ndom].windcone[0].dzdr = VERY_BIG;
-//OLD      zdom[ndom].windcone[0].z = -VERY_BIG;;
-//OLD    }
-
-
-//OLD    if (zdom[ndom].wind_thetamax > 0.0)
-//OLD    {
-//OLD      zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
-//OLD      zdom[ndom].windcone[1].z = (-zdom[ndom].wind_rhomax_at_disk / tan (zdom[ndom].wind_thetamax));
-//OLD    }
-//OLD    else
-//OLD    {
-//OLD      zdom[ndom].windcone[1].dzdr = VERY_BIG;
-//OLD      zdom[ndom].windcone[1].z = -VERY_BIG;;
-//OLD     }
-
-
     dzdr = 1. / tan (zdom[ndom].wind_thetamin);
-//    init_windcone (zdom[ndom].wind_rmin_at_disk, 0.0, dzdr, FALSE, &zdom[ndom].windcone[0]);
     z = zdisk (zdom[ndom].wind_rhomin_at_disk);
     init_windcone (zdom[ndom].wind_rhomin_at_disk, z, dzdr, FALSE, &zdom[ndom].windcone[0]);
 
@@ -459,7 +434,6 @@ init_windcone (r, z, dzdr, allow_negative_dzdr, one_windcone)
 
 {
 
-  Log ("test: %f %f %f %d\n", r, z, dzdr, allow_negative_dzdr);
 
   if (dzdr == 0 || (allow_negative_dzdr == FALSE && dzdr < 0))
   {
