@@ -563,7 +563,14 @@ bands_init (imode, band)
    * spectra in each cell for ionization calculations
    */
 
-  freqs_init (xband.f1[0], xband.f2[xband.nbands - 1]);
+//OLD  freqs_init (xband.f1[0], xband.f2[xband.nbands - 1]);
+
+  for (nband = 0; nband < band->nbands; nband++)
+  {
+    geo.xfreq[nband] = band->f1[nband];
+  }
+  geo.nxfreq = band->nbands;
+  geo.xfreq[band->nbands] = band->f2[band->nbands - 1];
   return (0);
 }
 
