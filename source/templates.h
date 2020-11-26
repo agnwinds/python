@@ -463,7 +463,7 @@ int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[n
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplasma);
 /* para_update.c */
 int communicate_estimators_para(void);
-int gather_spectra_para(int nspec_helper, int nspecs);
+int gather_spectra_para(void);
 int communicate_matom_estimators_para(void);
 /* setup_star_bh.c */
 double get_stellar_params(void);
@@ -493,7 +493,7 @@ int create_velocity_gradient_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
-int get_one_array_element(int ndom, char variable_name[], int array_dim, double x[]);
+int get_one_array_element(int ndom, char variable_name[], int array_dim, double xval[]);
 int create_spec_table(int ndom, char rootname[]);
 /* import.c */
 int import_wind(int ndom);
@@ -685,5 +685,5 @@ int create_velocity_gradient_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
-int get_one_array_element(int ndom, char variable_name[], int array_dim, double x[]);
+int get_one_array_element(int ndom, char variable_name[], int array_dim, double xval[]);
 int create_spec_table(int ndom, char rootname[]);

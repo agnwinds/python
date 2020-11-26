@@ -355,10 +355,10 @@ communicate_estimators_para ()
 /**
  * @brief sum up the synthetic spectra between threads.
  *
- * @param [in] int  nspecs number of spectra to compute
  * @param [in] int nspec_helper the length of the big arrays
  *                  to help with the MPI reductions of the spectra
  *                  equal to 2 * number of spectra (NSPEC) * number of wavelengths.
+ * @param [in] int  nspecs number of spectra to compute
  *
  * @details
  * sum up the synthetic spectra between threads. Does an
@@ -367,42 +367,56 @@ communicate_estimators_para ()
  *
  **********************************************************/
 
+//OLD int
+//OLD gather_spectra_para (nspec_helper, nspecs)
+//OLD      int nspec_helper;
+//OLD      int nspecs;
+//OLD {
+
 int
-gather_spectra_para (nspec_helper, nspecs)
-     int nspec_helper;
-     int nspecs;
+gather_spectra_para ()
 {
-#ifdef MPI_ON                   // these routines should only be called anyway in parallel but we need these to compile
+#ifdef MPI_ON
 
   double *redhelper, *redhelper2;
   int mpi_i, mpi_j;
 
-  redhelper = calloc (sizeof (double), nspec_helper);
-  redhelper2 = calloc (sizeof (double), nspec_helper);
+  int size_of_commbuffer, nspec;
 
+  size_of_commbuffer = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
+  nspec = MSPEC;
+
+
+//  redhelper = calloc (sizeof (double), nspec_helper);
+//  redhelper2 = calloc (sizeof (double), nspec_helper);
+
+  redhelper = calloc (sizeof (double), size_of_commbuffer);
+  redhelper2 = calloc (sizeof (double), size_of_commbuffer);
 
   for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
   {
-    for (mpi_j = 0; mpi_j < nspecs; mpi_j++)
+    for (mpi_j = 0; mpi_j < nspec; mpi_j++)
     {
-      redhelper[mpi_i * nspecs + mpi_j] = xxspec[mpi_j].f[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j] = xxspec[mpi_j].f[mpi_i] / np_mpi_global;
 
       if (geo.ioniz_or_extract == CYCLE_IONIZ)
-        redhelper[mpi_i * nspecs + mpi_j + (NWAVE * nspecs)] = xxspec[mpi_j].lf[mpi_i] / np_mpi_global;
+        redhelper[mpi_i * nspec + mpi_j + (NWAVE * nspec)] = xxspec[mpi_j].lf[mpi_i] / np_mpi_global;
     }
   }
 
-  MPI_Reduce (redhelper, redhelper2, nspec_helper, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Bcast (redhelper2, nspec_helper, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+//OLD  MPI_Reduce (redhelper, redhelper2, nspec_helper, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+//OLD  MPI_Bcast (redhelper2, nspec_helper, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
   {
-    for (mpi_j = 0; mpi_j < nspecs; mpi_j++)
+    for (mpi_j = 0; mpi_j < nspec; mpi_j++)
     {
-      xxspec[mpi_j].f[mpi_i] = redhelper2[mpi_i * nspecs + mpi_j];
+      xxspec[mpi_j].f[mpi_i] = redhelper2[mpi_i * nspec + mpi_j];
 
       if (geo.ioniz_or_extract == CYCLE_IONIZ)
-        xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i * nspecs + mpi_j + (NWAVE * nspecs)];
+        xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (NWAVE * nspec)];
     }
   }
   MPI_Barrier (MPI_COMM_WORLD);

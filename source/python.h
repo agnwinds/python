@@ -765,8 +765,15 @@ WindPtr wmain;
  */
 
 
+#define NBINS_IN_CELL_SPEC   1000
+
+// XXXX
+double cell_spec_freq[NBINS_IN_CELL_SPEC];
+
+
 typedef struct plasma
 {
+  double cell_spec_flux[NBINS_IN_CELL_SPEC];
   int nwind;                    /* A cross reference to the corresponding cell in the  wind structure */
   int nplasma;                  /* A self reference to this  in the plasma structure */
   double ne;                    /* Electron density in the shell (CMF) */
