@@ -137,7 +137,7 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   /* Increment the cell spectra  */
 
   log_freq = log10 (p->freq);
-  i = (log_freq - geo.cell_log_freq_min) / NBINS_IN_CELL_SPEC;
+  i = (log_freq - geo.cell_log_freq_min) / geo.cell_delta_lfreq;
   if (i < 0)
     i = 0;
   if (i > NBINS_IN_CELL_SPEC - 1)
