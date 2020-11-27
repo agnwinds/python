@@ -492,14 +492,21 @@ struct geometry
 #define OUTER_SHELL  1
 #define INNER_SHELL  2
 
-  /* The frequency bands used a boundaries for accumulating coarse spectral information about the spectrum of photons
-     in a cell. */
+  /* The next set of variables defineds frequency bands used a boundaries for accumulating coarse (and fine) spectral information 
+     about the spectrum of photons in a cell. There are the coarse bands currently used for creating spectral models and there
+     are a finer set of frequency intervals used for the fine spectra.  The spectra themselves can be found in the
+     Plasma structure for each cell*/
 
 #define  NXBANDS 20             /* the maximum number of bands (frequency intervals that can be defined for
                                    storing coarse spectra for each plasma cell */
 
   int nxfreq;                   /* the number of frequency intervals actually used */
   double xfreq[NXBANDS + 1];    /* the frequency boundaries for the coarse spectra  */
+
+#define NBINS_IN_CELL_SPEC   1000    // The number of bins in the cell spectra
+
+  double cell_log_freq_min, cell_log_freq_max,cell_delta_lfreq; /* Parameters defining freqency intervals for cell spectra.
+                                                                   These are defined as logarithmic frequency intervals */
 
 
   /* The next set pf variables assign a SPECTYPE (see above) for
@@ -765,15 +772,11 @@ WindPtr wmain;
  */
 
 
-#define NBINS_IN_CELL_SPEC   1000
 
-// XXXX
-double cell_spec_freq[NBINS_IN_CELL_SPEC];
 
 
 typedef struct plasma
 {
-  double cell_spec_flux[NBINS_IN_CELL_SPEC];
   int nwind;                    /* A cross reference to the corresponding cell in the  wind structure */
   int nplasma;                  /* A self reference to this  in the plasma structure */
   double ne;                    /* Electron density in the shell (CMF) */
@@ -889,6 +892,8 @@ typedef struct plasma
 
   double exp_temp[NXBANDS];     /* The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];        /* The prefactor of an exponential representation of the radiation field in a cell */
+
+  double cell_spec_flux[NBINS_IN_CELL_SPEC];  /*The array where the cell spectra are accumulated. */
 
   /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux)*/
   double F_vis[4];

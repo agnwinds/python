@@ -1132,6 +1132,11 @@ wind_rad_init ()
       plasmamain[n].fmax[i] = geo.xfreq[i];     /* Set the maximum frequency to the min frequency in the band */
     }
 
+    for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+    {
+      plasmamain[n].cell_spec_flux[i] = 0;
+    }
+
     for (i = 0; i < 4; i++)
       plasmamain[n].F_vis[i] = plasmamain[n].F_UV[i] = plasmamain[n].F_Xray[i] = 0.0;
 
