@@ -271,6 +271,7 @@ main (argc, argv)
   if (spec_switch >= 0)
   {
     printf ("Cell spectrum in wind cell %d will be printed\n", spec_switch);
+    create_detailed_cell_spec_table (spec_switch, root);
   }
 
 

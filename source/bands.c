@@ -572,6 +572,12 @@ bands_init (imode, band)
   geo.nxfreq = band->nbands;
   geo.xfreq[band->nbands] = band->f2[band->nbands - 1];
   return (0);
+
+  /* Now define the freqquency boundaries for the cell spectra */
+
+  geo.cell_log_freq_min = log10 (band->f1[0]);
+  geo.cell_log_freq_max = log10 (band->f2[band->nbands - 1]);
+  geo.cell_delta_lfreq = (geo.cell_log_freq_max - geo.cell_log_freq_min) / NBINS_IN_CELL_SPEC;
 }
 
 

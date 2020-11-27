@@ -1932,3 +1932,61 @@ create_spec_table (ndom, rootname)
 
   return (0);
 }
+
+
+/**********************************************************/
+/**
+ * @brief      write the detailed spectrum in a cell
+ * to a file
+ * @param [in] int  ncell   The number of a cell in the wind
+ * @param [in] char  rootname   The rootname of the master file
+ * @return   Always returns 0
+ *
+ * @details
+ *
+ *
+ **********************************************************/
+
+int
+create_detailed_cell_spec_table (ncell, rootname)
+     int ncell;
+     char rootname[];
+{
+  FILE *fptr;
+  char filename[132];
+
+  double freq[NBINS_IN_CELL_SPEC];
+  double flux[NBINS_IN_CELL_SPEC];
+  int i, nplasma;
+
+  printf ("%e %e\n", geo.cell_log_freq_min, geo.cell_delta_lfreq);
+
+  sprintf (filename, "%s.xspec.%d.txt", rootname, ncell);
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    freq[i] = pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
+  }
+
+  nplasma = wmain[ncell].nplasma;
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    flux[i] = plasmamain[nplasma].cell_spec_flux[i];
+  }
+
+
+  fptr = fopen (filename, "w");
+
+  fprintf (fptr, "Freq          FluX\n");
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    fprintf (fptr, "%10.3e  %10.3e\n", freq[i], flux[i]);
+  }
+
+
+  fclose (fptr);
+
+  return (0);
+}
