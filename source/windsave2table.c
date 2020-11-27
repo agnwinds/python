@@ -101,13 +101,14 @@ char windsave2table_help[] = "Usage: windsave2table [-r or -s] [-h] [--version] 
 ";
 
 void
-parse_arguments (int argc, char *argv[], char root[], int *ion_switch)
+parse_arguments (int argc, char *argv[], char root[], int *ion_switch, int *spec_switch)
 {
   int i;
   char *fget_rc;
   char input[LINELENGTH];
 
   *ion_switch = 0;
+  *spec_switch = -1;
 
 
   if (argc == 1)
@@ -134,6 +135,17 @@ parse_arguments (int argc, char *argv[], char root[], int *ion_switch)
         if (GIT_DIFF_STATUS)
           printf ("This version was compiled with %i files with uncommitted changes.\n", GIT_DIFF_STATUS);
         exit (0);
+      }
+      else if (!strncmp (argv[i], "-x", 2))
+      {
+        if (sscanf (argv[i + 1], "%d", spec_switch) != 1)
+        {
+          Error ("python: wind cell number  after -x switch\n");
+          exit (1);
+        }
+
+        printf ("Cell spectrum in wind cell %d will be printed\n", *spec_switch);
+        i++;
       }
       else if (!strncmp (argv[i], "-d", 2))
       {
@@ -210,6 +222,7 @@ main (argc, argv)
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   int ion_switch;
+  int spec_switch;
 
 
   strcpy (parameter_file, "NONE");
@@ -223,7 +236,7 @@ main (argc, argv)
    * last compiled and on what commit this was
    */
 
-  parse_arguments (argc, argv, root, &ion_switch);
+  parse_arguments (argc, argv, root, &ion_switch, &spec_switch);
 
   printf ("Reading data from file %s\n", root);
 
@@ -254,6 +267,12 @@ main (argc, argv)
 
 
   do_windsave2table (root, ion_switch);
+
+  if (spec_switch >= 0)
+  {
+    printf ("Cell spectrum in wind cell %d will be printed\n", spec_switch);
+  }
+
 
   return (0);
 }
