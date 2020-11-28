@@ -1978,7 +1978,7 @@ create_detailed_cell_spec_table (ncell, rootname)
 
   fptr = fopen (filename, "w");
 
-  fprintf (fptr, "Freq          FluX\n");
+  fprintf (fptr, "Freq.          Flux\n");
 
   for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
   {

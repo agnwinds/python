@@ -353,12 +353,7 @@ communicate_estimators_para ()
 
 /**********************************************************/
 /**
- * @brief sum up the synthetic spectra between threads.
- *
- * @param [in] int nspec_helper the length of the big arrays
- *                  to help with the MPI reductions of the spectra
- *                  equal to 2 * number of spectra (NSPEC) * number of wavelengths.
- * @param [in] int  nspecs number of spectra to compute
+ * @brief sum up the synthetic and cell spectra between threads.
  *
  * @details
  * sum up the synthetic spectra between threads. Does an
@@ -367,11 +362,6 @@ communicate_estimators_para ()
  *
  **********************************************************/
 
-//OLD int
-//OLD gather_spectra_para (nspec_helper, nspecs)
-//OLD      int nspec_helper;
-//OLD      int nspecs;
-//OLD {
 
 int
 gather_spectra_para ()
@@ -387,9 +377,6 @@ gather_spectra_para ()
   nspec = MSPEC;
 
 
-//  redhelper = calloc (sizeof (double), nspec_helper);
-//  redhelper2 = calloc (sizeof (double), nspec_helper);
-
   redhelper = calloc (sizeof (double), size_of_commbuffer);
   redhelper2 = calloc (sizeof (double), size_of_commbuffer);
 
@@ -404,8 +391,7 @@ gather_spectra_para ()
     }
   }
 
-//OLD  MPI_Reduce (redhelper, redhelper2, nspec_helper, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-//OLD  MPI_Bcast (redhelper2, nspec_helper, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -430,6 +416,7 @@ gather_spectra_para ()
 
   if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
+    MPI_Barrier (MPI_COMM_WORLD);
     size_of_commbuffer = NPLASMA * NBINS_IN_CELL_SPEC;
     nspec = NPLASMA;
 
@@ -438,13 +425,24 @@ gather_spectra_para ()
 
     for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
     {
-      for (mpi_j = 0; mpi_j < nspec; mpi_j++)
+      for (mpi_j = 0; mpi_j < NPLASMA; mpi_j++)
       {
-        redhelper[mpi_i * nspec + mpi_j] = plasmamain[mpi_j].cell_spec_flux[mpi_i] / np_mpi_global;
+        redhelper[mpi_i * NPLASMA + mpi_j] = plasmamain[mpi_j].cell_spec_flux[mpi_i] / np_mpi_global;
 
       }
     }
 
+    /*
+       n=spec_bin*NPLASMA+nplasma  ... so all of the first freqency appears first
+
+       XXX Currently there is a problem in that the next statement shows that 
+       some threads do not have renormalized values in them.  Only one thread does.
+     */
+
+
+    Log ("XXX1 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper[500 * NPLASMA + 15]);
+
+    MPI_Barrier (MPI_COMM_WORLD);
     MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -452,13 +450,15 @@ gather_spectra_para ()
 
     for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
     {
-      for (mpi_j = 0; mpi_j < nspec; mpi_j++)
+      for (mpi_j = 0; mpi_j < NPLASMA; mpi_j++)
       {
-        plasmamain[mpi_j].cell_spec_flux[mpi_i] = redhelper2[mpi_i * nspec + mpi_j];
+        plasmamain[mpi_j].cell_spec_flux[mpi_i] = redhelper2[mpi_i * NPLASMA + mpi_j];
 
       }
     }
     MPI_Barrier (MPI_COMM_WORLD);
+
+    Log ("XXX2 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper2[500 * NPLASMA + 15]);
 
 
     free (redhelper);

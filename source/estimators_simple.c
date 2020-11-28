@@ -141,8 +141,15 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   if (i < 0)
     i = 0;
   if (i > NBINS_IN_CELL_SPEC - 1)
+  {
     i = NBINS_IN_CELL_SPEC - 1;
+  }
   xplasma->cell_spec_flux[i] += w_ave * ds;
+
+  if (i == 500)
+  {
+    Log ("XXX7  %e %e %e\n", xplasma->cell_spec_flux[i], w_ave, ds);
+  }
 
 
   /* Increment counters which show the number of times a photon bundle of a certain type
@@ -516,10 +523,24 @@ normalise_simple_estimators (xplasma)
 
   for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
   {
+    if (i == 500)
+    {
+      Log ("XXX3  %e\n", xplasma->cell_spec_flux[i]);
+    }
+
     xplasma->cell_spec_flux[i] /= (4 * PI * invariant_volume_time);
+
+    if (i == 500)
+    {
+      Log ("XXX4  %e\n", xplasma->cell_spec_flux[i]);
+    }
   }
 
 
+// XXX for some reason I cannot put a barrier here. The program just stops and waits
+//#ifdef MPI_ON
+//  MPI_Barrier (MPI_COMM_WORLD);
+//#endif
 
   /* Normalise IP, which at this point should be
    * the number of photons in a cell by dividing by volume
