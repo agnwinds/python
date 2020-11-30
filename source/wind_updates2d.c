@@ -91,7 +91,7 @@ WindPtr (w);
 
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
-  int size_of_commbuffer;
+  int size_of_commbuffer, size_of_specbuffer;
   char *commbuffer;
 
   /* JM 1409 -- Added for issue #110 to ensure correct reporting in parallel */
@@ -102,13 +102,21 @@ WindPtr (w);
   /* The commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines 
    * The cmombuffer is currently sized to be the minimum requred.  Therefore when variables are added, the
    * size must must be increased.
+   *
+   * The cell spectra are handled separately
    */
 
   size_of_commbuffer =
     8 * (n_inner_tot + 10 * nions + nlte_levels + 3 * nphot_total + 15 * NXBANDS + 133) * (floor (NPLASMA / np_mpi_global) + 1);
+
+  size_of_specbuffer = 8 * NPLASMA * NBINS_IN_CELL_SPEC;
+
+  size_of_commbuffer += size_of_specbuffer;
+
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
-  /* JM 1409 -- Initialise parallel only variables */
+
+  /* Initialise parallel only variables */
   nmax_r_temp = nmax_e_temp = -1;
   dt_e_temp = dt_r_temp = 0.0;
 
@@ -369,6 +377,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].xi, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&dt_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&dt_r, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&nmax_e, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -514,6 +523,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].xi, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_r_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_e_temp, 1, MPI_INT, MPI_COMM_WORLD);
