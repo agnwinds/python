@@ -46,6 +46,7 @@ communicate_estimators_para ()
   double *redhelper, *redhelper2, *qdisk_helper, *qdisk_helper2;
   double *ion_helper, *ion_helper2;
   double *inner_ion_helper, *inner_ion_helper2;
+  int nspec, size_of_commbuffer;
 
   int *iredhelper, *iredhelper2, *iqdisk_helper, *iqdisk_helper2;
   // int size_of_helpers;
@@ -346,6 +347,65 @@ communicate_estimators_para ()
   free (iqdisk_helper);
   free (iqdisk_helper2);
 
+
+/* Now during ionization cylcels, process the cell spectra */
+
+  /* The size of the commbuffers need to be the number of spectra x the length of each */
+
+  if (geo.ioniz_or_extract == CYCLE_IONIZ)
+  {
+    MPI_Barrier (MPI_COMM_WORLD);
+    size_of_commbuffer = NPLASMA * NBINS_IN_CELL_SPEC;
+    nspec = NPLASMA;
+
+    redhelper = calloc (sizeof (double), size_of_commbuffer);
+    redhelper2 = calloc (sizeof (double), size_of_commbuffer);
+
+    for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
+    {
+      for (mpi_j = 0; mpi_j < NPLASMA; mpi_j++)
+      {
+        redhelper[mpi_i * NPLASMA + mpi_j] = plasmamain[mpi_j].cell_spec_flux[mpi_i] / np_mpi_global;
+
+      }
+    }
+
+    /*
+       n=spec_bin*NPLASMA+nplasma  ... so all of the first freqency appears first
+
+       XXX Currently there is a problem in that the next statement shows that 
+       some threads do not have renormalized values in them.  Only one thread does.
+     */
+
+
+    Log ("XXX1 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper[500 * NPLASMA + 15]);
+
+    MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+
+
+    for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
+    {
+      for (mpi_j = 0; mpi_j < NPLASMA; mpi_j++)
+      {
+        plasmamain[mpi_j].cell_spec_flux[mpi_i] = redhelper2[mpi_i * NPLASMA + mpi_j];
+
+      }
+    }
+    MPI_Barrier (MPI_COMM_WORLD);
+
+    Log ("XXX2 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper2[500 * NPLASMA + 15]);
+
+
+    free (redhelper);
+    free (redhelper2);
+
+
+  }
+
+
 #endif
   return (0);
 }
@@ -409,64 +469,6 @@ gather_spectra_para ()
 
   free (redhelper);
   free (redhelper2);
-
-/* Now during ionization cylcels, process the cell spectra */
-
-  /* The size of the commbuffers need to be the number of spectra x the length of each */
-
-  if (geo.ioniz_or_extract == CYCLE_IONIZ)
-  {
-    MPI_Barrier (MPI_COMM_WORLD);
-    size_of_commbuffer = NPLASMA * NBINS_IN_CELL_SPEC;
-    nspec = NPLASMA;
-
-    redhelper = calloc (sizeof (double), size_of_commbuffer);
-    redhelper2 = calloc (sizeof (double), size_of_commbuffer);
-
-    for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
-    {
-      for (mpi_j = 0; mpi_j < NPLASMA; mpi_j++)
-      {
-        redhelper[mpi_i * NPLASMA + mpi_j] = plasmamain[mpi_j].cell_spec_flux[mpi_i] / np_mpi_global;
-
-      }
-    }
-
-    /*
-       n=spec_bin*NPLASMA+nplasma  ... so all of the first freqency appears first
-
-       XXX Currently there is a problem in that the next statement shows that 
-       some threads do not have renormalized values in them.  Only one thread does.
-     */
-
-
-    Log ("XXX1 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper[500 * NPLASMA + 15]);
-
-    MPI_Barrier (MPI_COMM_WORLD);
-    MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-
-
-    for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
-    {
-      for (mpi_j = 0; mpi_j < NPLASMA; mpi_j++)
-      {
-        plasmamain[mpi_j].cell_spec_flux[mpi_i] = redhelper2[mpi_i * NPLASMA + mpi_j];
-
-      }
-    }
-    MPI_Barrier (MPI_COMM_WORLD);
-
-    Log ("XXX2 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper2[500 * NPLASMA + 15]);
-
-
-    free (redhelper);
-    free (redhelper2);
-
-
-  }
-
 
 
 #endif
