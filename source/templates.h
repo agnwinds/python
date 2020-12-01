@@ -496,6 +496,7 @@ double *get_one(int ndom, char variable_name[]);
 int get_one_array_element(int ndom, char variable_name[], int array_dim, double xval[]);
 int create_spec_table(int ndom, char rootname[]);
 int create_detailed_cell_spec_table(int ncell, char rootname[]);
+int create_big_detailed_spec_table(int ndom, char *rootname);
 /* import.c */
 int import_wind(int ndom);
 int import_wind2(int ndom, char *filename);
@@ -689,3 +690,4 @@ double *get_one(int ndom, char variable_name[]);
 int get_one_array_element(int ndom, char variable_name[], int array_dim, double xval[]);
 int create_spec_table(int ndom, char rootname[]);
 int create_detailed_cell_spec_table(int ncell, char rootname[]);
+int create_big_detailed_spec_table(int ndom, char *rootname);

@@ -1990,3 +1990,96 @@ create_detailed_cell_spec_table (ncell, rootname)
 
   return (0);
 }
+
+#define MAX_COLUMNS 1000
+
+int
+create_big_detailed_spec_table (ndom, rootname)
+     int ndom;
+     char *rootname;
+{
+  char column_name[MAX_COLUMNS][20];
+  int nplasma[MAX_COLUMNS], ii, jj, ncols;
+  int i, n, nwind_start, nwind_stop;
+
+  FILE *fptr;
+  char filename[132];
+  double freq[NBINS_IN_CELL_SPEC];
+
+  /* Identify the range of wind cells for this domain */
+
+  nwind_start = zdom[ndom].nstart;
+  nwind_stop = zdom[ndom].nstop;
+
+  ncols = 0;
+  for (n = nwind_start; n < nwind_stop; n++)
+  {
+    if (wmain[n].inwind >= 0)
+    {
+      nplasma[ncols] = wmain[n].nplasma;
+      if (zdom[ndom].coord_type == SPHERICAL)
+      {
+        sprintf (column_name[ncols], "F%03d      ", n - nwind_start);
+      }
+      else
+      {
+        wind_n_to_ij (ndom, n, &ii, &jj);
+        sprintf (column_name[ncols], "F%03d_%03d  ", ii, jj);
+      }
+
+      ncols++;
+      if (ncols == MAX_COLUMNS)
+      {
+        break;
+      }
+
+    }
+  }
+
+  /* Now we have the column names and we know which fluxes to print out, and we
+     can write out the header and the data */
+
+
+  sprintf (filename, "%s.xspec.all.txt", rootname);
+
+
+
+  /* Calculate the frequencies */
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    freq[i] = pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
+  }
+
+
+  fptr = fopen (filename, "w");
+
+  fprintf (fptr, "Freq.       ");
+  for (n = 0; n < ncols; n++)
+  {
+    fprintf (fptr, "%-10s ", column_name[n]);
+  }
+  fprintf (fptr, "\n");
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    fprintf (fptr, "%10.3e ", freq[i]);
+
+    for (n = 0; n < ncols; n++)
+    {
+      fprintf (fptr, "%10.3e ", plasmamain[nplasma[n]].cell_spec_flux[i]);
+    }
+
+    fprintf (fptr, "\n");
+  }
+
+
+  fclose (fptr);
+
+  return (0);
+
+
+
+
+
+
+}
