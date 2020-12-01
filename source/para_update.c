@@ -370,15 +370,7 @@ communicate_estimators_para ()
       }
     }
 
-    /*
-       n=spec_bin*NPLASMA+nplasma  ... so all of the first freqency appears first
 
-       XXX Currently there is a problem in that the next statement shows that 
-       some threads do not have renormalized values in them.  Only one thread does.
-     */
-
-
-    Log ("XXX1 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper[500 * NPLASMA + 15]);
 
     MPI_Barrier (MPI_COMM_WORLD);
     MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -396,7 +388,6 @@ communicate_estimators_para ()
     }
     MPI_Barrier (MPI_COMM_WORLD);
 
-    Log ("XXX2 %e   %e  \n", plasmamain[15].cell_spec_flux[500], redhelper2[500 * NPLASMA + 15]);
 
 
     free (redhelper);
