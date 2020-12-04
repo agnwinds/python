@@ -1994,6 +1994,35 @@ create_detailed_cell_spec_table (ncell, rootname)
 #define MAX_COLUMNS 10000
 #define MAX_IN_TABLE 1000
 
+
+/**********************************************************/
+/**
+ * @brief      write the detailed spectra in cells in a particular
+ * domain to a file or files
+ * @param [in] int  ncell   The domain number 
+ * @param [in] char  rootname   The rootname of the master file
+ * @return   Always returns 0
+ *
+ * @details
+ *
+ * The routine simply reads data in stored in the cell_spec_flux
+ * array of the Plasma structure
+ *
+ * Notes:
+ *
+ * The column names for the files represent the wind cell number
+ * (i,j) for for cylindrical and rtheta coordinates, (i) for 
+ * spherical coordinates.  
+ *
+ * Multiple files are written out if there are so many cells
+ * in the wind that the length of the lines seems impossibly
+ * large.  Whether this is a real limit or not is debatable.
+ *
+ * If there are multiple domains, the domain number needs
+ * to be incoprated into the rootname.
+ *
+ **********************************************************/
+
 int
 create_big_detailed_spec_table (ndom, rootname)
      int ndom;
