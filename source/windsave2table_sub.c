@@ -1991,7 +1991,8 @@ create_detailed_cell_spec_table (ncell, rootname)
   return (0);
 }
 
-#define MAX_COLUMNS 1000
+#define MAX_COLUMNS 10000
+#define MAX_IN_TABLE 1000
 
 int
 create_big_detailed_spec_table (ndom, rootname)
@@ -2005,6 +2006,7 @@ create_big_detailed_spec_table (ndom, rootname)
   FILE *fptr;
   char filename[132];
   double freq[NBINS_IN_CELL_SPEC];
+  int nstart, nstop;
 
   /* Identify the range of wind cells for this domain */
 
@@ -2029,7 +2031,9 @@ create_big_detailed_spec_table (ndom, rootname)
 
       ncols++;
       if (ncols == MAX_COLUMNS)
+
       {
+        printf ("There are more than %d cells in the wind, increase MAX_COLUMNS to get the rest\n", MAX_COLUMNS);
         break;
       }
 
@@ -2040,7 +2044,6 @@ create_big_detailed_spec_table (ndom, rootname)
      can write out the header and the data */
 
 
-  sprintf (filename, "%s.xspec.all.txt", rootname);
 
 
 
@@ -2050,30 +2053,52 @@ create_big_detailed_spec_table (ndom, rootname)
     freq[i] = pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
   }
 
-
-  fptr = fopen (filename, "w");
-
-  fprintf (fptr, "Freq.       ");
-  for (n = 0; n < ncols; n++)
+  nstart = 0;
+  while (nstart < ncols)
   {
-    fprintf (fptr, "%-10s ", column_name[n]);
-  }
-  fprintf (fptr, "\n");
-
-  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
-  {
-    fprintf (fptr, "%10.3e ", freq[i]);
-
-    for (n = 0; n < ncols; n++)
+    nstop = nstart + MAX_IN_TABLE;
+    if (nstop > ncols)
     {
-      fprintf (fptr, "%10.3e ", plasmamain[nplasma[n]].cell_spec_flux[i]);
+      nstop = ncols;
     }
 
+    if (ncols < MAX_IN_TABLE)
+    {
+      sprintf (filename, "%s.xspec.all.txt", rootname);
+    }
+    else
+    {
+      sprintf (filename, "%s.xspec.%02d.txt", rootname, nstart / MAX_IN_TABLE);
+    }
+
+    fptr = fopen (filename, "w");
+
+    printf ("Printing spectra %d to %d to %s\n", nstart, nstop, filename);
+
+    fprintf (fptr, "Freq.       ");
+    for (n = nstart; n < nstop; n++)
+    {
+      fprintf (fptr, "%-10s ", column_name[n]);
+    }
     fprintf (fptr, "\n");
+
+    for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+    {
+      fprintf (fptr, "%10.3e ", freq[i]);
+
+      for (n = 0; n < ncols; n++)
+      {
+        fprintf (fptr, "%10.3e ", plasmamain[nplasma[n]].cell_spec_flux[i]);
+      }
+
+      fprintf (fptr, "\n");
+    }
+
+
+    fclose (fptr);
+
+    nstart += MAX_IN_TABLE;
   }
-
-
-  fclose (fptr);
 
   return (0);
 
