@@ -79,7 +79,7 @@ char rad_hydro_files_help[] = "Usage: rad_hydro_files rootname \n\
 ";
 
 void
-parse_arguments (int argc, char *argv[], char root[], int *ion_switch)
+xparse_arguments (int argc, char *argv[], char root[], int *ion_switch)
 {
   char *fget_rc;
   char input[LINELENGTH];
@@ -169,7 +169,7 @@ main (argc, argv)
    * last compiled and on what commit this was
    */
 
-  parse_arguments (argc, argv, root, &ion_switch);
+  xparse_arguments (argc, argv, root, &ion_switch);
 
   printf ("Reading data from file %s\n", root);
 

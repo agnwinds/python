@@ -1932,3 +1932,208 @@ create_spec_table (ndom, rootname)
 
   return (0);
 }
+
+
+/**********************************************************/
+/**
+ * @brief      write the detailed spectrum in a cell
+ * to a file
+ * @param [in] int  ncell   The number of a cell in the wind
+ * @param [in] char  rootname   The rootname of the master file
+ * @return   Always returns 0
+ *
+ * @details
+ *
+ *
+ **********************************************************/
+
+int
+create_detailed_cell_spec_table (ncell, rootname)
+     int ncell;
+     char rootname[];
+{
+  FILE *fptr;
+  char filename[132];
+
+  double freq[NBINS_IN_CELL_SPEC];
+  double flux[NBINS_IN_CELL_SPEC];
+  int i, nplasma;
+
+  printf ("%e %e\n", geo.cell_log_freq_min, geo.cell_delta_lfreq);
+
+  sprintf (filename, "%s.xspec.%d.txt", rootname, ncell);
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    freq[i] = pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
+  }
+
+  nplasma = wmain[ncell].nplasma;
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    flux[i] = plasmamain[nplasma].cell_spec_flux[i];
+  }
+
+
+  fptr = fopen (filename, "w");
+
+  fprintf (fptr, "Freq.          Flux\n");
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    fprintf (fptr, "%10.3e  %10.3e\n", freq[i], flux[i]);
+  }
+
+
+  fclose (fptr);
+
+  return (0);
+}
+
+#define MAX_COLUMNS 10000
+#define MAX_IN_TABLE 1000
+
+
+/**********************************************************/
+/**
+ * @brief      write the detailed spectra in cells in a particular
+ * domain to a file or files
+ * @param [in] int  ncell   The domain number 
+ * @param [in] char  rootname   The rootname of the master file
+ * @return   Always returns 0
+ *
+ * @details
+ *
+ * The routine simply reads data in stored in the cell_spec_flux
+ * array of the Plasma structure
+ *
+ * Notes:
+ *
+ * The column names for the files represent the wind cell number
+ * (i,j) for for cylindrical and rtheta coordinates, (i) for 
+ * spherical coordinates.  
+ *
+ * Multiple files are written out if there are so many cells
+ * in the wind that the length of the lines seems impossibly
+ * large.  Whether this is a real limit or not is debatable.
+ *
+ * If there are multiple domains, the domain number needs
+ * to be incoprated into the rootname.
+ *
+ **********************************************************/
+
+int
+create_big_detailed_spec_table (ndom, rootname)
+     int ndom;
+     char *rootname;
+{
+  char column_name[MAX_COLUMNS][20];
+  int nplasma[MAX_COLUMNS], ii, jj, ncols;
+  int i, n, nwind_start, nwind_stop;
+
+  FILE *fptr;
+  char filename[132];
+  double freq[NBINS_IN_CELL_SPEC];
+  int nstart, nstop;
+
+  /* Identify the range of wind cells for this domain */
+
+  nwind_start = zdom[ndom].nstart;
+  nwind_stop = zdom[ndom].nstop;
+
+  ncols = 0;
+  for (n = nwind_start; n < nwind_stop; n++)
+  {
+    if (wmain[n].inwind >= 0)
+    {
+      nplasma[ncols] = wmain[n].nplasma;
+      if (zdom[ndom].coord_type == SPHERICAL)
+      {
+        sprintf (column_name[ncols], "F%03d      ", n - nwind_start);
+      }
+      else
+      {
+        wind_n_to_ij (ndom, n, &ii, &jj);
+        sprintf (column_name[ncols], "F%03d_%03d  ", ii, jj);
+      }
+
+      ncols++;
+      if (ncols == MAX_COLUMNS)
+
+      {
+        printf ("There are more than %d cells in the wind, increase MAX_COLUMNS to get the rest\n", MAX_COLUMNS);
+        break;
+      }
+
+    }
+  }
+
+  /* Now we have the column names and we know which fluxes to print out, and we
+     can write out the header and the data */
+
+
+
+
+
+  /* Calculate the frequencies */
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    freq[i] = pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
+  }
+
+  nstart = 0;
+  while (nstart < ncols)
+  {
+    nstop = nstart + MAX_IN_TABLE;
+    if (nstop > ncols)
+    {
+      nstop = ncols;
+    }
+
+    if (ncols < MAX_IN_TABLE)
+    {
+      sprintf (filename, "%s.xspec.all.txt", rootname);
+    }
+    else
+    {
+      sprintf (filename, "%s.xspec.%02d.txt", rootname, nstart / MAX_IN_TABLE);
+    }
+
+    fptr = fopen (filename, "w");
+
+    printf ("Printing spectra %d to %d to %s\n", nstart, nstop, filename);
+
+    fprintf (fptr, "Freq.       ");
+    for (n = nstart; n < nstop; n++)
+    {
+      fprintf (fptr, "%-10s ", column_name[n]);
+    }
+    fprintf (fptr, "\n");
+
+    for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+    {
+      fprintf (fptr, "%10.3e ", freq[i]);
+
+      for (n = 0; n < ncols; n++)
+      {
+        fprintf (fptr, "%10.3e ", plasmamain[nplasma[n]].cell_spec_flux[i]);
+      }
+
+      fprintf (fptr, "\n");
+    }
+
+
+    fclose (fptr);
+
+    nstart += MAX_IN_TABLE;
+  }
+
+  return (0);
+
+
+
+
+
+
+}
