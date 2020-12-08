@@ -62,9 +62,9 @@ calculate_ionization (restart_stat)
   int iwind;
 
 
-#ifdef MPI_ON
-  int ioniz_spec_helpers;
-#endif
+//OLD #ifdef MPI_ON
+//OLD   int ioniz_spec_helpers;
+//OLD #endif
 
   /* Save the the windfile before the first ionization cycle in order to
    * allow investigation of issues that may have arisen at the very beginning
@@ -87,11 +87,11 @@ calculate_ionization (restart_stat)
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
-#ifdef MPI_ON
-  /* the length of the big arrays to help with the MPI reductions of the spectra
-     the variables for the estimator arrays are set up in the subroutines themselves */
-  ioniz_spec_helpers = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
-#endif
+//OLD #ifdef MPI_ON
+//OLD   /* the length of the big arrays to help with the MPI reductions of the spectra
+//OLD      the variables for the estimator arrays are set up in the subroutines themselves */
+//OLD   ioniz_spec_helpers = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
+//OLD #endif
 
 /* THE CALCULATION OF THE IONIZATION OF THE WIND */
 
@@ -304,7 +304,8 @@ calculate_ionization (restart_stat)
 
 #ifdef MPI_ON
 
-    gather_spectra_para (ioniz_spec_helpers, MSPEC);
+//OLD    gather_spectra_para (ioniz_spec_helpers, MSPEC);
+    gather_spectra_para ();
 
 #endif
 
@@ -578,7 +579,8 @@ make_spectra (restart_stat)
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-    gather_spectra_para (spec_spec_helpers, nspectra);
+//OLD    gather_spectra_para (spec_spec_helpers, nspectra);
+    gather_spectra_para ();
 #endif
 
 

@@ -313,7 +313,7 @@ ds_to_wind (pp, ndom_current)
         stuff_phot (pp, &qtest);
         move_phot (&qtest, x);
         rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
-        if (zdom[ndom].wind_rho_min <= rho && rho <= zdom[ndom].wind_rho_min)
+        if (zdom[ndom].wind_rhomin_at_disk <= rho && rho <= zdom[ndom].wind_rhomax_at_disk)
         {
 
           ds = x;
@@ -327,7 +327,7 @@ ds_to_wind (pp, ndom_current)
         stuff_phot (pp, &qtest);
         move_phot (&qtest, x);
         rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
-        if (zdom[ndom].wind_rho_min <= rho && rho <= zdom[ndom].wind_rho_min)
+        if (zdom[ndom].wind_rhomin_at_disk <= rho && rho <= zdom[ndom].wind_rhomax_at_disk)
         {
 
           ds = x;
@@ -336,7 +336,7 @@ ds_to_wind (pp, ndom_current)
         }
       }
 
-      x = ds_to_cylinder (zdom[ndom].wind_rho_min, &ptest);
+      x = ds_to_cylinder (zdom[ndom].wind_rhomin_at_disk, &ptest);
       if (x > 0 && x < ds)
       {
         stuff_phot (pp, &qtest);
@@ -352,7 +352,7 @@ ds_to_wind (pp, ndom_current)
         }
       }
 
-      x = ds_to_cylinder (zdom[ndom].wind_rho_max, &ptest);
+      x = ds_to_cylinder (zdom[ndom].wind_rhomax_at_disk, &ptest);
       if (x > 0 && x < ds)
       {
         stuff_phot (pp, &qtest);

@@ -317,7 +317,16 @@ struct plane diskplane, disktop, diskbottom;
  * @param [in] int  allow_negative   if nonzero, permits a
             negative distance to
  *          be returned
+ * @param [out] int *hit  integer indicating whether the the 
+ * 	    photon hit the disk or not, and if so where
  * @return     The distance to the disk.
+ *
+ * The variable *hit returns
+ *
+ * * DISK_MISSED if the photon path would not hit the disk 
+ * * DISK_HIT_TOP if the photon path would hit the disk from the +z direction
+ * * DISK_HOT_BOT if the photon path would hit the disk from the -z direction
+ * * DISK_HIT_EDGE if photon path would hit the edge of a vertically extended sik
  *
  *
  * Usually, ds_to_disk returns the distance along the line of
@@ -759,7 +768,7 @@ ds_to_disk (p, allow_negative, hit)
    * calculate this first, and then check if s is less than s_diskplanerad.
    * 
    * To setup rtsafe, we have to find distances which bracket what we
-   * want.  smax should be no more than the distance to the disk_plane
+   * want.  smax should be no more than the distance to the disk plane
    * (assuming we have a photon headed toward the plane)
    * 
    * Note that the next little section is intended to select between the

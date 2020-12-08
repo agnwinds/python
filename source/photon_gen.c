@@ -787,7 +787,6 @@ star_init (freqmin, freqmax, ioniz_or_final, f)
 
 }
 
-/* Generate nphot photons from the star in the frequency interval f1 to f2 */
 
 
 /**********************************************************/
@@ -1018,7 +1017,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     }
 
-    if (random_number (-0.5, 0.5) > 0.0)        //Get a uniform random number brtween -0.5 and 0.5- use sign to toss a coin.
+    if (random_number (-0.5, 0.5) > 0.0)
     {                           /* Then the photon emerges in the upper hemisphere */
       p[i].x[2] = (z + EPSILON);
     }
@@ -1039,9 +1038,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
       p[i].freq = planck (t, freqmin, freqmax);
     }
     else if (spectype == SPECTYPE_UNIFORM)
-    {                           //Produce a uniform distribution of frequencies
-
-      p[i].freq = random_number (freqmin, freqmax);     //Get a random frequency between fmin and fmax (exluding the ends)
+    {
+      p[i].freq = random_number (freqmin, freqmax);
     }
 
     else

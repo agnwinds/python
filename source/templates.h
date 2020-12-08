@@ -108,6 +108,7 @@ double func_minimiser(double a, double m, double b, double (*func)(double, void 
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
 /* phot_util.c */
+int init_dummy_phot(PhotPtr p);
 int stuff_phot(PhotPtr pin, PhotPtr pout);
 int move_phot(PhotPtr pp, double ds);
 int comp_phot(PhotPtr p1, PhotPtr p2);
@@ -462,7 +463,7 @@ int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[n
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplasma);
 /* para_update.c */
 int communicate_estimators_para(void);
-int gather_spectra_para(int nspec_helper, int nspecs);
+int gather_spectra_para(void);
 int communicate_matom_estimators_para(void);
 /* setup_star_bh.c */
 double get_stellar_params(void);
@@ -471,6 +472,7 @@ int get_bl_and_agn_params(double lstar);
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int setup_windcone(void);
+int init_windcone(double r, double z, double dzdr, int allow_negative_dzdr, ConePtr one_windcone);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */
@@ -491,6 +493,10 @@ int create_velocity_gradient_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
+int get_one_array_element(int ndom, char variable_name[], int array_dim, double xval[]);
+int create_spec_table(int ndom, char rootname[]);
+int create_detailed_cell_spec_table(int ncell, char rootname[]);
+int create_big_detailed_spec_table(int ndom, char *rootname);
 /* import.c */
 int import_wind(int ndom);
 int import_wind2(int ndom, char *filename);
@@ -567,10 +573,6 @@ int is_input_line_synonym_for_question(char question[], char input_line[]);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* xtest.c */
 int xtest(void);
-/* derivative.c */
-double f(double x, void *params);
-int get_derivative(void);
-int xmodel_vgrad(double ds_fraction, int ndom, double x[], double v_grad[][3]);
 /* setup_reverb.c */
 int get_meta_params(void);
 /* setup_line_transfer.c */
@@ -674,7 +676,7 @@ int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 void py_wind_help(void);
 /* windsave2table.c */
-void parse_arguments(int argc, char *argv[], char root[], int *ion_switch);
+void parse_arguments(int argc, char *argv[], char root[], int *ion_switch, int *spec_switch);
 int main(int argc, char *argv[]);
 /* windsave2table_sub.c */
 int do_windsave2table(char *root, int ion_switch);
@@ -685,3 +687,7 @@ int create_velocity_gradient_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz, int ion_switch);
 double *get_ion(int ndom, int element, int istate, int iswitch, char *name);
 double *get_one(int ndom, char variable_name[]);
+int get_one_array_element(int ndom, char variable_name[], int array_dim, double xval[]);
+int create_spec_table(int ndom, char rootname[]);
+int create_detailed_cell_spec_table(int ncell, char rootname[]);
+int create_big_detailed_spec_table(int ndom, char *rootname);

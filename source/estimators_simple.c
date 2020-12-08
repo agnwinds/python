@@ -82,6 +82,7 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
      int ndom;
 {
   int i;
+  double log_freq;
 
   /*photon weight times distance in the shell is proportional to the mean intensity */
 
@@ -132,6 +133,19 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
 
     }
   }
+
+  /* Increment the cell spectra  */
+
+  log_freq = log10 (p->freq);
+  i = (log_freq - geo.cell_log_freq_min) / geo.cell_delta_lfreq;
+  if (i < 0)
+    i = 0;
+  if (i > NBINS_IN_CELL_SPEC - 1)
+  {
+    i = NBINS_IN_CELL_SPEC - 1;
+  }
+  xplasma->cell_spec_flux[i] += w_ave * ds;
+
 
 
   /* Increment counters which show the number of times a photon bundle of a certain type
@@ -411,26 +425,20 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
  *
  * @return Always return 0
  *
- * @details this routine normalises "simple" estimators. This quantities
- * vary - some of them are banded estimators used for the ionization 
+ * @details 
+ * This routine normalises "simple" estimators and in a few cases compleets
+ * the determination of the quantity itself by performaing calculations
+ * of various quantities that have been accumulated during photon transfer
+ *
+ * The quantities vary - some of them are banded estimators used for the ionization 
  * state spectral models, others are diagnostics such as xi, others are used
- * in dilute approximations (w and t_r). The main normalisation procedure needs
- * documenting, but it normally involves dividing by a Delta V Delta t, as well
- * as (sometimes) constants like c or 4 pi. 
+ * in dilute approximations (w and t_r). 
  *
  * ### Notes ###
  *
- * Currently wmain[].vol is the total volume in the cmf frame.
- * Most estimateors are calculated in the cmf frame, but delta_t_cmf
- * is given by delta_t_obs/gamma, that is 
- *
- *  V delta t = V/gamma
- *
- * is the factor by which most of the estimators are normalized.  This is 
- * equivalent to the volume in the observer frame, but that is not stored.
- *
- * This function calculates the force estimators in the observer
- * frame and thus requires quantities in the observer frame.
+ * Most of the quantities that are renormalized here are quanties that
+ * are measured in the co-moving frame, but the radiation force is
+ * an observer frame quantity and so is notmralized differently
  *
  **********************************************************/
 
@@ -478,7 +486,7 @@ normalise_simple_estimators (xplasma)
     }
   }
   else
-  {                             /* It is not clear what to do with no photons in a cell */
+  {
     xplasma->j = xplasma->j_direct = xplasma->j_scatt = 0;
     xplasma->t_e *= 0.7;
     if (xplasma->t_e < MIN_TEMP)
@@ -486,28 +494,38 @@ normalise_simple_estimators (xplasma)
     xplasma->w = 0;
   }
 
-  /* Calculate the frequency banded j and ave_freq variables */
+  /* Normalize and otherwise complete the information gathered about the 
+     coarse spectra used for generation of spectral models */
 
   for (i = 0; i < geo.nxfreq; i++)
-  {                             /*loop over number of bands */
+  {
     if (xplasma->nxtot[i] > 0)
-    {                           /*Check we actually have some photons in the cell in this band */
-      xplasma->xave_freq[i] /= xplasma->xj[i];  /*Normalise the average frequency */
-      xplasma->xsd_freq[i] /= xplasma->xj[i];   /*Normalise the mean square frequency */
+    {
+      xplasma->xave_freq[i] /= xplasma->xj[i];
+      xplasma->xsd_freq[i] /= xplasma->xj[i];
       xplasma->xsd_freq[i] = sqrt (xplasma->xsd_freq[i] - (xplasma->xave_freq[i] * xplasma->xave_freq[i]));     /*Compute standard deviation */
       xplasma->xj[i] /= (4 * PI * invariant_volume_time);       /*Convert to radiation density */
     }
     else
     {
-      xplasma->xj[i] = 0;       /*If no photons, set both radiation estimators to zero */
+      xplasma->xj[i] = 0;
       xplasma->xave_freq[i] = 0;
-      xplasma->xsd_freq[i] = 0; /*NSH 120815 and also the SD ???? */
+      xplasma->xsd_freq[i] = 0;
     }
   }
 
 
+  /* Normalize the cell spectra to radiation density */
 
-  /* 1110 NSH Normalise IP, which at this point should be
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+
+    xplasma->cell_spec_flux[i] /= (4 * PI * invariant_volume_time);
+
+  }
+
+
+  /* Normalise IP, which at this point should be
    * the number of photons in a cell by dividing by volume
    * and number density of hydrogen in the cell
    */
@@ -517,7 +535,7 @@ normalise_simple_estimators (xplasma)
   xplasma->ip_direct /= (VLIGHT * invariant_volume_time * nh);
   xplasma->ip_scatt /= (VLIGHT * invariant_volume_time * nh);
 
-  /* 1510 NSH Normalise xi, which at this point should be the luminosity of
+  /* Normalise xi, which at this point should be the luminosity of
    * ionizing photons in a cell (just the sum of photon weights)
    */
 
