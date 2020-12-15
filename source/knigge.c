@@ -75,7 +75,6 @@ get_knigge_wind_params (ndom)
      int ndom;
 {
   double dmin;
-//OLD  double disktheta;
   double rmin, rmax;
 
 
@@ -137,10 +136,6 @@ get_knigge_wind_params (ndom)
     zdom[ndom].wind_thetamax =
       atan (zdom[ndom].wind_rhomax_at_disk / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rhomax_at_disk))));
 
-//OLD    zdom[ndom].wind_rhomin_at_disk =
-//OLD      zdom[ndom].wind_rhomin_at_disk - (zdisk (zdom[ndom].wind_rhomin_at_disk) * tan (zdom[ndom].wind_thetamin));
-//OLD    zdom[ndom].wind_rhomax_at_disk =
-//OLD      zdom[ndom].wind_rhomax_at_disk - (zdisk (zdom[ndom].wind_rhomax_at_disk) * tan (zdom[ndom].wind_thetamax));
   }
 
 
@@ -156,16 +151,6 @@ get_knigge_wind_params (ndom)
 
   rmin = zdom[ndom].wind_rhomin_at_disk;
   rmax = zdom[ndom].wind_rhomax_at_disk;
-
-  /* For non-flat disk some streamlines are missing (SS). */
-
-//OLD  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-//OLD  {
-//OLD    disktheta = atan (zdisk (geo.diskrad) / geo.diskrad);
-//OLD    rmin =
-//OLD      zdom[ndom].kn_dratio * geo.rstar * sin (zdom[ndom].wind_thetamin) *
-//OLD      cos (disktheta) / sin ((PI / 2.) - zdom[ndom].wind_thetamin - disktheta);
-//OLD  }
 
 
   kn_lambda = zdom[ndom].kn_lambda;

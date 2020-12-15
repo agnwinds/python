@@ -113,11 +113,9 @@ observer_to_local_frame (p_in, p_out)
   double v[3], vel;
   double gamma;
   int i, ierr;
-//OLD  struct photon phot_dummy;
 
 
 
-//OLD  stuff_phot (p_in, &phot_dummy);
 
 
 
@@ -153,16 +151,11 @@ observer_to_local_frame (p_in, p_out)
 
   for (i = 0; i < 3; i++)
   {
-//OLD    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] - x * v[i]);
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
   }
 
   p_out->w *= (f_out / f_in);
 
-//OLD  if (length (p_out->lmn) < 0.9999999 || length (p_out->lmn) > 1.0000001)
-//OLD  {
-//OLD    Error ("observer_to_local_frame:  %11.4e -> %11.4e -> %11.4e \n", length (phot_dummy.lmn), length (p_in->lmn), length (p_out->lmn));
-//OLD  }
 
   return (ierr);
 }
@@ -211,9 +204,7 @@ local_to_observer_frame (p_in, p_out)
   int i;
   int ierr;
 
-//OLD  struct photon phot_dummy;
 
-//OLD  stuff_phot (p_in, &phot_dummy);
 
   ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame");
 
@@ -243,16 +234,11 @@ local_to_observer_frame (p_in, p_out)
 
   for (i = 0; i < 3; i++)
   {
-//OLD    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] + x * v[i]);
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] + x * v[i]);
   }
 
   p_out->w *= (f_out / f_in);
 
-//OLD  if (length (p_out->lmn) < 0.9999999 || length (p_out->lmn) > 1.0000001)
-//OLD  {
-//OLD    Error ("local_to_observer_frame:  %11.4e -> %11.4e -> %11.4e \n", length (phot_dummy.lmn), length (p_in->lmn), length (p_out->lmn));
-//OLD  }
 
   return (ierr);
 }
@@ -297,9 +283,7 @@ observer_to_local_frame_disk (p_in, p_out)
   double gamma;
   int i, ierr;
 
-//OLD  struct photon phot_dummy;
 
-//OLD  stuff_phot (p_in, &phot_dummy);
 
 
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame_disk");
@@ -334,17 +318,11 @@ observer_to_local_frame_disk (p_in, p_out)
 
   for (i = 0; i < 3; i++)
   {
-//OLD    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] - x * v[i]);
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
   }
 
   p_out->w *= (f_out / f_in);
 
-//OLD  if (length (p_out->lmn) < 0.9999999 || length (p_out->lmn) > 1.0000001)
-//OLD  {
-//OLD    Error ("observer_to_local_frame_disk:  %11.4e -> %11.4e -> %11.4e \n", length (phot_dummy.lmn), length (p_in->lmn),
-//OLD           length (p_out->lmn));
-//OLD  }
 
   return (ierr);
 }
@@ -392,9 +370,6 @@ local_to_observer_frame_disk (p_in, p_out)
   double gamma;
   int i;
   int ierr;
-//OLD  struct photon phot_dummy;
-
-//OLD  stuff_phot (p_in, &phot_dummy);
 
   ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame_disk");
 
@@ -425,18 +400,11 @@ local_to_observer_frame_disk (p_in, p_out)
 
   for (i = 0; i < 3; i++)
   {
-//OLD    p_out->lmn[i] = f_out / f_in * (p_in->lmn[i] + x * v[i]);
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] + x * v[i]);
   }
 
   p_out->w *= (f_out / f_in);
 
-
-//OLD  if (length (p_out->lmn) < 0.9999999 || length (p_out->lmn) > 1.0000001)
-//OLD  {
-//OLD    Error ("local_to_observer_frame_disk:  %11.4e -> %11.4e -> %11.4e \n", length (phot_dummy.lmn), length (p_in->lmn),
-//OLD           length (p_out->lmn));
-//OLD  }
 
 
   return (ierr);

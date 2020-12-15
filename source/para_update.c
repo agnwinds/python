@@ -348,7 +348,7 @@ communicate_estimators_para ()
   free (iqdisk_helper2);
 
 
-/* Now during ionization cylcels, process the cell spectra */
+/* Now during ionization cycles, process the cell spectra */
 
   /* The size of the commbuffers need to be the number of spectra x the length of each */
 

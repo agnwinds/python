@@ -304,7 +304,6 @@ calculate_ionization (restart_stat)
 
 #ifdef MPI_ON
 
-//OLD    gather_spectra_para (ioniz_spec_helpers, MSPEC);
     gather_spectra_para ();
 
 #endif

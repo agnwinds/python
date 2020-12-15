@@ -563,7 +563,6 @@ bands_init (imode, band)
    * spectra in each cell for ionization calculations
    */
 
-//OLD  freqs_init (xband.f1[0], xband.f2[xband.nbands - 1]);
 
   for (nband = 0; nband < band->nbands; nband++)
   {
