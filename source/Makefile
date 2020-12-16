@@ -121,7 +121,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 84i
+VERSION = 85 
 
 INDENT = yes
 
