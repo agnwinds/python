@@ -227,7 +227,6 @@ define_wind ()
       geo.frame = OBS_FRAME;    //relevant quantities are defined in the observer faems
     }
   }
-//OLD  printf ("BOOM frame=%i\n", geo.frame);
 
 
 /* The routines above have established the volumes of the cells that are in the wind

@@ -419,7 +419,7 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
 
 /**********************************************************/
 /**
- * @brief Normalise simple estimators 
+ * @brief Normalise simple estimators and cell spectra
  *
  * @param[in] PlasmaPtr xplasma  PlasmaPtr for the cell of interest
  *
@@ -436,7 +436,7 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
  *
  * ### Notes ###
  *
- * Most of the quantities that are renormalized here are quanties that
+ * Most of the quantities that are renormalized here are quantities that
  * are measured in the co-moving frame, but the radiation force is
  * an observer frame quantity and so is notmralized differently
  *
@@ -450,6 +450,7 @@ normalise_simple_estimators (xplasma)
   double radiation_temperature, nh, wtest;
   double volume_obs, invariant_volume_time;
   double electron_density_obs;
+  double freq_min, freq_max, dfreq;
 
   nwind = xplasma->nwind;
 
@@ -515,12 +516,15 @@ normalise_simple_estimators (xplasma)
   }
 
 
-  /* Normalize the cell spectra to radiation density */
+  /* Normalize the cell spectra to J_nu - erg/s/cm^3/Sr/Hz */
 
   for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
   {
+    freq_min = geo.cell_log_freq_min + (i) * geo.cell_delta_lfreq;
+    freq_max = freq_min + geo.cell_delta_lfreq;
+    dfreq = pow (10., freq_max) - pow (10., freq_min);
 
-    xplasma->cell_spec_flux[i] /= (4 * PI * invariant_volume_time);
+    xplasma->cell_spec_flux[i] /= (4 * PI * invariant_volume_time * dfreq);
 
   }
 
