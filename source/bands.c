@@ -563,7 +563,20 @@ bands_init (imode, band)
    * spectra in each cell for ionization calculations
    */
 
-  freqs_init (xband.f1[0], xband.f2[xband.nbands - 1]);
+
+  for (nband = 0; nband < band->nbands; nband++)
+  {
+    geo.xfreq[nband] = band->f1[nband];
+  }
+  geo.nxfreq = band->nbands;
+  geo.xfreq[band->nbands] = band->f2[band->nbands - 1];
+
+  /* Now define the freqquency boundaries for the cell spectra */
+
+  geo.cell_log_freq_min = log10 (band->f1[0]);
+  geo.cell_log_freq_max = log10 (band->f2[band->nbands - 1]);
+  geo.cell_delta_lfreq = (geo.cell_log_freq_max - geo.cell_log_freq_min) / NBINS_IN_CELL_SPEC;
+
   return (0);
 }
 
@@ -579,14 +592,14 @@ bands_init (imode, band)
  * @param [in] double  freqmax   The maximum frequency
  * @return     Always returns 0.  
  *
- * The frequncy intervals are stored
+ * The frequency intervals are stored
  * in geo.xfreq.  The total number of frequencies is geo.nxfreq
  *
  * @details
  * 
  * In order to approximate the radiation field in each plasma cell, one
  * needs to record a coarse spectrum.  There is no point in creaating 
- * a detailed spectrum since this will (usually) not be justivied by the
+ * a detailed spectrum since this will (usually) not be justified by the
  * photon statistics and in any event wouuld require to much memory. Memory
  * restrictions also mean we cannot simple record the effects of individual
  * photons.  
@@ -597,9 +610,9 @@ bands_init (imode, band)
  *
  * ### Notes ###
  *
- * At present everything is hardwired.  Two typs of banding
- * are carred out, one for AGN/X-ray bianries, and one for
- * stellar systems
+ * At present everything is hardwired.  In the case of SPECTYPE_CL_TAB,
+ * a special broken power law used for comparisons, a different set
+ * of bands are used.
  *
  * freqmin and freqmax are used in order to limit the total range of
  * the spectral bands.
