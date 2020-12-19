@@ -23,8 +23,7 @@
 #include "atomic.h"
 #include "python.h"
 
-//OLD struct photon cds_phot_old_observer, cds_phot_old_loc;
-
+int resonate_number_freq_diff_low = 0;
 
 /**********************************************************/
 /**
@@ -184,13 +183,29 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 /* The next section checks to see if the frequency difference on
  * the two sides is very small and if not limits the resonances
  * one has to worry about
+ *
+ * 201219 - ksl - Previously resonate simple returned if the frequency
+ * difference between two sides was too low and recorded an error.  Now,
+ * resonate attempts to calculate opacities anyway, and stops reporting 
+ * small dfreq after 1000 examples.  
  */
 
-  if (fabs (dfreq) < EPSILON)
+  if (fabs (dfreq) < EPSILON && resonate_number_freq_diff_low < 1000)
   {
-    Error ("calculate_ds: freq same at both sides of cell %d\n", one->nwind);
+    /* The frequency difference is very small so there are not resonances to consider in the
+       Sobolev approximation */
+    Error ("calculate_ds: freq same along path in cell %d\n", one->nwind);
     x = -1;
-    return (smax);              // This is not really the best thing to do, but it avoids disaster below
+
+    limit_lines (freq_inner, freq_outer);
+    nstart = nline_min;
+    ndelt = 1;
+    resonate_number_freq_diff_low += 1;
+
+    if (resonate_number_freq_diff_low == 1000)
+    {
+      Error ("calculate_ds: reached 1000 examples of freq. same along path in cell.\n");
+    }
 
   }
   else if (dfreq > 0)
