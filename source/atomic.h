@@ -75,7 +75,7 @@ int n_inner_tot;                /*The actual number of inner shell ionization cr
 
 // #define MAXJUMPS          1000000       /* The maximum number of Macro Atom jumps before emission (if this is exceeded
 // XXXX  - the maxium number of jumps has been reduced for testing
-#define MAXJUMPS          1000      /* The maximum number of Macro Atom jumps before emission (if this is exceeded
+#define MAXJUMPS          10000      /* The maximum number of Macro Atom jumps before emission (if this is exceeded
                                            it gives up (SS) */
 #define NAUGER 2                /*Maximum number of "auger" processes */
 int nauger;                     /*Actual number of innershell edges for which autoionization is to be computed */

@@ -19,6 +19,13 @@
 #include "atomic.h"
 #include "python.h"
 
+/* External variables for use in matom */
+
+double jprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)], eprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)];
+double pjnorm_known[NLEVELS_MACRO], penorm_known[NLEVELS_MACRO];
+int prbs_known[NLEVELS_MACRO];
+int matom_cell = 0;
+int matom_z = 0;
 
 /**********************************************************/
 /** 
@@ -38,7 +45,7 @@
  * Macro Atom jumping/deactivation probabilities following Lucy and so deduces
  * the process by which deactivation occurs. 
  * 
- * The two poossibilities are that the macro-atom deactivates by an r-packet
+ * The two possibilities are that the macro-atom deactivates by an r-packet
  * (radiative deactivations) or a k-packet (putting the energy  into the
  * thermal pool) as indicated by the variable escape.
  * 
@@ -82,15 +89,16 @@ matom (p, nres, escape)
   double rad_rate, coll_rate, lower_density, density_ratio;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
-  double jprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)], eprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)];
-  double pjnorm_known[NLEVELS_MACRO], penorm_known[NLEVELS_MACRO];
-  int prbs_known[NLEVELS_MACRO];
+  int z;
+//OLD  double jprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)], eprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)];
+//OLD  double pjnorm_known[NLEVELS_MACRO], penorm_known[NLEVELS_MACRO];
+//OLD  int prbs_known[NLEVELS_MACRO];
 
 
-  for (n = 0; n < NLEVELS_MACRO; n++)
-  {
-    prbs_known[n] = -1;         //flag all as unknown
-  }
+//OLD  for (n = 0; n < NLEVELS_MACRO; n++)
+//OLD  {
+//OLD    prbs_known[n] = -1;         //flag all as unknown
+//OLD  }
 
 
   one = &wmain[p->grid];
@@ -116,11 +124,13 @@ matom (p, nres, escape)
   if (*nres < NLINES)
   {
     uplvl = lin_ptr[*nres]->nconfigu;
+    z = lin_ptr[*nres]->z;
 
   }
   else if (*nres > NLINES)
   {
     uplvl = phot_top[*nres - NLINES - 1].uplev;
+    z = phot_top[*nres - NLINES - 1].z;
   }
   else
   {
@@ -130,6 +140,20 @@ matom (p, nres, escape)
     p->istat = P_ERROR_MATOM;
     return (0);
   }
+
+  if (z != matom_z || p->grid != matom_cell)
+  {
+    for (n = 0; n < NLEVELS_MACRO; n++)
+    {
+      prbs_known[n] = -1;       //flag all as unknown
+    }
+    matom_z = z;
+    matom_cell = p->grid;
+  }
+//OLD  else
+//OLD  {
+//OLD    Log ("Using old for photon in grid %d and element %e\n", p->grid, z);
+//OLD  }
 
   /* Now follows the main loop to govern the macro atom jumps. Keeps jumping until
      an emission occurs (at which point it breaks). */
@@ -161,7 +185,6 @@ matom (p, nres, escape)
       {
         jprbs_known[uplvl][n] = jprbs[n] = 0;   /*slots for upward jumps */
       }
-      /* Finished zeroing. */
 
 
       /* bb */
@@ -313,7 +336,6 @@ matom (p, nres, escape)
        now select what happens next. Start by choosing the random threshold value at which the
        event will occur. */
 
-    threshold = random_number (0.0, 1.0);
 
 
     if ((pjnorm_known[uplvl] + penorm_known[uplvl]) <= 0.0)
@@ -327,6 +349,7 @@ matom (p, nres, escape)
       return (0);
     }
 
+    threshold = random_number (0.0, 1.0);
     if (((pjnorm_known[uplvl] / (pjnorm_known[uplvl] + penorm_known[uplvl])) < threshold) || (pjnorm_known[uplvl] == 0))
       break;                    // An emission occurs and so we leave the for loop.
 
@@ -386,6 +409,7 @@ matom (p, nres, escape)
   }
 
   /* Check that the the number of level jumps has not exceeded the maxium value */
+
 
   if (njumps == MAXJUMPS)
   {
@@ -478,6 +502,8 @@ matom (p, nres, escape)
     p->istat = P_ERROR_MATOM;
     return (0);
   }
+
+  Log ("Leaving phot %d in cell %d after % d jumps via %d\n", p->np, p->grid, njumps, *escape);
 
   return (0);
 }
@@ -649,28 +675,12 @@ alpha_sp_integrand (double freq, void *params)
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
  * @param [out]  int escape  to tell us whether the matom de-activation
- *                             is via an r-packet (1) or a k-packet (0)
+ *                             is via an r-packet (1 TRUE) or a k-packet (0 FALSE)
  * @param [in] int mode         switch which allows photon to be deactivated by a non-radiative
  * term.  (non_zero is true)
  * @return 0
  *
  * ###Notes###
- *          Mar 04  SS   Coding began.
- *          Apr 04  SS   Various improvements including the addition of ff and collisions.
- *          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
- *                       and fb cooling for simple continua.
- *          May 04  SS   Modified to work for case with all "simple" ions.
- *          May 04  SS   Modified to use "scattering probability" formalism for 
- *                       simple ion cooling rates.
- *          Jun 04  SS   Modified to include the "escape" variable to identify excitation of
- *                       macro atoms. This removes the need to call matom from within this routine.
- *          Jun 04  SS   Modified to include collisional ionization as a cooling term.
- *          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
- *	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
- *			entire w array
- *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice 
- *	
- *	* 180616  Updated so that one could force kpkt to deactivate via radiation
 ************************************************************/
 
 int
@@ -722,22 +732,23 @@ kpkt (p, nres, escape, mode)
 
   electron_temperature = xplasma->t_e;
 
-  /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
-     generation (see call to one_ff below) */
+  /* Set maximum and minimum frequency limits.  See #187. We need band limits for free free packet
+     generation (see call to one_ff below). A bandaid is applied if there is not enough
+     separation between freqmin and max */
+
   freqmin = xband.f1[0];
   freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
-
-  /* ksl This is a Bandaid for when the temperatures are very low */
-  /* in this case cooling_ff should be low compared to cooling_ff_lofreq anyway */
   if (freqmax < 1.1 * freqmin)
   {
     freqmax = 1.1 * freqmin;
   }
 
   /* If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
-   * every time the wind is updated */
+   * every time the wind is updated. Note that most of the cooling rates do not include a factor
+   * of ne, since one power of ne applies to all of the cooling rates and we are only concerned
+   * with relative cooling rates */
 
-  if (mplasma->kpkt_rates_known != 1)
+  if (mplasma->kpkt_rates_known != TRUE)
   {
     cooling_normalisation = 0.0;
     cooling_bftot = 0.0;
@@ -757,11 +768,8 @@ kpkt (p, nres, escape, mode)
       if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {
         upper_density = den_config (xplasma, ulvl);
-        /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
-           stored values rather than recompue them. */
         cooling_bf[i] = mplasma->cooling_bf[i] =
           upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
-        // _sp_e is defined as the difference 
       }
       else
       {
@@ -770,9 +778,6 @@ kpkt (p, nres, escape, mode)
         cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * PLANCK * cont_ptr->freq[0] * (xplasma->recomb_simple[i]);
       }
 
-
-      /* Note that the electron density is not included here -- all cooling rates scale
-         with the electron density. */
       if (cooling_bf[i] < 0)
       {
         Error ("kpkt: phot %d bf cooling rate negative. Density was %g\n", p->np, upper_density);
@@ -791,8 +796,7 @@ kpkt (p, nres, escape, mode)
 
       if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {
-        /* Include collisional ionization as a cooling term in macro atoms. Don't include
-           for simple ions for now.  SS */
+        /* Include collisional ionization as a cooling term in macro atoms, but not simple atoms.  */
 
         lower_density = den_config (xplasma, cont_ptr->nlev);
         cooling_bf_col[i] = mplasma->cooling_bf_col[i] =
@@ -804,29 +808,24 @@ kpkt (p, nres, escape, mode)
 
       }
 
-
-
     }
 
-    /* End of BF calculation and beginning of BB calculation */
+    /* End of BF calculation and beginning of BB calculation.  Note that for macro atoms
+       the upper level density is stored but for simple atoms it must be calculated. */
 
     for (i = 0; i < nlines; i++)
     {
       line_ptr = &line[i];
       if (line_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
-      {                         //It's a macro atom line and so the density of the upper level is stored
+      {
         cooling_bb[i] = mplasma->cooling_bb[i] =
           den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * PLANCK;
 
-        /* Note that the electron density is not included here -- all cooling rates scale
-           with the electron density so I've factored it out. */
       }
       else
-      {                         //It's a simple line. Get the upper level density using two_level_atom
-
+      {
         two_level_atom (line_ptr, xplasma, &lower_density, &upper_density);
 
-        /* the collisional rate is multiplied by ne later */
         coll_rate = q21 (line_ptr, electron_temperature) * (1. - exp (-H_OVER_K * line_ptr->freq / electron_temperature));
 
         cooling_bb[i] =
@@ -857,29 +856,17 @@ kpkt (p, nres, escape, mode)
     /* end of BB calculation  */
 
 
-    /* 57+ -- This might be modified later since we "know" that xplasma cannot be for a grid with zero
-       volume.  Recall however that vol is part of the windPtr */
     if (one->inwind >= 0)
     {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne; // JM 1411 - changed to use filled volume
+      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;
       cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
     }
     else
     {
-      /* SS June 04 - This should never happen, but sometimes it does. I think it is because of 
-         photons leaking from one cell to another due to the push-through-distance. It is sufficiently
-         rare (~1 photon in a complete run of the code) that I'm not worrying about it for now but it does
-         indicate a real problem somewhere. */
-
-      /* SS Nov 09: actually I've not seen this problem for a long
-         time. Don't recall that we ever actually fixed it,
-         however. Perhaps the improved volume calculations
-         removed it? We delete this whole "else" if we're sure
-         volumes are never zero. */
-
+      /* This should never happen */
       cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
       Error ("kpkt: np %d A scattering event in cell %d with vol = 0???\n", p->np, one->nwind);
-      *escape = 1;
+      *escape = TRUE;
       p->istat = P_ERROR_MATOM;
       return (0);
     }
@@ -888,7 +875,7 @@ kpkt (p, nres, escape, mode)
     if (cooling_ff < 0)
     {
       Error ("kpkt: np %d ff cooling rate negative. Abort.", p->np);
-      *escape = 1;
+      *escape = TRUE;
       p->istat = P_ERROR_MATOM;
       return (0);
     }
@@ -909,13 +896,13 @@ kpkt (p, nres, escape, mode)
 
     if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
     {
-      Error ("Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
+      Error ("kpkt: Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
     }
 
 
-    /* JM 1302 -- Negative adiabatic coooling- this used to happen due to issue #70, where we incorrectly calculated dvdy, 
-       but this is now resolved. Now it should only happen for cellspartly in wind, because we don't treat these very well.
-       Now, if cooling_adiabatic < 0 then set it to zero to avoid runs exiting for part in wind cells. */
+    /* If the next error occurs see issue #70.  It is ghought to be fixed, with the possiple 
+       exception of cells that are partially in the wind.
+     */
     if (cooling_adiabatic < 0)
     {
       Error ("kpkt: Photon %d. Adiabatic cooling negative! Major problem if inwind (%d) == 0\n", p->np, one->inwind);
@@ -923,10 +910,6 @@ kpkt (p, nres, escape, mode)
       cooling_adiabatic = 0.0;
     }
 
-    /* When we generate photons in the wind, from photon_gen we need to prevent deactivation by non-radiative cooling
-     * terms.  If mode is True we include adiabatic cooling
-     * this is now dealt with by setting cooling_adiabatic to 0 
-     */
 
     cooling_normalisation += cooling_adiabatic;
 
@@ -939,22 +922,17 @@ kpkt (p, nres, escape, mode)
 
   }
 
-/* This is the end of the cooling rate calculations, which is done only once for each cell
-   and once for each cycle
+/* This is the end of the cooling rate calculation, which is done only once for each cell
+   and once for each cycle.  
+
+   The next little section deals whith handling adiabatic cooling and shock heating.
    */
 
-  /* only include adiabatic cooling if we're in the right mode. First set a default 
-     where adiabatic cooling is zero. This will be true if the mode isn't KPKT_MODE_ALL,
-     and also if we are in KPKT_NET_HEAT_MODE and shock heating beats adiabatic cooling. 
-   */
-  /* first subtract off the "true" adiabatic cooling */
   cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;
-  cooling_adiabatic = 0.0;      // this variable decides the probability of destruction and is altered below.
+  cooling_adiabatic = 0.0;
 
   if (mode == KPKT_MODE_ALL)
   {
-    /* if we are in KPKT_NET_HEAT_MODE and cooling beats shock heating then include
-       the net cooling channel */
     if (KPKT_NET_HEAT_MODE && geo.nonthermal)
     {
       if (xplasma->cool_adiabatic > xplasma->heat_shock)
@@ -964,21 +942,19 @@ kpkt (p, nres, escape, mode)
     }
     else
     {
-      /* this is the only situation where we genuinely want the destruction channel
-         to be exactly equal to the adiabatic cooling */
       cooling_adiabatic = mplasma->cooling_adiabatic;
     }
   }
-  /* add whatever the relevant adiabatic cooling value is back on to the normalisation. */
   cooling_normalisation += cooling_adiabatic;
 
 
   /* The cooling rates for the recombination and collisional processes are now known. 
+
      Choose which process destroys the k-packet with a random number. */
 
   destruction_choice = random_number (0.0, 1.0) * cooling_normalisation;
 
-  /* ksl - This logic of what follows may not be obvious.  For choosing the basic
+  /* This logic of what follows may not be obvious.  For choosing the basic
    * process, we just look to see if the destruction choice is less than bf, bf+bb, bf+bb+ff
    * etc, but inside the bhe "basic_choices", we iteratively reduce! the destruction
    * choice until we get to one that is less than the cooling associated with a specific
@@ -997,26 +973,19 @@ kpkt (p, nres, escape, mode)
     {
       if (destruction_choice < mplasma->cooling_bf[i])
       {
-        /* Having got here we know that destruction of the k-packet was via the BF process labelled
-           by i. Let's just check that i is a sensible number. */
 
         if (i > nphot_total - 1)
         {
           Error ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
-          *escape = 1;
+          *escape = TRUE;
           p->istat = P_ERROR_MATOM;
           return (0);
         }
 
-        /* If it gets here, all seems fine. Now set nres for the destruction process. */
 
         *nres = i + NLINES + 1;
-        *escape = 1;            //record that an r-packet is made - no need to excite a macro atom again
+        *escape = TRUE;
 
-
-        /* Now (as in matom) choose a frequency for the new packet. */
-
-        //p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
         p->freq = matom_select_bf_freq (one, i);
 
         /* if the cross-section corresponds to a simple ion (macro_info == FALSE)
@@ -1035,10 +1004,6 @@ kpkt (p, nres, escape, mode)
         }
 #endif
 
-        /* Co-moving frequency - changed to rest frequency by doppler */
-        /* Currently this assumed hydrogenic shape cross-section - Improve */
-
-        /* k-packet is now eliminated. All done. */
         return (0);
       }
       else
@@ -1049,35 +1014,25 @@ kpkt (p, nres, escape, mode)
   }
   else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot))
   {
-    /*this means that a collisional destruction has occurred - this results in 
-       a macro atom being excited. Choose which macro atom and level to excite  */
+    /* a collisional destruction has occurred and so, if the line is  associated with
+       a macro atom, it  must be excited.
+     */
+
     destruction_choice = destruction_choice - mplasma->cooling_bftot;
     for (i = 0; i < nlines; i++)
     {
       if (destruction_choice < mplasma->cooling_bb[i])
-      {                         //This is the bb collision which removes the k-packet
-        *nres = line[i].where_in_list;  //label for bb process 
-        if (line[i].macro_info == TRUE && geo.macro_simple == FALSE)    //line is for a macro atom
+      {
+        *nres = line[i].where_in_list;
+        if (line[i].macro_info == TRUE && geo.macro_simple == FALSE)
         {
-
-          /* escape = 0 flag returned to tell macro_gov that
-             a macro atom should be excited, rather than making a call to matom here. */
-
-          *escape = 0;
-
+          *escape = FALSE;
         }
-        else                    //line is not for a macro atom - use simple method
+        else
         {
-          /* Since the cooling rate accounts for the scattering fraction we know that if we
-             get here we want a line emission, not just an excited macro atom. (SS May 04) */
-          *escape = 1;          //No need for re-exciting a macro atom.
+          *escape = TRUE;
           p->freq = line[i].freq;
-
-
         }
-        /* When it gets here the packet is back to an
-           r-packet and the emission mechanism is identified by nres
-           i.e. that's it finished. (SS, Apr 04). */
         return (0);
       }
       else
@@ -1091,37 +1046,33 @@ kpkt (p, nres, escape, mode)
   {
     /* If reached this point, it is a FF destruction event */
     /* consult issues #187, #492 regarding free-free */
-    *escape = 1;                //we are making an r-packet not exciting a macro atom
+    *escape = TRUE;
     *nres = -2;
-    p->freq = one_ff (one, freqmin, freqmax);   //get frequency of resulting energy packet
+    p->freq = one_ff (one, freqmin, freqmax);
     return (0);
   }
   else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq))
-  {                             //this is ff at low frequency
-    *escape = 1;
+  {
+    /*this is ff at a frequency that is so low frequency that it is not worth tracking further */
+    *escape = TRUE;
     *nres = -2;
-    /* we don't bother tracking photons below 1e14 Hz, 
-       so record that this photon was lost to "low frequency free-free" */
     p->istat = P_LOFREQ_FF;
     return (0);
   }
 
 
-
-  /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
   else if (destruction_choice <
            (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq + cooling_adiabatic))
   {
+    /* It is a k-packat that is destroyed by adiabatic cooling */
 
     if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
     {
-      Error ("Destroying kpkt by adiabatic cooling even though it is turned off.\n");
+      Error ("kpkt: Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }
-    *escape = 1;                // we want to escape but set photon weight to zero
+    *escape = TRUE;
     *nres = -2;
-    //p->w = 0.0;             // JM131030 set photon weight to zero as energy is taken up in adiabatic expansion
-
-    p->istat = P_ADIABATIC;     // record that this photon went into a kpkt destruction from adiabatic cooling
+    p->istat = P_ADIABATIC;
 
     return (0);
   }
@@ -1129,7 +1080,7 @@ kpkt (p, nres, escape, mode)
 
   else
   {
-    /* We want destruction by collisional ionization in a macro atom. */
+    /* It is a k-packed destroyed by collisional ionization in a macro atom. */
     destruction_choice =
       destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_ff_lofreq -
       cooling_adiabatic;
@@ -1138,24 +1089,17 @@ kpkt (p, nres, escape, mode)
     {
       if (destruction_choice < mplasma->cooling_bf_col[i])
       {
-        /* Having got here we know that destruction of the k-packet was via the process labelled
-           by i. Let's just check that i is a sensible number. */
-
         if (i > nphot_total - 1)
         {
-          Error ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
-          *escape = 1;
+          Error ("kpkt: trying to destroy k-packet in unknown process. Abort.\n");
+          *escape = TRUE;
           p->istat = P_ERROR_MATOM;
           return (0);
         }
 
-        /* Now set nres for the destruction process. */
-
         *nres = i + NLINES + 1;
-        *escape = 0;            //collisional ionization makes an excited macro atom
+        *escape = FALSE;
 
-
-        /* k-packet is now eliminated. All done. */
         return (0);
       }
       else
@@ -1167,14 +1111,15 @@ kpkt (p, nres, escape, mode)
 
 
 
-  Error ("matom.c: Failed to select a destruction process in kpkt. Abort.\n");
+  Error ("kpkt: Failed to select a destruction process in kpkt. Abort.\n");
   Error
-    ("matom.c: choice %8.4e norm %8.4e cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_ff_lofreq %g, cooling_bf_coltot %g cooling_adiabatic %g cooling_adiabatic %g\n",
+    ("kpkt: choice %8.4e norm %8.4e cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_ff_lofreq %g, cooling_bf_coltot %g cooling_adiabatic %g cooling_adiabatic %g\n",
      destruction_choice, cooling_normalisation, mplasma->cooling_bftot, mplasma->cooling_bbtot, mplasma->cooling_ff,
      mplasma->cooling_ff_lofreq, mplasma->cooling_bf_coltot, mplasma->cooling_adiabatic, cooling_adiabatic);
 
-  *escape = 1;
+  *escape = TRUE;
   p->istat = P_ERROR_MATOM;
+
   return (0);
 
 }

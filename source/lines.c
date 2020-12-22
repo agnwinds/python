@@ -530,10 +530,10 @@ p_escape (line_ptr, xplasma)
   }
 
 //XXXX  This is a test
-  if (dvds < 1e6)
-  {
-    dvds = 1e6;
-  }
+//  if (dvds < 1e6)
+//  {
+//    dvds = 1e6;
+//  }
 
   if (pe_line_ptr != line_ptr || pe_ne != ne || pe_te != te || pe_dd != dd || pe_dvds != dvds || pe_w != w || pe_tr != tr)
   {
