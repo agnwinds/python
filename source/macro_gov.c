@@ -60,7 +60,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
 {
   int escape;                   //this tells us when the r-packet is escaping
-  int n_jump;
+  int n_jump = 0;
   int n_jump_tot = 0;
   int n_loop = 0;
 
@@ -189,16 +189,19 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       Error ("macro_gov: Unknown choice for next action. Abort.\n");
       Exit (0);
     }
-//XX    if (n_jump > -1)
-//XX    {
-//XX      n_jump_tot += n_jump;
-//XX      if (n_jump_tot > MAXJUMPS)
-//XX      {
-//XX        Error ("macro_gov: Exceed MAXJUMPS (%d) in n_loops %d for phot %d in cell %d\n", n_jump_tot, n_loop, p->np, p->grid);
-//XX        escape = TRUE;
-//XX        p->istat = P_ERROR_MATOM;
-//XX      }
-//XX    }
+    /*XXXX test */
+    if (n_jump > -1)
+    {
+      //XXXX This is a test that fails many times for the agn_macro model.  Just set to n_mump it is the same as in matom
+      n_jump_tot += n_jump;
+      if (n_jump > MAXJUMPS)
+      {
+        Error ("macro_gov: Exceed MAXJUMPS (last %d tot %d) in n_loops %d for phot %d in cell %d\n", n_jump, n_jump_tot, n_loop, p->np,
+               p->grid);
+        escape = TRUE;
+        p->istat = P_ERROR_MATOM;
+      }
+    }
     n_loop++;
   }
 
