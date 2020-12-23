@@ -35,7 +35,8 @@ int matom_z = 0;
  * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
  * @param [out]  int escape  flag to tell us whether the matom de-activation
  *                             is via an r-packet (1) or a k-packet (0)
- * @return 0
+ * @return returns the number of level jumps before exiting the routine, or -1
+ * if an error was encountered.
  *
  * Matom is the core of the implementation of Leon Lucy's Macro Atom
  * approach to dealing with radiation-matter interactions. It is called whenever
@@ -136,9 +137,9 @@ matom (p, nres, escape)
   {
     Error ("matom: upper level not identified. nres = %d in photon %d of cycle %d/%d in thread %d\n",
            *nres, p->np, geo.wcycle, geo.pcycle, rank_global);
-    *escape = 1;
+    *escape = TRUE;
     p->istat = P_ERROR_MATOM;
-    return (0);
+    return (-1);
   }
 
   if (z != matom_z || p->grid != matom_cell)
@@ -211,16 +212,16 @@ matom (p, nres, escape)
         if (jprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 1). Abort.");
-          *escape = 1;
+          *escape = TRUE;
           p->istat = P_ERROR_MATOM;
-          return (0);
+          return (-1);
         }
         if (eprbs[m] < 0.)      //test (can be deleted eventually SS)
         {
           Error ("Negative probability (matom, 2). Abort.");
-          *escape = 1;
+          *escape = TRUE;
           p->istat = P_ERROR_MATOM;
-          return (0);
+          return (-1);
         }
 
         pjnorm += jprbs[m];
@@ -344,9 +345,9 @@ matom (p, nres, escape)
              penorm_known[uplvl], t_e, ne);
       Error ("matom: macro atom level has no way out: z %d istate %d nion %d ilv %d nbfu %d nbfd %d nbbu %d nbbd %d\n", config[uplvl].z,
              config[uplvl].istate, config[uplvl].nion, config[uplvl].ilv, nbfu, nbfd, nbbu, nbbd);
-      *escape = 1;
+      *escape = TRUE;
       p->istat = P_ERROR_MATOM;
-      return (0);
+      return (-1);
     }
 
     threshold = random_number (0.0, 1.0);
@@ -401,9 +402,9 @@ matom (p, nres, escape)
     else
     {
       Error ("Trying to jump but nowhere to go! Matom. Abort");
-      *escape = 1;
+      *escape = TRUE;
       p->istat = P_ERROR_MATOM;
-      return (0);
+      return (-1);
     }
 
   }
@@ -415,9 +416,9 @@ matom (p, nres, escape)
   {
     Error ("Matom: jumped %d times with no emission for photon %d from upper level %d  pjnorm %e penorm %e Abort.\n", MAXJUMPS, p->np,
            uplvl, pjnorm_known[uplvl], penorm_known[uplvl]);
-    *escape = 1;
+    *escape = TRUE;
     p->istat = P_ERROR_MATOM;
-    return (0);
+    return (-1);
   }
 
 
@@ -458,14 +459,14 @@ matom (p, nres, escape)
     if (choice > (coll_rate / (rad_rate + coll_rate)))
     {
       /* It's a r-packet (radiative) deactivation */
-      *escape = 1;
+      *escape = TRUE;
       *nres = line[config[uplvl].bbd_jump[n]].where_in_list;
       p->freq = line[config[uplvl].bbd_jump[n]].freq;
     }
     else
     {
       /* It's a k-packet (collisional deactivation. */
-      *escape = 0;
+      *escape = FALSE;
     }
   }
   else if (n < (nbbd + nbfd))
@@ -483,7 +484,7 @@ matom (p, nres, escape)
     if (choice > (coll_rate / (rad_rate + coll_rate)))
     {
       /*It's a r-packet (radiative) deactivation */
-      *escape = 1;
+      *escape = TRUE;
       *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
       p->freq = matom_select_bf_freq (one, config[uplvl].bfd_jump[n - nbbd]);
 
@@ -491,21 +492,21 @@ matom (p, nres, escape)
     else
     {
       /* It's a k-packet (collisional) deactivation */
-      *escape = 0;
+      *escape = FALSE;
     }
 
   }
   else
   {
     Error ("Trying to emitt from Macro Atom but no available route (matom). Abort.");
-    *escape = 1;
+    *escape = TRUE;
     p->istat = P_ERROR_MATOM;
-    return (0);
+    return (-1);
   }
 
-  Log ("Leaving phot %d in cell %d after % d jumps via %d\n", p->np, p->grid, njumps, *escape);
+//  Log ("Leaving phot %d in cell %d after % d jumps via %d\n", p->np, p->grid, njumps, *escape);
 
-  return (0);
+  return (njumps);
 }
 
 
