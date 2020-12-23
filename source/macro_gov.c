@@ -189,16 +189,16 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       Error ("macro_gov: Unknown choice for next action. Abort.\n");
       Exit (0);
     }
-    if (n_jump > -1)
-    {
-      n_jump_tot += n_jump;
-      if (n_jump_tot > MAXJUMPS)
-      {
-        Error ("macro_gov: Exceed MAXJUMPS (%d) in n_loops %d for phot %d in cell %d\n", n_jump_tot, n_loop, p->np, p->grid);
-        escape = TRUE;
-        p->istat = P_ERROR_MATOM;
-      }
-    }
+//XX    if (n_jump > -1)
+//XX    {
+//XX      n_jump_tot += n_jump;
+//XX      if (n_jump_tot > MAXJUMPS)
+//XX      {
+//XX        Error ("macro_gov: Exceed MAXJUMPS (%d) in n_loops %d for phot %d in cell %d\n", n_jump_tot, n_loop, p->np, p->grid);
+//XX        escape = TRUE;
+//XX        p->istat = P_ERROR_MATOM;
+//XX      }
+//XX    }
     n_loop++;
   }
 
