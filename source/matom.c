@@ -869,8 +869,8 @@ kpkt (p, nres, escape, mode)
   {
     fill_kpkt_rates (xplasma, escape, istat);
 
-    if (escape == 1 && *istat == P_ERROR_MATOM)
-    {
+    // if (escape == 1 && *istat == P_ERROR_MATOM)
+    // {
     /* Start of BF calculation */
     /* JM 1503 -- we used to loop over ntop_phot here, 
        but we should really loop over the tabulated Verner Xsections too
@@ -1006,7 +1006,6 @@ kpkt (p, nres, escape, mode)
       cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
       Error ("kpkt: A scattering event in cell %d with vol = 0???\n", one->nwind);
       *escape = 1;
->>>>>>> 474e7eb983e4b497bd1c9f95ae381ef09fbb9de7
       p->istat = P_ERROR_MATOM;
       return (0.0);
     }

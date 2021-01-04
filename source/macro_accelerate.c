@@ -4,10 +4,14 @@
 
 #include "atomic.h"
 #include "python.h"
+//gsl matrix solvers
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-#include "my_linalg.h"
+#include <gsl/gsl_mode.h>
+#include <gsl/gsl_permutation.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
 
 
 /**********************************************************/
@@ -447,14 +451,14 @@ fill_kpkt_rates (xplasma, escape, istat)
         /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
            stored values rather than recompue them. */
         cooling_bf[i] = mplasma->cooling_bf[i] =
-          upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
+          upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
         // _sp_e is defined as the difference 
       }
       else
       {
         upper_density = xplasma->density[cont_ptr->nion + 1];
 
-        cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (xplasma->recomb_simple[i]);
+        cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * PLANCK * cont_ptr->freq[0] * (xplasma->recomb_simple[i]);
       }
 
 
@@ -482,7 +486,7 @@ fill_kpkt_rates (xplasma, escape, istat)
            for simple ions for now.  SS */
 
         lower_density = den_config (xplasma, cont_ptr->nlev);
-        cooling_bf_col[i] = mplasma->cooling_bf_col[i] = lower_density * H * cont_ptr->freq[0] * q_ioniz (cont_ptr, electron_temperature);
+        cooling_bf_col[i] = mplasma->cooling_bf_col[i] = lower_density * PLANCK * cont_ptr->freq[0] * q_ioniz (cont_ptr, electron_temperature);
 
         cooling_bf_coltot += cooling_bf_col[i];
 
@@ -502,7 +506,7 @@ fill_kpkt_rates (xplasma, escape, istat)
       if (line_ptr->macro_info == 1 && geo.macro_simple == 0)
       {                         //It's a macro atom line and so the density of the upper level is stored
         cooling_bb[i] = mplasma->cooling_bb[i] =
-          den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * H;
+          den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * PLANCK;
 
         /* Note that the electron density is not included here -- all cooling rates scale
            with the electron density so I've factored it out. */
@@ -517,7 +521,7 @@ fill_kpkt_rates (xplasma, escape, istat)
 
         cooling_bb[i] =
           (lower_density * line_ptr->gu / line_ptr->gl -
-           upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq / electron_temperature) - 1.) * line_ptr->freq * H;
+           upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq / electron_temperature) - 1.) * line_ptr->freq * PLANCK;
 
         rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
 
@@ -902,7 +906,7 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
 
   int escape_dummy = 0;
   int istat_dummy = 0;
-  fill_kpkt_rates (xplasma, escape_dummy, istat_dummy);
+  fill_kpkt_rates (xplasma, &escape_dummy, &istat_dummy);
 
   for (i = 0; i < nphot_total; i++)
   {
