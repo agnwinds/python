@@ -25,6 +25,41 @@
 int init_stuff_phot = 0;
 size_t sizeofphot;
 
+/**********************************************************/
+/**
+ * @brief      Simply initialize some of the variables in a 
+ *             single photon used for some special purpose 
+ *             calculation
+ *
+ *
+ * @param [in] PhotPtr  p   The photon bundle to be intialized
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+
+int
+init_dummy_phot (p)
+     PhotPtr p;
+{
+  p->x[0] = p->x[1] = p->x[2] = 0.0;
+  p->lmn[0] = p->lmn[1] = 0;
+  p->lmn[2] = 1;
+  p->freq = p->freq_orig = 0.0;
+  p->frame = F_OBSERVER;
+  p->origin = p->origin_orig = PTYPE_DUMMY;
+  p->np = -1;
+  p->tau = p->ds = 0;
+
+  return (0);
+
+
+}
+
 
 /**********************************************************/
 /**
@@ -61,7 +96,9 @@ stuff_phot (pin, pout)
   pout->tau = pin->tau;
 
   pout->istat = pin->istat;
+  pout->frame = pin->frame;
   pout->nres = pin->nres;
+  pout->nmacro = pin->nmacro;
   pout->nrscat = pin->nrscat;
   pout->nscat = pin->nscat;
   pout->nnscat = pin->nnscat;
@@ -72,6 +109,8 @@ stuff_phot (pin, pout)
   pout->np = pin->np;
 
   pout->path = pin->path;
+
+  pout->ds = pin->ds;
 
   return (0);
 }
@@ -102,13 +141,17 @@ move_phot (pp, ds)
      PhotPtr pp;
      double ds;
 {
+  int ierr;
 
-  pp->ds = ds;
+  ierr = check_frame (pp, F_OBSERVER, "move_phot");
+
   pp->x[0] += pp->lmn[0] * ds;
   pp->x[1] += pp->lmn[1] * ds;
   pp->x[2] += pp->lmn[2] * ds;
+
+  pp->ds += ds;
   pp->path += fabs (ds);
-  return (0);
+  return (ierr);
 }
 
 
@@ -144,188 +187,6 @@ comp_phot (p1, p2)
 }
 
 
-
-/**********************************************************/
-/**
- * @brief      Record the history of a single photon
- *   bundle, in terms of a series of photon structures that are
- *   populated as the photon goes through the grid
- *
- *   Unless phot_hist_on is true, then this routine is a NOP
- *
- * @param [in] PhotPtr  p   A photon to track
- * @param [in] int  iswitch   A switch that resets the array element
- * into which the photons current status is recorded.
- * @return     Returns the number of photons which have been stored
- *
- * @details
- *
- * This routine stores selected photons in an array, which one
- * can use to see what is happening in a special case.
- *
- * This is a diagnostic routine only
- *
- * ### Notes ###
- * The routine is useful (at present) only in the context of a debugger
- * since the array in which photons are stored is not written out.  The
- * basic idea is that one identifies a problem say with a specific photon
- * and then stores the history of that photon in the array so once can
- * inspect in detail what has  happened to the photon.
- *
- * @bug  It is not obvious that this routine is needed as we now have
- * another mechanism to write photons out to a file.  In any event,
- * this should be moved to some other place in the code.
- *
- **********************************************************/
-
-int
-phot_hist (p, iswitch)
-     PhotPtr p;
-     int iswitch;
-{
-  if (phot_hist_on == 0)
-    return (0);
-
-  if (iswitch == 0)
-  {
-    n_phot_hist = 0;
-  }
-
-  if (n_phot_hist < MAX_PHOT_HIST)
-  {
-    stuff_phot (p, &xphot_hist[n_phot_hist]);
-    n_phot_hist++;
-  }
-  else
-  {
-    Error ("phot_hist: The number of steps %d in phot_hist exceeds MAX_PHOT_HIST\n", MAX_PHOT_HIST);
-  }
-
-  return (n_phot_hist);
-}
-
-
-
-
-/**********************************************************/
-/**
- * @brief      The next routine is designed to update a portion of the PlasmaPtr to reflect where
- *  	photons along the line of sight to the observer were absorbed in the wind
- *
- * @return     Always returns 0  
- *
- * @details
- *
- * ### Notes ###
- * As photon is extracted from the wind, tau changes due to scatters and w changes due
- * 	to absorption.  We are just recording how much energy is absorbed by scatterng processes
- * 	here, and so the energy absorbed is the current weight (exp(-tau_before) - exp (-tau_after))
- *
- **********************************************************/
-
-int
-phot_history_summarize ()
-{
-  int n;
-  PlasmaPtr xplasma;
-  PhotPtr p;
-  double x;
-  double tau, tau_old;
-  int nion;
-
-  p = &xphot_hist[0];
-  tau_old = p->tau;
-
-  for (n = 1; n < n_phot_hist; n++)
-  {
-    p = &xphot_hist[n];
-
-    tau = p->tau;               // tau is tau after the scatter
-
-    nion = lin_ptr[p->nres]->nion;      // ion that scattered
-
-    x = p->w * (exp (-tau_old) - exp (-tau));   // energy removed by scatter
-
-    xplasma = &plasmamain[wmain[p->grid].nplasma];      // pointer to plasma cell where scattering occured
-
-    xplasma->xscatters[nion] += (x);
-
-    tau_old = tau;
-
-    if (xplasma->xscatters[nion] < 0.0)
-    {
-      Error ("phot_history_summarize:  n %d n_phot_hist %d phot_hist %d nplasma %d\n", n, n_phot_hist, p->grid, wmain[p->grid].nplasma);
-    }
-  }
-
-
-  return (0);
-}
-
-
-
-//OLD /*******************************************************
-//OLD             Space Telescope Science Institute
-//OLD
-//OLD Synopsis:
-//OLD    ds_to_cone (cc, p) This is a new version of ds_to_cone introduced in order to
-//OLD    allow cylvar coordinates  Eventually it is intended to replace ds_to_windcone
-//OLD    completely, or at least the guts of ds_to_windcone.
-//OLD
-//OLD Returns:
-//OLD
-//OLD
-//OLD Description:
-//OLD
-//OLD
-//OLD Notes:
-//OLD
-//OLD As part of the conversion, the old ds_to_cone was renamed to ds_to_windcone
-//OLD
-//OLD
-//OLD
-//OLD   56d -- Cones have become more prominent in python with time.  Originally
-//OLD   they were used simply to define the inner and outer edges of the
-//OLD   wind, that is   to determine when a photon entered the wind.  The wind was/is
-//OLD   assumed to be a biconical flow, and therefore the most naturally was defined in
-//OLD   terms of a footpoint in the disk for the innermost/outermost stream line
-//OLD   and a slope.
-//OLD
-//OLD   It was expanced when rtheta coordanates were introduced
-//OLD   to handle find when one had hit the theta coordinate boundaries.  And in
-//OLD   56d we also want it to handle the case where the grid cells have variable
-//OLD   z coordinates.  Therefore one needs to be quite careful, Since ds_to_cone
-//OLD   is the ultimate name of the routine I would like to use, the first step
-//OLD   I took was to change the name of the old routine to ds_to_windcone.  This
-//OLD   should allow me to replace the old routine incrementally.
-//OLD
-//OLD   56d -- With python 56d the variable defining a cone were changed to be
-//OLD   the point on the z axis intercepted by the cone (extended) through
-//OLD   the disk, and the slope.
-//OLD
-//OLD   Our approach is as follows:
-//OLD
-//OLD   The cone is defined by  z=z_o + dz/drho *drho
-//OLD   The photon is defined by X=X_o + LMN s
-//OLD
-//OLD   Unless dz/drho = 0, this turns into a simple quadratic equation that must
-//OLD   be solved.  We work in the northen hemisphere only.
-//OLD
-//OLD   There are issues concerning what to do so one crosses the disk plane.  For
-//OLD         finding how far a photon can travel in a cell, we are *not* interested
-//OLD   in the possibility that the photon hits the cone on the other side of
-//OLD   the disk plane, but for a photon travelling out of the wind we are
-//OLD   very interested in this possibility.
-//OLD
-//OLD History:
-//OLD   05jul   ksl     Created so that cylvar coordinates could be incorporated
-//OLD                   into python.
-//OLD   06sep   ksl     57h -- Corrected an error discovered by SS in the setup of the
-//OLD                   quadratic for a cone.  Note that if this routing ever became
-//OLD                   a "heavy hitter" in terms of efficiency, there are a few
-//OLD                   changes that could speed it up a bit since the magnitude
-//OLD                   of lmn is always 1.
-//OLD */
 
 
 
@@ -413,7 +274,7 @@ ds_to_cone (cc, p)
 
 /**********************************************************/
 /**
- * @brief      Calculate the pathlenth along a line of sight defined by
+ * @brief      Calculate the path length along a line of sight defined by
  * 	a photon p to a sphere centered on the origin.
  *
  * @param [in] double  r   The radius of the sphere
@@ -457,26 +318,6 @@ both roots were imaginary */
 }
 
 
-
-
-//OLD /**************************************************************************
-//OLD
-//OLD
-//OLD   Synopsis:
-//OLD   This is more generalized routine to find the positive distance to
-//OLD           a sphere centered at x with radius r
-//OLD
-//OLD   Description:
-//OLD
-//OLD   Arguments:
-//OLD
-//OLD   Returns:
-//OLD
-//OLD   Notes:
-//OLD
-//OLD   History:
-//OLD
-//OLD  ************************************************************************/
 
 
 /**********************************************************/

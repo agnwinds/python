@@ -17,7 +17,7 @@
  * 	- dot(a,b)		returns the  product of the 3 vectors a and b
  * 	- double length(x)	returns the length of the 3 vector x
  * 	- int renorm(a,scalar)		renormalizes the 3-vector a to a length of
- * 							a; retuns -1 if a has length 0.
+ * 							scalaar; retuns -1 if a has length 0.
  * 	- int cross(a,b,c)		c = a x b  (where x is the cross-product)
  * 	- vmove(u,lmn,s,result)
  * 	- vsub(u,v,result)
@@ -162,6 +162,34 @@ renorm (a, scalar)
   return (0);
 }
 
+
+
+
+/**********************************************************/
+/** 
+ * @brief      muliply  a vector by a scalar
+ *
+ * @param [in] double  a[]  the input vector
+ * @param [in] double  scalar   the number to scale the vector by
+ * @param [out]double  b[]  the output vector      
+ * @return     Always returns 0 
+ *
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
+
+int
+rescale (a, scalar, b)
+     double a[], scalar, b[];
+{
+
+  b[0] = a[0] * scalar;
+  b[1] = a[1] * scalar;
+  b[2] = a[2] * scalar;
+  return (0);
+}
 
 /**********************************************************/
 /** 

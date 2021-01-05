@@ -85,7 +85,6 @@ create_maps ()
   int i, j;
   j = 0;
 
-  /*The normal situation where there are fewer wind elements than plasma elements  */
   for (i = 0; i < NDIM2; i++)
   {
     wmain[i].nwind = i;
@@ -570,7 +569,6 @@ calloc_dyn_plasma (nelem)
 {
   int n;
 
-
 /*  Loop over all elements in the plasma array, adding one for an empty cell 
  *  used for extrapolations.
  */
@@ -612,6 +610,11 @@ calloc_dyn_plasma (nelem)
       Error ("calloc_dyn_plasma: Error in allocating memory for heat_ion\n");
       Exit (0);
     }
+    if ((plasmamain[n].heat_inner_ion = calloc (sizeof (double), nions)) == NULL)
+    {
+      Error ("calloc_dyn_plasma: Error in allocating memory for heat_ion\n");
+      Exit (0);
+    }
     if ((plasmamain[n].cool_rr_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for cool_rr_ion\n");
@@ -625,6 +628,11 @@ calloc_dyn_plasma (nelem)
     if ((plasmamain[n].inner_recomb = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for inner_recomb\n");
+      Exit (0);
+    }
+    if ((plasmamain[n].inner_ioniz = calloc (sizeof (double), n_inner_tot)) == NULL)
+    {
+      Error ("calloc_dyn_plasma: Error in allocating memory for inner_ioniz\n");
       Exit (0);
     }
     if ((plasmamain[n].cool_dr_ion = calloc (sizeof (double), nions)) == NULL)

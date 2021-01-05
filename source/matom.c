@@ -657,7 +657,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
-  if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
+  if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
   {
     alpha_sp_value = alpha_sp_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }
@@ -868,149 +868,8 @@ kpkt (p, nres, escape, mode)
   if (mplasma->kpkt_rates_known != 1)
   {
     fill_kpkt_rates (xplasma, escape, istat);
-
-    // if (escape == 1 && *istat == P_ERROR_MATOM)
-    // {
-    /* Start of BF calculation */
-    /* JM 1503 -- we used to loop over ntop_phot here, 
-       but we should really loop over the tabulated Verner Xsections too
-       see #86, #141 */
-    for (i = 0; i < nphot_total; i++)
-    {
-      cont_ptr = &phot_top[i];
-      ulvl = cont_ptr->uplev;
-
-      if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
-      {
-        upper_density = den_config (xplasma, ulvl);
-        /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
-           stored values rather than recompue them. */
-        cooling_bf[i] = mplasma->cooling_bf[i] =
-          upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
-        // _sp_e is defined as the difference 
-      }
-      else
-      {
-        upper_density = xplasma->density[cont_ptr->nion + 1];
-
-        cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * PLANCK * cont_ptr->freq[0] * (xplasma->recomb_simple[i]);
-      }
-
-
-      /* Note that the electron density is not included here -- all cooling rates scale
-         with the electron density. */
-      if (cooling_bf[i] < 0)
-      {
-        Error ("kpkt: bf cooling rate negative. Density was %g\n", upper_density);
-        Error ("alpha_sp(cont_ptr, xplasma,2) %g \n", alpha_sp (cont_ptr, xplasma, 2));
-        Error ("i, ulvl, nphot_total, nion %d %d %d %d\n", i, ulvl, nphot_total, cont_ptr->nion);
-        Error ("nlev, z, istate %d %d %d \n", cont_ptr->nlev, cont_ptr->z, cont_ptr->istate);
-        Error ("freq[0] %g\n", cont_ptr->freq[0]);
-        cooling_bf[i] = mplasma->cooling_bf[i] = 0.0;
-      }
-      else
-      {
-        cooling_bftot += cooling_bf[i];
-      }
-
-      cooling_normalisation += cooling_bf[i];
-
-      if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
-      {
-        /* Include collisional ionization as a cooling term in macro atoms. Don't include
-           for simple ions for now.  SS */
-
-        lower_density = den_config (xplasma, cont_ptr->nlev);
-        cooling_bf_col[i] = mplasma->cooling_bf_col[i] =
-          lower_density * PLANCK * cont_ptr->freq[0] * q_ioniz (cont_ptr, electron_temperature);
-
-        cooling_bf_coltot += cooling_bf_col[i];
-
-        cooling_normalisation += cooling_bf_col[i];
-
-      }
-
-
-
-    }
-
-    /* End of BF calculation and beginning of BB calculation */
-
-    for (i = 0; i < nlines; i++)
-    {
-      line_ptr = &line[i];
-      if (line_ptr->macro_info == 1 && geo.macro_simple == 0)
-      {                         //It's a macro atom line and so the density of the upper level is stored
-        cooling_bb[i] = mplasma->cooling_bb[i] =
-          den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * PLANCK;
-
-        /* Note that the electron density is not included here -- all cooling rates scale
-           with the electron density so I've factored it out. */
-      }
-      else
-      {                         //It's a simple line. Get the upper level density using two_level_atom
-
-        two_level_atom (line_ptr, xplasma, &lower_density, &upper_density);
-
-        /* the collisional rate is multiplied by ne later */
-        coll_rate = q21 (line_ptr, electron_temperature) * (1. - exp (-H_OVER_K * line_ptr->freq / electron_temperature));
-
-        cooling_bb[i] =
-          (lower_density * line_ptr->gu / line_ptr->gl -
-           upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq / electron_temperature) - 1.) * line_ptr->freq * PLANCK;
-
-        rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
-
-        /* Now multiply by the scattering probability - i.e. we are only going to consider bb cooling when
-           the photon actually escapes - we don't to waste time by exciting a two-level macro atom only so that
-           it makes another k-packet for us! (SS May 04) */
-
-        cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
-        mplasma->cooling_bb[i] = cooling_bb[i];
-      }
-
-      if (cooling_bb[i] < 0)
-      {
-        cooling_bb[i] = mplasma->cooling_bb[i] = 0.0;
-      }
-      else
-      {
-        cooling_bbtot += cooling_bb[i];
-      }
-      cooling_normalisation += cooling_bb[i];
-    }
-
-    /* end of BB calculation  */
-
-
-    /* 57+ -- This might be modified later since we "know" that xplasma cannot be for a grid with zero
-       volume.  Recall however that vol is part of the windPtr */
-    if (one->vol > 0)
-    {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne; // JM 1411 - changed to use filled volume
-      cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
-    }
-    else
-    {
-      /* SS June 04 - This should never happen, but sometimes it does. I think it is because of 
-         photons leaking from one cell to another due to the push-through-distance. It is sufficiently
-         rare (~1 photon in a complete run of the code) that I'm not worrying about it for now but it does
-         indicate a real problem somewhere. */
-
-      /* SS Nov 09: actually I've not seen this problem for a long
-         time. Don't recall that we ever actually fixed it,
-         however. Perhaps the improved volume calculations
-         removed it? We delete this whole "else" if we're sure
-         volumes are never zero. */
-
-      cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
-      Error ("kpkt: A scattering event in cell %d with vol = 0???\n", one->nwind);
-      *escape = 1;
-      p->istat = P_ERROR_MATOM;
-      return (0.0);
-    }
   }
-
+  
 /* This is the end of the cooling rate calculations, which is done only once for each cell
    and once for each cycle
    */
@@ -1091,13 +950,13 @@ kpkt (p, nres, escape, mode)
         //p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
         p->freq = matom_select_bf_freq (one, i);
 
-        /* if the cross-section corresponds to a simple ion (macro_info == 0)
+        /* if the cross-section corresponds to a simple ion (macro_info == FALSE)
            or if we are treating all ions as simple, then adopt the total emissivity
            approach to choosing photon weights - this means we 
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
 #if BF_SIMPLE_EMISSIVITY_APPROACH
-        if (phot_top[i].macro_info == 0 || geo.macro_simple == 1)
+        if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
         {
           upweight_factor = xplasma->recomb_simple_upweight[i];
           p->w *= upweight_factor;
@@ -1129,7 +988,7 @@ kpkt (p, nres, escape, mode)
       if (destruction_choice < mplasma->cooling_bb[i])
       {                         //This is the bb collision which removes the k-packet
         *nres = line[i].where_in_list;  //label for bb process 
-        if (line[i].macro_info == 1 && geo.macro_simple == 0)   //line is for a macro atom
+        if (line[i].macro_info == TRUE && geo.macro_simple == FALSE)    //line is for a macro atom
         {
 
           /* escape = 0 flag returned to tell macro_gov that

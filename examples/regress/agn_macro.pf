@@ -28,15 +28,14 @@ Wind.dim.in.x_or_r.direction               30
 Wind.dim.in.z_or_theta.direction           30
 
 ### Parameters associated with photon number, cycles,ionization and radiative transfer options
-Photons_per_cycle                          100000
-Ionization_cycles                          20
-Spectrum_cycles                            20
+Photons_per_cycle                          2000000
+Ionization_cycles                          3
+Spectrum_cycles                            2
 Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)           matrix_pow
-Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)     thermal_trapping
-Atomic_data                                data/standard80.dat
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)          macro_atoms_thermal_trapping
+Atomic_data                                data/h10_standard80.dat
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
-Wind_heating.extra_processes(none,adiabatic,nonthermal,both)                 both
-Wind_heating.extra_luminosity              0
+Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
 
 ### Parameters for Domain 0
 Wind.mdot(msol/yr)                         5
@@ -50,7 +49,7 @@ SV.acceleration_length(cm)                 1e18
 SV.acceleration_exponent                   1.0
 SV.gamma(streamline_skew;1=usually)        1
 SV.v_zero_mode(fixed,sound_speed)                fixed
-SV.v_zero(cm/s)                            600000
+SV.v_zero(cm/s)                            6e5
 Wind.radmax(cm)                            1e19
 Wind.t.init                                1e5
 Wind.filling_factor(1=smooth,<1=clumped)   1
@@ -65,18 +64,15 @@ Spectrum.wavemin(Angstroms)                200
 Spectrum.wavemax(Angstroms)                2600
 
 ### The observers and their location relative to the system
-Spectrum.no_observers                      2
+Spectrum.no_observers                      3
 Spectrum.angle(0=pole)                     20
-Spectrum.angle(0=pole)                     40
+Spectrum.angle(0=pole)                     75
+Spectrum.angle(0=pole)                     85
 Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-Reverb.type(none,photon,wind,matom)                 wind
-Reverb.disk_type(correlated,uncorrelated,ignore)               ignore
-Reverb.path_bins                           100
-Reverb.visualisation(none,vtk,dump,both)                 none
-Reverb.filter_lines(0=off,-1=continuum,>0=count)   -1
+Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                  agn

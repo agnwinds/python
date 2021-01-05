@@ -11,7 +11,7 @@ of python is working.
 
 Command line usage (if any):
 
-    usage: regression.py [-np 3 -pf_dir test -out_dir foo] version 
+    usage: regression.py [-np 3 -x 'whatever' -pf_dir test -out_dir foo] version 
 
     where 
 
@@ -22,6 +22,9 @@ Command line usage (if any):
                         to provide the full path name to the directory.  The routine doit
                         first searches the current workind directory for the directory and then
                         looks in $PYTHON/examples/
+        -x  '-v/c'      Extra switches to be applied to the run, such as using linear Doppler
+                        shifts.  Note that these will be applied to everything except the
+                        hydro calculation so use with caution.  This should be a single string
         -out_dir foo    The directory (below the current working directory) where the 
                         tests will run.  The defauld is constructed for the version
                         and the data
@@ -45,7 +48,19 @@ Primary routines:
 Notes:
 
     Regression here means to run a series of models. These routines do not compare the
-    models to earlier runs
+    models to earlier runs.  There is a seperate python script to compare models to between
+    regression tests
+
+    Sometimes it will be desirable to run different tests with different command line switches.
+    This can be accomplished using a named file 'commands.txt' in the pf_dir directory. 
+    This file should contain lines for at least the pf files to which one wishes to apply
+    these switches.  The line in the file should read
+
+    py switches and the pf file name, e.g
+
+    py -gamma agn_gamma.pf
+
+    The global switches obtained from the command line are applied after the individual swithches
 
     It is possible to add special tests for regression, either to because models must be 
     run in a certain order or because special options must be used.  These should
@@ -146,14 +161,18 @@ def check_one(xfile,root):
     Perform some checks on what happened in a run
     '''
 
-    g=open(root+'.sig')
-    lines=g.readlines()
-    last_line=lines[len(lines)-1]
-    words=last_line.split()
-    if last_line.count('COMPLETE'):
-        string='The model ran to completion in %s s' % (words[5])
-    else:
-        string='The models stopped before completing'
+    try:
+        g=open(root+'.sig')
+        lines=g.readlines()
+
+        last_line=lines[len(lines)-1]
+        words=last_line.split()
+        if last_line.count('COMPLETE'):
+            string='The model ran to completion in %s s' % (words[5])
+        else:
+            string='The models stopped before completing'
+    except:
+        string='This run did not produce a .sig file, suggesting that there were problems with the command line'
 
     print(string)
     xfile.write('%s\n' % string)
@@ -173,7 +192,7 @@ def check_one(xfile,root):
     
 
 
-def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
+def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.txt'):
     '''
     Test a specific version of python against a series of models
 
@@ -241,6 +260,28 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
             print(one)
 
 
+    # get any text files if any
+
+    for one in txt_files:
+        shutil.copy(one,out_dir)
+
+    # Lookd for a file with extra switches for some models
+    try:
+        x=open('%s/commands.txt' % (out_dir))
+        xx=x.readlines()
+        xcommands=[]
+        for one in xx:
+            words=one.split()
+            if words[0][0]!='#':
+                xcommands.append(words)
+    except:
+        print('There is no special command file in ')
+        xcommands=[]
+
+    print('xcommands')
+    print(xcommands)
+    			
+
 
     commands=[]
     root_names=[]
@@ -250,18 +291,18 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
         words=one.split('/')
         pf=(words[len(words)-1])
         root_name=pf.replace('.pf','')
+
+        xswitch=''
+        for one in xcommands:
+            if one[-1]==pf or one[-1]==root_name:
+                for one_word in one[1:-1]:
+                        xswitch='%s %s ' % (xswitch,one_word)
         if np<=1:
-            command='%s %s' % (version,pf)
+            command='%s %s%s %s' % (version,xswitch,switch,pf)
         else:
-            command='mpirun -np %d %s %s >%s.stdout.txt' % (np,version,pf,root_name)
+            command='mpirun -np %d %s %s%s %s >%s.stdout.txt' % (np,version,xswitch,switches,pf,root_name)
         commands.append(command)
         root_names.append(root_name)
-
-    # get any text files if any
-
-    for one in txt_files:
-        shutil.copy(one,out_dir)
-    			
 
     print('The commands that will be executed will be:')
     for one in commands:
@@ -445,6 +486,7 @@ def steer(argv):
     pf_dir=''
     out_dir=''
     np=3
+    switches=''
 
     i=1
     words=[]
@@ -461,6 +503,9 @@ def steer(argv):
         elif argv[i]=='-out_dir':
             i=i+1
             out_dir=(argv[i])
+        elif argv[i]=='-x':
+            i=i+1
+            switches=(argv[i])
         elif argv[i][0]=='-':
             print('Error: Unknown switch ---  %s' % argv[i])
             return
@@ -473,7 +518,7 @@ def steer(argv):
         return
 
     for one in words:
-        q=doit(version=one,pf_dir=pf_dir,out_dir=out_dir,np=np,outputfile='Summary.txt')
+        q=doit(version=one,pf_dir=pf_dir,out_dir=out_dir,np=np,switches=switches,outputfile='Summary.txt')
 
     # Now run regression checks between this run and the last time the routine was run
 

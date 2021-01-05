@@ -50,10 +50,8 @@ calculate_ionization (restart_stat)
      int restart_stat;
 {
   int n, nn;
-  double zz, zzz, zze, ztot, zz_adiab, zz_lofreq;
-  double zz_abs, zz_scat, zz_star, zz_disk;
-  double zz_err, zz_else;
-  int nn_adiab, nn_lofreq;
+  double zz, z_abs_all, z_abs[N_ISTAT], z_else, ztot;
+  int nphot_istat[N_ISTAT];
   WindPtr w;
   PhotPtr p;
 
@@ -64,9 +62,9 @@ calculate_ionization (restart_stat)
   int iwind;
 
 
-#ifdef MPI_ON
-  int ioniz_spec_helpers;
-#endif
+//OLD #ifdef MPI_ON
+//OLD   int ioniz_spec_helpers;
+//OLD #endif
 
   /* Save the the windfile before the first ionization cycle in order to
    * allow investigation of issues that may have arisen at the very beginning
@@ -89,20 +87,17 @@ calculate_ionization (restart_stat)
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
-#ifdef MPI_ON
-  /* the length of the big arrays to help with the MPI reductions of the spectra
-     the variables for the estimator arrays are set up in the subroutines themselves */
-  ioniz_spec_helpers = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
-#endif
+//OLD #ifdef MPI_ON
+//OLD   /* the length of the big arrays to help with the MPI reductions of the spectra
+//OLD      the variables for the estimator arrays are set up in the subroutines themselves */
+//OLD   ioniz_spec_helpers = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
+//OLD #endif
 
 /* THE CALCULATION OF THE IONIZATION OF THE WIND */
 
-  geo.ioniz_or_extract = 1;     //SS July 04 - want to compute MC estimators during ionization cycles
-  //1 simply implies we are in the ionization section of the code
-  //and allows routines to act accordinaly.
+  geo.ioniz_or_extract = CYCLE_IONIZ;
 
 
-/* BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
   if (geo.wcycle == geo.wcycles)
     xsignal (files.root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n", "COMMENT", geo.wcycle, geo.wcycles);
@@ -122,13 +117,15 @@ calculate_ionization (restart_stat)
   }
 
 
+/* BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
+
   while (geo.wcycle < geo.wcycles)
   {                             /* This allows you to build up photons in bunches */
 
     xsignal (files.root, "%-20s Starting %3d of %3d ionization cycles \n", "NOK", geo.wcycle + 1, geo.wcycles);
 
     Log ("!!Python: Beginning cycle %d of %d for defining wind\n", geo.wcycle + 1, geo.wcycles);
-    Log_flush ();               /* Flush the log file (so that we know where are if there are problems */
+    Log_flush ();
 
     /* Initialize all of the arrays, etc, that need initialization for each cycle
      */
@@ -176,6 +173,7 @@ calculate_ionization (restart_stat)
     nphot_to_define = (long) NPHOT;
 
     define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+    photon_checks (p, freqmin, freqmax, "Check before transport");
 
     /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
 
@@ -188,11 +186,6 @@ calculate_ionization (restart_stat)
     {
       qdisk.heat[n] = qdisk.nphot[n] = qdisk.w[n] = qdisk.ave_freq[n] = 0;
     }
-
-
-
-    photon_checks (p, freqmin, freqmax, "Check before transport");
-
 
 
     zz = 0.0;
@@ -220,71 +213,53 @@ calculate_ionization (restart_stat)
     /* Transport the photons through the wind */
     trans_phot (w, p, 0);
 
-    /*Determine how much energy was absorbed in the wind */
-    zze = zzz = zz_adiab = zz_abs = zz_scat = zz_star = zz_disk = zz_err = zz_else = zz_lofreq = 0.0;
-    nn_adiab = nn_lofreq = 0;
+    /* Determine how much energy was absorbed in the wind. first zero counters. 
+       There are counters for total energy absorbed and for each entry in the istat enum */
+    z_abs_all = z_else = 0.0;
+    for (nn = 0; nn < N_ISTAT; nn++)
+    {
+      z_abs[nn] = 0.0;
+      nphot_istat[nn] = 0.0;
+    }
+
+    /* loop over the different photon istats to determine where the luminosity went */
     for (nn = 0; nn < NPHOT; nn++)
     {
-      zzz += p[nn].w;
-      if (p[nn].istat == P_ESCAPE)
+      z_abs_all += p[nn].w;
+
+      /* we want the istat to be >1 (not P_SCAT or P_INWIND) */
+      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
       {
-        zze += p[nn].w;
-      }
-      else if (p[nn].istat == P_ADIABATIC)
-      {
-        zz_adiab += p[nn].w;
-        nn_adiab++;
-      }
-      else if (p[nn].istat == P_LOFREQ_FF)
-      {
-        zz_lofreq += p[nn].w;
-        nn_lofreq++;
-      }
-      else if (p[nn].istat == P_ABSORB)
-      {
-        zz_abs += p[nn].w;
-      }
-      else if (p[nn].istat == P_TOO_MANY_SCATTERS)
-      {
-        zz_scat += p[nn].w;
-      }
-      else if (p[nn].istat == P_HIT_STAR)
-      {
-        zz_star += p[nn].w;
-      }
-      else if (p[nn].istat == P_HIT_DISK)
-      {
-        zz_disk += p[nn].w;
-      }
-      else if (p[nn].istat == P_ERROR || p[nn].istat == P_ERROR_MATOM)
-      {
-        zz_err += p[nn].w;
+        z_abs[p[nn].istat] += p[nn].w;
+        nphot_istat[p[nn].istat]++;
       }
       else
-      {
-        zz_else += p[nn].w;
-      }
+        z_else += p[nn].w;
     }
 
     Log
-      ("!!python: Total photon luminosity after transphot  %18.12e (absorbed/lost  %18.12e). Radiated luminosity %18.12e\n",
-       zzz, zzz - zz, zze);
+      ("!!python: Total photon luminosity after transphot  %18.12e (absorbed or lost  %18.12e). Radiated luminosity %18.12e\n",
+       z_abs_all, z_abs_all - zz, z_abs[P_ESCAPE]);
     if (geo.rt_mode == RT_MODE_MACRO)
     {
-      Log ("!!python: luminosity lost by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
-      Log ("!!python: luminosity lost to low-frequency free-free    %18.12e number of packets %d\n", zz_lofreq, nn_lofreq);
+      Log ("!!python: luminosity lost by adiabatic kpkt destruction %18.12e number of packets %d\n", z_abs[P_ADIABATIC],
+           nphot_istat[P_ADIABATIC]);
+      Log ("!!python: luminosity lost to low-frequency free-free    %18.12e number of packets %d\n", z_abs[P_LOFREQ_FF],
+           nphot_istat[P_LOFREQ_FF]);
     }
-    Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", zz_abs);
-    Log ("!!python: luminosity lost by too many scatters          %18.12e \n", zz_scat);
-    Log ("!!python: luminosity lost by hitting the central object %18.12e \n", zz_star);
-    Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", zz_disk);
-    Log ("!!python: luminosity lost by errors                     %18.12e \n", zz_err);
-    Log ("!!python: luminosity lost by the unknown                %18.12e \n", zz_else);
+    Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
+    Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
+    Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
+    Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", z_abs[P_HIT_DISK]);
+    Log ("!!python: luminosity lost by errors                     %18.12e \n",
+         z_abs[P_ERROR] + z_abs[P_ERROR_MATOM] + z_abs[P_REPOSITION_ERROR]);
+    Log ("!!python: luminosity lost by the unknown                %18.12e \n", z_else);
+    if (geo.binary == TRUE)
+      Log ("!!python: luminosity lost by hitting the secondary %18.12e \n", z_abs[P_SEC]);
 
 
     photon_checks (p, freqmin, freqmax, "Check after transport");
-
-    spectrum_create (p, freqmin, freqmax, geo.nangles, geo.select_extract);
+    spectrum_create (p, geo.nangles, geo.select_extract);
 
 
 
@@ -329,7 +304,7 @@ calculate_ionization (restart_stat)
 
 #ifdef MPI_ON
 
-    gather_spectra_para (ioniz_spec_helpers, MSPEC);
+    gather_spectra_para ();
 
 #endif
 
@@ -471,7 +446,7 @@ make_spectra (restart_stat)
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
 
-  geo.ioniz_or_extract = 0;
+  geo.ioniz_or_extract = CYCLE_EXTRACT;
 
 /* Next steps to speed up extraction stage */
   if (!modes.keep_photoabs)
@@ -575,14 +550,13 @@ make_spectra (restart_stat)
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
-    /* TODAY */
-    if (modes.save_photons)
-    {
-      for (n = 0; n < NPHOT; n++)
-      {
-        save_photons (&p[n], "CREATE");
-      }
-    }
+//OLD    if (modes.save_photons)
+//OLD    {
+//OLD      for (n = 0; n < NPHOT; n++)
+//OLD      {
+//OLD        save_photons (&p[n], "CREATE");
+//OLD      }
+//OLD    }
 
     for (icheck = 0; icheck < NPHOT; icheck++)
     {
@@ -597,14 +571,15 @@ make_spectra (restart_stat)
 
     trans_phot (w, p, geo.select_extract);
 
-    spectrum_create (p, freqmin, freqmax, geo.nangles, geo.select_extract);
+    spectrum_create (p, geo.nangles, geo.select_extract);
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
     renorm = ((double) (geo.pcycles)) / (geo.pcycle + 1.0);
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-    gather_spectra_para (spec_spec_helpers, nspectra);
+//OLD    gather_spectra_para (spec_spec_helpers, nspectra);
+    gather_spectra_para ();
 #endif
 
 
@@ -685,6 +660,22 @@ make_spectra (restart_stat)
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
   Log ("\nBrief Run Summary\nAt program completion, the elapsed TIME was %f\n", timer ());
   Log ("There were %d of %d ionization cycles and %d of %d spectral cycles run\n", geo.wcycle, geo.wcycles, geo.pcycle, geo.pcycles);
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    if (nlevels_macro == 0)
+    {
+      Log ("THIS WAS A MACROATOM CALCULATION WITH NO MACROLEVELS. (Use for diagnostics only)\n");
+    }
+    else
+    {
+      Log ("This was a macro-atom calculation\n");
+    }
+  }
+  else
+  {
+    Log ("This was a simple atom calculation\n");
+  }
+
   Log ("Convergence statistics for the wind after the ionization calculation:\n");
   check_convergence ();
   Log ("Information about luminosities and apparent fluxes due to various portions of the system:\n");

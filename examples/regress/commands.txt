@@ -1,0 +1,10 @@
+# py 1d_sn.pf
+py -classic agn_macro.pf
+py -classic agn_short.pf
+py -gamma agn_gamma.pf
+py -gamma agn_macro_gamma.pf
+py cv.pf
+py -classic cv_kur.pf
+py cv_vert.pf
+py star.pf
+py two.pf

@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <math.h>
 #include <time.h>
 #include <gsl/gsl_integration.h>
@@ -22,7 +21,6 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_min.h>
-#include <gsl/gsl_errno.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -33,6 +31,7 @@
 /******************************
  * The next two routines were written by ksl.  They were not part of
    the recipes programs which I had but I think they are what was intended
+   TODO EP: I think these to functions are redundant now - we don't seem to use them
 ********************************/
 
 double *
@@ -69,8 +68,8 @@ free_vector (a, i, j)
  * This routine carries out numerical integration of the function func from a to b. It currently
  * uses the gsl implementation of the ROMBERG integration scheme. Initial tests using QAG showed that
  * the type of integrals we do - often with exponential tails - is not well treated. There is an 
- * internal test to ensure that the user isnt asking for an integral where the function is zero everywhere.
- * The gsl routine doesnt handle this well, and takes ages to (sometimes) return zero.
+ * internal test to ensure that the user is not asking for an integral where the function is zero everywhere.
+ * The gsl routine does not handle this well, and takes ages to run and (sometimes) return zero.
  *
  * ### Notes ###
  *
@@ -205,6 +204,8 @@ zero_find (func, x_lo, x_hi, tol)
 
   result = (x_lo + x_hi) / 2.0;
 
+  gsl_root_fsolver_free (s);
+
   return (result);
 }
 
@@ -279,6 +280,8 @@ func_minimiser (a, m, b, func, tol, xmin)
   }
   while (status == GSL_CONTINUE && iter < max_iter);
   *xmin = m;
+
+  gsl_min_fminimizer_free (s);
 
   return func (m, test);
 }

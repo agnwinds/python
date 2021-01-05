@@ -103,14 +103,22 @@ def read_diag(root):
                 t_r.append(eval(words[2]))
                 t_e.append(eval(words[4]))
                 hc.append(eval(words[8]))
-        t_r=numpy.array(t_r)
-        t_e=numpy.array(t_e)
-        hc=numpy.array(hc)
+
+        if len(t_r)>0:
+            t_r=numpy.array(t_r)
+            t_e=numpy.array(t_e)
+            hc=numpy.array(hc)
 
 
-        t_r=t_r/ncells
-        t_e=t_e/ncells
-        hc=hc/ncells
+            t_r=t_r/ncells
+            t_e=t_e/ncells
+            hc=hc/ncells
+        else:
+            t_r=[]
+            t_e=[]
+            hc=[]
+            print('Read diag file, but there is not evidence of ionization cycles')
+
 
         return converged,converging,t_r,t_e,hc
 
@@ -172,6 +180,7 @@ def plot_converged(root,converged,converging,t_r,t_e,hc):
     Make a plot of the convergence statistics in the diag directroy
     '''
 
+
     pylab.figure(1,(6,6))
     pylab.clf()
     pylab.plot(t_r,'--',label='t_r')
@@ -214,14 +223,20 @@ def check_completion(root):
 
     complete_message=[]
 
+    ion_time=0 # To handle the case where there were no ionization cycles
+
     if line.count('COMPLETE'):
         word=complete_string.split()
         message='%s ran to completion in %s s' % (root,word[5])
         complete_message.append(message)
-        word=ion_string.split()
-        message='%s ionization cycles were completed in %s s' % (word[8],word[5])
-        ion_time=eval(word[5])
+        try:
+            word=ion_string.split()
+            message='%s ionization cycles were completed in %s s' % (word[8],word[5])
+            ion_time=eval(word[5])
+        except:
+            message='There were no ionization cycles for this run'
         complete_message.append(message)
+
         try:
             word=spec_string.split()
             spec_time=eval(word[5])
@@ -259,8 +274,22 @@ A summary of the errors for this run of the program is shown below.  More inform
 can be found in the diag files directory.  This summary presents the total number of times an error message of a particularly 
 type was generated; many times the same error message will will occur in each of the threads.  
 '''
+
+tot_plot_description='''
+This plot is based on the .spec_tot file.  It shows the photons that were created and emitted in the last ionization cycle.  
+The photons created by a central object or disk (the external sources) are plotted separately from the wind (the internal source).
+For a simple atom model, the wind photons are generated based on physical conditions in  the wind at the beginning of the cycle.
+Ror a macro-atom models, the wind photons are generated as photons pass through the wind and interact with macro-atoms.  The observed
+flux from photons that escape to infinity and a subset of this, the emitted flux of photons arising in the wind are also shown.
+Finally, the flux of the photons that hit the disk or star is also shown (as they would be seen at a distance of 100 pc).
+'''
+
+spec_plot_description='''
+This plot is from the .spec file, and shows the expected spectra (at 100 pc) as a function of the various inclination angles requested. Note
+that the y-axis scale varies for different inclination angles.
+'''
     
-def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complete_message=['test'],errors=['test','test2']):
+def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,nspectra=3,complete_message=['test'],errors=['test','test2']):
     '''
     Make an html file that collates all the results
     '''
@@ -273,8 +302,11 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complet
 
     string+=xhtml.hline()
     string+=xhtml.h2('Did the run converge?')
-    # print(xhtml.image('file:./diag_%s/convergence.png' % root))
-    string+=xhtml.image('file:./diag_%s/convergence.png' % root)
+
+    if os.path.isfile('./diag_%s/convergence.png' % root):
+        string+=xhtml.image('file:./diag_%s/convergence.png' % root)
+    else:
+        string+=xhtml.paragraph('There is no convergence plot. OK if no ionization cycles')
 
     string+=xhtml.paragraph(convergence_message)
 
@@ -290,11 +322,21 @@ def make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complet
     # string+=xhtml.image('file:./diag_%s/%s_t_r.png' % (root,root))
     string+=xhtml.hline()
     string+=xhtml.h2('What do the total spectra look like (somewhat smoothed)?')
-    string+=xhtml.image('file:%s' % (spec_tot_plot))
+
+    if os.path.isfile(spec_tot_plot):
+        string+=xhtml.image('file:%s' % (spec_tot_plot),width=800)
+        string+=xhtml.paragraph(tot_plot_description)
+    else:
+        string+=xhtml.paragraph('There is no total spectrum plot. OK if no ionization cycles')
+
     string+=xhtml.hline()
     string+=xhtml.h2('What do the final spectra look like (somewhat smoothed)?')
     if spec_plot != 'None':
-        string+=xhtml.image('file:%s' % (spec_plot))
+        if nspectra==1:
+            string+=xhtml.image('file:%s' % (spec_plot),width=900,height=600)
+        else:
+            string+=xhtml.image('file:%s' % (spec_plot),width=900,height=nspectra*300)
+        string+=xhtml.paragraph(spec_plot_description)
     else:
         string+=xhtml.paragraph('There is no plot of a detailed spectrum, probably because detailed spectra were not created')
     string+=xhtml.hline()
@@ -369,33 +411,41 @@ def doit(root='ixvel',outputfile='out.txt'):
     for one in complete_message:
         print(one)
 
-    xdim=how_many_dimensions('%s.0.master.txt' % root)
+    xdim=how_many_dimensions('%s.master.txt' % root)
 
     if xdim==2:
-        converge_plot=plot_wind.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
-        te_plot=plot_wind.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
-        tr_plot=plot_wind.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
+        converge_plot=plot_wind.doit('%s.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
+        te_plot=plot_wind.doit('%s.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
+        tr_plot=plot_wind.doit('%s.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
     else:
-        converge_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
-        te_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
-        tr_plot=plot_wind_1d.doit('%s.0.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
+        converge_plot=plot_wind_1d.doit('%s.master.txt' % root,'converge',plot_dir='./diag_%s' % root)
+        te_plot=plot_wind_1d.doit('%s.master.txt' % root,'t_e',plot_dir='./diag_%s' % root)
+        tr_plot=plot_wind_1d.doit('%s.master.txt' % root,'t_r',plot_dir='./diag_%s' % root)
 
 
     converged,converging,t_r,t_e,hc=read_diag(root)
 
-    if len(converged):
+    if len(converged)>1:
         plot_converged(root,converged,converging,t_r,t_e,hc)
+    else:
+        print('There were not enough cycles to plot the convergence by cycle')
 
     plot_tot.doit(root)
     spec_tot_plot=root+'.spec_tot.png'
 
-    spec_plot=plot_spec.do_all_angles(root,wmin=0,wmax=0)
+    try:
+        spec_plot,nspectra=plot_spec.do_mosaic(root,wmin=0,wmax=0)
+    except:
+        print('Could not consturct detailed spectrum plot')
+        spec_plot='none'
+        nspectra=0
+
     # spec_plot=root+'.png'
 
     errors=py_error(root)
      
 
-    make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,complete_message,errors)
+    make_html(root,converge_plot,te_plot,tr_plot,spec_tot_plot,spec_plot,nspectra,complete_message,errors)
 
 
     return

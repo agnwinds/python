@@ -42,14 +42,29 @@ double kn_lambda;
  * 	description of the wind
  *
  * @param [in] int  ndom   The domain number
- * @return     Alwasys returns 0
+ * @return     Always returns 0
  *
  *
  * ###Notes###
  *
+ * The KWD model implemenented in Python follows that of KWD97 (ApJ,486,445), with
+ * some modifications.  
+ * 
+ * * We allow  the wind to start
+ *   and stop at a distance wind_rmin_at_disk_;ane*r_star and wind_rhomax_at_disk*rstar, not simply at 
+ *   r_star and r_disk, and 
+ * * we allow for the velocity at the base to be kn_v_zero*v_sound at the base of the wind, not
+ *   simply v_sound.
+ *
  * The routine first obtains wind_mdot and then the various parameters
  * required for the KWD model.   It then integrates the mass loss rate per unit area over
  * the region occupied by the wind to normalize the mass loss rate.
+ *
+ * There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
+ * used but in later papers, e.g KD97 d in WD radii was used.   This is more natural and is used in
+ * Python.
+ *
+ * To repeat, kn_dratio is the distance to the focus point in stellar radii!
  *
  * @bug There may weel be errors associated with a vertically extended disk that need tobe addressed
  *
@@ -60,7 +75,7 @@ get_knigge_wind_params (ndom)
      int ndom;
 {
   double dmin;
-  double disktheta, test;
+  double rmin, rmax;
 
 
   Log ("Creating KWD wind in domain %d\n", ndom);
@@ -70,31 +85,20 @@ get_knigge_wind_params (ndom)
   zdom[ndom].wind_mdot *= MSOL / YR;
 
 
-  /* Initialize the various parameters to something reasonable */
+  /* Initialize parameters of the KWD model */
 
-  zdom[ndom].kn_r_scale = 7e10; /*Accleration length scale for wind */
+  zdom[ndom].kn_r_scale = 7e10; /*Acceleration length scale for wind */
   zdom[ndom].kn_alpha = 1.5;    /* Accleration scale exponent for wind */
   zdom[ndom].kn_v_infinity = 3; /* Final speed of wind in units of escape velocity */
   zdom[ndom].kn_lambda = 0.0;   /* Mass loss rate exponent */
-  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the WD
-                                                                           radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is
-                                                                           approximate */
-  zdom[ndom].kn_v_zero = 1.0;   /* Parameter which
-                                   can use to muliply the initial velocity of wind so that it
-                                   is greater or less than the sound speed. This is not part of the standard KWD model */
-  zdom[ndom].wind_rho_min = 1;  /* Innner and outer edges of the wind in stellar radii. These
-                                   parameters were added to allow one to create models similar to those 
-                                   used in the YSO paper (Sim+05)  */
-  zdom[ndom].wind_rho_max = geo.diskrad / geo.rstar;
-
-
-/* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
-used but in later papers, e.g KD97 d in WD radii was used.   This is more natural and is used here.
-but one should remember that this differs from KWD95.
-
-To repeat, kn_dratio is the distance to the focus point in stellar radii!
-
-*/
+  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the stellar
+                                                                           radius. The value set here is for the minimum collimation, see KWD95.  
+                                                                         */
+  zdom[ndom].kn_v_zero = 1.0;   /* The velocity at the base of the wind will be kn_v_zero times the sound speed. */
+  zdom[ndom].wind_rhomin_at_disk = 1;   /* Innner and outer edges of the wind in stellar radii. These
+                                           parameters were added to allow one to create models similar to those 
+                                           used in the YSO paper (Sim+05)  */
+  zdom[ndom].wind_rhomax_at_disk = geo.diskrad / geo.rstar;
 
   rddoub ("KWD.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
 
@@ -112,65 +116,45 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
   rddoub ("KWD.acceleration_exponent", &zdom[ndom].kn_alpha);   /* Accleration scale exponent */
   rddoub ("KWD.v_zero(multiple_of_sound_speed_at_base)", &zdom[ndom].kn_v_zero);
 
-  rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
-  rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
+  rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rhomin_at_disk);
+  rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rhomax_at_disk);
 
-  zdom[ndom].wind_rho_min *= geo.rstar;
-  zdom[ndom].wind_rho_max *= geo.rstar;
-  zdom[ndom].wind_thetamin = atan (1. / zdom[ndom].kn_dratio);
+  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rhomin_at_disk / zdom[ndom].kn_dratio);      /* Corrected as a result of  #760 */
+  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rhomax_at_disk / zdom[ndom].kn_dratio);      /* Corrected as a result of  #760 */
+  zdom[ndom].wind_rhomin_at_disk *= geo.rstar;
+  zdom[ndom].wind_rhomax_at_disk *= geo.rstar;
+  zdom[ndom].rmin = zdom[ndom].wind_rhomin_at_disk;
 
-/* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is
-in units of WD radii */
-
-  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
-    zdom[ndom].wind_thetamax = atan (geo.diskrad / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
-  }
+    zdom[ndom].wind_thetamin =
+      atan (zdom[ndom].wind_rhomin_at_disk / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rhomin_at_disk))));
+    zdom[ndom].wind_thetamax =
+      atan (zdom[ndom].wind_rhomax_at_disk / (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (zdom[ndom].wind_rhomax_at_disk))));
 
-
-  zdom[ndom].rmin = zdom[ndom].wind_rho_min;
-
-  /* The change in the boundary of the wind (as corner of disk -- see above)
-     means that wind_rho_max nees to be redefined so that it is used correctly
-     to compute the boundary of the wind elsewhere. */
-
-  // XXX Next lines for a vertically extended disk supercede definitions above and look wrong
-  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-  {
-    zdom[ndom].wind_rho_max = geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
   }
 
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
+  if (modes.adjust_grid == FALSE)
   {
     zdom[ndom].xlog_scale = geo.rstar;
     zdom[ndom].zlog_scale = geo.rstar;
   }
 
 
-/*Now calculate the normalization factor for the wind*/
+/*Now calculate the normalization factor for the wind.  */
 
-  test = geo.rstar;
+  rmin = zdom[ndom].wind_rhomin_at_disk;
+  rmax = zdom[ndom].wind_rhomax_at_disk;
 
-  /* For non-flat disk some streamlines are missing (SS). */
-
-  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-  {
-    disktheta = atan (zdisk (geo.diskrad) / geo.diskrad);
-    test =
-      zdom[ndom].kn_dratio * geo.rstar * sin (zdom[ndom].wind_thetamin) *
-      cos (disktheta) / sin ((PI / 2.) - zdom[ndom].wind_thetamin - disktheta);
-  }
 
   kn_lambda = zdom[ndom].kn_lambda;
-//  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
-  zdom[ndom].mdot_norm = num_int (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+  zdom[ndom].mdot_norm = num_int (kn_wind_mdot_integral, rmin, rmax, 1e-6);
 
   return (0);
 }
@@ -220,6 +204,7 @@ kn_velocity (ndom, x, v)
   struct photon ptest;
   double xtest[3];
   double s;
+  int hit_disk;
 
   DomainPtr one_dom;
 
@@ -240,24 +225,40 @@ kn_velocity (ndom, x, v)
 
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
-/* Take the thickness of the disk into account if that is necessary.  */
+/* Take the thickness of the disk into account if that is necessary.  
+ * 
+ * For this, we calculate where the streamline hits the disk surface
+ * and we assume we want the velocity at this point to be determined
+ * by the base velocity at this radial distance and we want the
+ * velocity to change depending on the poloidal distance from this
+ * point.  We do not adjust the angle of the outflow in any way.
+ *
+ * It the streanline does not hit the disk (which can happen because
+ * we want the velocity everywhere even in regions outside the wind)
+ * use the value one would get for a glat disk.
+ */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
-    xtest[0] = r;               // Define xtest in the +xz plane
-    xtest[1] = 0;
-    xtest[2] = fabs (x[2]);
-    ptest.x[0] = rzero;         // Define ptest at the intersection of the streamline and x axis
+
+    init_dummy_phot (&ptest);
+    ptest.x[0] = rzero;         // Define ptest to be the footpoint extended to xy plane
     ptest.x[1] = 0.0;
     ptest.x[2] = EPSILON;
-    ptest.lmn[0] = sin (theta); // lmn is along the streamline toward xtest
+    ptest.lmn[0] = sin (theta); // ptest direction is along the stream line
     ptest.lmn[1] = 0.0;
     ptest.lmn[2] = cos (theta);
-    s = ds_to_disk (&ptest, 1);
-    move_phot (&ptest, s);      // Now test photon is at disk surface
-    vsub (ptest.x, xtest, xtest);
-    ldist = length (xtest);
-    rzero = length (ptest.x);
+    s = ds_to_disk (&ptest, 1, &hit_disk);
+    if (hit_disk)
+    {
+      move_phot (&ptest, s);    // Now move the test photon to  disk surface
+      xtest[0] = r;             // Define xtest in the +z plane
+      xtest[1] = 0;
+      xtest[2] = fabs (x[2]);
+      vsub (ptest.x, xtest, xtest);     // Poloidal distance is just the distance between these two points.
+      ldist = length (xtest);
+      rzero = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
+    }
   }
 
 
@@ -355,6 +356,7 @@ kn_rho (ndom, x)
   double v[3], rho;
   struct photon ptest;
   double s, theta;
+  int hit_disk;
 
   DomainPtr one_dom;
 
@@ -366,22 +368,31 @@ kn_rho (ndom, x)
   r = sqrt (x[0] * x[0] + x[1] * x[1]); //rho coordinate of the point we have been given
   rzero = r / (1. + fabs (x[2] / dd));  //rho at the base for this streamline
 
-  /* If the disk is thick we need to modify the position of rzero */
+  /* If the disk is thick we need to modify the position of rzero. 
+   * 
+   * We define rho so that at the base it has the rho expected
+   * at the same radial position, and let it decline as expected
+   * given the radial velocity*/
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     theta = atan (rzero / dd);
-    ptest.x[0] = rzero;
+
+    init_dummy_phot (&ptest);
+    ptest.x[0] = rzero;         // Define ptest at the intersection of the streamline and x axis
     ptest.x[1] = 0.0;
     ptest.x[2] = EPSILON;
-    ptest.lmn[0] = cos (theta);
+    ptest.lmn[0] = sin (theta); // lmn is along the streamline toward xtest
     ptest.lmn[1] = 0.0;
-    ptest.lmn[2] = sin (theta);
-    s = ds_to_disk (&ptest, 1);
+    ptest.lmn[2] = cos (theta);
+    s = ds_to_disk (&ptest, 1, &hit_disk);
     move_phot (&ptest, s);      // Now test photon is at disk surface
+//    vsub (ptest.x, xtest, xtest);
+//    ldist = length (xtest);
     rzero = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
   }
 
-  kn_velocity (ndom, x, v);
+  kn_velocity (ndom, x, v);     /* This takes into account the disk thickness */
+
   vqr = sqrt (v[0] * v[0] + v[2] * v[2]);       //poloidal velocity
   vzero = kn_vzero (rzero);     //polidal velocity at base
   if ((r * vqr) > 0)            // If statement to assure denominator is not zero

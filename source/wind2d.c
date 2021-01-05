@@ -44,7 +44,7 @@ define_wind ()
   int i, j, n;
   int nn;
   double rrstar;
-  double x[3];
+  double x[3], v[3];
   double mdotbase, mdotwind, rr;
   int ierr;
   int n_vol, n_inwind, n_part;
@@ -107,9 +107,11 @@ define_wind ()
     {
       import_make_grid (w, ndom);
     }
-    else if (zdom[ndom].wind_type == SHELL)     /* nsh: This is the mode where we want the wind and the grid carefully
-                                                   controlled to allow a very thin shell. We ensure that the coordinate type is spherical.
-                                                 */
+    /* nsh: This is the mode where we want the wind and the grid carefully
+     * controlled to allow a very thin shell. We ensure that the coordinate
+     * type is spherical.
+     */
+    else if (zdom[ndom].wind_type == SHELL)
     {
       Log
         ("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
@@ -125,10 +127,11 @@ define_wind ()
     }
     else if (zdom[ndom].coord_type == RTHETA)
     {
-      if (zdom[ndom].wind_type == HYDRO)        /* 13jun -- nsh - 76 - This is a switch to allow one to use the
-                                                   actual zeus grid in the special case of a 'proga' wind in rtheta
-                                                   coordinates
-                                                 */
+      /* 13jun -- nsh - 76 - This is a switch to allow one to use the
+       *  actual zeus grid in the special case of a 'proga' wind in rtheta
+       * coordinates
+       */
+      if (zdom[ndom].wind_type == HYDRO)
       {
         rtheta_make_hydro_grid (w, ndom);
       }
@@ -144,7 +147,9 @@ define_wind ()
     else
     {
       Error ("define_wind: Don't know how to make coordinate type %d\n", zdom[ndom].coord_type);
+      Exit (1);
     }
+
     for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
     {
       /* For imported models we we have already set the velocities
@@ -158,6 +163,9 @@ define_wind ()
     }
 
   }
+
+  /* wind_complete calculates one-d arrays that contain edges and centers of the grid cells */
+
   wind_complete (w);
 
   /* Now determine the valid volumes of each cell and also determine whether the cells are in all
@@ -165,7 +173,6 @@ define_wind ()
    */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
-
   {
     if (zdom[ndom].coord_type == SPHERICAL)
     {
@@ -201,6 +208,25 @@ define_wind ()
   }
 
 
+
+  /* Calculate gammas for wind cells, and make volumes co-moving volumes */
+
+  for (n = 0; n < NDIM2; n++)
+  {
+    if (rel_mode == REL_MODE_FULL)
+    {
+      w[n].xgamma = 1. / sqrt (1. - dot (w[n].v, w[n].v) / (VLIGHT * VLIGHT));
+      model_velocity (w[n].ndom, w[n].xcen, v);
+      w[n].xgamma_cen = 1. / sqrt (1. - dot (v, v) / (VLIGHT * VLIGHT));
+      w[n].vol *= w[n].xgamma_cen;
+      geo.frame = CMF_FRAME;    //relevant quantities in the windsave will by in co-moving frame
+    }
+    else
+    {
+      w[n].xgamma = w[n].xgamma_cen = 1.;
+      geo.frame = OBS_FRAME;    //relevant quantities are defined in the observer faems
+    }
+  }
 
 
 /* The routines above have established the volumes of the cells that are in the wind
@@ -238,7 +264,6 @@ define_wind ()
       Exit (1);
     }
 
-
     if (zdom[ndom].coord_type != SPHERICAL && zdom[ndom].wind_type != IMPORT)
     {
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
@@ -270,16 +295,15 @@ define_wind ()
     }
   }
 
-
-
-  /* Allocate space for the plasma array.  To save space, this structure is sized 
+  /* At this point the wind structure is defined.  Now 
+   * Allocate space for the plasma array.  To save space, this structure is sized 
    * to contain only those cells which are in the wind. */
 
   calloc_plasma (NPLASMA);
   calloc_dyn_plasma (NPLASMA);
   create_maps ();               /* Populate the maps between plasmamain & wmain */
 
-  /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = RT_MODE_MACRO. see #138  */
+  /* If in macro atom mode, allocate structures to hold macro atom information see #138  */
 
   if (geo.rt_mode == RT_MODE_MACRO)
   {
@@ -288,21 +312,32 @@ define_wind ()
   }
 
 
-/* 06may -- At this point we have calculated the volumes of all of the cells and it should
-be optional which variables beyond here are moved to structures othere than Wind */
+/* Now intialize the plasma structure.  Note that a few of the variables in the
+   plasma structure are similar to those in the wind.  However one should not assume
+   the are the same, since the plasma structure contains values at the centers of 
+   cells.  Properties of the plasma structure are ususually, though not necessarily
+   always, CMF quantities.  
+ */
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
+
+/* Convert plasma densities  to the co-moving frame. Gammas and volume have
+   already been calculated and are just copied. For the "classic" case, xgammas have
+   been set to 1, so densities will be unchanged */
+
 
   for (n = 0; n < NPLASMA; n++)
   {
     nwind = plasmamain[n].nwind;
     ndom = wmain[nwind].ndom;
     stuff_v (w[nwind].xcen, x);
+    plasmamain[n].xgamma = wmain[nwind].xgamma_cen;
 
-    /* Next two lines allow for clumping */
-    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
+
+    plasmamain[n].rho = model_rho (ndom, x) / (zdom[ndom].fill * plasmamain[n].xgamma);
     plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill; // Copy volumes
+
 
     /* This is where we initialise the spectral models for the wind. */
 
@@ -315,7 +350,7 @@ be optional which variables beyond here are moved to structures othere than Wind
                                                    set this number to the hottest part of the model -
                                                    this should define where any exponential dropoff becomes important */
       plasmamain[n].exp_w[nn] = 0.0;    /* 120817 Who knows what this should be! */
-      plasmamain[n].pl_alpha[nn] = geo.alpha_agn;       /*As an initial guess we assume the whole wind is
+      plasmamain[n].pl_alpha[nn] = geo.alpha_agn;       /*Awind2d: For domains an initial guess we assume the whole wind is
                                                            optically thin and so the spectral index for a PL illumination will be the
                                                            same everywhere.  */
       plasmamain[n].pl_log_w[nn] = -1e99;       /*131114 - a tiny weight - just to fill the variable */
@@ -334,6 +369,10 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       plasmamain[n].t_r = hydro_temp (x);       //NSH 151126 - slight tidy up here - we now set t_e and t_r to hydro temp, t_e change is below//
     }
+    else if (zdom[ndom].wind_type == IMPORT)
+    {
+      plasmamain[n].t_r = import_temperature (ndom, x, FALSE);
+    }
     else
     {
       plasmamain[n].t_r = zdom[ndom].twind;
@@ -350,13 +389,19 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  a fixed temprature calculation,then the wind temperature is set to be the wind temperature so the
 	  user gets what they are expecting */
 
-    if (modes.fixed_temp == 0 && modes.zeus_connect == 0)       //NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes
+    if (zdom[ndom].wind_type == IMPORT)
+    {
+      plasmamain[n].t_e = import_temperature (ndom, x, TRUE);
+    }
+    else if (modes.fixed_temp == FALSE && modes.zeus_connect == FALSE)  //NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes
+    {
       plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;      //Lucy guess
+    }
     else
+    {
       plasmamain[n].t_e = plasmamain[n].t_e_old = plasmamain[n].t_r;
+    }
     //If we want to fix the temperature, we set it to tr which has previously been set to twind.
-
-
 
 /* Calculate an initial guess for the weight of the PL spectrum (constant / area of a sphere / 4pi) */
 
@@ -423,8 +468,6 @@ be optional which variables beyond here are moved to structures othere than Wind
       plasmamain[i].heat_shock = 0.0;
     }
   }
-
-
 
 
   /* Calculate one over dvds */
@@ -495,6 +538,17 @@ be optional which variables beyond here are moved to structures othere than Wind
     }
   }
 
+  /*
+   * We have finished with imported models here, so free the memory to clear
+   * up the memory space for stuff we don't need anymore.
+   */
+
+  for (n = 0; n < geo.ndomain; n++)
+  {
+    if (zdom[n].wind_type == IMPORT)
+      free_import (zdom[n].coord_type, n);
+  }
+
   return (0);
 }
 
@@ -505,24 +559,27 @@ double wig_x, wig_y, wig_z;
 
 /**********************************************************/
 /**
- * @brief      locates the element in wmain associated with a postion
+ * @brief      locates the element in wmain associated with a position 
  *
  * @param [in] int  ndom   The domain number for the search
  * @param [in] double  x[]   The position
- * @return     where_in_grid normally  returns the element in wmain associated
- * with a position.  If the positions is in the grid (of one of the domains)
- * this will be a positive integer.  If the position is not in the grid of one
- * of the domains,
- * a negative number -1 will be returned if the position is inside athe grid,
- * -2 if it is outside the grid for that domain
+ * @return     where_in_grid normally  returns the element of wmain 
+ * associated that position.  
+ * 
+ * If the positions is in the grid (of the domains) this will be 
+ * a positive integer.  If the position is not in the grid of the
+ * domain, a negative number will be returned.  The negative number
+ * will be -1 if the positionis inside the grid, or -2 if it is outside
+ * the grid.,
  *
  * @details
- *
- * ### Notes ###
- * where in grid is mainly a steering routine that calls other various
+
+ * where_in_grid is mainly a steering routine that calls other various
  * coordinate system specific routines.
  *
- * Where_in grid does not tell you whether the position is in the wind!.
+ * ### Notes ###
+ *
+ * Where_in grid does not tell you whether the position is in the wind!
  *
  * What one means by inside or outside the grid may well be different
  * for different coordinate systems.
@@ -587,11 +644,11 @@ int ierr_vwind = 0;
 /**********************************************************/
 /**
  * @brief      finds the velocity vector v for the wind in cartesian
- * 	coordinates at the position of the photon p.
+ * 	coordinates at the position of the photon p in the Observer frame.
  *
  * @param [in] int  ndom   The domain of interest
  * @param [in] PhotPtr  p   A photon
- * @param [out] double  v[]   The velocity at the postion given by phtoon???
+ * @param [out] double  v[]   The velocity at the position given by the photon
  * @return     0 	on successful completion, or a negative number if
  * photon position is not in the in the grid for the domain of interest.
  *
@@ -621,7 +678,22 @@ int ierr_vwind = 0;
  * If we ever implement a real 3d coordinate system, one will need to look at
  * this routine again.
  *
+ * The routine checks to see whether the position for which the velocity is needed
+ * and if so short-circuits the calculation returning a stored value
+ *
+ * vwind_xyz expects the photon position to be in the Observer frame
+ * It returns the velocity in the Observer frame.
+ *
  **********************************************************/
+
+#define NVWIND  3
+int nvwind = 0;
+int nvwind_last = 0;
+struct vwind
+{
+  int iorder;
+  double v[3], pos[3];
+} xvwind[NVWIND];
 
 int
 vwind_xyz (ndom, p, v)
@@ -635,8 +707,19 @@ vwind_xyz (ndom, p, v)
   double ctheta, stheta;
   double x, frac[4];
   int nn, nnn[4], nelem;
+  int n;
 
-
+  /* Check if the velocity for this position is in the buffer, and if so return that */
+  for (n = 0; n < nvwind; n++)
+  {
+    if (xvwind[n].pos[0] == p->x[0] && xvwind[n].pos[1] == p->x[1] && xvwind[n].pos[2] == p->x[2])
+    {
+      v[0] = xvwind[n].v[0];
+      v[1] = xvwind[n].v[1];
+      v[2] = xvwind[n].v[2];
+      return (0);
+    }
+  }
 
   if (ndom < 0 || ndom >= geo.ndomain)
   {
@@ -689,6 +772,28 @@ vwind_xyz (ndom, p, v)
     Error ("vwind_xyz: %f %f %f\n", v[0], v[1], v[2]);
   }
 
+  /* Now populate the buffer */
+
+
+
+  if (nvwind < NVWIND)
+  {
+    nvwind_last = nvwind;
+    nvwind++;
+  }
+  else
+  {
+    nvwind_last = (nvwind_last + 1) % NVWIND;
+  }
+
+
+  xvwind[nvwind_last].pos[0] = p->x[0];
+  xvwind[nvwind_last].pos[1] = p->x[1];
+  xvwind[nvwind_last].pos[2] = p->x[2];
+  xvwind[nvwind_last].v[0] = v[0];
+  xvwind[nvwind_last].v[1] = v[1];
+  xvwind[nvwind_last].v[2] = v[2];
+
 
   return (0);
 }
@@ -707,18 +812,27 @@ vwind_xyz (ndom, p, v)
  *
  * @details
  * This is one of the initialization routines for the wind.
- * The divergence of velocity of the wind is used to calculated PdV cooling of a grid cell
+ * The divergence of velocity of the wind is used to calculated 
+ * PdV cooling of a grid cell
  *
  * ### Notes ###
  *
- * Because the routine calls vwind_xyz, one must have previously
- * populated w[].v.  Also as a result of this fact, the routine
- * is not tightly tied to any particular wind model.
+ * This version of this routine uses legacy code for to calulated the divergence
+ * in classic mode, but simply calls a new routine get_div_v_in_cmf_frame
+ * to calculate the divergence in the co-moving frame which is the proper
+ * thing to do when special relativity is taken into account.
  *
  * The divergence, like othe scalar quantities, does not
  * need to be "rotated" differently in different coordinate
  * systems
  *
+ * The legacy code should be deleted eventually.
+ *
+ * The comment below only applies to the legacy code.
+ *
+ * Because the routine calls vwind_xyz, one must have previously
+ * populated w[].v.  Also as a result of this fact, the routine
+ * is not tightly tied to any particular wind model.
  *
  **********************************************************/
 int wind_div_err = (-3);
@@ -727,10 +841,8 @@ int
 wind_div_v ()
 {
   int icell;
-  double x_zero[3], v2[3], v1[3];
-  struct photon ppp;
-  double div, delta;
-  double xxx[3];
+  double x_zero[3];
+  double div;
   int ndom;
   double scaling;
 
@@ -744,62 +856,7 @@ wind_div_v ()
     stuff_v (wmain[icell].xcen, x_zero);        /*Gget the centre of the current cell in the loop */
     ndom = wmain[icell].ndom;
 
-//    delta = 0.01 * x_zero[2];   //delta is the distance across which we measure e.g. dv_x/dx
-
-    if (x_zero[1] != 0)
-    {
-      delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], fmin (wmain[icell].x[1] - x_zero[1], wmain[icell].x[2] - x_zero[2])));
-    }
-    else
-    {
-      delta = fabs (fmin (wmain[icell].x[0] - x_zero[0], wmain[icell].x[2] - x_zero[2]));
-    }
-    delta = delta * scaling;
-
-
-    if (delta == 0)
-    {
-      Error ("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n", icell);
-      delta = wmain[icell].dfudge;
-    }
-
-
-
-
-    /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
-       in positive and negative directions and evaluate the difference in velocities. Dividing this by
-       delta gives the value of dv_x/dx, and the sum of these gives the divergence. If issues arise
-       see bug report #70. */
-
-
-    /* Calculate dv_x/dx at this position */
-    stuff_v (x_zero, ppp.x);
-    ppp.x[0] += 0.5 * delta;
-    vwind_xyz (ndom, &ppp, v2);
-    ppp.x[0] -= delta;
-    vwind_xyz (ndom, &ppp, v1);
-    div = xxx[0] = (v2[0] - v1[0]) / delta;
-
-    /* Calculate dv_y/dy */
-    stuff_v (x_zero, ppp.x);
-    ppp.x[1] += 0.5 * delta;
-    vwind_xyz (ndom, &ppp, v2);
-    ppp.x[1] -= delta;
-    vwind_xyz (ndom, &ppp, v1);
-    div += xxx[1] = (v2[1] - v1[1]) / delta;
-
-
-    /* Calculate dv_z/dz */
-    stuff_v (x_zero, ppp.x);
-    ppp.x[2] += 0.5 * delta;
-    vwind_xyz (ndom, &ppp, v2);
-    ppp.x[2] -= delta;
-    vwind_xyz (ndom, &ppp, v1);
-    div += xxx[2] = (v2[2] - v1[2]) / delta;
-
-
-    /* we have now evaluated the divergence, so can store in the wind pointer */
-    wmain[icell].div_v = div;
+    wmain[icell].div_v = div = get_div_v_in_cmf_frame (ndom, x_zero);
 
     if (div < 0 && (wind_div_err < 0 || wmain[icell].inwind == W_ALL_INWIND))
     {
@@ -829,9 +886,10 @@ wind_div_v ()
  *
  * @details
  * The routine first determines what domain the position is located in,
- * and then intepolates to find the density at a specific position
+ * and then interpolates to find the density at a specific position
  *
  * ### Notes ###
+ *
  *
  **********************************************************/
 
@@ -913,7 +971,7 @@ mdot_wind (w, z, rmax)
      double z;                  // The height (usually small) above the disk at which mdot will be calculated
      double rmax;               // The radius at which mdot will be calculated
 {
-  struct photon p;              //needed because vwind_xyz has a call which involves a photon
+  struct photon p;
   double r, dr, rmin;
   double theta, dtheta;
   double den, rho ();
@@ -927,7 +985,6 @@ mdot_wind (w, z, rmax)
 
 /* Calculate the mass loss rate immediately above the disk */
 
-  /* Check that everything is defined sensibly */
   rmin = geo.rstar;
 
   if (rmax <= rmin)

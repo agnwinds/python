@@ -47,6 +47,9 @@ from scipy.signal import convolve
 C=2.997e18 # c in Angstroms/s
 Lyman=C/912.
 HeII=C/912.*4
+LymanA=C/1216
+HB=C/4863
+HA=C/6563
 
 def xsmooth(flux,smooth=21):
     '''
@@ -85,25 +88,29 @@ def doit(rootname='sphere',smooth=21,fig_no=2):
     # print(data.colnames)
 
     
-    pylab.figure(fig_no,(6,6))
+    pylab.figure(fig_no,(12,6))
     pylab.clf()
 
     created=data['Freq.']*xsmooth(data['Created'])
+    pylab.loglog(data['Freq.'],created,label='Created(Ext)')
+
+    try:
+        wind=data['Freq.']*xsmooth(data['WCreated'])
+        pylab.loglog(data['Freq.'],wind,label='Created(Wind)')
+    except:
+        pass
+
+
+
     emitted=data['Freq.']*xsmooth(data['Emitted'])
     hit_surf=data['Freq.']*xsmooth(data['HitSurf'])
     wind=data['Freq.']*xsmooth(data['Wind'])
 
-    pylab.loglog(data['Freq.'],created,label='Created')
-    # pylab.loglog(data['Freq.'],data['Created'],label='Created')
+    pylab.loglog(data['Freq.'],emitted,label='Observed(Tot)')
 
-    pylab.loglog(data['Freq.'],emitted,label='Observed')
-    # pylab.loglog(data['Freq.'],data['Emitted'],label='Observed')
+    pylab.loglog(data['Freq.'],wind,label='Observed(Wind)')
 
     pylab.loglog(data['Freq.'],hit_surf,label='Hit Surface')
-    # pylab.loglog(data['Freq.'],data['HitSurf'],label='Hit Surface')
-
-    pylab.loglog(data['Freq.'],wind,label='Wind Observed')
-    # pylab.loglog(data['Freq.'],data['Wind'],label='Wind Observed')
 
     zz=pylab.axis()
 
@@ -126,6 +133,9 @@ def doit(rootname='sphere',smooth=21,fig_no=2):
 
     pylab.text(Lyman,0.9*ymax,'H',horizontalalignment='center',verticalalignment='top',size=14)
     pylab.text(HeII,0.9*ymax,'HeII',horizontalalignment='center',verticalalignment='top',size=14)
+    pylab.plot([LymanA,LymanA],[0.5*ymax,0.9*ymax],'-k')
+    pylab.plot([HB,HB],[0.5*ymax,0.9*ymax],'-k')
+    pylab.plot([HA,HA],[0.5*ymax,0.9*ymax],'-k')
     pylab.legend(loc='best')
     pylab.title(rootname,size=16)
     pylab.xlabel(r'$ {\nu} $',size=16)

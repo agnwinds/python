@@ -104,7 +104,7 @@ init_geo ()
   geo.tstar = 40000;
 
   geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
-  geo.line_mode = 3;            /* default is escape probabilites */
+  geo.line_mode = LINE_MODE_ESC_PROB;   /* default is escape probabilites */
 
   geo.star_radiation = TRUE;    /* 1 implies star will radiate */
   geo.disk_radiation = TRUE;    /* 1 implies disk will radiate */
@@ -621,20 +621,13 @@ init_ionization ()
 
 
   strcpy (answer, "matrix_bb");
-  geo.ioniz_mode = rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
+  geo.ioniz_mode =
+    rdchoice ("Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow,matrix_est)", "0,3,1,4,2,8,9,10", answer);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
     rdstr ("Wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
   }
-
-
-
-  /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
-     full advantage of the data file.  This means that in calculating the partition functions, the information
-     on levels and their multiplicities is taken into account.   */
-
-  geo.partition_mode = -1;      //?? Stuart, is there a reason not to move this earlier so it does not affect restart
 
 
   /* get_line_transfer_mode reads in the Line_transfer question from the user,
@@ -720,11 +713,11 @@ init_ionization ()
   /* initialise the choice of handling for macro pops. */
   if (geo.run_type == RUN_TYPE_PREVIOUS)
   {
-    geo.macro_ioniz_mode = 1;   // Now that macro atom properties are available for restarts
+    geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS; // Now that macro atom properties are available for restarts
   }
   else
   {
-    geo.macro_ioniz_mode = 0;
+    geo.macro_ioniz_mode = MACRO_IONIZ_MODE_NO_ESTIMATORS;
   }
 
   return (0);
@@ -784,8 +777,6 @@ setup_dfudge ()
     }
   }
 
-
-
   delta = geo.rmax - rmin;
 
   if (delta < 1.e8)
@@ -801,7 +792,6 @@ setup_dfudge ()
     dfudge = geo.rmax / 1.e10;
   }
 
-  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
   return (dfudge);
 }

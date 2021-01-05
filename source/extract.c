@@ -22,14 +22,14 @@
  * @brief      A supervisory routine called to 
  * 	builds detailed spectra in the normal (extract) mode.
  *
- * @param [in, out] WindPtr  w   The entire wind
- * @param [in, out] PhotPtr  p   The photon to extract
- * @param [in, out] int  itype   An integer representing the type of photon 
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in] PhotPtr  p   The photon to extract
+ * @param [in] int  itype   An integer representing the type of photon 
  * for the purpose of being extracted.
  * @return     Always returns 0
  *
  * @details
- * extract is called when a photon begins it's flight and every time that photon
+ * extract is called when a photon begins its flight and every time that photon
  * scatters, unless the user has exercised the "live or die" option, in
  * which case it is not called.  
  *
@@ -44,7 +44,7 @@
  * * PTYPE_WIND->the photon being redirected arose in the wind,
  * 
  * extract uses the types to prepare the photon for extraction, including
- * doppler shifting the photon if is of PTYPE_WIND or PTYPE_STAR 
+ * doppler shifting the photon if is of PTYPE_WIND or PTYPE_DISK.
  * 
  * Usually, Python constructs a spectrum of all photons, but there are
  * advanced options which allone to restict the spectrum created to
@@ -68,16 +68,6 @@
  * spherical region.
  * ### Notes ###
  * 
- * @bug This routine as well as extract_one have options for tracking the photon
- * history.  The routines are in diag.c It is not clear that they have been used 
- * in a long time and so it may be worthwhile to remove them. Furthermore,
- * we have established a new mechanism save_phot for essentially this same
- * task.  This really should be consolidated. 
- *
- * @bug This is also commented in the text, but there is a rather bizarre separation
- * for where the photon frequency is updated and where the weight is update. The former is
- * done in extract, while the latter is done in extract_one.  This is not an error precisely
- * but makes the code more confusing than it needs to be.
  *
  **********************************************************/
 
@@ -88,17 +78,66 @@ extract (w, p, itype)
      int itype;
 {
   int n, mscat, mtopbot;
-  struct photon pp;
-  double v[3];
-  double length ();
-  int vsub ();
+  struct photon pp, p_in, p_dummy;
   int yep;
   double xdiff[3];
-  int ndom;
+  double p_norm, tau_norm;
 
 
-  /* The next line selects the middle inclination angle for recording the absorbed energy */
-  phot_history_spectrum = 0.5 * (MSPEC + nspectra);
+
+  /* Make sure the input photon is not modified */
+
+  stuff_phot (p, &p_in);
+
+
+/* The next section was moved from trans_phot 200518 */
+
+  /* We increase weight to account for the number of scatters. This is done because in extract we multiply by the escape
+     probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
+     equal to 1/nnscat.  See issue #710 for a more extended explanation of how the weight is renormalized stocahstically. */
+
+
+
+
+  if (itype == PTYPE_WIND)
+  {
+    if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
+    {
+      /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
+         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+
+      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], wmain[p_in.grid].dvds_max);
+
+      /* then turn into a probability */
+      p_norm = p_escape_from_tau (tau_norm);
+
+    }
+    else
+    {
+      p_norm = 1.0;
+
+      /* throw an error if nnscat does not equal 1 */
+      if (p_in.nnscat != 1)
+        Error
+          ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+           p_in.nnscat, p_in.np, geo.scatter_mode, p_in.nres, NLINES);
+    }
+
+    p_in.w *= p_in.nnscat / p_norm;
+
+  }
+
+
+  if (itype == PTYPE_WIND)
+  {
+    observer_to_local_frame (&p_in, &p_in);
+  }
+  if (itype == PTYPE_DISK)
+  {
+    observer_to_local_frame_disk (&p_in, &p_in);
+  }
+
+
 
   for (n = MSPEC; n < nspectra; n++)
   {
@@ -109,7 +148,7 @@ extract (w, p, itype)
 
     yep = 1;                    // Start by assuming it is a good photon for extraction
 
-    if ((mscat = xxspec[n].nscat) > 999 || p->nscat == mscat || (mscat < 0 && p->nscat >= (-mscat)))
+    if ((mscat = xxspec[n].nscat) > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
       yep = 1;
     else
       yep = 0;
@@ -118,13 +157,13 @@ extract (w, p, itype)
     {
       if ((mtopbot = xxspec[n].top_bot) == 0)
         yep = 1;                // Then there are no positional parameters and we are done
-      else if (mtopbot == -1 && p->x[2] < 0)
+      else if (mtopbot == -1 && p_in.x[2] < 0)
         yep = 1;
-      else if (mtopbot == 1 && p->x[2] > 0)
+      else if (mtopbot == 1 && p_in.x[2] > 0)
         yep = 1;
       else if (mtopbot == 2)    // Then to count, the photom must originate within sn.r of sn.x
       {
-        vsub (p->x, xxspec[n].x, xdiff);
+        vsub (p_in.x, xxspec[n].x, xdiff);
         if (length (xdiff) > xxspec[n].r)
           yep = 0;
 
@@ -138,57 +177,37 @@ extract (w, p, itype)
 
 
 /* Create a photon pp to use here and in extract_one.  This assures we
- * have not modified p as part of extract
+ * have not modified p as part of extract.  Also, allow for aberration
+ * of photons to assure that we are extracting at the correct angle
+ * in the observer frame
+ * ZFRAME
  */
 
-      stuff_phot (p, &pp);
-      stuff_v (xxspec[n].lmn, pp.lmn);  /* Stuff new photon direction into pp */
-
-/* 
-
-Need to frequency shift the disk photons as well as the wind 
-photons.    
-
-Note that split of functionality between this and extract 
-one is odd. We do frequency here but weighting is carried out in  extract */
-
-      if (itype == PTYPE_DISK)
+      if (rel_mode == REL_MODE_LINEAR)
       {
-        vdisk (pp.x, v);
-        doppler (p, &pp, v, -1);
-
+        stuff_phot (&p_in, &pp);
+        stuff_v (xxspec[n].lmn, pp.lmn);        /* Stuff new photon direction into pp */
       }
-      if (itype == PTYPE_WIND)
-      {                         /* If the photon was scattered in the wind, 
-                                   the frequency also must be shifted */
-        ndom = wmain[p->grid].ndom;
-        vwind_xyz (ndom, &pp, v);       /*  Get the velocity at the position of pp */
-        doppler (p, &pp, v, pp.nres);   /*  Doppler shift the photon -- test! */
-
-/*  Doppler shift the photon (as nonresonant scatter) to new direction */
-
+      else
+      {
+        stuff_phot (&p_in, &p_dummy);
+        p_dummy.frame = F_OBSERVER;
+        stuff_v (xxspec[n].lmn, p_dummy.lmn);   /* Stuff new photon direction into pp */
+        observer_to_local_frame (&p_dummy, &p_dummy);
+        stuff_phot (&p_in, &pp);
+        stuff_v (p_dummy.lmn, pp.lmn);
       }
 
       if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
       {
-        save_extract_photons (n, p, &pp, v);
+        save_extract_photons (n, p, &pp);
       }
 
-/* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait
- * to actually initialize phot_hist because the photon bundle is reweighted in extract_one */
 
-      if (phot_history_spectrum == n)
-      {
-        phot_hist_on = 1;       // Start recording the history of the photon
-      }
-
-      /* Now extract the photon */
 
       extract_one (w, &pp, itype, n);
 
-      /* Make sure phot_hist is on, for just one extraction */
 
-      phot_hist_on = 0;
 
     }
 
@@ -259,13 +278,27 @@ extract_one (w, pp, itype, nspec)
   tau = 0;
   icell = 0;
 
+
+  if (itype == PTYPE_DISK)
+  {
+    local_to_observer_frame_disk (pp, pp);
+
+  }
+  if (itype == PTYPE_WIND)
+  {
+    local_to_observer_frame (pp, pp);
+
+  }
+
+  /* Now extract the photon */
+
 /* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
   stuff_phot (pp, &pstart);
 
-/* Reweight the photons. Note that photons have already been frequency shifted prior 
+/* Re-weight the photons. Note that photons have already been frequency shifted prior
 to entering extract */
 
   if (itype == PTYPE_STAR || itype == PTYPE_BL)
@@ -294,8 +327,7 @@ needs to reweight
 
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {
-
-      dvds = dvwind_ds (pp);
+      dvds = dvwind_ds_cmf (pp);
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
       if (tau > 0.0)
@@ -314,15 +346,6 @@ the same resonance again */
   else if (geo.binary == TRUE)
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
 
-
-/* 68b - 0902 - ksl If we are trying to track the history of this photon, we need to initialize the
- * phot_hist.  We had to do this here, because we have just reweighted the photon
- */
-
-  if (phot_hist_on)
-  {
-    phot_hist (pp, 0);          // Initialize the photon history
-  }
 
 /* Now we can actually extract the reweighted photon */
 
@@ -399,6 +422,7 @@ the same resonance again */
       xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
 
 
+
       /* If this photon was a wind photon, then also increment the "reflected" spectrum */
       if (pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0)
       {
@@ -418,18 +442,6 @@ the same resonance again */
           stuff_v (xxspec[nspec].lmn, pstart.lmn);
           delay_dump_single (&pstart, nspec);   //Dump photon now weight has been modified by extraction
         }
-      }
-
-
-
-/* 68b -0902 - ksl - turn phot_history off and store the information in the appropriate locations in the PlasmaPtrs
- * The reason this is here is that we only summarizes the history if the photon actually got to the observer
- */
-
-      if (phot_hist_on)
-      {
-        phot_history_summarize ();
-        phot_hist_on = 0;
       }
 
 

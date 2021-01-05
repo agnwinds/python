@@ -48,38 +48,24 @@ nebular_concentrations (xplasma, mode)
      PlasmaPtr xplasma;
      int mode;
 {
-  double get_ne ();
-  int lucy_mazzali1 ();
   int m;
 
-  if (mode == NEBULARMODE_TR)
-  {                             // LTE all the way -- uses tr
-
+  // LTE all the way -- uses tr or te for partition functions depending on nebular mode
+  if (mode == NEBULARMODE_TR || mode == NEBULARMODE_TE)
+  {
     partition_functions (xplasma, mode);
-
     m = concentrations (xplasma, mode);
-
-  }
-  else if (mode == NEBULARMODE_TE)
-  {                             //LTE but uses temperature te
-
-    partition_functions (xplasma, mode);
-
-    m = concentrations (xplasma, mode);
-
   }
   else if (mode == NEBULARMODE_ML93)    // This is the standard LM method
   {
-
-
-    partition_functions (xplasma, mode);        // calculate partition functions, using t_r with weights
+    partition_functions (xplasma, mode);        // calculate partition functions, using t_r with weights (dilute blackbody W)
 
     /* JM 1308 -- concentrations then populates xplasma with saha abundances. 
        in macro atom mode it also call macro_pops, which is done incorrectly, 
        the escape probabilities are calculated with saha ion densities each time,
        because saha() repopulates xplasma in each cycle. */
 
-    m = concentrations (xplasma, NEBULARMODE_TR);       // Saha equation using t_r
+    concentrations (xplasma, NEBULARMODE_TR);   // Saha equation using t_r
 
     /* JM 1308 -- lucy then applies the lucy mazzali correction factors to the saha abundances. 
        in macro atom mode it also call macro_pops which is done correctly in this case, as lucy_mazzali, 
@@ -87,33 +73,22 @@ nebular_concentrations (xplasma, mode)
        it doesn't actually matter that concentrations does macro level populations wrong, as that is 
        corrected here. It should be sorted very soon, however. */
 
-    m = lucy (xplasma);         // Main routine for running LucyMazzali
-
+    m = lucy (xplasma);         // Main routine for running Lucy Mazzali
   }
-  else if (mode == NEBULARMODE_MATRIX_BB)
+  else if (mode == NEBULARMODE_MATRIX_BB || mode == NEBULARMODE_MATRIX_SPECTRALMODEL || mode == NEBULARMODE_MATRIX_ESTIMATORS)
   {
-    /* Use rate matrices based on pairwise bb approxmaitions
-     * to the spectra
+    /*
+     * Use rate matrices based on pairwise bb approximations (matrix_bb) or
+     * power law approximations for the SED in a cell (matrix_est, matrix_pow)
      */
 
     m = matrix_ion_populations (xplasma, mode);
   }
-
-  else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
-  {
-
-    /* Use rate natrices based on powr law approximations to
-     * the spectra
-     */
-
-    m = matrix_ion_populations (xplasma, mode);
-  }
-
   else
   {
     Error ("nebular_concentrations: Unknown mode %d\n", mode);
-    Exit (0);
-    return (0);
+    Exit (EXIT_FAILURE);
+    exit (EXIT_FAILURE);        // avoids compiler warnings about return being uninitialized
   }
 
 
@@ -264,7 +239,7 @@ concentrations (xplasma, mode)
        densities which is wrong. Fortunately, macro_pops is called again in lucy() and converges on the 
        correct value, but this should be fixed. I am not sure if it even needs to be called at all. */
 
-    if (geo.macro_ioniz_mode == 1)
+    if (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_ESTIMATORS)
     {
       macro_pops (xplasma, xne);
     }
@@ -380,7 +355,7 @@ saha (xplasma, ne, t)
          probabilities that are calculated in macro_pops. The exception to this is prior
          to the first ionization cycle when we need to populate saha densities as a first guess */
 
-      if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
+      if ((ion[nion].macro_info == FALSE) || (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_NO_ESTIMATORS))
       {
         b = xsaha * partition[nion] * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne * partition[nion - 1]);
         if (b > big)
@@ -409,7 +384,7 @@ saha (xplasma, ne, t)
          probabilities that are calculated in macro_pops. The exception to this is prior
          to the first ionization cycle when we need to populate saha densities as a first guess */
 
-      if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
+      if ((ion[nion].macro_info == FALSE) || (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_NO_ESTIMATORS))
       {
 
         density[nion] *= a;
@@ -500,7 +475,7 @@ lucy (xplasma)
        structure for those ions which are being treated as macro ions. This means that the
        the newden array will contain wrong values for these particular macro ions, but due
        to the if loop at the end of this subroutine they are never passed to xplasma */
-    if (geo.macro_ioniz_mode == 1)
+    if (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_ESTIMATORS)
     {
       macro_pops (xplasma, xne);
     }
@@ -510,7 +485,7 @@ lucy (xplasma)
     {
 
       /* if the ion is being treated by macro_pops then use the populations just computed */
-      if ((ion[nion].macro_info == 1) && (geo.macro_simple == 0) && (geo.macro_ioniz_mode == 1))
+      if ((ion[nion].macro_info == TRUE) && (geo.macro_simple == FALSE) && (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_ESTIMATORS))
       {
         newden[nion] = xplasma->density[nion];
       }
@@ -545,7 +520,7 @@ lucy (xplasma)
   for (nion = 0; nion < nions; nion++)
   {
     /* If statement added here to suppress interference with macro populations (SS Apr 04) */
-    if (ion[nion].macro_info == 0 || geo.macro_ioniz_mode == 0 || geo.macro_simple == 1)
+    if (ion[nion].macro_info == FALSE || geo.macro_ioniz_mode == MACRO_IONIZ_MODE_NO_ESTIMATORS || geo.macro_simple == TRUE)
     {
       xplasma->density[nion] = newden[nion];
     }

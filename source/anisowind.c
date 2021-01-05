@@ -32,7 +32,7 @@
  *   a new anisotropic direction in geo.scatter_mode = SCATTER_MODE_THERMAL
  *
  * @param [in,out] PhotPtr  p   The photon being scattered
- * @param [out] int *  nnscat   The number of times the phton
+ * @param [out] int *  nnscat   The number of times the photon
  * scattered internally before escaping the local scattering region
  *
  * @return     0 for success. Also modifies the photon ptr p
@@ -116,7 +116,7 @@ randwind_thermal_trapping (p, nnscat)
        safety net (as dvds_max is worked out with a sample of directions) */
     ztest = random_number (0.0, 1.0) * p_norm;
 
-    dvds = dvwind_ds (p);
+    dvds = dvwind_ds_cmf (p);
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
     if (tau < tau_min)
