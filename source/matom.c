@@ -825,7 +825,7 @@ kpkt (p, nres, escape, mode)
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
-  int *istat;
+  int istat;
 
   double coll_rate, rad_rate;
   double freqmin, freqmax;
@@ -867,7 +867,8 @@ kpkt (p, nres, escape, mode)
 
   if (mplasma->kpkt_rates_known != 1)
   {
-    fill_kpkt_rates (xplasma, escape, istat);
+    istat = p->istat;
+    fill_kpkt_rates (xplasma, escape, &istat);
   }
   
 /* This is the end of the cooling rate calculations, which is done only once for each cell

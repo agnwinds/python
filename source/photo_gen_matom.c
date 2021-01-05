@@ -22,7 +22,7 @@
 #include "python.h"
 
 
-#define ACCELERATED_MACRO TRUE
+#define ACCELERATED_MACRO FALSE
 
 /**********************************************************/
 /** 
