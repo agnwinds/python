@@ -26,6 +26,7 @@ double pjnorm_known[NLEVELS_MACRO], penorm_known[NLEVELS_MACRO];
 int prbs_known[NLEVELS_MACRO];
 int matom_cell = -1;
 int matom_z = -1;
+int matom_cycle = -1;
 
 /**********************************************************/
 /** 
@@ -142,15 +143,16 @@ matom (p, nres, escape)
     return (-1);
   }
 
-//XX  if (z != matom_z || p->grid != matom_cell)
-//XX  {
-  for (n = 0; n < NLEVELS_MACRO; n++)
+  if (z != matom_z || p->grid != matom_cell || geo.wcycle != matom_cycle)
   {
-    prbs_known[n] = FALSE;      //flag all as unknown
+    for (n = 0; n < NLEVELS_MACRO; n++)
+    {
+      prbs_known[n] = FALSE;    //flag all as unknown
+    }
+    matom_z = z;
+    matom_cell = p->grid;
+    matom_cycle = geo.wcycle;
   }
-  matom_z = z;
-  matom_cell = p->grid;
-//XX  }
 //OLD  else
 //OLD  {
 //OLD    Log ("Using old for photon in grid %d and element %e\n", p->grid, z);
