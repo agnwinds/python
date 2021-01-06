@@ -22,8 +22,8 @@
 
 /**********************************************************/
 /** 
- * @brief      
- * modifies the densities of ions, levels, and
+ * @brief   steering routine for    
+ * modifying the densities of ions, levels, and
  * partition functions of ions within a cell of the wind based upon the mode, 
  * and other data contained within the WindPtr itself, such as t_r, t_e, w, 
  * based on the "mode".  
@@ -34,11 +34,7 @@
  * @return   A status message (returned from the individual routines that calculate the ionization. 
  * 0 generally signifies success.
  *
- *
  * @details
- * nebular concentrations serves as the steering routine
- * for all ionization calculations. 
- * 
  *
  * ###Notes####
  **********************************************************/
@@ -109,12 +105,11 @@ nebular_concentrations (xplasma, mode)
 
 /**********************************************************/
 /** 
- * @brief      A routine to calculate concentrations in a plasma cell using the Saha 
+ * @brief      Calculate concentrations in a plasma cell using the Saha 
  * equation with various assumptions about what to use for the temperature
- * 	Saha equantion.  
  *
  * @param [in,out] PlasmaPtr  xplasma   A singll plasma cell
- * @param [in] int  mode   A swich whith defines what to use for the temperature
+ * @param [in] int  mode   A swich which defines what to use for the temperature
  * @return     concentrations returns 0 if it converged; -1 if it did not converge.  If it does
  * 	not converge, both density and *ne are likely to be garbage.
  *
@@ -139,19 +134,19 @@ nebular_concentrations (xplasma, mode)
  * 	where N_r+1 is the number density of the r+1 ionization state
  * 	and   Z_r+1 is the partition function of that state.  
  * 
- *he program works by perfoming a crude iteration on ne.  It could undoubtedly 
+ *The program works by perfoming a crude iteration on ne.  It could undoubtedly 
  *be improved, if one wanted better accuracy or higher speed.
  *
  * ### Notes ###
  * So that one doesn't get zero-divides in other programs, e.g. nebular_concentrations, 
- *a floor is set on the density of any ion or the electron density.
+ * a floor is set on the density of any ion or the electron density.
  *
  **********************************************************/
 
 int
 concentrations (xplasma, mode)
      PlasmaPtr xplasma;
-     int mode;                  //   0=saha using tr, 1=saha using te
+     int mode;
 {
   int nion, niterate;
   double xne, xxne, xnew, xsaha;
@@ -183,7 +178,7 @@ concentrations (xplasma, mode)
     return (0);
   }
 
-  nh = xplasma->rho * rho2nh;   //LTE
+  nh = xplasma->rho * rho2nh;
 
   /* make an initial estimate of ne based on H alone,  Our guess
      assumes ion[0] is H1.  Note that x below is the fractional
@@ -199,7 +194,7 @@ concentrations (xplasma, mode)
    */
 
   if (t < MIN_TEMP)
-    t = MIN_TEMP;               /* fudge to prevent divide by zeros */
+    t = MIN_TEMP;
 
   xsaha = SAHA * pow (t, 1.5);
 
@@ -214,8 +209,7 @@ concentrations (xplasma, mode)
     xne = xxne = nh;
 
   if (xne < 1.e-6)
-    xne = 1.e-6;                /* fudge to assure we can actually calculate
-                                   xne the first time through the loop */
+    xne = 1.e-6;
 
   /* At this point we have an initial estimate of ne. */
 
@@ -252,10 +246,10 @@ concentrations (xplasma, mode)
     }
 
     /* Now determine the new value of ne from the ion abundances */
-    xnew = get_ne (xplasma->density);   /* determine the electron density for this density distribution */
+    xnew = get_ne (xplasma->density);
 
     if (xnew < DENSITY_MIN)
-      xnew = DENSITY_MIN;       /* fudge to keep a floor on ne */
+      xnew = DENSITY_MIN;
 
     if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
       break;

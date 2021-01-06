@@ -60,11 +60,14 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
 {
   int escape;                   //this tells us when the r-packet is escaping
+  int n_jump = 0;
+  int n_jump_tot = 0;
+  int n_loop = 0;
 
-  escape = 0;                   //start with it not being ready to escape as an r-packet
+  escape = FALSE;               //start with it not being ready to escape as an r-packet
 
   /* Beginning of the main loop for processing a macro-atom */
-  while (escape == 0)
+  while (escape == FALSE)
   {
     if (matom_or_kpkt == 1)     //excite a macro atom (either complete or simple)
     {
@@ -77,13 +80,13 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         {
           /* During the spectrum cycles we want to throw these photons away. */
           p->w = 0.0;
-          escape = 1;           //This doesn't matter but it breaks us out of this loop
+          escape = TRUE;
         }
         else
         {
-          matom (p, nres, &escape);
+          n_jump = matom (p, nres, &escape);
 
-          if (escape == 1)
+          if (escape == TRUE)
           {
             /* It is going to escape as a r-packet that was created by de-activation of a macro atom.
                Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the
@@ -112,13 +115,13 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         {
           /* During the spectrum cycles we want to throw these photons away. */
           p->w = 0.0;
-          escape = 1;           //This doesn't matter but it breaks us out of this loop
+          escape = TRUE;
         }
         else
         {
-          matom (p, nres, &escape);
+          n_jump = matom (p, nres, &escape);
 
-          if (escape == 1)
+          if (escape == TRUE)
           {
             /* It is going to escape as a r-packet that was created by de-activation of a macro atom.
                Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the
@@ -169,7 +172,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       {
         /* During the spectrum cycles we want to throw these photons away. */
         p->w = 0.0;
-        escape = 1;             /* This doesn't matter but it breaks us out of the loop */
+        escape = TRUE;          /* This doesn't matter but it breaks us out of the loop */
       }
       else
       {
@@ -186,6 +189,20 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       Error ("macro_gov: Unknown choice for next action. Abort.\n");
       Exit (0);
     }
+    /*XXXX test */
+    if (n_jump > -1)
+    {
+      //XXXX This is a test that fails many times for the agn_macro model.  Just set to n_mump it is the same as in matom
+      n_jump_tot += n_jump;
+      if (n_jump > MAXJUMPS)
+      {
+        Error ("macro_gov: Exceed MAXJUMPS (last %d tot %d) in n_loops %d for phot %d in cell %d\n", n_jump, n_jump_tot, n_loop, p->np,
+               p->grid);
+        escape = TRUE;
+        p->istat = P_ERROR_MATOM;
+      }
+    }
+    n_loop++;
   }
 
   /* End of main matom processing loop 
