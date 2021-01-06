@@ -369,10 +369,10 @@ calc_matom_matrix (xplasma, matom_matrix)
  **********************************************************/
 
 int
-fill_kpkt_rates (xplasma, escape, istat)
+fill_kpkt_rates (xplasma, escape, p)
      PlasmaPtr xplasma;
      int *escape;
-     int *istat;
+     PhotPtr p;
 {
 
   int i;
@@ -396,9 +396,6 @@ fill_kpkt_rates (xplasma, escape, istat)
   double coll_rate, rad_rate;
   double freqmin, freqmax;
 
-  //one = &wmain[p->grid];
-  //xplasma = &plasmamain[one->nplasma];
-  // check_plasma (xplasma, "fill_kpkt_rates");
   mplasma = &macromain[xplasma->nplasma];
   one = &wmain[xplasma->nwind];
 
@@ -439,11 +436,8 @@ fill_kpkt_rates (xplasma, escape, istat)
       if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {
         upper_density = den_config (xplasma, ulvl);
-        /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
-           stored values rather than recompue them. */
         cooling_bf[i] = mplasma->cooling_bf[i] =
           upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
-        // _sp_e is defined as the difference 
       }
       else
       {
@@ -452,12 +446,9 @@ fill_kpkt_rates (xplasma, escape, istat)
         cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * PLANCK * cont_ptr->freq[0] * (xplasma->recomb_simple[i]);
       }
 
-
-      /* Note that the electron density is not included here -- all cooling rates scale
-         with the electron density. */
       if (cooling_bf[i] < 0)
       {
-        //Error ("kpkt: phot %d bf cooling rate negative. Density was %g\n", p->np, upper_density);
+        Error ("kpkt: phot %d bf cooling rate negative. Density was %g\n", p->np, upper_density);
         Error ("alpha_sp(cont_ptr, xplasma,2) %g \n", alpha_sp (cont_ptr, xplasma, 2));
         Error ("i, ulvl, nphot_total, nion %d %d %d %d\n", i, ulvl, nphot_total, cont_ptr->nion);
         Error ("nlev, z, istate %d %d %d \n", cont_ptr->nlev, cont_ptr->z, cont_ptr->istate);
@@ -473,8 +464,7 @@ fill_kpkt_rates (xplasma, escape, istat)
 
       if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
       {
-        /* Include collisional ionization as a cooling term in macro atoms. Don't include
-           for simple ions for now.  SS */
+        /* Include collisional ionization as a cooling term in macro atoms, but not simple atoms.  */
 
         lower_density = den_config (xplasma, cont_ptr->nlev);
         cooling_bf_col[i] = mplasma->cooling_bf_col[i] =
@@ -486,29 +476,24 @@ fill_kpkt_rates (xplasma, escape, istat)
 
       }
 
-
-
     }
 
-    /* End of BF calculation and beginning of BB calculation */
+    /* End of BF calculation and beginning of BB calculation.  Note that for macro atoms
+       the upper level density is stored but for simple atoms it must be calculated. */
 
     for (i = 0; i < nlines; i++)
     {
       line_ptr = &line[i];
       if (line_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
-      {                         //It's a macro atom line and so the density of the upper level is stored
+      {
         cooling_bb[i] = mplasma->cooling_bb[i] =
           den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * PLANCK;
 
-        /* Note that the electron density is not included here -- all cooling rates scale
-           with the electron density so I've factored it out. */
       }
       else
-      {                         //It's a simple line. Get the upper level density using two_level_atom
-
+      {
         two_level_atom (line_ptr, xplasma, &lower_density, &upper_density);
 
-        /* the collisional rate is multiplied by ne later */
         coll_rate = q21 (line_ptr, electron_temperature) * (1. - exp (-H_OVER_K * line_ptr->freq / electron_temperature));
 
         cooling_bb[i] =
@@ -539,39 +524,27 @@ fill_kpkt_rates (xplasma, escape, istat)
     /* end of BB calculation  */
 
 
-    /* 57+ -- This might be modified later since we "know" that xplasma cannot be for a grid with zero
-       volume.  Recall however that vol is part of the windPtr */
     if (one->inwind >= 0)
     {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne; // JM 1411 - changed to use filled volume
+      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;
       cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
     }
     else
     {
-      /* SS June 04 - This should never happen, but sometimes it does. I think it is because of 
-         photons leaking from one cell to another due to the push-through-distance. It is sufficiently
-         rare (~1 photon in a complete run of the code) that I'm not worrying about it for now but it does
-         indicate a real problem somewhere. */
-
-      /* SS Nov 09: actually I've not seen this problem for a long
-         time. Don't recall that we ever actually fixed it,
-         however. Perhaps the improved volume calculations
-         removed it? We delete this whole "else" if we're sure
-         volumes are never zero. */
-
+      /* This should never happen */
       cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
-      //Error ("kpkt: np %d A scattering event in cell %d with vol = 0???\n", p->np, one->nwind);
-      *escape = 1;
-      *istat = P_ERROR_MATOM;
+      Error ("kpkt: np %d A scattering event in cell %d with vol = 0???\n", p->np, one->nwind);
+      *escape = TRUE;
+      p->istat = P_ERROR_MATOM;
       return (0);
     }
 
 
     if (cooling_ff < 0)
     {
-      //Error ("kpkt: np %d ff cooling rate negative. Abort.", p->np);
-      *escape = 1;
-      *istat = P_ERROR_MATOM;
+      Error ("kpkt: np %d ff cooling rate negative. Abort.", p->np);
+      *escape = TRUE;
+      p->istat = P_ERROR_MATOM;
       return (0);
     }
     else
@@ -591,24 +564,20 @@ fill_kpkt_rates (xplasma, escape, istat)
 
     if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
     {
-      Error ("Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
+      Error ("kpkt: Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
     }
 
 
-    /* JM 1302 -- Negative adiabatic coooling- this used to happen due to issue #70, where we incorrectly calculated dvdy, 
-       but this is now resolved. Now it should only happen for cellspartly in wind, because we don't treat these very well.
-       Now, if cooling_adiabatic < 0 then set it to zero to avoid runs exiting for part in wind cells. */
+    /* If the next error occurs see issue #70.  It is ghought to be fixed, with the possiple 
+       exception of cells that are partially in the wind.
+     */
     if (cooling_adiabatic < 0)
     {
-      //Error ("kpkt: Photon %d. Adiabatic cooling negative! Major problem if inwind (%d) == 0\n", p->np, one->inwind);
-      //Error ("kpkt: Photon %d. Setting adiabatic kpkt destruction probability to zero for this matom.\n", p->np);
+      Error ("kpkt: Photon %d. Adiabatic cooling negative! Major problem if inwind (%d) == 0\n", p->np, one->inwind);
+      Error ("kpkt: Photon %d. Setting adiabatic kpkt destruction probability to zero for this matom.\n", p->np);
       cooling_adiabatic = 0.0;
     }
 
-    /* When we generate photons in the wind, from photon_gen we need to prevent deactivation by non-radiative cooling
-     * terms.  If mode is True we include adiabatic cooling
-     * this is now dealt with by setting cooling_adiabatic to 0 
-     */
 
     cooling_normalisation += cooling_adiabatic;
 
@@ -670,7 +639,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
 
-  one = &w[p->grid];            //This is to identify the grip cell in which we are
+  one = &w[p->grid];            //This is to identify the grid cell in which we are
   xplasma = &plasmamain[one->nplasma];
 
   t_e = xplasma->t_e;           //electron temperature 
@@ -846,7 +815,7 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
 {
 
   int i;
-  int ulvl;
+  int ulvl, escape_dummy;
   double cooling_bf[nphot_total];
   double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
   double cooling_bb[NLINES];
@@ -862,6 +831,7 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
+  PhotPtr pdummy;
 
   double coll_rate, rad_rate;
   double freqmin, freqmax;
@@ -893,11 +863,12 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
   }
 
 
-  /* Now need to do k-packet processes */
-
-  int escape_dummy = 0;
-  int istat_dummy = 0;
-  fill_kpkt_rates (xplasma, &escape_dummy, &istat_dummy);
+  /* Now need to do k-packet processes. This subroutine calculates the k-packet 
+     cooling rates and stores them in mplasma->cooling. Dummy variables are needed
+     because this routine is also used in the main kpkt routine */
+  escape_dummy = 0;
+  stuff_phot (p, pdummy);
+  fill_kpkt_rates (xplasma, &escape_dummy, pdummy);
 
   for (i = 0; i < nphot_total; i++)
   {

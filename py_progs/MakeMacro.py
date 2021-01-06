@@ -465,7 +465,7 @@ def get_phot(ion="c_4"):
 # things into the right units, but also to remove non-physical x-sections.
 
 
-def make_phot(ion="c_4"):
+def make_phot(ion="c_4",macro=True):
     """
     Read a retrieved TopBase file and make a Python-Photon file
     
@@ -522,17 +522,29 @@ def make_phot(ion="c_4"):
                     "Warning: ex=0  for  %d %d %s %s %d - changing to %10.6f"
                     % (z, xion, islp, ilv, npts, ex)
                 )
-            string = "PhotTopS %d %d %s %s %10.6f %d" % (z, xion, islp, ilv, ex, npts)
+            new_xsection=True
+            # The string differs depending on whether Macro or NOT.  
+            # string = "PhotTopS %d %d %s %s %10.6f %d" % (z, xion, islp, ilv, ex, npts)
             # string='PhotTop %d %d  %d %d %d %d' % (z,xion,islp,ilv,ex,npts)
             # print(string)
-            f.write("%s\n" % string)
+            # f.write("%s\n" % string)
             num = 0
             xsection += 1
         else:
             energy = eval(records[i][0]) * 13.605693009
             xsection = eval(records[i][1]) * 1e-18
-            string = "Phot %10.6f %10.6e" % (energy, xsection)
+            if energy >= ex and new_xsection==True:
+                if macro==True:
+                    string = "PhotTopS %d %d %s %s %10.6f %d" % (z, xion, islp, ilv, ex, npts)
+                else:
+                    string='PhotTop %d %d  %d %d %d %d' % (z,xion,islp,ilv,ex,npts)
+                f.write("%s\n" % string)
+                new_xsection=False
+            else:
+                npts-=1
+
             if energy >= ex: #added so that only x-sections with energies greater than threshold appear (RG)
+                string = "Phot %10.6f %10.6e" % (energy, xsection)
                 f.write("%s\n" % string)
             num += 1
         i += 1
@@ -730,10 +742,16 @@ def write_phot(ion="c_4"):
             j = i + 1
             jstop = j + nphot
             while j < jstop:
-                xstring = "PhotMac       13.598430   6.3039999e-18"
-                xstring = lines[j]
-                xstring = xstring.replace("Phot", "PhotMac")
-                f.write(xstring)
+                try:
+                    xstring = "PhotMac       13.598430   6.3039999e-18"
+                    xstring = lines[j]
+                    xstring = xstring.replace("Phot", "PhotMac")
+                    f.write(xstring)
+                except IndexError:
+                    print('Failed on j %d for jstop %d and nphot %d' % (j,jstop,nphot))
+                    print(one)
+                    break
+
                 j += 1
     f.close()
 
@@ -894,15 +912,18 @@ def print_elvlc(ion="c_4"):
         i += 1
 
 
-def doit(atom="h_1", nlev=10, next_ion = 'False'): #added feature to add in first level of next ion (only use for adding in fully ionised state to single electron state) (RG)
+def doit(atom="h_1", nlev=10, next_ion = False): 
     """
-    Do something magnificent
+    Create all of the necessary files for 
+    a given atom
 
     Description:
 
     Notes:
 
     History:
+    
+    2020: RG - added feature to add in first level of next ion (only use for adding in fully ionised state to single electron state) (RG)
 
 
     """
@@ -929,7 +950,7 @@ def doit(atom="h_1", nlev=10, next_ion = 'False'): #added feature to add in firs
         ex_offset += xx.Ip
         i += 1
     
-    if next_ion == 'True': #if True, we add in the fully ionised state level (RG)  
+    if next_ion == True: #if True, we add in the fully ionised state level (RG)  
         xlevels.add_row(
             [
                 "LevMacro",

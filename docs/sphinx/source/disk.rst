@@ -36,3 +36,15 @@ disk.   The choices we have made are (intended to be) as follows:
 (Note that the in the KWD case, there is a slight inconsistency/inaccuracy  in calculating desired mass loss rates, because the mass loss rate is calculate as if the disk
 were flat, but the stream line directions are not exactly the same as due to the vertical extension of the disk.  There are also issues more generally because we do
 not take into account the fact that the disk area of a vertically extended disk is not exactly the same as that of a flat disk.)
+
+
+Non-Standard Temperature Profile
+================================
+
+If desired the user can read the temperature profile for the disk from a file. Each
+line in the file should consist of a radius and a temperature separated by whitespace (in the
+first two columns)   Lines, such as comments or header names of an astropy table, will be ignored.
+
+The radii in  the file should not extend beyond the disk itself.  If the range of radii included
+in the file does not correspond to the inner and outer boundary of the disk, then the portion of
+the disk outside that described in the file, will be treated as a normal SS disk.

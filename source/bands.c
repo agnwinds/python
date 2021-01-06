@@ -280,6 +280,12 @@ bands_init (imode, band)
     rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
     f2 = xx / HEV;
 
+    if (f2 <= f1)
+    {
+      Error ("bands_int: high energy limit must be greater than low energy limit\n");
+      Exit (0);
+    }
+
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
     Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
 
@@ -338,6 +344,12 @@ bands_init (imode, band)
       Log ("highest  frequency reset to 10x high frequency break\n");
     }
     f2 = xx / HEV;
+
+    if (f2 <= f1)
+    {
+      Error ("bands_int: high energy limit must be greater than low energy limit\n");
+      Exit (0);
+    }
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
     Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
 
@@ -506,7 +518,7 @@ bands_init (imode, band)
     band->min_fraction[9] = 0.1;
 
   }
-  else if (mode == LOG_USER_DEF_BAND)   /* 1306 - ksl - Generalized method to set up logarithmic bands */
+  else if (mode == LOG_USER_DEF_BAND)   /* Generalized method to set up logarithmic bands */
   {
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
     Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
@@ -527,6 +539,12 @@ bands_init (imode, band)
     xx = f1 * HEV;
     rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
     f2 = xx / HEV;
+
+    if (f2 <= f1)
+    {
+      Error ("bands_int: high energy limit must be greater than low energy limit\n");
+      Exit (0);
+    }
 
     f1_log = log10 (f1);
     f2_log = log10 (f2);
