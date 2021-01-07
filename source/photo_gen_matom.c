@@ -21,9 +21,6 @@
 #include "atomic.h"
 #include "python.h"
 
-
-#define ACCELERATED_MACRO FALSE
-
 /**********************************************************/
 /** 
  * @brief      returns the specific luminosity in the band needed for the computation of the

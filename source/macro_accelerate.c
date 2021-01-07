@@ -831,7 +831,7 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
-  PhotPtr pdummy;
+  struct photon pdummy;
 
   double coll_rate, rad_rate;
   double freqmin, freqmax;
@@ -867,8 +867,8 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
      cooling rates and stores them in mplasma->cooling. Dummy variables are needed
      because this routine is also used in the main kpkt routine */
   escape_dummy = 0;
-  stuff_phot (p, pdummy);
-  fill_kpkt_rates (xplasma, &escape_dummy, pdummy);
+  stuff_phot (p, &pdummy);
+  fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
 
   for (i = 0; i < nphot_total; i++)
   {
