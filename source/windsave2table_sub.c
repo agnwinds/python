@@ -2083,9 +2083,9 @@ create_big_detailed_spec_table (ndom, rootname)
   }
 
   nstart = 0;
+  nstop = nstart + MAX_IN_TABLE;
   while (nstart < ncols)
   {
-    nstop = nstart + MAX_IN_TABLE;
     if (nstop > ncols)
     {
       nstop = ncols;
@@ -2101,6 +2101,7 @@ create_big_detailed_spec_table (ndom, rootname)
     }
 
     fptr = fopen (filename, "w");
+    printf ("XTEST %s %d %d\n", filename, nstart, nstop);
 
     printf ("Printing spectra %d to %d to %s\n", nstart, nstop, filename);
 
@@ -2115,7 +2116,7 @@ create_big_detailed_spec_table (ndom, rootname)
     {
       fprintf (fptr, "%10.3e ", freq[i]);
 
-      for (n = 0; n < ncols; n++)
+      for (n = nstart; n < nstop; n++)
       {
         fprintf (fptr, "%10.3e ", plasmamain[nplasma[n]].cell_spec_flux[i]);
       }
@@ -2127,6 +2128,7 @@ create_big_detailed_spec_table (ndom, rootname)
     fclose (fptr);
 
     nstart += MAX_IN_TABLE;
+    nstop = nstart + MAX_IN_TABLE;
   }
 
   return (0);

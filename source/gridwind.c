@@ -268,8 +268,8 @@ calloc_plasma (nelem)
  * @param [in] PlasmaPtr  xplasma   A pointer to the plasma element
  * @param [in] char  message[]   A message which is printed out if 
  * one has tried to access the dummy Plsma element
- * @return     0 (False) if one is not in the empty plasma cell, 1 
- * (True) if you have gooten there.
+ * @return     0 (FALSE) if one is not in the empty plasma cell, 1 
+ * (TRUE) if you have gooten there.
  *
  * @details
  * Wind cells that have no associated volume are assigned to
@@ -291,11 +291,10 @@ check_plasma (xplasma, message)
   if (xplasma->nplasma == NPLASMA)
   {
     Error ("check_plasma -- %s \n", message);
-    return (1);
-    //true
+    return (TRUE);
   }
   else
-    return (0);
+    return (FALSE);
 }
 
 
