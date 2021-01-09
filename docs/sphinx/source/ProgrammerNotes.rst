@@ -25,7 +25,12 @@ All new routines should have Doxygen headers.
 
 printf statements should be avoided, particular in the main code.  Python has 
 its own replacements for these commands, e.g Log and Error which standardize the outputs
-and allow for managing what is printed to the screen in multprocessor mode.
+and allow for managing what is printed to the screen in multprocessor mode.  There is also
+a command line switch that contorls the amount of information that is printed to the 
+screen.  Specific errors are only logged for a limited number of times, after which they
+are merely counted.  A log of the number of times each error has occurred is printed out
+at the end of each run and for each thread.  (Additional detailes can be found in the Doxygen
+header for xlog.c)
 
 Structures
 ==========
@@ -100,3 +105,21 @@ The portions of the routine that are parallized are:
   radiative transfer involving macro-atoms. This is parallelized, in the same manner as the ionization
   calculation by assigning various cells to various threads and gathering the results back before 
   the radiative transfer step in the detailed spectrum phase.
+
+
+Input naming conventions
+========================
+
+As is evident from an inspection of a typical input file, we have adopted a somewhat hierarchical scheme
+for the naming of the input variables, which groups variables associated with the same part of the system
+together.  So for example, all of the variables associated with the central object have names like::
+
+    ### Parameters for the Central Object
+    Central_object.mass(msol)                  0.8
+    Central_object.radius(cm)                  7e+08
+    Central_object.radiation(yes,no)                  yes
+    Central_object.rad_type_to_make_wind(bb,models)                   bb
+    Central_object.temp                        40000
+
+
+that is, they all begin with Central_object.  This convention should be followed.
