@@ -48,9 +48,14 @@ disk.   The choices we have made are (intended to be) as follows:
 were flat, but the stream line directions are not exactly the same as due to the vertical extension of the disk.  There are also issues more generally because we do
 not take into account the fact that the disk area of a vertically extended disk is not exactly the same as that of a flat disk.)
 
-Non-Standard Temperature Distribution (Details)
-###############################################
 
-The format for reading the disk temperature profile into the program is a simple ascii file, with radius in cm in the first column, and temperature in the second column.  (Comment lines beginning with # will be ignored.) Temperatures between radii are linearly interpolated.
+Non-Standard Temperature Profile
+================================
 
-Very few checks are provided for determining whether the a user-supplied profile are provided.  If the temperature profile does not cover the full disk, an error message will be printed out, but the program wil continue to run. Regions outside the portion covered will be treated as if they were a portion of a standard steady state disk.  If one desires to prevent a region of the disk from radiating, that region of the disk should have temperatures set to zero.
+If desired the user can read the temperature profile for the disk from a file. Each
+line in the file should consist of a radius and a temperature separated by whitespace (in the
+first two columns)   Lines, such as comments or header names of an astropy table, will be ignored.
+
+The radii in  the file should not extend beyond the disk itself.  If the range of radii included
+in the file does not correspond to the inner and outer boundary of the disk, then the portion of
+the disk outside that described in the file, will be treated as a normal SS disk.
