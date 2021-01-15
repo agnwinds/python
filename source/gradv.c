@@ -97,6 +97,11 @@ dvwind_ds_cmf (p)
     /* copy the photon and move it by ds, and evaluate the velocity
        at the new point */
     stuff_phot (&pp, &pnew);
+    /*
+     * Put the photon into the observer frame, this way move_phot won't throw
+     * an error. Should be ok since we are only using move_photon to move a
+     * photon some vector ds.
+     * */
     pnew.frame = F_OBSERVER;
     move_phot (&pnew, ds);
     model_velocity (ndom, pnew.x, v2);
