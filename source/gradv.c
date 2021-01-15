@@ -97,6 +97,7 @@ dvwind_ds_cmf (p)
     /* copy the photon and move it by ds, and evaluate the velocity
        at the new point */
     stuff_phot (&pp, &pnew);
+    pnew.frame = F_OBSERVER;
     move_phot (&pnew, ds);
     model_velocity (ndom, pnew.x, v2);
 
