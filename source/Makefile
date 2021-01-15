@@ -251,7 +251,8 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
-		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o
+		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o \
+		macro_accelerate.o
 
 
 
@@ -275,7 +276,7 @@ table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_in
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
-		cooling.o import_calloc.o walls.o charge_exchange.o frame.o
+		cooling.o import_calloc.o walls.o charge_exchange.o frame.o macro_accelerate.o
 
 
 rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_wind_sub.o windsave.o py_wind_ion.o \
@@ -290,7 +291,7 @@ rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o 
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o synonyms.o \
-		cooling.o import_calloc.o frame.o walls.o charge_exchange.o
+		cooling.o import_calloc.o frame.o walls.o charge_exchange.o macro_accelerate.o
 
 
 run_indent:
