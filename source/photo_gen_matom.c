@@ -264,7 +264,7 @@ get_matom_f (mode)
               n_tries_local = 0;
             }
           }
-          /* We know "matom_abs" is the amount of energy absobed by
+          /* We know "matom_abs" is the amount of energy absorbed by
              each macro atom level in each cell. We now want to determine what fraction of
              that energy re-appears in the frequency range we want and from which macro atom
              level it is re-emitted (or if it appears via a k-packet). */
