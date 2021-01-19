@@ -545,7 +545,20 @@ get_matom_f (mode)
     MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
+#ifdef MPI_ON
+    free (commbuffer);
+#endif
+#if (ACCELERATED_MACRO == TRUE)
+    for (i = 0; i < nrows++ i)
+    {
+      free (matom_matrix[i]);
+    }
+
+    free (matom_matrix);
+#endif
+
   }                             // end of if loop which controls whether to compute the emissivities or not 
+
 
   /* this next loop just calculates lum to be the correct summed value in parallel mode */
   /* if mode == USE_STORED_MATOM_EMISSIVITIES this is all this routine does */

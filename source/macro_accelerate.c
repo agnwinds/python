@@ -348,6 +348,13 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_permutation_free (p);
   gsl_matrix_free (inverse_matrix);
   free (a_data);
+
+  /* need to free each calloc-ed row of the matrixes */
+  for (i = 0; i < nrows; i++)
+  {
+    free (R_matrix[i]);
+    free (Q_matrix[i]);
+  }
   free (R_matrix);
   free (Q_matrix);
   free (Q_norm);
@@ -673,7 +680,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
     eprbs_band[n] = 0;
   }
   /* Finished zeroing. */
-  
+
 
   /* bb downwards jumps */
 
