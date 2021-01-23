@@ -1468,7 +1468,7 @@ files;
 /* whether or not to use the implicit/accelerated macro-atom scheme, in which 
    a matrix inversion is used in the emissivity calcualtion rather than 
    a MC sampling of the transition probabilities */
-#define ACCELERATED_MACRO FALSE 
+#define ACCELERATED_MACRO TRUE  
 
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */

@@ -549,7 +549,7 @@ get_matom_f (mode)
     free (commbuffer);
 #endif
 #if (ACCELERATED_MACRO == TRUE)
-    for (i = 0; i < nrows++ i)
+    for (i = 0; i < nrows; i++)
     {
       free (matom_matrix[i]);
     }
