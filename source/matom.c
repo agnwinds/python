@@ -747,24 +747,14 @@ kpkt (p, nres, escape, mode)
 {
 
   int i;
-  int ulvl;
-  double cooling_bf[nphot_total];
-  double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
-  double cooling_bb[NLINES];
   double cooling_adiabatic;
-  struct topbase_phot *cont_ptr;
-  struct lines *line_ptr;
   double cooling_normalisation;
   double destruction_choice;
   double electron_temperature;
-  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-  double lower_density, upper_density;
-  double cooling_ff, upweight_factor;
+  double upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
-
-  double coll_rate, rad_rate;
   double freqmin, freqmax;
 
 

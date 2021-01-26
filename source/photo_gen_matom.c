@@ -130,14 +130,12 @@ double
 get_matom_f (mode)
      int mode;
 {
-  int n, m;
-  int mm, ss;
+  int n, m, mm;
   double lum;
-  int level_emit[NLEVELS_MACRO], kpkt_emit;
   double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
   int n_tries, n_tries_local;
   struct photon ppp;
-  double contribution, norm;
+  double norm;
   int nres, which_out, esc_ptr;
   int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
@@ -173,6 +171,10 @@ get_matom_f (mode)
     {
       matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
     }
+#else
+    /* these variables are only used in the non-accelerated scheme */
+    int ss, level_emit[NLEVELS_MACRO], kpkt_emit;
+    double contribution;
 #endif
 
 

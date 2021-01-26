@@ -42,7 +42,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   MacroPtr mplasma;
   double t_e, ne;
   int nbbd, nbbu, nbfd, nbfu;
-  int uplvl, target_level;
+  int uplvl, target_level, escape_dummy;
   double Qcont;
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -52,6 +52,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   double kpacket_to_rpacket_rate, norm, Rcont;
   double *a_data;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
+  struct photon pdummy;
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
@@ -212,10 +213,8 @@ calc_matom_matrix (xplasma, matom_matrix)
   }
 
   /* Now need to do k-packet processes */
-
-  int escape_dummy = 0;
-  int istat_dummy = 0;
-  fill_kpkt_rates (xplasma, &escape_dummy, &istat_dummy);
+  escape_dummy = 0;
+  fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
   /* Cooling due to collisional transitions in lines and collision ionization [for macro atoms] constitute internal transitions from the k-packet pool to macro atom states. */
   kpacket_to_rpacket_rate = 0.0;        // keep track of rate for kpacket_to_rpacket channel
 
@@ -295,7 +294,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* throw an error if this normalisation is not zero */
     /* note that the ground state is a special case here (improve error check) */
-    if ((abs (norm) > 1e-15 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
+    if ((fabs (norm) > 1e-15 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
       Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", norm, uplvl);
   }
 
@@ -314,7 +313,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* now get ready for the matrix operations. first let's assign variables for use with GSL */
   gsl_matrix_view N;
   gsl_matrix *inverse_matrix;
-  gsl_permutation *p, *pp;
+  gsl_permutation *p;
   int ierr, s;
 
   /* create a view into the array we just created */
@@ -391,11 +390,10 @@ fill_kpkt_rates (xplasma, escape, p)
   struct topbase_phot *cont_ptr;
   struct lines *line_ptr;
   double cooling_normalisation;
-  double destruction_choice;
   double electron_temperature;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double lower_density, upper_density;
-  double cooling_ff, upweight_factor;
+  double cooling_ff;
   WindPtr one;
 
   MacroPtr mplasma;
@@ -635,7 +633,6 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   int uplvl;
   double eprbs[NBBJUMPS + NBFJUMPS], eprbs_band[NBBJUMPS + NBFJUMPS];
   double penorm, penorm_band;
-  double threshold, run_tot;
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
@@ -822,25 +819,14 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
 {
 
   int i;
-  int ulvl, escape_dummy;
-  double cooling_bf[nphot_total];
-  double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
-  double cooling_bb[NLINES];
-  double cooling_adiabatic;
+  int escape_dummy;
   struct topbase_phot *cont_ptr;
-  struct lines *line_ptr;
-  double cooling_normalisation;
-  double destruction_choice;
   double electron_temperature;
-  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-  double lower_density, upper_density;
-  double cooling_ff, upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   struct photon pdummy;
 
-  double coll_rate, rad_rate;
   double freqmin, freqmax;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
