@@ -621,10 +621,8 @@ fill_kpkt_rates (xplasma, escape, p)
 ***********************************************************/
 
 double
-f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
-     WindPtr w;
-     PhotPtr p;
-     int *nres;
+f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
+     PlasmaPtr xplasma;
      int upper;
      double fmin, fmax;
 {
@@ -638,13 +636,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   int nbbd, nbfd;
   double t_e, ne;
   double bb_cont;
-  WindPtr one;
-  PlasmaPtr xplasma;
   double flast, fthresh, bf_int_full, bf_int_inrange;
-
-
-  one = &w[p->grid];            //This is to identify the grid cell in which we are
-  xplasma = &plasmamain[one->nplasma];
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
@@ -810,10 +802,8 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
 ************************************************************/
 
 double
-f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+f_kpkt_emit_accelerate (xplasma, mode, fmin, fmax)
+     PlasmaPtr xplasma;
      int mode;
      double fmin, fmax;
 {
@@ -822,23 +812,20 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
   int escape_dummy;
   struct topbase_phot *cont_ptr;
   double electron_temperature;
-  WindPtr one;
-  PlasmaPtr xplasma;
   MacroPtr mplasma;
+  WindPtr one;
   struct photon pdummy;
 
   double freqmin, freqmax;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
-
+  one = &wmain[xplasma->nplasma];
 
   penorm = 0.0;
   penorm_band = 0.0;
 
-  one = &wmain[p->grid];
-  xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "kpkt");
+  check_plasma (xplasma, "f_kpkt_emit_accelerate");
   mplasma = &macromain[xplasma->nplasma];
 
   electron_temperature = xplasma->t_e;
@@ -860,7 +847,6 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
      cooling rates and stores them in mplasma->cooling. Dummy variables are needed
      because this routine is also used in the main kpkt routine */
   escape_dummy = 0;
-  stuff_phot (p, &pdummy);
   fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
 
   for (i = 0; i < nphot_total; i++)

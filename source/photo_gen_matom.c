@@ -134,9 +134,8 @@ get_matom_f (mode)
   double lum;
   double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
   int n_tries, n_tries_local;
-  struct photon ppp;
   double norm;
-  int nres, which_out, esc_ptr;
+  int which_out;
   int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
 
@@ -173,8 +172,10 @@ get_matom_f (mode)
     }
 #else
     /* these variables are only used in the non-accelerated scheme */
+    struct photon ppp;
     int ss, level_emit[NLEVELS_MACRO], kpkt_emit;
     double contribution;
+    int nres, esc_ptr;
 #endif
 
 
@@ -265,11 +266,11 @@ get_matom_f (mode)
 
       for (i = 0; i < nlevels_macro; i++)
       {
-        level_emit_doub[i] = f_matom_emit_accelerate (wmain, &ppp, &nres, i, geo.sfmin, geo.sfmax);
+        level_emit_doub[i] = f_matom_emit_accelerate (xplasma, i, geo.sfmin, geo.sfmax);
       }
 
       /* do the same for k-packets */
-      kpkt_emit_doub = f_kpkt_emit_accelerate (&ppp, &nres, &esc_ptr, KPKT_MODE_ALL, geo.sfmin, geo.sfmax);
+      kpkt_emit_doub = f_kpkt_emit_accelerate (xplasma, KPKT_MODE_ALL, geo.sfmin, geo.sfmax);
 
       /* Now use the matrix to calculate the fraction of the absorbed energy that comes out in a given level */
       for (i = 0; i < nlevels_macro; i++)
