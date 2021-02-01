@@ -288,8 +288,8 @@ int convergence(PlasmaPtr xplasma);
 int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
-double zero_emit2(double t, void *params);
 double zero_emit(double t);
+double zero_emit2(double t, void *params);
 /* levels.c */
 int levels(PlasmaPtr xplasma, int mode);
 /* gradv.c */
@@ -319,11 +319,12 @@ void print_timer_duration(char *msg, struct timeval timer_t0);
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
+double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double fmin, double fmax);
 double alpha_sp_integrand(double freq, void *params);
 int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
-int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
+int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
 double matom_emit_in_line_prob(WindPtr one, struct lines *line_ptr_emit);
 /* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
@@ -601,6 +602,11 @@ double observer_to_local_frame_velocity(double *v_obs, double *v, double *v_cmf)
 double local_to_observer_frame_velocity(double *v_cmf, double *v, double *v_obs);
 int local_to_observer_frame_ruler_transform(double v[], double dx_cmf[], double dx_obs[]);
 int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double dx_cmf[]);
+/* macro_accelerate.c */
+void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
+int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
+double f_matom_emit_accelerate(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
+double f_kpkt_emit_accelerate(PhotPtr p, int *nres, int *escape, int mode, double fmin, double fmax);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

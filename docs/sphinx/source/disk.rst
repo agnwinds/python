@@ -10,6 +10,17 @@ temperature distribution.
 An option is provide for a vertically extended disk, whose thickness increases
 as with distance from the central object object.   
 
+The parameters involved in describing a flat disk are::
+
+    Disk.type(none,flat,vertically.extended)                 flat
+    Disk.radiation(yes,no)                          yes
+    Disk.rad_type_to_make_wind(bb,models)                   bb
+    Disk.temperature.profile(standard,readin)             standard
+    Disk.mdot(msol/yr)                         5
+    Disk.radmax(cm)                            1e17
+
+
+
 Vertically Extended disk (Details)
 ##################################
 

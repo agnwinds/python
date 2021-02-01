@@ -595,8 +595,6 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 {
   double alpha_sp_value;
   double fthresh, flast;
-  double qromb ();
-  double alpha_sp_integrand ();
 
   temp_choice = ichoice;
   temp_ext = xplasma->t_e;      //external for use in alph_sp_integrand
@@ -623,6 +621,60 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   }
 
   alpha_sp_value = alpha_sp_value * ALPHA_SP_CONSTANT;
+
+  return (alpha_sp_value);
+}
+
+/**********************************************************/
+/**  
+ *  @brief the matom estimator for the spontaneous recombination rate.
+ * 
+ * The rate is given by 
+ * 
+ *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
+ * times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
+ * 
+ * ###Notes###
+ * 04jul30	ksl	Modified so that one does not need to have multiple versions
+ * 		of the code depending on how whether the integrand is 
+ * 		multiplied by 1, f/fthresh, or f/fthresh-1.  This was
+ * 		done eliminate alpha_sp_e as a separate set of routines
+ * 		and to assure that bf rates are positive 
+ * 			ichoice = 0   --> spontanous recombination
+ * 			ichoice = 1   --> energy weighted recombination 
+ * 			ichoice = 2   --> the difference between energy_weighted
+ * 					and spontaneous
+ * 
+ * 	06may	ksl	57+ -- Modified to use plasma structure
+***********************************************************/
+#define ALPHA_SP_CONSTANT 5.79618e-36
+
+double
+scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, fmin, fmax)
+     struct topbase_phot *cont_ptr;
+     PlasmaPtr xplasma;
+     int ichoice;
+     double fmin, fmax;
+{
+  double alpha_sp_value;
+  double fthresh, flast;
+
+  temp_choice = ichoice;
+  temp_ext = xplasma->t_e;      //external for use in alph_sp_integrand
+  cont_ext_ptr = cont_ptr;      //"
+  fthresh = cont_ptr->freq[0];  //first frequency in list
+  flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+  if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
+  if (flast < fmax)
+  {
+    fmax = flast;
+  }
+  // alpha_sp_value = qromb (alpha_sp_integrand, fmin, fmax, 1e-4);
+  alpha_sp_value = num_int (alpha_sp_integrand, fmin, fmax, 1e-4);
 
   return (alpha_sp_value);
 }
@@ -753,176 +805,7 @@ kpkt (p, nres, escape, mode)
 
   if (mplasma->kpkt_rates_known != TRUE)
   {
-    cooling_normalisation = 0.0;
-    cooling_bftot = 0.0;
-    cooling_bbtot = 0.0;
-    cooling_ff = 0.0;
-    cooling_bf_coltot = 0.0;
-
-    /* Start of BF calculation */
-    /* JM 1503 -- we used to loop over ntop_phot here, 
-       but we should really loop over the tabulated Verner Xsections too
-       see #86, #141 */
-    for (i = 0; i < nphot_total; i++)
-    {
-      cont_ptr = &phot_top[i];
-      ulvl = cont_ptr->uplev;
-
-      if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
-      {
-        upper_density = den_config (xplasma, ulvl);
-        cooling_bf[i] = mplasma->cooling_bf[i] =
-          upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
-      }
-      else
-      {
-        upper_density = xplasma->density[cont_ptr->nion + 1];
-
-        cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * PLANCK * cont_ptr->freq[0] * (xplasma->recomb_simple[i]);
-      }
-
-      if (cooling_bf[i] < 0)
-      {
-        Error ("kpkt: phot %d bf cooling rate negative. Density was %g\n", p->np, upper_density);
-        Error ("alpha_sp(cont_ptr, xplasma,2) %g \n", alpha_sp (cont_ptr, xplasma, 2));
-        Error ("i, ulvl, nphot_total, nion %d %d %d %d\n", i, ulvl, nphot_total, cont_ptr->nion);
-        Error ("nlev, z, istate %d %d %d \n", cont_ptr->nlev, cont_ptr->z, cont_ptr->istate);
-        Error ("freq[0] %g\n", cont_ptr->freq[0]);
-        cooling_bf[i] = mplasma->cooling_bf[i] = 0.0;
-      }
-      else
-      {
-        cooling_bftot += cooling_bf[i];
-      }
-
-      cooling_normalisation += cooling_bf[i];
-
-      if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
-      {
-        /* Include collisional ionization as a cooling term in macro atoms, but not simple atoms.  */
-
-        lower_density = den_config (xplasma, cont_ptr->nlev);
-        cooling_bf_col[i] = mplasma->cooling_bf_col[i] =
-          lower_density * PLANCK * cont_ptr->freq[0] * q_ioniz (cont_ptr, electron_temperature);
-
-        cooling_bf_coltot += cooling_bf_col[i];
-
-        cooling_normalisation += cooling_bf_col[i];
-
-      }
-
-    }
-
-    /* End of BF calculation and beginning of BB calculation.  Note that for macro atoms
-       the upper level density is stored but for simple atoms it must be calculated. */
-
-    for (i = 0; i < nlines; i++)
-    {
-      line_ptr = &line[i];
-      if (line_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
-      {
-        cooling_bb[i] = mplasma->cooling_bb[i] =
-          den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr, electron_temperature) * line_ptr->freq * PLANCK;
-
-      }
-      else
-      {
-        two_level_atom (line_ptr, xplasma, &lower_density, &upper_density);
-
-        coll_rate = q21 (line_ptr, electron_temperature) * (1. - exp (-H_OVER_K * line_ptr->freq / electron_temperature));
-
-        cooling_bb[i] =
-          (lower_density * line_ptr->gu / line_ptr->gl -
-           upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq / electron_temperature) - 1.) * line_ptr->freq * PLANCK;
-
-        rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
-
-        /* Now multiply by the scattering probability - i.e. we are only going to consider bb cooling when
-           the photon actually escapes - we don't to waste time by exciting a two-level macro atom only so that
-           it makes another k-packet for us! (SS May 04) */
-
-        cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
-        mplasma->cooling_bb[i] = cooling_bb[i];
-      }
-
-      if (cooling_bb[i] < 0)
-      {
-        cooling_bb[i] = mplasma->cooling_bb[i] = 0.0;
-      }
-      else
-      {
-        cooling_bbtot += cooling_bb[i];
-      }
-      cooling_normalisation += cooling_bb[i];
-    }
-
-    /* end of BB calculation  */
-
-
-    if (one->inwind >= 0)
-    {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;
-      cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
-    }
-    else
-    {
-      /* This should never happen */
-      cooling_ff = mplasma->cooling_ff = mplasma->cooling_ff_lofreq = 0.0;
-      Error ("kpkt: np %d A scattering event in cell %d with vol = 0???\n", p->np, one->nwind);
-      *escape = TRUE;
-      p->istat = P_ERROR_MATOM;
-      return (0);
-    }
-
-
-    if (cooling_ff < 0)
-    {
-      Error ("kpkt: np %d ff cooling rate negative. Abort.", p->np);
-      *escape = TRUE;
-      p->istat = P_ERROR_MATOM;
-      return (0);
-    }
-    else
-    {
-      cooling_normalisation += cooling_ff;
-    }
-
-
-    /* JM -- 1310 -- we now want to add adiabatic cooling as another way of destroying kpkts
-       this should have already been calculated and stored in the plasma structure. Note that 
-       adiabatic cooling does not depend on type of macro atom excited */
-
-    /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
-
-    cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;   // JM 1411 - changed to use filled volume
-
-
-    if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
-    {
-      Error ("kpkt: Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
-    }
-
-
-    /* If the next error occurs see issue #70.  It is ghought to be fixed, with the possiple 
-       exception of cells that are partially in the wind.
-     */
-    if (cooling_adiabatic < 0)
-    {
-      Error ("kpkt: Photon %d. Adiabatic cooling negative! Major problem if inwind (%d) == 0\n", p->np, one->inwind);
-      Error ("kpkt: Photon %d. Setting adiabatic kpkt destruction probability to zero for this matom.\n", p->np);
-      cooling_adiabatic = 0.0;
-    }
-
-
-    cooling_normalisation += cooling_adiabatic;
-
-    mplasma->cooling_bbtot = cooling_bbtot;
-    mplasma->cooling_bftot = cooling_bftot;
-    mplasma->cooling_bf_coltot = cooling_bf_coltot;
-    mplasma->cooling_adiabatic = cooling_adiabatic;
-    mplasma->cooling_normalisation = cooling_normalisation;
-    mplasma->kpkt_rates_known = 1;
-
+    fill_kpkt_rates (xplasma, escape, p);
   }
 
 /* This is the end of the cooling rate calculation, which is done only once for each cell
@@ -1289,16 +1172,16 @@ fake_matom_bf (p, nres, escape)
 ***********************************************************/
 
 int
-emit_matom (w, p, nres, upper)
+emit_matom (w, p, nres, upper, fmin, fmax)
      WindPtr w;
      PhotPtr p;
      int *nres;
      int upper;
+     double fmin, fmax;
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
   int uplvl;
-  double alpha_sp ();
   double eprbs[NBBJUMPS + NBFJUMPS];
   double penorm;
   double threshold, run_tot;
@@ -1353,7 +1236,7 @@ emit_matom (w, p, nres, upper)
     line_ptr = &line[config[uplvl].bbd_jump[n]];
     /* Since we are only interested in making an r-packet here we can (a) ignore collisional
        deactivation and (b) ignore lines outside the frequency range of interest. */
-    if ((line_ptr->freq > geo.sfmin) && (line_ptr->freq < geo.sfmax))   // correct range
+    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))     // correct range
     {
       bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 
@@ -1377,7 +1260,7 @@ emit_matom (w, p, nres, upper)
 
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
-    if (cont_ptr->freq[0] < geo.sfmax)  //means that it may contribute
+    if (cont_ptr->freq[0] < fmax)       //means that it may contribute
     {
       sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
       eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference

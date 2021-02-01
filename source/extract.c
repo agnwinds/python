@@ -90,7 +90,6 @@ extract (w, p, itype)
   stuff_phot (p, &p_in);
 
 
-/* The next section was moved from trans_phot 200518 */
 
   /* We increase weight to account for the number of scatters. This is done because in extract we multiply by the escape
      probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
