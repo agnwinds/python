@@ -208,7 +208,12 @@ main (argc, argv)
   fptr5 = fopen ("py_pcon_data.dat", "w");
   fptr6 = fopen ("py_debug_data.dat", "w");
 
-  fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+
+  if (zdom[domain].coord_type == SPHERICAL)
+    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+  else if (zdom[domain].coord_type == CYLIND)
+    fprintf (fptr, "i j rcen zcen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+
 
   fprintf (fptr3, "nions %i\n", nions);
   for (i = 0; i < nions; i++)
@@ -232,7 +237,11 @@ main (argc, argv)
 
   fprintf (fptr5, "nplasma %i\n", NPLASMA);
 
-  fprintf (fptr6, "i j rcen thetacen v_th dvdr \n");
+  if (zdom[domain].coord_type == SPHERICAL)
+    fprintf (fptr6, "i j rcen thetacen v_th dvdr \n");
+  else if (zdom[domain].coord_type == CYLIND)
+    fprintf (fptr6, "i j rcen zcen v_th dvz_dz \n");
+
 
   printf ("Set up files\n");
 
@@ -249,9 +258,9 @@ main (argc, argv)
   {
     fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_r F_UV_r F_Xray_r es_f_r bf_f_r\n");    //directional flux by band
   }
-  else
+  else if (zdom[domain].coord_type == CYLIND)
   {
-    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x _es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");       //directional flux by band
+    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x _es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");   //directional flux by band
   }
 
 
@@ -265,7 +274,11 @@ main (argc, argv)
       wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
       i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
       vol = wmain[plasmamain[nplasma].nwind].vol;
-      fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);  //output geometric things
+      if (zdom[domain].coord_type == SPHERICAL)
+        fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);        //output geometric things
+      else if (zdom[domain].coord_type == CYLIND)
+        fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);       //output geometric things
+
       fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);     //output temp, xi and ne to ease plotting of heating rates
       fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);   //Xray heating - or photoionization
       fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);     //Compton heating
@@ -276,7 +289,11 @@ main (argc, argv)
       fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);        //ff cooling
       fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
       fprintf (fptr, "%e \n", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
-      fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol); //output geometric things
+
+      if (zdom[domain].coord_type == SPHERICAL)
+        fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);       //output geometric things
+      else if (zdom[domain].coord_type == CYLIND)
+        fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);      //output geometric things
       fprintf (fptr2, "%e ", plasmamain[nplasma].rho);  //density
       fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
       if (zdom[domain].coord_type == SPHERICAL)
