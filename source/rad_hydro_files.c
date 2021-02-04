@@ -172,9 +172,7 @@ main (argc, argv)
   xparse_arguments (argc, argv, root, &ion_switch);
 
   printf ("Reading data from file %s\n", root);
-
   /* Now create the names of all the files which will be written */
-
   strcpy (windsavefile, root);
   strcpy (outputfile, root);
 
@@ -243,6 +241,8 @@ main (argc, argv)
     fprintf (fptr6, "i j rcen zcen v_th dvz_dz \n");
 
 
+  printf ("BOOM rho2nh=%e\n", rho2nh);
+
   printf ("Set up files\n");
 
   if (geo.hydro_domain_number > 0)
@@ -253,6 +253,7 @@ main (argc, argv)
   {
     domain = 0;
   }
+  printf ("BOOM %i %i %i\n", zdom[domain].coord_type, CYLIND, SPHERICAL);
 
   if (zdom[domain].coord_type == SPHERICAL)
   {

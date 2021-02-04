@@ -34,7 +34,10 @@ to modify it's operation.  These include the following:
 
 -r
   Restarts a run that has been interrupted or halted, by reading a the ``xxx.windsave``
-  and ``xxx.specsave`` file (if it exists).
+  and ``xxx.specsave`` file (if it exists). If the user wishes to change details of the 
+  spectral cycles (e.g. the wavelength range via the Spectrum.wavemin or Spectrum.wavemax 
+  parameters)- but avoid repeating the ionization cycles
+  then the number of ionization cycles in the parameter file should be set to zero.
 
 -v n
   Changes the amount of information printed to the screen by Python during a run.
