@@ -9,7 +9,7 @@ The wind is equatorial, and illuminated by an isotropic SED.
 [more description]
 
 Important Parameters
-==============
+============================
 .. math::
 	\theta_{\rm min} \\ 
 	\theta_{\rm max} \\ 
@@ -17,13 +17,13 @@ Important Parameters
 	r_{\rm max}     \\
 
 Illuminating SED 
-==============
+============================
 
 Runtime 
-==============
+============================
 
 Outputs 
-==============
+============================
 
 References
-==============
+============================
