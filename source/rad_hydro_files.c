@@ -240,9 +240,6 @@ main (argc, argv)
   else if (zdom[domain].coord_type == CYLIND)
     fprintf (fptr6, "i j rcen zcen v_th dvz_dz \n");
 
-
-  printf ("BOOM rho2nh=%e\n", rho2nh);
-
   printf ("Set up files\n");
 
   if (geo.hydro_domain_number > 0)
@@ -253,7 +250,6 @@ main (argc, argv)
   {
     domain = 0;
   }
-  printf ("BOOM %i %i %i\n", zdom[domain].coord_type, CYLIND, SPHERICAL);
 
   if (zdom[domain].coord_type == SPHERICAL)
   {
