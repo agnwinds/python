@@ -45,8 +45,7 @@ extensions = ['sphinx.ext.mathjax',
 import os
 import sys
 
-python_doc = os.environ["PYTHON"]
-sys.path.insert(0, os.path.abspath('{}/py_progs/'.format(python_doc)))
+sys.path.insert(0, '../../py_progs/')
 
 
 # == Options for the varous plugins =======================================
