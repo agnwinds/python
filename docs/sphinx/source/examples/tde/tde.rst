@@ -53,24 +53,41 @@ in `Shlosman & Vitello, 1993 <https://ui.adsabs.harvard.edu/abs/1993ApJ...409..3
 Radiation Sources
 -----------------
 
-There are two radiation sources in this model.
-
-1. The accretion disc, and,
-2. The wind itself.
-
-We treat the accretion disc as an ensemble of black bodies, using a standard
+There are two radiation sources in this model.The accretion disc, and,the wind
+itself. Although, the wind does not act as a *net* source of photons, but rather
+as a reprocessing medium. We assume that the wind is in radiative equilibrium
+meaning any energy absorbed is reprocessed and re-radiated, i.e. via radiative
+recombination. We treat the accretion disc as an ensemble of black bodies, using a standard
 :math:`\alpha`-disc effective temperature profile
 `(Shakura & Sunyaev 1973) <https://ui.adsabs.harvard.edu/abs/1973A%26A....24..337S/abstract>`_.
 The emergent SED is hence specified entirely by the mass accretion rate of
-the accretion disc and the mass of the black hole itself. We assume that the wind
-in radiative equilibrium. This means any energy absorbed by it is reprocessed
-and re-radiated. Thus, the wind is not a *net* source of photons in itself, but
-more of a reprocessing layer.
+the accretion disc and the mass of the black hole itself.
+
+The angle integrated SED for this model thus takes the form in the figure below.
+
+.. figure :: images/tde_sed.png
+:align: center
+
+    The angle integrated disc SED for the TDE model.
+
 
 Runtime
 =======
 
+As the TDE outflow is optically thick, the model requires a fair amount of
+computing power to be completed within a reasonable time frame. We ran this model
+using two Intel Xeon Platinum 8160 with 24 processor cores each for a total of
+48 cores. Each processor core runs at a clock frequency of 2.1 GHz, with a max
+boost clock of 3.7 GHz.
 
+Using these CPUs, the model takes roughly 10 ionization cycles to converge in roughly
+7.5 hours, or 360 total CPU hours, with :math:`10^{8}` photons and Python's "-p 2"
+option for logarithmic photon number stepping. The spectral cycles take a significantly
+longer time than the ionization cycles. With :math:`10^{8}` photons, a single
+spectral cycle can take in excess of 12 hours to complete. However, with
+:math:`10^{6}` photons, the cycles take roughly 100 seconds each. We find that
+5 - 10 spectral cycles with :math:`10^{6}` photons result in a reasonable low
+noise spectrum.
 
 Outputs
 =======
@@ -89,5 +106,11 @@ Synthetic Spectra
 
 Physical Properties
 -------------------
+
+
+Files
+=====
+
+
 
 

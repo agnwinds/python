@@ -10,4 +10,4 @@ The files relating to these examples can be found in the `examples/` section of 
    :glob:
 
    examples/reverb/reverb
-   examples/tde
+   examples/tde/tde
