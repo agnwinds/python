@@ -2,7 +2,7 @@ Spectral Cycles
 ###############
 
 The purpose of the ionization cycles is to establish the ionization state
-of the plasma. The prupose of the spectral cycles is to created simulated
+of the plasma. The purpose of the spectral cycles is to created simulated
 spectra given a defined ionization state in a wavelength range that is
 (usually) less wide than required to establish the ionization state.  For
 a cataclysminc variable, One might, for example, want to create a simulated
@@ -94,3 +94,10 @@ the interaction like a resonant scatter and proceed, still tracking the packet.
 This is a reasonable approximation for resonant lines, but less so for bound-free continua, since the possible
 recombination cascade and potential reddening of the photons is not dealt with.
 Partially addressing this was the aim of the bound-free simple emissivity approach.
+
+Other Issues
+------------
+Spectral cycles are executed after the ionization and temperature state of the wind is computed 
+by the ionization cycles. It is possible to modify the requested spectra (both wavelength
+range and observer angles) by making the changes to the spectral cycle parameters, setting the
+number if ionization cycles to zero, and then restarting the simulation.

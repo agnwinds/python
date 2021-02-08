@@ -179,7 +179,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
-		macro_accelerate.o
+		macro_accelerate.o tau_spectrum.o
 
 
 
@@ -203,7 +203,7 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c \
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c \
-		macro_accelerate.c
+		macro_accelerate.c tau_spectrum.c
 
 #
 # kpar_source is now declared separately from python_source so that the file log.h
@@ -337,9 +337,11 @@ modify_wind:  $(modify_wind_objects)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
 
 
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
-all: clean python windsave2table py_wind indent rad_hydro_files modify_wind
+all: clean python windsave2table py_wind indent rad_hydro_files modify_wind 
 
 
 FILE = atomicdata.o atomicdata_init.o atomicdata_sub.o atomic.o

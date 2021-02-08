@@ -607,6 +607,9 @@ void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
 double f_matom_emit_accelerate(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
 double f_kpkt_emit_accelerate(PhotPtr p, int *nres, int *escape, int mode, double fmin, double fmax);
+/* tau_spectrum.c */
+double smax_in_cell(PhotPtr p);
+void optical_depth_diagnostics(WindPtr w);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -697,3 +700,4 @@ int get_one_array_element(int ndom, char variable_name[], int array_dim, double 
 int create_spec_table(int ndom, char rootname[]);
 int create_detailed_cell_spec_table(int ncell, char rootname[]);
 int create_big_detailed_spec_table(int ndom, char *rootname);
+
