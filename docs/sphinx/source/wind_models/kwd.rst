@@ -8,7 +8,7 @@ shown below:
 
 .. todo:: This figure needs modification to account for the fact that we allow rmin and rmax to be specified.
 
-.. figure:: images/kwd.png
+.. figure:: ../images/kwd.png
     :width: 300px
     :align: center
 

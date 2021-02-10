@@ -527,13 +527,13 @@ calloc_estimators (nelem)
 
   if (nlevels_macro > 0 || geo.nmacro > 0)
   {
-    Log_silent
+    Log
       ("Allocated %10.1f Mb for MA estimators \n",
        1.e-6 * (nelem + 1) * (2. * nlevels_macro + 2. * size_alpha_est + 8. * size_gamma_est + 2. * size_Jbar_est) * sizeof (double));
   }
   else
   {
-    Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
+    Log ("Allocated no space for macro estimators since nlevels_macro==0\n");
   }
 
   return (0);

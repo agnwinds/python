@@ -40,8 +40,13 @@ extensions = [
     'sphinx_issues',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
-    # 'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc',
 ]
+
+import os
+import sys
+
+sys.path.insert(0, '../../py_progs/')
 
 # == Options for the varous plugins =======================================
 # -- Whether or not to include ToDo notes ---------------------------------
