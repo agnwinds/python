@@ -10,6 +10,7 @@ The files relating to these examples can be found in the `examples/` section of 
    :glob:
 
    examples/reverb/reverb
-   examples/demo-models/quasar
+   examples/demo-models/quasar/quasar
+   examples/demo-models/tde/tde
    examples/benchmarking/cmfgen
    examples/benchmarking/tardis
