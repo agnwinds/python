@@ -12,44 +12,49 @@ Model Setup
 Key Model Parameters
 --------------------
 
-We model a disc wind outflow using the kinematic `Shlosman & Vitello (1993) <https://ui.adsabs.harvard.edu/abs/1993ApJ...409..372S/abstract>`_
+We model a disc wind outflow using the kinematic
+`Shlosman & Vitello (1993) <https://ui.adsabs.harvard.edu/abs/1993ApJ...409..372S/abstract>`_
 (SV93) biconical disc wind model. This model has seen extensive use throughout the
 history of Python to model across all length scales of accretion, from CVs to
 QSO winds. Further information about the SV93 model can be found in the
 documentation `here <../../sv.rst>`_.
 
-The key parameters controlling the geometry and radiative transfer in this model
-are as follows,
+The key parameters controlling the geometry and central object in this model
+are as follows.
 
-.. code-block::
+Schwarzschild black hole parameters:
 
-    Central_object.mass(msol)                    3e6
-    Central_object.radius(cm)                    1e13
-    Disk.type(none,flat,vertically.extended)        flat
-    Disk.temperature.profile(standard,readin)       standard
-    Disk.mdot(msol/yr)                    9.98e-03
-    Disk.radmax(cm)     1e15
-    Wind.dim.in.x_or_r.direction        100
-    Wind.dim.in.z_or_theta.direction        100
-    Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)      matrix_pow
-    Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)       macro_atoms_thermal_trapping
-    Atomic_data     data/h20_hetop_standard80.dat
-    Wind.mdot(msol/yr)                    2.99e-3
-    SV.diskmin(units_of_rstar)      1
-    SV.diskmax(units_of_rstar)                    377
-    SV.thetamin(deg)        20
-    SV.thetamax(deg)        65
-    SV.mdot_r_exponent      0
-    SV.v_infinity(in_units_of_vescape       1
-    SV.acceleration_length(cm)      5e16
-    SV.acceleration_exponent        1.5
-    SV.v_zero_mode(fixed,sound_speed)       sound_speed
-    SV.v_zero(multiple_of_sound_speed)      1
-    SV.gamma(streamline_skew;1=usually)     1
-    Wind.radmax(cm)     5e17
-    Wind.filling_factor(1=smooth,<1=clumped)        0.1
+.. math::
 
-.. todo :: Convert into something nicer to look at
+    \text{R}_{\text{disc, in}}   &=~10^{13} ~ \text{cm} \\
+                                 &=~22.8 ~ \text{R}_{\text{g}} \\
+    \text{R}_{\text{disc, out}}  &=~10^{15} ~ \text{cm} \\
+                                 &=~2258 ~ \text{R}_{\text{g}} \\
+    \text{M}_{\text{BH}}         &=~3 \times 10 \text{M}_{\odot} \\
+    \dot{\text{M}}_{\text{disc}} &=~9.99 \times 10^{-3}~\text{M}_{\odot}~\text{yr}^{-1} \\
+                                 &=~0.15~\dot{\text{M}}_{\text{Edd}}
+
+Wind geometry parameters:
+
+.. math::
+
+    r_{\text{min}}        &=~10^{13} ~ \text{cm} \\
+                          &=~22.8 ~ \text{R}_{\text{g}} \\
+    r_{\text{max}}        &=~10^{15}~ \text{cm} \\
+                          &=~2258 ~ \text{R}_{\text{g}} \\
+    \alpha                &=~1.5 \\
+    R_{v}                 &=~5 \times 10^{16} ~ \\
+                          &=~1.13 \times 10^{5}~\text{R}_{\text{g}} \\
+    \theta_{\text{min}}   &=~20^{\circ} \\
+    \theta_{\text{max}}   &=~65^{\circ} \\
+    \text{R}_{\text{max}} &=~5 \times 10^{17}~\text{cm} \\
+                          &=~1.13 \times 10^{6}~\text{R}_{\text{g}} \\
+    \gamma                &=~1 \\
+    \lambda               &=~0 \\
+    f_{v}                 &=~0.1 \\
+
+For parameters controlling the radiative transfer and flow of Python, the
+parameter file for this model can be found :download:`here <tde_fiducial.pf>`.
 
 Radiation Sources
 -----------------
@@ -81,20 +86,24 @@ total of 48 cores. Each processor core runs at a clock frequency of 2.1 GHz, wit
 a maximum boost clock of 3.7 GHz. The model uses roughly 70 GB of the available
 DDR4 2666 MHz memory available in this system.
 
-With this configuration, the model takes roughly 10 ionization cycles to converge
-in roughly 7.5 hours, or 360 total CPU hours, with :math:`10^{8}` photons and
-Python's "-p 2" option for logarithmic photon number stepping. The spectral
-cycles take a significantly longer time than the ionization cycles. With
-:math:`10^{8}` photons, a single spectral cycle can take in excess of 12 hours
-to complete. However, with :math:`10^{6}` photons, the cycles take roughly 100
-seconds each. We find that 5 - 10 spectral cycles with :math:`10^{6}` photons
-result in reasonable low noise spectra.
+With this configuration using :math:`10^{8}` photons and Python's "-p 2" option
+for logarithmic photon number stepping, the model takes roughly 10 ionization
+cycles to converge in roughly 7.5 hours, or 360 total CPU hours. The spectral
+cycles take a significantly longer time to complete. For six inclination angles and
+:math:`10^{8}` photons, a single spectral cycle takes in excess of three hours.
+However, with :math:`10^{6}` photons a spectral cycles takes roughly 100
+seconds. We find that 5 - 10 spectral cycles with :math:`10^{6}` photons
+result in reasonable sacrifice between noise in the final spectrum and the
+run time of the spectral cycles.
 
 Outputs
 =======
 
 Synthetic Spectra
 -----------------
+
+Below is a figure of three inclination angles for the emitted spectrum of this
+model.
 
 .. figure:: images/tde_spectra.png
     :align: center
@@ -108,6 +117,8 @@ Synthetic Spectra
 Physical Properties
 -------------------
 
+In the figure below, the physical properties of the outflow are shown.
+
 .. figure:: images/tde_wind.png
     :align: center
 
@@ -115,6 +126,40 @@ Physical Properties
     a log-log spatial scale. The top left panel shows which parts of the wind
     four inclination inclinations intersect.
 
+At the base of the wind, the velocity is dominated by rotation. The rotational
+velocity decreases with radius, due to conserving angular momentum. Far out in
+the wind, the velocity is dominated by the polodial velocity, as set by the
+velocity law in the model. The electron temperature and density are both greatest
+at the base of the wind. The density decreases with radius, resulting in line
+formation processes which scale with electron density, such as collisional
+excitation, decreasing with radius also.
+
+The outer top edge of the wind is cool, reaching temperature as low as
+:math:`T_{e} \sim 10^{3}` K. Python does not implement any dust or molecular
+physics, hence the treatment of this region of the wind is highly approximate.
+However, since the line formation we are interested in does not occur in this
+region, our negelect of this physics should not effect the emergency spectrum.
+
+To measure the ionization state of the wind, we define the ionization parameter
+:math:`U_{\text{H}}`,
+
+.. math::
+
+    U_{\text{H}} = \frac{4\pi}{n_{\text{H}}c} \int_{13.6 \frac{\text{eV}}{h}}^{\infty} \frac{J_{\nu}}{h\nu}~d\nu,
+
+where :math:`\nu` denotes frequency, :math:`n_{\text{H}}` is the number density
+of Hydrogen, :math:`h` is Planck's constant and :math:`J_{\nu}` is the monochromatic
+mean intensity. The ionization parameter measures the ratio of the number density
+of Hydrogen ionizing photons to the local matter density. For values of :math:`U_{\text{H}} > 1`,
+Hydrogen is ionized making it a useful predictor of the global ionization state.
+The ionization parameter is fairly constant throughout the wind with :math:`U_{\text{H}} \sim 10^{4}`,
+indicating that the Hydrogen is ionized in much of the wind. At the very top of
+the wind, the wind is highly ionized with :math:`U_{\text{H}} \sim 10^{8}`. There is,
+however, a portion of the wind where :math:`U_{\text{H}} < 1`. This part of the wind
+is at the base of the wind and large disc radii, :math:`\rho \sim 10^{15}` cm,
+where Hydrogen is neutral. The density of neutral Hydrogen is, naturally, greatest
+here with :math:`n_{\text{H I}} \sim 10^{7} ~ \text{cm}^{-3}` and is where the
+majority of H :math:`\alpha` photons are emitted.
 
 Files
 =====
