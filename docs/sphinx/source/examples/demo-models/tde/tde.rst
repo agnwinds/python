@@ -4,7 +4,13 @@ Demo: Tidal Disruption Event
 ############################
 
 One of the recent applications of Python is modelling outflows in Tidal
-Disruption Events (TDEs).
+Disruption Events (TDEs). We have explored how line formation in an accretion
+disc wind could explain the BAL vs. BEL dichotomy observed in the UV spectra of
+TDEs. We have also explored how reprocessing in an accretion disc wring could
+give rise to the, at one point, unexpected optically bright TDEs.
+
+We now describe a model used to simulate both the UV and optical features of
+TDEs.
 
 Model Setup
 ===========
@@ -102,7 +108,7 @@ Outputs
 Synthetic Spectra
 -----------------
 
-Below is a figure of three inclination angles for the emitted spectrum of this
+Below is a figure of three inclination angles of the emitted spectrum for this
 model.
 
 .. figure:: images/tde_spectra.png
@@ -113,6 +119,19 @@ model.
     wind, whereas both noth the 10 :math:`^{\circ}` and 75 :math:`^{\circ}` sight lines
     are not looking above and below the wind respectively. Important line
     transitions have been labelled at the top of the plot.
+
+The model produces the strong resonance lines of N V, Si IV and C IV often seen
+in UV spectra of TDEs and other objects with mildly ionized winds. We also
+reproduce the BAL vs. BEL behaviour seen, as described in, i.e. `Parkinson et al. (2020) <https://ui.adsabs.harvard.edu/abs/2020MNRAS.494.4914P/abstract>`_,.
+For inclinations which look into the wind, BALs are preferentially produced
+and for inclinations looking above or below the wind, BELs are instead seen.
+
+In the optical portion of the spectrum, the model produces broad recombination
+emission features for the Balmer series of lines as well as for He II. These
+features have extended red wings, clearest at low inclination angles. At intermediate
+and high inclinations, the emission features are double peaked due to the high
+rotational velocity of the wind near the base of the wind, where these features
+are forming.
 
 Physical Properties
 -------------------
@@ -138,7 +157,7 @@ The outer top edge of the wind is cool, reaching temperature as low as
 :math:`T_{e} \sim 10^{3}` K. Python does not implement any dust or molecular
 physics, hence the treatment of this region of the wind is highly approximate.
 However, since the line formation we are interested in does not occur in this
-region, our negelect of this physics should not effect the emergency spectrum.
+region, our neglect of this physics should not effect the emergency spectrum.
 
 To measure the ionization state of the wind, we define the ionization parameter
 :math:`U_{\text{H}}`,
