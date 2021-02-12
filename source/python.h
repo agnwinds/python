@@ -20,6 +20,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
 #define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
 #define REL_MODE_FULL   1      /*Make full corrections for special relativity including co-moving frame effects*/
+#define REL_MODE_SR_FREQ 2     /*Make full corrects for special relativity frequency shifts, but ignore co-moving frame effects */
 
 int rel_mode;                 /* How doppler effects and co-moving frames are  */
 
