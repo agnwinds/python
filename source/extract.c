@@ -4,7 +4,7 @@
  * @author ksl
  * @date   April, 2018
  *
- * @brief  Maing routines for extracting photons during the 
+ * @brief  Routines for extracting photons during the 
  * spectral generation phase.
  *
  ***********************************************************/
@@ -47,7 +47,7 @@
  * doppler shifting the photon if is of PTYPE_WIND or PTYPE_DISK.
  * 
  * Usually, Python constructs a spectrum of all photons, but there are
- * advanced options which allone to restict the spectrum created to
+ * advanced options which allone to restrict the spectrum created to
  * those produced with a certain number of scatters or from photons 
  * that arise from the above or below the disk.  extract enforces
  * those choices before calling extract_one.
@@ -84,11 +84,7 @@ extract (w, p, itype)
   double p_norm, tau_norm;
 
 
-
-  /* Make sure the input photon is not modified */
-
   stuff_phot (p, &p_in);
-
 
 
   /* We increase weight to account for the number of scatters. This is done because in extract we multiply by the escape
@@ -115,7 +111,6 @@ extract (w, p, itype)
     {
       p_norm = 1.0;
 
-      /* throw an error if nnscat does not equal 1 */
       if (p_in.nnscat != 1)
         Error
           ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
@@ -179,7 +174,6 @@ extract (w, p, itype)
  * have not modified p as part of extract.  Also, allow for aberration
  * of photons to assure that we are extracting at the correct angle
  * in the observer frame
- * ZFRAME
  */
 
       if (rel_mode == REL_MODE_LINEAR)
@@ -203,9 +197,7 @@ extract (w, p, itype)
       }
 
 
-
       extract_one (w, &pp, itype, n);
-
 
 
     }
@@ -284,15 +276,15 @@ For disk and centrol object photons, see Eqn 2.19 Knigge's thesis
 
  */
 
-  if (itype == PTYPE_STAR || itype == PTYPE_BL)
-  {                             /* It was an unscattered photon from the star */
+  if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
+  {
     stuff_v (pp->x, x);
     renorm (x, 1.);
     zz = fabs (dot (x, xxspec[nspec].lmn));
     pp->w *= zz * (2.0 + 3.0 * zz);
   }
   else if (itype == PTYPE_DISK)
-  {                             /* It was an unscattered photon from the disk */
+  {
     zz = fabs (xxspec[nspec].lmn[2]);
     pp->w *= zz * (2.0 + 3.0 * zz);
   }
@@ -340,7 +332,6 @@ through the same resonance a second time.
     local_to_observer_frame (pp, pp);
 
   }
-
 
 /* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
@@ -431,8 +422,8 @@ through the same resonance a second time.
        * of resonance, and so the weight must be reduced by tau
        */
 
-      xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
-      xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
+      xxspec[nspec].f[k] += pp->w * exp (-(tau));
+      xxspec[nspec].lf[k1] += pp->w * exp (-(tau));
 
 
 
@@ -440,8 +431,8 @@ through the same resonance a second time.
       if (pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0)
       {
 
-        xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));        //OK increment the spectrum in question
-        xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));      //OK increment the spectrum in question
+        xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));
+        xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));
 
       }
 
@@ -451,9 +442,9 @@ through the same resonance a second time.
       {
         if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
         {                       //If this photon has scattered, been reprocessed, or originated in the wind it's important
-          pstart.w = pp->w * exp (-(tau));      //Adjust weight to weight reduced by extraction
+          pstart.w = pp->w * exp (-(tau));
           stuff_v (xxspec[nspec].lmn, pstart.lmn);
-          delay_dump_single (&pstart, nspec);   //Dump photon now weight has been modified by extraction
+          delay_dump_single (&pstart, nspec);
         }
       }
 
