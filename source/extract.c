@@ -349,6 +349,12 @@ through the same resonance a second time.
   stuff_phot (pp, &pstart);
 
 
+  if (modes.save_photons)
+  {
+    save_photons (pp, "BeforeExtract");
+  }
+
+
 /* Now we can actually extract the reweighted photon */
 
   while (istat == P_INWIND)
@@ -381,6 +387,11 @@ through the same resonance a second time.
     {                           /* Cause the photon to scatter and reinitilize */
       break;
     }
+  }
+
+  if (modes.save_photons)
+  {
+    save_photons (pp, "AfterExtract");
   }
 
   if (istat == P_ESCAPE)
