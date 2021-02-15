@@ -277,42 +277,26 @@ extract_one (w, pp, itype, nspec)
   tau = 0;
   icell = 0;
 
-
-  if (itype == PTYPE_DISK)
-  {
-    local_to_observer_frame_disk (pp, pp);
-
-  }
-  if (itype == PTYPE_WIND)
-  {
-    local_to_observer_frame (pp, pp);
-
-  }
-
-  /* Now extract the photon */
-
-/* Preserve the starting position of the photon so one can use this to determine whether the
- * photon encountered the disk or star as it tried to exist the wind.
- */
-
-  stuff_phot (pp, &pstart);
-
 /* Re-weight the photons. Note that photons have already been frequency shifted prior
-to entering extract */
+to entering extract 
+
+For disk and centrol object photons, see Eqn 2.19 Knigge's thesis
+
+ */
 
   if (itype == PTYPE_STAR || itype == PTYPE_BL)
   {                             /* It was an unscattered photon from the star */
     stuff_v (pp->x, x);
     renorm (x, 1.);
     zz = fabs (dot (x, xxspec[nspec].lmn));
-    pp->w *= zz * (2.0 + 3.0 * zz);     /* Eqn 2.19 Knigge's thesis */
+    pp->w *= zz * (2.0 + 3.0 * zz);
   }
   else if (itype == PTYPE_DISK)
   {                             /* It was an unscattered photon from the disk */
     zz = fabs (xxspec[nspec].lmn[2]);
-    pp->w *= zz * (2.0 + 3.0 * zz);     /* Eqn 2.19 Knigge's thesis */
+    pp->w *= zz * (2.0 + 3.0 * zz);
   }
-  else if (pp->nres > -1 && pp->nres < NLINES)  // added < NLINES condition for macro atoms (SS)
+  else if (pp->nres > -1 && pp->nres < NLINES)
   {
 
 /* It was a wind photon.  In this case, what we do depends
@@ -322,6 +306,9 @@ some other process.
 If geo.scatter_mode==SCATTER_MODE_ISOTROPIC then there is no need 
 to reweight.  This is the isotropic assumption.  Otherwise, one
 needs to reweight
+
+Once the photon is reweighted, repoosition it so it does not to
+through the same resonance a second time.
 */
 
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
@@ -334,16 +321,32 @@ needs to reweight
       tau = 0.0;
     }
 
-/* But in any event we have to reposition wind photons so that they don't go through
-the same resonance again */
-
-    reposition (pp);            // Only reposition the photon if it was a wind photon
+    reposition (pp);
   }
 
   if (tau > TAU_MAX)
     istat = P_ABSORB;           /* Check to see if tau already too large */
   else if (geo.binary == TRUE)
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
+
+
+  if (itype == PTYPE_DISK)
+  {
+    local_to_observer_frame_disk (pp, pp);
+
+  }
+  if (itype == PTYPE_WIND)
+  {
+    local_to_observer_frame (pp, pp);
+
+  }
+
+
+/* Preserve the starting position of the photon so one can use this to determine whether the
+ * photon encountered the disk or star as it tried to exist the wind.
+ */
+
+  stuff_phot (pp, &pstart);
 
 
 /* Now we can actually extract the reweighted photon */
