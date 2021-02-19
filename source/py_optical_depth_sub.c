@@ -257,7 +257,7 @@ calculate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
 
   if (geo.rt_mode == RT_MODE_2LEVEL)
   {
-    radiation (photon, smax, &kappa_total);
+    kappa_total += radiation (photon, smax);
   }
   else                          // macro atom case
   {
