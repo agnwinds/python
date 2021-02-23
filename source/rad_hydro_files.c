@@ -155,7 +155,7 @@ main (argc, argv)
   struct photon ptest;          //We need a test photon structure in order to compute t
 
   FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fptr6, *fopen ();        /*This is the file to communicate with zeus */
-
+  domain = geo.hydro_domain_number;
 
 
   strcpy (parameter_file, "NONE");
@@ -207,10 +207,11 @@ main (argc, argv)
   fptr6 = fopen ("py_debug_data.dat", "w");
 
 
-  if (zdom[domain].coord_type == SPHERICAL)
+  if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
     fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
   else if (zdom[domain].coord_type == CYLIND)
     fprintf (fptr, "i j rcen zcen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+
 
 
   fprintf (fptr3, "nions %i\n", nions);
@@ -239,6 +240,8 @@ main (argc, argv)
     fprintf (fptr6, "i j rcen thetacen v_th dvdr \n");
   else if (zdom[domain].coord_type == CYLIND)
     fprintf (fptr6, "i j rcen zcen v_th dvz_dz \n");
+  else if (zdom[domain].coord_type == RTHETA)
+    fprintf (fptr6, "i j rcen thetacen v_th dvr_dr \n");
 
   printf ("Set up files\n");
 
@@ -257,7 +260,11 @@ main (argc, argv)
   }
   else if (zdom[domain].coord_type == CYLIND)
   {
-    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x _es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");   //directional flux by band
+    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");    //directional flux by band
+  }
+  else if (zdom[domain].coord_type == RTHETA)
+  {
+    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");        //directional flux by band
   }
 
 
@@ -269,9 +276,11 @@ main (argc, argv)
     {
       nplasma = wmain[nwind].nplasma;
       wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
-      i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
-      vol = wmain[plasmamain[nplasma].nwind].vol;
+
       if (zdom[domain].coord_type == SPHERICAL)
+        i = i - 1;              //There is an extra radial 'ghost zone' in spherical coords in python, we need to make our i,j agree with zeus
+      vol = wmain[plasmamain[nplasma].nwind].vol;
+      if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
         fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);        //output geometric things
       else if (zdom[domain].coord_type == CYLIND)
         fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);       //output geometric things
@@ -287,7 +296,7 @@ main (argc, argv)
       fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
       fprintf (fptr, "%e \n", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
 
-      if (zdom[domain].coord_type == SPHERICAL)
+      if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
         fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);       //output geometric things
       else if (zdom[domain].coord_type == CYLIND)
         fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);      //output geometric things

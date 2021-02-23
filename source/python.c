@@ -720,7 +720,7 @@ main (argc, argv)
 
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
 
-  optical_depth_diagnostics (w);
+  // optical_depth_diagnostics (w);
 
   make_spectra (restart_stat);
 
