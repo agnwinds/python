@@ -73,8 +73,8 @@ int error_bb_lo = 0;
 
 /**********************************************************/
 /**
- * @brief      returns the frequency for a photon which follows a Placnk distribution
- * within defined frequncy limits
+ * @brief      returns the frequency for a photon which follows a Planck distribution
+ * within defined frequency limits
  *
  * @param [in] double  t   The temperature of the bb
  * @param [in] double  freqmin   The minimum frequency for the photon
@@ -130,10 +130,6 @@ planck (t, freqmin, freqmax)
      * */
 
 
-//    cdf_bb_tot = qromb (planck_d, 0, ALPHABIG, 1e-8);
-//    cdf_bb_lo = qromb (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;
-//    cdf_bb_hi = 1. - qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;
-
     cdf_bb_tot = num_int (planck_d, 0, ALPHABIG, 1e-8);
     cdf_bb_lo = num_int (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;
     cdf_bb_hi = 1. - num_int (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;
@@ -162,7 +158,6 @@ planck (t, freqmin, freqmax)
 
     if (alphamin < ALPHABIG)    //check to make sure we get a sensible number - planck_d(ALPHAMAX is too small to sensibly integrate)
     {
-//      cdf_bb_ylo = qromb (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;    //position in the full cdf of current low frequency boundary
       cdf_bb_ylo = num_int (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;  //position in the full cdf of current low frequency boundary
 
       if (cdf_bb_ylo > 1.0)
@@ -170,7 +165,6 @@ planck (t, freqmin, freqmax)
     }
     if (alphamax < ALPHABIG)    //again, check to see that the integral will be sensible
     {
-//      cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;    //position in the full cdf of currnet hi frequency boundary
       cdf_bb_yhi = num_int (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;  //position in the full cdf of currnet hi frequency boundary
 
       if (cdf_bb_yhi > 1.0)
@@ -335,7 +329,7 @@ get_rand_exp (alpha_min, alpha_max)
   double a, aa;
   double delta_alpha;
 
-  r = random_number (0.0, 1.0); //A random number between 0 and 1 excl
+  r = random_number (0.0, 1.0);
 
   x = exp (alpha_min - alpha_max);
 
@@ -347,7 +341,7 @@ get_rand_exp (alpha_min, alpha_max)
 
   if (sane_check (a))
   {
-    Error ("get_rand_exp:sane_check %e %e %e %e %e\n", a, aa, delta_alpha, x, r);
+    Error ("get_rand_exp:sane_check: alpha_min %e alpha_max %e --> %e %e %e %e %e\n", alpha_min, alpha_max, a, aa, delta_alpha, x, r);
   }
   return (a);
 }

@@ -18,30 +18,6 @@
 #include "python.h"
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis:
-  get_disk_params sets up the disk parameters according to user inputs,
-  e.g. the temperature profile, accretion rate etc.
-
-Arguments:
-
-Returns:
-
-Description:
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-	1510	ksl	Modified to restore illumination
-			options, which were brokedn
-    1712    ksl Collected input parameters for disk into
-                a single routine and modified some of the
-                input fil names to be more uniform
-
-**************************************************************/
 
 /**********************************************************/
 /**

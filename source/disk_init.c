@@ -471,6 +471,11 @@ read_non_standard_disk_profile (tprofile)
     }
   }
 
+  for (n = 0; n < blmod.n_blpts; n++)
+  {
+    Log ("Disk: r %.3e t %.3e \n", blmod.r[n], blmod.t[n]);
+  }
+
 
   if (geo.diskrad > blmod.r[blmod.n_blpts - 1])
   {
