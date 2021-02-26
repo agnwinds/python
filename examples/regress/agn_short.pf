@@ -60,6 +60,7 @@ Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems)                power
 
 ### The minimum and maximum wavelengths in the final spectra
+Spectrum.n_wavelength_bins                 10000
 Spectrum.wavemin(Angstroms)                200
 Spectrum.wavemax(Angstroms)                2600
 
