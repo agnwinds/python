@@ -476,23 +476,23 @@ spec_read (filename)
 
   /* First allocate space */
 
-  xxspec = calloc (sizeof (spectrum_dummy), nspectra);
+  xxspec = calloc (nspectra, sizeof (spectrum_dummy));
   if (xxspec == NULL)
   {
-    Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspectra, NWAVE);
+    Error ("spectrum_init: Could not allocate memory for %d spectra\n", nspectra);
     Exit (EXIT_FAILURE);
   }
-  allocate_spectrum_arrays (nspectra);
+  count += (int) fread (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
 
   /* Now read the rest of the file */
 
-  count += (int) fread (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
+  allocate_spectrum_arrays (nspectra);
   for (i = 0; i < nspectra; ++i)
   {
-    count += (int) fread (xxspec, sizeof (*xxspec[i].f), NWAVE, fptr);
-    count += (int) fread (xxspec, sizeof (*xxspec[i].lf), NWAVE, fptr);
-    count += (int) fread (xxspec, sizeof (*xxspec[i].f_wind), NWAVE, fptr);
-    count += (int) fread (xxspec, sizeof (*xxspec[i].lf_wind), NWAVE, fptr);
+    count += (int) fread (xxspec[i].f, sizeof (*xxspec[i].f), NWAVE, fptr);
+    count += (int) fread (xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE, fptr);
+    count += (int) fread (xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE, fptr);
+    count += (int) fread (xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE, fptr);
   }
 
   fclose (fptr);
