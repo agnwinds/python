@@ -946,10 +946,10 @@ scatter (p, nres, nnscat)
 
   /* Scatter assumes it has been passed a photon in the observer frame */
 
-  if (check_frame (p, F_OBSERVER, "BeginScatter(err)\n") && modes.save_photons)
-  {
-    save_photons (p, "BeginScatter(err)");
-  }
+//OLD  if (check_frame (p, F_OBSERVER, "BeginScatter(err)\n") && modes.save_photons)
+//OLD  {
+//OLD    save_photons (p, "BeginScatter(err)");
+//OLD  }
 
   stuff_phot (p, &p_orig);
 
