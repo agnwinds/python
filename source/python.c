@@ -632,11 +632,11 @@ main (argc, argv)
 
 
 
-  /* If required, read in a non-standard disk temperature profile */
-  if (geo.disk_tprofile == 1)
-  {
-    read_non_standard_disk_profile (files.tprofile);
-  }
+//OLD  /* If required, read in a non-standard disk temperature profile */
+//OLD  if (geo.disk_tprofile == 1)
+//OLD  {
+//OLD    read_non_standard_disk_profile (files.tprofile);
+//OLD  }
 
 
 
