@@ -439,7 +439,7 @@ qdisk_save (diskfile, ztot)
  *
  **********************************************************/
 
-int
+double
 read_non_standard_disk_profile (tprofile)
      char *tprofile;
 {
