@@ -102,7 +102,8 @@ double PHOT_RANGE;              /* When a variable number of photons are called 
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
-#define NWAVE  			  10000 //This is the number of wavelength bins in spectra that are produced
+int  NWAVE;  			   //This is the number of wavelength bins in spectra that are produced
+#define NWAVEMIN 25
 #define MAXSCAT 			2000
 
 /* Define the structures */
@@ -1232,8 +1233,8 @@ int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
 typedef struct spectrum
 {
   char name[40];
-  float freqmin, freqmax, dfreq;
-  float lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
+  double freqmin, freqmax, dfreq;
+  double lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
   double lmn[3];
   double mmax, mmin;            /* Used only in live or die situations, mmax=cos(angle-DANG_LIVE_OR_DIE)
                                    and mmim=cos(angle+DANG_LIVE_OR_DIE).   In actually defining this
@@ -1253,13 +1254,12 @@ typedef struct spectrum
   double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
                                    x is taken to be the center of the region and r is taken to be the radius of
                                    the region.   */
-  double f[NWAVE];              /* The spectrum in linear (wavelength or frequency) units */
-  double lf[NWAVE];             /* The specturm in log (wavelength or frequency)  units  */
-  double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
+  double *f;              /* The spectrum in linear (wavelength or frequency) units */
+  double *lf;             /* The specturm in log (wavelength or frequency)  units  */
 
-  double f_wind[NWAVE];         /* The spectrum of photons created in the wind or scattered in the wind. Created for 
+  double *f_wind;         /* The spectrum of photons created in the wind or scattered in the wind. Created for
                                    reflection studies but possibly useful for other reasons as well. */
-  double lf_wind[NWAVE];        /* The logarithmic version of this */
+  double *lf_wind;        /* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;
 

@@ -350,7 +350,7 @@ init_observers ()
   int ichoice;
   char answer[LINELENGTH];
 
-
+  NWAVE = 10000;
   geo.nangles = 4;
   geo.angle[0] = 10;
   geo.angle[1] = 30.;
@@ -367,7 +367,17 @@ init_observers ()
   geo.swavemin = 850;
   geo.swavemax = 1850;
 
-  rdpar_comment ("The minimum and maximum wavelengths in the final spectra");
+  rdpar_comment ("The minimum and maximum wavelengths in the final spectra and the number of wavelength bins");
+  rdint ("Spectrum.n_wavelength_bins", &NWAVE);
+  if (NWAVE < 0)
+  {
+    NWAVE *= -1;
+  }
+  if (NWAVE < NWAVEMIN)
+  {
+    Error ("Minimum number of spectrum bins is %d\n", NWAVEMIN);
+    NWAVE = NWAVEMIN;
+  }
   rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
   rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
   if (geo.swavemin > geo.swavemax)

@@ -20,8 +20,7 @@
 #include "atomic.h"
 #include "python.h"
 
-int i_spec_start = 0;
-
+int spec_initialized = FALSE;
 
 /**********************************************************/
 /**
@@ -93,20 +92,21 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
   double x1, x2;
   char dummy[20];
 
+  nspec = nangle + MSPEC;
+
+  /* Setup bins for linear and logarithmic spectrum */
+
   freqmin = f1;
   freqmax = f2;
   dfreq = (freqmax - freqmin) / NWAVE;
-
-  nspec = nangle + MSPEC;
-
-/* Lines to set up a logarithmic spectrum */
 
   lfreqmin = log10 (freqmin);
   lfreqmax = log10 (freqmax);
   ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
-  /* Create the spectrum arrays the first time routine is called */
-  if (i_spec_start == 0)
+  /* Allocate memory for the spectrum arrays the first time routine is called */
+
+  if (spec_initialized == FALSE)
   {
     xxspec = calloc (sizeof (spectrum_dummy), nspec);
     if (xxspec == NULL)
@@ -114,15 +114,12 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
       Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE);
       Exit (0);
     }
-
+    allocate_spectrum_arrays (nspec);
     nspectra = nspec;           /* Note that nspectra is a global variable */
-
-    i_spec_start = 1;           /* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
+    spec_initialized = TRUE;    /* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
   }
 
-
-  Log_silent ("Zeroing or rezeroing all %d spectral matrices\n", nspec);
-
+  Log_silent ("Zeroing or re-zeroing all %d spectral matrices\n", nspec);
 
   for (i = 0; i <= MAXSCAT; i++)
     nscat[i] = nres[i] = 0;
@@ -132,14 +129,19 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
 
   for (n = 0; n < nspec; n++)
   {
+    xxspec[n].lmn[0] = xxspec[n].lmn[1] = xxspec[n].lmn[2] = 0.0;
+    xxspec[n].renorm = 1.0;
     xxspec[n].freqmin = freqmin;
     xxspec[n].freqmax = freqmax;
     xxspec[n].dfreq = dfreq;
     xxspec[n].lfreqmin = lfreqmin;
     xxspec[n].lfreqmax = lfreqmax;
     xxspec[n].ldfreq = ldfreq;
+
     for (i = 0; i < NSTAT; i++)
+    {
       xxspec[n].nphot[i] = 0;
+    }
     for (i = 0; i < NWAVE; i++)
     {
       xxspec[n].f[i] = 0;
@@ -155,24 +157,20 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
   strcpy (xxspec[SPEC_WIND].name, "Wind");
   strcpy (xxspec[SPEC_HITSURF].name, "HitSurf");
   strcpy (xxspec[SPEC_SCATTERED].name, "Scattered");
-  for (n = 0; n < MSPEC; n++)
-  {
-    xxspec[n].lmn[0] = xxspec[n].lmn[1] = xxspec[n].lmn[2] = 0.;
-    xxspec[n].renorm = 1.0;
-  }
 
   for (n = MSPEC; n < nspec; n++)
   {
-/*
-We want to set up the direction cosines for extractions.  We have to be careful
-about the sense of the orbital phase within the program.  Viewed from the "north"
-pole in a system with the secondary along the x axis the observer moves clockwise
-and phases just before 0 should be in the +x + y quadrant (since we have the disk and
-wind rotating counter clockwize as viewed from the top.  Another way of saying this
-is at phases just before 0, e.g. 0.98, the observer sees the receeding side of the
-disk. The minus sign in the terms associated with phase are to make this happen.
-02feb ksl
-*/
+
+    /*
+       We want to set up the direction cosines for extractions.  We have to be careful
+       about the sense of the orbital phase within the program.  Viewed from the "north"
+       pole in a system with the secondary along the x axis the observer moves clockwise
+       and phases just before 0 should be in the +x + y quadrant (since we have the disk and
+       wind rotating counter clockwise as viewed from the top.  Another way of saying this
+       is at phases just before 0, e.g. 0.98, the observer sees the receding side of the
+       disk. The minus sign in the terms associated with phase are to make this happen.
+       02feb ksl
+     */
 
     sprintf (xxspec[n].name, "A%02.0f", angle[n - MSPEC]);
     xxspec[n].lmn[0] = sin (angle[n - MSPEC] / RADIAN) * cos (-phase[n - MSPEC] * 360. / RADIAN);
@@ -280,6 +278,49 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 
   return (0);
 }
+
+
+
+
+/**********************************************************/
+/**
+ * @brief  Allocate memory for the arrays in xxspec.
+ * @param  nspec  The number of spectra to allocate.
+ *
+ * @details
+ *
+ ********************************************************/
+
+void
+allocate_spectrum_arrays (int nspec)
+{
+  int i;
+
+  for (i = 0; i < nspec; ++i)
+  {
+    if ((xxspec[i].f = calloc (NWAVE, sizeof (*xxspec[i].f))) == NULL)
+    {
+      Error ("Unable to allocate memory for xxspec[%d].f array with %d bins\n", nspec, NWAVE);
+      Exit (1);
+    }
+    if ((xxspec[i].lf = calloc (NWAVE, sizeof (*xxspec[i].lf))) == NULL)
+    {
+      Error ("Unable to allocate memory for xxspec[%d].lf array with %d bins\n", nspec, NWAVE);
+      Exit (1);
+    }
+    if ((xxspec[i].f_wind = calloc (NWAVE, sizeof (*xxspec[i].f_wind))) == NULL)
+    {
+      Error ("Unable to allocate memory for xxspec[%d].f_wind array with %d bins\n", nspec, NWAVE);
+      Exit (1);
+    }
+    if ((xxspec[i].lf_wind = calloc (NWAVE, sizeof (*xxspec[i].lf_wind))) == NULL)
+    {
+      Error ("Unable to allocate memory for xxspec[%d].lf_wind array with %d bins\n", nspec, NWAVE);
+      Exit (1);
+    }
+  }
+}
+
 
 
 
