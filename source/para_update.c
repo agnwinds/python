@@ -424,8 +424,18 @@ gather_spectra_para ()
 
   int size_of_commbuffer, nspec;
 
-  size_of_commbuffer = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
-  nspec = MSPEC;
+
+  if (geo.ioniz_or_extract == CYCLE_EXTRACT)
+  {
+    nspec = MSPEC + geo.nangles;
+  }
+  else
+  {
+    nspec = MSPEC;
+  }
+
+  size_of_commbuffer = 2 * nspec * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
+
 
 
   redhelper = calloc (sizeof (double), size_of_commbuffer);
