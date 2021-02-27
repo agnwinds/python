@@ -369,7 +369,7 @@ init_observers ()
   geo.swavemax = 1850;
 
   rdpar_comment ("The minimum and maximum wavelengths in the final spectra and the number of wavelength bins");
-  rddoub ("Spectrum.n_wavelength_bins", &nwave_db);
+  rddoub ("Spectrum.nwave", &nwave_db);
   NWAVE = (int) nwave_db;
   if (NWAVE < 0)
   {
