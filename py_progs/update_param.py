@@ -34,10 +34,6 @@ def get_root_from_filepath(
     if type(where) is not str:
         raise TypeError("expected a string as input for the file path, not whatever you put")
 
-    dot = 0
-    slash = 0
-
-    # todo: use find or rfind instead to avoid this mess
     dot = where.rfind(".")
     slash = where.rfind("/")
 
