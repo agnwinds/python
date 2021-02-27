@@ -101,8 +101,8 @@ def find_parameter_files(
     return parameterfiles
 
 
-def update_parameter_name(
-    where, oldname, newname
+def update_parameter(
+    mode, where, parameter, newvalue
 ):
     """Change the name of a parameter in a Python parameter file. If the old and
     new parameter name are the same, the script will still update the parameter
@@ -110,65 +110,33 @@ def update_parameter_name(
 
     Parameters
     ----------
+    mode: str
+        The run mode of the script, either "value" to update a parameter value
+        or "name" to update a parameter name.
     where: str
-        The path to the parameter file to update
-    oldname: str
-        The old name of the parameter
-    newname: str
-        The new name of the parameter"""
-
-    if where.find(".pf") == -1:
-        raise IOError("provided parameter file path {} does not include a .pf".format(where))
-
-    new = None
-
-    with open(where, "r") as f:
-        lines = f.readlines()
-
-    for i, line in enumerate(lines):
-        if line.find(oldname) != -1:
-            parametervalue = line.split()[-1]
-            new = "{}{:20s}{}\n".format(newname, " ", parametervalue)
-            lines[i] = new
-            break
-
-    if not new:
-        print("Haven't been able to update {} to {} for {}".format(oldname, newname, where))
-        return
-
-    with open(where, "w") as f:
-        f.writelines(lines)
-
-    return
-
-
-def update_parameter_value(
-    where, parameter, newvalue
-):
-    """Change the name of a parameter in a Python parameter file. If the old and
-    new parameter name are the same, the script will still update the parameter
-    file anyway.
-
-    Parameters
-    ----------
-    where: str
-        The path to the parameter file to update
+        The path to the parameter file to update.
     parameter: str
-        The name of the parameter to update
+        The name of the parameter to update.
     newvalue: str
-        The new value of the parameter"""
+        The new value of the parameter."""
 
     if where.find(".pf") == -1:
         raise IOError("provided parameter file path {} does not include a .pf".format(where))
+    if mode not in ["value", "name"]:
+        print("{} is an unknown mode for function".format(mode))
 
-    new = None
+    new = None  # new is used to track to see if a change was made or not
 
     with open(where, "r") as f:
         lines = f.readlines()
 
     for i, line in enumerate(lines):
         if line.find(parameter) != -1:
-            new = "{}{:20s}{}\n".format(parameter, " ", newvalue)
+            if mode == "value":
+                new = "{}{:20s}{}\n".format(parameter, " ", newvalue)
+            else:
+                parametervalue = line.split()[-1]
+                new = "{}{:20s}{}\n".format(newvalue, " ", parametervalue)
             lines[i] = new
             break
 
@@ -205,13 +173,8 @@ def main():
 
     args = p.parse_args()
 
-    if args.mode == "name":
-        update = update_parameter_name
-    else:
-        update = update_parameter_value
-
     for parameterfile in find_parameter_files(args.root):
-        update(parameterfile, args.update, args.new)
+        update_parameter(args.mode, parameterfile, args.update, args.new)
 
     return
 
