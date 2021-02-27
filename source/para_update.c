@@ -434,7 +434,7 @@ gather_spectra_para ()
     nspec = MSPEC;
   }
 
-  size_of_commbuffer = 2 * nspec * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
+  size_of_commbuffer = 4 * nspec * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
 
 
 
@@ -446,9 +446,9 @@ gather_spectra_para ()
     for (mpi_j = 0; mpi_j < nspec; mpi_j++)
     {
       redhelper[mpi_i * nspec + mpi_j] = xxspec[mpi_j].f[mpi_i] / np_mpi_global;
-
-      if (geo.ioniz_or_extract == CYCLE_IONIZ)
-        redhelper[mpi_i * nspec + mpi_j + (NWAVE * nspec)] = xxspec[mpi_j].lf[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j + (NWAVE * nspec)] = xxspec[mpi_j].lf[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j + (2 * NWAVE * nspec)] = xxspec[mpi_j].f_wind[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j + (3 * NWAVE * nspec)] = xxspec[mpi_j].lf_wind[mpi_i] / np_mpi_global;
     }
   }
 
@@ -461,9 +461,9 @@ gather_spectra_para ()
     for (mpi_j = 0; mpi_j < nspec; mpi_j++)
     {
       xxspec[mpi_j].f[mpi_i] = redhelper2[mpi_i * nspec + mpi_j];
-
-      if (geo.ioniz_or_extract == CYCLE_IONIZ)
-        xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (NWAVE * nspec)];
+      xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (NWAVE * nspec)];
+      xxspec[mpi_j].f_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (2 * NWAVE * nspec)];
+      xxspec[mpi_j].lf_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (3 * NWAVE * nspec)];
     }
   }
   MPI_Barrier (MPI_COMM_WORLD);
