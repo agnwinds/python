@@ -424,8 +424,11 @@ gather_spectra_para ()
 
   int size_of_commbuffer, nspec;
 
+
   size_of_commbuffer = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
   nspec = MSPEC;
+
+  Log ("Entered gather_spectra: nspec %d \n",nspec);
 
 
   redhelper = calloc (sizeof (double), size_of_commbuffer);
