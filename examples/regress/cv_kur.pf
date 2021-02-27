@@ -65,7 +65,7 @@ Disk.rad_type_in_final_spectrum(bb,models,uniform)               models
 Input_spectra.model_file                   data/kurucz91.ls
 
 ### The minimum and maximum wavelengths in the final spectra
-Spectrum.n_wavelength_bins                 10000
+Spectrum.nwave                    10000
 Spectrum.wavemin(Angstroms)                800
 Spectrum.wavemax(Angstroms)                1850
 

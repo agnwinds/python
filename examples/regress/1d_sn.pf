@@ -44,7 +44,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
-Spectrum.n_wavelength_bins                 10000
+Spectrum.nwave                    10000
 Spectrum.wavemin(Angstroms)                200
 Spectrum.wavemax(Angstroms)                20000
 
