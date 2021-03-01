@@ -418,12 +418,9 @@ int
 gather_spectra_para ()
 {
 #ifdef MPI_ON
-
   double *redhelper, *redhelper2;
   int mpi_i, mpi_j;
-
   int size_of_commbuffer, nspec;
-
 
   if (geo.ioniz_or_extract == CYCLE_EXTRACT)
   {
@@ -434,9 +431,7 @@ gather_spectra_para ()
     nspec = MSPEC;
   }
 
-  size_of_commbuffer = 4 * nspec * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
-
-
+  size_of_commbuffer = 4 * nspec * NWAVE;       //we need space for all 4 separate spectra we are normalizing
 
   redhelper = calloc (sizeof (double), size_of_commbuffer);
   redhelper2 = calloc (sizeof (double), size_of_commbuffer);
@@ -470,8 +465,6 @@ gather_spectra_para ()
 
   free (redhelper);
   free (redhelper2);
-
-
 #endif
 
   return (0);
