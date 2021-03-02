@@ -350,7 +350,7 @@ model_vgrad (ndom, x, v_grad)
   {
     stuff_v (zero_vector, v_grad[0]);
     stuff_v (zero_vector, v_grad[1]);
-    stuff_v (zero_vector, v_grad[1]);
+    stuff_v (zero_vector, v_grad[2]);
     return (0);
   }
 
