@@ -37,7 +37,7 @@
  *
  * @return     0 for success. Also modifies the photon ptr p
  *   to reflect new direction (p->lmn), and nnscat, which
- *   should be copied to the phoiton structure after calling
+ *   should be copied to the photon structure after calling
  *   this routine.
  *
  * @details

@@ -178,7 +178,7 @@ dvwind_ds_cmf (p)
  *
  * @details
  * The routine cycles through all of the cells in the wind, and calculates
- * the aveage value of dv_ds at the center of the wind cell by randomly
+ * the aveage value of dv_ds at the corner of the wind cell by randomly
  * generating directions and then calculating dv_ds in these directions
  *
  * It not only finds the average value, it also keeps track of the maximum
@@ -191,7 +191,6 @@ dvwind_ds_cmf (p)
  *
  *  * dvds_ave - the average dvds
  *  * dvds_max - the maximum value of dvds
- *  * lmn - the direction of the maximum value
  *
  * There is an advanced mode which prints this information to
  * file.
@@ -224,17 +223,17 @@ dvds_ave ()
   {
     ndom = wmain[icell].ndom;
 
-    dvds_max = 0.0;             // Set dvds_max to zero for the cell.
-    dvds_min = 1.e30;           // TEST
+    dvds_max = 0.0;
+    dvds_min = 1.e30;
 
 
-    /* Find the center of the cell */
+    /*  x is the corner of the cell */
 
-    stuff_v (wmain[icell].xcen, p.x);
+    stuff_v (wmain[icell].x, p.x);
 
     /* Define a small length */
 
-    vsub (p.x, wmain[icell].x, diff);
+    vsub (wmain[icell].xcen, p.x, diff);
     ds = 0.001 * length (diff);
 
     /* Find the velocity at the center of the cell */
@@ -279,7 +278,7 @@ dvds_ave ()
     /* Store the results in wmain */
     wmain[icell].dvds_ave = sum / (N_DVDS_AVE * ds);
     wmain[icell].dvds_max = dvds_max / ds;
-    stuff_v (lmn, wmain[icell].lmn);
+//OLD Not used    stuff_v (lmn, wmain[icell].lmn);
 
     if (modes.print_dvds_info)
     {
@@ -296,4 +295,27 @@ dvds_ave ()
     fclose (optr);
 
   return (0);
+}
+
+
+
+double 
+get_dvds_max(p)
+    PhotPtr p;
+{
+    int ndom,nnn[4],nelem;
+    double frac[4];
+
+    ndom=wmain[p->grid].ndom;
+
+    coord_fraction(ndom,0,p->x,nnn,frac,&nelem);
+
+    dvds=0;
+
+    for (nn=0,nn<nelem;nn++) {
+        dvds+=wmain[nnn[nn]].dvds_max;
+    }
+
+return dvds;
+
 }
