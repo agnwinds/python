@@ -82,6 +82,7 @@ extract (w, p, itype)
   int yep;
   double xdiff[3];
   double p_norm, tau_norm;
+  double dvds_max;
 
 
   stuff_phot (p, &p_in);
@@ -101,7 +102,8 @@ extract (w, p, itype)
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
          First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
 
-      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], wmain[p_in.grid].dvds_max);
+      dvds_max = get_dvds_max (&p_in);
+      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
       /* then turn into a probability */
       p_norm = p_escape_from_tau (tau_norm);

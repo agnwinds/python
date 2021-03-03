@@ -75,6 +75,7 @@ randwind_thermal_trapping (p, nnscat)
   double z_prime[3], z_min[3];
   int nscat;
   double tau_min = VERY_BIG;
+  double dvds_max;
   WindPtr one;
 
   /* find the wind pointer for the photon */
@@ -83,7 +84,10 @@ randwind_thermal_trapping (p, nnscat)
   /* we want to normalise our rejection method by the escape
      probability along the vector of maximum velocity gradient.
      First find the sobolev optical depth along that vector */
-  tau_norm = sobolev (one, p->x, -1.0, lin_ptr[p->nres], one->dvds_max);
+
+
+  dvds_max = get_dvds_max (p);
+  tau_norm = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds_max);
 
   /* then turn into a probability. Note that we take account of
      this in trans_phot before calling extract */
