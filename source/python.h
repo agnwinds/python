@@ -1,7 +1,5 @@
 #ifdef MPI_ON
 #include "mpi.h"
-
-
 #endif
 
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
@@ -9,13 +7,18 @@
 
 int q_test_count;
 
-int np_mpi_global;              /// Global variable which holds the number of MPI processes
+int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
 
-
 int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
+#define TRUE  1
+#define FALSE 0
+
+
+#define PNORM_FUDGE_FACTOR     5  /*An extra factor used for fudging the velocity factor See #815 */
+#define USE_GRADIENTS        TRUE   /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
 #define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
@@ -310,9 +313,6 @@ int current_domain;             // This integer is used by py_wind only
 #define RUN_TYPE_NEW       0
 #define RUN_TYPE_RESTART   1
 #define RUN_TYPE_PREVIOUS  3
-
-#define TRUE  1
-#define FALSE 0
 
 
 

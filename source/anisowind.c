@@ -83,10 +83,15 @@ randwind_thermal_trapping (p, nnscat)
 
   /* we want to normalise our rejection method by the escape
      probability along the vector of maximum velocity gradient.
-     First find the sobolev optical depth along that vector */
+     First find the sobolev optical depth along that vector 
+
+     PNORM_FUDGE_FACTOR is a bandaide to address #815.  It should
+     not be the final solution
+   */
 
 
-  dvds_max = get_dvds_max (p);
+  dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (p);
+//OLD  dvds_max = get_dvds_max (p);
   tau_norm = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds_max);
 
   /* then turn into a probability. Note that we take account of
@@ -121,6 +126,11 @@ randwind_thermal_trapping (p, nnscat)
     ztest = random_number (0.0, 1.0) * p_norm;
 
     dvds = dvwind_ds_cmf (p);
+
+    if (dvds > dvds_max)
+    {
+      Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e \n", dvds, dvds_max, dvds / dvds_max);
+    }
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
     if (tau < tau_min)

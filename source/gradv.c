@@ -81,7 +81,7 @@ dvwind_ds_cmf (p)
      tensor ought to be rotated in order to give the right answer for spherical
      coordinates. */
 
-  if (zdom[ndom].coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL || USE_GRADIENTS == FALSE)
   {
     struct photon pnew;
     double v1[3], v2[3], dv[3], diff[3];
@@ -362,7 +362,7 @@ dvds_max ()
     /* Define a small length */
 
     vsub (wmain[icell].xcen, p.x, diff);
-    ds = 0.001 * length (diff);
+    ds = 0.000001 * length (diff);
 
     /* Find the velocity at the center of the cell */
     vwind_xyz (ndom, &p, v_zero);
@@ -404,7 +404,6 @@ dvds_max ()
 
     /* Store the results in wmain */
     wmain[icell].dvds_max = dvds_max / ds;
-//OLD Not used    stuff_v (lmn, wmain[icell].lmn);
 
     if (modes.print_dvds_info)
     {

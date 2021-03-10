@@ -100,9 +100,11 @@ extract (w, p, itype)
     if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
     {
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density 
+         PNORM_FUDGE_FACTROR is a bandaide for a issue #815   */
 
-      dvds_max = get_dvds_max (&p_in);
+      dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (&p_in);
+//OLD      dvds_max = get_dvds_max (&p_in);
       tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
       /* then turn into a probability */
@@ -311,12 +313,10 @@ through the same resonance a second time.
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
       if (tau > 0.0)
-//HOLD        pp->w *= (1. - exp (-tau)) / tau;
         pp->w *= p_escape_from_tau (tau);
       tau = 0.0;
     }
 
-//HOLD    reposition (pp);
   }
 
   if (tau > TAU_MAX)
