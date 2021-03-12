@@ -68,6 +68,12 @@ and run the code by typing, e.g.
     $ py root.pf
 
 
+Running in parallel mode
+------------------------
+
+.. todo::
+
+    Provide brief information about what MPI is, why it is important and how to installi and run with it
 Auxiliary programs
 ------------------
 
