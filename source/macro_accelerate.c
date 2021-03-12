@@ -295,7 +295,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* throw an error if this normalisation is not zero */
     /* note that the ground state is a special case here (improve error check) */
-    if ((abs (norm) > 1e-15 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
+    if ((fabs (norm) > 1e-15 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
       Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", norm, uplvl);
   }
 
@@ -314,7 +314,8 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* now get ready for the matrix operations. first let's assign variables for use with GSL */
   gsl_matrix_view N;
   gsl_matrix *inverse_matrix;
-  gsl_permutation *p, *pp;
+  gsl_permutation *p;
+//OLD  gsl_permutation *pp;
   int ierr, s;
 
   /* create a view into the array we just created */
@@ -391,11 +392,12 @@ fill_kpkt_rates (xplasma, escape, p)
   struct topbase_phot *cont_ptr;
   struct lines *line_ptr;
   double cooling_normalisation;
-  double destruction_choice;
+//OLD  double destruction_choice;
   double electron_temperature;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double lower_density, upper_density;
-  double cooling_ff, upweight_factor;
+  double cooling_ff;
+//OLD  double cooling_ff, upweight_factor;
   WindPtr one;
 
   MacroPtr mplasma;
@@ -635,7 +637,7 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   int uplvl;
   double eprbs[NBBJUMPS + NBFJUMPS], eprbs_band[NBBJUMPS + NBFJUMPS];
   double penorm, penorm_band;
-  double threshold, run_tot;
+//OLD  double threshold, run_tot;
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
@@ -822,25 +824,28 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
 {
 
   int i;
-  int ulvl, escape_dummy;
-  double cooling_bf[nphot_total];
-  double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
-  double cooling_bb[NLINES];
-  double cooling_adiabatic;
+//OLD  int ulvl; 
+  int escape_dummy;
+//OLD  double cooling_bf[nphot_total];
+//OLD  double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
+//OLD double cooling_bb[NLINES];
+//OLD  double cooling_adiabatic;
   struct topbase_phot *cont_ptr;
-  struct lines *line_ptr;
-  double cooling_normalisation;
-  double destruction_choice;
+//OLD  struct lines *line_ptr;
+//OLD  double cooling_normalisation;
+//OLD  double destruction_choice;
   double electron_temperature;
-  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-  double lower_density, upper_density;
-  double cooling_ff, upweight_factor;
+//OLD  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
+//OLD  double lower_density, upper_density;
+//OLD  double cooling_ff;
+  //OLD double upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   struct photon pdummy;
 
-  double coll_rate, rad_rate;
+//OLD  double coll_rate; 
+//OLD  double rad_rate;
   double freqmin, freqmax;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
