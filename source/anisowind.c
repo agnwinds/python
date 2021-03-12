@@ -65,6 +65,8 @@
 
 #define NSCAT_MAX 10000
 
+int max_dvds_error = 0;
+
 int
 randwind_thermal_trapping (p, nnscat)
      PhotPtr p;
@@ -117,19 +119,19 @@ randwind_thermal_trapping (p, nnscat)
   while (ztest > z && nscat < NSCAT_MAX)
   {
     *nnscat = *nnscat + 1;
-    randvec (z_prime, 1.0);     /* Get a new direction for the photon (isotropic */
-    stuff_v (z_prime, p->lmn);  // copy to photon pointer
+    randvec (z_prime, 1.0);
+    stuff_v (z_prime, p->lmn);
 
 
-    /* generate random number, normalised by p_norm with a 1.2 for 20%
-       safety net (as dvds_max is worked out with a sample of directions) */
+    /* generate random number, normalised by p_norm as dvds_max is worked out with a sample of directions) */
     ztest = random_number (0.0, 1.0) * p_norm;
 
     dvds = dvwind_ds_cmf (p);
 
-    if (dvds > dvds_max)
+    if (dvds > dvds_max && max_dvds_error < 1e4)
     {
-      Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e \n", dvds, dvds_max, dvds / dvds_max);
+      Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e in grid %d \n", dvds, dvds_max, dvds / dvds_max, p->grid);
+      max_dvds_error++;
     }
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 

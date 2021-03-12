@@ -317,6 +317,7 @@ through the same resonance a second time.
       tau = 0.0;
     }
 
+    reposition (pp);            // ??? Why does this only work when here
   }
 
   if (tau > TAU_MAX)
@@ -333,7 +334,7 @@ through the same resonance a second time.
   if (itype == PTYPE_WIND)
   {
     local_to_observer_frame (pp, pp);
-    reposition (pp);
+//HOLD    reposition (pp);   ?? This did not work for reasons unkknown
 
   }
 
