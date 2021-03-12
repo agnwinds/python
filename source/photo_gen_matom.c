@@ -134,12 +134,13 @@ get_matom_f (mode)
   int mm, ss;
   double lum;
   int level_emit[NLEVELS_MACRO], kpkt_emit;
-  double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
+//OLD  double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
   int n_tries, n_tries_local;
   struct photon ppp;
   double contribution, norm;
-  int nres, which_out, esc_ptr;
-  int i, j;
+//OLD  int nres, which_out, esc_ptr;
+  int nres, which_out;
+//OLD  int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
 
 

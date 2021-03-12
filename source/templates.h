@@ -296,6 +296,8 @@ int levels(PlasmaPtr xplasma, int mode);
 /* gradv.c */
 double dvwind_ds_cmf(PhotPtr p);
 int dvds_ave(void);
+int dvds_max(void);
+double get_dvds_max(PhotPtr p);
 /* reposition.c */
 int reposition(PhotPtr p);
 /* anisowind.c */

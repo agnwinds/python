@@ -82,6 +82,7 @@ extract (w, p, itype)
   int yep;
   double xdiff[3];
   double p_norm, tau_norm;
+  double dvds_max;
 
 
   stuff_phot (p, &p_in);
@@ -99,9 +100,12 @@ extract (w, p, itype)
     if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
     {
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density 
+         PNORM_FUDGE_FACTROR is a bandaide for a issue #815   */
 
-      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], wmain[p_in.grid].dvds_max);
+      dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (&p_in);
+//OLD      dvds_max = get_dvds_max (&p_in);
+      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
       /* then turn into a probability */
       p_norm = p_escape_from_tau (tau_norm);
@@ -309,11 +313,11 @@ through the same resonance a second time.
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
       if (tau > 0.0)
-        pp->w *= (1. - exp (-tau)) / tau;
+        pp->w *= p_escape_from_tau (tau);
       tau = 0.0;
     }
 
-    reposition (pp);
+    reposition (pp);            // ??? Why does this only work when here
   }
 
   if (tau > TAU_MAX)
@@ -330,6 +334,7 @@ through the same resonance a second time.
   if (itype == PTYPE_WIND)
   {
     local_to_observer_frame (pp, pp);
+//HOLD    reposition (pp);   ?? This did not work for reasons unkknown
 
   }
 

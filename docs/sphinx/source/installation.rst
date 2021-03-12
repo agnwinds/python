@@ -68,6 +68,12 @@ and run the code by typing, e.g.
     $ py root.pf
 
 
+Running in parallel mode
+------------------------
+
+.. todo::
+
+    Provide brief information about what MPI is, why it is important and how to installi and run with it
 Auxiliary programs
 ------------------
 
@@ -85,6 +91,28 @@ The two files are run as follows
 
 Brief descriptions of command line options for running these routines can obtained using a -h switch
 
+Python scripts
+--------------
+
+There are a number of python, the progamming language scripts, that can be used to plot results 
+from a Python run.  These are not particularly well documented and many have been developed
+for looking at various aspects of the code.  A few may require python packages to be installed.
+However, a number are likely to be useful.
+
+To make use of these scipts one should add
+
+$PYTHON/py_progs both to the PATH and PYTHONPATH variables 
+
+One script that is particularly useful is run_check.py, which is run as follows
+
+.. code:: bash
+
+    $run_check.py root
+
+
+This should create an html file that contains a summary set of information about a run, with plots that 
+indicate how much of the wind has converged as a function of cycle, which cells have converged at the end, what 
+the electron and temperature structrue of the wind is, as well as quick plots of the spectra that were produced.
 
 Directory structure
 -------------------
