@@ -65,7 +65,6 @@
 
 #define NSCAT_MAX 10000
 
-int max_dvds_error = 0;
 
 int
 randwind_thermal_trapping (p, nnscat)
@@ -128,10 +127,9 @@ randwind_thermal_trapping (p, nnscat)
 
     dvds = dvwind_ds_cmf (p);
 
-    if (dvds > dvds_max && max_dvds_error < 1e4)
+    if (dvds > dvds_max)
     {
       Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e in grid %d \n", dvds, dvds_max, dvds / dvds_max, p->grid);
-      max_dvds_error++;
     }
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
@@ -148,7 +146,7 @@ randwind_thermal_trapping (p, nnscat)
   if (nscat == NSCAT_MAX)
   {
     stuff_v (z_min, p->lmn);    // copy to photon pointer
-    Error ("rand_wind_thermal_trapping: photon had more than  %d internal scatters\n", nscat);
+    Error ("rand_wind_thermal_trapping: photon had more than  %d internal scatters in cell %d with p_norm %e \n", nscat, p->grid, p_norm);
   }
 
   return (0);
