@@ -17,7 +17,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 #define FALSE 0
 
 
-#define PNORM_FUDGE_FACTOR     5  /*An extra factor used for fudging the velocity factor See #815 */
+#define PNORM_FUDGE_FACTOR     1  /*An extra factor used for fudging the velocity factor See #815 */
 #define USE_GRADIENTS        TRUE   /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
