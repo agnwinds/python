@@ -242,6 +242,8 @@ compute_qrecomb_coeffs (T)
   int n, nvmin, ntmin;
   struct topbase_phot *xtop;
 
+  xtop = NULL;                  //Avoid compiler warning, though it seem odd we need to do this at all.
+
   for (n = 0; n < nions; n++)   //We need to generate data for the ions doing the recombining.
   {
     if (ion[n].istate > 1)      //We cannot recombine to anything from the neutral iom

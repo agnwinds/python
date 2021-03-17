@@ -317,7 +317,9 @@ through the same resonance a second time.
       tau = 0.0;
     }
 
-    reposition (pp);            // ??? Why does this only work when here
+    /* XXX - It is unclear wy reposition needs to be here, but at present this
+     * produceds better agreement with live or die than below */
+    reposition (pp);
   }
 
   if (tau > TAU_MAX)
@@ -334,7 +336,7 @@ through the same resonance a second time.
   if (itype == PTYPE_WIND)
   {
     local_to_observer_frame (pp, pp);
-//HOLD    reposition (pp);   ?? This did not work for reasons unkknown
+//HOLD    reposition (pp);            //?? This did not work for reasons unkknown
 
   }
 

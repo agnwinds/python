@@ -93,6 +93,9 @@ radiation (PhotPtr p, double ds)
   double ds_cmf, w_ave_cmf;
 
 
+  z = frac_path = freq_xs = 0;  // Initialize to avoid compiler warnings
+
+
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
   ndom = one->ndom;

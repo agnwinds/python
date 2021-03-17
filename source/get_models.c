@@ -405,6 +405,8 @@ model (spectype, par)
   double flux[NWAVES];
   double q1, q2, lambda, tscale, xxx;   // Used for rescaleing according to a bb
 
+  tscale = 0;
+
 
 
 /* First determine whether we already have interpolated this
