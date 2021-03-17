@@ -1352,6 +1352,7 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
   double bb_cont;
   PlasmaPtr xplasma;
 
+  line_ptr = NULL;              // Avoid compiler warning
   xplasma = &plasmamain[one->nplasma];
   ne = xplasma->ne;
 
