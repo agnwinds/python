@@ -214,7 +214,9 @@ calc_matom_matrix (xplasma, matom_matrix)
 
   /* Now need to do k-packet processes */
   escape_dummy = 0;
+  init_dummy_phot(&pdummy);
   fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
+  
   /* Cooling due to collisional transitions in lines and collision ionization [for macro atoms] constitute internal transitions from the k-packet pool to macro atom states. */
   kpacket_to_rpacket_rate = 0.0;        // keep track of rate for kpacket_to_rpacket channel
 
@@ -847,6 +849,7 @@ f_kpkt_emit_accelerate (xplasma, mode, fmin, fmax)
      cooling rates and stores them in mplasma->cooling. Dummy variables are needed
      because this routine is also used in the main kpkt routine */
   escape_dummy = 0;
+  init_dummy_phot (&pdummy);
   fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
 
   for (i = 0; i < nphot_total; i++)
