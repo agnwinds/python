@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.0)
 
 # Set the Python version
 
-set(PYTHON_VERSION 84g)
+set(PYTHON_VERSION 85c)
 message(STATUS "Python version : ${PYTHON_VERSION}")
 
 # The C standard is being set to 99, although if we follow this standard is
@@ -34,7 +34,7 @@ message(STATUS "Python version : ${PYTHON_VERSION}")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_COMPILER mpicc)
-add_definitions(-Wall -Wextra -O3 -D MPI_ON)
+add_definitions(-Wall -Wextra -D MPI_ON)
 
 # Setup any include directories, as well as any library directories. This is
 # used to link the GSL directories
@@ -80,7 +80,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
     file(WRITE ${VERSION_FILE} "#define VERSION \"${PYTHON_VERSION}\"\n\
 #define GIT_COMMIT_HASH \"${GIT_HASH}\"\n\
 #define GIT_DIFF_STATUS \"${GIT_NUM_CHANGES}\"\n"
-     )
+            )
 endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
 
 # Define the source for the various different programs contained with the
@@ -115,21 +115,25 @@ set(PYTHON_SOURCE
         source/trans_phot.c source/vvector.c source/walls.c source/wind.c
         source/wind2d.c source/wind_sum.c source/wind_updates2d.c
         source/wind_util.c source/windsave.c source/windsave2table_sub.c
-        source/xlog.c source/xtest.c source/zeta.c
-)
+        source/xlog.c source/xtest.c source/zeta.c source/macro_accelerate.c
+        )
 
 set(PY_WIND_SOURCE
         source/py_wind_ion.c source/py_wind_macro.c
         source/py_wind_sub.c source/py_wind_write.c
-)
+        )
 
 set(WINDSAVE2TABLE_SOURCE
         source/windsave2table_sub.c
-)
+        )
 
 set(RAD_HYDRO_SOURCE
         source/rad_hydro_files.c
-)
+        )
+
+set(OPTICAL_DEPTH_SOURCE
+        source/py_optical_depth.c source/py_optical_depth_sub.c
+        )
 
 # Create the executables for each program, and link the required libraries
 
@@ -144,6 +148,10 @@ target_link_libraries(windsave2table gsl gslcblas m)
 # Rad_hydro_files
 add_executable(rad_hydro_files ${PYTHON_SOURCE} ${RAD_HYDRO_SOURCE})
 target_link_libraries(rad_hydro_files gsl gslcblas m)
+
+# py_optical_depth
+add_executable(py_optical_depth ${PYTHON_SOURCE} ${OPTICAL_DEPTH_SOURCE})
+target_link_libraries(py_optical_depth gsl gslcblas m)
 
 # Python
 add_executable(python source/python.c ${PYTHON_SOURCE})

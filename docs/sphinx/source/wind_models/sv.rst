@@ -15,7 +15,7 @@ where
 
 and :math:`r_o` refers to the footpoint of a streamline.
 
-.. figure:: images/sv.png
+.. figure:: ../images/sv.png
     :width: 300px
     :align: center
 

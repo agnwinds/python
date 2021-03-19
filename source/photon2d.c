@@ -431,12 +431,15 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 {
 
   int n;
-  double smax, s, ds_current, ds_cmf;
+//OLD  double smax, s, ds_current, ds_cmf;
+  double smax, ds_current, ds_cmf;
   int istat;
   int nplasma;
-  int ndom, ndom_current;
+//OLD  int ndom, ndom_current;
+  int ndom;
   int inwind;
-  int hit_disk;
+//OLD  int hit_disk;
+//OLD  double kappa_tot;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -469,6 +472,97 @@ return and record an error */
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
+  smax = smax_in_cell (p);
+
+  /* We now determine whether scattering prevents the photon from reaching the far edge of
+     the cell.  calculate_ds calculates whether there are scatterings and makes use of the
+     current position of the photon and the position of the photon at the far edge of the
+     shell.  It needs a "trial photon at the maximum distance however...
+     Note that ds_current does not alter p in any way */
+
+  ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
+
+  if (p->nres < 0)
+    xplasma->nscat_es++;
+  if (p->nres > 0)
+    xplasma->nscat_res++;
+
+
+
+/* We now increment the radiation field in the cell, translate the photon and wrap
+   things up.  For simple atoms, the routine radiation also reduces
+   the weight of the photon due to continuum absorption, e.g. free free.
+   */
+
+
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    /* In the macro-method, b-f and other continuum processes do not reduce the photon
+       weight, but are treated as as scattering processes.  Therefore most of what was in
+       subroutine radiation for the simple atom case can be avoided.  
+     */
+    if (geo.ioniz_or_extract == CYCLE_IONIZ)
+    {
+      /* Provide inputs to bf_estimators in the local frame  */
+      stuff_phot (p, &phot_mid);
+      move_phot (&phot_mid, 0.5 * ds_current);
+      observer_to_local_frame (&phot_mid, &phot_mid_cmf);
+      ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
+      bf_estimators_increment (&w[p->grid], &phot_mid_cmf, ds_cmf);
+    }
+  }
+  else
+  {
+    radiation (p, ds_current);
+  }
+
+  move_phot (p, ds_current);
+
+  p->nres = (*nres);
+
+  return (p->istat = istat);
+
+
+}
+
+
+
+
+/* ************************************************************************* */
+/**
+ * @brief           Calculate the maximum distance a photon can travel in its
+ *                  current cell.
+ *
+ * @param[in]       PhotPtr   p       The currently transported photon packet
+ *
+ * @return          double    smax    The maximum distance the photon packet
+ *                                    can move
+ *
+ * @details
+ *
+ * smax can be found in various ways depending on if the photon is in the wind
+ * or not.
+ *
+ * This section of code was put into its own function in an attempt to avoid
+ * code duplication for the optical depth diagnostic ray tracing thing.
+ *
+ * ************************************************************************** */
+
+double
+smax_in_cell (PhotPtr p)
+{
+  int n, ndom, ndom_current;
+  double s, smax;
+  int hit_disk;
+
+  WindPtr one;
+
+  n = p->grid;
+  one = &wmain[n];              /* one is the grid cell where the photon is */
+  ndom = one->ndom;
+
+  /* Calculate the maximum distance the photon can travel in the cell */
+
   if ((smax = ds_in_cell (ndom, p)) < 0)
   {
     return ((int) smax);
@@ -499,84 +593,22 @@ return and record an error */
 
   }
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, *tau);
-//OLD  }
-
-
-/* At this point we now know how far the photon can travel in it's current grid cell */
+  /* At this point we now know how far the photon can travel in it's current grid cell */
 
   smax += one->dfudge;          /* dfudge is to force the photon through the cell boundaries. */
 
-/* Set limits the distance a photon can travel.  There are
-a good many photons which travel more than this distance without this
-limitation, at least in the standard 30 x 30 instantiation.  It does
-make small differences in the structure of lines in some cases.
-The choice of SMAX_FRAC can affect execution time.*/
+  /* Set limits the distance a photon can travel.  There are
+     a good many photons which travel more than this distance without this
+     limitation, at least in the standard 30 x 30 instantiation.  It does
+     make small differences in the structure of lines in some cases.
+     The choice of SMAX_FRAC can affect execution time. */
 
   if (smax > SMAX_FRAC * length (p->x))
   {
     smax = SMAX_FRAC * length (p->x);
   }
 
-  /* We now determine whether scattering prevents the photon from reaching the far edge of
-     the cell.  calculate_ds calculates whether there are scatterings and makes use of the
-     current position of the photon and the position of the photon at the far edge of the
-     shell.  It needs a "trial photon at the maximum distance however */
-
-
-/* Note that ds_current does not alter p in any way */
-
-  ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-
-  if (p->nres < 0)
-    xplasma->nscat_es++;
-  if (p->nres > 0)
-    xplasma->nscat_res++;
-
-
-
-/* We now increment the radiation field in the cell, translate the photon and wrap
-   things up.  For simple atoms, the routine radiation also reduces
-   the weight of the photon due to continuum absorption, e.g. free free.
-   */
-
-
-  if (geo.rt_mode == RT_MODE_MACRO)
-  {
-    /* In the macro-method, b-f and other continuum processes do not reduce the photon
-       weight, but are treated as as scattering processes.  Therefore most of what was in
-       subroutine radiation for the simple atom case can be avoided.  
-     */
-
-    one = &w[p->grid];
-    nplasma = one->nplasma;
-    xplasma = &plasmamain[nplasma];
-
-    /* Provide inputs to bf_estimators in the local frame  */
-    stuff_phot (p, &phot_mid);
-    move_phot (&phot_mid, 0.5 * ds_current);
-    observer_to_local_frame (&phot_mid, &phot_mid_cmf);
-    ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
-
-    if (geo.ioniz_or_extract == CYCLE_IONIZ)
-    {
-      bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
-    }
-  }
-  else
-  {
-    radiation (p, ds_current);
-  }
-
-  move_phot (p, ds_current);
-
-  p->nres = (*nres);
-
-  return (p->istat = istat);
-
-
+  return smax;
 }
 
 

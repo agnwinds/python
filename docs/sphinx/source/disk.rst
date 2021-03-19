@@ -54,8 +54,9 @@ Non-Standard Temperature Profile
 
 If desired the user can read the temperature profile for the disk from a file. Each
 line in the file should consist of a radius and a temperature separated by whitespace (in the
-first two columns)   Lines, such as comments or header names of an astropy table, will be ignored.
+first two columns)  The values are assumed to be entered in a logical order, that is in 
+ascending values of raidus. Lines, such as comments or header names of an astropy table, will be ignored.
 
-The radii in  the file should not extend beyond the disk itself.  If the range of radii included
-in the file does not correspond to the inner and outer boundary of the disk, then the portion of
-the disk outside that described in the file, will be treated as a normal SS disk.
+With this option, the radius of the disk will be set to the maximum radius (the last value of r) in 
+the file.  
+

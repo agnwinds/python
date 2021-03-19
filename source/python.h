@@ -1,7 +1,5 @@
 #ifdef MPI_ON
 #include "mpi.h"
-
-
 #endif
 
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
@@ -9,17 +7,23 @@
 
 int q_test_count;
 
-int np_mpi_global;              /// Global variable which holds the number of MPI processes
+int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
 
-
 int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
+#define TRUE  1
+#define FALSE 0
+
+
+#define PNORM_FUDGE_FACTOR     1  /*An extra factor used for fudging the velocity factor See #815 */
+#define USE_GRADIENTS        TRUE   /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
 #define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
 #define REL_MODE_FULL   1      /*Make full corrections for special relativity including co-moving frame effects*/
+#define REL_MODE_SR_FREQ 2     /*Make full corrects for special relativity frequency shifts, but ignore co-moving frame effects */
 
 int rel_mode;                 /* How doppler effects and co-moving frames are  */
 
@@ -91,7 +95,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 
 #define DELTA_V				1.      /*This is the accuracy in velocity space (cm/s) that we sample edges when producing freebound photons */
 
-#define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
+#define DANG_LIVE_OR_DIE   0.5  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
 double PHOT_RANGE;              /* When a variable number of photons are called in different ionization
@@ -309,9 +313,6 @@ int current_domain;             // This integer is used by py_wind only
 #define RUN_TYPE_NEW       0
 #define RUN_TYPE_RESTART   1
 #define RUN_TYPE_PREVIOUS  3
-
-#define TRUE  1
-#define FALSE 0
 
 
 
@@ -745,7 +746,8 @@ typedef struct wind
   double v_grad[3][3];          /*velocity gradient tensor  at the inner vertex of the cell in the co-moving frame*/
   double div_v;                 /*Divergence of v at center of cell in the co-moving frame*/
   double dvds_ave;              /* Average value of dvds */
-  double dvds_max, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
+  double dvds_max;              /*The maximum value of dvds*/
+//OLD  double dvds_max; //, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
                                    where the volume is the volume that is actually filled with material. 

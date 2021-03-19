@@ -1,36 +1,23 @@
 Programming Notes
 #################
 
-Python is written in C and is normally tested on linux machines and on Macs, where the
-compiler usually turns out to be clang.  Certin portions of the code are parellized 
-using mpi. 
+Python is written in C and is normally tested on linux machines and on Macs, where the compiler usually turns out to be clang. It is also regularly compiled with gcc as part of the travis-CI tests. Certain portions of the code are parallelized using the Message Parsing Interface (MPI). 
 
-Version control is (obviously) managed through git.  The stable version is on the master 
-branch; the main development is carried out on the dev branch. This is generally the 
-branch to start with in developing new code.
+Version control is (obviously) managed through **git**.  The stable version is on the `master` branch; the main development is carried out on the `dev` branch. This is generally the branch to start with in developing new code. If possible, a developer should use the so-called Fork and Pull model for their version control workflow. See e.g. `this gist post <https://gist.github.com/Chaser324/ce0505fbed06b947d962>`_.
 
-If one modifies the code, a developer needs to be sure to have $PYTHON/py_progs both in PYTHONPATH and PATH.  One should also have a version of indent installed, preferably but not 
-necessarily gnu_indent installed.  This is because, the Makefile will call a script 
-run_indent.py on files that the developer has changed, which enforces a specific indent 
-style on the code.
+If one modifies the code, a developer needs to be sure to have ``$PYTHON/py_progs`` both in ``PYTHONPATH`` and ``PATH``.  One should also have a version of indent installed, preferably but not necessarily gnu_indent installed.  This is because, the Makefile will call a script run_indent.py on files that the developer has changed, which enforces a specific indent style on the code.
 
 In addition to indent, one should have cproto or something equivalent installed. cproto is used to prototypes for all of the subroutines (through the make command 
 
-* make prototypes
+.. code:: bash
 
-(The many warnings that appear when cproto is run on OSX can so far be ignored. cproto for 
-macs is available with brew)
+    make prototypes
+
+(The many warnings that appear when cproto is run on OSX can so far be ignored. cproto for macs is available with brew)
 
 All new routines should have Doxygen headers.
 
-printf statements should be avoided, particular in the main code.  Python has 
-its own replacements for these commands, e.g Log and Error which standardize the outputs
-and allow for managing what is printed to the screen in multprocessor mode.  There is also
-a command line switch that contorls the amount of information that is printed to the 
-screen.  Specific errors are only logged for a limited number of times, after which they
-are merely counted.  A log of the number of times each error has occurred is printed out
-at the end of each run and for each thread.  (Additional detailes can be found in the Doxygen
-header for xlog.c)
+printf statements should be avoided, particular in the main code.  Python has its own replacements for these commands, e.g Log and Error which standardize the outputsand allow for managing what is printed to the screen in multprocessor mode.  There is alsoa command line switch that contorls the amount of information that is printed to the screen.  Specific errors are only logged for a limited number of times, after which theyare merely counted.  A log of the number of times each error has occurred is printed outat the end of each run and for each thread.  (Additional detailes can be found in the Doxygenheader for xlog.c)
 
 Structures
 ==========
@@ -80,7 +67,7 @@ Parallel Operation
 Python uses MPI to parallelize the most compute intensive portions of the routine.  It has
 been run on large machines with 100s of cores without problem.
 
-The portions of the routine that are parallized are:
+The portions of the routine that are parallelize are:
 
 * Photon generation and transfer: When run in multiprocesser mode, each thread creates only a 
   fraction of the total number of photons.  The weight of the photons in each thread is such

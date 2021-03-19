@@ -314,6 +314,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_matrix_view N;
   gsl_matrix *inverse_matrix;
   gsl_permutation *p;
+
   int ierr, s;
 
   /* create a view into the array we just created */
@@ -815,7 +816,6 @@ f_kpkt_emit_accelerate (xplasma, mode, fmin, fmax)
   MacroPtr mplasma;
   WindPtr one;
   struct photon pdummy;
-
   double freqmin, freqmax;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
