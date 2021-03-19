@@ -631,15 +631,6 @@ main (argc, argv)
   }
 
 
-
-//OLD  /* If required, read in a non-standard disk temperature profile */
-//OLD  if (geo.disk_tprofile == 1)
-//OLD  {
-//OLD    read_non_standard_disk_profile (files.tprofile);
-//OLD  }
-
-
-
 /* The next section sets up a structure qdisk to record the effects
  * of illumination on the disk.  disk_init is called primarily to get
  * a defined set of annular rings which are kept throughout the

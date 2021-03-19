@@ -181,13 +181,6 @@ walls (p, pold, normal)
       Error ("walls: %d The previous position %11.4e %11.4e %11.4e is inside the disk by %e\n", pold->np, pold->x[0], pold->x[1],
              pold->x[2], z - fabs (pold->x[2]));
 
-//OLD      if (modes.save_photons)
-//OLD      {
-//OLD        save_photons (pold, "walls:old");
-//OLD        save_photons (p, "walls:new");
-//OLD        Diag ("walls: %d At rho %11.4e, zdisk is %e and zpos %e is inside the disk by %e\n", pold->np, rho, z, fabs (pold->x[2]),
-//OLD              z - fabs (pold->x[2]));
-//OLD      }
 
     }
 
@@ -254,13 +247,6 @@ walls (p, pold, normal)
           normal[2] *= -1;
         }
       }
-
-//OLD      if (modes.save_photons)
-//OLD      {
-//OLD        Diag ("NORMAL   %d   %e %e %e (%e %e %e %e %e)\n", p->np, normal[0], normal[1], normal[2], theta,
-//OLD              (zdisk (rho * (1. + EPSILON)) - z), (EPSILON * rho), rho, EPSILON);
-//OLD
-//OLD      }
 
 
       return (p->istat = P_HIT_DISK);

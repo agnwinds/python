@@ -60,10 +60,6 @@ check_frame (p, desired_frame, msg)
   {
     Error ("check_frame: %s :Photon (%d) of type (%d) not in frame %d\n", msg, p->np, p->istat, desired_frame);
     ncheck_frame++;
-
-//OLD    if (modes.save_photons)
-//OLD      save_photons (p, "PhotonInIncorrectFrame");
-
     return (1);
   }
   else
