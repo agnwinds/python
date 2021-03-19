@@ -81,6 +81,9 @@ matrix_ion_populations (xplasma, mode)
   double pi_rates[nions];       //photoionization rate coefficients
   double rr_rates[nions];       //radiative recombination rate coefficients
   double inner_rates[n_inner_tot];      //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
+
+  nh1 = nh2 = 0;
+
   /* Copy some quantities from the cell into local variables */
 
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density

@@ -9,3 +9,4 @@ Some of these are descibed below:
 
    physics/macroatoms
    physics/relativity_comoving
+   physics/aniso

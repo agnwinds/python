@@ -37,11 +37,11 @@ of photons by that fraction, that is
 
 .. math::
 
-    w_{out}=\frac{P(\theta)}{<P>} w_{in}
+    w_{\rm out}=\frac{P(\theta)}{\langle P \rangle} w_{\rm in}.
 
-For isotropic scattering the :math:`w_{out}==w_{in}` but for resonant scattering the
+For isotropic scattering the :math:`w_{\rm out}==w_{\rm in}` but for resonant scattering the
 weight will increase if the desired photon direction is in the direction of maximum
-velocity gradient and decrease if it is along the direction of minumum velocity gradent.
+velocity gradient and decrease if it is along the direction of minumum velocity gradient (see :doc:`/physics/aniso`).
 For photons generated at the surface of a star of disk, the weight of the dummy photon
 is determined by the limb darkening law assumed. One then extracts the dummy photon along
 the line of sight reducing the weight of the photon by the total optical depth along that
