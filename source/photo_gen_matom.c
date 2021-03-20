@@ -859,19 +859,20 @@ photo_gen_matom (p, weight, photstart, nphot)
        a quick and dirty test for now. Really kpkt should be modified to 
        do what we want in a more elegant way. */
 
-    test = pp.freq;
+//OLD    test = pp.freq;
 
-    while (test > geo.sfmax || test < geo.sfmin)
-    {
+//OLD    while (test > geo.sfmax || test < geo.sfmin)
+//OLD    {
 
-      /* Call routine that will select an emission process for the
-         deactivating macro atom. If it deactivates outside the frequency
-         range of interest then ignore it and try again. SS June 04. */
+    /* Call routine that will select an emission process and a frequencyfor the
+       deactivating macro atom. */
+//OLD    If it deactivates outside the frequency
+//OLD         range of interest then ignore it and try again. SS June 04. */
 
-      emit_matom (wmain, &pp, &nres, upper, geo.sfmin, geo.sfmax);
+    emit_matom (wmain, &pp, &nres, upper, geo.sfmin, geo.sfmax);
 
-      test = pp.freq;
-    }
+//OLD      test = pp.freq;
+//OLD    }
 
 
     p[n].freq = pp.freq;
