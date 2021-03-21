@@ -70,6 +70,7 @@
  * 
  *
  **********************************************************/
+double xlmn[3];                 // XTEST
 
 int
 extract (w, p, itype)
@@ -179,6 +180,8 @@ extract (w, p, itype)
  * of photons to assure that we are extracting at the correct angle
  * in the observer frame
  */
+
+      stuff_v (xxspec[n].lmn, xlmn);    //XTEST
 
       if (rel_mode == REL_MODE_LINEAR)
       {
@@ -319,7 +322,7 @@ through the same resonance a second time.
 
     /* XXX - It is unclear wy reposition needs to be here, but at present this
      * produceds better agreement with live or die than below */
-    reposition (pp);
+//OLD    reposition (pp);
   }
 
   if (tau > TAU_MAX)
@@ -336,9 +339,24 @@ through the same resonance a second time.
   if (itype == PTYPE_WIND)
   {
     local_to_observer_frame (pp, pp);
-//HOLD    reposition (pp);            //?? This did not work for reasons unkknown
+    reposition (pp);
 
   }
+
+  double foo[3], xdot, xxang;
+  xdot = dot (pp->lmn, xlmn);
+  xxang = acos (xdot) * 57.29578;
+  if (xxang > 0.1)
+  {
+
+    Log ("gotcha %10.3e %10.3e %10.3e -> %10.3e %10.3e %10.3e not equal theta %.6f\n",
+         xlmn[0], xlmn[1], xlmn[2], pp->lmn[0], pp->lmn[1], pp->lmn[2], xxang);
+
+  }
+
+
+
+
 
 /* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
