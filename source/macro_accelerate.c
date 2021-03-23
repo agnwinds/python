@@ -609,13 +609,10 @@ fill_kpkt_rates (xplasma, escape, p)
  * @brief a routine which calculates what fraction of a level 
  *         emissivity comes out in a given frequency range
  *
- * @param [in]     WindPtr w   the ptr to the structure defining the wind
- * @param [in]     int upper   the upper level that we deactivate from
- * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [in,out]  int nres    the process by which deactivation occurs
- * @param [in]     fmin   minimum frequency of the band
- * @param [in]     fmax   maximum frequency of the band
- * @return 0
+ * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
+ * @param [in]      int         upper         macro-atom level
+ * @param [in]      double      fmin, freq    Frequency range requested 
+ *                                            (e.g. spectral cycle freq range)
  *
  * @details similar to routines like emit_matom, except that we calculate the fraction
  * of emission in a band rather than calculating frequencies for photons. Used to be 
@@ -769,45 +766,27 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
 
 /**********************************************************/
 /** 
- * @brief deals with the elimination of k-packets.
+ * @brief calculate what fraction of the thermal continuum emission comes out in the required band
  *
- * Whenever a k-packet is created it is
- * immediately destroyed insitu by this routine. At output "nres" identified the process
- * that destroys the k-packet and the packet information has been updated in the same
- * way as at the end of matom
+ * This routine uses the various cooling rates to work out which k->r processes contribute 
+ * in the frequency range requested (between fmin and fmax). This involves doing a series 
+ * of band-limited integrals, for the bound-free "alpha" estimators, for each cross-section.
+ * It also calls functions like total_free() to work out the fraction of free-free emission
+ * that emerges in the frequency range. 
  *
- * @param [in]     WindPtr w   the ptr to the structure defining the wind
- * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
- * @param [in,out]  int escape  to tell us whether the matom de-activation
- *                             is via an r-packet (1) or a k-packet (0)
- * @param [in] int mode         switch which allows photon to be deactivated by a non-radiative
- * term.  (non_zero is true)
- * @return 0
  *
- * ###Notes###
- *          Mar 04  SS   Coding began.
- *          Apr 04  SS   Various improvements including the addition of ff and collisions.
- *          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
- *                       and fb cooling for simple continua.
- *          May 04  SS   Modified to work for case with all "simple" ions.
- *          May 04  SS   Modified to use "scattering probability" formalism for 
- *                       simple ion cooling rates.
- *          Jun 04  SS   Modified to include the "escape" variable to identify excitation of
- *                       macro atoms. This removes the need to call matom from within this routine.
- *          Jun 04  SS   Modified to include collisional ionization as a cooling term.
- *          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
- *	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
- *			entire w array
- *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice 
- *	
- *	* 180616  Updated so that one could force kpkt to deactivate via radiation
+ *
+ * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
+ *
+ * @param [in]      double      fmin, freq    Frequency range requested 
+ *                                            (e.g. spectral cycle freq range)
+ * 
+ * @return penorm_band / penorm   total fraction of k->r emission that emerges in the band
 ************************************************************/
 
 double
-f_kpkt_emit_accelerate (xplasma, mode, fmin, fmax)
+f_kpkt_emit_accelerate (xplasma, fmin, fmax)
      PlasmaPtr xplasma;
-     int mode;
      double fmin, fmax;
 {
 
