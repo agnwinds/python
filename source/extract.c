@@ -4,7 +4,7 @@
  * @author ksl
  * @date   April, 2018
  *
- * @brief  Maing routines for extracting photons during the 
+ * @brief  Routines for extracting photons during the 
  * spectral generation phase.
  *
  ***********************************************************/
@@ -47,7 +47,7 @@
  * doppler shifting the photon if is of PTYPE_WIND or PTYPE_DISK.
  * 
  * Usually, Python constructs a spectrum of all photons, but there are
- * advanced options which allone to restict the spectrum created to
+ * advanced options which allone to restrict the spectrum created to
  * those produced with a certain number of scatters or from photons 
  * that arise from the above or below the disk.  extract enforces
  * those choices before calling extract_one.
@@ -82,13 +82,10 @@ extract (w, p, itype)
   int yep;
   double xdiff[3];
   double p_norm, tau_norm;
+  double dvds_max;
 
-
-
-  /* Make sure the input photon is not modified */
 
   stuff_phot (p, &p_in);
-
 
 
   /* We increase weight to account for the number of scatters. This is done because in extract we multiply by the escape
@@ -103,9 +100,12 @@ extract (w, p, itype)
     if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
     {
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density 
+         PNORM_FUDGE_FACTROR is a bandaide for a issue #815   */
 
-      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], wmain[p_in.grid].dvds_max);
+      dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (&p_in);
+//OLD      dvds_max = get_dvds_max (&p_in);
+      tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
       /* then turn into a probability */
       p_norm = p_escape_from_tau (tau_norm);
@@ -115,7 +115,6 @@ extract (w, p, itype)
     {
       p_norm = 1.0;
 
-      /* throw an error if nnscat does not equal 1 */
       if (p_in.nnscat != 1)
         Error
           ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
@@ -179,7 +178,6 @@ extract (w, p, itype)
  * have not modified p as part of extract.  Also, allow for aberration
  * of photons to assure that we are extracting at the correct angle
  * in the observer frame
- * ZFRAME
  */
 
       if (rel_mode == REL_MODE_LINEAR)
@@ -203,9 +201,7 @@ extract (w, p, itype)
       }
 
 
-
       extract_one (w, &pp, itype, n);
-
 
 
     }
@@ -277,42 +273,26 @@ extract_one (w, pp, itype, nspec)
   tau = 0;
   icell = 0;
 
+/* Re-weight the photons. Note that photons have already been frequency shifted prior
+to entering extract 
 
-  if (itype == PTYPE_DISK)
-  {
-    local_to_observer_frame_disk (pp, pp);
+For disk and centrol object photons, see Eqn 2.19 Knigge's thesis
 
-  }
-  if (itype == PTYPE_WIND)
-  {
-    local_to_observer_frame (pp, pp);
-
-  }
-
-  /* Now extract the photon */
-
-/* Preserve the starting position of the photon so one can use this to determine whether the
- * photon encountered the disk or star as it tried to exist the wind.
  */
 
-  stuff_phot (pp, &pstart);
-
-/* Re-weight the photons. Note that photons have already been frequency shifted prior
-to entering extract */
-
-  if (itype == PTYPE_STAR || itype == PTYPE_BL)
-  {                             /* It was an unscattered photon from the star */
+  if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
+  {
     stuff_v (pp->x, x);
     renorm (x, 1.);
     zz = fabs (dot (x, xxspec[nspec].lmn));
-    pp->w *= zz * (2.0 + 3.0 * zz);     /* Eqn 2.19 Knigge's thesis */
+    pp->w *= zz * (2.0 + 3.0 * zz);
   }
   else if (itype == PTYPE_DISK)
-  {                             /* It was an unscattered photon from the disk */
+  {
     zz = fabs (xxspec[nspec].lmn[2]);
-    pp->w *= zz * (2.0 + 3.0 * zz);     /* Eqn 2.19 Knigge's thesis */
+    pp->w *= zz * (2.0 + 3.0 * zz);
   }
-  else if (pp->nres > -1 && pp->nres < NLINES)  // added < NLINES condition for macro atoms (SS)
+  else if (pp->nres > -1 && pp->nres < NLINES)
   {
 
 /* It was a wind photon.  In this case, what we do depends
@@ -322,6 +302,9 @@ some other process.
 If geo.scatter_mode==SCATTER_MODE_ISOTROPIC then there is no need 
 to reweight.  This is the isotropic assumption.  Otherwise, one
 needs to reweight
+
+Once the photon is reweighted, repoosition it so it does not to
+through the same resonance a second time.
 */
 
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
@@ -330,20 +313,44 @@ needs to reweight
       ishell = pp->grid;
       tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
       if (tau > 0.0)
-        pp->w *= (1. - exp (-tau)) / tau;
+        pp->w *= p_escape_from_tau (tau);
       tau = 0.0;
     }
 
-/* But in any event we have to reposition wind photons so that they don't go through
-the same resonance again */
-
-    reposition (pp);            // Only reposition the photon if it was a wind photon
+    /* XXX - It is unclear wy reposition needs to be here, but at present this
+     * produceds better agreement with live or die than below */
+    reposition (pp);
   }
 
   if (tau > TAU_MAX)
     istat = P_ABSORB;           /* Check to see if tau already too large */
   else if (geo.binary == TRUE)
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
+
+
+  if (itype == PTYPE_DISK)
+  {
+    local_to_observer_frame_disk (pp, pp);
+
+  }
+  if (itype == PTYPE_WIND)
+  {
+    local_to_observer_frame (pp, pp);
+//HOLD    reposition (pp);            //?? This did not work for reasons unkknown
+
+  }
+
+/* Preserve the starting position of the photon so one can use this to determine whether the
+ * photon encountered the disk or star as it tried to exist the wind.
+ */
+
+  stuff_phot (pp, &pstart);
+
+
+  if (modes.save_photons)
+  {
+    save_photons (pp, "BeforeExtract");
+  }
 
 
 /* Now we can actually extract the reweighted photon */
@@ -378,6 +385,11 @@ the same resonance again */
     {                           /* Cause the photon to scatter and reinitilize */
       break;
     }
+  }
+
+  if (modes.save_photons)
+  {
+    save_photons (pp, "AfterExtract");
   }
 
   if (istat == P_ESCAPE)
@@ -417,8 +429,8 @@ the same resonance again */
        * of resonance, and so the weight must be reduced by tau
        */
 
-      xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
-      xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
+      xxspec[nspec].f[k] += pp->w * exp (-(tau));
+      xxspec[nspec].lf[k1] += pp->w * exp (-(tau));
 
 
 
@@ -426,8 +438,8 @@ the same resonance again */
       if (pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0)
       {
 
-        xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));        //OK increment the spectrum in question
-        xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));      //OK increment the spectrum in question
+        xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));
+        xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));
 
       }
 
@@ -437,9 +449,9 @@ the same resonance again */
       {
         if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
         {                       //If this photon has scattered, been reprocessed, or originated in the wind it's important
-          pstart.w = pp->w * exp (-(tau));      //Adjust weight to weight reduced by extraction
+          pstart.w = pp->w * exp (-(tau));
           stuff_v (xxspec[nspec].lmn, pstart.lmn);
-          delay_dump_single (&pstart, nspec);   //Dump photon now weight has been modified by extraction
+          delay_dump_single (&pstart, nspec);
         }
       }
 

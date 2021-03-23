@@ -81,7 +81,7 @@ dvwind_ds_cmf (p)
      tensor ought to be rotated in order to give the right answer for spherical
      coordinates. */
 
-  if (zdom[ndom].coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL || USE_GRADIENTS == FALSE)
   {
     struct photon pnew;
     double v1[3], v2[3], dv[3], diff[3];
@@ -166,7 +166,6 @@ dvwind_ds_cmf (p)
 
 
 
-
 #define N_DVDS_AVE	10000
 
 /**********************************************************/
@@ -181,8 +180,6 @@ dvwind_ds_cmf (p)
  * the aveage value of dv_ds at the center of the wind cell by randomly
  * generating directions and then calculating dv_ds in these directions
  *
- * It not only finds the average value, it also keeps track of the maximum
- * value of dvds and its direction
  *
  *
  * ### Notes ###
@@ -190,11 +187,13 @@ dvwind_ds_cmf (p)
  * the following elements of wmain
  *
  *  * dvds_ave - the average dvds
- *  * dvds_max - the maximum value of dvds
- *  * lmn - the direction of the maximum value
  *
  * There is an advanced mode which prints this information to
  * file.
+ *
+ * 210303 - ksl - Removed calculation of dvds_max from this 
+ * routine because we want this at the edges of cells, so one 
+ * can interpolate.  Portions of the old routine still remain.
  **********************************************************/
 
 
@@ -238,7 +237,8 @@ dvds_ave ()
     ds = 0.001 * length (diff);
 
     /* Find the velocity at the center of the cell */
-    vwind_xyz (ndom, &p, v_zero);
+//HOLD    vwind_xyz (ndom, &p, v_zero);
+    model_velocity (ndom, p.x, v_zero);
 
     sum = 0.0;
     for (n = 0; n < N_DVDS_AVE; n++)
@@ -251,7 +251,8 @@ dvds_ave ()
         delta[2] = (-delta[2]);
       }
       vadd (p.x, delta, pp.x);
-      vwind_xyz (ndom, &pp, vdelta);
+//HOLD      vwind_xyz (ndom, &pp, vdelta);
+      model_velocity (ndom, pp.x, vdelta);
       vsub (vdelta, v_zero, diff);
       dvds = length (diff);
 
@@ -278,8 +279,7 @@ dvds_ave ()
 
     /* Store the results in wmain */
     wmain[icell].dvds_ave = sum / (N_DVDS_AVE * ds);
-    wmain[icell].dvds_max = dvds_max / ds;
-    stuff_v (lmn, wmain[icell].lmn);
+//OLD    stuff_v (lmn, wmain[icell].lmn);
 
     if (modes.print_dvds_info)
     {
@@ -296,4 +296,182 @@ dvds_ave ()
     fclose (optr);
 
   return (0);
+}
+
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the maximum
+ * dv_ds in each grid cell of the wind
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * The routine cycles through all of the cells in the wind, and calculates
+ * the maxium value of dv_ds at the corner of the wind cell by randomly
+ * generating directions and then calculating dv_ds in these directions
+ *
+ *
+ * ### Notes ###
+ * The routine is called during the intialization process and fills
+ * the following elements of wmain
+ *
+ *  * dvds_max - the maximum value of dvds
+ *
+ * Unlike dvds_ave, these values are at the corners of cells,
+ * and are intended to be interpolated.
+ *
+ * There is an advanced mode which prints this information to
+ * file.
+ **********************************************************/
+
+
+int
+dvds_max ()
+{
+  struct photon p, pp;
+  double v_zero[3], delta[3], vdelta[3], diff[3];
+  double sum, dvds, ds;
+  double dvds_max, lmn[3];
+  int n;
+  int icell;
+  double dvds_min, lmn_min[3];
+  char filename[LINELENGTH];
+  int ndom;
+
+
+  /* Open a diagnostic file if print_dvds_info is non-zero */
+  strcpy (filename, basename);
+  strcat (filename, ".dvds.diag");
+  if (modes.print_dvds_info)
+  {
+    optr = fopen (filename, "w");
+  }
+
+  for (icell = 0; icell < NDIM2; icell++)
+  {
+    ndom = wmain[icell].ndom;
+
+    dvds_max = 0.0;
+    dvds_min = 1.e30;
+
+
+    /*  x is the corner of the cell */
+
+    stuff_v (wmain[icell].x, p.x);
+
+    /* Define a small length */
+
+    vsub (wmain[icell].xcen, p.x, diff);
+    ds = 0.000001 * length (diff);
+
+    /* Find the velocity at the center of the cell */
+//HOLD    vwind_xyz (ndom, &p, v_zero);
+    model_velocity (ndom, p.x, v_zero);
+
+    sum = 0.0;
+    for (n = 0; n < N_DVDS_AVE; n++)
+    {
+      randvec (delta, ds);
+      if (p.x[2] + delta[2] < 0)
+      {                         // Then the new position would punch through the disk
+        delta[0] = (-delta[0]); // So we reverse the direction of the vector
+        delta[1] = (-delta[1]);
+        delta[2] = (-delta[2]);
+      }
+      vadd (p.x, delta, pp.x);
+//HOLD      vwind_xyz (ndom, &pp, vdelta);
+      model_velocity (ndom, pp.x, vdelta);
+      vsub (vdelta, v_zero, diff);
+      dvds = length (diff);
+
+      /* Find the maximum and minimum values of dvds and the direction
+       * for this
+       */
+
+      if (dvds > dvds_max)
+      {
+        dvds_max = dvds;
+        renorm (delta, 1.0);
+        stuff_v (delta, lmn);
+      }
+      if (dvds < dvds_min)
+      {
+        dvds_min = dvds;
+        renorm (delta, 1.0);
+        stuff_v (delta, lmn_min);
+      }
+
+
+    }
+
+    /* Store the results in wmain */
+    wmain[icell].dvds_max = dvds_max / ds;
+
+    if (modes.print_dvds_info)
+    {
+      fprintf (optr,
+               "%d %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e \n",
+               icell, p.x[0], p.x[1], p.x[2], dvds_max / ds,
+               dvds_min / ds, lmn[0], lmn[1], lmn[2], lmn_min[0], lmn_min[1], lmn_min[2], dot (lmn, lmn_min));
+    }
+
+  }
+
+
+  if (modes.print_dvds_info)
+    fclose (optr);
+
+  return (0);
+}
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the maximum
+ * dv_ds at a particular position in a grid
+ *
+ * @param [in] PhotPtr  p   A photon
+
+ * @return     Returns dvds_max at the position of the photon
+ *
+ * @details
+ * The routine interpolates dvds_max given the position of
+ * a photon in a cell
+ *
+ * dvds_max at the vertex points of cells must have been
+ * initialized using the routine dvds_max
+ *
+ * ### Notes ###
+ *
+ * The routine uses both the position of the photon and 
+ * the grid cell in which the photon exitsts, so this
+ * must be acurrate.
+ **********************************************************/
+
+
+double
+get_dvds_max (p)
+     PhotPtr p;
+{
+  int ndom, nn, nnn[4], nelem;
+  double frac[4];
+  double dvds;
+
+  ndom = wmain[p->grid].ndom;
+
+  coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
+
+  dvds = 0;
+
+  for (nn = 0; nn < nelem; nn++)
+  {
+    dvds += wmain[nnn[nn]].dvds_max;
+  }
+
+  return dvds;
+
 }

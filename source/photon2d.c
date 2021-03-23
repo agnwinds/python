@@ -431,13 +431,15 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 {
 
   int n;
-  double smax, s, ds_current, ds_cmf;
+//OLD  double smax, s, ds_current, ds_cmf;
+  double smax, ds_current, ds_cmf;
   int istat;
   int nplasma;
-  int ndom, ndom_current;
+//OLD  int ndom, ndom_current;
+  int ndom;
   int inwind;
-  int hit_disk;
-  double kappa_tot;
+//OLD  int hit_disk;
+//OLD  double kappa_tot;
 
   WindPtr one;
   PlasmaPtr xplasma;
