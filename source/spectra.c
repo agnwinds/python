@@ -35,30 +35,30 @@ int spec_initialized = FALSE;
  ********************************************************/
 
 void
-spectrum_allocate(int nspec)
+spectrum_allocate (int nspec)
 {
   int i;
 
   for (i = 0; i < nspec; ++i)
   {
-    if ((xxspec[i].f = calloc(NWAVE_MAX, sizeof (*xxspec[i].f))) == NULL)
+    if ((xxspec[i].f = calloc (NWAVE_MAX, sizeof (*xxspec[i].f))) == NULL)
     {
-      Error("Unable to allocate memory for xxspec[%d].f array with %d bins\n", i, NWAVE_MAX);
+      Error ("Unable to allocate memory for xxspec[%d].f array with %d bins\n", i, NWAVE_MAX);
       Exit (EXIT_FAILURE);
     }
-    if ((xxspec[i].lf = calloc(NWAVE_MAX, sizeof (*xxspec[i].lf))) == NULL)
+    if ((xxspec[i].lf = calloc (NWAVE_MAX, sizeof (*xxspec[i].lf))) == NULL)
     {
-      Error("Unable to allocate memory for xxspec[%d].lf array with %d bins\n", i, NWAVE_MAX);
+      Error ("Unable to allocate memory for xxspec[%d].lf array with %d bins\n", i, NWAVE_MAX);
       Exit (EXIT_FAILURE);
     }
-    if ((xxspec[i].f_wind = calloc(NWAVE_MAX, sizeof (*xxspec[i].f_wind))) == NULL)
+    if ((xxspec[i].f_wind = calloc (NWAVE_MAX, sizeof (*xxspec[i].f_wind))) == NULL)
     {
-      Error("Unable to allocate memory for xxspec[%d].f_wind array with %d bins\n", i, NWAVE_MAX);
+      Error ("Unable to allocate memory for xxspec[%d].f_wind array with %d bins\n", i, NWAVE_MAX);
       Exit (EXIT_FAILURE);
     }
-    if ((xxspec[i].lf_wind = calloc(NWAVE_MAX, sizeof (*xxspec[i].lf_wind))) == NULL)
+    if ((xxspec[i].lf_wind = calloc (NWAVE_MAX, sizeof (*xxspec[i].lf_wind))) == NULL)
     {
-      Error("Unable to allocate memory for xxspec[%d].lf_wind array with %d bins\n", i, NWAVE_MAX);
+      Error ("Unable to allocate memory for xxspec[%d].lf_wind array with %d bins\n", i, NWAVE_MAX);
       Exit (EXIT_FAILURE);
     }
   }
@@ -147,10 +147,10 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
     xxspec = calloc (sizeof (spectrum_dummy), nspec);
     if (xxspec == NULL)
     {
-      Error("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE_EXTRACT);
+      Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE_EXTRACT);
       Exit (EXIT_FAILURE);
     }
-    spectrum_allocate(nspec);
+    spectrum_allocate (nspec);
     spec_initialized = TRUE;    /* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
   }
 
@@ -198,7 +198,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
       xxspec[n].nphot[i] = 0;
     }
 
-    for (i = 0; i < NWAVE_MAX; i++)  // NWAVE_MAX is on purpose
+    for (i = 0; i < NWAVE_MAX; i++)     // NWAVE_MAX is on purpose
     {
       xxspec[n].f[i] = 0;
       xxspec[n].lf[i] = 0;
@@ -849,11 +849,20 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
 {
   FILE *fopen (), *fptr;
   int i, n;
+  int nwave;
   char string[LINELENGTH];
   double freq, freqmin, dfreq, freq1;
-  double lfreqmin, lfreqmax, ldfreq;
+  double lfreqmin, ldfreq;
   double x, dd;
 
+  if (geo.ioniz_or_extract == CYCLE_IONIZ)
+  {
+    nwave = NWAVE_IONIZ;
+  }
+  else
+  {
+    nwave = NWAVE_EXTRACT;
+  }
 
   /* Open or reopen a file for writing the spectrum */
   if ((fptr = fopen (filename, "w")) == NULL)
@@ -921,8 +930,8 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   if (loglin == 0)              /* Then were are writing out the linear version of the spectra */
   {
     freqmin = xxspec[nspecmin].freqmin;
-    dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE_EXTRACT;
-    for (i = 1; i < NWAVE_EXTRACT - 1; i++)
+    dfreq = xxspec[nspecmin].dfreq;
+    for (i = 1; i < nwave - 1; i++)
     {
       freq = freqmin + i * dfreq;
       fprintf (fptr, "%-8e %9.3f ", freq, VLIGHT * 1e8 / freq);
@@ -956,12 +965,10 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   }
   else if (loglin == 1)
   {
-    lfreqmin = log10 (xxspec[nspecmin].freqmin);
-    freq1 = lfreqmin;
-    lfreqmax = log10 (xxspec[nspecmin].freqmax);
-    ldfreq = (lfreqmax - lfreqmin) / NWAVE_EXTRACT;
+    freq1 = lfreqmin = xxspec[nspecmin].lfreqmin;
+    ldfreq = xxspec[nspecmin].ldfreq;
 
-    for (i = 1; i < NWAVE_EXTRACT - 1; i++)
+    for (i = 1; i < nwave - 1; i++)
     {
       freq = pow (10., (lfreqmin + i * ldfreq));
       dfreq = freq - freq1;
