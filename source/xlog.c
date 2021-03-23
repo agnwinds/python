@@ -870,16 +870,18 @@ Debug (char *format, ...)
  *
  *  ### Notes ###
  *
+ *  Exit codes should be non-zero. In the past, we used to warn the user that
+ *  a non-zero exit code was sent, but we found that this confused non-expert
+ *  users (and us sometimes). Hence we silently now change the exit code to
+ *  EXIT_FAILURE and move on with our lives.
+ *
  **********************************************************/
 
 void
 Exit (int error_code)
 {
   if (error_code == 0)
-  {
-    Log_parallel ("!!Exit: error codes should be non-zero!\n", my_rank);
     error_code = EXIT_FAILURE;
-  }
 
   Log_flush ();
 
