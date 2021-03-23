@@ -24,6 +24,51 @@ int spec_initialized = FALSE;
 
 /**********************************************************/
 /**
+ * @brief  Allocate memory for the arrays in xxspec.
+ * @param  nspec  The number of spectra to allocate.
+ *
+ * @details
+ *
+ * NWAVE_MAX bins is allocated. This is done because the ionization and spectral
+ * cycles use a different number of wavelength bins.
+ *
+ ********************************************************/
+
+void
+spectrum_allocate(int nspec)
+{
+  int i;
+
+  for (i = 0; i < nspec; ++i)
+  {
+    if ((xxspec[i].f = calloc(NWAVE_MAX, sizeof (*xxspec[i].f))) == NULL)
+    {
+      Error("Unable to allocate memory for xxspec[%d].f array with %d bins\n", i, NWAVE_MAX);
+      Exit (EXIT_FAILURE);
+    }
+    if ((xxspec[i].lf = calloc(NWAVE_MAX, sizeof (*xxspec[i].lf))) == NULL)
+    {
+      Error("Unable to allocate memory for xxspec[%d].lf array with %d bins\n", i, NWAVE_MAX);
+      Exit (EXIT_FAILURE);
+    }
+    if ((xxspec[i].f_wind = calloc(NWAVE_MAX, sizeof (*xxspec[i].f_wind))) == NULL)
+    {
+      Error("Unable to allocate memory for xxspec[%d].f_wind array with %d bins\n", i, NWAVE_MAX);
+      Exit (EXIT_FAILURE);
+    }
+    if ((xxspec[i].lf_wind = calloc(NWAVE_MAX, sizeof (*xxspec[i].lf_wind))) == NULL)
+    {
+      Error("Unable to allocate memory for xxspec[%d].lf_wind array with %d bins\n", i, NWAVE_MAX);
+      Exit (EXIT_FAILURE);
+    }
+  }
+}
+
+
+
+
+/**********************************************************/
+/**
  * @brief      allocates space for and initializes the spectrum arrays, storing
  * the criteria that are later used to create each spectrum.
  *
@@ -86,7 +131,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
      double rho_select[], z_select[], az_select[], r_select[];
 {
   int i, n;
-  int nspec;
+  int nspec, nbins;
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;    /* NSH 1302 Min, max and delta for the log spectrum */
   double x1, x2;
@@ -94,28 +139,18 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
 
   nspec = nangle + MSPEC;
 
-  /* Setup bins for linear and logarithmic spectrum */
-
-  freqmin = f1;
-  freqmax = f2;
-  dfreq = (freqmax - freqmin) / NWAVE;
-
-  lfreqmin = log10 (freqmin);
-  lfreqmax = log10 (freqmax);
-  ldfreq = (lfreqmax - lfreqmin) / NWAVE;
-
   /* Allocate memory for the spectrum arrays the first time routine is called */
 
   if (spec_initialized == FALSE)
   {
+    nspectra = nspec;           /* Note that nspectra is a global variable */
     xxspec = calloc (sizeof (spectrum_dummy), nspec);
     if (xxspec == NULL)
     {
-      Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE);
-      Exit (0);
+      Error("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE_EXTRACT);
+      Exit (EXIT_FAILURE);
     }
-    allocate_spectrum_arrays (nspec);
-    nspectra = nspec;           /* Note that nspectra is a global variable */
+    spectrum_allocate(nspec);
     spec_initialized = TRUE;    /* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
   }
 
@@ -126,6 +161,26 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
 
   for (i = 0; i < NSTAT; i++)
     nstat[i] = 0;
+
+  /* Setup bins for linear and logarithmic spectrum. During the ionization
+   * and spectral cycles, we use a different number of wavelength bins. */
+
+  if (geo.ioniz_or_extract == CYCLE_IONIZ)
+  {
+    nbins = NWAVE_IONIZ;
+  }
+  else
+  {
+    nbins = NWAVE_EXTRACT;
+  }
+
+  freqmin = f1;
+  freqmax = f2;
+  dfreq = (freqmax - freqmin) / nbins;
+
+  lfreqmin = log10 (freqmin);
+  lfreqmax = log10 (freqmax);
+  ldfreq = (lfreqmax - lfreqmin) / nbins;
 
   for (n = 0; n < nspec; n++)
   {
@@ -142,10 +197,13 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
     {
       xxspec[n].nphot[i] = 0;
     }
-    for (i = 0; i < NWAVE; i++)
+
+    for (i = 0; i < NWAVE_MAX; i++)  // NWAVE_MAX is on purpose
     {
       xxspec[n].f[i] = 0;
       xxspec[n].lf[i] = 0;
+      xxspec[n].f_wind[i] = 0;
+      xxspec[n].lf_wind[i] = 0;
     }
   }
 
@@ -282,44 +340,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
 
 
 
-/**********************************************************/
-/**
- * @brief  Allocate memory for the arrays in xxspec.
- * @param  nspec  The number of spectra to allocate.
- *
- * @details
- *
- ********************************************************/
 
-void
-allocate_spectrum_arrays (int nspec)
-{
-  int i;
-
-  for (i = 0; i < nspec; ++i)
-  {
-    if ((xxspec[i].f = calloc (NWAVE, sizeof (*xxspec[i].f))) == NULL)
-    {
-      Error ("Unable to allocate memory for xxspec[%d].f array with %d bins\n", nspec, NWAVE);
-      Exit (1);
-    }
-    if ((xxspec[i].lf = calloc (NWAVE, sizeof (*xxspec[i].lf))) == NULL)
-    {
-      Error ("Unable to allocate memory for xxspec[%d].lf array with %d bins\n", nspec, NWAVE);
-      Exit (1);
-    }
-    if ((xxspec[i].f_wind = calloc (NWAVE, sizeof (*xxspec[i].f_wind))) == NULL)
-    {
-      Error ("Unable to allocate memory for xxspec[%d].f_wind array with %d bins\n", nspec, NWAVE);
-      Exit (1);
-    }
-    if ((xxspec[i].lf_wind = calloc (NWAVE, sizeof (*xxspec[i].lf_wind))) == NULL)
-    {
-      Error ("Unable to allocate memory for xxspec[%d].lf_wind array with %d bins\n", nspec, NWAVE);
-      Exit (1);
-    }
-  }
-}
 
 
 
@@ -360,9 +381,8 @@ spectrum_create (p, nangle, select_extract)
 
 {
   int nphot, istat, j, k, k1, n;
-  int nspec, spectype;
-  double freqmin, freqmax, dfreq;
-  double lfreqmin, lfreqmax, ldfreq;
+  int nspec, nwave, spectype;
+  double freqmin, freqmax, dfreq, ldfreq;
   double x1;
   int mscat, mtopbot;
   double delta;
@@ -371,16 +391,20 @@ spectrum_create (p, nangle, select_extract)
   int iwind;                    // Variable defining whether this is a wind photon
   int max_scat, max_res;
 
+  if (geo.ioniz_or_extract == CYCLE_IONIZ)
+  {
+    nwave = NWAVE_IONIZ;
+  }
+  else
+  {
+    nwave = NWAVE_EXTRACT;
+  }
 
   /* Setup frequency boundaries, etc using values set in spectrum_int */
 
   freqmin = xxspec[SPEC_CREATED].freqmin;
   freqmax = xxspec[SPEC_CREATED].freqmax;
   dfreq = xxspec[SPEC_CREATED].dfreq;
-
-
-  lfreqmin = xxspec[SPEC_CREATED].lfreqmin;
-  lfreqmax = xxspec[SPEC_CREATED].lfreqmax;
   ldfreq = xxspec[SPEC_CREATED].ldfreq;
 
   nspec = nangle + MSPEC;
@@ -412,56 +436,56 @@ spectrum_create (p, nangle, select_extract)
     }
 
     /* find out where we are in log space */
-    k1 = (log10 (p[nphot].freq) - log10 (freqmin)) / ldfreq;
+    k1 = (int) ((log10 (p[nphot].freq) - log10 (freqmin)) / ldfreq);
     if (k1 < 0)
     {
       k1 = 0;
     }
-    if (k1 > NWAVE - 1)
+    if (k1 > nwave - 1)
     {
-      k1 = NWAVE - 1;
+      k1 = nwave - 1;
     }
 
     /* also need to work out where we are for photon's original wavelength */
-    k1_orig = (log10 (p[nphot].freq_orig) - log10 (freqmin)) / ldfreq;
+    k1_orig = (int) ((log10 (p[nphot].freq_orig) - log10 (freqmin)) / ldfreq);
     if (k1_orig < 0)
     {
       k1_orig = 0;
     }
-    if (k1_orig > NWAVE - 1)
+    if (k1_orig > nwave - 1)
     {
-      k1_orig = NWAVE - 1;
+      k1_orig = nwave - 1;
     }
 
     /* lines to work out where we are in a normal spectrum with linear spacing */
 
-    k = (p[nphot].freq - freqmin) / dfreq;
+    k = (int) ((p[nphot].freq - freqmin) / dfreq);
     if (k < 0)
     {
       if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nlow = nlow + 1;
       k = 0;
     }
-    else if (k > NWAVE - 1)
+    else if (k > nwave - 1)
     {
       if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nhigh = nhigh + 1;
-      k = NWAVE - 1;
+      k = nwave - 1;
     }
 
     /* also need to work out where we are for photon's original wavelength */
-    k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
+    k_orig = (int) ((p[nphot].freq_orig - freqmin) / dfreq);
     if (k_orig < 0)
     {
       if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nlow = nlow + 1;
       k_orig = 0;
     }
-    else if (k_orig > NWAVE - 1)
+    else if (k_orig > nwave - 1)
     {
       if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nhigh = nhigh + 1;
-      k_orig = NWAVE - 1;
+      k_orig = nwave - 1;
     }
 
     /* Having worked out what spectral bins to increment, we now actually increment the various spectra */
@@ -633,7 +657,7 @@ spectrum_create (p, nangle, select_extract)
 
   for (j = 0; j <= max_scat; j++)
   {
-    Log ("%6d", nscat[j]);
+    Log ("%-6g", (double) nscat[j]);
     if ((j % 10) == 9)
       Log ("\n");
   }
@@ -641,14 +665,14 @@ spectrum_create (p, nangle, select_extract)
   Log ("\nNumber of photons resonantly scattering n times.  The max number of scatters seen was %d\n", max_res);
   for (j = 0; j <= max_res; j++)
   {
-    Log ("%6d", nres[j]);
+    Log ("%-6g", (double) nres[j]);
     if ((j % 10) == 9)
       Log ("\n");
   }
   Log ("\nNo of photons and their fates\n!!PhotFate: ");
   for (j = 0; j < NSTAT; j++)
   {
-    Log ("%6d", nstat[j]);
+    Log ("%-6g", (double) nstat[j]);
     if ((j % 10) == 9)
       Log ("\n");
   }
@@ -662,7 +686,7 @@ spectrum_create (p, nangle, select_extract)
   {
     Log ("%20s ", xxspec[n].name);
     for (j = 0; j < NSTAT; j++)
-      Log (" %7d", xxspec[n].nphot[j]);
+      Log (" %-7g", (double) xxspec[n].nphot[j]);
     Log ("\n");
 
   }
@@ -731,8 +755,8 @@ spec_add_one (p, spec_type)
 
   k = (freq - xxspec[spec_type].freqmin) / xxspec[spec_type].dfreq;
 
-  if (k > NWAVE - 1)
-    k = NWAVE - 1;
+  if (k > NWAVE_EXTRACT - 1)
+    k = NWAVE_EXTRACT - 1;
   else if (k < 0)
     k = 0;
 
@@ -745,8 +769,8 @@ spec_add_one (p, spec_type)
 
   k = (log10 (freq) - xxspec[spec_type].lfreqmin) / xxspec[spec_type].ldfreq;
 
-  if (k > NWAVE - 1)
-    k = NWAVE - 1;
+  if (k > NWAVE_EXTRACT - 1)
+    k = NWAVE_EXTRACT - 1;
   else if (k < 0)
     k = 0;
 
@@ -897,8 +921,8 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   if (loglin == 0)              /* Then were are writing out the linear version of the spectra */
   {
     freqmin = xxspec[nspecmin].freqmin;
-    dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
-    for (i = 1; i < NWAVE - 1; i++)
+    dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE_EXTRACT;
+    for (i = 1; i < NWAVE_EXTRACT - 1; i++)
     {
       freq = freqmin + i * dfreq;
       fprintf (fptr, "%-8e %9.3f ", freq, VLIGHT * 1e8 / freq);
@@ -935,9 +959,9 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
     lfreqmin = log10 (xxspec[nspecmin].freqmin);
     freq1 = lfreqmin;
     lfreqmax = log10 (xxspec[nspecmin].freqmax);
-    ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+    ldfreq = (lfreqmax - lfreqmin) / NWAVE_EXTRACT;
 
-    for (i = 1; i < NWAVE - 1; i++)
+    for (i = 1; i < NWAVE_EXTRACT - 1; i++)
     {
       freq = pow (10., (lfreqmin + i * ldfreq));
       dfreq = freq - freq1;
@@ -1044,7 +1068,7 @@ spectrum_restart_renormalise (nangle)
   /* loop over each spectrum column and each wavelength bin */
   for (n = 0; n < nspec; n++)
   {
-    for (m = 0; m < NWAVE; m++)
+    for (m = 0; m < NWAVE_EXTRACT; m++)
     {
       xxspec[n].f[m] *= renorm_factor;
       xxspec[n].lf[m] *= renorm_factor;

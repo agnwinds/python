@@ -102,8 +102,10 @@ double PHOT_RANGE;              /* When a variable number of photons are called 
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
-int  NWAVE;  			   //This is the number of wavelength bins in spectra that are produced
-#define NWAVEMIN 25
+int NWAVE_MAX;
+int  NWAVE_EXTRACT;  			   //The number of wavelength bins for spectra during the spectrum cycles
+#define NWAVE_IONIZ 20000  //The number of wavelength bins for spectra during the ionization cycles
+#define NWAVE_MIN 25
 #define MAXSCAT 			2000
 
 /* Define the structures */
@@ -1286,7 +1288,7 @@ have access to the proper normalization.
 
 
 #define NCDF 30000              //The default size for these arrays.  This needs to be greater than
-                                //the size of any model that is read in, hence larger than NWAVE in models.h
+                                //the size of any model that is read in, hence larger than NWAVE_EXTRACT in models.h
 #define FUNC_CDF  200           //The size for CDFs made from functional form CDFs
 #define ARRAY_PDF 1000          //The size for PDFs to be turned into CDFs from arrays
 

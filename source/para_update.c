@@ -431,19 +431,19 @@ gather_spectra_para ()
     nspec = MSPEC;
   }
 
-  size_of_commbuffer = 4 * nspec * NWAVE;       //we need space for all 4 separate spectra we are normalizing
+  size_of_commbuffer = 4 * nspec * NWAVE_MAX;       //we need space for all 4 separate spectra we are normalizing
 
   redhelper = calloc (sizeof (double), size_of_commbuffer);
   redhelper2 = calloc (sizeof (double), size_of_commbuffer);
 
-  for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
+  for (mpi_i = 0; mpi_i < NWAVE_MAX; mpi_i++)
   {
     for (mpi_j = 0; mpi_j < nspec; mpi_j++)
     {
       redhelper[mpi_i * nspec + mpi_j] = xxspec[mpi_j].f[mpi_i] / np_mpi_global;
-      redhelper[mpi_i * nspec + mpi_j + (NWAVE * nspec)] = xxspec[mpi_j].lf[mpi_i] / np_mpi_global;
-      redhelper[mpi_i * nspec + mpi_j + (2 * NWAVE * nspec)] = xxspec[mpi_j].f_wind[mpi_i] / np_mpi_global;
-      redhelper[mpi_i * nspec + mpi_j + (3 * NWAVE * nspec)] = xxspec[mpi_j].lf_wind[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j + (NWAVE_MAX * nspec)] = xxspec[mpi_j].lf[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j + (2 * NWAVE_MAX * nspec)] = xxspec[mpi_j].f_wind[mpi_i] / np_mpi_global;
+      redhelper[mpi_i * nspec + mpi_j + (3 * NWAVE_MAX * nspec)] = xxspec[mpi_j].lf_wind[mpi_i] / np_mpi_global;
     }
   }
 
@@ -451,14 +451,14 @@ gather_spectra_para ()
   MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-  for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
+  for (mpi_i = 0; mpi_i < NWAVE_MAX; mpi_i++)
   {
     for (mpi_j = 0; mpi_j < nspec; mpi_j++)
     {
       xxspec[mpi_j].f[mpi_i] = redhelper2[mpi_i * nspec + mpi_j];
-      xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (NWAVE * nspec)];
-      xxspec[mpi_j].f_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (2 * NWAVE * nspec)];
-      xxspec[mpi_j].lf_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (3 * NWAVE * nspec)];
+      xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (NWAVE_MAX * nspec)];
+      xxspec[mpi_j].f_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (2 * NWAVE_MAX * nspec)];
+      xxspec[mpi_j].lf_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (3 * NWAVE_MAX * nspec)];
     }
   }
   MPI_Barrier (MPI_COMM_WORLD);
