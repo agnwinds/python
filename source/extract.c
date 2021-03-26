@@ -198,6 +198,11 @@ extract (w, p, itype)
         stuff_v (p_dummy.lmn, pp.lmn);
       }
 
+      if (modes.save_photons && 1180. < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1240.0)
+      {
+        save_photons (&pp, "Extract_start");
+      }
+
       if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
       {
         save_extract_photons (n, p, &pp);
@@ -259,6 +264,7 @@ extract_one (w, pp, itype, nspec)
 {
   int istat, nres;
   struct photon pstart;
+  struct photon pdummy, pdummy_orig;
   double weight_min;
   int icell;
   int k, k1;
@@ -274,7 +280,7 @@ extract_one (w, pp, itype, nspec)
   weight_min = EPSILON * pp->w;
   istat = P_INWIND;
   tau = 0;
-  icell = 0;
+  stuff_phot (pp, &pstart);
 
 /* Re-weight the photons. Note that photons have already been frequency shifted prior
 to entering extract 
@@ -320,16 +326,42 @@ through the same resonance a second time.
       tau = 0.0;
     }
 
-    /* XXX - It is unclear wy reposition needs to be here, but at present this
+    /* XXX - It is unclear why reposition needs to be here, but at present this
      * produceds better agreement with live or die than below */
-//OLD    reposition (pp);
+    stuff_phot (pp, &pstart);
+    reposition (pp);
+//HOLD    if (pp->x[2] * pstart.x[2] < 0)
+//HOLD    {
+//HOLD      Error ("Extract_one: Went through xz plane on reposition\n");
+//HOLD      Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD             pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
+//HOLD      Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD             pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+//HOLD    }
   }
 
+  stuff_phot (pp, &pdummy);
   if (tau > TAU_MAX)
+  {
     istat = P_ABSORB;           /* Check to see if tau already too large */
+    Error ("extract: tau should not be large\n");
+  }
   else if (geo.binary == TRUE)
+  {
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
+    Error ("extract: Should not have hit secondary\n");
+  }
 
+//HOLD  if (pp->x[2] * pstart.x[2] < 0)
+//HOLD  {
+//HOLD    Error ("Extract_one: Went through xz plane after hit secondary \n");
+//HOLD    Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD           pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
+//HOLD    Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD           pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
+//HOLD    Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD           pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+//HOLD  }
 
   if (itype == PTYPE_DISK)
   {
@@ -338,9 +370,28 @@ through the same resonance a second time.
   }
   if (itype == PTYPE_WIND)
   {
+    stuff_phot (pp, &pdummy);
     local_to_observer_frame (pp, pp);
-    reposition (pp);
+    if (pp->x[2] * pstart.x[2] < 0)
+    {
+      Error ("Extract_one: Went through xz plane on local2observer frame\n");
+      Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
+      Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
+      Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+    }
+//AFTER    stuff_phot (pp, &pstart);
+//AFTER    reposition (pp);
+    pstart.lmn[0] = pp->lmn[0];
+    pstart.lmn[1] = pp->lmn[1];
+    pstart.lmn[2] = pp->lmn[2];
 
+  }
+  if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
+  {
+    save_photons (pp, "AfterRepoObs");
   }
 
   double foo[3], xdot, xxang;
@@ -354,6 +405,10 @@ through the same resonance a second time.
 
   }
 
+//HOLD  pp->lmn[0] = xlmn[0];
+//HOLD  pp->lmn[1] = xlmn[1];
+//HOLD  pp->lmn[2] = xlmn[2];
+
 
 
 
@@ -362,26 +417,41 @@ through the same resonance a second time.
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
-  stuff_phot (pp, &pstart);
+//OLD  stuff_phot (pp, &pstart);
 
 
-  if (modes.save_photons)
+  if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
   {
     save_photons (pp, "BeforeExtract");
   }
 
-
+  tau = 0;
+  pp->ds = 0;
+  icell = 0;
 /* Now we can actually extract the reweighted photon */
+
+//HOLD  istat = walls (pp, &pstart, normal);
+  stuff_phot (pp, &pdummy_orig);
 
   while (istat == P_INWIND)
   {
     istat = translate (w, pp, 20., &tau, &nres);
     icell++;
 
+    stuff_phot (pp, &pdummy);
     istat = walls (pp, &pstart, normal);
     if (istat == -1)
     {
-      Error ("Extract_one: Abnormal return from translate\n");
+
+      Error ("Extract_one: Abnormal return from translate (icell %d)\n", icell);
+//HOLD      Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD             pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
+//HOLD      Error ("Extract_one:  orig %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD             pdummy_orig.x[0], pdummy_orig.x[1], pdummy_orig.x[2], pdummy_orig.lmn[0], pdummy_orig.lmn[1], pdummy_orig.lmn[2]);
+//HOLD      Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD             pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
+//HOLD      Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD             pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
       break;
     }
 
@@ -405,7 +475,7 @@ through the same resonance a second time.
     }
   }
 
-  if (modes.save_photons)
+  if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
   {
     save_photons (pp, "AfterExtract");
   }

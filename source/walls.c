@@ -137,7 +137,10 @@ walls (p, pold, normal)
 
     if (s_disk < 0)
     {
-      Error ("walls: distance %g<0. Position %g %g %g \n", s_disk, p->x[0], p->x[1], p->x[2]);
+      Error
+        ("walls: distance %10.3e < 0. OLD %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e -> NEW %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e \n",
+         s_disk, pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1], pold->lmn[2], p->x[0], p->x[1], p->x[2], p->lmn[0],
+         p->lmn[1], p->lmn[2]);
       return (-1);
     }
 

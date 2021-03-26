@@ -48,6 +48,7 @@ reposition (PhotPtr p)
   double s, s_disk, s_star;
   int hit_disk;
 
+
   if (p->nres > -1 && p->nres < NLINES)
   {
 
@@ -72,6 +73,12 @@ reposition (PhotPtr p)
     if (s_star > 0 && s_star < s)
     {
       s = 0.1 * s_star;
+    }
+
+//XXXX This next test should not be needed
+    if (s < 0)
+    {
+      Error ("reposition: s (%10.3e) < 0", s);
     }
 
     move_phot (p, s);
