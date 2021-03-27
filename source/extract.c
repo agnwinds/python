@@ -84,6 +84,7 @@ extract (w, p, itype)
   double xdiff[3];
   double p_norm, tau_norm;
   double dvds_max;
+  int ierr;
 
 
   stuff_phot (p, &p_in);
@@ -129,11 +130,17 @@ extract (w, p, itype)
 
   if (itype == PTYPE_WIND)
   {
-    observer_to_local_frame (&p_in, &p_in);
+    if ((ierr = observer_to_local_frame (&p_in, &p_in)))
+      Error ("extract: wind photon not in observer frame %d\n", ierr);
   }
   if (itype == PTYPE_DISK)
   {
-    observer_to_local_frame_disk (&p_in, &p_in);
+    if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
+      Error ("extract: disk photon not in observer frame %d\n", ierr);
+  }
+  else
+  {
+    p_in.frame = F_LOCAL;       // no transformation required, 
   }
 
 
@@ -175,24 +182,26 @@ extract (w, p, itype)
     {
 
 
-/* Create a photon pp to use here and in extract_one.  This assures we
- * have not modified p as part of extract.  Also, allow for aberration
+/* Create a photon pp to use here and in extract_one, and send it in 
+ * the correct direction.  This assures we
+ * have not modified p_in as part of extract.  Also, allow for aberration
  * of photons to assure that we are extracting at the correct angle
  * in the observer frame
  */
 
       stuff_v (xxspec[n].lmn, xlmn);    //XTEST
+      check_frame (&p_in, F_LOCAL, "p_in:before fudge");
 
       if (rel_mode == REL_MODE_LINEAR)
       {
         stuff_phot (&p_in, &pp);
-        stuff_v (xxspec[n].lmn, pp.lmn);        /* Stuff new photon direction into pp */
+        stuff_v (xxspec[n].lmn, pp.lmn);
       }
       else
       {
         stuff_phot (&p_in, &p_dummy);
         p_dummy.frame = F_OBSERVER;
-        stuff_v (xxspec[n].lmn, p_dummy.lmn);   /* Stuff new photon direction into pp */
+        stuff_v (xxspec[n].lmn, p_dummy.lmn);
         observer_to_local_frame (&p_dummy, &p_dummy);
         stuff_phot (&p_in, &pp);
         stuff_v (p_dummy.lmn, pp.lmn);
@@ -208,7 +217,8 @@ extract (w, p, itype)
         save_extract_photons (n, p, &pp);
       }
 
-
+      check_frame (&p_in, F_LOCAL, "p_in:end of extract");
+      check_frame (&pp, F_LOCAL, "pp:end of extract");
       extract_one (w, &pp, itype, n);
 
 
@@ -275,12 +285,16 @@ extract_one (w, pp, itype, nspec)
   double lfreqmin, lfreqmax, ldfreq;
   int ishell;
   double normal[3];
+  int ierr;
 
 
   weight_min = EPSILON * pp->w;
   istat = P_INWIND;
   tau = 0;
-  stuff_phot (pp, &pstart);
+//OLD  stuff_phot (pp, &pstart);
+// We want pstart to be in the observer frame
+  if ((ierr = local_to_observer_frame (pp, &pstart)))
+    Error ("extract_one: pp not in local frame %d\n", ierr);
 
 /* Re-weight the photons. Note that photons have already been frequency shifted prior
 to entering extract 
@@ -328,8 +342,14 @@ through the same resonance a second time.
 
     /* XXX - It is unclear why reposition needs to be here, but at present this
      * produceds better agreement with live or die than below */
-    stuff_phot (pp, &pstart);
-    reposition (pp);
+    if (run_ztest == TRUE)
+    {
+//OLD      stuff_phot (pp, &pstart); //BEFORE
+      pp->frame = F_OBSERVER;
+      if ((ierr = reposition (pp)))
+        Error ("extract_one: reposition returned error %d\n", ierr);    //BEFORE
+      pp->frame = F_LOCAL;
+    }
 //HOLD    if (pp->x[2] * pstart.x[2] < 0)
 //HOLD    {
 //HOLD      Error ("Extract_one: Went through xz plane on reposition\n");
@@ -365,13 +385,16 @@ through the same resonance a second time.
 
   if (itype == PTYPE_DISK)
   {
-    local_to_observer_frame_disk (pp, pp);
-
+    if ((ierr = local_to_observer_frame_disk (pp, pp)))
+      Error ("extract_one: disk photon not in local frame");
   }
   if (itype == PTYPE_WIND)
   {
     stuff_phot (pp, &pdummy);
-    local_to_observer_frame (pp, pp);
+
+    if ((ierr = local_to_observer_frame (pp, pp)))
+      Error ("extract_one: wind photon not in local frame\n");
+
     if (pp->x[2] * pstart.x[2] < 0)
     {
       Error ("Extract_one: Went through xz plane on local2observer frame\n");
@@ -382,8 +405,15 @@ through the same resonance a second time.
       Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
              pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
     }
-//AFTER    stuff_phot (pp, &pstart);
-//AFTER    reposition (pp);
+
+    if (run_ztest == FALSE)
+    {
+//OLD      stuff_phot (pp, &pstart); //AFTER
+      if ((ierr = reposition (pp)))
+      {
+        Error ("extract_one: reposition returned error %d\n", ierr);    //BEFORE
+      };                        //AFTER
+    }
     pstart.lmn[0] = pp->lmn[0];
     pstart.lmn[1] = pp->lmn[1];
     pstart.lmn[2] = pp->lmn[2];

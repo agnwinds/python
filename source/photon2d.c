@@ -507,6 +507,16 @@ return and record an error */
 
   move_phot (p, ds_current);
 
+  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
+  {
+    Log ("translate_in_wind: nres %5d repeat after motion of %10.3e of phot %6d in ion cycle %2d spec cycle %2d stat(%d -> %d)\n", *nres,
+         ds_current, p->np, geo.wcycle, geo.pcycle, p->istat, istat);
+    if (ds_current < 1e5)
+    {
+      istat = P_INWIND;
+    }
+  }
+
   p->nres = (*nres);
 
   return (p->istat = istat);

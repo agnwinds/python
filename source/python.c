@@ -112,6 +112,7 @@ main (argc, argv)
 
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
+  run_ztest = FALSE;
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To

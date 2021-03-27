@@ -525,7 +525,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       pp.ds = 0;
       stuff_phot (&pp, p);
 
-      reposition (&pp);
+      if ((ierr = reposition (&pp)))
+        Error ("trans_phot: reposition returned error %d\n", ierr);
 
       /* JM 1506 -- call walls again to account for instance where DFUDGE
          can take photon outside of the wind and into the disk or star
