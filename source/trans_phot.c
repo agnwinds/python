@@ -288,7 +288,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 
         randvcos (pp.lmn, normal);
-        move_phot (&pp, DFUDGE);
+        if (move_phot (&pp, DFUDGE))
+        {
+          Error ("trans_phot_single:Frame Error\n");
+        }
         stuff_phot (&pp, p);
         p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));

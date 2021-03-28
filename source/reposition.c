@@ -78,6 +78,11 @@ reposition (PhotPtr p)
 
     ierr = move_phot (p, s);
 
+    if (ierr)
+    {
+      Error ("reposition: move_phot error: Photon %d - %10.3e %10.3e %10.3e\n", p->np, p->x[0], p->x[1], p->x[2]);
+    }
+
 /*XXXX This next test should not be needed, it is placed here
     so that we catch any error in move_phot*/
     if (s < 0)

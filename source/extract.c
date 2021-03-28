@@ -80,22 +80,25 @@ extract (w, p, itype)
 {
   int n, mscat, mtopbot;
   struct photon pp, p_in, p_dummy;
-  int yep;
+  int good;
   double xdiff[3];
   double p_norm, tau_norm;
   double dvds_max;
   int ierr;
 
 
-  stuff_phot (p, &p_in);
+  ierr = check_frame (p, F_OBSERVER, "extract_start");
+  if (ierr)
+  {
+    Error ("extract: check_frame failure at very start for itype %d\n", itype);
+  }
 
+
+  stuff_phot (p, &p_in);
 
   /* We increase weight to account for the number of scatters. This is done because in extract we multiply by the escape
      probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
      equal to 1/nnscat.  See issue #710 for a more extended explanation of how the weight is renormalized stocahstically. */
-
-
-
 
   if (itype == PTYPE_WIND)
   {
@@ -138,10 +141,9 @@ extract (w, p, itype)
     if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
       Error ("extract: disk photon not in observer frame %d\n", ierr);
   }
-  else
-  {
-    p_in.frame = F_LOCAL;       // no transformation required, 
-  }
+
+  /* At this point were are in a local frame for WIND and DISK photons, but the
+     global frame for the central source and boundary layer */
 
 
 
@@ -152,33 +154,32 @@ extract (w, p, itype)
        of times or in specific regions of the wind. A region is specified by a position
        and a radius. */
 
-    yep = 1;                    // Start by assuming it is a good photon for extraction
+    good = TRUE;
 
     if ((mscat = xxspec[n].nscat) > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
-      yep = 1;
+      good = TRUE;
     else
-      yep = 0;
+      good = FALSE;
 
-    if (yep)
+    if (good)
     {
       if ((mtopbot = xxspec[n].top_bot) == 0)
-        yep = 1;                // Then there are no positional parameters and we are done
+        good = TRUE;            // Then there are no positional parameters and we are done
       else if (mtopbot == -1 && p_in.x[2] < 0)
-        yep = 1;
+        good = TRUE;
       else if (mtopbot == 1 && p_in.x[2] > 0)
-        yep = 1;
+        good = TRUE;
       else if (mtopbot == 2)    // Then to count, the photom must originate within sn.r of sn.x
       {
         vsub (p_in.x, xxspec[n].x, xdiff);
         if (length (xdiff) > xxspec[n].r)
-          yep = 0;
-
+          good = FALSE;
       }
       else
-        yep = 0;
+        good = FALSE;
     }
 
-    if (yep)                    //Then we want to extract this photon
+    if (good)                   //Then extract photon
     {
 
 
@@ -187,17 +188,17 @@ extract (w, p, itype)
  * have not modified p_in as part of extract.  Also, allow for aberration
  * of photons to assure that we are extracting at the correct angle
  * in the observer frame
+ *
+ * Note that a wind photon is in the local frame, and the only thing
+ * we need to do is to figure out the extraction direction in the local
+ * frame that will produce the directon we want
+ *
+ * A disk photon is in the observer frame
  */
 
       stuff_v (xxspec[n].lmn, xlmn);    //XTEST
-      check_frame (&p_in, F_LOCAL, "p_in:before fudge");
 
-      if (rel_mode == REL_MODE_LINEAR)
-      {
-        stuff_phot (&p_in, &pp);
-        stuff_v (xxspec[n].lmn, pp.lmn);
-      }
-      else
+      if (rel_mode == REL_MODE_FULL && itype == PTYPE_WIND)
       {
         stuff_phot (&p_in, &p_dummy);
         p_dummy.frame = F_OBSERVER;
@@ -206,6 +207,24 @@ extract (w, p, itype)
         stuff_phot (&p_in, &pp);
         stuff_v (p_dummy.lmn, pp.lmn);
       }
+      else if (rel_mode == REL_MODE_FULL && itype == PTYPE_DISK)
+      {
+        stuff_phot (&p_in, &p_dummy);
+//        p_dummy.frame = F_OBSERVER;
+        stuff_v (xxspec[n].lmn, p_dummy.lmn);
+        observer_to_local_frame_disk (&p_dummy, &p_dummy);
+        stuff_phot (&p_in, &pp);
+        stuff_v (p_dummy.lmn, pp.lmn);
+      }
+      else
+      {
+        stuff_phot (&p_in, &pp);
+        stuff_v (xxspec[n].lmn, pp.lmn);
+      }
+
+/*At this point photons of type DISK or WIND are in the local frame, but others 
+  are in the global frame
+*/
 
       if (modes.save_photons && 1180. < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1240.0)
       {
@@ -217,8 +236,7 @@ extract (w, p, itype)
         save_extract_photons (n, p, &pp);
       }
 
-      check_frame (&p_in, F_LOCAL, "p_in:end of extract");
-      check_frame (&pp, F_LOCAL, "pp:end of extract");
+
       extract_one (w, &pp, itype, n);
 
 
@@ -291,10 +309,31 @@ extract_one (w, pp, itype, nspec)
   weight_min = EPSILON * pp->w;
   istat = P_INWIND;
   tau = 0;
-//OLD  stuff_phot (pp, &pstart);
+
 // We want pstart to be in the observer frame
-  if ((ierr = local_to_observer_frame (pp, &pstart)))
-    Error ("extract_one: pp not in local frame %d\n", ierr);
+
+  if (itype == PTYPE_WIND)
+  {
+    ierr = local_to_observer_frame (pp, &pstart);
+    if (ierr)
+      Error ("extract_one: pp of type WIND not in local frame %d\n", ierr);
+  }
+  else if (itype == PTYPE_DISK)
+  {
+    ierr = local_to_observer_frame_disk (pp, &pstart);
+    if (ierr)
+      Error ("extract_one: pp of type DISK not in local frame %d\n", ierr);
+  }
+  else
+  {
+    ierr = check_frame (pp, F_OBSERVER, "extract_one: start");
+    if (ierr)
+    {
+      Error ("extract_one: check_frame_failure for itype %d\n", itype);
+    }
+    stuff_phot (pp, &pstart);
+  }
+
 
 /* Re-weight the photons. Note that photons have already been frequency shifted prior
 to entering extract 
@@ -344,7 +383,7 @@ through the same resonance a second time.
      * produceds better agreement with live or die than below */
     if (run_ztest == TRUE)
     {
-//OLD      stuff_phot (pp, &pstart); //BEFORE
+/* Fudge to be able to reposition photon while it is in the local frame */
       pp->frame = F_OBSERVER;
       if ((ierr = reposition (pp)))
         Error ("extract_one: reposition returned error %d\n", ierr);    //BEFORE
@@ -408,7 +447,6 @@ through the same resonance a second time.
 
     if (run_ztest == FALSE)
     {
-//OLD      stuff_phot (pp, &pstart); //AFTER
       if ((ierr = reposition (pp)))
       {
         Error ("extract_one: reposition returned error %d\n", ierr);    //BEFORE
@@ -424,14 +462,14 @@ through the same resonance a second time.
     save_photons (pp, "AfterRepoObs");
   }
 
-  double foo[3], xdot, xxang;
+  double xdot, xxang;
   xdot = dot (pp->lmn, xlmn);
   xxang = acos (xdot) * 57.29578;
   if (xxang > 0.1)
   {
 
-    Log ("gotcha %10.3e %10.3e %10.3e -> %10.3e %10.3e %10.3e not equal theta %.6f\n",
-         xlmn[0], xlmn[1], xlmn[2], pp->lmn[0], pp->lmn[1], pp->lmn[2], xxang);
+    Log ("gotcha type %d nphot %8d lmn  %10.3e %10.3e %10.3e -> %10.3e %10.3e %10.3e not equal theta %.6f\n",
+         itype, pp->np, xlmn[0], xlmn[1], xlmn[2], pp->lmn[0], pp->lmn[1], pp->lmn[2], xxang);
 
   }
 
@@ -447,7 +485,6 @@ through the same resonance a second time.
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
-//OLD  stuff_phot (pp, &pstart);
 
 
   if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
@@ -463,6 +500,13 @@ through the same resonance a second time.
 //HOLD  istat = walls (pp, &pstart, normal);
   stuff_phot (pp, &pdummy_orig);
 
+  ierr = check_frame (pp, F_OBSERVER, "extract_one: photon not in observer frame at start");
+  ierr = walls (&pdummy_orig, &pstart, normal);
+  if (pdummy.istat != pp->istat)
+  {
+    Error ("extract_one: Surprising state change made by walls %d _> %d\n", pp->istat, pdummy.istat);
+  }
+
   while (istat == P_INWIND)
   {
     istat = translate (w, pp, 20., &tau, &nres);
@@ -473,15 +517,15 @@ through the same resonance a second time.
     if (istat == -1)
     {
 
-      Error ("Extract_one: Abnormal return from translate (icell %d)\n", icell);
-//HOLD      Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD             pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
-//HOLD      Error ("Extract_one:  orig %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD             pdummy_orig.x[0], pdummy_orig.x[1], pdummy_orig.x[2], pdummy_orig.lmn[0], pdummy_orig.lmn[1], pdummy_orig.lmn[2]);
-//HOLD      Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD             pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
-//HOLD      Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD             pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+      Error ("Extract_one: Abnormal return from translate (icell %d) of phot no %5d\n", icell, pp->np);
+      Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
+      Error ("Extract_one:  orig %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pdummy_orig.x[0], pdummy_orig.x[1], pdummy_orig.x[2], pdummy_orig.lmn[0], pdummy_orig.lmn[1], pdummy_orig.lmn[2]);
+      Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
+      Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+             pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
       break;
     }
 
