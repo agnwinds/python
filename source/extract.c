@@ -408,7 +408,8 @@ through the same resonance a second time.
   else if (geo.binary == TRUE)
   {
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
-    Error ("extract: Should not have hit secondary\n");
+    if (istat)
+      Error ("extract: Should not have hit secondary\n");
   }
 
 //HOLD  if (pp->x[2] * pstart.x[2] < 0)
