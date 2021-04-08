@@ -62,9 +62,6 @@ calculate_ionization (restart_stat)
   int iwind;
 
 
-//OLD #ifdef MPI_ON
-//OLD   int ioniz_spec_helpers;
-//OLD #endif
 
   /* Save the the windfile before the first ionization cycle in order to
    * allow investigation of issues that may have arisen at the very beginning
@@ -87,11 +84,6 @@ calculate_ionization (restart_stat)
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
-//OLD #ifdef MPI_ON
-//OLD   /* the length of the big arrays to help with the MPI reductions of the spectra
-//OLD      the variables for the estimator arrays are set up in the subroutines themselves */
-//OLD   ioniz_spec_helpers = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
-//OLD #endif
 
 /* THE CALCULATION OF THE IONIZATION OF THE WIND */
 
@@ -550,13 +542,6 @@ make_spectra (restart_stat)
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
-//OLD    if (modes.save_photons)
-//OLD    {
-//OLD      for (n = 0; n < NPHOT; n++)
-//OLD      {
-//OLD        save_photons (&p[n], "CREATE");
-//OLD      }
-//OLD    }
 
     for (icheck = 0; icheck < NPHOT; icheck++)
     {
@@ -578,7 +563,6 @@ make_spectra (restart_stat)
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-//OLD    gather_spectra_para (spec_spec_helpers, nspectra);
     gather_spectra_para ();
 #endif
 

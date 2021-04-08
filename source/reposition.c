@@ -23,12 +23,14 @@
 
 /**********************************************************/
 /**
- * @brief      p) attempts to assure that a photon is not scattered
- * 	a second time inappropriately by the same transition
+ * @brief      move a photon that was resonantly scattereds a
+ * small distance to assure that it is not scattered a
+ * second time by the same transition.
  *
- * @param [in,out] PhotPtr  p   A photons
+ * @param [in,out] PhotPtr  p   A photon
+
  * @return    Normally returns 0, but returns a negative number
- * if p is not in the wind in the domain it is supposed to be in
+ * if p is not in the wind domain it is supposed to be in
  *
  * @details
  * For resonant scatters, the routine moves the photon by
@@ -45,33 +47,52 @@ reposition (PhotPtr p)
   int n;
   double s, s_disk, s_star;
   int hit_disk;
+  int ierr = 0;
 
-  if (p->nres < 0)
-    return (0);                 /* Do nothing for non-resonant scatters */
 
-  if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
+  if (p->nres > -1 && p->nres < NLINES)
   {
-    Error ("reposition: Photon not in grid when routine entered %d \n", n);
-    return (n);                 /* Photon was not in wind */
-  }
 
-  s = wmain[p->grid].dfudge;
 
-  if (geo.disk_type != DISK_NONE)
-  {
-    s_disk = ds_to_disk (p, 1, &hit_disk);      // Allow negative values
-    if (s_disk > 0 && s_disk < s)
+    if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
     {
-      s = 0.1 * s_disk;
+      Error ("reposition: Photon not in grid when routine entered %d \n", n);
+      return (n);
     }
-  }
-  s_star = ds_to_sphere (geo.rstar, p);
-  if (s_star > 0 && s_star < s)
-  {
-    s = 0.1 * s_star;
+
+    s = wmain[p->grid].dfudge;
+
+    if (geo.disk_type != DISK_NONE)
+    {
+      s_disk = ds_to_disk (p, 1, &hit_disk);    // Allow negative values
+      if (s_disk > 0 && s_disk < s)
+      {
+        s = 0.1 * s_disk;
+      }
+    }
+    s_star = ds_to_sphere (geo.rstar, p);
+    if (s_star > 0 && s_star < s)
+    {
+      s = 0.1 * s_star;
+    }
+
+    ierr = move_phot (p, s);
+
+    if (ierr)
+    {
+      Error ("reposition: move_phot error: Photon %d - %10.3e %10.3e %10.3e\n", p->np, p->x[0], p->x[1], p->x[2]);
+    }
+
+/*XXXX This next test should not be needed, it is placed here
+    so that we catch any error in move_phot*/
+    if (s < 0)
+    {
+      Error ("reposition: s (%10.3e) < 0", s);
+      ierr = TRUE;
+    }
+
   }
 
-  move_phot (p, s);
 
-  return (0);
+  return (ierr);
 }

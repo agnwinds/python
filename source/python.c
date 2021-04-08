@@ -112,6 +112,7 @@ main (argc, argv)
 
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
+  run_ztest = FALSE;
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -629,15 +630,6 @@ main (argc, argv)
 
     init_extra_diagnostics ();
   }
-
-
-
-//OLD  /* If required, read in a non-standard disk temperature profile */
-//OLD  if (geo.disk_tprofile == 1)
-//OLD  {
-//OLD    read_non_standard_disk_profile (files.tprofile);
-//OLD  }
-
 
 
 /* The next section sets up a structure qdisk to record the effects

@@ -948,10 +948,6 @@ scatter (p, nres, nnscat)
 
   /* Scatter assumes it has been passed a photon in the observer frame */
 
-//OLD  if (check_frame (p, F_OBSERVER, "BeginScatter(err)\n") && modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "BeginScatter(err)");
-//OLD  }
 
   stuff_phot (p, &p_orig);
 
@@ -963,10 +959,6 @@ scatter (p, nres, nnscat)
     return (-1);
   }
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "ScatIn");
-//OLD  }
 
   if (observer_to_local_frame (p, p))
   {
@@ -1246,10 +1238,6 @@ The rest of this is only needed during ionization cycles, before the wind itself
 if fixed.  
 */
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "ExScatter");
-//OLD  }
 
 
   if (geo.ioniz_or_extract == CYCLE_IONIZ)

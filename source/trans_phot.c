@@ -87,7 +87,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int absorb_reflect;           /* this is a variable used to store geo.absorb_reflect during exxtract */
   int nreport;
   struct timeval timer_t0;
-//OLD  double rho;
 
   nreport = 100000;
   if (nreport < NPHOT / 100)
@@ -106,16 +105,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   {
 
     check_frame (&p[nphot], F_OBSERVER, "trans_phot_start\n");
-//OLD    if (modes.save_photons)
-//OLD    {
-//OLD      save_photons (&p[nphot], "trans_phot_start");
-//OLD      rho = sqrt (p[nphot].x[0] * p[nphot].x[0] + p[nphot].x[1] * p[nphot].x[1]);
-//OLD      if (fabs (p[nphot].x[2]) <= zdisk (rho))
-//OLD      {
-//OLD        Diag ("ZDISK %d  %e < = %e delta= %e\n", nphot, fabs (p[nphot].x[2]), rho, rho - fabs (p[nphot].x[2]));
-//OLD      }
-//OLD    }
-
 
 
     /* This is just a watchdog method to tell the user the program is still running */
@@ -250,11 +239,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   n = 0;
 
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "trans_phot_single:Begin");
-//OLD  }
-
   /* This is the beginning of the loop for a single photon and executes until the photon leaves the wind */
 
   while (istat == P_INWIND)
@@ -271,18 +255,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        position of the photon. */
 
 
-//OLD    if (modes.save_photons)
-//OLD    {
-//OLD      save_photons (&pp, "BeforeTranslate");
-//OLD    }
-
     istat = translate (w, &pp, tau_scat, &tau, &current_nres);
-
-//OLD    if (modes.save_photons)
-//OLD    {
-//OLD      save_photons (&pp, "AfterTranslate");
-//OLD    }
-
 
     icell++;
     istat = walls (&pp, p, normal);
@@ -315,7 +288,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 
         randvcos (pp.lmn, normal);
-        move_phot (&pp, DFUDGE);
+        if (move_phot (&pp, DFUDGE))
+        {
+          Error ("trans_phot_single:Frame Error\n");
+        }
         stuff_phot (&pp, p);
         p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));
@@ -360,14 +336,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       geo.lum_disk_back = qdisk.heat[kkk] += pp.w;
       qdisk.ave_freq[kkk] += pp.w * pp.freq;
 
-//OLD      if (modes.save_photons && rho > geo.diskrad)
-//OLD      {
-//OLD        Diag ("trans_phot: Photon %d hit disk at %.3e \n", pp.np, rho);
-//OLD        save_photons (p, "BeforeHitDisk");
-//OLD        save_photons (&pp, "AfterHitDisk");
-
-//OLD      }
-
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
       {
 
@@ -376,10 +344,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           dz = (zdisk (rho) - fabs (pp.x[2]));
           if (dz > 0)
           {
-//OLD            if (modes.save_photons)
-//OLD            {
-//OLD              Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), dz);
-//OLD            }
             if (pp.x[2] > 0)
             {
               pp.x[2] += (dz + 1000.);
@@ -390,21 +354,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
               pp.x[2] -= (dz + 1000.);
             }
 
-            if (zdisk (rho) > fabs (pp.x[2]))
-            {
-//OLD              if (modes.save_photons)
-//OLD              {
-//OLD                Diag ("trans_phot: Photon %d is still in the disk, zdisk %e diff %e\n", pp.np, zdisk (rho), zdisk (rho) - fabs (pp.x[2]));
-//OLD              }
-            }
           }
         }
-
-
-//OLD        if (modes.save_photons)
-//OLD        {
-//OLD          save_photons (&pp, "HitDisk");
-//OLD        }
 
 
         spec_add_one (&pp, SPEC_HITSURF);
@@ -437,10 +388,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         break;
       }
 
-//OLD      if (modes.save_photons)
-//OLD      {
-//OLD        save_photons (&pp, "HitDisk");
-//OLD      }
     }
 
     if (istat == P_SCAT)
@@ -500,18 +447,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       nnscat = 1;
       pp.nscat++;
 
-
-//OLD      if (modes.save_photons)
-//OLD      {
-//OLD        save_photons (&pp, "BeforeScat");
-//OLD      }
-
       ierr = scatter (&pp, &current_nres, &nnscat);
 
-//OLD      if (modes.save_photons)
-//OLD      {
-//OLD        save_photons (&pp, "AfterScat");
-//OLD      }
       if (ierr)
       {
         Error ("trans_phot: bad return from scatter %d at point 2\n", ierr);
@@ -591,7 +528,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       pp.ds = 0;
       stuff_phot (&pp, p);
 
-      reposition (&pp);
+      if ((ierr = reposition (&pp)))
+        Error ("trans_phot: reposition returned error %d\n", ierr);
 
       /* JM 1506 -- call walls again to account for instance where DFUDGE
          can take photon outside of the wind and into the disk or star
@@ -664,10 +602,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
    * outer boundary of the calculation you would want pp.  So one should keep both lines below, and comment
    * out the one you do not want. */
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (&pp, "Final");        //The position of the photon where it exits the calculation
-//OLD  }
 
   return (0);
 }

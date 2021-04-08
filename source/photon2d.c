@@ -391,6 +391,7 @@ ds_to_wind (pp, ndom_current)
  */
 int neglible_vol_count = 0;
 int translate_in_wind_failure = 0;
+int translate_in_wind_res_count = 0;
 
 /**********************************************************/
 /**
@@ -431,15 +432,11 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 {
 
   int n;
-//OLD  double smax, s, ds_current, ds_cmf;
   double smax, ds_current, ds_cmf;
   int istat;
   int nplasma;
-//OLD  int ndom, ndom_current;
   int ndom;
   int inwind;
-//OLD  int hit_disk;
-//OLD  double kappa_tot;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -451,13 +448,6 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
-//OLD    if (translate_in_wind_failure < 1000)
-//OLD    {
-//OLD     if (modes.save_photons)
-//OLD       {
-//OLD         save_photons (p, "NotInGrid_translate_in_wind");
-//OLD       }
-//OLD    }
     return (n);                 /* Photon was not in grid */
   }
 /* Assign the pointers for the cell containing the photon */
@@ -517,6 +507,17 @@ return and record an error */
   }
 
   move_phot (p, ds_current);
+  translate_in_wind_res_count++;
+
+  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT && translate_in_wind_res_count < 5000)
+  {
+    if (ds_current < 1e5)
+    {
+      Error ("translate_in_wind: nres %5d repeat after motion of %10.3e of phot %6d in ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
+             *nres, ds_current, p->np, geo.wcycle, geo.pcycle, p->istat, istat);
+      istat = P_INWIND;
+    }
+  }
 
   p->nres = (*nres);
 
@@ -652,10 +653,6 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
-//OLD      if (modes.save_photons)
-//OLD   {
-//OLD     save_photons (p, "NotInGrid_ds_in_cell");
-//OLD   }
     return (n);
   }
 
