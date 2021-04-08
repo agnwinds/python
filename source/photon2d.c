@@ -391,6 +391,7 @@ ds_to_wind (pp, ndom_current)
  */
 int neglible_vol_count = 0;
 int translate_in_wind_failure = 0;
+int translate_in_wind_res_count = 0;
 
 /**********************************************************/
 /**
@@ -506,6 +507,17 @@ return and record an error */
   }
 
   move_phot (p, ds_current);
+  translate_in_wind_res_count++;
+
+  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT && translate_in_wind_res_count < 5000)
+  {
+    if (ds_current < 1e5)
+    {
+      Error ("translate_in_wind: nres %5d repeat after motion of %10.3e of phot %6d in ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
+             *nres, ds_current, p->np, geo.wcycle, geo.pcycle, p->istat, istat);
+      istat = P_INWIND;
+    }
+  }
 
   p->nres = (*nres);
 

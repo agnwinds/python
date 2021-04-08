@@ -864,8 +864,11 @@ create_velocity_gradient_table (ndom, rootname)
   c[11] = get_one (ndom, "gamma");
   strcpy (column_name[11], "gamma");
 
+  c[12] = get_one (ndom, "dfudge");
+  strcpy (column_name[12], "dfudge");
+
   /* This should be the maxium number above +1 */
-  ncols = 12;
+  ncols = 13;
 
 
 
@@ -1520,6 +1523,10 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "gamma") == 0)
       {
         x[n] = wmain[n].xgamma;
+      }
+      else if (strcmp (variable_name, "dfudge") == 0)
+      {
+        x[n] = wmain[n].dfudge;
       }
       else
       {

@@ -288,7 +288,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 
         randvcos (pp.lmn, normal);
-        move_phot (&pp, DFUDGE);
+        if (move_phot (&pp, DFUDGE))
+        {
+          Error ("trans_phot_single:Frame Error\n");
+        }
         stuff_phot (&pp, p);
         p->ds = 0;
         tau_scat = -log (1. - random_number (0.0, 1.0));
@@ -525,7 +528,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       pp.ds = 0;
       stuff_phot (&pp, p);
 
-      reposition (&pp);
+      if ((ierr = reposition (&pp)))
+        Error ("trans_phot: reposition returned error %d\n", ierr);
 
       /* JM 1506 -- call walls again to account for instance where DFUDGE
          can take photon outside of the wind and into the disk or star
