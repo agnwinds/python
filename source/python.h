@@ -370,7 +370,7 @@ struct geometry
   int scat_select[NSPEC], top_bot_select[NSPEC];
   double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
   double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
-  int select_extract, select_spectype;
+  int select_extract, select_spectype;   //select_extract is TRUE if extract mode, FALSE if Live or Die
 
 /* Begin description of the actual geometry */
 
