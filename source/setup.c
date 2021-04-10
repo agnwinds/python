@@ -421,13 +421,12 @@ init_observers ()
 
   strcpy (answer, "extract");
   geo.select_extract = rdchoice ("Spectrum.live_or_die(live.or.die,extract)", "0,1", answer);
-  if (geo.select_extract != 0)
+  if (geo.select_extract == TRUE)
   {
-    geo.select_extract = 1;
-    Log ("OK, extracting from specific angles\n");
+    Log ("OK, detailed spectra will be created using the extract option\n");
   }
   else
-    Log ("OK, using live or die option\n");
+    Log ("OK, detailed spectra will be created using the live or die option\n");
 
 /* In advanced mode, select spectra with certain numbers of scatteringsi, and or other
  * characteristics
