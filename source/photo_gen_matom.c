@@ -270,7 +270,7 @@ get_matom_f (mode)
       }
 
       /* do the same for k-packets */
-      kpkt_emit_doub = f_kpkt_emit_accelerate (xplasma, KPKT_MODE_ALL, geo.sfmin, geo.sfmax);
+      kpkt_emit_doub = f_kpkt_emit_accelerate (xplasma, geo.sfmin, geo.sfmax);
 
       /* Now use the matrix to calculate the fraction of the absorbed energy that comes out in a given level */
       for (i = 0; i < nlevels_macro; i++)
