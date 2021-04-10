@@ -33,8 +33,8 @@
  * @brief      run the ionization cycles for a 
  * python model
  *
- * @param [in] int  restart_stat   0 if the is run is beginning from
- * scratch,  non-zero if this was a restart
+ * @param [in] int  restart_stat   FALSE if the is run is beginning from
+ * scratch,  TRUE if this was a restart
  * @return     Always returns 0 
  *
  * @details
@@ -388,8 +388,8 @@ calculate_ionization (restart_stat)
 /** 
  * @brief      generates the detailed spectra
  *
- * @param [in, out] int  restart_stat   0 if the is run is beginning from
- * scratch, non-zero if this was a restart 
+ * @param [in] int  restart_stat   FALSE if the is run is beginning from
+ * scratch, TRUE if this was a restart 
  * @return     Always returns EXIT_SUCCESS
  *
  * @details
@@ -494,8 +494,7 @@ make_spectra (restart_stat)
   /* the next condition should only occur when one has nothing more to do */
 
   else if (geo.pcycle >= geo.pcycles)
-    xsignal (files.root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
-
+    xsignal (files.root, "%-20s No spectrum needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
   else
   {
     /* Then we are restarting a run with more spectral cycles, but we 
@@ -504,7 +503,7 @@ make_spectra (restart_stat)
        on the original run, so we just need to renormalise the saved spectrum */
     /* See issue #134 and #503  */
 
-    if (restart_stat == 0)
+    if (restart_stat == FALSE)
       Error ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n", geo.pcycle);
 
     spectrum_restart_renormalise (geo.nangles);
@@ -515,8 +514,6 @@ make_spectra (restart_stat)
   {                             /* This allows you to build up photons in bunches */
 
     xsignal (files.root, "%-20s Starting %3d of %3d spectrum cycles \n", "NOK", geo.pcycle + 1, geo.pcycles);
-
-
 
     Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle + 1, geo.pcycles);
     Log_flush ();

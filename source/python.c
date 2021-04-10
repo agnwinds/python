@@ -103,7 +103,7 @@ main (argc, argv)
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
                                    the assumption is that we are reading from the command line */
-  restart_stat = 0;             /* Assume initially that these is a new run from scratch, and not
+  restart_stat = FALSE;         /* Assume initially that these is a new run from scratch, and not
                                    a restart */
   time_max = 13.8e9 * 3.2e7;    /* The maximum time the program will run without stopping.  This
                                    is initially set to the lifetime of the universe */
@@ -171,7 +171,7 @@ main (argc, argv)
      of the system */
 
 
-  if (restart_stat == 1)        /* We want to continue a run. This is generally used
+  if (restart_stat == TRUE)     /* We want to continue a run. This is generally used
                                    because we had to limit to runtime of python or we decided
                                    we needed more ionization or spectral cycles */
   {
@@ -205,7 +205,7 @@ main (argc, argv)
     }
   }
 
-  else if (restart_stat == 0)   /* We are starting a new run, which is the normal mode of operation */
+  else if (restart_stat == FALSE)       /* We are starting a new run, which is the normal mode of operation */
   {
 
     /* First,  establish the overall system type.  System type should be a physical system,
