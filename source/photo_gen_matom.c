@@ -130,17 +130,13 @@ double
 get_matom_f (mode)
      int mode;
 {
-  int n, m;
-  int mm, ss;
+  int n, m, mm;
   double lum;
-  int level_emit[NLEVELS_MACRO], kpkt_emit;
-//OLD  double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
+  double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
   int n_tries, n_tries_local;
-  struct photon ppp;
-  double contribution, norm;
-//OLD  int nres, which_out, esc_ptr;
-  int nres, which_out;
-//OLD  int i, j;
+  double norm;
+  int which_out;
+  int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
 
 
@@ -174,6 +170,12 @@ get_matom_f (mode)
     {
       matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
     }
+#else
+    /* these variables are only used in the non-accelerated scheme */
+    struct photon ppp;
+    int ss, level_emit[NLEVELS_MACRO], kpkt_emit;
+    double contribution;
+    int nres, esc_ptr;
 #endif
 
 
@@ -264,11 +266,11 @@ get_matom_f (mode)
 
       for (i = 0; i < nlevels_macro; i++)
       {
-        level_emit_doub[i] = f_matom_emit_accelerate (wmain, &ppp, &nres, i, geo.sfmin, geo.sfmax);
+        level_emit_doub[i] = f_matom_emit_accelerate (xplasma, i, geo.sfmin, geo.sfmax);
       }
 
       /* do the same for k-packets */
-      kpkt_emit_doub = f_kpkt_emit_accelerate (&ppp, &nres, &esc_ptr, KPKT_MODE_ALL, geo.sfmin, geo.sfmax);
+      kpkt_emit_doub = f_kpkt_emit_accelerate (xplasma, KPKT_MODE_ALL, geo.sfmin, geo.sfmax);
 
       /* Now use the matrix to calculate the fraction of the absorbed energy that comes out in a given level */
       for (i = 0; i < nlevels_macro; i++)
@@ -550,7 +552,7 @@ get_matom_f (mode)
     free (commbuffer);
 #endif
 #if (ACCELERATED_MACRO == TRUE)
-    for (i = 0; i < nrows++ i)
+    for (i = 0; i < nrows; i++)
     {
       free (matom_matrix[i]);
     }
@@ -857,19 +859,20 @@ photo_gen_matom (p, weight, photstart, nphot)
        a quick and dirty test for now. Really kpkt should be modified to 
        do what we want in a more elegant way. */
 
-    test = pp.freq;
+//OLD    test = pp.freq;
 
-    while (test > geo.sfmax || test < geo.sfmin)
-    {
+//OLD    while (test > geo.sfmax || test < geo.sfmin)
+//OLD    {
 
-      /* Call routine that will select an emission process for the
-         deactivating macro atom. If it deactivates outside the frequency
-         range of interest then ignore it and try again. SS June 04. */
+    /* Call routine that will select an emission process and a frequencyfor the
+       deactivating macro atom. */
+//OLD    If it deactivates outside the frequency
+//OLD         range of interest then ignore it and try again. SS June 04. */
 
-      emit_matom (wmain, &pp, &nres, upper, geo.sfmin, geo.sfmax);
+    emit_matom (wmain, &pp, &nres, upper, geo.sfmin, geo.sfmax);
 
-      test = pp.freq;
-    }
+//OLD      test = pp.freq;
+//OLD    }
 
 
     p[n].freq = pp.freq;
