@@ -315,7 +315,7 @@ photo_gen_matom (p, weight, photstart, nphot)
   int nres;
   int n;
   double dot ();
-  double test;
+//OLD  double test;
   int upper;
   int nnscat;
   int nplasma;

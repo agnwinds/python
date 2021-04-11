@@ -199,7 +199,7 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		agn.c shell_wind.c compton.c zeta.c dielectronic.c \
 		spectral_estimators.c matom_diag.c disk_init.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup_star_bh.c setup_domains.c \
-		setup_disk.c photo_gen_matom.c  macro_gen_f.o macro_gov.c windsave2table_sub.c \
+		setup_disk.c photo_gen_matom.c  macro_gen_f.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c \
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c \

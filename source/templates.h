@@ -328,7 +328,6 @@ int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
-double matom_emit_in_line_prob(WindPtr one, struct lines *line_ptr_emit);
 /* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
@@ -482,9 +481,11 @@ double get_disk_params(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
 double get_kpkt_heating_f(void);
-double get_matom_f(int mode);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
+/* macro_gen_f.c */
+double get_matom_f(int mode);
+double get_matom_f_accelerate(int mode);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
