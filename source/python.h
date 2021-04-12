@@ -28,6 +28,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 int rel_mode;                 /* How doppler effects and co-moving frames are  */
 
 int run_xtest;               /* Variable if TRUE causes a special test mode to be run */
+int run_ztest;               /* Provides a way the optionally run certain code within python */
 
 
 
@@ -95,7 +96,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 
 #define DELTA_V				1.      /*This is the accuracy in velocity space (cm/s) that we sample edges when producing freebound photons */
 
-#define DANG_LIVE_OR_DIE   0.5  /* If constructing photons from a live or die run of the code, the
+#define DANG_LIVE_OR_DIE   0.2  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
 double PHOT_RANGE;              /* When a variable number of photons are called in different ionization
@@ -372,7 +373,7 @@ struct geometry
   int scat_select[NSPEC], top_bot_select[NSPEC];
   double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
   double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
-  int select_extract, select_spectype;
+  int select_extract, select_spectype;   //select_extract is TRUE if extract mode, FALSE if Live or Die
 
 /* Begin description of the actual geometry */
 
@@ -1472,7 +1473,7 @@ files;
 /* whether or not to use the implicit/accelerated macro-atom scheme, in which 
    a matrix inversion is used in the emissivity calcualtion rather than 
    a MC sampling of the transition probabilities */
-#define ACCELERATED_MACRO FALSE 
+#define ACCELERATED_MACRO FALSE
 
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */

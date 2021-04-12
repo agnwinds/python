@@ -237,7 +237,6 @@ dvds_ave ()
     ds = 0.001 * length (diff);
 
     /* Find the velocity at the center of the cell */
-//HOLD    vwind_xyz (ndom, &p, v_zero);
     model_velocity (ndom, p.x, v_zero);
 
     sum = 0.0;
@@ -251,7 +250,6 @@ dvds_ave ()
         delta[2] = (-delta[2]);
       }
       vadd (p.x, delta, pp.x);
-//HOLD      vwind_xyz (ndom, &pp, vdelta);
       model_velocity (ndom, pp.x, vdelta);
       vsub (vdelta, v_zero, diff);
       dvds = length (diff);
@@ -279,7 +277,6 @@ dvds_ave ()
 
     /* Store the results in wmain */
     wmain[icell].dvds_ave = sum / (N_DVDS_AVE * ds);
-//OLD    stuff_v (lmn, wmain[icell].lmn);
 
     if (modes.print_dvds_info)
     {
@@ -367,7 +364,6 @@ dvds_max ()
     ds = 0.000001 * length (diff);
 
     /* Find the velocity at the center of the cell */
-//HOLD    vwind_xyz (ndom, &p, v_zero);
     model_velocity (ndom, p.x, v_zero);
 
     sum = 0.0;
@@ -381,7 +377,6 @@ dvds_max ()
         delta[2] = (-delta[2]);
       }
       vadd (p.x, delta, pp.x);
-//HOLD      vwind_xyz (ndom, &pp, vdelta);
       model_velocity (ndom, pp.x, vdelta);
       vsub (vdelta, v_zero, diff);
       dvds = length (diff);

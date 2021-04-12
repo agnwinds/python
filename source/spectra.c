@@ -79,7 +79,7 @@ spectrum_allocate (int nspec)
  * @param [in] double  phase[]   The orbital phase associated with each spectrum
  * @param [in] int  scat_select[]   A parameter for each spectrum which allows one to construct spectra with specifid numbers of scatters
  * @param [in] int  top_bot_select[]   A code which allows one to select photons only from below or above the disk
- * @param [in] int  select_extract   0 for Live or Die option, non-zero fo a normal extraction
+ * @param [in] int  select_extract   FALSE for Live or Die option, TRUE  for a normal extraction
  * @param [in] double  rho_select[]   Rho coordinates for extracting only photons in a particular region
  * @param [in] double  z_select[]   Z cooordiante for selecting only photons that scattered or were created in a praticular region
  * @param [in] double  az_select[]  Aximuthal angle for selecting only photons in a particular region
@@ -133,7 +133,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
   int i, n;
   int nspec, nbins;
   double freqmin, freqmax, dfreq;
-  double lfreqmin, lfreqmax, ldfreq;    /* NSH 1302 Min, max and delta for the log spectrum */
+  double lfreqmin, lfreqmax, ldfreq;
   double x1, x2;
   char dummy[20];
 
@@ -154,7 +154,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
     spec_initialized = TRUE;    /* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
   }
 
-  Log_silent ("Zeroing or re-zeroing all %d spectral matrices\n", nspec);
+  /* Zero or rezero all spectral matrices */
 
   for (i = 0; i <= MAXSCAT; i++)
     nscat[i] = nres[i] = 0;
@@ -236,23 +236,36 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
     xxspec[n].lmn[2] = cos (angle[n - MSPEC] / RADIAN);
     Log_silent ("Angle %e Angle cosines:%e %e %e\n", angle[n - MSPEC], xxspec[n].lmn[0], xxspec[n].lmn[1], xxspec[n].lmn[2]);
 
-    /* Initialize variables needed for live or die option */
+    /* Initialize variables needed for live or die option.
+
+       There are  various issues associated with extracting a spectrum
+       at inclinations near 0 or 90 deg in the live or die mode
+
+       At 90 degrees, the isseus arise, because we normally
+       extract on both sides of the disk, that is to say if we want to
+       get the flux at 45d, we actually use bands at 45 and 135 degrees,
+       explicitly assuming that the program only deals with winds which are
+       biconical.
+
+       But if we choose 90 degrees for extraction we are extracting
+       basically from 88-92 degrees, not as in the case of 45, from 43-47, and
+       133-137.
+
+       Similar issues occur at very low inclination angles near the poles.
+
+     */
+
+
     x1 = angle[n - MSPEC] - DANG_LIVE_OR_DIE;
     x2 = angle[n - MSPEC] + DANG_LIVE_OR_DIE;
+
+    /* Adjust when the direction one wishes to extract is close to the poles */
     if (x1 < 0.)
       x1 = 0;
     if (x2 > 180.)
       x2 = 180.;
 
-    /* There are problems near 90 deg which need to be dealt with for the
-       live or die mode.  These arise because in live or die, we normally
-       extract on both sides of the disk, that is to say if we want to
-       get the flux at 45d, we actually use bands at 45 and 135 degrees,
-       explicitly assuming that the program only deals with winds which are
-       biconical.  But if we choose 90 degrees for extraction we are extracing
-       basically from 88-92 degrees, not as in the case of 45, from 43-47, and 
-       133-137.
-     */
+    /* Adjust when the direction one wishes to extract is close to the disk or xy plane */
 
     if (x1 < 90 && x2 > 90)
     {
@@ -266,8 +279,6 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
       }
     }
 
-
-
     x1 = fabs (cos (x1 / RADIAN));
     x2 = fabs (cos (x2 / RADIAN));
     if (x1 > x2)
@@ -280,15 +291,16 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
       xxspec[n].mmax = x2;
       xxspec[n].mmin = x1;
     }
-    if (select_extract == 0)
+
+    if (select_extract == FALSE)        // We are in Live or Die mode
     {
       xxspec[n].renorm = 1. / (xxspec[n].mmax - xxspec[n].mmin);
 
     }
-    else
+    else                        // No renormalization in extract mode
       xxspec[n].renorm = 1.;
-    /* Completed initialization of variables for live or die */
 
+    /* Completed initialization of variables for live or die */
 
     strcpy (dummy, "");
     sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
@@ -336,11 +348,6 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
 
   return (0);
 }
-
-
-
-
-
 
 
 
@@ -569,7 +576,7 @@ spectrum_create (p, nangle, select_extract)
       }
 
       /* For Live or Die option, increment the spectra here */
-      if (select_extract == 0)
+      if (select_extract == FALSE)
       {
         x1 = fabs (p[nphot].lmn[2]);
         for (n = MSPEC; n < nspec; n++)

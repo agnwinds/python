@@ -22,7 +22,8 @@
  * @brief      init_files
  *
  * @param [in] int  restart_stat   A flag indicating whether 
- * this run is a restart or a new run.
+ * this run is a restart or a new run.  TRUE for a restart,
+ * FALSE for a new run.
  *
  * @return     Always returns 0                   
  *
@@ -35,8 +36,6 @@
  *
  *
  * ### Notes ###
- *
- * restart_stat will be 1 if restarting, 0 if a new run
  *
  * @bug This routine was refactored out of python.c in an attempt
  * to make that routine simpler, but it is not obvious that 
@@ -53,15 +52,15 @@ init_log_and_windsave (restart_stat)
 {
   FILE *fopen (), *qptr;
 
-  if (restart_stat == 0)
+  if (restart_stat == FALSE)
   {                             // Then we are simply running from a new model
-    xsignal_rm (files.root);    // Any old signal file
+    xsignal_rm (files.root);
     xsignal (files.root, "%-20s %s \n", "START", files.root);
     Log_init (files.diag);
   }
   else
   {
-    /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
+    /* Note that although we check that we can open the windsave file, it is not read here.   */
 
     strcpy (files.windsave, files.root);
     strcat (files.windsave, ".wind_save");
@@ -77,8 +76,8 @@ init_log_and_windsave (restart_stat)
     else
     {
       /* It does not exist and so we start from scratch */
-      restart_stat = 0;
-      xsignal_rm (files.root);  // Any old signal file
+//OLD      restart_stat = FALSE;
+      xsignal_rm (files.root);
       xsignal (files.root, "%-20s %s \n", "START", files.root);
       Log_init (files.diag);
     }

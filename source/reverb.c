@@ -90,7 +90,7 @@ delay_dump_prep (int restart_stat)
   for (i = 0; i < delay_dump_bank_size; i++)
     delay_dump_spec[i] = 0;
 
-  if (restart_stat == 1)
+  if (restart_stat == TRUE)
   {                             //Check whether the output file already has a header
     Log ("delay_dump_prep: Resume run, skipping writeout\n");
     return (0);

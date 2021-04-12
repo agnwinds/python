@@ -609,8 +609,8 @@ int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double 
 /* macro_accelerate.c */
 void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
-double f_matom_emit_accelerate(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
-double f_kpkt_emit_accelerate(PhotPtr p, int *nres, int *escape, int mode, double fmin, double fmax);
+double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double fmin, double fmax);
+double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double fmin, double fmax);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

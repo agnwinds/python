@@ -42,7 +42,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   MacroPtr mplasma;
   double t_e, ne;
   int nbbd, nbbu, nbfd, nbfu;
-  int uplvl, target_level;
+  int uplvl, target_level, escape_dummy;
   double Qcont;
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -52,6 +52,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   double kpacket_to_rpacket_rate, norm, Rcont;
   double *a_data;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
+  struct photon pdummy;
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
@@ -212,10 +213,10 @@ calc_matom_matrix (xplasma, matom_matrix)
   }
 
   /* Now need to do k-packet processes */
-
-  int escape_dummy = 0;
-  int istat_dummy = 0;
-  fill_kpkt_rates (xplasma, &escape_dummy, &istat_dummy);
+  escape_dummy = 0;
+  init_dummy_phot(&pdummy);
+  fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
+  
   /* Cooling due to collisional transitions in lines and collision ionization [for macro atoms] constitute internal transitions from the k-packet pool to macro atom states. */
   kpacket_to_rpacket_rate = 0.0;        // keep track of rate for kpacket_to_rpacket channel
 
@@ -315,7 +316,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_matrix_view N;
   gsl_matrix *inverse_matrix;
   gsl_permutation *p;
-//OLD  gsl_permutation *pp;
+
   int ierr, s;
 
   /* create a view into the array we just created */
@@ -392,12 +393,10 @@ fill_kpkt_rates (xplasma, escape, p)
   struct topbase_phot *cont_ptr;
   struct lines *line_ptr;
   double cooling_normalisation;
-//OLD  double destruction_choice;
   double electron_temperature;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double lower_density, upper_density;
   double cooling_ff;
-//OLD  double cooling_ff, upweight_factor;
   WindPtr one;
 
   MacroPtr mplasma;
@@ -610,13 +609,10 @@ fill_kpkt_rates (xplasma, escape, p)
  * @brief a routine which calculates what fraction of a level 
  *         emissivity comes out in a given frequency range
  *
- * @param [in]     WindPtr w   the ptr to the structure defining the wind
- * @param [in]     int upper   the upper level that we deactivate from
- * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [in,out]  int nres    the process by which deactivation occurs
- * @param [in]     fmin   minimum frequency of the band
- * @param [in]     fmax   maximum frequency of the band
- * @return 0
+ * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
+ * @param [in]      int         upper         macro-atom level
+ * @param [in]      double      fmin, freq    Frequency range requested 
+ *                                            (e.g. spectral cycle freq range)
  *
  * @details similar to routines like emit_matom, except that we calculate the fraction
  * of emission in a band rather than calculating frequencies for photons. Used to be 
@@ -625,10 +621,8 @@ fill_kpkt_rates (xplasma, escape, p)
 ***********************************************************/
 
 double
-f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
-     WindPtr w;
-     PhotPtr p;
-     int *nres;
+f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
+     PlasmaPtr xplasma;
      int upper;
      double fmin, fmax;
 {
@@ -637,19 +631,12 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
   int uplvl;
   double eprbs[NBBJUMPS + NBFJUMPS], eprbs_band[NBBJUMPS + NBFJUMPS];
   double penorm, penorm_band;
-//OLD  double threshold, run_tot;
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
   double t_e, ne;
   double bb_cont;
-  WindPtr one;
-  PlasmaPtr xplasma;
   double flast, fthresh, bf_int_full, bf_int_inrange;
-
-
-  one = &w[p->grid];            //This is to identify the grid cell in which we are
-  xplasma = &plasmamain[one->nplasma];
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
@@ -779,85 +766,47 @@ f_matom_emit_accelerate (w, p, nres, upper, fmin, fmax)
 
 /**********************************************************/
 /** 
- * @brief deals with the elimination of k-packets.
+ * @brief calculate what fraction of the thermal continuum emission comes out in the required band
  *
- * Whenever a k-packet is created it is
- * immediately destroyed insitu by this routine. At output "nres" identified the process
- * that destroys the k-packet and the packet information has been updated in the same
- * way as at the end of matom
+ * This routine uses the various cooling rates to work out which k->r processes contribute 
+ * in the frequency range requested (between fmin and fmax). This involves doing a series 
+ * of band-limited integrals, for the bound-free "alpha" estimators, for each cross-section.
+ * It also calls functions like total_free() to work out the fraction of free-free emission
+ * that emerges in the frequency range. 
  *
- * @param [in]     WindPtr w   the ptr to the structure defining the wind
- * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
- * @param [in,out]  int escape  to tell us whether the matom de-activation
- *                             is via an r-packet (1) or a k-packet (0)
- * @param [in] int mode         switch which allows photon to be deactivated by a non-radiative
- * term.  (non_zero is true)
- * @return 0
  *
- * ###Notes###
- *          Mar 04  SS   Coding began.
- *          Apr 04  SS   Various improvements including the addition of ff and collisions.
- *          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
- *                       and fb cooling for simple continua.
- *          May 04  SS   Modified to work for case with all "simple" ions.
- *          May 04  SS   Modified to use "scattering probability" formalism for 
- *                       simple ion cooling rates.
- *          Jun 04  SS   Modified to include the "escape" variable to identify excitation of
- *                       macro atoms. This removes the need to call matom from within this routine.
- *          Jun 04  SS   Modified to include collisional ionization as a cooling term.
- *          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
- *	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
- *			entire w array
- *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice 
- *	
- *	* 180616  Updated so that one could force kpkt to deactivate via radiation
+ *
+ * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
+ *
+ * @param [in]      double      fmin, freq    Frequency range requested 
+ *                                            (e.g. spectral cycle freq range)
+ * 
+ * @return penorm_band / penorm   total fraction of k->r emission that emerges in the band
 ************************************************************/
 
 double
-f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
-     PhotPtr p;
-     int *nres;
-     int *escape;
-     int mode;
+f_kpkt_emit_accelerate (xplasma, fmin, fmax)
+     PlasmaPtr xplasma;
      double fmin, fmax;
 {
 
   int i;
-//OLD  int ulvl; 
   int escape_dummy;
-//OLD  double cooling_bf[nphot_total];
-//OLD  double cooling_bf_col[nphot_total];   //collisional cooling in bf transitions
-//OLD double cooling_bb[NLINES];
-//OLD  double cooling_adiabatic;
   struct topbase_phot *cont_ptr;
-//OLD  struct lines *line_ptr;
-//OLD  double cooling_normalisation;
-//OLD  double destruction_choice;
   double electron_temperature;
-//OLD  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-//OLD  double lower_density, upper_density;
-//OLD  double cooling_ff;
-  //OLD double upweight_factor;
-  WindPtr one;
-  PlasmaPtr xplasma;
   MacroPtr mplasma;
+  WindPtr one;
   struct photon pdummy;
-
-//OLD  double coll_rate; 
-//OLD  double rad_rate;
   double freqmin, freqmax;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
-
+  one = &wmain[xplasma->nplasma];
 
   penorm = 0.0;
   penorm_band = 0.0;
 
-  one = &wmain[p->grid];
-  xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "kpkt");
+  check_plasma (xplasma, "f_kpkt_emit_accelerate");
   mplasma = &macromain[xplasma->nplasma];
 
   electron_temperature = xplasma->t_e;
@@ -879,7 +828,7 @@ f_kpkt_emit_accelerate (p, nres, escape, mode, fmin, fmax)
      cooling rates and stores them in mplasma->cooling. Dummy variables are needed
      because this routine is also used in the main kpkt routine */
   escape_dummy = 0;
-  stuff_phot (p, &pdummy);
+  init_dummy_phot (&pdummy);
   fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
 
   for (i = 0; i < nphot_total; i++)
