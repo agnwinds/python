@@ -349,7 +349,7 @@ init_observers ()
   int n;
   int ichoice;
   char answer[LINELENGTH];
-
+  double spec_nwave_default_double;
 
   geo.nangles = 4;
   geo.angle[0] = 10;
@@ -367,7 +367,46 @@ init_observers ()
   geo.swavemin = 850;
   geo.swavemax = 1850;
 
-  rdpar_comment ("The minimum and maximum wavelengths in the final spectra");
+  rdpar_comment ("The minimum and maximum wavelengths in the final spectra and the number of wavelength bins");
+  spec_nwave_default_double = 10000;
+  rddoub("Spectrum.nwave", &spec_nwave_default_double);
+  NWAVE_EXTRACT = (int) spec_nwave_default_double;
+
+  /*
+   * First, do some safety checks to make sure NWAVE_EXTRACT will not cause
+   * problems -- namely, NWAVE has to be positive and more then NWAVE_MIN
+   */
+
+  if (NWAVE_EXTRACT < 0)
+  {
+    NWAVE_EXTRACT *= -1;
+  }
+
+  if (NWAVE_EXTRACT < NWAVE_MIN)
+  {
+    Error("Minimum number of spectrum bins is %d\n", NWAVE_MIN);
+    NWAVE_EXTRACT = NWAVE_MIN;
+  }
+
+  /*
+   * Determine the maximum number of wavelength bins we need to allocate. The
+   * ionization and spectral cycles spectra use a different amount of wavelength
+   * bins, but we allocate the same amount of memory for each cycle type
+   */
+
+  if (NWAVE_EXTRACT < NWAVE_IONIZ)
+  {
+    NWAVE_MAX = NWAVE_IONIZ;
+  }
+  else
+  {
+    NWAVE_MAX = NWAVE_EXTRACT;
+  }
+
+  /*
+   * Now read in the read of the variables for the spectra
+   */
+
   rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
   rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
   if (geo.swavemin > geo.swavemax)
@@ -383,7 +422,6 @@ init_observers ()
   geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
-
 
   rdpar_comment ("The observers and their location relative to the system");
 
@@ -428,9 +466,9 @@ init_observers ()
   else
     Log ("OK, detailed spectra will be created using the live or die option\n");
 
-/* In advanced mode, select spectra with certain numbers of scatteringsi, and or other
- * characteristics
- */
+  /* In advanced mode, select spectra with certain numbers of scatterings and or other
+   * characteristics
+   */
 
   if (modes.iadvanced)
   {

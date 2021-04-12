@@ -389,7 +389,7 @@ calculate_ionization (restart_stat)
  * @brief      generates the detailed spectra
  *
  * @param [in] int  restart_stat   FALSE if the is run is beginning from
- * scratch, TRUE if this was a restart 
+ * scratch, TRUE if this was a restart
  * @return     Always returns EXIT_SUCCESS
  *
  * @details
@@ -415,7 +415,6 @@ make_spectra (restart_stat)
 
 #ifdef MPI_ON
   char dummy[LINELENGTH];
-  int spec_spec_helpers;
 #endif
 
   int icheck;
@@ -423,14 +422,8 @@ make_spectra (restart_stat)
   p = photmain;
   w = wmain;
 
-  freqmax = VLIGHT / (geo.swavemin * 1.e-8);
-  freqmin = VLIGHT / (geo.swavemax * 1.e-8);
-
-#ifdef MPI_ON
-  /* the length of the big arrays to help with the MPI reductions of the spectra
-     the variables for the estimator arrays are set up in the subroutines themselves */
-  spec_spec_helpers = (NWAVE * (MSPEC + geo.nangles));  //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
-#endif
+  freqmax = VLIGHT / (geo.swavemin * ANGSTROM);
+  freqmin = VLIGHT / (geo.swavemax * ANGSTROM);
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
      calculation of the spectrum.  
