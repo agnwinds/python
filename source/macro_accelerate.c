@@ -86,6 +86,10 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
+    if (uplvl == 64)
+    {
+      Log ("Gotcha");
+    }
     nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
     nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
     nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
@@ -101,10 +105,11 @@ calc_matom_matrix (xplasma, matom_matrix)
       rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
       coll_rate = q21 (line_ptr, t_e);  // this is multiplied by ne below
 
-      if (coll_rate < 0)
-      {
-        coll_rate = 0;
-      }
+//OLD Unneeded check.  There is already a check in q21
+//OLD      if (coll_rate < 0)
+//OLD      {
+//OLD        coll_rate = 0;
+//OLD      }
 
       bb_cont = rad_rate + (coll_rate * ne);
 
@@ -166,10 +171,11 @@ calc_matom_matrix (xplasma, matom_matrix)
 
       coll_rate = q12 (line_ptr, t_e);  // this is multiplied by ne below
 
-      if (coll_rate < 0)
-      {
-        coll_rate = 0;
-      }
+// Unneded check this has been checked previously
+//OLD      if (coll_rate < 0)
+//OLD      {
+//OLD        coll_rate = 0;
+//OLD      }
       target_level = line[config[uplvl].bbu_jump[n]].nconfigu;
       Q_matrix[uplvl][target_level] += Qcont = ((rad_rate) + (coll_rate * ne)) * config[uplvl].ex;      //energy of lower state
 
@@ -214,9 +220,9 @@ calc_matom_matrix (xplasma, matom_matrix)
 
   /* Now need to do k-packet processes */
   escape_dummy = 0;
-  init_dummy_phot(&pdummy);
+  init_dummy_phot (&pdummy);
   fill_kpkt_rates (xplasma, &escape_dummy, &pdummy);
-  
+
   /* Cooling due to collisional transitions in lines and collision ionization [for macro atoms] constitute internal transitions from the k-packet pool to macro atom states. */
   kpacket_to_rpacket_rate = 0.0;        // keep track of rate for kpacket_to_rpacket channel
 

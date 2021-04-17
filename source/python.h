@@ -1008,6 +1008,9 @@ MatomPhotStorePtr matomphotstoremain;
 
 
 /*******************************MACRO STRUCTURE*****************************/
+/* The various arrays created here are organized sequentially by macro level
+   and so the number of elements in each is the number of macro levels.
+*/
 typedef struct macro
 {
   double *jbar;
