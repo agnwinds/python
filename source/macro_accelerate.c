@@ -268,6 +268,24 @@ calc_matom_matrix (xplasma, matom_matrix)
 
   /* end kpacket */
 
+
+  Log ("Q:\n");
+  for (mm = 0; mm < nrows; mm++)
+  {
+    for (nn = 0; nn < nrows; nn++)
+    {
+      if (Q_norm[mm] > 0)
+      {
+        Log ("%10.3e ", Q_matrix[mm][nn] / Q_norm[mm]);
+      }
+      else
+      {
+        Log ("%10.3e ", 0.0);
+      }
+    }
+    Log ("\n");
+  }
+
   /* now in one step, we multiply by the identity matrix and normalise the probabilities
      this means that what is now stored in Q_matrix is no longer Q, but N=(I - Q) using Vogl 
      notation. We check that Q_norm is 0, because some states (ground states) can have 0 
@@ -317,6 +335,17 @@ calc_matom_matrix (xplasma, matom_matrix)
       a_data[mm * nrows + nn] = Q_matrix[mm][nn];
     }
   }
+
+  Log ("R:\n");
+  for (mm = 0; mm < nrows; mm++)
+  {
+    for (nn = 0; nn < nrows; nn++)
+    {
+      Log ("%10.3e ", R_matrix[mm][nn]);
+    }
+    Log ("\n");
+  }
+
 
   /* now get ready for the matrix operations. first let's assign variables for use with GSL */
   gsl_matrix_view N;
