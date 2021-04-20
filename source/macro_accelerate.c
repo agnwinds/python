@@ -269,22 +269,22 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* end kpacket */
 
 
-  Log ("Q:\n");
-  for (mm = 0; mm < nrows; mm++)
-  {
-    for (nn = 0; nn < nrows; nn++)
-    {
-      if (Q_norm[mm] > 0)
-      {
-        Log ("%10.3e ", Q_matrix[mm][nn] / Q_norm[mm]);
-      }
-      else
-      {
-        Log ("%10.3e ", 0.0);
-      }
-    }
-    Log ("\n");
-  }
+//OLD  Log ("Q:\n");
+//OLD  for (mm = 0; mm < nrows; mm++)
+//OLD  {
+//OLD    for (nn = 0; nn < nrows; nn++)
+//OLD    {
+//OLD      if (Q_norm[mm] > 0)
+//OLD      {
+//OLD        Log ("%10.3e ", Q_matrix[mm][nn] / Q_norm[mm]);
+//OLD      }
+//OLD      else
+//OLD      {
+//OLD        Log ("%10.3e ", 0.0);
+//OLD      }
+//OLD    }
+//OLD    Log ("\n");
+//OLD  }
 
   /* now in one step, we multiply by the identity matrix and normalise the probabilities
      this means that what is now stored in Q_matrix is no longer Q, but N=(I - Q) using Vogl 
@@ -336,15 +336,15 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
   }
 
-  Log ("R:\n");
-  for (mm = 0; mm < nrows; mm++)
-  {
-    for (nn = 0; nn < nrows; nn++)
-    {
-      Log ("%10.3e ", R_matrix[mm][nn]);
-    }
-    Log ("\n");
-  }
+//OLD  Log ("R:\n");
+//OLD  for (mm = 0; mm < nrows; mm++)
+//OLD  {
+//OLD    for (nn = 0; nn < nrows; nn++)
+//OLD    {
+//OLD      Log ("%10.3e ", R_matrix[mm][nn]);
+//OLD    }
+//OLD    Log ("\n");
+//OLD  }
 
 
   /* now get ready for the matrix operations. first let's assign variables for use with GSL */
@@ -380,6 +380,17 @@ calc_matom_matrix (xplasma, matom_matrix)
       matom_matrix[mm][nn] = gsl_matrix_get (inverse_matrix, mm, nn) * R_matrix[nn][nn];
     }
   }
+
+//OLD  Log ("matom_matrix:\n");
+//OLD  for (mm = 0; mm < nrows; mm++)
+//OLD  {
+//OLD    for (nn = 0; nn < nrows; nn++)
+//OLD    {
+//OLD      Log ("%10.3e ", matom_matrix[mm][nn]);
+//OLD    }
+//OLD    Log ("\n");
+//OLD  }
+
 
   /* free memory */
   gsl_permutation_free (p);
