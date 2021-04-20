@@ -408,12 +408,24 @@ iwind = -1 	Don't generate any wind photons at all
        can use the saved emissivities.  The routine  returns the specific luminosity
        in the spectral band of interest */
 
+#if ACCELERATED_MACRO == TRUE
+    Log ("Using accelerated calculation of emissivities\n");
+    if (geo.pcycle == 0)
+    {
+      geo.f_matom = get_matom_f_accelerate (CALCULATE_MATOM_EMISSIVITIES);
+    }
+    else
+      geo.f_matom = get_matom_f_accelerate (USE_STORED_MATOM_EMISSIVITIES);
+#else
+    Log ("Using old slow calculation of emissivities\n");
     if (geo.pcycle == 0)
     {
       geo.f_matom = get_matom_f (CALCULATE_MATOM_EMISSIVITIES);
     }
     else
       geo.f_matom = get_matom_f (USE_STORED_MATOM_EMISSIVITIES);
+
+#endif
 
 
     geo.f_kpkt = get_kpkt_f (); /* This returns the specific luminosity

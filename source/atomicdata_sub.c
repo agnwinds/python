@@ -508,33 +508,6 @@ check_xsections ()
 }
 
 
-
-
-/*
-
-   q21 calculates and returns the collisional de-excitation coefficient q21
-
-   Notes:  This uses a simple approximation for the effective_collision_strength omega.
-   ?? I am not sure where this came from at present and am indeed no sure that
-   omega is omega(2->1) as it should be.  This should be carefully checked.??
-   This has no been improved, and wherever possible we use tabulated collision
-   stength data from Chianti (after Burgess and Tully 1992)
-
-   c21=n_e * q21
-   q12 = g_2/g_1 q21 exp(-h nu / kT )
-
-   History:
-   98aug        ksl     Recoded from other routines so that one always calculates q21 in
-			the same way.
-	01nov	ksl	Add tracking mechanism so if called with same conditions it
-			returns without recalculation
-	12oct	nsh	Added, then commented out approximate gaunt factor given in
-			hazy 2.
-	17jan	nsh Added code to use the actual collision strength date from chianti
-
- */
-
-
 /// (8*PI)/(sqrt(3) *nu_1Rydberg
 #define ECS_CONSTANT 4.773691e16
 
@@ -635,6 +608,13 @@ q12 (line_ptr, t)
   double exp ();
 
   x = line_ptr->gu / line_ptr->gl * q21 (line_ptr, t) * exp (-H_OVER_K * line_ptr->freq / t);
+
+  // Not clear that this check is needed; it should only occure if q21 is less than 0
+  if (x < 0.0)
+  {
+    Error ("q12: Calculated q12 (%e) < 0. Setting to 0", x);
+    x = 0.0;
+  }
 
   return (x);
 }

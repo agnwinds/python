@@ -1719,7 +1719,7 @@ matom_select_bf_freq (WindPtr one, int nconf)
 
   dfreq = (f2 - f1) / (MATOM_BF_PDF - 1);       //This is the frequency spacing for the equally spaced elements
 
-  for (n = 0; n < MATOM_BF_PDF / 100; n++)      //We keep going until n=ARRAY_PDF-1, which will give the maximum required frequency
+  for (n = 0; n < MATOM_BF_PDF; n++)    //We keep going until n=ARRAY_PDF-1, which will give the maximum required frequency
   {
     freq = f1 + dfreq * n;      //The frequency of the array element we would make in the normal run of things
     fb_x[n] = freq;             //Set the next array element frequency
@@ -1740,7 +1740,7 @@ matom_select_bf_freq (WindPtr one, int nconf)
   /* At this point, the variable nnn stores the number of points */
 
 
-  if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, ARRAY_PDF / 100, f1, f2) != 0)
+  if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, ARRAY_PDF, f1, f2) != 0)
   {
     Error ("matom_select_bf_freq after cdf_gen_from_array: f1 %g f2 %g te %g \n", f1, f2, xplasma->t_e);
     Error ("Giving up\n");
