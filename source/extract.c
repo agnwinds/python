@@ -562,29 +562,29 @@ through the same resonance a second time.
       Error_silent ("Warning: extract_one: ignoring very high tau  %8.2e at %g\n", tau, pp->freq);
     else
     {
-      k = (pp->freq - xxspec[nspec].freqmin) / xxspec[nspec].dfreq;
+      k = (int) ((pp->freq - xxspec[nspec].freqmin) / xxspec[nspec].dfreq);
 
       /* Force the frequency to be in range of that recorded in the spectrum */
 
       if (k < 0)
         k = 0;
-      else if (k > NWAVE - 1)
-        k = NWAVE - 1;
+      else if (k > NWAVE_EXTRACT - 1)
+        k = NWAVE_EXTRACT - 1;
 
 
       lfreqmin = log10 (xxspec[nspec].freqmin);
       lfreqmax = log10 (xxspec[nspec].freqmax);
-      ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+      ldfreq = (lfreqmax - lfreqmin) / NWAVE_EXTRACT;
 
       /* find out where we are in log space */
-      k1 = (log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq;
+      k1 = (int) ((log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq);
       if (k1 < 0)
       {
         k1 = 0;
       }
-      if (k1 > NWAVE - 1)
+      if (k1 > NWAVE_EXTRACT - 1)
       {
-        k1 = NWAVE - 1;
+        k1 = NWAVE_EXTRACT - 1;
       }
 
       /* Increment the spectrum.  Note that the photon weight has not been diminished
