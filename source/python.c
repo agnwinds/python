@@ -113,6 +113,7 @@ main (argc, argv)
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
   run_ztest = FALSE;
+  NWAVE_MAX = (int) NWAVE_IONIZ;
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -285,7 +286,7 @@ main (argc, argv)
 
       /* At this point we check whether we have any sources of radiation and exit if we do not */
 
-      if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation && !geo.bl_radiation && !geo.agn_radiation)
+      if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation && !geo.wind_radiation && !geo.agn_radiation)
       {
         Error ("python: No radiation sources so nothing to do but quit!\n");
         Exit (0);
