@@ -471,7 +471,8 @@ macro_pops (xplasma, xne)
 
               if (rate < 0.0 || sane_check (rate))
               {
-                Error ("macro_pops: bfu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+                Error ("macro_pops: bfu rate is %8.4e in cell/matom %i  %g %g %g\n", rate, xplasma->nplasma,
+                       xne, q_ioniz (cont_ptr, xplasma->t_e), mplasma->gamma_old[config[index_lvl].bfu_indx_first + index_bfu]);
               }
 
               /* Now deal with the stimulated emission. */

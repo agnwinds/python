@@ -163,6 +163,10 @@ bf_estimators_increment (one, p, ds)
         /* Increment the photoionization rate estimator */
 
         mplasma->gamma[config[llvl].bfu_indx_first + m] += y / freq_av;
+        if (mplasma->gamma[config[llvl].bfu_indx_first + m] < 0)
+        {
+          Error ("bf_estimators_increment: gamma (%e) < 0  (%e)\n", mplasma->gamma[config[llvl].bfu_indx_first + m], y);
+        }
 
         mplasma->alpha_st[config[llvl].bfu_indx_first + m] += exponential / freq_av;
 
@@ -459,6 +463,11 @@ mc_estimator_normalise (n)
     {
 
       mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / PLANCK / invariant_volume_time; //normalise
+      if (mplasma->gamma_old[config[i].bfu_indx_first + j] < 0)
+      {
+        Error ("mc_estimators_normalize: gamma_old %e < 0 (%e,%e) (%d,%d) in wind cell %d\n", mplasma->gamma_old[config[i].bfu_indx_first + j],
+               mplasma->gamma[config[i].bfu_indx_first + j], invariant_volume_time, i, j, n);
+      }
       mplasma->gamma[config[i].bfu_indx_first + j] = 0.0;       //re-initialise for next iteration
       mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / PLANCK / invariant_volume_time;     //normalise
       mplasma->gamma_e[config[i].bfu_indx_first + j] = 0.0;     //re-initialise for next iteration
@@ -1017,6 +1026,7 @@ get_gamma (cont_ptr, xplasma)
   double fthresh, flast;
   double qromb ();
   double gamma_integrand ();
+  double x;
 
   temp_ext2 = xplasma->t_r;     //external temperature
   cont_ext_ptr2 = cont_ptr;     //external cont pointer
@@ -1030,9 +1040,14 @@ get_gamma (cont_ptr, xplasma)
 
 
   // gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
-  gamma_value = num_int (gamma_integrand, fthresh, flast, 1e-4);
+  gamma_value = x = num_int (gamma_integrand, fthresh, flast, 1e-4);
 
   gamma_value *= 8 * PI / VLIGHT / VLIGHT * xplasma->w;
+
+  if (gamma_value < 0)
+  {
+    Error ("get_gamma: gamma_value %e <0.0  (%e %e) %e %e \n", gamma_value, fthresh, flast, x, xplasma->w);
+  }
 
   return (gamma_value);
 
@@ -1069,6 +1084,11 @@ gamma_integrand (double freq, void *params)
 
   x = sigma_phot (cont_ext_ptr2, freq); //this is the cross-section
   integrand = x * freq * freq / (exp (H_OVER_K * freq / tt) - 1);
+
+//  if (integrand < 0)
+//  {
+//    Error ("gamma_integrand: %e freq %e sigma %e  t %e\n", integrand, freq, x, tt);
+//  }
 
   return (integrand);
 }
