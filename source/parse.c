@@ -325,6 +325,7 @@ and the switches have the following meanings \n\
  --version      Print out python version, commit hash and if there were files with uncommitted \n\
                 changes and stop \n\
  --rseed        Set the random number seed to be time-based, rather than fixed. \n\
+ --prng         Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
 \n\
 Other switches exist but these are not intended for the general user.\n\
 These are largely diagnostic or for special cases. These include\n\
