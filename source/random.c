@@ -262,6 +262,92 @@ init_rand (seed)
   return (0);
 }
 
+/**********************************************************/
+/**
+ * @brief  Dump the current GSL RNG state to a binary file.
+ *
+ * @details
+ *
+ * Saves the RNG state to the file root.gsl_save. The point of this
+ * is mostly for debugging purposes, being able to keep the same RNG if
+ * restarting the model.
+ *
+ **********************************************************/
+
+void
+save_gsl_rng_state ()
+{
+  FILE *file;
+  char fname[LINELENGTH];
+
+  sprintf (fname, "%s.gsl_save", files.root);
+  if ((file = fopen (fname, "w")) == NULL)
+  {
+    Error ("save_gsl_rng_state: unable to open %s\n", fname);
+    return;
+  }
+
+  if (gsl_rng_fwrite (file, rng))
+  {
+    Error ("save_gsl_rng_state: gsl_rng_fwrite failed to write RNG state to file");
+  }
+
+  Log_silent ("RNG state loaded from %s\n", fname);
+
+  if (fclose (file))
+  {
+    Error ("save_gsl_rng_state: problem when closing gsl save file\n");
+  }
+}
+
+/**********************************************************/
+/**
+ * @brief  Load a dump GSL RNG save into the current RNG.
+ *
+ * @details
+ *
+ * Read's in a dumped RNG state from the file root.gsl_save. The point of this
+ * is mostly for debugging purposes, being able to keep the same RNG if
+ * restarting the model.
+ *
+ * gsl_rng_fread will modify rng, the global rng variable, so we do not need
+ * to re-set the rng system. However note that we still need to allocate
+ * memory for it. The previous rng memory is deallocated if, for some reason,
+ * it is not a NULL pointer.
+ *
+ **********************************************************/
+
+void
+reload_gsl_rng_state ()
+{
+  FILE *file;
+  char fname[LINELENGTH];
+
+  if (rng != NULL)
+    gsl_rng_free (rng);
+
+  rng = gsl_rng_alloc (gsl_rng_mt19937);
+
+  sprintf (fname, "%s.gsl_save", files.root);
+  if ((file = fopen (fname, "r")) == NULL)
+  {
+    Error ("reload_gsl_rng_state: unable to open %s\n", fname);
+    Exit (1);
+  }
+
+  if (gsl_rng_fread (file, rng))
+  {
+    Error ("reload_gsl_rng_state: gsl_rng_fread failed to read RNG state to file");
+    Exit (1);
+  }
+
+  Log_silent ("RNG state saved to %s\n", fname);
+
+  if (fclose (file))
+  {
+    Error ("reload_gsl_rng_state: problem when closing gsl save file\n");
+  }
+}
 
 /**********************************************************/
 /** 

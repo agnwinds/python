@@ -587,11 +587,15 @@ main (argc, argv)
    * to use the same phtons in ezch cycle.  There we initiate the seeds unsing
    * the clock
    */
-  if (modes.rand_seed_usetime == 1)
+  if (modes.rand_seed_usetime)
   {
     n = (unsigned int) clock () * (rank_global + 1);
     init_rand (n);
 
+  }
+  else if (modes.persistent_rng && restart_stat == TRUE)
+  {
+    reload_gsl_rng_state ();
   }
   else
   {
@@ -602,7 +606,6 @@ main (argc, argv)
      sets the push through distance depending on the size of the system.
    */
 
-//  DFUDGE = setup_dfudge ();
   DFUDGE = setup_dfudge ();
 
   /* Next line finally defines the wind if this is the initial time this model is being run */

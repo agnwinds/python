@@ -185,12 +185,17 @@ parse_command_line (argc, argv)
         Log ("Invoking fixed temperature mode\n");
         j = i;
       }
-
       else if (strcmp (argv[i], "--rseed") == 0)
       {
         modes.rand_seed_usetime = 1;
         j = i;
         Log ("Using a random seed in random number generator\n");
+      }
+      else if (strcmp (argv[i], "--prng") == 0)
+      {
+        modes.persistent_rng = 1;
+        j = i;
+        Log ("Using a persistent RNG state\n");
       }
       else if (strcmp (argv[i], "-z") == 0)
       {

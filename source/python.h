@@ -1419,6 +1419,7 @@ struct advanced_modes
   int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
   int photon_speedup;
+  int persistent_rng;                 // save the GSL RNG stage
 }
 modes;
 

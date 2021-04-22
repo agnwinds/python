@@ -357,6 +357,10 @@ calculate_ionization (restart_stat)
         sprintf (dummy, "diag_%s/%s.%02d", files.root, files.root, geo.wcycle);
         do_windsave2table (dummy, 0);
       }
+      if (modes.persistent_rng)
+      {
+        save_gsl_rng_state ();
+      }
 
 #ifdef MPI_ON
     }
