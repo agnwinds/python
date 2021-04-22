@@ -590,6 +590,10 @@ make_spectra (restart_stat)
 #endif
       wind_save (files.windsave);       // This is only needed to update pcycle
       spec_save (files.specsave);
+      if (modes.persistent_rng)
+      {
+        save_gsl_rng_state ();
+      }
 #ifdef MPI_ON
     }
 #endif
