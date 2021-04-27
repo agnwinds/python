@@ -777,6 +777,8 @@ sobolev (one, x, den_ion, lptr, dvds)
   ndom = wmain[plasmamain->nwind].ndom;
   nion = lptr->nion;
 
+  levden_upper = 0;             // initialize to avoid compiler warning
+
   if ((dvds = fabs (dvds)) == 0.0)      // This forces dvds to be positive -- a good thing!
   {
     d1 = d2 = 0.;               // Eliminate warning when complied with clang
@@ -946,10 +948,6 @@ scatter (p, nres, nnscat)
 
   /* Scatter assumes it has been passed a photon in the observer frame */
 
-  if (check_frame (p, F_OBSERVER, "BeginScatter(err)\n") && modes.save_photons)
-  {
-    save_photons (p, "BeginScatter(err)");
-  }
 
   stuff_phot (p, &p_orig);
 
@@ -961,10 +959,6 @@ scatter (p, nres, nnscat)
     return (-1);
   }
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "ScatIn");
-//OLD  }
 
   if (observer_to_local_frame (p, p))
   {
@@ -1244,10 +1238,6 @@ The rest of this is only needed during ionization cycles, before the wind itself
 if fixed.  
 */
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    save_photons (p, "ExScatter");
-//OLD  }
 
 
   if (geo.ioniz_or_extract == CYCLE_IONIZ)

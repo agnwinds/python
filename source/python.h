@@ -1,7 +1,5 @@
 #ifdef MPI_ON
 #include "mpi.h"
-
-
 #endif
 
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
@@ -9,13 +7,18 @@
 
 int q_test_count;
 
-int np_mpi_global;              /// Global variable which holds the number of MPI processes
+int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
 
-
 int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
+#define TRUE  1
+#define FALSE 0
+
+
+#define PNORM_FUDGE_FACTOR     1  /*An extra factor used for fudging the velocity factor See #815 */
+#define USE_GRADIENTS        TRUE   /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
 #define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
@@ -25,6 +28,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 int rel_mode;                 /* How doppler effects and co-moving frames are  */
 
 int run_xtest;               /* Variable if TRUE causes a special test mode to be run */
+int run_ztest;               /* Provides a way the optionally run certain code within python */
 
 
 
@@ -92,7 +96,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 
 #define DELTA_V				1.      /*This is the accuracy in velocity space (cm/s) that we sample edges when producing freebound photons */
 
-#define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
+#define DANG_LIVE_OR_DIE   0.2  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
 double PHOT_RANGE;              /* When a variable number of photons are called in different ionization
@@ -102,7 +106,10 @@ double PHOT_RANGE;              /* When a variable number of photons are called 
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
-#define NWAVE  			  10000 //This is the number of wavelength bins in spectra that are produced
+int NWAVE_MAX;
+int  NWAVE_EXTRACT;  			   //The number of wavelength bins for spectra during the spectrum cycles
+#define NWAVE_IONIZ 10000  //The number of wavelength bins for spectra during the ionization cycles
+#define NWAVE_MIN 10
 #define MAXSCAT 			2000
 
 /* Define the structures */
@@ -311,9 +318,6 @@ int current_domain;             // This integer is used by py_wind only
 #define RUN_TYPE_RESTART   1
 #define RUN_TYPE_PREVIOUS  3
 
-#define TRUE  1
-#define FALSE 0
-
 
 
 
@@ -369,7 +373,7 @@ struct geometry
   int scat_select[NSPEC], top_bot_select[NSPEC];
   double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
   double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
-  int select_extract, select_spectype;
+  int select_extract, select_spectype;   //select_extract is TRUE if extract mode, FALSE if Live or Die
 
 /* Begin description of the actual geometry */
 
@@ -746,7 +750,8 @@ typedef struct wind
   double v_grad[3][3];          /*velocity gradient tensor  at the inner vertex of the cell in the co-moving frame*/
   double div_v;                 /*Divergence of v at center of cell in the co-moving frame*/
   double dvds_ave;              /* Average value of dvds */
-  double dvds_max, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
+  double dvds_max;              /*The maximum value of dvds*/
+//OLD  double dvds_max; //, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
                                    where the volume is the volume that is actually filled with material. 
@@ -1006,6 +1011,9 @@ MatomPhotStorePtr matomphotstoremain;
 
 
 /*******************************MACRO STRUCTURE*****************************/
+/* The various arrays created here are organized sequentially by macro level
+   and so the number of elements in each is the number of macro levels.
+*/
 typedef struct macro
 {
   double *jbar;
@@ -1232,8 +1240,8 @@ int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
 typedef struct spectrum
 {
   char name[40];
-  float freqmin, freqmax, dfreq;
-  float lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
+  double freqmin, freqmax, dfreq;
+  double lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
   double lmn[3];
   double mmax, mmin;            /* Used only in live or die situations, mmax=cos(angle-DANG_LIVE_OR_DIE)
                                    and mmim=cos(angle+DANG_LIVE_OR_DIE).   In actually defining this
@@ -1253,13 +1261,12 @@ typedef struct spectrum
   double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
                                    x is taken to be the center of the region and r is taken to be the radius of
                                    the region.   */
-  double f[NWAVE];              /* The spectrum in linear (wavelength or frequency) units */
-  double lf[NWAVE];             /* The specturm in log (wavelength or frequency)  units  */
-  double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
+  double *f;              /* The spectrum in linear (wavelength or frequency) units */
+  double *lf;             /* The specturm in log (wavelength or frequency)  units  */
 
-  double f_wind[NWAVE];         /* The spectrum of photons created in the wind or scattered in the wind. Created for 
+  double *f_wind;         /* The spectrum of photons created in the wind or scattered in the wind. Created for
                                    reflection studies but possibly useful for other reasons as well. */
-  double lf_wind[NWAVE];        /* The logarithmic version of this */
+  double *lf_wind;        /* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;
 
@@ -1286,7 +1293,7 @@ have access to the proper normalization.
 
 
 #define NCDF 30000              //The default size for these arrays.  This needs to be greater than
-                                //the size of any model that is read in, hence larger than NWAVE in models.h
+                                //the size of any model that is read in, hence larger than NWAVE_EXTRACT in models.h
 #define FUNC_CDF  200           //The size for CDFs made from functional form CDFs
 #define ARRAY_PDF 1000          //The size for PDFs to be turned into CDFs from arrays
 
@@ -1469,7 +1476,7 @@ files;
 /* whether or not to use the implicit/accelerated macro-atom scheme, in which 
    a matrix inversion is used in the emissivity calcualtion rather than 
    a MC sampling of the transition probabilities */
-#define ACCELERATED_MACRO FALSE 
+#define ACCELERATED_MACRO  TRUE
 
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */

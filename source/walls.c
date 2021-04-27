@@ -113,7 +113,10 @@ walls (p, pold, normal)
 
 
     stuff_phot (pold, p);
-    move_phot (p, s_star);
+    if (move_phot (p, s_star))
+    {
+      Error ("walls: move_phot frame error on push to star of np %d \n", p->np);
+    }
 
 
     stuff_v (p->x, normal);
@@ -137,7 +140,10 @@ walls (p, pold, normal)
 
     if (s_disk < 0)
     {
-      Error ("walls: distance %g<0. Position %g %g %g \n", s_disk, p->x[0], p->x[1], p->x[2]);
+      Error
+        ("walls: np %5d distance %10.3e < 0. OLD %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e -> NEW %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e \n",
+         p->np, s_disk, pold->x[0], pold->x[1], pold->x[2], pold->lmn[0], pold->lmn[1], pold->lmn[2], p->x[0], p->x[1], p->x[2], p->lmn[0],
+         p->lmn[1], p->lmn[2]);
       return (-1);
     }
 
@@ -147,7 +153,10 @@ walls (p, pold, normal)
     if (dot (xxx, xxx) < geo.diskrad_sq)
     {                           /* The photon has hit the disk */
       stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
-      move_phot (p, s_disk - DFUDGE);
+      if (move_phot (p, s_disk - DFUDGE))
+      {
+        Error ("walls: frame error in move_phot of np %D on move to disk \n", p->np);
+      };
 
       /* Now fill in the direction for the normal to the surface */
       if (pold->x[2] > 0)
@@ -181,13 +190,6 @@ walls (p, pold, normal)
       Error ("walls: %d The previous position %11.4e %11.4e %11.4e is inside the disk by %e\n", pold->np, pold->x[0], pold->x[1],
              pold->x[2], z - fabs (pold->x[2]));
 
-      if (modes.save_photons)
-      {
-        save_photons (pold, "walls:old");
-        save_photons (p, "walls:new");
-        Diag ("walls: %d At rho %11.4e, zdisk is %e and zpos %e is inside the disk by %e\n", pold->np, rho, z, fabs (pold->x[2]),
-              z - fabs (pold->x[2]));
-      }
 
     }
 
@@ -226,7 +228,10 @@ walls (p, pold, normal)
 
 
       stuff_phot (pold, p);
-      move_phot (p, s_disk - DFUDGE);
+      if (move_phot (p, s_disk - DFUDGE))
+      {
+        Error ("walls: frame error in move_phot for photon %d which hit disk\n", p->np);
+      }
 
       rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
       /* This leaves the photon just outside the disk */
@@ -253,13 +258,6 @@ walls (p, pold, normal)
         {
           normal[2] *= -1;
         }
-      }
-
-      if (modes.save_photons)
-      {
-        Diag ("NORMAL   %d   %e %e %e (%e %e %e %e %e)\n", p->np, normal[0], normal[1], normal[2], theta,
-              (zdisk (rho * (1. + EPSILON)) - z), (EPSILON * rho), rho, EPSILON);
-
       }
 
 

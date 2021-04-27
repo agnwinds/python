@@ -84,6 +84,8 @@ bf_estimators_increment (one, p, ds)
   PlasmaPtr xplasma;
   MacroPtr mplasma;
 
+  llvl = 0;
+  density = 0.0;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];

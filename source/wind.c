@@ -196,20 +196,6 @@ where_in_wind (x, ndomain)
 
 
 
-/* model_velocity(ndom, x,v)
-
-Calculate the wind velocity at a specific point in space from the original 
-usually analytic expressions
-
- History
-
-	04aug	ksl	52 -- adapted from wind2d.c as part of effort to 
- 			handle multiple coordinate systems
-	15Aug	ksl	Updated for domains
- */
-
-
-
 /**********************************************************/
 /** 
  * @brief      Calculate the wind velocity at a specific point in space from the original 
@@ -217,8 +203,8 @@ usually analytic expressions
  *
  * @param [out] int  ndom   The domain of interest
  * @param [out] double  x[]   A position (nominally in the domain)
- * @param [out] double  v[]   The resulting velicity
- * @return  The speed at that postion  
+ * @param [out] double  v[]   The resulting 3 velicity 
+ * @return  The speed at that position  
  *
  * @details
  * 
@@ -237,7 +223,11 @@ usually analytic expressions
  * The routine works for imported models as well, even in the case
  * the model velocity is actually one of the inputs.
  *
- * This routine calculates velocities in the observer frame.
+ * This routine calculates velocities in the observer frame.  
+ * 
+ * The routine has a check to see that the velocities do not exceed
+ * the speed of light; if they do the velocity is rescaled to 0.99
+ * C
  **********************************************************/
 
 double
@@ -350,7 +340,7 @@ model_vgrad (ndom, x, v_grad)
   {
     stuff_v (zero_vector, v_grad[0]);
     stuff_v (zero_vector, v_grad[1]);
-    stuff_v (zero_vector, v_grad[1]);
+    stuff_v (zero_vector, v_grad[2]);
     return (0);
   }
 

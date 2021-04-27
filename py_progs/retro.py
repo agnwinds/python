@@ -49,6 +49,9 @@ Notes:
 
     If the run requires special files, such as seds that are not part of the normal python 
     distribution, one needs to adjust the parameter files to work in the subdirectories.
+    (The above sentence is worth repeating, because the system can easily hang up if
+    this is not correct.  python will exit but mpirun will not catch this problem, and
+    so the subprocess routine will not exist until it times out.)
 
     Run the function run_many to run all of the model that you have compiled.  
 
@@ -289,9 +292,9 @@ def check_completion(parameter_file='cv.pf'):
         return SUCCESS
     return  FAILURE
 
-def run_one(command='py',parameter_file='cv.pf',np=8, print_output=False,timeout=3000):
+def run_one(command='py',parameter_file='cv.pf',np=8, extra_inputs='',print_output=False,timeout=3000):
     '''
-    Run a single model, with a timeout
+    Run a single model, with a timeout, in the current working directory
 
     Here the timeout does not use the timeout for Python itself but is on the
     python subprocess call.
@@ -304,7 +307,7 @@ def run_one(command='py',parameter_file='cv.pf',np=8, print_output=False,timeout
         return FAILURE
     
     try:
-        result=subprocess.run(['mpirun', '-np',str(np),command, parameter_file],capture_output=True,text=True,timeout=timeout)
+        result=subprocess.run(['mpirun', '-np',str(np),command, extra_inputs,parameter_file],capture_output=True,text=True,timeout=timeout)
     except subprocess.TimeoutExpired:
         print('Failed for timeout')
         return FAILURE
@@ -415,7 +418,7 @@ def compile_many(masterfile='retro_master.txt',increment=10, nmin=0,nmax=0,rerun
     return 
 
 
-def run_many(master='retro_master.txt',parameter_file='cv.pf',np=8,nmin=0,nmax=0,rerun=False,run_changed_only=False):
+def run_many(master='retro_master.txt',parameter_file='cv.pf',extra_inputs='',np=8,nmin=0,nmax=0,rerun=False,run_changed_only=False):
     '''
     Run many versions of python on a single parameter file.
     
@@ -488,7 +491,8 @@ def run_many(master='retro_master.txt',parameter_file='cv.pf',np=8,nmin=0,nmax=0
             shutil.copy(parameter_file,'r_'+xcommand)
             os.chdir('r_'+xcommand)
 
-            success=run_one(command='../'+xcommand,parameter_file=parameter_file,np=np, print_output=False,timeout=8000)
+            success=run_one(command='../'+xcommand,parameter_file=parameter_file,
+                    extra_inputs=extra_inputs,np=np, print_output=False,timeout=8000)
             if success==SUCCESS:
                 one['Ran']='Yes'
                 print('%s completed successfully' % (xcommand))

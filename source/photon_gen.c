@@ -87,6 +87,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   int iphot_start, nphot_rad, nphot_k;
   long nphot_tot_rad, nphot_tot_k;
 
+  nphot_k = nphot_tot_k = natural_weight = iphot_start = 0;     // Initialize to avoid compiler warnings
+
   /* if we are generating nonradiative kpackets, then we need to subtract 
      off the fraction reserved for k-packets */
   if (geo.nonthermal && (geo.rt_mode == RT_MODE_MACRO) && (ioniz_or_final == 0))
@@ -406,12 +408,24 @@ iwind = -1 	Don't generate any wind photons at all
        can use the saved emissivities.  The routine  returns the specific luminosity
        in the spectral band of interest */
 
+#if ACCELERATED_MACRO == TRUE
+    Log ("Using accelerated calculation of emissivities\n");
+    if (geo.pcycle == 0)
+    {
+      geo.f_matom = get_matom_f_accelerate (CALCULATE_MATOM_EMISSIVITIES);
+    }
+    else
+      geo.f_matom = get_matom_f_accelerate (USE_STORED_MATOM_EMISSIVITIES);
+#else
+    Log ("Using old slow calculation of emissivities\n");
     if (geo.pcycle == 0)
     {
       geo.f_matom = get_matom_f (CALCULATE_MATOM_EMISSIVITIES);
     }
     else
       geo.f_matom = get_matom_f (USE_STORED_MATOM_EMISSIVITIES);
+
+#endif
 
 
     geo.f_kpkt = get_kpkt_f (); /* This returns the specific luminosity

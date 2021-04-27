@@ -858,11 +858,17 @@ create_velocity_gradient_table (ndom, rootname)
   c[9] = get_one (ndom, "div_v");
   strcpy (column_name[9], "div_v");
 
-  c[10] = get_one (ndom, "gamma");
-  strcpy (column_name[10], "gamma");
+  c[10] = get_one (ndom, "dvds_max");
+  strcpy (column_name[10], "dvds_max");
+
+  c[11] = get_one (ndom, "gamma");
+  strcpy (column_name[11], "gamma");
+
+  c[12] = get_one (ndom, "dfudge");
+  strcpy (column_name[12], "dfudge");
 
   /* This should be the maxium number above +1 */
-  ncols = 11;
+  ncols = 13;
 
 
 
@@ -1506,6 +1512,10 @@ get_one (ndom, variable_name)
       {
         x[n] = wmain[n].v_grad[2][2];
       }
+      else if (strcmp (variable_name, "dvds_max") == 0)
+      {
+        x[n] = wmain[n].dvds_max;
+      }
       else if (strcmp (variable_name, "div_v") == 0)
       {
         x[n] = wmain[n].div_v;
@@ -1513,6 +1523,10 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "gamma") == 0)
       {
         x[n] = wmain[n].xgamma;
+      }
+      else if (strcmp (variable_name, "dfudge") == 0)
+      {
+        x[n] = wmain[n].dfudge;
       }
       else
       {

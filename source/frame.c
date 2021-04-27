@@ -56,14 +56,11 @@ check_frame (p, desired_frame, msg)
   {
     return (0);
   }
-  else if (ncheck_frame < 100)
+  else if (ncheck_frame < 1000)
   {
-    Error ("check_frame: %s :Photon (%d) of type (%d) not in frame %d\n", msg, p->np, p->istat, desired_frame);
+    Error ("check_frame: %s :Photon (%5d) of istat (%2d) and origin (%2d) not in desired frame %d (0=Loc,1=Obs)\n", msg, p->np, p->istat,
+           p->origin, desired_frame);
     ncheck_frame++;
-
-    if (modes.save_photons)
-      save_photons (p, "PhotonInIncorrectFrame");
-
     return (1);
   }
   else

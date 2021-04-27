@@ -407,27 +407,39 @@ qdisk_save (diskfile, ztot)
 /** 
  * @brief      Read the temperature profile from a file
  *
- * @param [in, out] char *  tprofile   Name of the input file
- * @return     Always returns 0
+ * @param [in] char *  tprofile   Name of the input file
+ * @return     Returns the maximum radius 
  *
- * The input format for the file to be read in is quite spefic
- * The first line should contina the number of points n
- * the profile
+ * @details
  *
- * Subsequent lines should contian a radius and a temperarue
+ * Each line of the input file 
+ * a radius and a temperature in the first two columns.
+ * Any extra columns are ignored.  
  *
- * The radius values shoule be in units of 1e11 cm
- * The temperature should be in units of 1000K
+ * Comment lines (and other lines) that can not
+ * be parsed are ignored, but will be printed out
+ * to make sure that nothing is amiss.
+ *
+ * The radius values shoule be in cm
+ * The temperature in degrees Kelvin
+ *
+ * The maxium radius of the disk is set to the maximum
+ * radius contained in the input file.
  *
  * ###Notes###
  *
- * @bug This routine which was written for the YSO study
- *  needs to be made less YSO centric. It should also be
- *  retested.
+ * 210226 - In the distant past, the units were different, that is
+ * the r values were in units of 10**11 cm and the temperature
+ * values were in 1000 of degrees.  At one time, the temperature
+ * profile did not have to be for the entire disk, and one used
+ * mdot and a standard model to describe the disk.  This has been
+ * changed so that if one reads in a non standard temperature
+ * profile, it must include the entire disk..
+ *
  *
  **********************************************************/
 
-int
+double
 read_non_standard_disk_profile (tprofile)
      char *tprofile;
 {
@@ -441,8 +453,8 @@ read_non_standard_disk_profile (tprofile)
 
   if ((fptr = fopen (tprofile, "r")) == NULL)
   {
-    Error ("Could not open filename %s\n", tprofile);
-    Exit (0);
+    Error ("read_non_standard_disk_profile: Could not open filename %s\n", tprofile);
+    Exit (1);
   }
 
   line = (char *) malloc (buffsize * sizeof (char));
@@ -471,15 +483,20 @@ read_non_standard_disk_profile (tprofile)
     }
   }
 
-
-  if (geo.diskrad > blmod.r[blmod.n_blpts - 1])
+  for (n = 0; n < blmod.n_blpts; n++)
   {
-    Error ("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n", geo.diskrad,
-           blmod.r[blmod.n_blpts - 1]);
-    Log ("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
+    Log ("Disk: r %.3e t %.3e \n", blmod.r[n], blmod.t[n]);
   }
+
+
+//OLD  if (geo.diskrad > blmod.r[blmod.n_blpts - 1])
+//OLD  {
+//OLD    Error ("read_non_standard_disk_profile: The disk radius (%.2e) exceeds rmax (%.2e) in the temperature profile\n", geo.diskrad,
+//OLD           blmod.r[blmod.n_blpts - 1]);
+//OLD    Log ("read_non_standard_disk_profile: Portions of the disk outside are treated as part of a steady state disk\n");
+//OLD  }
 
   fclose (fptr);
 
-  return (0);
+  return (blmod.r[blmod.n_blpts - 1]);
 }

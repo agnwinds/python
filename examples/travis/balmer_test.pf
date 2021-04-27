@@ -35,7 +35,7 @@ Shell.wind_mdot(msol/yr)                   1e-20
 Shell.wind.radmin(cm)                      1e10
 Shell.wind.radmax(cm)                      1.00001e10
 Shell.wind_v_at_rmin(cm)                   1
-Shell.wind.v_at_rmax(cm)                   2
+Shell.wind.v_at_rmax(cm)                   1.2
 Shell.wind.acceleration_exponent           1
 Wind.t.init                                10000
 Wind.filling_factor(1=smooth,<1=clumped)   1
@@ -45,6 +45,7 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
+Spectrum.nwave                    10000
 Spectrum.wavemin(Angstroms)                3000
 Spectrum.wavemax(Angstroms)                7000
 

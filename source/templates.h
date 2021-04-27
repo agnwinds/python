@@ -60,6 +60,7 @@ int fix_concentrations(PlasmaPtr xplasma, int mode);
 double get_ne(double density[]);
 /* spectra.c */
 int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
+void spectrum_allocate(int nspec);
 int spectrum_create(PhotPtr p, int nangle, int select_extract);
 int spec_add_one(PhotPtr p, int spec_type);
 int spectrum_summary(char filename[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin, int iwind);
@@ -296,6 +297,8 @@ int levels(PlasmaPtr xplasma, int mode);
 /* gradv.c */
 double dvwind_ds_cmf(PhotPtr p);
 int dvds_ave(void);
+int dvds_max(void);
+double get_dvds_max(PhotPtr p);
 /* reposition.c */
 int reposition(PhotPtr p);
 /* anisowind.c */
@@ -326,7 +329,6 @@ int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
-double matom_emit_in_line_prob(WindPtr one, struct lines *line_ptr_emit);
 /* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
@@ -445,7 +447,7 @@ int matom_emiss_report(void);
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
 int qdisk_save(char *diskfile, double ztot);
-int read_non_standard_disk_profile(char *tprofile);
+double read_non_standard_disk_profile(char *tprofile);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double q_ioniz_dere(int nion, double t_e);
@@ -480,9 +482,11 @@ double get_disk_params(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
 double get_kpkt_heating_f(void);
-double get_matom_f(int mode);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
+/* macro_gen_f.c */
+double get_matom_f(int mode);
+double get_matom_f_accelerate(int mode);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
@@ -606,11 +610,16 @@ int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double 
 /* macro_accelerate.c */
 void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
+<<<<<<< HEAD
 double f_matom_emit_accelerate(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
 double f_kpkt_emit_accelerate(PhotPtr p, int *nres, int *escape, int mode, double fmin, double fmax);
 /* tau_spectrum.c */
 double smax_in_cell(PhotPtr p);
 void optical_depth_diagnostics(WindPtr w);
+=======
+double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double fmin, double fmax);
+double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double fmin, double fmax);
+>>>>>>> 47cccd73fc7f13a60052d76aea3d05652843a0dc
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

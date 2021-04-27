@@ -2,6 +2,7 @@
 # ignore binaries in bin/ such as e.g. py78a
 bin/py*
 bin/windsave2table*
+bin/rad_hydro*
 
 # Run files
 *.spec*

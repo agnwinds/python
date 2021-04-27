@@ -68,6 +68,24 @@ and run the code by typing, e.g.
     $ py root.pf
 
 
+Running in parallel mode
+------------------------
+
+While Python can be run in single processor mode, it is generally more efficient to run on multiple processors. in multiprocessor mode,
+When multiprocessing is invoked, Python uses mulitple threads for photon transfer and in calcuation ionization equilibrium.  As these 
+comprise the bulk of the computational load the total time to run is  roughly an inverse of the number of threads.  Python uses `MPI <https://en.wikipedia.org/wiki/Message_Passing_Interface>`_ for parallel processing and so software libraries that implement this must be on the machine that is
+being used.  For Macs, mpi can installed with HomeBrew or Fink.  For linux machines, two common libraries are `Open-MPI <https://www.open-mpi.org/>`_ and `MPICH <https://www.mpich.org/>`_  If not already installed, one should 
+install them.  
+
+With mpi installed (and after recompiling with mpicc, which is the default) one would simply run the above program with 
+
+.. code:: bash
+
+    $ mpirun -np 8  py root.pf
+
+where  -np followed by a number designates the number of threads assigned.
+
+
 Auxiliary programs
 ------------------
 
@@ -85,6 +103,28 @@ The two files are run as follows
 
 Brief descriptions of command line options for running these routines can obtained using a -h switch
 
+Python scripts
+--------------
+
+There are a number of python, the progamming language scripts, that can be used to plot results 
+from a Python run.  These are not particularly well documented and many have been developed
+for looking at various aspects of the code.  A few may require python packages to be installed.
+However, a number are likely to be useful.
+
+To make use of these scipts one should add
+
+$PYTHON/py_progs both to the PATH and PYTHONPATH variables 
+
+One script that is particularly useful is run_check.py, which is run as follows
+
+.. code:: bash
+
+    $run_check.py root
+
+
+This should create an html file that contains a summary set of information about a run, with plots that 
+indicate how much of the wind has converged as a function of cycle, which cells have converged at the end, what 
+the electron and temperature structrue of the wind is, as well as quick plots of the spectra that were produced.
 
 Directory structure
 -------------------
