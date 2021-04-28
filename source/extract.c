@@ -148,8 +148,7 @@ extract (w, p, itype)
 
     mscat = xxspec[n].nscat;
 
-    // I think this should be mscat == MAXSCAT, can someone check? This part of the code confuses me
-    if (mscat == MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
+    if (mscat > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
       extract_photon = TRUE;
     else
       extract_photon = FALSE;
