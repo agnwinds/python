@@ -1,4 +1,3 @@
-
 /***********************************************************/
 /** @file  macro_gov.c
  * @author ksl
@@ -146,7 +145,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       /* This is a bf continuum but we don't want the full macro atom treatment. In the pre-2018
          approach, we process the photon in a way that makes it return a bf photon of the same type
          as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
-         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error 
+         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
          is thrown and we exit. */
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
       {
@@ -164,7 +163,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     }
 
 
-    /* This the end of the section of the loop that deals with matom excitations. next domes the 
+    /* This the end of the section of the loop that deals with matom excitations. next domes the
        section of the loop that deals with kpts */
     else if (matom_or_kpkt == 2)
     {
@@ -266,10 +265,9 @@ macro_pops (xplasma, xne)
   double this_ion_density, level_population;
   double ionden_temp, fractional_population;
   double inversion_test;
-  double q_ioniz (), q_recomb ();
   double *a_data, *b_data;
   double *populations;
-  int index_fast_col, ierr, insane, sane_populations;
+  int index_fast_col, ierr, numerical_population_issue, populations_ok;
 
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
@@ -306,9 +304,9 @@ macro_pops (xplasma, xne)
 
     if (ion[ele[index_element].firstion].macro_info == TRUE && geo.macro_simple == FALSE)
     {
+      populations_ok = FALSE;
 
-      sane_populations = 0;
-      while (sane_populations == 0)
+      while (populations_ok == FALSE)
       {
 
         /* Having established that the ion requires a macro atom treatment we
@@ -345,7 +343,6 @@ macro_pops (xplasma, xne)
              star. The input radiative lifetime is used to judge this at the moment. If the lifetime was set
              to be long (essentially infite) then a very fast collisional transition is put in to dominate
              all other rates into and out of this level.
-
              Whether this is really the best thing to do I don't know, but it's an improvement over ignoring
              this issue altogether! SS Aug 05 */
 
@@ -537,7 +534,7 @@ macro_pops (xplasma, xne)
         /* Now we can just invert the matrix to get the fractional level populations. */
 
 
-          /********************************************************************************/
+        /********************************************************************************/
         /* The block that follows (down to next line of ***s) is to do the
            matrix inversion. It uses LU decomposition - the code for doing this is
            taken from the GSL manual with very few modifications. */
@@ -580,7 +577,7 @@ macro_pops (xplasma, xne)
 
         /* MC noise can cause population inversions (particularly amongst highly excited states)
            which are never a good thing and most likely unphysical.
-           Therefor let's follow Leon's procedure (Lucy 2003) and remove inversions. */
+           Therefore let's follow Leon's procedure (Lucy 2003, section 6.3) and remove inversions. */
 
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
         {
@@ -612,7 +609,7 @@ macro_pops (xplasma, xne)
            level populations within an ion. Get the ion
            populations and write them to one->density[nion]. The level populations
            are to be put in "levden". */
-        insane = 0;
+        numerical_population_issue = FALSE;
         nn = 0;
         mm = 0;
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
@@ -632,7 +629,7 @@ macro_pops (xplasma, xne)
           if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
             Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
-            insane = 1;
+            numerical_population_issue = TRUE;
           }
 
           /* Check the sanity and positivity of the level populations */
@@ -640,28 +637,29 @@ macro_pops (xplasma, xne)
           {
             if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
-              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
+              Error ("macro_pops: level %i has calculated pop. %8.4e in plasma cell %i\n",
                      index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
-              insane = 1;
+              numerical_population_issue = TRUE;
             }
             mm++;
           }
         }
 
-        /* if the variable insane has been set to 1 then that means we had either a negative or
+        /* if the variable numerical_population_issue has been set to 1 then that means we had either a negative or
            non-finite level population somewhere. If that is the case, then set all the estimators
            to dilute blackbodies instead and go through the solution again */
-        if (insane)
+        if (numerical_population_issue)
         {
-          Error ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
-                 xplasma->nplasma, xplasma->w, xplasma->t_r);
+          Error
+            ("macro_pops: found unreasonable populations in wind cell %d plasma cell %i; using dilute BBody excitation w %8.4e t_r %8.4e\n",
+             xplasma->nwind, xplasma->nplasma, xplasma->w, xplasma->t_r);
           get_dilute_estimators (xplasma);
         }
-        /* if we didn't set insane to 1 then we have a realistic set of populations, so set sane_populations to 1 to break
+        /* if we didn't set numerical_population_issue to 1 then we have a realistic set of populations, so set populations_ok to 1 to break
            the while loop, and copy the populations into the arrays */
         else
         {
-          sane_populations = 1;
+          populations_ok = TRUE;
           for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
           {
             this_ion_density = 0.0;
