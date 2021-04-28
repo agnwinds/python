@@ -80,19 +80,15 @@ extract (w, p, itype)
 {
   int n, mscat, mtopbot;
   struct photon pp, p_in, p_dummy;
-  int good;
+  int extract_photon;
   double xdiff[3];
   double p_norm, tau_norm;
   double dvds_max;
-  int ierr;
 
-
-  ierr = check_frame (p, F_OBSERVER, "extract_start");
-  if (ierr)
+  if (check_frame (p, F_OBSERVER, "extract_start"))
   {
     Error ("extract: check_frame failure at very start for itype %d\n", itype);
   }
-
 
   stuff_phot (p, &p_in);
 
@@ -105,11 +101,10 @@ extract (w, p, itype)
     if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
     {
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density 
+         First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density
          PNORM_FUDGE_FACTROR is a bandaide for a issue #815   */
 
       dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (&p_in);
-//OLD      dvds_max = get_dvds_max (&p_in);
       tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
       /* then turn into a probability */
@@ -130,22 +125,19 @@ extract (w, p, itype)
 
   }
 
-
   if (itype == PTYPE_WIND)
   {
-    if ((ierr = observer_to_local_frame (&p_in, &p_in)))
-      Error ("extract: wind photon not in observer frame %d\n", ierr);
+    if (observer_to_local_frame (&p_in, &p_in))
+      Error ("extract: wind photon not in observer frame\n");
   }
   if (itype == PTYPE_DISK)
   {
-    if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
-      Error ("extract: disk photon not in observer frame %d\n", ierr);
+    if (observer_to_local_frame_disk (&p_in, &p_in))
+      Error ("extract: disk photon not in observer frame\n");
   }
 
   /* At this point were are in a local frame for WIND and DISK photons, but the
-     global frame for the central source and boundary layer */
-
-
+     observer/global frame for the central source and boundary layer */
 
   for (n = MSPEC; n < nspectra; n++)
   {
@@ -154,67 +146,78 @@ extract (w, p, itype)
        of times or in specific regions of the wind. A region is specified by a position
        and a radius. */
 
-    good = TRUE;
+    extract_photon = TRUE;
 
-    if ((mscat = xxspec[n].nscat) > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
-      good = TRUE;
+    if ((mscat = xxspec[n].nscat) > MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
+      extract_photon = TRUE;
     else
-      good = FALSE;
+      extract_photon = FALSE;
 
-    if (good)
+    if (extract_photon)
     {
       if ((mtopbot = xxspec[n].top_bot) == 0)
-        good = TRUE;            // Then there are no positional parameters and we are done
+        extract_photon = TRUE;  // Then there are no positional parameters and we are done
       else if (mtopbot == -1 && p_in.x[2] < 0)
-        good = TRUE;
+        extract_photon = TRUE;
       else if (mtopbot == 1 && p_in.x[2] > 0)
-        good = TRUE;
+        extract_photon = TRUE;
       else if (mtopbot == 2)    // Then to count, the photom must originate within sn.r of sn.x
       {
         vsub (p_in.x, xxspec[n].x, xdiff);
         if (length (xdiff) > xxspec[n].r)
-          good = FALSE;
+          extract_photon = FALSE;
       }
       else
-        good = FALSE;
+        extract_photon = FALSE;
     }
 
-    if (good)                   //Then extract photon
+    if (extract_photon)
     {
+      stuff_v (xxspec[n].lmn, xlmn);
 
+      /* Create a photon pp to use here and in extract_one, and send it in
+       * the correct direction.  This assures we
+       * have not modified p_in as part of extract.  Also, allow for aberration
+       * of photons to assure that we are extracting at the correct angle
+       * in the observer frame
+       *
+       * Note that a wind photon is in the local frame, and the only thing
+       * we need to do is to figure out the extraction direction in the local
+       * frame that will produce the direction we want
+       */
 
-/* Create a photon pp to use here and in extract_one, and send it in 
- * the correct direction.  This assures we
- * have not modified p_in as part of extract.  Also, allow for aberration
- * of photons to assure that we are extracting at the correct angle
- * in the observer frame
- *
- * Note that a wind photon is in the local frame, and the only thing
- * we need to do is to figure out the extraction direction in the local
- * frame that will produce the directon we want
- *
- * A disk photon is in the observer frame
- */
-
-      stuff_v (xxspec[n].lmn, xlmn);    //XTEST
-
-      if (rel_mode == REL_MODE_FULL && itype == PTYPE_WIND)
+      if (rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ)
       {
-        stuff_phot (&p_in, &p_dummy);
-        p_dummy.frame = F_OBSERVER;
-        stuff_v (xxspec[n].lmn, p_dummy.lmn);
-        observer_to_local_frame (&p_dummy, &p_dummy);
-        stuff_phot (&p_in, &pp);
-        stuff_v (p_dummy.lmn, pp.lmn);
-      }
-      else if (rel_mode == REL_MODE_FULL && itype == PTYPE_DISK)
-      {
-        stuff_phot (&p_in, &p_dummy);
-//        p_dummy.frame = F_OBSERVER;
-        stuff_v (xxspec[n].lmn, p_dummy.lmn);
-        observer_to_local_frame_disk (&p_dummy, &p_dummy);
-        stuff_phot (&p_in, &pp);
-        stuff_v (p_dummy.lmn, pp.lmn);
+        /*
+         * Note that the change of p_dummy to observer frame is done and is OK
+         * as we are using observer_to_local* to transform the spectrum angle
+         * (defined in the observer frame) into the local frame. The change in
+         * frame is done to avoid error messages.
+         */
+
+        if (itype == PTYPE_WIND)
+        {
+          stuff_phot (&p_in, &p_dummy);
+          p_dummy.frame = F_OBSERVER;   // see comment above
+          stuff_v (xxspec[n].lmn, p_dummy.lmn);
+          observer_to_local_frame (&p_dummy, &p_dummy);
+          stuff_phot (&p_in, &pp);
+          stuff_v (p_dummy.lmn, pp.lmn);
+        }
+        else if (itype == PTYPE_DISK)
+        {
+          stuff_phot (&p_in, &p_dummy);
+          p_dummy.frame = F_OBSERVER;   // see comment above
+          stuff_v (xxspec[n].lmn, p_dummy.lmn);
+          observer_to_local_frame_disk (&p_dummy, &p_dummy);
+          stuff_phot (&p_in, &pp);
+          stuff_v (p_dummy.lmn, pp.lmn);
+        }
+        else                    // this photon is in the observer frame
+        {
+          stuff_phot (&p_in, &pp);
+          stuff_v (xxspec[n].lmn, pp.lmn);
+        }
       }
       else
       {
@@ -222,9 +225,9 @@ extract (w, p, itype)
         stuff_v (xxspec[n].lmn, pp.lmn);
       }
 
-/*At this point photons of type DISK or WIND are in the local frame, but others 
-  are in the global frame
-*/
+      /*At this point photons of type DISK or WIND are in the local frame, but others
+         are in the observer/global frame
+       */
 
       if (modes.save_photons && 1180. < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1240.0)
       {
@@ -236,13 +239,10 @@ extract (w, p, itype)
         save_extract_photons (n, p, &pp);
       }
 
-
       extract_one (w, &pp, itype, n);
-
-
     }
-
   }
+
   return (0);
 }
 
@@ -251,7 +251,7 @@ extract (w, p, itype)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Extract a single photon along a single line of sight.
  *
  * @param [in] WindPtr  w   The entire wind
@@ -263,9 +263,9 @@ extract (w, p, itype)
  * @details
  * extract_one is analogous to the detailed portion of transphot except here the
  * basic point is to calculate the optical depth through the plasma in a certain
- * direction, and to increment the appropriate spectrum.  
+ * direction, and to increment the appropriate spectrum.
  *
- * Unlike trans_phot, this routine also checks to see if 
+ * Unlike trans_phot, this routine also checks to see if
  * whether the photon hits the secondary star, if one exists.
  *
  * ### Notes ###
@@ -273,7 +273,7 @@ extract (w, p, itype)
  * section 2.3.4.  According to equation 2.19
  * 	Pc/Pw=12 cos(theta)*(1+b cos(theta)/(3+2b) where b=1.5 corresponds to the
  * Eddington approximation.
- * 
+ *
  * In Python, and in extract and transphot in particular, tau generally refers to the tau associated
  * with scattering processes, and the weight contains the effect of dimunition of the energy of
  * the photon bundle due to pure absorption processes.  So, in extract, we add pp->w * exp(-tau)
@@ -326,21 +326,19 @@ extract_one (w, pp, itype, nspec)
   }
   else
   {
-    ierr = check_frame (pp, F_OBSERVER, "extract_one: start");
-    if (ierr)
-    {
-      Error ("extract_one: check_frame_failure for itype %d\n", itype);
-    }
     stuff_phot (pp, &pstart);
   }
 
+  ierr = check_frame (&pstart, F_OBSERVER, "extract_one: start");
+  if (ierr)
+  {
+    Error ("extract_one: check_frame failure for photon %d itype %d\n", pstart.np, itype);
+  }
 
-/* Re-weight the photons. Note that photons have already been frequency shifted prior
-to entering extract 
-
-For disk and centrol object photons, see Eqn 2.19 Knigge's thesis
-
- */
+  /*
+   * Re-weight the photons. Note that photons have already been frequency shifted prior
+   * to entering extract. For disk and central object photons, see Eqn 2.19 Knigge's thesis
+   */
 
   if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
   {
