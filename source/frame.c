@@ -56,16 +56,11 @@ check_frame (p, desired_frame, msg)
   {
     return (0);
   }
-  else if (ncheck_frame < 1000)
+  else
   {
     Error ("check_frame: %s :Photon (%5d) of istat (%2d) and origin (%2d) not in desired frame %d (0=Loc,1=Obs)\n", msg, p->np, p->istat,
            p->origin, desired_frame);
-    ncheck_frame++;
     return (1);
-  }
-  else
-  {
-    return (0);
   }
 }
 
@@ -111,11 +106,6 @@ observer_to_local_frame (p_in, p_out)
   double gamma;
   int i, ierr;
 
-
-
-
-
-
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame");
 
   /* Initialize the output photon */
@@ -126,33 +116,37 @@ observer_to_local_frame (p_in, p_out)
   one = &wmain[p_in->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_in, v);
-
   vel = dot (p_in->lmn, v);
-
-
   f_in = p_in->freq;
 
   if (rel_mode == REL_MODE_LINEAR)
   {
-    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
+    p_out->freq = f_in * (1. - vel / VLIGHT);
+
+    if (p_out->freq < 0)
+    {
+      Error ("observer_to_local: photon frequency %g < 0 after linear transformation", p_out->freq);
+      Exit (1);
+    }
+
     return (ierr);
   }
 
-
-
   gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-
   f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
 
-  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
+  if (p_out->freq < 0)
+  {
+    Error ("observer_to_local: photon frequency %g < 0 after SR transformation", p_out->freq);
+    Exit (1);
+  }
 
+  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
   for (i = 0; i < 3; i++)
   {
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
   }
-
   p_out->w *= (f_out / f_in);
-
 
   return (ierr);
 }
@@ -162,21 +156,21 @@ observer_to_local_frame (p_in, p_out)
 /**********************************************************/
 /**
  * @brief      carries out the transformation of all the quantities
- *      in a photon structure 
+ *      in a photon structure
  *      from the local (or co-moving) frame to the observer (or global)
  *      frame
  *
- * @param [in] PhotPtr  p_in   The photon in the local frame                   
- * @param [out] PhotPtr  p_out   The photon in the global frame                  
+ * @param [in] PhotPtr  p_in   The photon in the local frame
+ * @param [out] PhotPtr  p_out   The photon in the global frame
  *
- * @return    The routine returns 0 unless there was an error       
+ * @return    The routine returns 0 unless there was an error
  *
  *
  * @details
- * The routine copies all of the quantities contain in the p_in to 
- * p_out, obtains the velocity at that point in the wind, and then 
+ * The routine copies all of the quantities contain in the p_in to
+ * p_out, obtains the velocity at that point in the wind, and then
  * performs an in place transformation from the local to the observer
- * frame of the photon allowing for special 
+ * frame of the photon allowing for special
  * relativity.
  *
  *
@@ -201,8 +195,6 @@ local_to_observer_frame (p_in, p_out)
   int i;
   int ierr;
 
-
-
   ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame");
 
   /* Initialize the output photon */
@@ -213,18 +205,30 @@ local_to_observer_frame (p_in, p_out)
   one = &wmain[p_in->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_in, v);
-
   f_in = p_in->freq;
-
   vel = dot (p_in->lmn, v);
+
   if (rel_mode == REL_MODE_LINEAR)
   {
-    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
+    p_out->freq = f_in / (1. - vel / VLIGHT);
+
+    if (p_out->freq < 0)
+    {
+      Error ("local_to_observer_frame: photon frequency %g < 0 after linear transformation", p_out->freq);
+      Exit (1);
+    }
+
     return (ierr);
   }
+
   gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
   f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
 
+  if (p_out->freq < 0)
+  {
+    Error ("local_to_observer_frame: photon frequency %g < 0 after SR transformation", p_out->freq);
+    Exit (1);
+  }
 
 /* Need to worry about sign changes, etc. here */
   x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
@@ -280,9 +284,6 @@ observer_to_local_frame_disk (p_in, p_out)
   double gamma;
   int i, ierr;
 
-
-
-
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame_disk");
 
   /* Initialize the output photon */
@@ -299,27 +300,34 @@ observer_to_local_frame_disk (p_in, p_out)
 
   if (rel_mode == REL_MODE_LINEAR)
   {
-    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
+    p_out->freq = f_in * (1. - vel / VLIGHT);
+
+    if (p_out->freq < 0)
+    {
+      Error ("observer_to_local_frame_disk: photon frequency %g < 0 after linear transformation", p_out->freq);
+      Exit (1);
+    }
+
     return (ierr);
   }
-
-
 
   // beta=length(v)/VLIGHT;
 
   gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-
   f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
 
-  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
+  if (p_out->freq < 0)
+  {
+    Error ("observer_to_local_frame_disk: photon frequency %g < 0 after SR transformation", p_out->freq);
+    Exit (1);
+  }
 
+  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
   for (i = 0; i < 3; i++)
   {
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
   }
-
   p_out->w *= (f_out / f_in);
-
 
   return (ierr);
 }
@@ -333,27 +341,27 @@ observer_to_local_frame_disk (p_in, p_out)
  *      from the local (or co-moving) frame to the observer (or global)
  *      frame
  *
- * @param [in] PhotPtr  p_in   The photon in the local frame                   
- * @param [out] PhotPtr  p_out   The photon in the global frame                  
+ * @param [in] PhotPtr  p_in   The photon in the local frame
+ * @param [out] PhotPtr  p_out   The photon in the global frame
  *
- * @return    The routine returns 0 unless the was an error         
+ * @return    The routine returns 0 unless the was an error
  *
  *
  * @details
- * The routine copies all of the quantities contain in the p_in to 
- * p_out, obtains the velocity at that point in the wind, and then 
+ * The routine copies all of the quantities contain in the p_in to
+ * p_out, obtains the velocity at that point in the wind, and then
  * performs an in place transformation from the local to the observer
- * frame of the photon allowing for special 
+ * frame of the photon allowing for special
  * relativity.
  *
  *
  * ### Notes ###
  *
  * It p_in and p_out are the same then the transformation will
- * be performed in place.  This is normally the way the 
+ * be performed in place.  This is normally the way the
  * routine is used.   One could have omitted p_out in this case
  * but to make the interface coisistent, both photon structures
- * are included.  
+ * are included.
  *
  **********************************************************/
 
@@ -374,35 +382,40 @@ local_to_observer_frame_disk (p_in, p_out)
   stuff_phot (p_in, p_out);
   p_out->frame = F_OBSERVER;
 
-
   /* Calculate the local velocity of the disk at this position */
   vdisk (p_in->x, v);
   vel = dot (p_in->lmn, v);
-
   f_in = p_in->freq;
-
-
 
   if (rel_mode == REL_MODE_LINEAR)
   {
-    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
+    p_out->freq = f_in / (1. - vel / VLIGHT);
+
+    if (p_out->freq < 0)
+    {
+      Error ("local_to_observer_frame_disk: photon frequency %g < 0 after linear transformation", p_out->freq);
+      Exit (1);
+    }
+
     return (ierr);
   }
 
   gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
   f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
 
-/* Need to worry about sign changes, etc. here */
-  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
+  if (p_out->freq < 0)
+  {
+    Error ("local_to_observer_frame_disk: photon frequency %g < 0 after SR transformation", p_out->freq);
+    Exit (1);
+  }
 
+  /* Need to worry about sign changes, etc. here */
+  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
   for (i = 0; i < 3; i++)
   {
     p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] + x * v[i]);
   }
-
   p_out->w *= (f_out / f_in);
-
-
 
   return (ierr);
 }
@@ -413,11 +426,11 @@ local_to_observer_frame_disk (p_in, p_out)
  *      in the local frame given a distance in the observer
  *      frame
  *
- * @param [in] PhotPtr  p_obs    The photon in the observer frame                
+ * @param [in] PhotPtr  p_obs    The photon in the observer frame
  * @param [in] double   ds_obs   The distance from a starting point
                                  for the photon to travel
  *
- * @return    The distance in the co-moving or local frame         
+ * @return    The distance in the co-moving or local frame
  *
  *
  * @details
@@ -435,7 +448,7 @@ observer_to_local_frame_ds (p_obs, ds_obs)
 {
   WindPtr one;
   int ndom;
-  double v[3], vel;
+  double v[3];
   double gamma;
   double ds_cmf;
 
@@ -448,20 +461,17 @@ observer_to_local_frame_ds (p_obs, ds_obs)
   one = &wmain[p_obs->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_obs, v);
-  vel = dot (p_obs->lmn, v);
-
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+  ds_cmf = ds_obs * gamma * (1 - dot (p_obs->lmn, v) / VLIGHT);
 
-  ds_cmf = ds_obs;
-
-
-  ds_cmf *= gamma * (1 - dot (p_obs->lmn, v) / VLIGHT);
-
+  if (ds_cmf < 0)
+  {
+    Error ("observer_to_local_frame_ds: ds_cmf < 0 in cell %d for photon %d with lmn [%g, %g %g] \n", p_obs->grid, p_obs->np,
+           p_obs->lmn[0], p_obs->lmn[1], p_obs->lmn[2]);
+    Exit(1);
+  }
 
   return (ds_cmf);
-
-
-
 }
 
 /**********************************************************/
@@ -470,16 +480,16 @@ observer_to_local_frame_ds (p_obs, ds_obs)
  *      in the observer frame given a distance in the local
  *      frame
  *
- * @param [in] PhotPtr  p_obs    The photon in the observer frame                
+ * @param [in] PhotPtr  p_obs    The photon in the observer frame
  * @param [in] double   ds_cmf   The distance from a starting point
                                  for the photon to travel
  *
- * @return    The distance in the observer frame         
+ * @return    The distance in the observer frame
  *
  *
  * @details
  *
- * Note that the photon MUST BE in the observer frame here. 
+ * Note that the photon MUST BE in the observer frame here.
  *
  *
  * ### Notes ###
@@ -494,7 +504,7 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
 {
   WindPtr one;
   int ndom;
-  double v[3], vel;
+  double v[3];
   double gamma;
   double ds_obs;
 
@@ -507,32 +517,31 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
   one = &wmain[p_obs->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_obs, v);
-  vel = dot (p_obs->lmn, v);
-
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
+  ds_obs = ds_cmf / gamma * (1 - dot (p_obs->lmn, v) / VLIGHT);
 
-  ds_obs = ds_cmf;
-  ds_obs /= gamma * (1 - dot (p_obs->lmn, v) / VLIGHT);
-
+  if (ds_obs < 0)
+  {
+    Error ("local_to_observer_frame_ds: ds_obs < 0 in cell %d for photon %d with lmn [%g, %g %g] \n", p_obs->grid, p_obs->np,
+           p_obs->lmn[0], p_obs->lmn[1], p_obs->lmn[2]);
+    Exit (1);
+  }
 
   return (ds_obs);
-
-
-
 }
 
 /**********************************************************/
 /**
  * @brief      calculate a velocity in the local frame given
  *      a velocity in the observer frame
- *      
  *
- * @param [in] double   *v_obs       A velocity in the observer frame                
- * @param [in] double   *v           The velocity of the local frame as 
+ *
+ * @param [in] double   *v_obs       A velocity in the observer frame
+ * @param [in] double   *v           The velocity of the local frame as
  *                                   measured in the observers frame
  * @param [out] double  *v_cmf       The peculiar velocity in the local frame
  *
- * @return    The speed in the local frame               
+ * @return    The speed in the local frame
  *
  *
  * @details
@@ -586,14 +595,14 @@ observer_to_local_frame_velocity (v_obs, v, v_cmf)
 /**
  * @brief      calculate a velocity in the observer frame
  *      a velocity in the local frame
- *      
  *
- * @param [in] double   *v_cmf       A peculiar velocity in the local frame                
+ *
+ * @param [in] double   *v_cmf       A peculiar velocity in the local frame
  * @param [in] double   *v           The velocity of the local frame in
  *                                   the observers frame
  * @param [out] double  *v_obs       The velocity in the global frame
  *
- * @return    The speed in the observer frame               
+ * @return    The speed in the observer frame
  *
  *
  * @details
@@ -651,13 +660,13 @@ local_to_observer_frame_velocity (v_cmf, v, v_obs)
 /**
  * @brief      calculate how a 3-vector would look in the observer
  *      frame given a 3-vector in the local frame.
- *      
  *
- * @param [in]  double  V           the v  of the co-moving frame 
+ *
+ * @param [in]  double  V           the v  of the co-moving frame
  * @param [in]  double  dx_cmf      the 3 vector in the local frame
  * @param [out] double  dx_obs     the resulting 3 vector in the obsevr frame
  *
- * @return    Always returns 0               
+ * @return    Always returns 0
  *
  *
  * @details
@@ -713,13 +722,13 @@ local_to_observer_frame_ruler_transform (v, dx_cmf, dx_obs)
 /**
  * @brief      calculate how a 3-vector would look in the observer
  *      frame given a 3-vector in the cmf frame.
- *      
  *
- * @param [in]  double  V           the v  of the co-moving frame 
+ *
+ * @param [in]  double  V           the v  of the co-moving frame
  * @param [in] double   dx_obs      the 3 vector in the observer frame
  * @param [out] double  dx_cmf     the resulting 3 vector in the local frame
  *
- * @return    Always returns 0               
+ * @return    Always returns 0
  *
  *
  * @details
