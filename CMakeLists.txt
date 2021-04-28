@@ -116,6 +116,7 @@ set(PYTHON_SOURCE
         source/wind2d.c source/wind_sum.c source/wind_updates2d.c
         source/wind_util.c source/windsave.c source/windsave2table_sub.c
         source/xlog.c source/xtest.c source/zeta.c source/macro_accelerate.c
+        source/macro_gen_f.c
         )
 
 set(PY_WIND_SOURCE
