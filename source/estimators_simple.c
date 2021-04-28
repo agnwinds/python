@@ -97,16 +97,22 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
     xplasma->j_scatt += w_ave * ds;
   }
 
+  /* frequency weighted by the weights and distance in the shell .  See eqn 2 ML93 */
 
-
-/* frequency weighted by the weights and distance in the shell .  See eqn 2 ML93 */
   xplasma->mean_ds += ds;
   xplasma->n_ds++;
   xplasma->ave_freq += p->freq * w_ave * ds;
 
+  if (xplasma->ave_freq < 0)
+  {
+    Error ("updated_banded_estimators: ave_freq %g Hz < 0 in plasma cell %d with p->np %d p->freq %g w_ave %g ds %g\n", xplasma->ave_freq,
+           xplasma->nplasma, p->np, p->freq, w_ave, ds);
+    Exit (1);
+  }
+
   /* The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
-     nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
-     going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
+     nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies,
+     going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop
      will be i=nxfreq-1 */
 
   /* note that here we can use the photon weight and don't need to calculate anm attenuated average weight
@@ -213,7 +219,7 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
 }
 
 /**********************************************************/
-/** 
+/**
  * @brief      updates the estimators for calculating
  * the radiative force on each Plasma Cell
  * spectra in each Plasma cell
@@ -229,14 +235,14 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
  *
  * @details
  *
- * 
+ *
  *
  * ### Notes ###
  *
- * 
+ *
  * In non macro atom mode, w_ave
- * this is an average weight (passed as w_ave), but 
- * in macro atom mode weights are never reduced (so p->w 
+ * this is an average weight (passed as w_ave), but
+ * in macro atom mode weights are never reduced (so p->w
  * is used).
  *
  * This routine is called from bf_estimators in macro_atom modes
@@ -248,7 +254,7 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
  *
  * The flux estimators are constructed in the Observer frame
  * As a result, inputs are also expected to be in the Observer frame
- * 
+ *
  **********************************************************/
 
 
@@ -280,7 +286,7 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
   {
     renorm (phot_mid->x, 1);    //Create a unit vector in the direction of the photon from the origin
     flux[0] = dot (p_dir_cos, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
-    flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
+    flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero
   }
 
 
@@ -425,16 +431,18 @@ update_force_estimators (xplasma, p, phot_mid, ds, w_ave, ndom, z, frac_ff, frac
  *
  * @return Always return 0
  *
- * @details 
- * This routine normalises "simple" estimators and in a few cases compleets
- * the determination of the quantity itself by performaing calculations
+ * @details
+ * This routine normalises "simple" estimators and in a few cases completes
+ * the determination of the quantity itself by performing calculations
  * of various quantities that have been accumulated during photon transfer
  *
- * The quantities vary - some of them are banded estimators used for the ionization 
+ * The quantities vary - some of them are banded estimators used for the ionization
  * state spectral models, others are diagnostics such as xi, others are used
- * in dilute approximations (w and t_r). 
+ * in dilute approximations (w and t_r).
  *
  * ### Notes ###
+ *
+ * This function is where the radiation temperature is updated.
  *
  * Most of the quantities that are renormalized here are quantities that
  * are measured in the co-moving frame, but the radiation force is
@@ -459,6 +467,13 @@ normalise_simple_estimators (xplasma)
   if (xplasma->ntot > 0)
   {
     wtest = xplasma->ave_freq;
+
+    if (wtest < 0)
+    {
+      Error ("The average frequency (%g Hz) in plasma cell %d is negative! Need to exit.\n", wtest, xplasma->nplasma);
+      Exit (1);
+    }
+
     xplasma->ave_freq /= xplasma->j;    /* Normalization to frequency moment */
     if (sane_check (xplasma->ave_freq))
     {
@@ -471,6 +486,12 @@ normalise_simple_estimators (xplasma)
 
     xplasma->t_r_old = xplasma->t_r;    // Store the previous t_r in t_r_old immediately before recalculating
     radiation_temperature = xplasma->t_r = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
+    if (xplasma->t_r < 0)
+    {
+      Error ("t_r %g is negative in plasma cell %d ave_freq %g\n", xplasma->t_r, xplasma->nplasma, xplasma->ave_freq);
+      Exit (1);
+    }
+
     xplasma->w =
       PI * xplasma->j / (STEFAN_BOLTZMANN * radiation_temperature * radiation_temperature * radiation_temperature * radiation_temperature);
 
@@ -495,7 +516,7 @@ normalise_simple_estimators (xplasma)
     xplasma->w = 0;
   }
 
-  /* Normalize and otherwise complete the information gathered about the 
+  /* Normalize and otherwise complete the information gathered about the
      coarse spectra used for generation of spectral models */
 
   for (i = 0; i < geo.nxfreq; i++)
@@ -515,7 +536,6 @@ normalise_simple_estimators (xplasma)
     }
   }
 
-
   /* Normalize the cell spectra to J_nu - erg/s/cm^3/Sr/Hz */
 
   for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
@@ -525,9 +545,7 @@ normalise_simple_estimators (xplasma)
     dfreq = pow (10., freq_max) - pow (10., freq_min);
 
     xplasma->cell_spec_flux[i] /= (4 * PI * invariant_volume_time * dfreq);
-
   }
-
 
   /* Normalise IP, which at this point should be
    * the number of photons in a cell by dividing by volume
