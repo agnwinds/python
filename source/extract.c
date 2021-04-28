@@ -146,9 +146,10 @@ extract (w, p, itype)
        of times or in specific regions of the wind. A region is specified by a position
        and a radius. */
 
-    extract_photon = TRUE;
+    mscat = xxspec[n].nscat;
 
-    if ((mscat = xxspec[n].nscat) > MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
+    // I think this should be mscat == MAXSCAT, can someone check? This part of the code confuses me
+    if (mscat == MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
       extract_photon = TRUE;
     else
       extract_photon = FALSE;
