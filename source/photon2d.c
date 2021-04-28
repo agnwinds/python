@@ -516,6 +516,7 @@ return and record an error */
       Error ("translate_in_wind: nres %5d repeat after motion of %10.3e of phot %6d in ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
              *nres, ds_current, p->np, geo.wcycle, geo.pcycle, p->istat, istat);
       istat = P_INWIND;
+      *tau = 0;
     }
   }
 

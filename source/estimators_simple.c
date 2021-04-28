@@ -84,6 +84,18 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
   int i;
   double log_freq;
 
+  if (ds < 0)
+  {
+    Error("updated_banded_estimators: ds %e < 0 in plasma cell %d when it has to be positive\n", ds, xplasma->nplasma);
+    Exit(1);
+  }
+
+  if (w_ave < 0)
+  {
+    Error("updated_banded_estimators: w_ave %e < 0 in plasma cell %d when it has to be positive\n", w_ave, xplasma->nplasma);
+    Exit(1);
+  }
+
   /*photon weight times distance in the shell is proportional to the mean intensity */
 
   xplasma->j += w_ave * ds;
