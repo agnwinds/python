@@ -190,7 +190,7 @@ extract (w, p, itype)
 
       stuff_v (xxspec[n].lmn, xlmn);    //XTEST
 
-      if (rel_mode == REL_MODE_FULL && itype == PTYPE_WIND)
+      if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_WIND)
       {
         stuff_phot (&p_in, &p_dummy);
         p_dummy.frame = F_OBSERVER;
@@ -199,7 +199,7 @@ extract (w, p, itype)
         stuff_phot (&p_in, &pp);
         stuff_v (p_dummy.lmn, pp.lmn);
       }
-      else if (rel_mode == REL_MODE_FULL && itype == PTYPE_DISK)
+      else if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_DISK)
       {
         stuff_phot (&p_in, &p_dummy);
         p_dummy.frame = F_OBSERVER;
