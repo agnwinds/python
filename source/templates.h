@@ -702,3 +702,4 @@ int get_one_array_element(int ndom, char variable_name[], int array_dim, double 
 int create_spec_table(int ndom, char rootname[]);
 int create_detailed_cell_spec_table(int ncell, char rootname[]);
 int create_big_detailed_spec_table(int ndom, char *rootname);
+

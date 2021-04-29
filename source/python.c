@@ -712,7 +712,12 @@ main (argc, argv)
   kbf_need (freqmin, freqmax);
 
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
+
+  // optical_depth_diagnostics (w);
+
   make_spectra (restart_stat);
+
+
 
   return (0);
 }

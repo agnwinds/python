@@ -212,6 +212,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
     cdf->y[m] = pdf_array[n];
     mm++;                       // increment the number associated with the desired y ignoring jumps
     /* So pdf->y will contain numbers from 0 to 1 */
+
   }
 
   cdf->x[FUNC_CDF] = xmax;      //Set the last x point in the downsampled CDF
@@ -219,6 +220,9 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   cdf->norm = 1.;               /* pdf_gen_from array produces a properly nomalized cdf and so the
                                    normalization is 1.  110629 ksl */
   cdf->ncdf = FUNC_CDF;         //The number of points is
+
+
+
 
 /* Calculate the gradients */
   if (calc_cdf_gradient (cdf))
@@ -307,7 +311,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
     x = xmin + (n + 0.5) * xstep;       /*The next value of x - it is midway between points on the required cdf because we
                                            will be adding the new z value onto the cumlative total, we assume the function is best approximated over the
                                            whole rage from x[n] to x[n+1] by using the value of the function between the two */
-    if ((z = (*func) (x, NULL)) < 0 || z > VERY_BIG || sane_check (z))        //check the function return is sensible
+    if ((z = (*func) (x, NULL)) < 0 || z > VERY_BIG || sane_check (z))  //check the function return is sensible
     {
       Error ("pdf_gen_from_func: probability density %g < 0 at %g\n", z, x);
     }
@@ -1054,14 +1058,24 @@ calc_cdf_gradient (cdf)
 
   }
   /* Fill in the ends */
+  //Simple versuion
+
   cdf->d[0] = cdf->d[1];
-
-
 
   cdf->d[cdf->ncdf] = cdf->d[cdf->ncdf - 1];
 
 
+  //more complex inear interpolation - might be risky so currently commented out.
+//  cdf->d[0] = cdf->d[1] - (cdf->d[2] - cdf->d[1]) / (cdf->x[2] - cdf->x[1]) * (cdf->x[1] - cdf->x[0]); //
 
+//  cdf->d[cdf->ncdf] =
+//    cdf->d[cdf->ncdf - 1] + (cdf->d[cdf->ncdf - 2] - cdf->d[cdf->ncdf - 1]) / (cdf->x[cdf->ncdf - 2] -
+//                                                                               cdf->x[cdf->ncdf - 1]) * (cdf->x[cdf->ncdf] -
+//                                                                                                         cdf->x[cdf->ncdf - 1]);
+  for (n = 0; n < cdf->ncdf + 1; n++)
+  {
+    printf ("BOOM3 %i %e %e %e\n", n, cdf->x[n], cdf->y[n], cdf->d[n]);
+  }
 
 
   return (istat);

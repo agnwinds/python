@@ -154,8 +154,8 @@ main (argc, argv)
 
   struct photon ptest;          //We need a test photon structure in order to compute t
 
-  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fopen ();        /*This is the file to communicate with zeus */
-
+  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fptr6, *fopen ();        /*This is the file to communicate with zeus */
+  domain = geo.hydro_domain_number;
 
 
   strcpy (parameter_file, "NONE");
@@ -172,9 +172,7 @@ main (argc, argv)
   xparse_arguments (argc, argv, root, &ion_switch);
 
   printf ("Reading data from file %s\n", root);
-
   /* Now create the names of all the files which will be written */
-
   strcpy (windsavefile, root);
   strcpy (outputfile, root);
 
@@ -206,8 +204,15 @@ main (argc, argv)
   fptr3 = fopen ("py_ion_data.dat", "w");
   fptr4 = fopen ("py_spec_data.dat", "w");
   fptr5 = fopen ("py_pcon_data.dat", "w");
+  fptr6 = fopen ("py_debug_data.dat", "w");
 
-  fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+
+  if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
+    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+  else if (zdom[domain].coord_type == CYLIND)
+    fprintf (fptr, "i j rcen zcen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+
+
 
   fprintf (fptr3, "nions %i\n", nions);
   for (i = 0; i < nions; i++)
@@ -230,6 +235,14 @@ main (argc, argv)
     fprintf (fptr4, "nplasma %i\n", NPLASMA);
 
   fprintf (fptr5, "nplasma %i\n", NPLASMA);
+
+  if (zdom[domain].coord_type == SPHERICAL)
+    fprintf (fptr6, "i j rcen thetacen v_th dvdr \n");
+  else if (zdom[domain].coord_type == CYLIND)
+    fprintf (fptr6, "i j rcen zcen v_th dvz_dz \n");
+  else if (zdom[domain].coord_type == RTHETA)
+    fprintf (fptr6, "i j rcen thetacen v_th dvr_dr \n");
+
   printf ("Set up files\n");
 
   if (geo.hydro_domain_number > 0)
@@ -245,9 +258,13 @@ main (argc, argv)
   {
     fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_r F_UV_r F_Xray_r es_f_r bf_f_r\n");    //directional flux by band
   }
-  else
+  else if (zdom[domain].coord_type == CYLIND)
   {
-    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x _es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");       //directional flux by band
+    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");    //directional flux by band
+  }
+  else if (zdom[domain].coord_type == RTHETA)
+  {
+    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");        //directional flux by band
   }
 
 
@@ -255,15 +272,19 @@ main (argc, argv)
 
   for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
   {
-    printf ("nwind=%i\n", nwind);
     if (wmain[nwind].vol > 0.0)
     {
       nplasma = wmain[nwind].nplasma;
-      printf ("Doing cell %i\n", nplasma);
       wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
-      i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
+
+      if (zdom[domain].coord_type == SPHERICAL)
+        i = i - 1;              //There is an extra radial 'ghost zone' in spherical coords in python, we need to make our i,j agree with zeus
       vol = wmain[plasmamain[nplasma].nwind].vol;
-      fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);  //output geometric things
+      if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
+        fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);        //output geometric things
+      else if (zdom[domain].coord_type == CYLIND)
+        fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);       //output geometric things
+
       fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);     //output temp, xi and ne to ease plotting of heating rates
       fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);   //Xray heating - or photoionization
       fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);     //Compton heating
@@ -274,7 +295,11 @@ main (argc, argv)
       fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);        //ff cooling
       fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
       fprintf (fptr, "%e \n", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
-      fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol); //output geometric things
+
+      if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
+        fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);       //output geometric things
+      else if (zdom[domain].coord_type == CYLIND)
+        fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);      //output geometric things
       fprintf (fptr2, "%e ", plasmamain[nplasma].rho);  //density
       fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
       if (zdom[domain].coord_type == SPHERICAL)
@@ -324,6 +349,8 @@ main (argc, argv)
       stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x); //place our test photon at the centre of the cell
       ptest.grid = nwind;       //We need our test photon to know where it is 
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
+      kappa_es = THOMPSON / MPROT;
+
       //First for the optcial band (up to 4000AA)     
       if (length (plasmamain[nplasma].F_vis) > 0.0)     //Only makes sense if flux in this band is non-zero
       {
@@ -388,6 +415,8 @@ main (argc, argv)
 
       fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
+
+      fprintf (fptr6, "%d %d %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)));     //output geometric things
     }
   }
   fclose (fptr);
@@ -395,9 +424,5 @@ main (argc, argv)
   fclose (fptr3);
   fclose (fptr4);
   fclose (fptr5);
-
-
-
-
   exit (0);
 }

@@ -363,8 +363,11 @@ py_optical_depth: startup $(py_optical_depth_objects)
 	mv $@ $(BIN)/py_optical_depth$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
+
 all: clean python windsave2table py_wind indent rad_hydro_files modify_wind py_optical_depth
 
 

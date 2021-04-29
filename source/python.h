@@ -1294,7 +1294,7 @@ have access to the proper normalization.
 
 #define NCDF 30000              //The default size for these arrays.  This needs to be greater than
                                 //the size of any model that is read in, hence larger than NWAVE_EXTRACT in models.h
-#define FUNC_CDF  200           //The size for CDFs made from functional form CDFs
+#define FUNC_CDF  2000           //The size for CDFs made from functional form CDFs
 #define ARRAY_PDF 1000          //The size for PDFs to be turned into CDFs from arrays
 
 

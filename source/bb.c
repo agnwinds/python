@@ -63,7 +63,7 @@ double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  
 double bb_set[] = {
 
   10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
-  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
+  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29., 29.99999
 };
 
 
@@ -124,7 +124,7 @@ planck (t, freqmin, freqmax)
 
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
-    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d_2, ALPHAMIN, ALPHAMAX, 20, bb_set)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d_2, ALPHAMIN, ALPHAMAX, 21, bb_set)) != 0)
     {
       Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
     }
