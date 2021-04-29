@@ -664,7 +664,7 @@ spectrum_create (p, nangle, select_extract)
 
   for (j = 0; j <= max_scat; j++)
   {
-    Log ("%-6g", (double) nscat[j]);
+    Log ("%-9g", (double) nscat[j]);
     if ((j % 10) == 9)
       Log ("\n");
   }
@@ -672,14 +672,14 @@ spectrum_create (p, nangle, select_extract)
   Log ("\nNumber of photons resonantly scattering n times.  The max number of scatters seen was %d\n", max_res);
   for (j = 0; j <= max_res; j++)
   {
-    Log ("%-6g", (double) nres[j]);
+    Log ("%-9g", (double) nres[j]);
     if ((j % 10) == 9)
       Log ("\n");
   }
   Log ("\nNo of photons and their fates\n!!PhotFate: ");
   for (j = 0; j < NSTAT; j++)
   {
-    Log ("%-6g", (double) nstat[j]);
+    Log ("%-9g", (double) nstat[j]);
     if ((j % 10) == 9)
       Log ("\n");
   }
@@ -688,14 +688,13 @@ spectrum_create (p, nangle, select_extract)
 
 
   Log ("Photons contributing to the various spectra\n");
-  Log ("                     Inwind   Scat    Esc     Star    >nscat    err    Absorb   Disk    sec    Adiab(matom)\n");
+  Log ("                      Inwind    Scat      Esc       Star      >nscat    err       Absorb    Disk     Sec        Adiab(matom)\n");
   for (n = 0; n < nspectra; n++)
   {
     Log ("%20s ", xxspec[n].name);
     for (j = 0; j < NSTAT; j++)
-      Log (" %-7g", (double) xxspec[n].nphot[j]);
+      Log (" %-9g", (double) xxspec[n].nphot[j]);
     Log ("\n");
-
   }
 
 
