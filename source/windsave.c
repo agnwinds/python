@@ -406,18 +406,18 @@ spec_save (filename)
     Exit (EXIT_FAILURE);
   }
 
-  sprintf(header, "Version %s  nspectra %d NWAVE_IONIZ %d NWAVE_EXTRACT %d NWAVE_MAX %d\n", VERSION, nspectra, NWAVE_IONIZ,
-          NWAVE_EXTRACT, NWAVE_MAX);
+  sprintf (header, "Version %s  nspectra %d NWAVE_IONIZ %d NWAVE_EXTRACT %d NWAVE_MAX %d\n", VERSION, nspectra, NWAVE_IONIZ,
+           NWAVE_EXTRACT, NWAVE_MAX);
 
   count = (int) fwrite (header, sizeof (header), 1, fptr);
   count += (int) fwrite (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
 
   for (i = 0; i < nspectra; ++i)
   {
-    count += (int) fwrite(xxspec[i].f, sizeof (*xxspec[i].f), NWAVE_MAX, fptr);
-    count += (int) fwrite(xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE_MAX, fptr);
-    count += (int) fwrite(xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE_MAX, fptr);
-    count += (int) fwrite(xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].f, sizeof (*xxspec[i].f), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE_MAX, fptr);
   }
 
   fclose (fptr);
@@ -467,21 +467,21 @@ spec_read (filename)
 
   count = (int) fread (header, sizeof (header), 1, fptr);
 
-  nhead = sscanf(header, "%*s %s %*s %d %*s %d %*s %d %*s %d", version, &nspectra, &nwave_ioniz_check, &NWAVE_EXTRACT, &NWAVE_MAX);
+  nhead = sscanf (header, "%*s %s %*s %d %*s %d %*s %d %*s %d", version, &nspectra, &nwave_ioniz_check, &NWAVE_EXTRACT, &NWAVE_MAX);
   if (nhead != 5)
   {
     Error ("Incorrect header format in %s\n", files.specsave);
     Exit (EXIT_FAILURE);
   }
-  if(nwave_ioniz_check != (int) NWAVE_IONIZ)
+  if (nwave_ioniz_check != (int) NWAVE_IONIZ)
   {
-    Error("The current NWAVE_IONIZ (%d) value is incompatible with the spec_save file which has NWAVE_IONIZ = %d\n", NWAVE_IONIZ,
-          nwave_ioniz_check);
-    Exit(EXIT_FAILURE);
+    Error ("The current NWAVE_IONIZ (%d) value is incompatible with the spec_save file which has NWAVE_IONIZ = %d\n", NWAVE_IONIZ,
+           nwave_ioniz_check);
+    Exit (EXIT_FAILURE);
   }
 
-  Log("Reading specfile %s with %d spectra and %d wavelength bins, created with python version %s and currently using python version %s\n",
-      filename, nspectra, NWAVE_EXTRACT, version, VERSION);
+  Log ("Reading specfile %s with %d spectra and %d wavelength bins, created with python version %s and currently using python version %s\n",
+       filename, nspectra, NWAVE_EXTRACT, version, VERSION);
 
   /* First allocate space */
 
@@ -495,13 +495,13 @@ spec_read (filename)
 
   /* Now read the rest of the file */
 
-  spectrum_allocate(nspectra);
+  spectrum_allocate (nspectra);
   for (i = 0; i < nspectra; ++i)
   {
-    count += (int) fread(xxspec[i].f, sizeof (*xxspec[i].f), NWAVE_MAX, fptr);
-    count += (int) fread(xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE_MAX, fptr);
-    count += (int) fread(xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE_MAX, fptr);
-    count += (int) fread(xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].f, sizeof (*xxspec[i].f), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE_MAX, fptr);
   }
 
   fclose (fptr);

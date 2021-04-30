@@ -1073,7 +1073,7 @@ calc_cdf_gradient (cdf)
 //                                                                               cdf->x[cdf->ncdf - 1]) * (cdf->x[cdf->ncdf] -
 //                                                                                                         cdf->x[cdf->ncdf - 1]);
 
- return (istat);
+  return (istat);
 }
 
 

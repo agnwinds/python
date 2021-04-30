@@ -17,18 +17,18 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 #define FALSE 0
 
 
-#define PNORM_FUDGE_FACTOR     1  /*An extra factor used for fudging the velocity factor See #815 */
-#define USE_GRADIENTS        TRUE   /*IF true use interpolated velcity gradients to calculate dv_ds */
+#define PNORM_FUDGE_FACTOR     1        /*An extra factor used for fudging the velocity factor See #815 */
+#define USE_GRADIENTS        TRUE       /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
-#define REL_MODE_LINEAR 0      /*Only make v/c corrections when doing frame transfers*/
-#define REL_MODE_FULL   1      /*Make full corrections for special relativity including co-moving frame effects*/
-#define REL_MODE_SR_FREQ 2     /*Make full corrects for special relativity frequency shifts, but ignore co-moving frame effects */
+#define REL_MODE_LINEAR 0       /*Only make v/c corrections when doing frame transfers */
+#define REL_MODE_FULL   1       /*Make full corrections for special relativity including co-moving frame effects */
+#define REL_MODE_SR_FREQ 2      /*Make full corrects for special relativity frequency shifts, but ignore co-moving frame effects */
 
-int rel_mode;                 /* How doppler effects and co-moving frames are  */
+int rel_mode;                   /* How doppler effects and co-moving frames are  */
 
-int run_xtest;               /* Variable if TRUE causes a special test mode to be run */
-int run_ztest;               /* Provides a way the optionally run certain code within python */
+int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
+int run_ztest;                  /* Provides a way the optionally run certain code within python */
 
 
 
@@ -82,8 +82,8 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define NSTAT 				10      // JM increased this to ten to allow for adiabatic
 #define TAU_MAX				20.     /* Sets an upper limit in extract on when
                                                    a photon can be assumed to be completely absorbed */
-#define TAU_MIN                         1e-6  /* minimum value for tau for p_escape_from_tau function- 
-                                                 below this we set to p_escape_ to 1 */
+#define TAU_MIN                         1e-6    /* minimum value for tau for p_escape_from_tau function- 
+                                                   below this we set to p_escape_ to 1 */
 
 #define TMAX_FACTOR			1.5     /*Factor by which t_e can exceed
                                                    t_r in order for absorbed to 
@@ -107,8 +107,8 @@ int NPHOT_MAX;                  /* The maximum number of photon bundles created 
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
 int NWAVE_MAX;
-int  NWAVE_EXTRACT;  			   //The number of wavelength bins for spectra during the spectrum cycles
-#define NWAVE_IONIZ 10000  //The number of wavelength bins for spectra during the ionization cycles
+int NWAVE_EXTRACT;              //The number of wavelength bins for spectra during the spectrum cycles
+#define NWAVE_IONIZ 10000       //The number of wavelength bins for spectra during the ionization cycles
 #define NWAVE_MIN 10
 #define MAXSCAT 			2000
 
@@ -163,7 +163,7 @@ enum coord_type_enum
 #define KNIGGE			5
 #define	HOMOLOGOUS 		6
 #define	SHELL 			9
-#define IMPORT                  10     
+#define IMPORT                  10
 #define	DISK_ATMOS 		11
 
 
@@ -173,7 +173,7 @@ enum coord_type_enum
    as well as some used for vector operations
 */
 
-typedef struct plane           
+typedef struct plane
 {
   double x[3];                  /* A position included in the plane (usually the "center" */
   double lmn[3];                /* A unit vector perpendicular to the plane (usually in the "positive" direction */
@@ -229,7 +229,7 @@ typedef struct domain
   struct plane windplane[2];    /* Planes which define the top and bottom of the wind */
   double rho_min, rho_max;      /* The values defining inner and outer cylinders that bound the wind */
 
-  double wind_x[NDIM_MAX], wind_z[NDIM_MAX];            /* Edges of the cells in the x and z directions */
+  double wind_x[NDIM_MAX], wind_z[NDIM_MAX];    /* Edges of the cells in the x and z directions */
   double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];      /* Midpoints of the cells in the x and z directions */
 
   ConePtr cones_rtheta;         /*A ptr to the cones that define boundaries of cells in the theta direction 
@@ -246,7 +246,7 @@ typedef struct domain
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
   double rmin, rmax;            /*Spherical extent of the wind */
   double zmin, zmax;            /* Vertical extent of the wind, often the same as rmax */
-  double wind_rhomin_at_disk, wind_rhomax_at_disk;    /*Min/Max rho for wind in disk plane */
+  double wind_rhomin_at_disk, wind_rhomax_at_disk;      /*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
 
@@ -329,7 +329,7 @@ struct geometry
 #define OBS_FRAME 0
 #define CMF_FRAME 1
 
-  int frame;                    /* Records frame parmeters like density and volumes are stroed */   
+  int frame;                    /* Records frame parmeters like density and volumes are stroed */
   int system_type;              /* See allowed types above. system_type should only be used for setp */
   int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
@@ -373,7 +373,7 @@ struct geometry
   int scat_select[NSPEC], top_bot_select[NSPEC];
   double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
   double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
-  int select_extract, select_spectype;   //select_extract is TRUE if extract mode, FALSE if Live or Die
+  int select_extract, select_spectype;  //select_extract is TRUE if extract mode, FALSE if Live or Die
 
 /* Begin description of the actual geometry */
 
@@ -500,7 +500,7 @@ struct geometry
   /* The next set of variables defineds frequency bands used a boundaries for accumulating coarse (and fine) spectral information 
      about the spectrum of photons in a cell. There are the coarse bands currently used for creating spectral models and there
      are a finer set of frequency intervals used for the fine spectra.  The spectra themselves can be found in the
-     Plasma structure for each cell*/
+     Plasma structure for each cell */
 
 #define  NXBANDS 20             /* the maximum number of bands (frequency intervals that can be defined for
                                    storing coarse spectra for each plasma cell */
@@ -508,10 +508,10 @@ struct geometry
   int nxfreq;                   /* the number of frequency intervals actually used */
   double xfreq[NXBANDS + 1];    /* the frequency boundaries for the coarse spectra  */
 
-#define NBINS_IN_CELL_SPEC   1000    // The number of bins in the cell spectra
+#define NBINS_IN_CELL_SPEC   1000       // The number of bins in the cell spectra
 
-  double cell_log_freq_min, cell_log_freq_max,cell_delta_lfreq; /* Parameters defining freqency intervals for cell spectra.
-                                                                   These are defined as logarithmic frequency intervals */
+  double cell_log_freq_min, cell_log_freq_max, cell_delta_lfreq;        /* Parameters defining freqency intervals for cell spectra.
+                                                                           These are defined as logarithmic frequency intervals */
 
 
   /* The next set pf variables assign a SPECTYPE (see above) for
@@ -747,10 +747,10 @@ typedef struct wind
                                    CYLVAR coordinates */
   double v[3];                  /*velocity at inner vertex of cell in the observer frame.  For 2d coordinate systems this
                                    is defined in the xz plane */
-  double v_grad[3][3];          /*velocity gradient tensor  at the inner vertex of the cell in the co-moving frame*/
-  double div_v;                 /*Divergence of v at center of cell in the co-moving frame*/
+  double v_grad[3][3];          /*velocity gradient tensor  at the inner vertex of the cell in the co-moving frame */
+  double div_v;                 /*Divergence of v at center of cell in the co-moving frame */
   double dvds_ave;              /* Average value of dvds */
-  double dvds_max;              /*The maximum value of dvds*/
+  double dvds_max;              /*The maximum value of dvds */
 //OLD  double dvds_max; //, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
@@ -758,13 +758,13 @@ typedef struct wind
                                    The vol that is stored here after the progam has initialized itself is the
                                    co-moving frame volume.
                                  */
-  double xgamma,xgamma_cen;     /* 1./sqrt(1-beta**2) at x at edge and center of cell*/
+  double xgamma, xgamma_cen;    /* 1./sqrt(1-beta**2) at x at edge and center of cell */
   double dfudge;                /* A number which defines a push through distance for this cell, which replaces the
                                    global variable DFUDGE in many instances */
   enum inwind_enum
   { W_IN_DISK = -5, W_IN_STAR = -4, W_IGNORE = -2, W_NOT_INWIND = -1,
     W_ALL_INWIND = 0, W_PART_INWIND = 1, W_NOT_ASSIGNED = -999
-  } inwind;                      /* Basic information on the nature of a particular cell. */
+  } inwind;                     /* Basic information on the nature of a particular cell. */
   Wind_Paths_Ptr paths, *line_paths;    // Path data struct for each cell
 }
 wind_dummy, *WindPtr;
@@ -811,7 +811,7 @@ typedef struct plasma
    * that are "significant" in a plasma cell, based on the density of a particular ion in a cell and the x-section 
    * at the photoinization edge.  This process was introduced as a means to speed the program up by ignoring those
    * bf processes that would contribute negligibly to the bf opacity
-  */
+   */
 
   int *kbf_use;                 /* List of the indices of the photoionization processes to be used for kappa_bf.  */
   int kbf_nuse;                 /* Total number of photoionization processes to be used for kappa_bf. (SS) */
@@ -874,11 +874,11 @@ typedef struct plasma
 
   /* Information related to spectral bands used for modelling */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* Frequency limited versions of j and ave_freq */
-  double fmin[NXBANDS], fmax[NXBANDS];          /* Minimum (Maximum) frequency photon observed in a band - 
-                                                   this is incremented during photon flight */
+  double fmin[NXBANDS], fmax[NXBANDS];  /* Minimum (Maximum) frequency photon observed in a band - 
+                                           this is incremented during photon flight */
   double fmin_mod[NXBANDS], fmax_mod[NXBANDS];  /* Minimum (Maximum) frequency of the band-limited model 
                                                    after allowing possibility that the observed limit, 
-                                                   is primarily due to photon statistics. See epectral_estimators.c*/
+                                                   is primarily due to photon statistics. See epectral_estimators.c */
   double xsd_freq[NXBANDS];     /* The standard deviation of the frequency in the band */
   int nxtot[NXBANDS];           /* The total number of photon passages in frequency bands */
 
@@ -899,9 +899,9 @@ typedef struct plasma
   double exp_temp[NXBANDS];     /* The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];        /* The prefactor of an exponential representation of the radiation field in a cell */
 
-  double cell_spec_flux[NBINS_IN_CELL_SPEC];  /*The array where the cell spectra are accumulated. */
+  double cell_spec_flux[NBINS_IN_CELL_SPEC];    /*The array where the cell spectra are accumulated. */
 
-  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux)*/
+  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux) */
   double F_vis[4];
   double F_UV[4];
   double F_Xray[4];
@@ -945,26 +945,26 @@ typedef struct plasma
                                  */
 
   double dmo_dt[3];             /*Radiative force of wind */
-  double rad_force_es[4];       /*Radiative force of wind - 4th element is sum of magnitudes*/
-  double rad_force_ff[4];       /*Radiative force of wind - 4th element is sum of magnitudes*/
-  double rad_force_bf[4];       /*Radiative force of wind - 4th element is sum of magnitudes*/
+  double rad_force_es[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_ff[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_bf[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
 
 
 
   double gain;                  /* The gain being used in iterations of the structure */
-  double converge_t_r, converge_t_e, converge_hc;       
+  double converge_t_r, converge_t_e, converge_hc;
   /* Three measures of whether the program believes the grid is converged.  The first two 
      are the fractional changes in t_r, t_e between this and the last cycle. 
      The third number is the fraction between heating and cooling divided by the sum of the 2
    */
 
-  int trcheck, techeck, hccheck;        
+  int trcheck, techeck, hccheck;
   /* The individual convergence checks used to calculate converge_whole.  
      Each of these values is 0 if the fractional change or in the case of the last 
      check error is less than a value, currently set to 0.05.  This number is now 
      also used to say if the cell is over temperature - it is set to 2 in this case   */
 
-  int converge_whole, converging;       
+  int converge_whole, converging;
   /* converge_whole is the sum of the individual convergence checks.  It is 0 if all 
      of the convergence checks indicated convergence. converging is an indicator of whether 
      the program thought the cell is on the way to convergence 0 implies converging */
@@ -975,8 +975,8 @@ typedef struct plasma
 #define CONVERGENCE_CHECK_FAIL 1        /* Cell has failed a convergence check */
 #define CONVERGENCE_CHECK_OVER_TEMP 2   /* Cell has electron temperature is more than TMAX */
 
-  double ip;    /* Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  double xi;    /* Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
+  double ip;                    /* Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
+  double xi;                    /* Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;
@@ -1120,13 +1120,13 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 /***************************************PHOTON STRUCTURE*********************************/
 typedef struct photon
 {
-  double x[3];                                  /* The position of packet */
-  double lmn[3];                                /* Direction cosines of the packet */
-  double freq, freq_orig;        /* current, original frequency (redshifted) of this packet */
-  double w, w_orig;                             /* current and original weight of this packet */
-  double tau;                                   /* optical depth of the photon since its creation or last interaction */
+  double x[3];                  /* The position of packet */
+  double lmn[3];                /* Direction cosines of the packet */
+  double freq, freq_orig;       /* current, original frequency (redshifted) of this packet */
+  double w, w_orig;             /* current and original weight of this packet */
+  double tau;                   /* optical depth of the photon since its creation or last interaction */
 
-#define N_ISTAT 13 // number of entries in the istat_enum 
+#define N_ISTAT 13              // number of entries in the istat_enum
   enum istat_enum
   {
     P_INWIND = 0,               //in wind,
@@ -1178,7 +1178,7 @@ typedef struct photon
     PTYPE_DISK_MATOM = 12,
     PTYPE_WIND_MATOM = 13,
     PTYPE_AGN_MATOM = 14,
-    PTYPE_DUMMY = -1    
+    PTYPE_DUMMY = -1
   } origin, origin_orig;        /* Where this photon originated.  If the photon has
                                    scattered its "origin" may be changed to "wind". */
   /* note that we add 10 to origin when processed by a macro-atom
@@ -1198,7 +1198,7 @@ p_dummy, *PhotPtr;
 
 PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
                                    breaking the main routine of python into separate rooutines for inputs and 
-                                   running the program */ 
+                                   running the program */
 
 /**************************************SPECTRUM STRUCTURE ***********************/
     /* The next section defines the spectrum arrays.  The spectrum structure contains
@@ -1225,7 +1225,7 @@ int nspectra;                   /* After create_spectrum, the number of elements
 
 #define MSPEC               8   /* The number of standard spectra - i.e. not user defined angles */
 #define SPEC_CREATED        0   /* The spectrum of from external sources with  weights before transmission through the wind */
-#define SPEC_CWIND          1   /* The spectrum created in the wind with rheir original weights*/
+#define SPEC_CWIND          1   /* The spectrum created in the wind with rheir original weights */
 #define SPEC_EMITTED        2   /* The emitted spectrum - i.e. photons with their weights changed by transmission through the wind */
 #define SPEC_CENSRC         3   /* The emitted spectrum from photons emitted from the central source (if there is one) */
 #define SPEC_DISK           4   /* The emitted spectrum from photons emitted from the disk (if there is one) */
@@ -1241,7 +1241,7 @@ typedef struct spectrum
 {
   char name[40];
   double freqmin, freqmax, dfreq;
-  double lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
+  double lfreqmin, lfreqmax, ldfreq;    /* NSH 1302 - values for logarithmic spectra */
   double lmn[3];
   double mmax, mmin;            /* Used only in live or die situations, mmax=cos(angle-DANG_LIVE_OR_DIE)
                                    and mmim=cos(angle+DANG_LIVE_OR_DIE).   In actually defining this
@@ -1261,12 +1261,12 @@ typedef struct spectrum
   double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
                                    x is taken to be the center of the region and r is taken to be the radius of
                                    the region.   */
-  double *f;              /* The spectrum in linear (wavelength or frequency) units */
-  double *lf;             /* The specturm in log (wavelength or frequency)  units  */
+  double *f;                    /* The spectrum in linear (wavelength or frequency) units */
+  double *lf;                   /* The specturm in log (wavelength or frequency)  units  */
 
-  double *f_wind;         /* The spectrum of photons created in the wind or scattered in the wind. Created for
+  double *f_wind;               /* The spectrum of photons created in the wind or scattered in the wind. Created for
                                    reflection studies but possibly useful for other reasons as well. */
-  double *lf_wind;        /* The logarithmic version of this */
+  double *lf_wind;              /* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;
 
@@ -1294,7 +1294,7 @@ have access to the proper normalization.
 
 #define NCDF 30000              //The default size for these arrays.  This needs to be greater than
                                 //the size of any model that is read in, hence larger than NWAVE_EXTRACT in models.h
-#define FUNC_CDF  2000           //The size for CDFs made from functional form CDFs
+#define FUNC_CDF  2000          //The size for CDFs made from functional form CDFs
 #define ARRAY_PDF 1000          //The size for PDFs to be turned into CDFs from arrays
 
 
@@ -1530,6 +1530,5 @@ struct rdpar_choices zz_spec;
    only use log.h and don't use python.h due to repeated definitions */
 #include "log.h"
 #include "strict.h"
-#include "version.h"           
+#include "version.h"
 #include "templates.h"
-

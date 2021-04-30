@@ -631,7 +631,7 @@ emittance_bb (freqmin, freqmax, t)
  **********************************************************/
 
 double
-check_freq_max(freq_max, temp)
+check_freq_max (freq_max, temp)
      double freq_max, temp;
 {
   double bblim;

@@ -369,7 +369,7 @@ init_observers ()
 
   rdpar_comment ("The minimum and maximum wavelengths in the final spectra and the number of wavelength bins");
   spec_nwave_default_double = 10000;
-  rddoub("Spectrum.nwave", &spec_nwave_default_double);
+  rddoub ("Spectrum.nwave", &spec_nwave_default_double);
   NWAVE_EXTRACT = (int) spec_nwave_default_double;
 
   /*
@@ -384,7 +384,7 @@ init_observers ()
 
   if (NWAVE_EXTRACT < NWAVE_MIN)
   {
-    Error("Minimum number of spectrum bins is %d\n", NWAVE_MIN);
+    Error ("Minimum number of spectrum bins is %d\n", NWAVE_MIN);
     NWAVE_EXTRACT = NWAVE_MIN;
   }
 
