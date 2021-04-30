@@ -141,7 +141,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int nnscat;
   int nplasma, ndom;
   int kpkt_mode;
-  double fmin, fmax;
+  double freq_min, freq_max;
 
   photstop = photstart + nphot;
   Log ("photo_gen_kpkt  creates nphot %5d photons from %5d to %5d, weight %8.4e \n", nphot, photstart, photstop, weight);
@@ -149,15 +149,15 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
     /* we are in the ionization cycles, so use all frequencies. kpkt_mode should allow all processes */
-    fmin = xband.f1[0];
-    fmax = xband.f2[xband.nbands - 1];
+    freq_min = xband.f1[0];
+    freq_max = xband.f2[xband.nbands - 1];
     kpkt_mode = KPKT_MODE_ALL;
   }
   else
   {
     /* we are in the spectral cycles, so use all the required frequency range */
-    fmin = geo.sfmin;
-    fmax = geo.sfmax;
+    freq_min = geo.sfmin;
+    freq_max = geo.sfmax;
     /* we only want k->r processes */
     kpkt_mode = KPKT_MODE_CONTINUUM;
   }
@@ -192,7 +192,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     test = pp.freq;
 
-    while (test > fmax || test < fmin)
+    while (test > freq_max || test < freq_min)
     {
       pp.w = p[n].w;
       kpkt (&pp, &nres, &esc_ptr, kpkt_mode);

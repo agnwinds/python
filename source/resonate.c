@@ -622,8 +622,8 @@ kappa_bf (xplasma, freq, macro_all)
  * @brief      computes and stores the set of bound-free processes which
  *         make significiant contributions to the opacity in a grid cell.
  *
- * @param [in] double  fmin   the lowest frequency of interest to the calculation
- * @param [in] double  fmax   the highest frequency of interest to the calculations
+ * @param [in] double  freq_min   the lowest frequency of interest to the calculation
+ * @param [in] double  freq_max   the highest frequency of interest to the calculations
  * @return     Always returns 0
  *
  * The purpose of this routine is to speed up calculations by idenfifying which
@@ -658,8 +658,8 @@ kappa_bf (xplasma, freq, macro_all)
  **********************************************************/
 
 int
-kbf_need (fmin, fmax)
-     double fmin, fmax;
+kbf_need (freq_min, freq_max)
+     double freq_min, freq_max;
 
 
 {
@@ -685,7 +685,7 @@ kbf_need (fmin, fmax)
 
       ft = phot_top[n].freq[0]; //This is the edge frequency (SS)
 
-      if ((ft > (fmin / 3.)) && (ft < fmax))
+      if ((ft > (freq_min / 3.)) && (ft < freq_max))
       {
         nion = phot_top[n].nion;
 

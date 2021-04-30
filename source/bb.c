@@ -606,7 +606,7 @@ emittance_bb (freqmin, freqmax, t)
  * If it is too far off the end of the planck function, the numerical integration routine  will malfunction. We
  * just have to set it to a frequency where the BB function is tiny, say where hnu/kT =100.
  *
- * @param [in] double  fmax   The maximum frequency 
+ * @param [in] double  freq_max   The maximum frequency
  * @param [in] double  temp   The temperature
  * @return   A frequency which is the maximum value for which one should try to evaluate the
  * BB function
@@ -631,20 +631,20 @@ emittance_bb (freqmin, freqmax, t)
  **********************************************************/
 
 double
-check_fmax (fmax, temp)
-     double fmax, temp;
+check_freq_max(freq_max, temp)
+     double freq_max, temp;
 {
   double bblim;
 
 
   bblim = ALPHABIG * (temp / H_OVER_K);
 
-  if (bblim < fmax)
+  if (bblim < freq_max)
   {
-    fmax = bblim;
+    freq_max = bblim;
   }
 
-  return (fmax);
+  return (freq_max);
 
 }
 

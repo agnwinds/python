@@ -621,8 +621,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
  * @param [in] struct topbase_phot cont_ptr pointer to calculate
  * @param [in] struct PlasmaPtr xplasma the plasma cell of interesest
  * @param [in] int ichoice one of several types or rates to calculate
- * @param [in] double fmin  the mimimum frequency                           
- * @param [in] double fmax  the maximum frequencey
+ * @param [in] double freq_min  the mimimum frequency                           
+ * @param [in] double freq_max  the maximum frequencey
  *
  * @returns  The routine returns the spontanous recombination rate, in various forms
  *
@@ -648,11 +648,11 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
 double
-scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, fmin, fmax)
+scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, freq_min, freq_max)
      struct topbase_phot *cont_ptr;
      PlasmaPtr xplasma;
      int ichoice;
-     double fmin, fmax;
+     double freq_min, freq_max;
 {
   double alpha_sp_value;
   double fthresh, flast;
@@ -667,11 +667,11 @@ scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, fmin, fmax)
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
     flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
-  if (flast < fmax)
+  if (flast < freq_max)
   {
-    fmax = flast;
+    freq_max = flast;
   }
-  alpha_sp_value = num_int (alpha_sp_integrand, fmin, fmax, 1e-4);
+  alpha_sp_value = num_int (alpha_sp_integrand, freq_min, freq_max, 1e-4);
 
   return (alpha_sp_value);
 }
@@ -1163,8 +1163,8 @@ fake_matom_bf (p, nres, escape)
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in]     int upper   the upper level that we deactivate from
  * @param [in,out]  int nres    the process by which deactivation occurs
- * @param [in]     double fmin  the lower limit to the desired frequency 
- * @param [in]    double fmax   the upper limit to the desired frequency 
+ * @param [in]     double freq_min  the lower limit to the desired frequency 
+ * @param [in]    double freq_max   the upper limit to the desired frequency 
  * @return 0
  *
  * @details  emit matom is called to generate a photon frequency emitted in the
@@ -1181,12 +1181,12 @@ fake_matom_bf (p, nres, escape)
 ***********************************************************/
 
 int
-emit_matom (w, p, nres, upper, fmin, fmax)
+emit_matom (w, p, nres, upper, freq_min, freq_max)
      WindPtr w;
      PhotPtr p;
      int *nres;
      int upper;
-     double fmin, fmax;
+     double freq_min, freq_max;
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -1241,7 +1241,7 @@ emit_matom (w, p, nres, upper, fmin, fmax)
   for (n = 0; n < nbbd; n++)
   {
     line_ptr = &line[config[uplvl].bbd_jump[n]];
-    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))     // correct range
+    if ((line_ptr->freq > freq_min) && (line_ptr->freq < freq_max))     // correct range
     {
       bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 
@@ -1260,7 +1260,7 @@ emit_matom (w, p, nres, upper, fmin, fmax)
   {
     cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];
 
-    if (cont_ptr->freq[0] < fmax)
+    if (cont_ptr->freq[0] < freq_max)
     {
       sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
 
@@ -1278,7 +1278,7 @@ emit_matom (w, p, nres, upper, fmin, fmax)
 
   double xfreq;
   xfreq = 0;
-  while (xfreq < fmin || xfreq > fmax)
+  while (xfreq < freq_min || xfreq > freq_max)
   {
     threshold = random_number (0.0, 1.0);
 
