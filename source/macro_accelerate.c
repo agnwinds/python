@@ -847,7 +847,7 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
-  one = &wmain[xplasma->nplasma];
+  one = &wmain[xplasma->nwind];
 
   penorm = 0.0;
   penorm_band = 0.0;
