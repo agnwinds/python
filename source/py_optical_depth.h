@@ -16,7 +16,7 @@
  *
  * ************************************************************************** */
 
-#define DOMAIN_TO_CONSIDER 0  // For now, we only care about photons starting in domain 0
+#define DOMAIN_TO_CONSIDER 0    // For now, we only care about photons starting in domain 0
 #define N_FREQ_BINS 25000
 
 // Inclination angles structure
@@ -28,7 +28,7 @@ typedef struct SightLines_s
 } SightLines_t;
 
 SightLines_t *INCLINATION_ANGLES;
-int N_INCLINATION_ANGLES;         // The number of inclination angles
+int N_INCLINATION_ANGLES;       // The number of inclination angles
 
 // PI edges structure
 
@@ -38,7 +38,7 @@ typedef struct PIEdges_s
   double freq;
 } PIEdges_t;
 
-#define N_PI_EDGES (int) (sizeof PI_EDGES_TO_MEASURE / sizeof *PI_EDGES_TO_MEASURE)  // The number of optical depths for the simple calculation
+#define N_PI_EDGES (int) (sizeof PI_EDGES_TO_MEASURE / sizeof *PI_EDGES_TO_MEASURE)     // The number of optical depths for the simple calculation
 
 // Control the column density extracted
 

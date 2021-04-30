@@ -7,7 +7,7 @@ int init_integ_planck_d(void);
 double planck_d(double alpha, void *params);
 double planck_d_2(double alpha, void *params);
 double emittance_bb(double freqmin, double freqmax, double t);
-double check_fmax(double fmax, double temp);
+double check_freq_max(double freq_max, double temp);
 /* atomicdata.c */
 int get_atomic_data(char masterfile[]);
 /* atomicdata_init.c */
@@ -59,8 +59,8 @@ int lucy_mazzali1(double nh, double t_r, double t_e, double www, int nelem, doub
 int fix_concentrations(PlasmaPtr xplasma, int mode);
 double get_ne(double density[]);
 /* spectra.c */
-int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
 void spectrum_allocate(int nspec);
+int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
 int spectrum_create(PhotPtr p, int nangle, int select_extract);
 int spec_add_one(PhotPtr p, int spec_type);
 int spectrum_summary(char filename[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin, int iwind);
@@ -125,7 +125,7 @@ double ds_to_cylinder(double rho, struct photon *p);
 double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres, double smax, int *istat);
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);
 double kappa_bf(PlasmaPtr xplasma, double freq, int macro_all);
-int kbf_need(double fmin, double fmax);
+int kbf_need(double freq_min, double freq_max);
 double sobolev(WindPtr one, double x[], double den_ion, struct lines *lptr, double dvds);
 int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
@@ -323,12 +323,12 @@ void print_timer_duration(char *msg, struct timeval timer_t0);
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
-double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double fmin, double fmax);
+double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double freq_min, double freq_max);
 double alpha_sp_integrand(double freq, void *params);
 int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
-int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double fmin, double fmax);
+int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double freq_min, double freq_max);
 /* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
@@ -610,8 +610,8 @@ int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double 
 /* macro_accelerate.c */
 void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
-double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double fmin, double fmax);
-double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double fmin, double fmax);
+double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double freq_min, double freq_max);
+double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double freq_min, double freq_max);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -702,4 +702,3 @@ int get_one_array_element(int ndom, char variable_name[], int array_dim, double 
 int create_spec_table(int ndom, char rootname[]);
 int create_detailed_cell_spec_table(int ncell, char rootname[]);
 int create_big_detailed_spec_table(int ndom, char *rootname);
-
