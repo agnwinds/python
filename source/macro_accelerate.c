@@ -86,10 +86,6 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
-    if (uplvl == 64)
-    {
-      Log ("Gotcha");
-    }
     nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
     nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
     nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
