@@ -846,6 +846,7 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
   double freqmin, freqmax;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
+  double total_ff_lofreq, total_ff;
 
   one = &wmain[xplasma->nwind];
 
@@ -932,23 +933,34 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
     }
 
 
+
     /* consult issues #187, #492 regarding free-free */
     penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
+
+    total_ff_lofreq = total_free (one, xplasma->t_e, 0, freqmin);
+    total_ff = total_free (one, xplasma->t_e, freqmin, freqmax);
+
+    /*
+     * Do not increment penorm_band when the total free-free luminosity is zero
+     */
+
     if (fmin > freqmin)
     {
-      penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
+      if (total_ff > 0)
+        penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_ff * mplasma->cooling_ff;
     }
     else if (fmax > freqmin)
     {
-      penorm_band += total_free (one, xplasma->t_e, freqmin, fmax) / total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
-      penorm_band +=
-        total_free (one, xplasma->t_e, fmin, freqmin) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+      if (total_ff > 0)
+        penorm_band += total_free (one, xplasma->t_e, freqmin, fmax) / total_ff * mplasma->cooling_ff;
+      if (total_ff_lofreq > 0)
+        penorm_band += total_free (one, xplasma->t_e, fmin, freqmin) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
     }
     else
     {
-      penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+      if (total_ff_lofreq > 0)
+        penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
     }
-
 
     penorm += eprbs = mplasma->cooling_adiabatic;
 
