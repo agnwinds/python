@@ -687,7 +687,6 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
 
-
   /* The first step is to identify the configuration that has been excited. */
 
   uplvl = upper;
@@ -843,7 +842,7 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
   MacroPtr mplasma;
   WindPtr one;
   struct photon pdummy;
-  double freqmin, freqmax;
+  double ff_freq_min, ff_freq_max;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
   double total_ff_lofreq, total_ff;
@@ -860,14 +859,14 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
 
   /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
      generation (see call to one_ff below) */
-  freqmin = xband.f1[0];
-  freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
+  ff_freq_min = xband.f1[0];
+  ff_freq_max = ALPHA_FF * xplasma->t_e / H_OVER_K;
 
   /* ksl This is a Bandaid for when the temperatures are very low */
   /* in this case cooling_ff should be low compared to cooling_ff_lofreq anyway */
-  if (freqmax < 1.1 * freqmin)
+  if (ff_freq_max < 1.1 * ff_freq_min)
   {
-    freqmax = 1.1 * freqmin;
+    ff_freq_max = 1.1 * ff_freq_min;
   }
 
 
@@ -937,24 +936,24 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
     /* consult issues #187, #492 regarding free-free */
     penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
 
-    total_ff_lofreq = total_free (one, xplasma->t_e, 0, freqmin);
-    total_ff = total_free (one, xplasma->t_e, freqmin, freqmax);
+    total_ff_lofreq = total_free(one, xplasma->t_e, 0, ff_freq_min);
+    total_ff = total_free(one, xplasma->t_e, ff_freq_min, ff_freq_max);
 
     /*
      * Do not increment penorm_band when the total free-free luminosity is zero
      */
 
-    if (fmin > freqmin)
+    if (fmin > ff_freq_min)
     {
       if (total_ff > 0)
         penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_ff * mplasma->cooling_ff;
     }
-    else if (fmax > freqmin)
+    else if (fmax > ff_freq_min)
     {
       if (total_ff > 0)
-        penorm_band += total_free (one, xplasma->t_e, freqmin, fmax) / total_ff * mplasma->cooling_ff;
+        penorm_band += total_free(one, xplasma->t_e, ff_freq_min, fmax) / total_ff * mplasma->cooling_ff;
       if (total_ff_lofreq > 0)
-        penorm_band += total_free (one, xplasma->t_e, fmin, freqmin) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
+        penorm_band += total_free(one, xplasma->t_e, fmin, ff_freq_min) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
     }
     else
     {
