@@ -34,7 +34,7 @@ or
 
 .. code:: console
 
-   py -n my_new_model
+   py -i my_new_model
 
 
 Python then queries the user for answers to a series of question, creating in the process a pf file, my_new_model.pf,
@@ -50,5 +50,25 @@ There the number in the second set of parenthesis is a suggested value of the pa
 The user types in a new value and a carriage return, or, if the the suggested value seems appropriate,
 responds with a carriage return, in which case the suggested value will be used.
 
-The :code:`-n` switch above indicates that Python should accumulate all of the necessary inputs, write out the parameter file,
+The :code:`-i` switch above indicates that Python should accumulate all of the necessary inputs, write out the parameter file,
 and exit, which is useful if one is not completely sure what one wants.
+
+
+Changes in the input files as the code evolves
+----------------------------------------------
+
+Occassionally, new input variables will be introduced into Python.  In this case, when one tries to run a parameter file 
+created with a previous version of Python in single processor mode, the program will query the user for the parameters that are missing, and then
+attempt to run the program as normal. 
+
+If the original name of the parameter file was :code:`test.pf`, the modified version of the parameter file will be written to  :code:`test.out.pf`, so
+one normally copies, in this case :code:`test.out.pf` to  :code:`test.pf` to avoid having the reenter the variable by hand if one wishes to run the parameter file a second time.
+
+A better approach, if one is aware a change to the inputs has been made, is to run the old parameter file with :code:`-i` switch, copy the :code:`test.out.pf` to  :code:`test.pf`, and then
+run the program normally.
+
+Alternatively, if one heeds to modify a number of input files, once one knows what the change is, one can simply edit the .pf files directly.
+
+(In multiprocessor mode, if the inputs have changed, the program will fail at the outset, requiring one to got through the process of runnning the program with  the  :code:`-i` switch, copying the :code:`test.out.pf` 
+to  :code:`test.pf`, and then running normally.)
+
