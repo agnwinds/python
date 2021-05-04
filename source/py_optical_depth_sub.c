@@ -18,7 +18,7 @@
 #include "python.h"
 #include "py_optical_depth.h"
 
-const PIEdges_t PI_EDGES_TO_MEASURE[] = {
+const PIEdges_t PHOTOION_EDGES_TO_MEASURE[] = {
   {"HLymanEdge", 3.387485e+15},
   {"HBalmerEdge", 8.293014e+14},
   {"HeI24eVEdge", 5.9483e+15},
@@ -70,7 +70,7 @@ print_optical_depths (const double *optical_depth_values, const double *column_d
     c_linelen = 0;
     for (j = 0; j < N_PI_EDGES; j++)
     {
-      c_linelen += sprintf (str, "tau_%-9s: %3.2e  ", PI_EDGES_TO_MEASURE[j].name, optical_depth_values[i * N_PI_EDGES + j]);
+      c_linelen += sprintf (str, "tau_%-9s: %3.2e  ", PHOTOION_EDGES_TO_MEASURE[j].name, optical_depth_values[i * N_PI_EDGES + j]);
       if (c_linelen > MAX_COL)
       {
         c_linelen = 0;
@@ -635,7 +635,7 @@ create_optical_depth_spectrum (void)
  * ************************************************************************** */
 
 void
-calculate_PI_edge_optical_depth (void)
+optical_depth_photoion(void)
 {
   int i, j;
   int err;
@@ -646,7 +646,7 @@ calculate_PI_edge_optical_depth (void)
   optical_depth_values = calloc (N_INCLINATION_ANGLES * N_PI_EDGES, sizeof *optical_depth_values);
   if (optical_depth_values == NULL)
   {
-    printf ("calculate_PI_edge_optical_depth: cannot allocate %lu bytes for optical_depths\n",
+    printf ("optical_depth_photoion: cannot allocate %lu bytes for optical_depths\n",
             N_INCLINATION_ANGLES * N_PI_EDGES * sizeof *optical_depth_values);
     exit (EXIT_FAILURE);
   }
@@ -654,9 +654,8 @@ calculate_PI_edge_optical_depth (void)
   column_density_values = calloc (N_INCLINATION_ANGLES, sizeof *optical_depth_values);
   if (column_density_values == NULL)
   {
-    printf ("calculate_PI_edge_optical_depth: cannot allocate %lu bytes for column_densities\n",
+    printf ("optical_depth_photoion: cannot allocate %lu bytes for column_densities\n",
             N_INCLINATION_ANGLES * sizeof *optical_depth_values);
-    free (optical_depth_values);
     exit (EXIT_FAILURE);
   }
 
@@ -671,12 +670,12 @@ calculate_PI_edge_optical_depth (void)
     {
       c_optical_depth = 0.0;
       c_column_density = 0.0;
-      c_frequency = PI_EDGES_TO_MEASURE[j].freq;
+      c_frequency = PHOTOION_EDGES_TO_MEASURE[j].freq;
 
       err = create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn);
       if (err == EXIT_FAILURE)
       {
-        printf ("calculate_PI_edge_optical_depth: skipping photon of frequency %e\n", c_frequency);
+        printf ("optical_depth_photoion: skipping photon of frequency %e\n", c_frequency);
         continue;
       }
 
@@ -709,7 +708,7 @@ void
 do_optical_depth_diagnostics (void)
 {
   initialize_inclination_angles ();
-  calculate_PI_edge_optical_depth ();
+  optical_depth_photoion();
   create_optical_depth_spectrum ();
   free (INCLINATION_ANGLES);
 }

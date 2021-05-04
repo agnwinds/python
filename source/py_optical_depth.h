@@ -39,7 +39,7 @@ typedef struct PIEdges_s
   double freq;
 } PIEdges_t;
 
-#define N_PI_EDGES (int) (sizeof PI_EDGES_TO_MEASURE / sizeof *PI_EDGES_TO_MEASURE)     // The number of optical depths for the simple calculation
+#define N_PI_EDGES (int) (sizeof PHOTOION_EDGES_TO_MEASURE / sizeof *PHOTOION_EDGES_TO_MEASURE)     // The number of optical depths for the simple calculation
 
 // Control the column density extracted
 
