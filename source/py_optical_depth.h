@@ -16,8 +16,9 @@
  *
  * ************************************************************************** */
 
-#define DOMAIN_TO_CONSIDER 0    // For now, we only care about photons starting in domain 0
-#define N_FREQ_BINS 25000
+void do_optical_depth_diagnostics(void);
+
+#define N_FREQ_BINS 10000
 
 // Inclination angles structure
 
@@ -50,3 +51,16 @@ enum COLUMN_DENSITY
 
 int COLUMN_MODE;
 int COLUMN_MODE_ION_NUMBER;
+
+// Control which domain to send photons from
+
+int N_DOMAIN;
+
+// Control how the optical depth integration is done
+
+enum {
+  RUN_MODE_OUTWARD,
+  RUN_MODE_PHOTOSPHERE,
+} MODE;
+
+double TAU_DEPTH;

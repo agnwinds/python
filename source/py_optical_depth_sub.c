@@ -25,6 +25,8 @@ const PIEdges_t PI_EDGES_TO_MEASURE[] = {
   {"HeII54eVEdge", 1.394384e+16}
 };
 
+const double MAXDIFF = VCHECK / VLIGHT; // For linear velocity requirement for photon transport
+
 /* ************************************************************************** */
 /**
  * @brief  Print the various optical depths calculated using this routine
@@ -50,7 +52,7 @@ print_optical_depths (const double *optical_depth_values, const double *column_d
   char str[LINELENGTH];
   const int MAX_COL = 120;
 
-  printf ("\nOptical depths along the defined line of sights for domain %i:\n\n", DOMAIN_TO_CONSIDER);
+  printf ("\nOptical depths along the defined line of sights for domain %i:\n\n", N_DOMAIN);
 
   for (i = 0; i < N_INCLINATION_ANGLES; i++)
   {
@@ -162,24 +164,22 @@ write_optical_depth_spectrum (const double *tau_spectrum, const double freq_min,
  *
  * ************************************************************************** */
 
-const double MAXDIFF = VCHECK / VLIGHT; // For linear velocity requirement for photon transport
-
 int
-calculate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_optical_depth)
+integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_optical_depth)
 {
   int p_istat;
-  int n_dom, n_plasma;
+  int n_domain, n_plasma;
   double kappa_total, density;
-  double smax;
-  double diff;
+  double smax, diff;
   double freq_inner, freq_outer, mean_freq;
   WindPtr c_wind_cell;
   PlasmaPtr c_plasma_cell;
   struct photon p_start, p_stop, p_now;
 
-  if ((photon->grid = where_in_grid (wmain[photon->grid].ndom, photon->x)) < 0)
+  photon->grid = where_in_grid (wmain[photon->grid].ndom, photon->x);
+  if (photon->grid < 0)
   {
-    printf ("calculate_tau_across_cell: photon is not in grid in cell %i\n", photon->grid);
+    printf ("integrate_tau_across_cell: photon is not in a grid cell\n");
     return EXIT_FAILURE;
   }
 
@@ -190,7 +190,7 @@ calculate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
    */
 
   c_wind_cell = &wmain[photon->grid];
-  n_dom = c_wind_cell->ndom;
+  n_domain = c_wind_cell->ndom;
   n_plasma = wmain[photon->grid].nplasma;
   c_plasma_cell = &plasmamain[n_plasma];
 
@@ -206,7 +206,7 @@ calculate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
   smax = smax_in_cell (photon);
   if (smax < 0)
   {
-    printf ("calculate_tau_across_cell: abnormal value of smax for photon\n");
+    printf ("integrate_tau_across_cell: smax %e < 0 in cell %d\n", smax, photon->grid);
     return EXIT_FAILURE;
   }
 
@@ -268,7 +268,7 @@ calculate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
     }
   }
 
-  kappa_total += klein_nishina (mean_freq) * c_plasma_cell->ne * zdom[n_dom].fill;
+  kappa_total += klein_nishina (mean_freq) * c_plasma_cell->ne * zdom[n_domain].fill;
 
   /*
    * Increment the optical depth and column density variables and move the
@@ -305,8 +305,9 @@ calculate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
  * ************************************************************************** */
 
 int
-extract_tau (PhotPtr photon, double *c_column_density, double *c_optical_depth)
+integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_optical_depth)
 {
+  int err;
   int n_dom;
   enum istat_enum p_istat;
   const int max_translate_in_space = 10;
@@ -325,28 +326,45 @@ extract_tau (PhotPtr photon, double *c_column_density, double *c_optical_depth)
       translate_in_space (&p_extract);
       if (++n_in_space > max_translate_in_space)
       {
-        printf ("extract_tau: tau_extract photon transport ended due to too many translate_in_space\n");
+        printf ("integrate_tau_across_wind: tau_extract photon transport ended due to too many translate_in_space\n");
         return EXIT_FAILURE;
       }
     }
     else if ((p_extract.grid = where_in_grid (n_dom, p_extract.x)) >= 0)
     {
-      if (calculate_tau_across_cell (&p_extract, c_column_density, c_optical_depth))
+      err = integrate_tau_across_cell (&p_extract, c_column_density, c_optical_depth);
+      if (err)
         return EXIT_FAILURE;
     }
     else
     {
-      printf ("extract_tau: photon in unknown location grid stat %i\n", p_extract.grid);
+      printf ("integrate_tau_across_wind: photon in unknown location grid stat %i\n", p_extract.grid);
       return EXIT_FAILURE;
     }
 
     p_istat = walls (&p_extract, photon, norm);
   }
 
-  if (p_istat == P_HIT_STAR || p_istat == P_HIT_DISK)
+  /*
+   * If we are in RUN_MODE_PHOTOSPHERE, then we shouldn't care about hitting the
+   * star or disc, since we are aiming for the origin of the system
+   */
+
+  if (MODE == RUN_MODE_OUTWARD)
   {
-    printf ("extract_tau: photon hit central source or disk incorrectly istat = %i\n", p_istat);
-    return EXIT_FAILURE;
+    if (p_istat == P_HIT_STAR || p_istat == P_HIT_DISK)
+    {
+      printf ("integrate_tau_across_wind: photon hit central source or disk incorrectly istat = %i\n", p_istat);
+      return EXIT_FAILURE;
+    }
+  }
+  else
+  {
+    if (p_istat == P_HIT_DISK)
+    {
+      printf ("integrate_tau_across_wind: the photon hit the disk whilst in RUN_MODE_PHOTOSPHERE when it should hit the central source\n");
+      return EXIT_FAILURE;
+    }
   }
 
   return EXIT_SUCCESS;
@@ -380,21 +398,35 @@ extract_tau (PhotPtr photon, double *c_column_density, double *c_optical_depth)
 int
 create_photon (PhotPtr p_out, double freq, double *lmn)
 {
+  int n;
+
   if (freq < 0)
   {
     printf ("create_photon: photon can't be created with negative frequency\n");
     return EXIT_FAILURE;
   }
 
-  stuff_v (lmn, p_out->lmn);
   p_out->freq = p_out->freq_orig = freq;
   p_out->origin = p_out->origin_orig = PTYPE_DISK;
   p_out->istat = P_INWIND;
   p_out->w = p_out->w_orig = geo.f_tot;
   p_out->tau = 0.0;
-  p_out->x[0] = p_out->x[1] = p_out->x[2] = 0;
   p_out->frame = F_OBSERVER;
-  move_phot (p_out, geo.rstar + DFUDGE);
+  p_out->x[0] = p_out->x[1] = p_out->x[2] = 0.0;
+  stuff_v (lmn, p_out->lmn);
+
+  if (MODE == RUN_MODE_OUTWARD)
+  {
+    move_phot (p_out, geo.rstar + DFUDGE);
+  }
+  else
+  {
+    move_phot (p_out, zdom[N_DOMAIN].rmax - DFUDGE);
+    for (n = 0; n < 3; ++n)
+    {
+      p_out->lmn[n] *= -1.0;
+    }
+  }
 
   return EXIT_SUCCESS;
 }
@@ -425,7 +457,8 @@ initialize_inclination_angles (void)
 
   /*
    * Use the angles specified for by the user for spectrum generation, this
-   * requires for xxspec to be initialised.
+   * requires for xxspec to be initialised. Otherwise use the pre-defined angles
+   * above.
    */
 
   if (geo.nangles > 0 && xxspec != NULL)
@@ -447,12 +480,6 @@ initialize_inclination_angles (void)
       }
     }
   }
-
-  /*
-   * If no spectrum cycles are being run, or if the model is being restarted
-   * without initialising xxspec, then a default set of angles is used instead.
-   */
-
   else
   {
     printf ("tau_spectrum: as there are no spectrum cycles or observers defined, a set of default angles will be used instead\n");
@@ -488,7 +515,7 @@ initialize_inclination_angles (void)
  * tau_diag algorithm which this function is called in.
  *
  * A photon is generated at the central source of the model and is extracted
- * from this location towards the observer where it escapes, where extract_tau
+ * from this location towards the observer where it escapes, where integrate_tau_across_wind
  * returns the integrated optical depth along its path to escape. This is done
  * for a range of photon frequencies to find how optical depth changes with
  * frequency.
@@ -504,6 +531,7 @@ void
 create_optical_depth_spectrum (void)
 {
   int i, j;
+  int err;
   double *tau_spectrum;
   double c_optical_depth, c_column_density;
   double c_frequency, freq_min, freq_max, d_freq;
@@ -511,11 +539,12 @@ create_optical_depth_spectrum (void)
 
   printf ("Creating optical depth spectra:\n");
 
-  if ((tau_spectrum = calloc (N_INCLINATION_ANGLES * N_FREQ_BINS, sizeof *tau_spectrum)) == NULL)
+  tau_spectrum = calloc (N_INCLINATION_ANGLES * N_FREQ_BINS, sizeof *tau_spectrum);
+  if (tau_spectrum == NULL)
   {
     printf ("create_optical_depth_spectrum: cannot allocate %lu bytes for tau_spectrum\n",
             N_INCLINATION_ANGLES * N_FREQ_BINS * sizeof *tau_spectrum);
-    return;
+    exit (EXIT_FAILURE);
   }
 
   /*
@@ -561,12 +590,16 @@ create_optical_depth_spectrum (void)
     {
       c_optical_depth = 0.0;
       c_column_density = 0.0;
-      if ((create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn)) == EXIT_FAILURE)
+
+      err = create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn);
+      if (err == EXIT_FAILURE)
       {
         printf ("create_optical_depth_spectrum: skipping photon of frequency %e when creating spectrum\n", c_frequency);
         continue;
       }
-      if ((extract_tau (&photon, &c_column_density, &c_optical_depth)) == EXIT_FAILURE)
+      photon.np = j;
+      err = integrate_tau_across_wind (&photon, &c_column_density, &c_optical_depth);
+      if (err == EXIT_FAILURE)
         continue;
       tau_spectrum[i * N_FREQ_BINS + j] = c_optical_depth;
       c_frequency += d_freq;
@@ -574,8 +607,7 @@ create_optical_depth_spectrum (void)
   }
 
   write_optical_depth_spectrum (tau_spectrum, freq_min, d_freq);
-  if (tau_spectrum)             // I didn't think I needed to do this, but if I don't, there are runtime errors
-    free (tau_spectrum);
+  free (tau_spectrum);
 }
 
 /* ************************************************************************* */
@@ -606,22 +638,26 @@ void
 calculate_PI_edge_optical_depth (void)
 {
   int i, j;
+  int err;
   double c_frequency, c_optical_depth, c_column_density;
   double *optical_depth_values, *column_density_values;
   struct photon photon;
 
-  if ((optical_depth_values = calloc (N_INCLINATION_ANGLES * N_PI_EDGES, sizeof *optical_depth_values)) == NULL)
+  optical_depth_values = calloc (N_INCLINATION_ANGLES * N_PI_EDGES, sizeof *optical_depth_values);
+  if (optical_depth_values == NULL)
   {
     printf ("calculate_PI_edge_optical_depth: cannot allocate %lu bytes for optical_depths\n",
             N_INCLINATION_ANGLES * N_PI_EDGES * sizeof *optical_depth_values);
-    return;
+    exit (EXIT_FAILURE);
   }
-  if ((column_density_values = calloc (N_INCLINATION_ANGLES, sizeof *optical_depth_values)) == NULL)
+
+  column_density_values = calloc (N_INCLINATION_ANGLES, sizeof *optical_depth_values);
+  if (column_density_values == NULL)
   {
     printf ("calculate_PI_edge_optical_depth: cannot allocate %lu bytes for column_densities\n",
             N_INCLINATION_ANGLES * sizeof *optical_depth_values);
     free (optical_depth_values);
-    return;
+    exit (EXIT_FAILURE);
   }
 
   /*
@@ -637,14 +673,16 @@ calculate_PI_edge_optical_depth (void)
       c_column_density = 0.0;
       c_frequency = PI_EDGES_TO_MEASURE[j].freq;
 
-      if (create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn) == EXIT_FAILURE)
+      err = create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn);
+      if (err == EXIT_FAILURE)
       {
         printf ("calculate_PI_edge_optical_depth: skipping photon of frequency %e\n", c_frequency);
         continue;
       }
 
-      if (extract_tau (&photon, &c_column_density, &c_optical_depth) == EXIT_FAILURE)
-        continue;               // do not throw extra warning when one is already thrown in extract_tau
+      err = integrate_tau_across_wind (&photon, &c_column_density, &c_optical_depth);
+      if (err == EXIT_FAILURE)
+        continue;               // do not throw extra warning when one is already thrown in integrate_tau_across_wind
 
       optical_depth_values[i * N_PI_EDGES + j] = c_optical_depth;
       column_density_values[i] = c_column_density;
@@ -652,16 +690,8 @@ calculate_PI_edge_optical_depth (void)
   }
 
   print_optical_depths (optical_depth_values, column_density_values);
-
-  /*
-   * The if's here are to avoid warnings with potentially freeing already
-   * deallocated memory
-   */
-
-  if (optical_depth_values)
-    free (optical_depth_values);
-  if (column_density_values)
-    free (column_density_values);
+  free (optical_depth_values);
+  free (column_density_values);
 }
 
 /* ************************************************************************* */

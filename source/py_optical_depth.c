@@ -31,6 +31,8 @@ print_help (void)
     "usage: py_optical_depth [-h] [-cion nion] [-classic] [--version] root\n"
     "\n"
     "-h           Print this help message and exit\n"
+    "-d ndom      Set the domain to launch photons from\n"
+    "-p tau_stop  Integrate from outwards to find the electron scattering photosphere\n"
     "-cion nion   Extract the column density for an ion of number nion\n"
     "-classic     Use linear frequency transforms. Use when Python run in classic mode.\n"
     "--version    Print the version information and exit.\n";
@@ -77,7 +79,7 @@ get_arguments (int argc, char *argv[])
   }
 
   /*
-   * Otherwise, iterate over the command line arguments and initialize various
+   * Otherwise, loop over the command line arguments and initialize various
    * variables
    */
 
@@ -120,6 +122,31 @@ get_arguments (int argc, char *argv[])
       i++;
       n_read = i;
     }
+    else if (!strcmp (argv[i], "-p"))
+    {
+      MODE = RUN_MODE_PHOTOSPHERE;
+      char *check;
+      TAU_DEPTH = (int) strtod (argv[i + 1], &check);
+      if (*check != '\0')
+      {
+        printf ("Unable to convert argument provided for -p into a double\n");
+        exit (EXIT_FAILURE);
+      }
+      i++;
+      n_read = i;
+    }
+    else if (!strcmp (argv[i], "-d"))
+    {
+      char *check;
+      N_DOMAIN = (int) strtol (argv[i + 1], &check, 10);
+      if (*check != '\0')
+      {
+        printf ("Unable to convert argument provided for -d into an integer\n");
+        exit (EXIT_FAILURE);
+      }
+      i++;
+      n_read = i;
+    }
     else if (!strncmp (argv[i], "-", 1))
     {
       printf ("Unknown argument %s\n", argv[i]);
@@ -155,7 +182,6 @@ main (int argc, char *argv[])
 {
   char windsave_filename[LINELENGTH + 24];
   char specsave_filename[LINELENGTH + 24];
-  void do_optical_depth_diagnostics (void);
 
   timer ();
 
@@ -165,12 +191,16 @@ main (int argc, char *argv[])
    */
 
   Log_set_verbosity (0);
-  init_rand (time (NULL));
+  Log_print_max (500);
+  Log_quit_after_n_errors ((int) 1e7);
+  init_rand ((int) time (NULL));
   rel_mode = REL_MODE_FULL;     // this is updated in get_arguments if required
   SMAX_FRAC = 0.5;
   DENSITY_PHOT_MIN = 1.e-10;
   COLUMN_MODE = COLUMN_MODE_RHO;
   N_INCLINATION_ANGLES = 0;
+  MODE = RUN_MODE_OUTWARD;
+  N_DOMAIN = 0;
 
   get_arguments (argc, argv);
   printf ("%-20s Optical depth diagnostics beginning\n", "TAU");
@@ -234,9 +264,15 @@ main (int argc, char *argv[])
    * Now we can finally being the optical depth diagnostics...
    */
 
+  Log_close ();
+  Log_set_verbosity (5);
+
   do_optical_depth_diagnostics ();
+
   printf ("\n%-20s Optical depth diagnostics completed\n", "TAU");
   printf ("Completed optical depth diagnostics. The elapsed TIME was %f\n", timer ());
+
+  error_summary ("end of program");
 
   return EXIT_SUCCESS;
 }
