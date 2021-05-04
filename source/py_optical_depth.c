@@ -191,8 +191,8 @@ main (int argc, char *argv[])
    */
 
   Log_set_verbosity (0);
-  Log_print_max (500);
-  Log_quit_after_n_errors ((int) 1e7);
+  Log_print_max (1);
+  Log_quit_after_n_errors ((int) 1e8);
   init_rand ((int) time (NULL));
   rel_mode = REL_MODE_FULL;     // this is updated in get_arguments if required
   SMAX_FRAC = 0.5;
@@ -261,10 +261,12 @@ main (int argc, char *argv[])
   }
 
   /*
-   * Now we can finally being the optical depth diagnostics...
+   * Now we can finally being the optical depth diagnostics... first we close
+   * the log and re-open it, with a verbosity of 5. This clears the errors due
+   * to atomic data, which we should not need to worry about for this program
    */
 
-  Log_close ();
+  // Log_close ();
   Log_set_verbosity (5);
 
   do_optical_depth_diagnostics ();
