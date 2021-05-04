@@ -501,6 +501,8 @@ class TransferFunction:
         Todo:
             Catch doublets.
         """
+        if response and not self._response:
+            raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
 
         if velocity:
             midpoints = calculate_midpoints(self._bins_vel)
@@ -530,8 +532,10 @@ class TransferFunction:
         Todo:
             Implement fractional bounds. Should just be able to call the centroid_delay function!
         """
-        assert threshold < 1 or threshold >= 0,\
-            "Threshold is a multiplier to the peak flux! It must be between 0 and 1"
+        if response and not self._response:
+            raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
+        if threshold >= 1 or threshold < 0:
+            raise ValueError("Threshold is a multiplier to the peak flux! It must be between 0 and 1")
 
         if response:
             data = np.sum(self._response, 1)
@@ -564,6 +568,11 @@ class TransferFunction:
         Returns:
             float: The peak delay.
         """
+        if response and not self._response:
+            raise RuntimeError(
+                "Must generate the response map using `response_map_from_tf()` before attempting to use it!"
+            )
+
         data = self.transfer_function_1d(response=response, days=days)
         peak = data[np.argmax(data[:, 1]), 0]
         return peak
@@ -740,6 +749,8 @@ class TransferFunction:
         Returns:
             float: Total response.
         """
+        if not self._response:
+            raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
         return np.sum(self._response)
 
     def delay_bins(self) -> np.ndarray:
@@ -770,8 +781,8 @@ class TransferFunction:
         Todo:
             Allow for only wavelength to be provided?
         """
-        assert self._response is not None,\
-            "No response map has been built!"
+        if not self._response:
+            raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
         return self._return_array(self._response, delay=delay, wave=wave, delay_index=delay_index)
 
     def emissivity(
@@ -835,6 +846,11 @@ class TransferFunction:
             np.ndarray: A [bins, 2]-d array containing the midpoints of the delay bins,
                 and the value of the 1-d transfer or response function in each bin.
         """
+        if response and not self._response:
+            raise RuntimeError(
+                "Must generate the response map using `response_map_from_tf()` before attempting to use it!"
+            )
+
         if response:
             if days:
                 return np.column_stack(
