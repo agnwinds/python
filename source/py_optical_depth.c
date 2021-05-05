@@ -191,7 +191,7 @@ main (int argc, char *argv[])
    */
 
   Log_set_verbosity (0);
-  Log_print_max (1);
+  Log_print_max (1000);
   Log_quit_after_n_errors ((int) 1e8);
   init_rand ((int) time (NULL));
   rel_mode = REL_MODE_FULL;     // this is updated in get_arguments if required

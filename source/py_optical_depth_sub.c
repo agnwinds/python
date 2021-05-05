@@ -255,16 +255,19 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
 
   kappa_total = 0;
 
-  if (geo.rt_mode == RT_MODE_2LEVEL)
+  if (MODE != RUN_MODE_PHOTOSPHERE)
   {
-    kappa_total += radiation (photon, smax);
-  }
-  else                          // macro atom case
-  {
-    if (c_wind_cell->vol > 0)
+    if (geo.rt_mode == RT_MODE_2LEVEL)
     {
-      kappa_total += kappa_bf (c_plasma_cell, freq_inner, 0);
-      kappa_total += kappa_ff (c_plasma_cell, freq_inner);
+      kappa_total += radiation (photon, smax);
+    }
+    else                        // macro atom case
+    {
+      if (c_wind_cell->vol > 0)
+      {
+        kappa_total += kappa_bf (c_plasma_cell, freq_inner, 0);
+        kappa_total += kappa_ff (c_plasma_cell, freq_inner);
+      }
     }
   }
 
@@ -318,15 +321,24 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
   p_istat = P_INWIND;           // assume photon is in wind for initialisation reasons
   stuff_phot (photon, &p_extract);
 
+  // printf ("\n");
+
   n_in_space = 0;
   while (p_istat == P_INWIND)
   {
-    if (where_in_wind (p_extract.x, &n_dom) < 0)
+    int where = where_in_wind (p_extract.x, &n_dom);
+    if (where < 0)
     {
+      // int i = -1, j = -1;
+      // WindPtr one = &wmain[p_extract.grid];
+      // wind_n_to_ij (n_dom, p_extract.grid, &i, &j);
+      // printf ("p_extract->grid %i length(p_extract->x) = %e geo.rstar %e\n", p_extract.grid, length (p_extract.x), geo.rstar);
+      // printf ("cell coordinates: n %i (%i, %i) r %e theta %f\n", one->nwind, i, j, one->r, one->theta);
+      // printf ("translated in space, inside star? where = %d\n", where);
       translate_in_space (&p_extract);
       if (++n_in_space > max_translate_in_space)
       {
-        printf ("integrate_tau_across_wind: tau_extract photon transport ended due to too many translate_in_space\n");
+        printf ("integrate_tau_across_wind: something has gone wrong as this photon has translated in space %d times\n", n_in_space);
         return EXIT_FAILURE;
       }
     }
@@ -342,8 +354,21 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
       return EXIT_FAILURE;
     }
 
+    // printf ("before walls: grid %d p_extract->x = [%e, %e, %e]\n", p_extract.grid, p_extract.x[0], p_extract.x[1], p_extract.x[2]);
     p_istat = walls (&p_extract, photon, norm);
+    // printf (" after walls: grid %d p_extract->x = [%e, %e, %e]\n", p_extract.grid, p_extract.x[0], p_extract.x[1], p_extract.x[2]);
+
+    if (MODE == RUN_MODE_PHOTOSPHERE)
+      if (*c_optical_depth >= TAU_DEPTH)
+      {
+        printf ("Reached optical depth limit of %e %e\n", *c_optical_depth, TAU_DEPTH);
+        printf ("p_extract->x [%e, %e, %e]\n", p_extract.x[0], p_extract.x[1], p_extract.x[2]);
+        printf ("\n");
+        break;
+      }
   }
+
+  // printf ("istat %d p_extract->grid %i length(p_extract->x) = %e geo.rstar %e\n", p_istat, p_extract.grid, length (p_extract.x), geo.rstar);
 
   /*
    * If we are in RUN_MODE_PHOTOSPHERE, then we shouldn't care about hitting the
@@ -635,7 +660,7 @@ create_optical_depth_spectrum (void)
  * ************************************************************************** */
 
 void
-optical_depth_photoion(void)
+optical_depth_photoion (void)
 {
   int i, j;
   int err;
@@ -695,6 +720,63 @@ optical_depth_photoion(void)
 
 /* ************************************************************************* */
 /**
+ * @brief
+ *
+ * @details
+ *
+ * ************************************************************************** */
+
+void
+find_photosphere (void)
+{
+  int i, err;
+  const double default_phase = 0.5;
+  const int n_angles = 180;
+  const double d_theta = 90.0 / (double) n_angles;
+
+  N_INCLINATION_ANGLES = n_angles;
+  INCLINATION_ANGLES = calloc (n_angles, sizeof *INCLINATION_ANGLES);
+  if (INCLINATION_ANGLES == NULL)
+  {
+    long mem_req = n_angles * (int) sizeof *INCLINATION_ANGLES;
+    printf ("initialize_inclination_angles: cannot allocate %ld bytes for observers array\n", mem_req);
+    exit (EXIT_FAILURE);
+  }
+
+  for (i = 0; i < n_angles; i++)
+  {
+    double default_angle = i * d_theta;
+    sprintf (INCLINATION_ANGLES[i].name, "A%02.0fP%04.2f", default_angle, default_phase);
+    INCLINATION_ANGLES[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
+    INCLINATION_ANGLES[i].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
+    INCLINATION_ANGLES[i].lmn[2] = cos (default_angle / RADIAN);
+  }
+
+  struct photon photon;
+  double tau = 0;
+  double nh = 0;
+  const double test_freq = VLIGHT / (100 * ANGSTROM);
+
+  FILE *fp = fopen ("locations.txt", "w");
+
+  for (i = 0; i < N_INCLINATION_ANGLES; i++)
+  {
+    err = create_photon (&photon, test_freq, INCLINATION_ANGLES[i].lmn);
+    if (err)
+      printf ("find_photosphere: error creating photon\n");
+
+    err = integrate_tau_across_wind (&photon, &tau, &nh);
+    if (err)
+      printf ("find_photosphere: something went wrong with tau integration");
+
+    fprintf (fp, "%e %e %e\n", photon.x[0], photon.x[1], photon.x[2]);
+  }
+
+  fclose (fp);
+}
+
+/* ************************************************************************* */
+/**
  * @brief  Main control function for create optical depth diagnostics.
  *
  * @details
@@ -708,7 +790,16 @@ void
 do_optical_depth_diagnostics (void)
 {
   initialize_inclination_angles ();
-  optical_depth_photoion();
-  create_optical_depth_spectrum ();
+
+  if (MODE == RUN_MODE_OUTWARD)
+  {
+    optical_depth_photoion ();
+    create_optical_depth_spectrum ();
+  }
+  else
+  {
+    find_photosphere ();
+  }
+
   free (INCLINATION_ANGLES);
 }
