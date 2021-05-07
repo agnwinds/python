@@ -593,10 +593,6 @@ main (argc, argv)
     init_rand (n);
 
   }
-  else if (modes.save_rng && restart_stat == TRUE)
-  {
-    reload_gsl_rng_state ();
-  }
   else
   {
     init_rand (1084515760 + (13 * rank_global));
