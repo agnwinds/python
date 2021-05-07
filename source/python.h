@@ -661,7 +661,8 @@ enum band_definition_enum
   CLOUDY_TEST_BAND = 5,
   WIDE_BAND = 6,
   AGN_BAND = 7,
-  LOG_USER_DEF_BAND = 8
+  LOG_USER_DEF_BAND = 8,
+  TDE_BB_BAND = 9
 };
 
 /* xdisk is a structure that is used to store information about the disk in a system */
