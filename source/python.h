@@ -1419,6 +1419,8 @@ struct advanced_modes
   int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
   int photon_speedup;
+  int save_rng;                 // save the GSL RNG stage
+  int load_rng;                 // load the GSL RNG state
 }
 modes;
 
@@ -1451,6 +1453,7 @@ struct filenames
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
+  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
 }
 files;
 
