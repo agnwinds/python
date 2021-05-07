@@ -57,7 +57,7 @@ def generate_spectrum_bounds(spectrum: Table) -> ndarray:
 
 def generate_tf(databases: dict, spectrum: Table, delay_bins: int,
                 line: int, wave: float, name: str, limit: int = 999999999,
-                dynamic_range: float = 2) -> TransferFunction:
+                dynamic_range: float = 2, observer: Optional[int] = None) -> TransferFunction:
     """
     Generates the response function for a system.
 
@@ -71,6 +71,7 @@ def generate_tf(databases: dict, spectrum: Table, delay_bins: int,
         wave (float): Frequency of the line selected (in A)
         name (str): Name of the output files.
         limit (int): Number of photons to limit the DB query to. Set low for testing.
+        observer (int): Which observer (if several) to use.
 
     Returns:
         TransferFunction: The response-mapped transfer function.
@@ -88,10 +89,14 @@ def generate_tf(databases: dict, spectrum: Table, delay_bins: int,
     bounds = generate_spectrum_bounds(spectrum)
 
     tf_mid = TransferFunction(
-        db_mid, name, continuum=databases['mid']['continuum'], wave_bins=(len(bounds)-1), delay_bins=delay_bins
+        db_mid, name, continuum=databases['mid']['continuum'], wave_bins=(len(bounds)-1),
+        delay_bins=delay_bins
     )
+    if observer:
+        tf_mid.spectrum(observer)
+
     tf_mid.line(line, wave).wavelength_bins(bounds).delay_dynamic_range(dynamic_range).run(
-                scaling_factor=databases['mid']['scale'], limit=limit, verbose=True).plot()
+        scaling_factor=databases['mid']['scale'], limit=limit, verbose=True).plot()
 
     tf_min = TransferFunction(
         db_min, name+'_min', continuum=databases['min']['continuum'], template=tf_mid

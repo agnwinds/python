@@ -417,7 +417,7 @@ def rescaled_rfs(
                 keplerian=keplerian)
 
 
-def plot_spectra_rms(spectra: List[(Table, Table)], filenames: List[str]):
+def plot_spectra_rms(spectra: List[Tuple[Table, Table]], filenames: List[str]):
     """
     Given a list of timeseries of spectra (full and continuum subtracted), produce a trailed
     spectrogram of each, plus the RMS spectra.
