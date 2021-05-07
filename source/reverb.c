@@ -241,7 +241,7 @@ delay_dump (PhotPtr p, int np)
      * more scatters
      */
     i = delay_dump_spec[nphot];
-    if (((mscat = xxspec[i].nscat) > 999 ||
+    if (((mscat = xxspec[i].nscat) > MAXSCAT ||
          p[nphot].nscat == mscat ||
          (mscat < 0 && p[nphot].nscat >= (-mscat))) && ((mtopbot = xxspec[i].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
     {
