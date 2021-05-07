@@ -160,7 +160,7 @@ calculate_ionization (restart_stat)
       }
     }
 
-    Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle);
+    Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle + 1);
 
     /* Create the photons that need to be transported through the wind
      *

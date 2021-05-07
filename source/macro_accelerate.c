@@ -86,10 +86,6 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
-    if (uplvl == 64)
-    {
-      Log ("Gotcha");
-    }
     nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
     nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
     nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
@@ -657,7 +653,7 @@ fill_kpkt_rates (xplasma, escape, p)
  *
  * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
  * @param [in]      int         upper         macro-atom level
- * @param [in]      double      fmin, freq    Frequency range requested 
+ * @param [in]      double      freq_min, freq    Frequency range requested 
  *                                            (e.g. spectral cycle freq range)
  *
  * @details similar to routines like emit_matom, except that we calculate the fraction
@@ -667,10 +663,10 @@ fill_kpkt_rates (xplasma, escape, p)
 ***********************************************************/
 
 double
-f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
+f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
      PlasmaPtr xplasma;
      int upper;
-     double fmin, fmax;
+     double freq_min, freq_max;
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -686,7 +682,6 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
-
 
   /* The first step is to identify the configuration that has been excited. */
 
@@ -735,7 +730,7 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
     }
 
     penorm += eprbs[n];
-    if ((line_ptr->freq > fmin) && (line_ptr->freq < fmax))     // correct range
+    if ((line_ptr->freq > freq_min) && (line_ptr->freq < freq_max))     // correct range
     {
       eprbs_band[m] = eprbs[n];
       penorm_band += eprbs_band[m];
@@ -758,7 +753,7 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
       Exit (0);
     }
     penorm += eprbs[n + nbbd];
-    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)    //means that it may contribute
+    if (cont_ptr->freq[0] < freq_max && cont_ptr->freq[cont_ptr->np - 1] > freq_min)    //means that it may contribute
     {
       eprbs_band[m] = eprbs[n + nbbd];
       fthresh = cont_ptr->freq[0];      //first frequency in list
@@ -767,19 +762,19 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
 
       /* the limits differ depending on whether the band covers all or part of the cross-section. 
          four possibilities */
-      if (fthresh < fmin && flast > fmax)
+      if (fthresh < freq_min && flast > freq_max)
       {
-        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, freq_min, freq_max);
       }
-      else if (fthresh < fmin && flast < fmax)
+      else if (fthresh < freq_min && flast < freq_max)
       {
-        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, freq_min, flast);
       }
-      else if (fthresh > fmin && flast > fmax)
+      else if (fthresh > freq_min && flast > freq_max)
       {
-        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, freq_max);
       }
-      else if (fthresh > fmin && flast < fmax)
+      else if (fthresh > freq_min && flast < freq_max)
       {
         bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
       }
@@ -815,7 +810,7 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
  * @brief calculate what fraction of the thermal continuum emission comes out in the required band
  *
  * This routine uses the various cooling rates to work out which k->r processes contribute 
- * in the frequency range requested (between fmin and fmax). This involves doing a series 
+ * in the frequency range requested (between freq_min and freq_max). This involves doing a series 
  * of band-limited integrals, for the bound-free "alpha" estimators, for each cross-section.
  * It also calls functions like total_free() to work out the fraction of free-free emission
  * that emerges in the frequency range. 
@@ -824,16 +819,16 @@ f_matom_emit_accelerate (xplasma, upper, fmin, fmax)
  *
  * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
  *
- * @param [in]      double      fmin, freq    Frequency range requested 
+ * @param [in]      double      freq_min, freq    Frequency range requested 
  *                                            (e.g. spectral cycle freq range)
  * 
  * @return penorm_band / penorm   total fraction of k->r emission that emerges in the band
 ************************************************************/
 
 double
-f_kpkt_emit_accelerate (xplasma, fmin, fmax)
+f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
      PlasmaPtr xplasma;
-     double fmin, fmax;
+     double freq_min, freq_max;
 {
 
   int i;
@@ -843,11 +838,12 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
   MacroPtr mplasma;
   WindPtr one;
   struct photon pdummy;
-  double freqmin, freqmax;
+  double ff_freq_min, ff_freq_max;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
+  double total_ff_lofreq, total_ff;
 
-  one = &wmain[xplasma->nplasma];
+  one = &wmain[xplasma->nwind];
 
   penorm = 0.0;
   penorm_band = 0.0;
@@ -859,14 +855,14 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
 
   /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
      generation (see call to one_ff below) */
-  freqmin = xband.f1[0];
-  freqmax = ALPHA_FF * xplasma->t_e / H_OVER_K;
+  ff_freq_min = xband.f1[0];
+  ff_freq_max = ALPHA_FF * xplasma->t_e / H_OVER_K;
 
   /* ksl This is a Bandaid for when the temperatures are very low */
   /* in this case cooling_ff should be low compared to cooling_ff_lofreq anyway */
-  if (freqmax < 1.1 * freqmin)
+  if (ff_freq_max < 1.1 * ff_freq_min)
   {
-    freqmax = 1.1 * freqmin;
+    ff_freq_max = 1.1 * ff_freq_min;
   }
 
 
@@ -886,25 +882,25 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
 
     eprbs = mplasma->cooling_bf[i];
     penorm += eprbs;
-    if (cont_ptr->freq[0] < fmax && cont_ptr->freq[cont_ptr->np - 1] > fmin)    //means that it may contribute
+    if (cont_ptr->freq[0] < freq_max && cont_ptr->freq[cont_ptr->np - 1] > freq_min)    //means that it may contribute
     {
       eprbs_band = mplasma->cooling_bf[i];
       fthresh = cont_ptr->freq[0];      //first frequency in list
       flast = cont_ptr->freq[cont_ptr->np - 1]; //last frequency in list
       bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
-      if (fthresh < fmin && flast > fmax)
+      if (fthresh < freq_min && flast > freq_max)
       {
-        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, fmax);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, freq_min, freq_max);
       }
-      else if (fthresh < fmin && flast < fmax)
+      else if (fthresh < freq_min && flast < freq_max)
       {
-        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fmin, flast);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, freq_min, flast);
       }
-      else if (fthresh > fmin && flast > fmax)
+      else if (fthresh > freq_min && flast > freq_max)
       {
-        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, fmax);
+        bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, freq_max);
       }
-      else if (fthresh > fmin && flast < fmax)
+      else if (fthresh > freq_min && flast < freq_max)
       {
         bf_int_inrange = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
       }
@@ -924,7 +920,7 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
       else                      //line is not for a macro atom - use simple method
       {
         penorm += eprbs = mplasma->cooling_bb[i];
-        if ((line[i].freq > fmin) && (line[i].freq < fmax))     // correct range
+        if ((line[i].freq > freq_min) && (line[i].freq < freq_max))     // correct range
         {
           penorm_band += eprbs_band = eprbs;
         }
@@ -932,23 +928,34 @@ f_kpkt_emit_accelerate (xplasma, fmin, fmax)
     }
 
 
+
     /* consult issues #187, #492 regarding free-free */
     penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
-    if (fmin > freqmin)
+
+    total_ff_lofreq = total_free (one, xplasma->t_e, 0, ff_freq_min);
+    total_ff = total_free (one, xplasma->t_e, ff_freq_min, ff_freq_max);
+
+    /*
+     * Do not increment penorm_band when the total free-free luminosity is zero
+     */
+
+    if (freq_min > ff_freq_min)
     {
-      penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
+      if (total_ff > 0)
+        penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff * mplasma->cooling_ff;
     }
-    else if (fmax > freqmin)
+    else if (freq_max > ff_freq_min)
     {
-      penorm_band += total_free (one, xplasma->t_e, freqmin, fmax) / total_free (one, xplasma->t_e, freqmin, freqmax) * mplasma->cooling_ff;
-      penorm_band +=
-        total_free (one, xplasma->t_e, fmin, freqmin) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+      if (total_ff > 0)
+        penorm_band += total_free (one, xplasma->t_e, ff_freq_min, freq_max) / total_ff * mplasma->cooling_ff;
+      if (total_ff_lofreq > 0)
+        penorm_band += total_free (one, xplasma->t_e, freq_min, ff_freq_min) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
     }
     else
     {
-      penorm_band += total_free (one, xplasma->t_e, fmin, fmax) / total_free (one, xplasma->t_e, 0, freqmin) * mplasma->cooling_ff_lofreq;
+      if (total_ff_lofreq > 0)
+        penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
     }
-
 
     penorm += eprbs = mplasma->cooling_adiabatic;
 

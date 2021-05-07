@@ -143,12 +143,12 @@ double
 emittance_pow (freqmin, freqmax, alpha)
      double freqmin, freqmax, alpha;
 {
-  double emit, fmin;
+  double emit, this_fmin;
 
   /* if we have a PL cutoff, then we need to either adjust the minimum frequency,
      or return 0 luminosity if the cutoff is above our band */
   /* in advanced mode, this should always be zero */
-  fmin = freqmin;               // default is no cutoff
+  this_fmin = freqmin;          // default is no cutoff
   emit = 0.0;
   if (freqmax < geo.pl_low_cutoff)      //The maximum frequency requested is *lower* than the cut off
   {
@@ -156,7 +156,7 @@ emittance_pow (freqmin, freqmax, alpha)
   }
   else if (freqmin < geo.pl_low_cutoff) //The minimum frequency is lower than the cxut off
   {
-    fmin = geo.pl_low_cutoff;   //Reset the min frequency to the cutoff
+    this_fmin = geo.pl_low_cutoff;      //Reset the min frequency to the cutoff
   }
 
   /* conservative error check */
@@ -169,11 +169,11 @@ emittance_pow (freqmin, freqmax, alpha)
 
   if (alpha == -1.0)            //deal with the pathological case
   {
-    emit = geo.const_agn * (log (freqmax) - log (fmin));
+    emit = geo.const_agn * (log (freqmax) - log (this_fmin));
   }
   else
   {
-    emit = geo.const_agn * ((pow (freqmax, alpha + 1.0) - pow (fmin, alpha + 1.0)) / (alpha + 1.0));
+    emit = geo.const_agn * ((pow (freqmax, alpha + 1.0) - pow (this_fmin, alpha + 1.0)) / (alpha + 1.0));
   }
 
 

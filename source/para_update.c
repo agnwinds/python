@@ -431,7 +431,7 @@ gather_spectra_para ()
     nspec = MSPEC;
   }
 
-  size_of_commbuffer = 4 * nspec * NWAVE_MAX;       //we need space for all 4 separate spectra we are normalizing
+  size_of_commbuffer = 4 * nspec * NWAVE_MAX;   //we need space for all 4 separate spectra we are normalizing
 
   redhelper = calloc (sizeof (double), size_of_commbuffer);
   redhelper2 = calloc (sizeof (double), size_of_commbuffer);

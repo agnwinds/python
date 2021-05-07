@@ -263,14 +263,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     if (pp.w < weight_min)
     {
-      istat = pp.istat = P_ABSORB;      /* This photon was absorbed by continuum opacity within the wind */
+      istat = pp.istat = P_ABSORB;
       pp.tau = VERY_BIG;
       stuff_phot (&pp, p);
       break;
     }
 
     if (istat == P_HIT_STAR)
-    {                           /* It hit the star */
+    {
       geo.lum_star_back += pp.w;
       spec_add_one (&pp, SPEC_HITSURF);
       if (geo.absorb_reflect == BACK_RAD_SCATTER)
@@ -307,13 +307,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     if (istat == P_HIT_DISK)
     {
-      /* It hit the disk */
-      /* ZFRAME - this next section assumes that disk heating is supposed to be carried out
-         in the local frame of the disk.  That this is the correct thing to do needs to
-         be confirmed.
-       */
-
-
 
       /* Store the energy of the photon bundle into a disk structure so that one 
          can determine later how much and where the disk was heated by photons.
@@ -354,8 +347,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
         spec_add_one (&pp, SPEC_HITSURF);
 
-
-
         /* If we got here, the a new photon direction needs to be defined that will cause the photon
          * to continue in the wind.  Since this is effectively a scattering event we also have to
          * extract a photon to construct the detailed spectrum
@@ -386,7 +377,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     if (istat == P_SCAT)
     {                           /* Cause the photon to scatter and reinitialize */
-
 
       pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x);
 
@@ -432,12 +422,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         wind_paths_add_phot (&wmain[n], &pp);
       }
 
-
-      /* SS July 04 - next lines modified so that the "thermal trapping" model of anisotropic scattering is included in the
-         macro atom method. What happens now is all in scatter - within that routine the "thermal trapping" model is used to
-         decide what the direction of emission is before returning here.
-       */
-
       nnscat = 1;
       pp.nscat++;
 
@@ -448,13 +432,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         Error ("trans_phot: bad return from scatter %d at point 2\n", ierr);
       }
 
-
-      /* SS June 04: During the spectrum calculation cycles, photons are thrown away when they interact with macro atoms or
-         become k-packets. This is done by setting their weight to zero (effectively they have been absorbed into either
-         excitation energy or thermal energy). Since they now have no weight there is no need to follow them further. */
-
       if (geo.matom_radiation == 1 && geo.rt_mode == RT_MODE_MACRO && pp.w < weight_min)
-        /* Flag for the spectrum calculations in a macro atom calculation SS */
       {
         istat = pp.istat = P_ABSORB;
         pp.tau = VERY_BIG;
@@ -470,7 +448,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       {
         pp.nrscat++;
 
-        /* This next statement writes out the position of every resonant scattering event to a file */
         if (modes.track_resonant_scatters)
           track_scatters (&pp, wmain[n].nplasma, "Resonant");
 
@@ -484,7 +461,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
         if (pp.w < weight_min)
         {
-          istat = pp.istat = P_ABSORB;  /* This photon was absorbed by continuum opacity within the wind */
+          istat = pp.istat = P_ABSORB;
           pp.tau = VERY_BIG;
           stuff_phot (&pp, p);
           break;
@@ -542,9 +519,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       }
 
 
-      /*ksl - eliminated reposition_lost_photon from code, as this should not happen anymore.  If it
-         does then it needs to be investigated. */
-
       if (istat == P_REPOSITION_ERROR)
       {
         Error ("Got reposition error for %d.  INVESTIGATE\n", p->np);
@@ -556,7 +530,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       if (where_in_wind (pp.x, &ndom) != W_ALL_INWIND && where_in_wind (x_dfudge_check, &ndom) == W_ALL_INWIND)
       {
-        n_lost_to_dfudge++;     // increment the counter (checked at end of trans_phot)
+        n_lost_to_dfudge++;
       }
 
       stuff_phot (&pp, p);
@@ -590,11 +564,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     p->w = pp.w;                // Assure that final weight of photon is returned.
   }
   /* This is the end of the loop over a photon */
-
-  /* The next section is for diagnostic purposes.  There are two possibilities.  If you wish to know where
-   * the photon was last while in the wind, you want to track p; if you wish to know where it hits the
-   * outer boundary of the calculation you would want pp.  So one should keep both lines below, and comment
-   * out the one you do not want. */
 
 
   return (0);

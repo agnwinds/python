@@ -45,7 +45,7 @@
  **********************************************************/
 
 int
-init_atomic_data()
+init_atomic_data ()
 {
 
   int n, i, j;
@@ -348,6 +348,5 @@ init_atomic_data()
   }
 
 
-  return(0);
+  return (0);
 }
-
