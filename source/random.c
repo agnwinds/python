@@ -374,7 +374,7 @@ reload_gsl_rng_state ()
     Exit (1);
   }
 
-  Log ("RNG state saved to %s\n", files.rngsave);
+  Log ("RNG state loaded from %s\n", files.rngsave);
 
   if (fclose (file))
   {
