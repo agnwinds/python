@@ -191,9 +191,10 @@ parse_command_line (argc, argv)
         j = i;
         Log ("Using a random seed in random number generator\n");
       }
-      else if (strcmp (argv[i], "--prng") == 0)
+      else if (strcmp (argv[i], "--rng") == 0)
       {
-        modes.persistent_rng = 1;
+        modes.save_rng = 1;
+        modes.load_rng = 1;
         j = i;
         Log ("Using a persistent RNG state\n");
       }
@@ -255,7 +256,6 @@ parse_command_line (argc, argv)
       exit (1);
     }
 
-
     strcpy (dummy, argv[argc - 1]);
     get_root (files.root, dummy);
 
@@ -270,7 +270,12 @@ parse_command_line (argc, argv)
     strcat (files.diag, files.root);
     strcat (files.diag, dummy);
 
+    /* Set up the directory structure for storing the rng state */
 
+    if (modes.save_rng)
+    {
+      init_rng_directory ();
+    }
   }
 
   return (restart_stat);
@@ -325,7 +330,7 @@ and the switches have the following meanings \n\
  --version      Print out python version, commit hash and if there were files with uncommitted \n\
                 changes and stop \n\
  --rseed        Set the random number seed to be time-based, rather than fixed. \n\
- --prng         Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
+ --rng          Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
 \n\
 Other switches exist but these are not intended for the general user.\n\
 These are largely diagnostic or for special cases. These include\n\

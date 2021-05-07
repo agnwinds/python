@@ -593,7 +593,7 @@ main (argc, argv)
     init_rand (n);
 
   }
-  else if (modes.persistent_rng && restart_stat == TRUE)
+  else if (modes.save_rng && restart_stat == TRUE)
   {
     reload_gsl_rng_state ();
   }
