@@ -178,9 +178,13 @@ typedef struct plane
   double x[3];                  /* A position included in the plane (usually the "center" */
   double lmn[3];                /* A unit vector perpendicular to the plane (usually in the "positive" direction */
 } plane_dummy, *PlanePtr;
-plane_dummy plane_l1, plane_sec, plane_m2_far;  /* these all define planes which are perpendicular to the line of sight from the 
-                                                   primary to the seconday */
 
+
+/* These planes define the ends of a cylinder/pillbox which encapsulate the secondary with respect to the origin
+ which also the location of the central source.  The values are defined in the routin binary_basics*/
+
+// plane_dummy plane_l1, plane_sec, plane_m2_far;  
+plane_dummy plane_m2_near, plane_m2_far;  
 
 typedef struct cone
 {
@@ -591,7 +595,7 @@ struct geometry
   double period;                /* Period of the systems in seconds */
   double a, l1, l2, phi;        /* Separation of primary and secondary, distance of l1 from primary,phi at l1 */
   double l1_from_m2, r2_far;    /* Distance to l1 from m2, distance to far side of secondary from primary */
-  double r2_width;              /* Maximum width of Roche surface of secondary in the plane of orbit */
+  double r2_width;              /* Maximum half width of Roche surface of secondary in the plane of orbit */
 
   double t_bl;                  /*temperature of the boundary layer */
   double weight;                /*weight factor for photons/defined in define_phot */
