@@ -174,7 +174,7 @@ double pillbox(PhotPtr p, double *smin, double *smax);
 double phi(double s, void *params);
 double dphi_ds(double s, void *params);
 double roche_width(double x, void *params);
-double roche2_width_max(void);
+double roche2_half_width(void);
 /* random.c */
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);

@@ -79,10 +79,6 @@ binary_basics ()
   double x;
   void *dummy_par = NULL;
 
-  /* Mark p_roche as being in the observer frame */
-
-  p_roche.frame = F_OBSERVER;
-
   /* Calculate a the separation of the primary and the secondary */
 
   x = GRAV * geo.period * geo.period * (geo.mstar + geo.m_sec) / (16. * PI * PI);
@@ -94,10 +90,10 @@ binary_basics ()
 
   /* Define the position of the secondary with respect to the primary.  */
 
-  plane_sec.x[0] = geo.a;
-  plane_sec.x[1] = plane_sec.x[2] = 0;
-  plane_sec.lmn[0] = 1;
-  plane_sec.lmn[1] = plane_sec.lmn[2] = 0;
+//OLD  plane_sec.x[0] = geo.a;
+//OLD  plane_sec.x[1] = plane_sec.x[2] = 0;
+//OLD  plane_sec.lmn[0] = 1;
+//OLD  plane_sec.lmn[1] = plane_sec.lmn[2] = 0;
 
   /* Find the position of the L1 point with respect to the primary */
 
@@ -111,15 +107,16 @@ binary_basics ()
   p_roche.x[1] = p_roche.x[2] = 0;
   p_roche.lmn[0] = 1;
   p_roche.lmn[1] = p_roche.lmn[2] = 0;
+  p_roche.frame = F_OBSERVER;
 
   geo.l1 = x = zero_find (dphi_ds, 0.01 * geo.a, 0.99 * geo.a, geo.a / 1000.);
 
   geo.l1_from_m2 = geo.a - geo.l1;
 
-  plane_l1.x[0] = geo.l1 + 10000.;
-  plane_l1.x[1] = plane_l1.x[2] = 0;
-  plane_l1.lmn[0] = 1;
-  plane_l1.lmn[1] = plane_l1.lmn[2] = 0;
+  plane_m2_near.x[0] = geo.l1 + 10000.;
+  plane_m2_near.x[1] = plane_m2_near.x[2] = 0;
+  plane_m2_near.lmn[0] = 1;
+  plane_m2_near.lmn[1] = plane_m2_near.lmn[2] = 0;
 
   /* Similarly, find l2, the Lagrangian point behind the secondary */
 
@@ -142,12 +139,13 @@ binary_basics ()
   plane_m2_far.lmn[1] = plane_m2_far.lmn[2] = 0;
 
 
-  Log_silent ("binary_basics: l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n", geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
+  Log ("binary_basics: l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n", geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
+  Log ("binary_basics: m2_near=%8.2e m2_far=%8.2e \n", plane_m2_near.x[0], plane_m2_far.x[0]);
 
   /* Calculate the maximum half width of the secondary in the plane of the orbit */
 
-  geo.r2_width = roche2_width_max ();
-  Log_silent ("binary_basics: r2_width=%6.2e\n", geo.r2_width);
+  geo.r2_width = roche2_half_width ();
+  Log ("binary_basics: r2_width=%6.2e\n", geo.r2_width);
   return (0);
 }
 
@@ -174,7 +172,6 @@ binary_basics ()
  * value of the Rooche potential. If this is greater than 0, then the photon has missed the secondary. If less
  * thn zero then it has hit the secondary.
  *
- * modified in 2019 to use gsl routines instead of numerical recipies
  *
  **********************************************************/
 
@@ -292,7 +289,6 @@ pillbox (p, smin, smax)
   struct photon pp;
   double ds_to_plane ();
 
-
   n = 0;                        // At this point no boundaries to the pillbox have been identified
 
 /* If the photon is along the x-axis, then it will not intersect the cylinder anywhere, and
@@ -348,7 +344,7 @@ root is really only possible if the photon is already in the pillbox  */
 planes of the two end caps and then checking the cylindrical radius. Negative
 distances are valid only if the photon is in the pillbox already */
 
-  x1 = ds_to_plane (&plane_l1, p);      /* Calculate the distance to the L1 plane */
+  x1 = ds_to_plane (&plane_m2_near, p); /* Calculate the distance to the L1 plane */
   stuff_phot (p, &pp);
   move_phot (&pp, x1);          /* So pp is now located at the l1 plane */
   if ((pp.x[1] * pp.x[1] + pp.x[2] * pp.x[2]) <= geo.r2_width * geo.r2_width)
@@ -392,8 +388,6 @@ then the photon did not hit the pillbox ksl 02jan */
   return (VERY_BIG);
 
 }
-
-
 
 
 int phi_init = 0;
@@ -468,9 +462,11 @@ phi (double s, void *params)
 
  * @return     the first derivative of the potential
  *
- * This is a brute force calculation of the first derivative of the Roche potentail
+ * This is a brute force calculation of the first derivative of the Roche potential
  *
  * ###Notes###
+ *
+ * XXXX This seems awfully coarse and it is not a two-sided derivative
  *
  *
  **********************************************************/
@@ -494,21 +490,23 @@ dphi_ds (double s, void *params)
 
 /**********************************************************/
 /**
- * @brief      Calculate the width of the Roche potential at a position x along the x axis
+ * @brief      Calculate the half width of the Roche potential at a position x along the x axis
  *
- * @param [in, out] double  x   The distance the photon has traveled from its initial position
+ * @param [in] double  x   The distance the photon has traveled from its initial position
  *                  void params  unused variable required to present the correct function to gsl
  *
- * @return     the width
+ * @return     the half width (or actually the negative of the half width)
  *
  * Calculate the half width of the Roche lobe at the position x along the
  *   x axis in the plane of the orbit.
  *
  * ###Notes###
- *   There is no real guarantee that this would
- *   work if you were outside L2 or L3.
- *   modified in 2019 to use gsl zero find in place of numerical recipie rtsafe
+ * There is no real guarantee that this would
+ * work if you were outside L2 or L3.
  *
+ * The routine return -rho because it is used as part of a search for
+ * the maximum value of the half width, and that search is based on
+ * finding a minimum and not a maximum value.
  *
  **********************************************************/
 
@@ -534,11 +532,8 @@ roche_width (double x, void *params)
   {
     Error ("roche_with : zero_find failure x=%6.2e\n", x);
   }
-  return (-rho);                /* This is because we are going to search for a minimun not a maximum */
-
+  return (-rho);
 }
-
-
 
 
 /**********************************************************/
@@ -547,18 +542,16 @@ roche_width (double x, void *params)
  *
  * @return     The half width is returned
  *
- * Find the maximum half width of the Roche lobe of the secondary.   This routine
- *   uses the NR routine golden to find the point in x where the Roche lobe is maximized.
+ * Find the maximum half width of the Roche lobe of the secondary.   
  *
  * ###Notes###
  *
- *  modified in 2019 to use gsl routines rather than numerical recipies  
  *
  *
  **********************************************************/
 
 double
-roche2_width_max ()
+roche2_half_width ()
 {
   double xmin, xmax, xmid, xbest;
   double rmin;
@@ -568,14 +561,14 @@ roche2_width_max ()
   xmax = geo.r2_far + geo.a - 1.e5;
   xmid = geo.a;
 
-  Log_silent ("roche2_width_max: Search from %6.2e %6.2e %6.2e\n", xmin, xmid, xmax);
+  Log_silent ("roche2_half_width: Search from %6.2e %6.2e %6.2e\n", xmin, xmid, xmax);
 
-  /* func_minimiser returns the miniumum value of the function it is evaluating; xbest is the position of the minimum */
+  /* func_minimiser returns the miniumum value of the function it is evaluating; xbest is the position of the minimum
+     Note that  "func_minimiser" is designed to find a minimum rather than a maximum! */
 
   rmin = func_minimiser (xmin, xmid, xmax, roche_width, 0.0001, &xbest);
 
+  Log_silent ("roche2_half_width: Max half width of %6.2e is located at %6.2e\n", -rmin, xbest);
 
-  Log_silent ("roche2_width_max: Max width at %6.2e of %6.2e\n", xbest, -rmin);
-
-  return (-rmin);               /* Because "func_minimiser" is designed to find a minimum rather than a maximum! */
+  return (-rmin);
 }

@@ -436,7 +436,10 @@ extract_one (w, pp, itype, nspec)
   {
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
     if (istat)
-      Error ("extract: Should not have hit secondary\n");
+    {
+      Log ("extract: Hit secondary %3d %5d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+           geo.pcycle, pp->np, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+    }
   }
 
 //HOLD  if (pp->x[2] * pstart.x[2] < 0)
