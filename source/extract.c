@@ -435,11 +435,11 @@ extract_one (w, pp, itype, nspec)
   else if (geo.binary == TRUE)
   {
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
-    if (istat)
-    {
-      Log ("extract: Hit secondary %3d %5d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-           geo.pcycle, pp->np, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
-    }
+//HOLD    if (istat)
+//HOLD    {
+//HOLD      Log ("extract: Hit secondary %3d %5d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
+//HOLD           geo.pcycle, pp->np, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+//HOLD    }
   }
 
 //HOLD  if (pp->x[2] * pstart.x[2] < 0)

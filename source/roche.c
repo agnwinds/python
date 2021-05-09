@@ -120,7 +120,7 @@ binary_basics ()
 
   /* Similarly, find l2, the Lagrangian point behind the secondary */
 
-  geo.l2 = x = zero_find (dphi_ds, 1.01 * geo.a, 2.0 * geo.a, geo.a / 1000.);
+  geo.l2 = x = zero_find (dphi_ds, 1.01 * geo.a, 10.0 * geo.a, geo.a / 1000.);
 
   /* Now find the position of the far side of the star */
 
@@ -129,7 +129,7 @@ binary_basics ()
 
   /* Set geo.r2_far to be the radius of the secondary on the backside of the secondary */
 
-  x = zero_find (phi, 1.01 * geo.a, geo.l2, geo.a / 1000.) - geo.a;
+  geo.r2_far = x = zero_find (phi, 1.01 * geo.a, geo.l2, geo.a / 1000.) - geo.a;
 
   /* Define a plane on the backside of the secondary */
 
@@ -139,7 +139,7 @@ binary_basics ()
   plane_m2_far.lmn[1] = plane_m2_far.lmn[2] = 0;
 
 
-  Log ("binary_basics: l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n", geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
+  Log ("binary_basics: a=%8.2e l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n", geo.a, geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
   Log ("binary_basics: m2_near=%8.2e m2_far=%8.2e \n", plane_m2_near.x[0], plane_m2_far.x[0]);
 
   /* Calculate the maximum half width of the secondary in the plane of the orbit */
@@ -156,8 +156,7 @@ binary_basics ()
 
 /**********************************************************/
 /**
- * @brief      Find out whether a photon will hit the secondary, but don't actually calculate the
- * point where it hits
+ * @brief      Find out whether a photon will hit the secondary
  *
  * @param [in] PhotPtr  p   A photon, for which we have a possiton and adirection of travel
  * @return     0 if the photon would miss the secondary, P_SEC otherwise
@@ -167,11 +166,13 @@ binary_basics ()
  * ###Notes###
  *
  * The routine first checks if the photon encounters a pill_box that surrouds the secondary.  Photons
- * that do not encounter this pill box do not hit the secondar.  If  the photon enters the pill box, then
+ * that do not encounter this pill box do not hit the secondary.  If  the photon enters the pill box, then
  * the routine determines whether the photon hits the roche surface of the secondary, by finding the minimum
  * value of the Rooche potential. If this is greater than 0, then the photon has missed the secondary. If less
  * thn zero then it has hit the secondary.
  *
+ * The routine does not in most cases calculate where the photon hits the secondary, only if it hits
+ * the secondary.
  *
  **********************************************************/
 
@@ -182,12 +183,11 @@ hit_secondary (p)
   double smin, smax, smid, s;
   double potential;
   double idelt = 1e-2;
-  double pillbox ();
   void *dummy_par = NULL;       //A variable required (but not set) for calls to phi
 
-
+  /* Check to see if the photon encountered the pill box */
   if (pillbox (p, &smin, &smax) == VERY_BIG)
-    return (0);                 /* Missed secondary */
+    return (0);
   stuff_phot (p, &p_roche);
 
 
@@ -226,13 +226,12 @@ hit_secondary (p)
   }
   else
   {
-    potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);     //All is well behaved, call the minimiser
+    potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);
   }
 
 
-
   if (potential > 0.0)
-    return (0);                 /*Missed secondary) */
+    return (0);
 
 
   return (P_SEC);
@@ -249,9 +248,8 @@ hit_secondary (p)
  * @param [out] double *  smin   If the photon, hits the pillbox, this is how far the photon must travel to enter the pillbox
  * @param [out] double *  smax   If the photon, hits the pillbox, this is how far the photon must travel to exit the pillbox
  * @return
- * pillbox returns VERY_BIG if the photon p has not intersected the pillbox.  It appears to return the distance
- * to the pillbox if the photon p hits the pillbox.  smin and smax contain the entrance and exit distances.  It
- * is not obvious that smin < smax.
+ * pillbox returns VERY_BIG if the photon p has not intersected the pillbox.  It return the distance
+ * to near edge the pillbox if the photon p hits the pillbox, or 0 if the photon is inside the pillbox.  
  *
  * The purpose of this routine is to separate photons which may hit the Roche surface and those which certainly do not
  * by seeing if the photon avoids a pillbox surrounding the secondary.  If the photons does not enter the pillbox then
@@ -262,18 +260,9 @@ hit_secondary (p)
  *
  * ###Notes###
  *
- * The pillbox is defined by a plane at L1, a plane on the backside of the star and a cylinder whose radius
+ * The pillbox is defined by a plane at L1, a plane on the backside of the secondary star and a cylinder whose radius
  * is the maximum (half) width of the star in the plane of the orbit.
  *
- * This routine distinguishes two basic types of photons, "normal" and "abnormal" photons.  A normal photon
- * is on the WD side of L1 plane; an abnormal one is on the side of the L1 plane with the secondary.
- *
- * Note:   01jul22	ksl revised  this so that it would handle photons coming in all directions for use with plot_roche
- * but this instantiation of pillbox still seems to me not optical.  The basic point is that unless the photon
- * is in the pillbox, the only roots that matter are ones which are positive.  Only inside the pillbox will
- * there be a positive and a negative root.  Here we try to correct this at the end by making sure that both
- * roots are not negative, but one would have thought that one might establish that that photons inside the
- * pillbox are special and dealt with them accordindly
  *
  **********************************************************/
 
@@ -289,7 +278,7 @@ pillbox (p, smin, smax)
   struct photon pp;
   double ds_to_plane ();
 
-  n = 0;                        // At this point no boundaries to the pillbox have been identified
+  n = 0;
 
 /* If the photon is along the x-axis, then it will not intersect the cylinder anywhere, and
 the only possibility is that it hit the endcaps of the cylinder. But normally, it will
@@ -366,7 +355,7 @@ distances are valid only if the photon is in the pillbox already */
 then the photon did not hit the pillbox ksl 02jan */
 
   if ((n == 0) || (ss[0] < 0 && ss[1] < 0))
-    return (VERY_BIG);          // The photon did not hit the pillbox
+    return (VERY_BIG);
 
   if (n == 2)
   {
@@ -379,6 +368,15 @@ then the photon did not hit the pillbox ksl 02jan */
     {
       *smin = ss[1];
       *smax = ss[0];
+    }
+
+    /* If the photon is inside the pillbox, we set the minimum distance to 0,
+       we only want to consider travel in the forward direction.
+     */
+
+    if (*smin < 0)
+    {
+      *smin = 0;
     }
 
     return (*smin);
