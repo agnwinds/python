@@ -356,19 +356,14 @@ macro_pops (xplasma, xne)
 
         macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
-        /* The populations are now known. The populations need to be stored
-           firstly as ion populations and secondly as fractional level populations
-           within an ion. Get the ion populations and write them to one->density[nion].
-           The level populations are to be put in "levden". */
-
-        numerical_error = macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix);
-
         /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
            non-finite level population somewhere. If that is the case, then set all the estimators
            to dilute blackbodies instead and go through the solution again.
            2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
            populations_ok to 1 to break the while loop, and copy the populations into the arrays
          */
+
+        numerical_error = macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix);
 
         if (numerical_error)
         {
@@ -764,6 +759,10 @@ macro_pops_check_densities_for_numerical_errors (PlasmaPtr xplasma, int index_el
  * @return void
  *
  * @details
+ * The populations are now known. The populations need to be stored firstly as
+ * ion populations and secondly as fractional level populations within an ion.
+ * Get the ion populations and write them to one->density[nion]. The level
+ * populations are to be put in "levden".
  *
  **********************************************************/
 
