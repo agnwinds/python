@@ -224,7 +224,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
   return (0);
 }
 
-
 /**********************************************************/
 /**
  * @brief      uses the Monte Carlo estimators to compute a set
@@ -255,24 +254,17 @@ macro_pops (xplasma, xne)
      PlasmaPtr xplasma;
      double xne;
 {
-  int index_element, index_ion, index_lvl;
+  int nn, mm, index_element, index_ion, index_lvl;
+  int ierr, numerical_error, populations_ok;
   int n_macro_lvl;
-  double rate;
-  double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
-  int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO];     // 140423 JM flag if two levels are radiatively linked
-  int conf_to_matrix[NLEVELS_MACRO];
-  struct lines *line_ptr;
-  struct topbase_phot *cont_ptr;
-  int nn, mm;
-  int index_bbu, index_bbd, index_bfu, index_bfd;
-  int lower, upper;
   double this_ion_density, level_population;
-  double ionden_temp, fractional_population;
+  double ion_density_temp, fractional_population;
   double inversion_test;
   double *a_data, *b_data;
   double *populations;
-  int index_fast_col, ierr, numerical_error, populations_ok;
-
+  double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
+  int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO];     // 140423 JM flag if two levels are radiatively linked
+  int conf_to_matrix[NLEVELS_MACRO];
   MacroPtr mplasma = &macromain[xplasma->nplasma];
 
   /* Start with an outer loop over elements: there are no rates that couple
@@ -307,212 +299,13 @@ macro_pops (xplasma, xne)
       populations_ok = FALSE;
       while (populations_ok == FALSE)
       {
-
         /* Having established that the ion requires a macro atom treatment we
            are going to construct a matrix of rates between the levels and
            invert that matrix to get the level populations. The first thing we need
            to do is work out how many levels we are dealing with in total. This is
            easily done by summing up the number of levels of each ion. */
 
-        n_macro_lvl = 0;
-
-        for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
-        {
-          for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
-          {
-            /* I want to be able to easily go from knowing the index of a level in the
-               configurations structure to its position in the rates matrix. So I'm making
-               two arrays here that allow the mapping between these indices to be done easily.
-             */
-            conf_to_matrix[index_lvl] = n_macro_lvl;
-            n_macro_lvl++;
-          }
-        }
-
-        /* We now know how many levels there are and therefore how big the matrix we
-           need to invert will be. */
-
-        /* Now we want to populate the matrix with all the rates between the levels. */
-
-        for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
-        {
-          index_lvl = ion[index_ion].first_nlte_level;
-
-          /* The next loop judges whether or not a level is to be fixed in population relative to ground
-             star. The input radiative lifetime is used to judge this at the moment. If the lifetime was set
-             to be long (essentially infite) then a very fast collisional transition is put in to dominate
-             all other rates into and out of this level.
-
-             Whether this is really the best thing to do I don't know, but it's an improvement over ignoring
-             this issue altogether! SS Aug 05 */
-
-          for (index_fast_col = index_lvl; index_fast_col < ion[index_ion].first_nlte_level + ion[index_ion].nlte - 1; index_fast_col++)
-          {
-            {
-              if (config[index_fast_col + 1].rad_rate > 1.e15)
-              {
-                fast_line.gl = config[index_lvl].g;
-                fast_line.gu = config[index_fast_col + 1].g;
-                fast_line.freq = (config[index_fast_col + 1].ex - config[index_lvl].ex) / PLANCK;
-                fast_line.f = 1e4;
-                rate = q12 (&fast_line, xplasma->t_e) * xne;
-                lower = conf_to_matrix[index_lvl];
-                upper = conf_to_matrix[index_fast_col + 1];
-                rate_matrix[lower][lower] += -1. * rate;
-                rate_matrix[upper][lower] += rate;
-                rate = q21 (&fast_line, xplasma->t_e) * xne;
-                rate_matrix[upper][upper] += -1. * rate;
-                rate_matrix[lower][upper] += rate;
-              }
-            }
-          }
-
-          for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
-          {
-            /* Now add contribution for all the bb and bf processes between the levels. This is
-               done by looping over the numbers "bbu, bbd, bfu, bfd" which tell us how many
-               processes there are. */
-
-
-            for (index_bbu = 0; index_bbu < config[index_lvl].n_bbu_jump; index_bbu++)
-            {
-              /* These are bb upwards jumps. The rate in such a jump is given by
-                 Jbar which has been computed as a Monte Carlo estimator. I'm also
-                 including a collisional term (which depends on ne). */
-
-              line_ptr = &line[config[index_lvl].bbu_jump[index_bbu]];
-              rate = b12 (line_ptr) * mplasma->jbar_old[config[index_lvl].bbu_indx_first + index_bbu];
-              rate += q12 (line_ptr, xplasma->t_e) * xne;
-
-              /* This is the rate out of the level in question. We need to add it
-                 to the matrix in two places: firstly as a -ve contribution to the
-                 diagonal and secondly as a +ve contribution for the off-diagonal
-                 corresponding to the level populated by this process. */
-
-              /* Get the matix indices for the upper and lower states of the jump. */
-
-              lower = conf_to_matrix[index_lvl];
-              upper = conf_to_matrix[line_ptr->nconfigu];
-
-              rate_matrix[lower][lower] += -1. * rate;
-              rate_matrix[upper][lower] += rate;
-
-              if (rate < 0.0 || sane_check (rate))
-              {
-                Error ("macro_pops: bbu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
-              }
-
-              /* There's a radiative jump between these levels, so we want to clean
-                 for popualtion inversions. Flag this jump */
-              radiative_flag[index_lvl][line_ptr->nconfigu] = 1;
-            }
-
-            for (index_bbd = 0; index_bbd < config[index_lvl].n_bbd_jump; index_bbd++)
-            {
-              /* These are bb downwards jumps. The rate in such a jump is given by
-                 the A-value. I'm also
-                 including a collisional term (which depends on ne). */
-
-              line_ptr = &line[config[index_lvl].bbd_jump[index_bbd]];
-              rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
-              rate += q21 (line_ptr, xplasma->t_e) * xne;
-
-              /* This is the rate out of the level in question. We need to add it
-                 to the matrix in two places: firstly as a -ve contribution to the
-                 diagonal and secondly as a +ve contribution for the off-diagonal
-                 corresponding to the level populated by this process. */
-
-              /* Get the matix indices for the upper and lower states of the jump. */
-
-              upper = conf_to_matrix[index_lvl];
-              lower = conf_to_matrix[line_ptr->nconfigl];
-
-              rate_matrix[upper][upper] += -1. * rate;
-              rate_matrix[lower][upper] += rate;
-
-              /* There's a radiative jump between these levels, so we want to clean
-                 for population inversions. Flag this jump */
-              radiative_flag[line_ptr->nconfigl][index_lvl] = 1;
-
-              if (rate < 0.0 || sane_check (rate))
-              {
-                Error ("macro_pops: bbd rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
-              }
-            }
-
-            for (index_bfu = 0; index_bfu < config[index_lvl].n_bfu_jump; index_bfu++)
-            {
-              /* These are bf upwards jumps. The rate in such a jump is given by
-                 gamma which has been computed as a Monte Carlo estimator. */
-
-              cont_ptr = &phot_top[config[index_lvl].bfu_jump[index_bfu]];
-              rate = mplasma->gamma_old[config[index_lvl].bfu_indx_first + index_bfu];
-              rate += q_ioniz (cont_ptr, xplasma->t_e) * xne;
-
-              /* This is the rate out of the level in question. We need to add it
-                 to the matrix in two places: firstly as a -ve contribution to the
-                 diagonal and secondly as a +ve contribution for the off-diagonal
-                 corresponding to the level populated by this process. */
-
-              /* Get the matrix indices for the upper and lower states of the jump. */
-
-              lower = conf_to_matrix[index_lvl];
-              upper = conf_to_matrix[cont_ptr->uplev];
-
-              rate_matrix[lower][lower] += -1. * rate;
-              rate_matrix[upper][lower] += rate;
-
-              if (rate < 0.0 || sane_check (rate))
-              {
-                Error ("macro_pops: bfu rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
-              }
-
-              /* Now deal with the stimulated emission. */
-              /* Lower and upper are the same, but now it contributes in the
-                 other direction. */
-
-              rate = mplasma->alpha_st_old[config[index_lvl].bfu_indx_first + index_bfu] * xne;
-
-              rate_matrix[upper][upper] += -1. * rate;
-              rate_matrix[lower][upper] += rate;
-
-              if (rate < 0.0 || sane_check (rate))
-              {
-                Error ("macro_pops: st. recomb rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
-              }
-            }
-
-            for (index_bfd = 0; index_bfd < config[index_lvl].n_bfd_jump; index_bfd++)
-            {
-              /* These are bf downwards jumps. The rate in such a jump is given by
-                 the alpha value. */
-              cont_ptr = &phot_top[config[index_lvl].bfd_jump[index_bfd]];
-              /* Get new values of the recombination rates and store them. */
-              mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 0);
-              mplasma->recomb_sp_e[config[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 2);
-              rate = mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] * xne;
-              rate += q_recomb (cont_ptr, xplasma->t_e) * xne * xne;
-
-              /* This is the rate out of the level in question. We need to add it
-                 to the matrix in two places: firstly as a -ve contribution to the
-                 diagonal and secondly as a +ve contribution for the off-diagonal
-                 corresponding to the level populated by this process. */
-
-              /* Get the matrix indices for the upper and lower states of the jump. */
-
-              upper = conf_to_matrix[index_lvl];
-              lower = conf_to_matrix[cont_ptr->nlev];
-
-              rate_matrix[upper][upper] += -1. * rate;
-              rate_matrix[lower][upper] += rate;
-
-              if (rate < 0.0 || sane_check (rate))
-              {
-                Error ("macro_pops: bfd rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
-              }
-            }
-          }
-        }
+        n_macro_lvl = macro_pops_fill_rate_matrix (mplasma, xplasma, xne, index_element, rate_matrix, radiative_flag);
 
         /* The rate matrix is now filled up. Since the problem is not closed as it stands, the next
            thing is to replace one of the rows of the matrix (say the first row) with the constraint
@@ -532,7 +325,7 @@ macro_pops (xplasma, xne)
            level populations as a fraction w.r.t the whole element */
         /********************************************************************************/
 
-        a_data = (double *) calloc (sizeof (rate), n_macro_lvl * n_macro_lvl);
+        a_data = (double *) calloc (n_macro_lvl * n_macro_lvl, sizeof (double));
 
         for (nn = 0; nn < n_macro_lvl; nn++)
         {
@@ -542,8 +335,8 @@ macro_pops (xplasma, xne)
           }
         }
 
-        b_data = (double *) calloc (sizeof (rate), n_macro_lvl);
-        populations = (double *) calloc (sizeof (rate), n_macro_lvl);
+        b_data = (double *) calloc (n_macro_lvl, sizeof (double));
+        populations = (double *) calloc (n_macro_lvl, sizeof (double));
 
         /* replace the first entry with 1.0 - this is part of the normalisation constraint */
         b_data[0] = 1.0;
@@ -609,14 +402,15 @@ macro_pops (xplasma, xne)
 
           /* Check that the ion density is positive and finite */
 
-          ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
-          if (fabs (ionden_temp) < DENSITY_MIN)
+          ion_density_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
+          if (fabs (ion_density_temp) < DENSITY_MIN)
           {
-            ionden_temp = DENSITY_MIN;
+            ion_density_temp = DENSITY_MIN;
           }
-          else if (sane_check (ionden_temp) || ionden_temp < 0.0)
+          else if (sane_check (ion_density_temp) || ion_density_temp < 0.0)
           {
-            Error ("macro_pops: ion %i has calculated a frac. pop. of %8.4e in plasma cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
+            Error ("macro_pops: ion %i has calculated a frac. pop. of %8.4e in plasma cell %i\n", index_ion, ion_density_temp,
+                   xplasma->nplasma);
             numerical_error = TRUE;
           }
 
@@ -698,4 +492,248 @@ macro_pops (xplasma, xne)
 
 
   return (0);
+}
+
+
+
+/**********************************************************/
+/**
+ * @brief  Populate the rate matrix for the given element's ions and levels.
+ *
+ * @param[in] MacroPtr mplasma        The macro atom quantities for the current cell
+ * @param[in] PlasmaPtr xplasma       The current plasma cell
+ * @param[in] double xne              The current value of the electron density
+ * @param[in] int index_element       The index of the current element to populate
+ * @param[out] double rate_matrix     The populated rate matrix for the current element
+ * @param[out] double radiative_flag  Flags for if two levels are radiatively linked
+ *
+ * @return int n_macro_lvl   The number of macro atom levels for this element
+ *
+ * @details
+ * Having established that the ion requires a macro atom treatment we are going
+ * to construct a matrix of rates between the levels and invert that matrix to
+ * get the level populations. The first thing we need to do is work out how many
+ * levels we are dealing with in total. This is easily done by summing up the
+ * number of levels of each ion.
+ *
+ **********************************************************/
+
+int
+macro_pops_fill_rate_matrix (MacroPtr mplasma,
+                             PlasmaPtr xplasma,
+                             double xne,
+                             int index_element,
+                             double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO], int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO])
+{
+  int index_bbu, index_bbd;
+  int index_bfu, index_bfd;
+  int upper, lower;
+  int index_fast_col;
+  int index_ion, index_lvl;
+  double rate;
+  int n_macro_lvl = 0;
+  int conf_to_matrix[NLEVELS_MACRO];
+  struct lines *line_ptr;
+  struct topbase_phot *cont_ptr;
+
+
+  for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
+  {
+    for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+    {
+      /* I want to be able to easily go from knowing the index of a level in the
+         configurations structure to its position in the rates matrix. So I'm making
+         two arrays here that allow the mapping between these indices to be done easily.
+       */
+      conf_to_matrix[index_lvl] = n_macro_lvl;
+      n_macro_lvl++;
+    }
+  }
+
+  /* We now know how many levels there are and therefore how big the matrix we
+     need to invert will be. */
+
+  /* Now we want to populate the matrix with all the rates between the levels. */
+
+  for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
+  {
+    index_lvl = ion[index_ion].first_nlte_level;
+
+    /* The next loop judges whether or not a level is to be fixed in population relative to ground
+       star. The input radiative lifetime is used to judge this at the moment. If the lifetime was set
+       to be long (essentially infite) then a very fast collisional transition is put in to dominate
+       all other rates into and out of this level.
+
+       Whether this is really the best thing to do I don't know, but it's an improvement over ignoring
+       this issue altogether! SS Aug 05 */
+
+    for (index_fast_col = index_lvl; index_fast_col < ion[index_ion].first_nlte_level + ion[index_ion].nlte - 1; index_fast_col++)
+    {
+      {
+        if (config[index_fast_col + 1].rad_rate > 1.e15)
+        {
+          fast_line.gl = config[index_lvl].g;
+          fast_line.gu = config[index_fast_col + 1].g;
+          fast_line.freq = (config[index_fast_col + 1].ex - config[index_lvl].ex) / PLANCK;
+          fast_line.f = 1e4;
+          rate = q12 (&fast_line, xplasma->t_e) * xne;
+          lower = conf_to_matrix[index_lvl];
+          upper = conf_to_matrix[index_fast_col + 1];
+          rate_matrix[lower][lower] += -1. * rate;
+          rate_matrix[upper][lower] += rate;
+          rate = q21 (&fast_line, xplasma->t_e) * xne;
+          rate_matrix[upper][upper] += -1. * rate;
+          rate_matrix[lower][upper] += rate;
+        }
+      }
+    }
+
+    for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+    {
+      /* Now add contribution for all the bb and bf processes between the levels. This is
+         done by looping over the numbers "bbu, bbd, bfu, bfd" which tell us how many
+         processes there are. */
+
+
+      for (index_bbu = 0; index_bbu < config[index_lvl].n_bbu_jump; index_bbu++)
+      {
+        /* These are bb upwards jumps. The rate in such a jump is given by
+           Jbar which has been computed as a Monte Carlo estimator. I'm also
+           including a collisional term (which depends on ne). */
+
+        line_ptr = &line[config[index_lvl].bbu_jump[index_bbu]];
+        rate = b12 (line_ptr) * mplasma->jbar_old[config[index_lvl].bbu_indx_first + index_bbu];
+        rate += q12 (line_ptr, xplasma->t_e) * xne;
+
+        /* This is the rate out of the level in question. We need to add it
+           to the matrix in two places: firstly as a -ve contribution to the
+           diagonal and secondly as a +ve contribution for the off-diagonal
+           corresponding to the level populated by this process. */
+
+        /* Get the matix indices for the upper and lower states of the jump. */
+
+        lower = conf_to_matrix[index_lvl];
+        upper = conf_to_matrix[line_ptr->nconfigu];
+
+        rate_matrix[lower][lower] += -1. * rate;
+        rate_matrix[upper][lower] += rate;
+
+        if (rate < 0.0 || sane_check (rate))
+        {
+          Error ("macro_pops: bbu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+        }
+
+        /* There's a radiative jump between these levels, so we want to clean
+           for popualtion inversions. Flag this jump */
+        radiative_flag[index_lvl][line_ptr->nconfigu] = 1;
+      }
+
+      for (index_bbd = 0; index_bbd < config[index_lvl].n_bbd_jump; index_bbd++)
+      {
+        /* These are bb downwards jumps. The rate in such a jump is given by
+           the A-value. I'm also
+           including a collisional term (which depends on ne). */
+
+        line_ptr = &line[config[index_lvl].bbd_jump[index_bbd]];
+        rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
+        rate += q21 (line_ptr, xplasma->t_e) * xne;
+
+        /* This is the rate out of the level in question. We need to add it
+           to the matrix in two places: firstly as a -ve contribution to the
+           diagonal and secondly as a +ve contribution for the off-diagonal
+           corresponding to the level populated by this process. */
+
+        /* Get the matix indices for the upper and lower states of the jump. */
+
+        upper = conf_to_matrix[index_lvl];
+        lower = conf_to_matrix[line_ptr->nconfigl];
+
+        rate_matrix[upper][upper] += -1. * rate;
+        rate_matrix[lower][upper] += rate;
+
+        /* There's a radiative jump between these levels, so we want to clean
+           for population inversions. Flag this jump */
+        radiative_flag[line_ptr->nconfigl][index_lvl] = 1;
+
+        if (rate < 0.0 || sane_check (rate))
+        {
+          Error ("macro_pops: bbd rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
+        }
+      }
+
+      for (index_bfu = 0; index_bfu < config[index_lvl].n_bfu_jump; index_bfu++)
+      {
+        /* These are bf upwards jumps. The rate in such a jump is given by
+           gamma which has been computed as a Monte Carlo estimator. */
+
+        cont_ptr = &phot_top[config[index_lvl].bfu_jump[index_bfu]];
+        rate = mplasma->gamma_old[config[index_lvl].bfu_indx_first + index_bfu];
+        rate += q_ioniz (cont_ptr, xplasma->t_e) * xne;
+
+        /* This is the rate out of the level in question. We need to add it
+           to the matrix in two places: firstly as a -ve contribution to the
+           diagonal and secondly as a +ve contribution for the off-diagonal
+           corresponding to the level populated by this process. */
+
+        /* Get the matrix indices for the upper and lower states of the jump. */
+
+        lower = conf_to_matrix[index_lvl];
+        upper = conf_to_matrix[cont_ptr->uplev];
+
+        rate_matrix[lower][lower] += -1. * rate;
+        rate_matrix[upper][lower] += rate;
+
+        if (rate < 0.0 || sane_check (rate))
+        {
+          Error ("macro_pops: bfu rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
+        }
+
+        /* Now deal with the stimulated emission. */
+        /* Lower and upper are the same, but now it contributes in the
+           other direction. */
+
+        rate = mplasma->alpha_st_old[config[index_lvl].bfu_indx_first + index_bfu] * xne;
+
+        rate_matrix[upper][upper] += -1. * rate;
+        rate_matrix[lower][upper] += rate;
+
+        if (rate < 0.0 || sane_check (rate))
+        {
+          Error ("macro_pops: st. recomb rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
+        }
+      }
+
+      for (index_bfd = 0; index_bfd < config[index_lvl].n_bfd_jump; index_bfd++)
+      {
+        /* These are bf downwards jumps. The rate in such a jump is given by
+           the alpha value. */
+        cont_ptr = &phot_top[config[index_lvl].bfd_jump[index_bfd]];
+        /* Get new values of the recombination rates and store them. */
+        mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 0);
+        mplasma->recomb_sp_e[config[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 2);
+        rate = mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] * xne;
+        rate += q_recomb (cont_ptr, xplasma->t_e) * xne * xne;
+
+        /* This is the rate out of the level in question. We need to add it
+           to the matrix in two places: firstly as a -ve contribution to the
+           diagonal and secondly as a +ve contribution for the off-diagonal
+           corresponding to the level populated by this process. */
+
+        /* Get the matrix indices for the upper and lower states of the jump. */
+
+        upper = conf_to_matrix[index_lvl];
+        lower = conf_to_matrix[cont_ptr->nlev];
+
+        rate_matrix[upper][upper] += -1. * rate;
+        rate_matrix[lower][upper] += rate;
+
+        if (rate < 0.0 || sane_check (rate))
+        {
+          Error ("macro_pops: bfd rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
+        }
+      }
+    }
+  }
+
+  return n_macro_lvl;
 }

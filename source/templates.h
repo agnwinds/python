@@ -490,6 +490,7 @@ double get_matom_f_accelerate(int mode);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
+int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[200][200], int radiative_flag[200][200]);
 /* windsave2table_sub.c */
 int do_windsave2table(char *root, int ion_switch);
 int create_master_table(int ndom, char rootname[]);
