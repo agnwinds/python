@@ -492,6 +492,7 @@ int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
 int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[200][200], int radiative_flag[200][200], int conf_to_matrix[200]);
 void macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[200][200], int conf_to_matrix[200]);
+int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200]);
 /* windsave2table_sub.c */
 int do_windsave2table(char *root, int ion_switch);
 int create_master_table(int ndom, char rootname[]);
