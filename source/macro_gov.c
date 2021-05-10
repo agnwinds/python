@@ -254,10 +254,9 @@ macro_pops (xplasma, xne)
      PlasmaPtr xplasma;
      double xne;
 {
-  int nn, mm, index_element, index_ion, index_lvl;
+  int nn, mm, index_element, index_lvl;
   int ierr, numerical_error, populations_ok;
   int n_macro_lvl;
-  double this_ion_density, fractional_population;
   double *a_data, *b_data;
   double *populations;
   double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
@@ -384,40 +383,7 @@ macro_pops (xplasma, xne)
         else
         {
           populations_ok = TRUE;
-
-          for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
-          {
-            this_ion_density = 0.0;
-            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte;
-                 index_lvl++)
-            {
-              this_ion_density += populations[conf_to_matrix[index_lvl]];
-            }
-
-            xplasma->density[index_ion] = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
-
-            /* JM Nov 18 -- to maintain consistency with the higher level routines, 
-               only allow density to drop to DENSITY_MIN */
-            if (xplasma->density[index_ion] < DENSITY_MIN)
-            {
-              xplasma->density[index_ion] = DENSITY_MIN;
-            }
-
-            /* Check the sanity and positivity of the level populations */
-            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte;
-                 index_lvl++)
-            {
-              fractional_population = populations[conf_to_matrix[index_lvl]] / this_ion_density;
-              if (this_ion_density < DENSITY_MIN || fractional_population < DENSITY_MIN)
-              {
-                xplasma->levden[config[index_lvl].nden] = DENSITY_MIN;
-              }
-              else
-              {
-                xplasma->levden[config[index_lvl].nden] = fractional_population;
-              }
-            }
-          }
+          macro_pops_copy_to_xplasma (xplasma, index_element, populations, conf_to_matrix);
         }
 
         free (populations);
@@ -784,4 +750,57 @@ macro_pops_check_densities_for_numerical_errors (PlasmaPtr xplasma, int index_el
   }
 
   return numerical_error;
+}
+
+/**********************************************************/
+/**
+ * @brief  Copy the calculated populations into the xplasma arrays.
+ *
+ * @param[in, out] PlasmaPtr xplasma  The plasma cell to update
+ * @param[in] int index_element       The index of the element
+ * @param[in] double *populations     The calculated densities to copy
+ * @param[in] int *conf_to_matrix     ?
+ *
+ * @return void
+ *
+ * @details
+ *
+ **********************************************************/
+
+void
+macro_pops_copy_to_xplasma (PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[NLEVELS_MACRO])
+{
+  int index_ion, index_lvl;
+  double this_ion_density, fractional_population;
+
+  for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
+  {
+    this_ion_density = 0.0;
+    for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+    {
+      this_ion_density += populations[conf_to_matrix[index_lvl]];
+    }
+
+    xplasma->density[index_ion] = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
+
+    /* to maintain consistency with the higher level routines, only allow density to drop to DENSITY_MIN */
+
+    if (xplasma->density[index_ion] < DENSITY_MIN)
+    {
+      xplasma->density[index_ion] = DENSITY_MIN;
+    }
+
+    for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+    {
+      fractional_population = populations[conf_to_matrix[index_lvl]] / this_ion_density;
+      if (this_ion_density < DENSITY_MIN || fractional_population < DENSITY_MIN)
+      {
+        xplasma->levden[config[index_lvl].nden] = DENSITY_MIN;
+      }
+      else
+      {
+        xplasma->levden[config[index_lvl].nden] = fractional_population;
+      }
+    }
+  }
 }
