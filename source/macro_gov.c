@@ -259,7 +259,6 @@ macro_pops (xplasma, xne)
   int n_macro_lvl;
   double this_ion_density, level_population;
   double ion_density_temp, fractional_population;
-  double inversion_test;
   double *a_data, *b_data;
   double *populations;
   double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
@@ -305,7 +304,7 @@ macro_pops (xplasma, xne)
            to do is work out how many levels we are dealing with in total. This is
            easily done by summing up the number of levels of each ion. */
 
-        n_macro_lvl = macro_pops_fill_rate_matrix (mplasma, xplasma, xne, index_element, rate_matrix, radiative_flag);
+        n_macro_lvl = macro_pops_fill_rate_matrix (mplasma, xplasma, xne, index_element, rate_matrix, radiative_flag, conf_to_matrix);
 
         /* The rate matrix is now filled up. Since the problem is not closed as it stands, the next
            thing is to replace one of the rows of the matrix (say the first row) with the constraint
@@ -344,7 +343,7 @@ macro_pops (xplasma, xne)
         /* this next routine is a general routine which solves the matrix equation
            via LU decomposition */
         ierr = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
-        if (ierr != 0)
+        if (ierr)
         {
           Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", ierr);
         }
@@ -357,28 +356,7 @@ macro_pops (xplasma, xne)
            which are never a good thing and most likely unphysical.
            Therefore let's follow Leon's procedure (Lucy 2003) and remove inversions. */
 
-        for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
-        {
-          for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
-          {                     /* Start loop with lowest level of the ion. For each level in turn check to see if there's a population
-                                   inversion i.e. is  upper_pop > lower_pop * g_upper / g_lower. If it is then replace upper_pop with
-                                   lower_pop * g_upper / g_lower. We loop over all levels higher than the currently chosen lower level. */
-
-            for (nn = index_lvl + 1; nn < (ion[index_ion].first_nlte_level + ion[index_ion].nlte); nn++)
-            {
-              /* this if statement means we only clean if there's a radiative jump between the levels */
-              if (radiative_flag[index_lvl][nn])
-              {
-                inversion_test = populations[conf_to_matrix[index_lvl]] * config[nn].g / config[index_lvl].g * 0.999999;        //include a correction factor
-
-                if (populations[conf_to_matrix[nn]] > inversion_test)
-                {
-                  populations[conf_to_matrix[nn]] = inversion_test;
-                }
-              }
-            }
-          }
-        }
+        macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
         /* The populations are now known. The populations need to be stored
            firstly as ion populations and secondly as fractional level populations
@@ -494,8 +472,6 @@ macro_pops (xplasma, xne)
   return (0);
 }
 
-
-
 /**********************************************************/
 /**
  * @brief  Populate the rate matrix for the given element's ions and levels.
@@ -506,6 +482,7 @@ macro_pops (xplasma, xne)
  * @param[in] int index_element       The index of the current element to populate
  * @param[out] double rate_matrix     The populated rate matrix for the current element
  * @param[out] double radiative_flag  Flags for if two levels are radiatively linked
+ * @param[out] int conf_to_matrix     ?
  *
  * @return int n_macro_lvl   The number of macro atom levels for this element
  *
@@ -519,11 +496,9 @@ macro_pops (xplasma, xne)
  **********************************************************/
 
 int
-macro_pops_fill_rate_matrix (MacroPtr mplasma,
-                             PlasmaPtr xplasma,
-                             double xne,
-                             int index_element,
-                             double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO], int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO])
+macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element,
+                             double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO], int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO],
+                             int conf_to_matrix[NLEVELS_MACRO])
 {
   int index_bbu, index_bbd;
   int index_bfu, index_bfd;
@@ -532,7 +507,6 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma,
   int index_ion, index_lvl;
   double rate;
   int n_macro_lvl = 0;
-  int conf_to_matrix[NLEVELS_MACRO];
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
 
@@ -736,4 +710,54 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma,
   }
 
   return n_macro_lvl;
+}
+
+/**********************************************************/
+/**
+ * @brief  Check for population inversions and deal with them appropriately.
+ *
+ * @param[in]  int index_element     The index for the element
+ * @param[in]  double *populations   The calculated population densities
+ * @param[in]  int **radiative_flag  Flags for if two levels are radiatively linked
+ * @param[in]  int *conf_to_matrix   ?
+ *
+ * @return  void
+ *
+ * @details
+ * MC noise can cause population inversions (particularly amongst highly excited
+ * states) which are never a good thing and are most likely unphysical. We
+ * therefore follow Leon Lucy's procedure (Lucy 2003) and remove inversions.
+ *
+ **********************************************************/
+
+void
+macro_pops_check_for_population_inversion (int index_element, double *populations, int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO],
+                                           int conf_to_matrix[NLEVELS_MACRO])
+{
+  int i, index_ion, index_lvl;
+  double inversion_test;
+
+  for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
+  {
+    /* Start loop with lowest level of the ion. For each level in turn check to see if there's a population
+       inversion i.e. is  upper_pop > lower_pop * g_upper / g_lower. If it is then replace upper_pop with
+       lower_pop * g_upper / g_lower. We loop over all levels higher than the currently chosen lower level. */
+    for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+    {
+      for (i = index_lvl + 1; i < (ion[index_ion].first_nlte_level + ion[index_ion].nlte); i++)
+      {
+        /* this if statement means we only clean if there's a radiative jump between the levels */
+        if (radiative_flag[index_lvl][i])
+        {
+          inversion_test = populations[conf_to_matrix[index_lvl]] * config[i].g / config[index_lvl].g * 0.999999;       //include a correction factor
+
+          if (populations[conf_to_matrix[i]] > inversion_test)
+          {
+            populations[conf_to_matrix[i]] = inversion_test;
+          }
+        }
+      }
+    }
+  }
+
 }
