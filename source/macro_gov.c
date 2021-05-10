@@ -4,9 +4,14 @@
  * @author ksl
  * @date   January, 2018
  *
- * @brief  is a file which contains the functions which govern macro-atoms and obtain
- *  their level populations. The actual functions which do the jumps inside an activated
- *  macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
+ * @brief
+ * Contains the main functions to govern macro atoms and calculate densities.
+ *
+ * @details
+ * This is the file which contains the functions which govern macro-atoms and
+ * obtain their level populations and ion densities. The actual functions which
+ * do the jumps inside an activated macro-atom are in matom.c. This is done to
+ * prevent overly long files.
  *
  ***********************************************************/
 
@@ -57,7 +62,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
      int *nres;
      int matom_or_kpkt;
      int *which_out;
-
 {
   int escape;                   //this tells us when the r-packet is escaping
   int n_jump = 0;
@@ -224,11 +228,11 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 /**********************************************************/
 /**
  * @brief      uses the Monte Carlo estimators to compute a set
- *        of level populations for levels of macro atoms.
+ *             of level populations for levels of macro atoms.
  *
  * @param [in out] PlasmaPtr  xplasma   Plasma pointer of cell in question
  * @param [in out] double  xne   -> current value for electron density in this shell
- * @return     Should compute the fractional level populations for
+ * @return   Should compute the fractional level populations for
  *           macro atoms and store them in "levden" array. The ion fractions
  *           are also computed and stored in w[n].density[nion]
  *
@@ -238,7 +242,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
  * include files that I've added to the top of this file and access to the
  * GSL "library" file (I've added the library into the Makefile too). I found
  * GSL to be very easy to install but if there are problems in the future we
- * may need to switch to another matrix solver. (SS, Apr 04)
+ * may need to switch to another matrix solver.
  *
  * We also clean for population inversion in this routine.
  *
@@ -251,7 +255,6 @@ macro_pops (xplasma, xne)
      PlasmaPtr xplasma;
      double xne;
 {
-
   int index_element, index_ion, index_lvl;
   int n_macro_lvl;
   double rate;
@@ -266,22 +269,17 @@ macro_pops (xplasma, xne)
   double this_ion_density, level_population;
   double ionden_temp, fractional_population;
   double inversion_test;
-  double q_ioniz (), q_recomb ();
   double *a_data, *b_data;
   double *populations;
-  int index_fast_col, ierr, insane, sane_populations;
+  int index_fast_col, ierr, numerical_error, populations_ok;
 
-  MacroPtr mplasma;
-  mplasma = &macromain[xplasma->nplasma];
+  MacroPtr mplasma = &macromain[xplasma->nplasma];
 
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
 
-
   for (index_element = 0; index_element < nelements; index_element++)
   {
-
-
     /* Zero all elements of the matrix before doing anything else. */
 
     for (nn = 0; nn < NLEVELS_MACRO; nn++)
@@ -306,9 +304,8 @@ macro_pops (xplasma, xne)
 
     if (ion[ele[index_element].firstion].macro_info == TRUE && geo.macro_simple == FALSE)
     {
-
-      sane_populations = 0;
-      while (sane_populations == 0)
+      populations_ok = FALSE;
+      while (populations_ok == FALSE)
       {
 
         /* Having established that the ion requires a macro atom treatment we
@@ -418,7 +415,6 @@ macro_pops (xplasma, xne)
 
               line_ptr = &line[config[index_lvl].bbd_jump[index_bbd]];
               rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
-              //rate =0.0;
               rate += q21 (line_ptr, xplasma->t_e) * xne;
 
               /* This is the rate out of the level in question. We need to add it
@@ -434,18 +430,15 @@ macro_pops (xplasma, xne)
               rate_matrix[upper][upper] += -1. * rate;
               rate_matrix[lower][upper] += rate;
 
-
               /* There's a radiative jump between these levels, so we want to clean
-                 for popualtion inversions. Flag this jump */
+                 for population inversions. Flag this jump */
               radiative_flag[line_ptr->nconfigl][index_lvl] = 1;
 
               if (rate < 0.0 || sane_check (rate))
               {
-                Error ("macro_pops: bbd rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+                Error ("macro_pops: bbd rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
               }
             }
-
-
 
             for (index_bfu = 0; index_bfu < config[index_lvl].n_bfu_jump; index_bfu++)
             {
@@ -454,14 +447,14 @@ macro_pops (xplasma, xne)
 
               cont_ptr = &phot_top[config[index_lvl].bfu_jump[index_bfu]];
               rate = mplasma->gamma_old[config[index_lvl].bfu_indx_first + index_bfu];
-              rate += q_ioniz (cont_ptr, xplasma->t_e) * xne;
+              rate += q_ioniz(cont_ptr, xplasma->t_e) * xne;
 
               /* This is the rate out of the level in question. We need to add it
                  to the matrix in two places: firstly as a -ve contribution to the
                  diagonal and secondly as a +ve contribution for the off-diagonal
                  corresponding to the level populated by this process. */
 
-              /* Get the matix indices for the upper and lower states of the jump. */
+              /* Get the matrix indices for the upper and lower states of the jump. */
 
               lower = conf_to_matrix[index_lvl];
               upper = conf_to_matrix[cont_ptr->uplev];
@@ -469,9 +462,9 @@ macro_pops (xplasma, xne)
               rate_matrix[lower][lower] += -1. * rate;
               rate_matrix[upper][lower] += rate;
 
-              if (rate < 0.0 || sane_check (rate))
+              if(rate < 0.0 || sane_check(rate))
               {
-                Error ("macro_pops: bfu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+                Error("macro_pops: bfu rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
               }
 
               /* Now deal with the stimulated emission. */
@@ -483,14 +476,11 @@ macro_pops (xplasma, xne)
               rate_matrix[upper][upper] += -1. * rate;
               rate_matrix[lower][upper] += rate;
 
-              if (rate < 0.0 || sane_check (rate))
+              if(rate < 0.0 || sane_check(rate))
               {
-                Error ("macro_pops: st. recomb rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+                Error("macro_pops: st. recomb rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
               }
-
             }
-
-
 
             for (index_bfd = 0; index_bfd < config[index_lvl].n_bfd_jump; index_bfd++)
             {
@@ -503,13 +493,12 @@ macro_pops (xplasma, xne)
               rate = mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] * xne;
               rate += q_recomb (cont_ptr, xplasma->t_e) * xne * xne;
 
-
               /* This is the rate out of the level in question. We need to add it
                  to the matrix in two places: firstly as a -ve contribution to the
                  diagonal and secondly as a +ve contribution for the off-diagonal
                  corresponding to the level populated by this process. */
 
-              /* Get the matix indices for the upper and lower states of the jump. */
+              /* Get the matrix indices for the upper and lower states of the jump. */
 
               upper = conf_to_matrix[index_lvl];
               lower = conf_to_matrix[cont_ptr->nlev];
@@ -519,7 +508,7 @@ macro_pops (xplasma, xne)
 
               if (rate < 0.0 || sane_check (rate))
               {
-                Error ("macro_pops: bfd rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+                Error ("macro_pops: bfd rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
               }
             }
           }
@@ -534,17 +523,14 @@ macro_pops (xplasma, xne)
           rate_matrix[0][index_lvl] = 1.0;
         }
 
-        /* Now we can just invert the matrix to get the fractional level populations. */
-
-
-          /********************************************************************************/
-        /* The block that follows (down to next line of ***s) is to do the
+        /********************************************************************************/
+        /* Now we can just invert the matrix to get the fractional level populations.
+           The block that follows (down to next line of ***s) is to do the
            matrix inversion. It uses LU decomposition - the code for doing this is
-           taken from the GSL manual with very few modifications. */
-        /* here we solve the matrix equation M x = b, where x is our vector containing
+           taken from the GSL manual with very few modifications.
+           Here we solve the matrix equation M x = b, where x is our vector containing
            level populations as a fraction w.r.t the whole element */
-
-        /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
+        /********************************************************************************/
 
         a_data = (double *) calloc (sizeof (rate), n_macro_lvl * n_macro_lvl);
 
@@ -556,31 +542,27 @@ macro_pops (xplasma, xne)
           }
         }
 
-
-        /* Replaced inline array allocaation with calloc, which will work with older version of c compilers
-           calloc also sets the elements to zero, which is required */
-
         b_data = (double *) calloc (sizeof (rate), n_macro_lvl);
         populations = (double *) calloc (sizeof (rate), n_macro_lvl);
 
-        /* replace the first entry with 1.0- this is part of the normalisation constraint */
+        /* replace the first entry with 1.0 - this is part of the normalisation constraint */
         b_data[0] = 1.0;
 
         /* this next routine is a general routine which solves the matrix equation
            via LU decomposition */
         ierr = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
-
         if (ierr != 0)
-          Error ("macro_pops: bad return from solve_matrix\n");
+        {
+          Error("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", ierr);
+        }
 
         /* free memory */
         free (a_data);
         free (b_data);
 
-
         /* MC noise can cause population inversions (particularly amongst highly excited states)
            which are never a good thing and most likely unphysical.
-           Therefor let's follow Leon's procedure (Lucy 2003) and remove inversions. */
+           Therefore let's follow Leon's procedure (Lucy 2003) and remove inversions. */
 
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
         {
@@ -591,7 +573,6 @@ macro_pops (xplasma, xne)
 
             for (nn = index_lvl + 1; nn < (ion[index_ion].first_nlte_level + ion[index_ion].nlte); nn++)
             {
-
               /* this if statement means we only clean if there's a radiative jump between the levels */
               if (radiative_flag[index_lvl][nn])
               {
@@ -606,15 +587,15 @@ macro_pops (xplasma, xne)
           }
         }
 
-
         /* The populations are now known. The populations need to be stored
-           firstly as ion populations and secondly as fractional
-           level populations within an ion. Get the ion
-           populations and write them to one->density[nion]. The level populations
-           are to be put in "levden". */
-        insane = 0;
+           firstly as ion populations and secondly as fractional level populations
+           within an ion. Get the ion populations and write them to one->density[nion].
+           The level populations are to be put in "levden". */
+
         nn = 0;
         mm = 0;
+        numerical_error = FALSE;
+
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
         {
           this_ion_density = 0.0;
@@ -626,42 +607,57 @@ macro_pops (xplasma, xne)
             nn++;
           }
 
-          /* Check the sanity and positivity of the ion densities */
-          ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
+          /* Check that the ion density is positive and finite */
 
-          if (sane_check (ionden_temp) || ionden_temp < 0.0)
+          ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
+          if(fabs(ionden_temp) < DENSITY_MIN)
+          {
+            ionden_temp = DENSITY_MIN;
+          }
+          else if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
             Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
-            insane = 1;
+            numerical_error = TRUE;
           }
 
-          /* Check the sanity and positivity of the level populations */
+          /* Check that the level populations for this ion are positive and finite */
+
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
-            if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
+            if(fabs(populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
+            {
+              populations[conf_to_matrix[index_lvl]] = DENSITY_MIN;
+            }
+            else if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
               Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
                      index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
-              insane = 1;
+              numerical_error = TRUE;
             }
             mm++;
           }
         }
 
-        /* if the variable insane has been set to 1 then that means we had either a negative or
+        /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
            non-finite level population somewhere. If that is the case, then set all the estimators
-           to dilute blackbodies instead and go through the solution again */
-        if (insane)
+           to dilute blackbodies instead and go through the solution again.
+           2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
+           populations_ok to 1 to break the while loop, and copy the populations into the arrays
+        */
+
+        if (numerical_error)
         {
-          Error ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
+          if(xplasma->w < DILUTION_FACTOR_MINIMUM)
+            xplasma->w = DILUTION_FACTOR_MINIMUM;
+
+          Error ("macro_pops: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
                  xplasma->nplasma, xplasma->w, xplasma->t_r);
+
           get_dilute_estimators (xplasma);
         }
-        /* if we didn't set insane to 1 then we have a realistic set of populations, so set sane_populations to 1 to break
-           the while loop, and copy the populations into the arrays */
         else
         {
-          sane_populations = 1;
+          populations_ok = TRUE;
           for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
           {
             this_ion_density = 0.0;
@@ -696,9 +692,7 @@ macro_pops (xplasma, xne)
         }
 
         free (populations);
-      }                         // end of while sane loop
-
-
+      }                         // end of populations_ok == FALSE sane loop
     }                           // end of if statement for macro-atoms
   }                             // end of elements loop
 
