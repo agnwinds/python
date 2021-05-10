@@ -447,7 +447,7 @@ macro_pops (xplasma, xne)
 
               cont_ptr = &phot_top[config[index_lvl].bfu_jump[index_bfu]];
               rate = mplasma->gamma_old[config[index_lvl].bfu_indx_first + index_bfu];
-              rate += q_ioniz(cont_ptr, xplasma->t_e) * xne;
+              rate += q_ioniz (cont_ptr, xplasma->t_e) * xne;
 
               /* This is the rate out of the level in question. We need to add it
                  to the matrix in two places: firstly as a -ve contribution to the
@@ -462,9 +462,9 @@ macro_pops (xplasma, xne)
               rate_matrix[lower][lower] += -1. * rate;
               rate_matrix[upper][lower] += rate;
 
-              if(rate < 0.0 || sane_check(rate))
+              if (rate < 0.0 || sane_check (rate))
               {
-                Error("macro_pops: bfu rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
+                Error ("macro_pops: bfu rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
               }
 
               /* Now deal with the stimulated emission. */
@@ -476,9 +476,9 @@ macro_pops (xplasma, xne)
               rate_matrix[upper][upper] += -1. * rate;
               rate_matrix[lower][upper] += rate;
 
-              if(rate < 0.0 || sane_check(rate))
+              if (rate < 0.0 || sane_check (rate))
               {
-                Error("macro_pops: st. recomb rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
+                Error ("macro_pops: st. recomb rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
               }
             }
 
@@ -553,7 +553,7 @@ macro_pops (xplasma, xne)
         ierr = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
         if (ierr != 0)
         {
-          Error("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", ierr);
+          Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", ierr);
         }
 
         /* free memory */
@@ -610,13 +610,13 @@ macro_pops (xplasma, xne)
           /* Check that the ion density is positive and finite */
 
           ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
-          if(fabs(ionden_temp) < DENSITY_MIN)
+          if (fabs (ionden_temp) < DENSITY_MIN)
           {
             ionden_temp = DENSITY_MIN;
           }
           else if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
-            Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
+            Error ("macro_pops: ion %i has calculated a frac. pop. of %8.4e in plasma cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
             numerical_error = TRUE;
           }
 
@@ -624,13 +624,13 @@ macro_pops (xplasma, xne)
 
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
-            if(fabs(populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
+            if (fabs (populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
             {
               populations[conf_to_matrix[index_lvl]] = DENSITY_MIN;
             }
             else if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
-              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
+              Error ("macro_pops: level %i has a calculated pop. of %8.4e in plasma cell %i\n",
                      index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
               numerical_error = TRUE;
             }
@@ -643,11 +643,11 @@ macro_pops (xplasma, xne)
            to dilute blackbodies instead and go through the solution again.
            2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
            populations_ok to 1 to break the while loop, and copy the populations into the arrays
-        */
+         */
 
         if (numerical_error)
         {
-          if(xplasma->w < DILUTION_FACTOR_MINIMUM)
+          if (xplasma->w < DILUTION_FACTOR_MINIMUM)
             xplasma->w = DILUTION_FACTOR_MINIMUM;
 
           Error ("macro_pops: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
