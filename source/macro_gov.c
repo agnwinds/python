@@ -31,14 +31,14 @@
 /**********************************************************/
 /**
  * @brief macro_gov is a routine that governs the excitation and de-excitation of macro-atoms, kpkts and simple-atoms.
- 
+
  * @param [in,out]  PhotPtr  p   the packet at the point of activation
  * @param [in,out]  int *  nres   the process which activates the Macro Atom
  * @param [in]      int  matom_or_kpkt   initially excite a matom (1) or create a kpkt (2)
  * @param [in,out]     int *  which_out   set to 1 if return is via macro atom and 2 if via kpkt
  * @return 0        Will return an r-packet after (possibly) several calls to matom and kpkt
  *
- * @details macro_gov sits at a higher level in the code than either matom or kpkt and governs the passage 
+ * @details macro_gov sits at a higher level in the code than either matom or kpkt and governs the passage
  * of packets between these routines. At the moment, since matom and kpkt
  * call each other it can all get rather confusing and loads of nested subroutine calls ensue.
  * macro_gov removes this by calling matom and kpkt which on return tell  to either return
@@ -150,7 +150,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       /* This is a bf continuum but we don't want the full macro atom treatment. In the pre-2018
          approach, we process the photon in a way that makes it return a bf photon of the same type
          as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
-         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error 
+         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
          is thrown and we exit. */
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
       {
@@ -162,13 +162,13 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       }
 
       /* If it did not escape then it must have had a
-         de-activation by collision processes, and so we label it a kpkt.  On the next go-through 
+         de-activation by collision processes, and so we label it a kpkt.  On the next go-through
          of the loop we will process it as such */
       matom_or_kpkt = 2;
     }
 
 
-    /* This the end of the section of the loop that deals with matom excitations. next domes the 
+    /* This the end of the section of the loop that deals with matom excitations. next domes the
        section of the loop that deals with kpts */
     else if (matom_or_kpkt == 2)
     {
@@ -209,8 +209,8 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     n_loop++;
   }
 
-  /* End of main matom processing loop 
-     When it gets here an escpae has taken place. 
+  /* End of main matom processing loop
+     When it gets here an escpae has taken place.
    */
 
   *which_out = 2;
@@ -260,8 +260,8 @@ macro_pops (xplasma, xne)
   double *a_data, *b_data;
   double *populations;
   double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
-  int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO];     // 140423 JM flag if two levels are radiatively linked
-  int conf_to_matrix[NLEVELS_MACRO];
+  int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO];     // array to flag if two levels are radiatively linked
+  int conf_to_matrix[NLEVELS_MACRO];                    // links config number to elements in arrays
   MacroPtr mplasma = &macromain[xplasma->nplasma];
 
   /* Start with an outer loop over elements: there are no rates that couple
@@ -276,9 +276,6 @@ macro_pops (xplasma, xne)
       for (mm = 0; mm < NLEVELS_MACRO; mm++)
       {
         rate_matrix[mm][nn] = 0.0;
-
-        /* 140423 JM -- new int array to flag if  two levels are radiatively linked
-           initialize to 0 */
         radiative_flag[mm][nn] = 0;
       }
     }
@@ -346,13 +343,8 @@ macro_pops (xplasma, xne)
           Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", ierr);
         }
 
-        /* free memory */
         free (a_data);
         free (b_data);
-
-        /* MC noise can cause population inversions (particularly amongst highly excited states)
-           which are never a good thing and most likely unphysical.
-           Therefore let's follow Leon's procedure (Lucy 2003) and remove inversions. */
 
         macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
@@ -400,7 +392,8 @@ macro_pops (xplasma, xne)
  * @param[in] int index_element       The index of the current element to populate
  * @param[out] double rate_matrix     The populated rate matrix for the current element
  * @param[out] double radiative_flag  Flags for if two levels are radiatively linked
- * @param[out] int conf_to_matrix     ?
+ * @param[out] int conf_to_matrix     A map to link congfiruation number to elements in
+ *                                    the populations matrix
  *
  * @return int n_macro_lvl   The number of macro atom levels for this element
  *
@@ -428,14 +421,15 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
 
+  /* I want to be able to easily go from knowing the index of a level in the
+     configurations structure to its position in the rates matrix. So I'm making
+     two arrays here that allow the mapping between these indices to be done easily.
+   */
+
   for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
   {
     for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
     {
-      /* I want to be able to easily go from knowing the index of a level in the
-         configurations structure to its position in the rates matrix. So I'm making
-         two arrays here that allow the mapping between these indices to be done easily.
-       */
       conf_to_matrix[index_lvl] = n_macro_lvl;
       n_macro_lvl++;
     }
@@ -485,7 +479,6 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
          done by looping over the numbers "bbu, bbd, bfu, bfd" which tell us how many
          processes there are. */
 
-
       for (index_bbu = 0; index_bbu < config[index_lvl].n_bbu_jump; index_bbu++)
       {
         /* These are bb upwards jumps. The rate in such a jump is given by
@@ -511,7 +504,7 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
 
         if (rate < 0.0 || sane_check (rate))
         {
-          Error ("macro_pops: bbu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+          Error ("macro_pops: bbu rate is %8.4e in plasma cell/matom %i\n", rate, xplasma->nplasma);
         }
 
         /* There's a radiative jump between these levels, so we want to clean
@@ -636,7 +629,8 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
  * @param[in]  int index_element     The index for the element
  * @param[in]  double *populations   The calculated population densities
  * @param[in]  int **radiative_flag  Flags for if two levels are radiatively linked
- * @param[in]  int *conf_to_matrix   ?
+ * @param[in]  int *conf_to_matrix   A map to link congfiruation number to elements in
+ *                                    the populations matrix
  *
  * @return  void
  *
@@ -754,7 +748,8 @@ macro_pops_check_densities_for_numerical_errors (PlasmaPtr xplasma, int index_el
  * @param[in, out] PlasmaPtr xplasma  The plasma cell to update
  * @param[in] int index_element       The index of the element
  * @param[in] double *populations     The calculated densities to copy
- * @param[in] int *conf_to_matrix     ?
+ * @param[in] int *conf_to_matrix     A map to link congfiruation number to elements in
+ *                                    the populations matrix
  *
  * @return void
  *
