@@ -427,40 +427,30 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      PhotPtr p;
      double tau_scat, *tau;
      int *nres;
-
-
 {
-
   int n;
   double smax, ds_current, ds_cmf;
   int istat;
   int nplasma;
-  int ndom;
-  int inwind;
 
   WindPtr one;
   PlasmaPtr xplasma;
   struct photon phot_mid, phot_mid_cmf; // Photon at the midpt of its path in the cell
 
-
-/* First verify that the photon is in the grid, and if not
-return and record an error */
+  /* First verify that the photon is in the grid, and if not
+  return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
     return (n);                 /* Photon was not in grid */
   }
-/* Assign the pointers for the cell containing the photon */
+  /* Assign the pointers for the cell containing the photon */
 
   one = &wmain[n];              /* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  ndom = one->ndom;
-  inwind = one->inwind;
 
-
-
-/* Calculate the maximum distance the photon can travel in the cell */
+  /* Calculate the maximum distance the photon can travel in the cell */
 
   smax = smax_in_cell (p);
 
@@ -477,13 +467,10 @@ return and record an error */
   if (p->nres > 0)
     xplasma->nscat_res++;
 
-
-
-/* We now increment the radiation field in the cell, translate the photon and wrap
-   things up.  For simple atoms, the routine radiation also reduces
-   the weight of the photon due to continuum absorption, e.g. free free.
+  /* We now increment the radiation field in the cell, translate the photon and wrap
+   * things up.  For simple atoms, the routine radiation also reduces
+   * the weight of the photon due to continuum absorption, e.g. free free.
    */
-
 
   if (geo.rt_mode == RT_MODE_MACRO)
   {
@@ -513,18 +500,16 @@ return and record an error */
   {
     if (ds_current < 1e5)
     {
-      Error ("translate_in_wind: nres %5d repeat after motion of %10.3e of phot %6d in ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
-             *nres, ds_current, p->np, geo.wcycle, geo.pcycle, p->istat, istat);
+      Error ("translate_in_wind: nres %5d repeat after motion of %10.3e for photon %d in plasma cell %d ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
+             *nres, ds_current, p->np, wmain[p->grid].nplasma, geo.wcycle, geo.pcycle, p->istat, istat);
       istat = P_INWIND;
       *tau = 0;
     }
   }
 
-  p->nres = (*nres);
+  p->nres = *nres;
 
   return (p->istat = istat);
-
-
 }
 
 
