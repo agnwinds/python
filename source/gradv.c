@@ -52,7 +52,7 @@ dvwind_ds_cmf (p)
   int j, k, nn;
   double dot_tensor_vec ();
   struct photon pp;
-  int nnn[4], nelem;            // At present the largest number of dimenssion in the grid is 2
+  int nnn[4], nelem;
   double frac[4];
   double x;
 
@@ -88,7 +88,8 @@ dvwind_ds_cmf (p)
     double ds;
     /* choose a small distance which is dependent on the cell size */
     vsub (pp.x, wmain[pp.grid].x, diff);
-    ds = 0.001 * length (diff);
+    vsub (wmain[pp.grid].xcen, wmain[pp.grid].x, diff);
+    ds = 0.000001 * length (diff);
     /* calculate the velocity at the position of the photon */
     /* note we use model velocity, which could potentially be slow,
        but avoids interpolating (see #118) */
