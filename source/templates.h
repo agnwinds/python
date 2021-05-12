@@ -174,12 +174,15 @@ double pillbox(PhotPtr p, double *smin, double *smax);
 double phi(double s, void *params);
 double dphi_ds(double s, void *params);
 double roche_width(double x, void *params);
-double roche2_width_max(void);
+double roche2_half_width(void);
 /* random.c */
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x, void *params);
 int init_rand(int seed);
+void init_rng_directory(void);
+void save_gsl_rng_state(void);
+void reload_gsl_rng_state(void);
 double random_number(double min, double max);
 /* stellar_wind.c */
 int get_stellar_wind_params(int ndom);

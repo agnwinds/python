@@ -14,6 +14,9 @@
 #include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -24,7 +27,7 @@
    Basis is defined in python.h
  */
 
-gsl_rng *rng;                   // pointer to a global random number generator
+gsl_rng *rng = NULL;            // pointer to a global random number generator
 
 
 /**********************************************************/
@@ -262,6 +265,122 @@ init_rand (seed)
   return (0);
 }
 
+/**********************************************************/
+/**
+ * @brief  Initialise the RNG directory structure.
+ *
+ * @details
+ *
+ * Creates a hidden folder named .rng_root where root.rng_save files are
+ * stored.
+ *
+ **********************************************************/
+
+void
+init_rng_directory (void)
+{
+  int err;
+  char dir_name[LINELENGTH];
+  char file_name[LINELENGTH];
+
+  sprintf (dir_name, ".rng_%s/", files.root);
+
+  err = mkdir (dir_name, 0777);
+  if (err)
+  {
+    if (errno != EEXIST)
+    {
+      perror ("init_rng_directory");
+      Exit (1);
+    }
+  }
+
+  sprintf (file_name, "%s%s_%d.rng_save", dir_name, files.root, rank_global);
+  strcpy (files.rngsave, file_name);
+}
+
+/**********************************************************/
+/**
+ * @brief  Dump the current GSL RNG state to a binary file.
+ *
+ * @details
+ *
+ * Saves the RNG state to the file root.gsl_save. The point of this
+ * is mostly for debugging purposes, being able to keep the same RNG if
+ * restarting the model.
+ *
+ **********************************************************/
+
+void
+save_gsl_rng_state ()
+{
+  FILE *file;
+
+  if ((file = fopen (files.rngsave, "w")) == NULL)
+  {
+    Error ("save_gsl_rng_state: unable to open %s\n", files.rngsave);
+    return;
+  }
+
+  if (gsl_rng_fwrite (file, rng))
+  {
+    Error ("save_gsl_rng_state: gsl_rng_fwrite failed to write RNG state to file\n");
+  }
+
+  Log ("RNG state loaded from %s\n", files.rngsave);
+
+  if (fclose (file))
+  {
+    Error ("save_gsl_rng_state: problem when closing gsl save file\n");
+  }
+}
+
+/**********************************************************/
+/**
+ * @brief  Load a dump GSL RNG save into the current RNG.
+ *
+ * @details
+ *
+ * Read's in a dumped RNG state from the file root.gsl_save. The point of this
+ * is mostly for debugging purposes, being able to keep the same RNG if
+ * restarting the model.
+ *
+ * gsl_rng_fread will modify rng, the global rng variable, so we do not need
+ * to re-set the rng system. However note that we still need to allocate
+ * memory for it. The previous rng memory is deallocated if, for some reason,
+ * it is not a NULL pointer.
+ *
+ **********************************************************/
+
+void
+reload_gsl_rng_state ()
+{
+  FILE *file;
+
+  if (rng != NULL)
+    gsl_rng_free (rng);
+
+  rng = gsl_rng_alloc (gsl_rng_mt19937);
+
+  if ((file = fopen (files.rngsave, "r")) == NULL)
+  {
+    Error ("reload_gsl_rng_state: unable to open %s\n", files.rngsave);
+    Exit (1);
+  }
+
+  if (gsl_rng_fread (file, rng))
+  {
+    Error ("reload_gsl_rng_state: gsl_rng_fread failed to read RNG state to file\n");
+    Exit (1);
+  }
+
+  Log ("RNG state loaded from %s\n", files.rngsave);
+
+  if (fclose (file))
+  {
+    Error ("reload_gsl_rng_state: problem when closing gsl save file\n");
+  }
+}
 
 /**********************************************************/
 /** 
