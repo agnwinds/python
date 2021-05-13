@@ -628,10 +628,10 @@ macro_pops (xplasma, xne)
           /* Check the sanity and positivity of the ion densities */
           ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
 
-          if (fabs(ionden_temp) < DENSITY_MIN)
-          {
-            ionden_temp = DENSITY_MIN;
-          }
+//          if (fabs(ionden_temp) < DENSITY_MIN)
+//          {
+//            ionden_temp = DENSITY_MIN;
+//          }
 
           if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
@@ -642,10 +642,10 @@ macro_pops (xplasma, xne)
           /* Check the sanity and positivity of the level populations */
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
-            if (fabs(populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
-            {
-              populations[conf_to_matrix[index_lvl]] = DENSITY_MIN;
-            }
+//            if (fabs(populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
+//            {
+//              populations[conf_to_matrix[index_lvl]] = DENSITY_MIN;
+//            }
 
             if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
