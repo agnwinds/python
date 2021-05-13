@@ -535,7 +535,7 @@ mc_estimator_normalise (n)
           ("estimators: den_config (xplasma, i) %g  den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu) %g \n",
            den_config (xplasma, i), den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu));
         stimfac = 0.0;
-        //Exit (0);
+        Exit (0);
       }
       else
       {
