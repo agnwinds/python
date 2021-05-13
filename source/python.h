@@ -1541,3 +1541,5 @@ struct rdpar_choices zz_spec;
 #include "strict.h"
 #include "version.h"
 #include "templates.h"
+
+int *macro_pops_inversion_check;

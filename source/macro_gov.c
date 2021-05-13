@@ -273,6 +273,9 @@ macro_pops (xplasma, xne)
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
 
+  if (macro_pops_inversion_check != NULL)
+    free (macro_pops_inversion_check);
+
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
 
@@ -561,6 +564,7 @@ macro_pops (xplasma, xne)
 
         b_data = (double *) calloc (sizeof (rate), n_macro_lvl);
         populations = (double *) calloc (sizeof (rate), n_macro_lvl);
+        macro_pops_inversion_check = calloc (n_macro_lvl, sizeof (int));
 
         /* replace the first entry with 1.0- this is part of the normalisation constraint */
         b_data[0] = 1.0;
@@ -599,12 +603,12 @@ macro_pops (xplasma, xne)
                 if (populations[conf_to_matrix[nn]] > inversion_test)
                 {
                   populations[conf_to_matrix[nn]] = inversion_test;
+                  macro_pops_inversion_check[conf_to_matrix[nn]] = TRUE;
                 }
               }
             }
           }
         }
-
 
         /* The populations are now known. The populations need to be stored
            firstly as ion populations and secondly as fractional
