@@ -628,6 +628,11 @@ macro_pops (xplasma, xne)
           /* Check the sanity and positivity of the ion densities */
           ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
 
+          if (fabs(ionden_temp) < DENSITY_MIN)
+          {
+            ionden_temp = DENSITY_MIN;
+          }
+
           if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
             Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
@@ -637,6 +642,11 @@ macro_pops (xplasma, xne)
           /* Check the sanity and positivity of the level populations */
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
+            if (fabs(populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
+            {
+              populations[conf_to_matrix[index_lvl]] = DENSITY_MIN;
+            }
+
             if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
               Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
@@ -652,6 +662,9 @@ macro_pops (xplasma, xne)
            to dilute blackbodies instead and go through the solution again */
         if (numerical_population_issue)
         {
+          if (xplasma->w < DILUTE_FACTOR_MIN)
+            xplasma->w = DILUTE_FACTOR_MIN;
+
           Error ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
                  xplasma->nplasma, xplasma->w, xplasma->t_r);
           get_dilute_estimators (xplasma);

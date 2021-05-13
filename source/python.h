@@ -70,9 +70,10 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
                                    be calculated self-consistently.  Program speed is somewhat sensitive 
                                    to this parameter, at the 10% level if raised from 1e-3 to 1.  There is a 
                                    trade-off since lower minima may give better results, especially for macro atoms. */
-
 #define LDEN_MIN        1e-3    /* The minimum density required for a line to be conidered for scattering
                                    or emission in calculate_ds and lum_lines */
+
+#define DILUTE_FACTOR_MIN 1e-10
 
 
 /* End of "care factor" definition */
