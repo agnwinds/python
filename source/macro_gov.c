@@ -310,8 +310,10 @@ macro_pops (xplasma, xne)
     {
       populations_ok = FALSE;
 
+      int n_iter = 0;
       while (populations_ok == FALSE)
       {
+        n_iter++;
 
         /* Having established that the ion requires a macro atom treatment we
            are going to construct a matrix of rates between the levels and
@@ -639,7 +641,8 @@ macro_pops (xplasma, xne)
 
           if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
-            Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
+            Error ("macro_pops: iteration %d: ion %i has calculated frac. pop. %8.4e in cell %i\n", n_iter, index_ion, ionden_temp,
+                   xplasma->nplasma);
             numerical_population_issue = TRUE;
           }
 
@@ -653,8 +656,8 @@ macro_pops (xplasma, xne)
 
             if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
-              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
-                     index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
+              Error ("macro_pops: iteration %d : level %i has calculated pop. %8.4e in cell %i\n",
+                     n_iter, index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
               numerical_population_issue = TRUE;
             }
             mm++;
@@ -666,11 +669,15 @@ macro_pops (xplasma, xne)
            to dilute blackbodies instead and go through the solution again */
         if (numerical_population_issue)
         {
-          if (xplasma->w < DILUTE_FACTOR_MIN)
-            xplasma->w = DILUTE_FACTOR_MIN;
+          Error ("macro_pops: iteration %d : found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
+                 n_iter, xplasma->nplasma, xplasma->w, xplasma->t_r);
 
-          Error ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
-                 xplasma->nplasma, xplasma->w, xplasma->t_r);
+          if (xplasma->w < DILUTE_FACTOR_MIN)
+          {
+            Error ("macro_pops: iteration %d: dilution factor < %g so setting w to this\n", n_iter, DILUTE_FACTOR_MIN);
+            xplasma->w = DILUTE_FACTOR_MIN;
+          }
+
           get_dilute_estimators (xplasma);
         }
         /* if we didn't set numerical_population_issue to 1 then we have a realistic set of populations, so set populations_ok to 1 to break
