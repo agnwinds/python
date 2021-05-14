@@ -356,9 +356,9 @@ macro_pops (xplasma, xne)
         if (macro_pops_inversion_check != NULL)
         {
           free(macro_pops_inversion_check);
-          macro_pops_inversion_check = calloc(n_macro_lvl, sizeof(*macro_pops_inversion_check));
         }
 
+        macro_pops_inversion_check = calloc(n_macro_lvl, sizeof(*macro_pops_inversion_check));
         macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
         n_inversions = macro_pops_count_inversions();
 
