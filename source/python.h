@@ -1542,3 +1542,7 @@ struct rdpar_choices zz_spec;
 #include "strict.h"
 #include "version.h"
 #include "templates.h"
+
+int macro_pops_n_levels;
+int *macro_pops_inversion_check;
+int inversion_conf_to_matrix[NLEVELS_MACRO];
