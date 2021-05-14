@@ -612,6 +612,18 @@ macro_pops (xplasma, xne)
           }
         }
 
+        int inversion_count = 0;
+        for (int i = 0; i < NLEVELS_MACRO; ++i)
+        {
+          inversion_count += macro_pops_inversion_check[i];
+        }
+
+        if (inversion_count > 0)
+        {
+          Log ("macro_pops: iteration %d: for plasma cell %d there were %d population inversions\n", n_iter, xplasma->nplasma,
+               inversion_count);
+        }
+
         /* The populations are now known. The populations need to be stored
            firstly as ion populations and secondly as fractional
            level populations within an ion. Get the ion
