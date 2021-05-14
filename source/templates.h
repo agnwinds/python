@@ -335,7 +335,7 @@ int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double freq_min, doub
 /* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
-int normalise_macro_estimators(n);
+int normalise_macro_estimators(int n);
 double total_fb_matoms(PlasmaPtr xplasma, double t_e, double f1, double f2);
 double total_bb_cooling(PlasmaPtr xplasma, double t_e);
 double macro_bb_heating(PlasmaPtr xplasma, double t_e);
