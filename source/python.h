@@ -876,6 +876,9 @@ typedef struct plasma
   double *lum_rr_ion;           /* The recombination luminosity
                                    by this ion via recombination. */
 
+#define MEAN_INTENSITY_BB_MODEL  1
+#define MEAN_INTENSITY_ESTIMATOR_MODEL 2
+
   double *cool_dr_ion;
   double j, ave_freq;           /* Mean (angle-averaged) total intensity, intensity-averaged frequency */
 

@@ -406,7 +406,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
  **********************************************************/
 
 int
-normalise_macro_estimators(n)
+normalise_macro_estimators (n)
      int n;
 {
   double invariant_volume_time;
@@ -525,7 +525,7 @@ normalise_macro_estimators(n)
         Error ("normalise_macro_estimators: bb stimulated correction factor is out of bounds, 0 <= stimfac < 1 but got %g\n", stimfac);
         Error ("ms_estimator_normalise: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
                upper_density, lower_density, xplasma->levden[config[nlev_upper].nden]);
-        macro_pops_check_if_level_inversion(nlev_upper);
+        macro_pops_check_if_level_inversion (nlev_upper);
         stimfac = 0.0;
       }
       else
@@ -961,7 +961,6 @@ get_dilute_estimators (xplasma)
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
 
-
   for (i = 0; i < nlte_levels; i++)
   {
     for (j = 0; j < config[i].n_bfu_jump; j++)
@@ -974,9 +973,8 @@ get_dilute_estimators (xplasma)
     for (j = 0; j < config[i].n_bbu_jump; j++)
     {
       line_ptr = &line[config[i].bbu_jump[j]];
-      mplasma->jbar_old[config[i].bbu_indx_first + j] = mean_intensity (xplasma, line_ptr->freq, 1);
+      mplasma->jbar_old[config[i].bbu_indx_first + j] = mean_intensity (xplasma, line_ptr->freq, MEAN_INTENSITY_BB_MODEL);
     }
-
   }
 
   return (0);
