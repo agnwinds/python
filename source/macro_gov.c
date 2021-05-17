@@ -262,7 +262,7 @@ macro_pops (xplasma, xne)
   double *populations;
   double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
   int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO];     // array to flag if two levels are radiatively linked
-  int conf_to_matrix[NLEVELS_MACRO];                    // links config number to elements in arrays
+  int conf_to_matrix[NLEVELS_MACRO];    // links config number to elements in arrays
   MacroPtr mplasma = &macromain[xplasma->nplasma];
 
   /*
@@ -271,16 +271,16 @@ macro_pops (xplasma, xne)
    * down the road
    */
 
-  if(xplasma->ntot == 0)
+  if (xplasma->ntot == 0)
   {
     if (xplasma->w < DILUTION_FACTOR_MINIMUM)
     {
       Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n", n_iterations,
-        xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
+             xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
       xplasma->w = DILUTION_FACTOR_MINIMUM;
     }
 
-    get_dilute_estimators(xplasma);
+    get_dilute_estimators (xplasma);
   }
 
   /* Start with an outer loop over elements: there are no rates that couple
@@ -359,10 +359,10 @@ macro_pops (xplasma, xne)
 
         /* this next routine is a general routine which solves the matrix equation
            via LU decomposition */
-        gsl_err = solve_matrix(a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
+        gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
         if (gsl_err)
         {
-          Error("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
+          Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
         }
 
         free (a_data);
@@ -373,16 +373,16 @@ macro_pops (xplasma, xne)
 
         if (macro_pops_inversion_check != NULL)
         {
-          free(macro_pops_inversion_check);
+          free (macro_pops_inversion_check);
         }
 
-        macro_pops_inversion_check = calloc(n_macro_lvl, sizeof(*macro_pops_inversion_check));
+        macro_pops_inversion_check = calloc (n_macro_lvl, sizeof (*macro_pops_inversion_check));
         macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
-        n_inversions = macro_pops_count_inversions();
+        n_inversions = macro_pops_count_inversions ();
 
-        if(n_inversions > 0)
-          Log("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n", n_iterations,
-              n_inversions, xplasma->nplasma);
+        if (n_inversions > 0)
+          Log ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
+               n_iterations, n_inversions, xplasma->nplasma);
 
         /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
            non-finite level population somewhere. If that is the case, then set all the estimators
@@ -391,17 +391,19 @@ macro_pops (xplasma, xne)
            populations_ok to 1 to break the while loop, and copy the populations into the arrays
          */
 
-        numerical_error = macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix, n_iterations);
+        numerical_error =
+          macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix, n_iterations);
 
         if (numerical_error)
         {
-          Error ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
-                 n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
+          Error
+            ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
+             n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
 
           if (xplasma->w < DILUTION_FACTOR_MINIMUM)
           {
-            Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n", n_iterations,
-                  xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
+            Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n",
+                   n_iterations, xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
             xplasma->w = DILUTION_FACTOR_MINIMUM;
           }
 
@@ -701,7 +703,8 @@ macro_pops_check_for_population_inversion (int index_element, double *population
         /* this if statement means we only clean if there's a radiative jump between the levels */
         if (radiative_flag[index_lvl][i])
         {
-          inversion_test = populations[conf_to_matrix[index_lvl]] * config[i].g / config[index_lvl].g * 0.999999;       //include a correction factor
+          // todo: learn why we have a correction factor at the end
+          inversion_test = populations[conf_to_matrix[index_lvl]] * config[i].g / config[index_lvl].g * 0.999999;
 
           if (populations[conf_to_matrix[i]] > inversion_test)
           {
@@ -728,12 +731,12 @@ macro_pops_check_for_population_inversion (int index_element, double *population
  * ********************************************************/
 
 int
-macro_pops_count_inversions(void)
+macro_pops_count_inversions (void)
 {
   int i;
   int n_total_inversions = 0;
 
-  for(i = 0; i < macro_pops_n_levels; i++)
+  for (i = 0; i < macro_pops_n_levels; i++)
   {
     n_total_inversions += macro_pops_inversion_check[i];
   }
@@ -752,11 +755,11 @@ macro_pops_count_inversions(void)
  * ********************************************************/
 
 void
-macro_pops_check_if_level_inversion(int nlevel)
+macro_pops_check_if_level_inversion (int nlevel)
 {
-  if(macro_pops_inversion_check[inversion_conf_to_matrix[nlevel]])
+  if (macro_pops_inversion_check[inversion_conf_to_matrix[nlevel]])
   {
-    Error("macro_pops_check_if_level_inversion: macro level %d was cleaned due to a population inversion\n");
+    Error ("macro_pops_check_if_level_inversion: macro level %d was cleaned due to a population inversion\n");
   }
 }
 
@@ -804,7 +807,8 @@ macro_pops_check_densities_for_numerical_errors (PlasmaPtr xplasma, int index_el
     // }
     if (sane_check (ion_density_temp) || ion_density_temp < 0.0)
     {
-      Error ("macro_pops: iteration %d: ion %i has calculated a frac. pop. of %8.4e in plasma cell %i\n", n_iterations, index_ion, ion_density_temp, xplasma->nplasma);
+      Error ("macro_pops: iteration %d: ion %i has calculated a frac. pop. of %8.4e in plasma cell %i\n", n_iterations, index_ion,
+             ion_density_temp, xplasma->nplasma);
       numerical_error = TRUE;
     }
 
