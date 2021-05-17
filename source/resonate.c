@@ -69,6 +69,9 @@ int resonate_number_freq_diff_low = 0;
  * shell should be calculated outside of this routine.
  *
  **********************************************************/
+
+#define  MAXDIFF  (VCHECK/VLIGHT) /* The same as our old velocity requirement */
+
 double
 calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      WindPtr w;
@@ -142,7 +145,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
   diff = 1;
-#define  MAXDIFF  VCHECK/VLIGHT /* The same as our old velocity requirement */
 
   while (smax > DFUDGE)
   {

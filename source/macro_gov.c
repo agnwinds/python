@@ -265,6 +265,24 @@ macro_pops (xplasma, xne)
   int conf_to_matrix[NLEVELS_MACRO];                    // links config number to elements in arrays
   MacroPtr mplasma = &macromain[xplasma->nplasma];
 
+  /*
+   * In cells where there are no photons, we don't have any estimators yet
+   * so we should first use dilute estimators to avoid problems further
+   * down the road
+   */
+
+  if(xplasma->ntot == 0)
+  {
+    if (xplasma->w < DILUTION_FACTOR_MINIMUM)
+    {
+      Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n", n_iterations,
+        xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
+      xplasma->w = DILUTION_FACTOR_MINIMUM;
+    }
+
+    get_dilute_estimators(xplasma);
+  }
+
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
 
