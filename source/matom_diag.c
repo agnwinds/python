@@ -142,7 +142,7 @@ write_1d_matrix_to_file (char *filename, double *matrix, int len_i)
 
   for (i = 0; i < len_i; ++i)
   {
-    fprintf (fp, "%g ", matrix[i]);
+    fprintf (fp, "%-+15.6g", matrix[i]);
   }
 
   err = fclose (fp);
@@ -190,7 +190,7 @@ write_flat_2d_matrix_to_file (char *filename, double *matrix, int len_i, int len
   {
     for (j = 0; j < len_j; j++)
     {
-      fprintf (fp, "%g ", matrix[i * len_j + j]);
+      fprintf (fp, "%-+15.6g", matrix[i * len_j + j]);
     }
     fprintf (fp, "\n");
   }
@@ -217,7 +217,7 @@ write_flat_2d_matrix_to_file (char *filename, double *matrix, int len_i, int len
  **********************************************************/
 
 void
-write_2d_matrix_to_file (char *filename, double matrix[NLEVELS_MACRO][NLEVELS_MACRO])
+write_2d_matrix_to_file (char *filename, double matrix[NLEVELS_MACRO][NLEVELS_MACRO], int len_i, int len_j)
 {
   int i, j;
   int err;
@@ -237,11 +237,11 @@ write_2d_matrix_to_file (char *filename, double matrix[NLEVELS_MACRO][NLEVELS_MA
     Exit (1);
   }
 
-  for (i = 0; i < NLEVELS_MACRO; ++i)
+  for (i = 0; i < len_i; ++i)
   {
-    for (j = 0; j < NLEVELS_MACRO; j++)
+    for (j = 0; j < len_j; j++)
     {
-      fprintf (fp, "%g ", matrix[i][j]);
+      fprintf (fp, "%-+15.6g", matrix[i][j]);
     }
     fprintf (fp, "\n");
   }

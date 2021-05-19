@@ -271,17 +271,17 @@ macro_pops (xplasma, xne)
    * down the road
    */
 
-  if (xplasma->ntot == 0)
-  {
-    if (xplasma->w < DILUTION_FACTOR_MINIMUM)
-    {
-      Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n", n_iterations,
-             xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
-      xplasma->w = DILUTION_FACTOR_MINIMUM;
-    }
-
-    get_dilute_estimators (xplasma);
-  }
+  // if (xplasma->ntot == 0)
+  // {
+  //   if (xplasma->w < DILUTION_FACTOR_MINIMUM)
+  //   {
+  //     Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n", n_iterations,
+  //            xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
+  //     xplasma->w = DILUTION_FACTOR_MINIMUM;
+  //   }
+  //
+  //   get_dilute_estimators (xplasma);
+  // }
 
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
@@ -357,7 +357,7 @@ macro_pops (xplasma, xne)
         /* replace the first entry with 1.0 - this is part of the normalisation constraint */
         b_data[0] = 1.0;
 
-        if (OUTPUT_MACRO_DIAG)
+        if (OUTPUT_MACRO_DIAG && rank_global == 0)
         {
           if (xplasma->nplasma == MACRO_DIAG_CELL)
           {
@@ -365,14 +365,14 @@ macro_pops (xplasma, xne)
             char file2[LINELENGTH];
             char file3[LINELENGTH];
             char file4[LINELENGTH];
-            sprintf (file1, "matrix_output/b4_a_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
-            sprintf (file2, "matrix_output/b4_b_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
-            sprintf (file3, "matrix_output/b4_populations_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
-            sprintf (file4, "matrix_output/b4_rate_matrix_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file1, "matrix_output/b4_a_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
+            sprintf (file2, "matrix_output/b4_b_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
+            sprintf (file3, "matrix_output/b4_populations_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
+            sprintf (file4, "matrix_output/b4_rate_matrix_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
             write_flat_2d_matrix_to_file (file1, a_data, n_macro_lvl, n_macro_lvl);
             write_1d_matrix_to_file (file2, b_data, n_macro_lvl);
             write_1d_matrix_to_file (file3, populations, n_macro_lvl);
-            write_2d_matrix_to_file (file4, rate_matrix);
+            write_2d_matrix_to_file (file4, rate_matrix, n_macro_lvl, n_macro_lvl);
           }
         }
 
@@ -384,7 +384,7 @@ macro_pops (xplasma, xne)
           Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
         }
 
-        if (OUTPUT_MACRO_DIAG)
+        if (OUTPUT_MACRO_DIAG && rank_global == 0)
         {
           if (xplasma->nplasma == MACRO_DIAG_CELL)
           {
@@ -392,14 +392,14 @@ macro_pops (xplasma, xne)
             char file2[LINELENGTH];
             char file3[LINELENGTH];
             char file4[LINELENGTH];
-            sprintf (file1, "matrix_output/af_a_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
-            sprintf (file2, "matrix_output/af_b_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
-            sprintf (file3, "matrix_output/af_populations_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
-            sprintf (file4, "matrix_output/af_rate_matrix_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file1, "matrix_output/af_a_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
+            sprintf (file2, "matrix_output/af_b_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
+            sprintf (file3, "matrix_output/af_populations_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
+            sprintf (file4, "matrix_output/af_rate_matrix_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
             write_flat_2d_matrix_to_file (file1, a_data, n_macro_lvl, n_macro_lvl);
             write_1d_matrix_to_file (file2, b_data, n_macro_lvl);
             write_1d_matrix_to_file (file3, populations, n_macro_lvl);
-            write_2d_matrix_to_file (file4, rate_matrix);
+            write_2d_matrix_to_file (file4, rate_matrix, n_macro_lvl, n_macro_lvl);
           }
         }
 
@@ -438,12 +438,12 @@ macro_pops (xplasma, xne)
             ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
              n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
 
-          if (xplasma->w < DILUTION_FACTOR_MINIMUM)
-          {
-            Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n",
-                   n_iterations, xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
-            xplasma->w = DILUTION_FACTOR_MINIMUM;
-          }
+          // if (xplasma->w < DILUTION_FACTOR_MINIMUM)
+          // {
+          //   Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n",
+          //          n_iterations, xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
+          //   xplasma->w = DILUTION_FACTOR_MINIMUM;
+          // }
 
           get_dilute_estimators (xplasma);
         }
