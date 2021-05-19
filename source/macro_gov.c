@@ -639,8 +639,9 @@ macro_pops (xplasma, xne)
           {
             if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
-              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
-                     index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
+              Log ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
+                   index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
+              populations[conf_to_matrix[index_lvl]] = 0;
               numerical_population_issue = TRUE;
             }
             mm++;
@@ -652,8 +653,8 @@ macro_pops (xplasma, xne)
            to dilute blackbodies instead and go through the solution again */
         if (numerical_population_issue)
         {
-          Error ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
-                 xplasma->nplasma, xplasma->w, xplasma->t_r);
+          Log ("macro_pops: found unreasonable populations in cell %i; use dilute BBody excitation w %8.4e t_r %8.4e\n",
+               xplasma->nplasma, xplasma->w, xplasma->t_r);
           get_dilute_estimators (xplasma);
         }
         /* if we didn't set numerical_population_issue to 1 then we have a realistic set of populations, so set populations_ok to 1 to break
