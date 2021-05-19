@@ -1122,7 +1122,7 @@ scatter (p, nres, nnscat)
 
         if (prob_kpkt < 0)
         {
-          if (prob_kpkt < -5e-3)
+          if (prob_kpkt < -10e-3)
           {
             Error ("scatter: kpkt probability (%8.4e) < 0 for phot_top %d, zeroing\n", prob_kpkt, *nres - NLINES - 1);
             Log ("scatter: photon edge frequency: %8.4e, comoving (observer) frequency %8.4e %8.4e\n", phot_top[*nres - NLINES - 1].freq[0],
