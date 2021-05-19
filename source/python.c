@@ -113,8 +113,10 @@ main (argc, argv)
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
   run_ztest = FALSE;
+  OUTPUT_MACRO_DIAG = FALSE;
+  MACRO_DIAG_CELL = -1;
   NWAVE_MAX = (int) NWAVE_IONIZ;
-  macro_pops_inversion_check = NULL;  // TODO: remove when this becomes a local check
+  macro_pops_inversion_check = NULL;    // TODO: remove when this becomes a local check
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
      get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */

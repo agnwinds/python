@@ -29,6 +29,8 @@ int rel_mode;                   /* How doppler effects and co-moving frames are 
 
 int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
 int run_ztest;                  /* Provides a way the optionally run certain code within python */
+int OUTPUT_MACRO_DIAG;
+int MACRO_DIAG_CELL;
 
 
 

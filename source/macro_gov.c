@@ -357,12 +357,50 @@ macro_pops (xplasma, xne)
         /* replace the first entry with 1.0 - this is part of the normalisation constraint */
         b_data[0] = 1.0;
 
+        if (OUTPUT_MACRO_DIAG)
+        {
+          if (xplasma->nplasma == MACRO_DIAG_CELL)
+          {
+            char file1[LINELENGTH];
+            char file2[LINELENGTH];
+            char file3[LINELENGTH];
+            char file4[LINELENGTH];
+            sprintf (file1, "matrix_output/b4_a_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file2, "matrix_output/b4_b_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file3, "matrix_output/b4_populations_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file4, "matrix_output/b4_rate_matrix_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            write_flat_2d_matrix_to_file (file1, a_data, n_macro_lvl, n_macro_lvl);
+            write_1d_matrix_to_file (file2, b_data, n_macro_lvl);
+            write_1d_matrix_to_file (file3, populations, n_macro_lvl);
+            write_2d_matrix_to_file (file4, rate_matrix);
+          }
+        }
+
         /* this next routine is a general routine which solves the matrix equation
            via LU decomposition */
         gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
         if (gsl_err)
         {
           Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
+        }
+
+        if (OUTPUT_MACRO_DIAG)
+        {
+          if (xplasma->nplasma == MACRO_DIAG_CELL)
+          {
+            char file1[LINELENGTH];
+            char file2[LINELENGTH];
+            char file3[LINELENGTH];
+            char file4[LINELENGTH];
+            sprintf (file1, "matrix_output/af_a_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file2, "matrix_output/af_b_data_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file3, "matrix_output/af_populations_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            sprintf (file4, "matrix_output/af_rate_matrix_cell%i_iter%i.txt", xplasma->nplasma, n_iterations);
+            write_flat_2d_matrix_to_file (file1, a_data, n_macro_lvl, n_macro_lvl);
+            write_1d_matrix_to_file (file2, b_data, n_macro_lvl);
+            write_1d_matrix_to_file (file3, populations, n_macro_lvl);
+            write_2d_matrix_to_file (file4, rate_matrix);
+          }
         }
 
         free (a_data);

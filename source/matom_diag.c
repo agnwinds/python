@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -73,4 +75,181 @@ matom_emiss_report ()
   Log ("Totals: f_matom %le f_kpkt %le\n", geo.f_matom, geo.f_kpkt);
 
   return (0);
+}
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @param
+ *
+ * @return
+ *
+ * @details
+ *
+ **********************************************************/
+
+int directory_init = FALSE;
+
+void
+create_matrix_diag_folder (void)
+{
+  int err;
+
+  err = mkdir ("matrix_output", 0777);
+  if (err)
+  {
+    if (errno != EEXIST)
+    {
+      perror ("create_matrix_diag_folder");
+      Exit (1);
+    }
+  }
+}
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @param
+ *
+ * @return
+ *
+ * @details
+ *
+ **********************************************************/
+
+void
+write_1d_matrix_to_file (char *filename, double *matrix, int len_i)
+{
+  int i;
+  int err;
+  FILE *fp;
+
+  if (directory_init == FALSE)
+  {
+    create_matrix_diag_folder ();
+    directory_init = TRUE;
+  }
+
+  fp = fopen (filename, "w");
+  if (fp == NULL)
+  {
+    Error ("Unable to open %s to write 1D matrix to file\n", filename);
+    perror ("write_1d_matrix_to_file");
+    Exit (1);
+  }
+
+  for (i = 0; i < len_i; ++i)
+  {
+    fprintf (fp, "%g ", matrix[i]);
+  }
+
+  err = fclose (fp);
+  if (err)
+  {
+    perror ("write_1d_matrix_to_file");
+    Exit (1);
+  }
+}
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @param
+ *
+ * @return
+ *
+ * @details
+ *
+ **********************************************************/
+
+void
+write_flat_2d_matrix_to_file (char *filename, double *matrix, int len_i, int len_j)
+{
+  int i, j;
+  int err;
+  FILE *fp;
+
+  if (directory_init == FALSE)
+  {
+    create_matrix_diag_folder ();
+    directory_init = TRUE;
+  }
+
+  fp = fopen (filename, "w");
+  if (fp == NULL)
+  {
+    Error ("Unable to open %s to write 1D matrix to file\n", filename);
+    perror ("write_flat_2d_matrix_to_file");
+    Exit (1);
+  }
+
+  for (i = 0; i < len_i; ++i)
+  {
+    for (j = 0; j < len_j; j++)
+    {
+      fprintf (fp, "%g ", matrix[i * len_j + j]);
+    }
+    fprintf (fp, "\n");
+  }
+
+  err = fclose (fp);
+  if (err)
+  {
+    perror ("write_flat_2d_matrix_to_file");
+    Exit (1);
+  }
+}
+
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @param
+ *
+ * @return
+ *
+ * @details
+ *
+ **********************************************************/
+
+void
+write_2d_matrix_to_file (char *filename, double matrix[NLEVELS_MACRO][NLEVELS_MACRO])
+{
+  int i, j;
+  int err;
+  FILE *fp;
+
+  if (directory_init == FALSE)
+  {
+    create_matrix_diag_folder ();
+    directory_init = TRUE;
+  }
+
+  fp = fopen (filename, "w");
+  if (fp == NULL)
+  {
+    Error ("Unable to open %s to write 2D matrix to file\n", filename);
+    perror ("write_2d_matrix_to_file");
+    Exit (1);
+  }
+
+  for (i = 0; i < NLEVELS_MACRO; ++i)
+  {
+    for (j = 0; j < NLEVELS_MACRO; j++)
+    {
+      fprintf (fp, "%g ", matrix[i][j]);
+    }
+    fprintf (fp, "\n");
+  }
+
+  err = fclose (fp);
+  if (err)
+  {
+    perror ("write_2d_matrix_to_file");
+    Exit (1);
+  }
 }
