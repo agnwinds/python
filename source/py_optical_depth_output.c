@@ -54,7 +54,7 @@ print_optical_depths (SightLines_t * inclinations, int n_inclinations, Edges_t e
     c_linelen = 0;
     for (j = 0; j < n_edges; j++)
     {
-      c_linelen += sprintf (str, "tau_%-9s: %3.2e  ", edges[j].name, optical_depth_values[i * n_edges + j]);
+      c_linelen += snprintf (str, LINELENGTH, "tau_%-9s: %3.2e  ", edges[j].name, optical_depth_values[i * n_edges + j]);
       if (c_linelen > MAX_COL)
       {
         c_linelen = 0;
@@ -82,10 +82,14 @@ write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, d
 {
   int i, j;
   double c_wavelength, c_frequency;
-  char filename[LINELENGTH + 12];
+  char filename[LINELENGTH];
   FILE *fp;
 
-  sprintf (filename, "%s.spec_tau", files.root);
+  int len = snprintf (filename, LINELENGTH, "%s.spec_tau", files.root);
+  if (len < 0)
+  {
+    exit (EXIT_FAILURE);
+  }
 
   fp = fopen (filename, "w");
   if (fp == NULL)
@@ -120,4 +124,39 @@ write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, d
 
   if (fclose (fp))
     printf ("write_optical_depth_spectrum: uh oh, could not close optical depth spectrum output file\n");
+}
+
+/* ************************************************************************* */
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ************************************************************************** */
+
+void
+write_photosphere_location_to_file (Positions_t * positions, int n_inclinations)
+{
+  int i;
+
+  char filename[LINELENGTH];
+  FILE *fp;
+
+  int len = snprintf (filename, LINELENGTH, "%s.photosphere.txt", files.root);
+  if (len < 0)
+  {
+    exit (EXIT_FAILURE);
+  }
+
+  fp = fopen (filename, "w");
+
+  fprintf (fp, "# TAU DEPTH = %f\n", TAU_DEPTH);
+  fprintf (fp, "# x y z\n");
+
+  for (i = 0; i < n_inclinations; i++)
+  {
+    fprintf (fp, "%e %e %e\n", positions[i].x, positions[i].y, positions[i].z);
+  }
+
+  fclose (fp);
 }

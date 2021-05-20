@@ -152,6 +152,8 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
    * photon to the edge of the cell
    */
 
+  photon->nscat++;
+
   *c_column_density += smax * density;
   *c_optical_depth += smax * kappa_total;
   move_phot (photon, smax);
@@ -227,13 +229,12 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
     {
       if (*c_optical_depth >= TAU_DEPTH)
       {
-        // printf ("Reached optical depth limit of %e %e\n", *c_optical_depth, TAU_DEPTH);
-        // printf ("p_extract->x [%e, %e, %e]\n", p_extract.x[0], p_extract.x[1], p_extract.x[2]);
-        // printf ("\n");
-        break;
+        p_istat = P_ABSORB;
       }
     }
   }
+
+
 
   /*
    * If we are in RUN_MODE_PHOTOSPHERE, then we shouldn't care about hitting the
@@ -255,10 +256,6 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
     {
       printf ("integrate_tau_across_wind: the photon hit the disk whilst in RUN_MODE_PHOTOSPHERE when it should hit the central source\n");
       return EXIT_FAILURE;
-    }
-    if (p_istat == P_HIT_STAR)
-    {
-      printf ("Hit the star, as we should\n");
     }
   }
 
@@ -350,6 +347,7 @@ create_optical_depth_spectrum (void)
   {
     printf ("  - Creating spectrum: %s\n", inclinations[i].name);
     c_frequency = freq_min;
+
     for (j = 0; j < N_FREQ_BINS; j++)
     {
       c_optical_depth = 0.0;
@@ -489,11 +487,6 @@ find_photosphere (void)
 
   inclinations = initialize_inclination_angles (&n_inclinations);
 
-  typedef struct Positions_s
-  {
-    double x, y, z;
-  } Positions_t;
-
   Positions_t *positions = calloc (n_inclinations, sizeof (Positions_t));
   if (positions == NULL)
   {
@@ -501,57 +494,31 @@ find_photosphere (void)
     exit (EXIT_FAILURE);
   }
 
-  double tau = 0;
-  double nh = 0;
-  // const double test_freq = VLIGHT / (100 * ANGSTROM);
+  double tau, nh;
   const double test_freq = 8e14;
-
-  Positions_t *original = calloc (n_inclinations, sizeof (Positions_t));
-
-
-  FILE *fp3 = fopen ("lmn_directions.txt", "w");
 
   for (i = 0; i < n_inclinations; i++)
   {
+    printf ("Doing angle %i\n", i);
     err = create_photon (&photon, test_freq, inclinations[i].lmn);
     if (err)
       printf ("find_photosphere: error creating photon\n");
 
-    original[i].x = photon.x[0];
-    original[i].y = photon.x[1];
-    original[i].z = photon.x[2];
+    tau = 0;
+    nh = 0;
 
-    err = integrate_tau_across_wind (&photon, &tau, &nh);
+    err = integrate_tau_across_wind (&photon, &nh, &tau);
     if (err)
       printf ("find_photosphere: something went wrong with tau integration");
 
     positions[i].x = photon.x[0];
     positions[i].y = photon.x[1];
     positions[i].z = photon.x[2];
-
-    fprintf (fp3, "%e %e %e\n", photon.lmn[0], photon.lmn[1], photon.lmn[2]);
-
   }
 
-  fclose (fp3);
-
-  FILE *fp = fopen ("locations.txt", "w");
-  FILE *fp2 = fopen ("original_locations.txt", "w");
-
-  for (i = 0; i < n_inclinations; i++)
-  {
-    printf ("angle %s", inclinations[i].name);
-    printf (" %e %e %e\n", positions[i].x, positions[i].y, positions[i].z);
-
-    printf ("angle %s", inclinations[i].name);
-    printf (" %e %e %e\n\n", original[i].x, original[i].y, original[i].z);
-
-    fprintf (fp, "%e %e %e\n", positions[i].x, positions[i].y, positions[i].z);
-    fprintf (fp2, "%e %e %e\n", original[i].x, original[i].y, original[i].z);
-  }
-
-  fclose (fp);
-  fclose (fp2);
+  write_photosphere_location_to_file (positions, n_inclinations);
+  free (inclinations);
+  free (positions);
 }
 
 /* ************************************************************************* */

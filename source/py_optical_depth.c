@@ -191,12 +191,12 @@ main (int argc, char *argv[])
    */
 
   Log_set_verbosity (0);
-  Log_print_max (1000);
+  Log_print_max (10);
   Log_quit_after_n_errors ((int) 1e8);
   init_rand ((int) time (NULL));
 
   rel_mode = REL_MODE_FULL;     // this is updated in get_arguments if required
-  SMAX_FRAC = 0.5;
+  SMAX_FRAC = 0.01;
   DENSITY_PHOT_MIN = 1.e-10;
   COLUMN_MODE = COLUMN_MODE_RHO;
   MODE = RUN_MODE_OUTWARD;
@@ -229,18 +229,25 @@ main (int argc, char *argv[])
    * it is a sensible number and print the ion to be extracted
    */
 
-  if (COLUMN_MODE == COLUMN_MODE_ION)
+  if (MODE != RUN_MODE_PHOTOSPHERE)
   {
-    if (COLUMN_MODE_ION_NUMBER > nions - 1)
+    if (COLUMN_MODE == COLUMN_MODE_ION)
     {
-      printf ("Argument for -cion > nions\n");
-      exit (1);
+      if (COLUMN_MODE_ION_NUMBER > nions - 1)
+      {
+        printf ("Argument for -cion > nions\n");
+        exit (1);
+      }
+      printf ("Extracting column density for %s %i\n", ele[ion[COLUMN_MODE_ION_NUMBER].nelem].name, ion[COLUMN_MODE_ION_NUMBER].istate);
     }
-    printf ("Extracting column density for %s %i\n", ele[ion[COLUMN_MODE_ION_NUMBER].nelem].name, ion[COLUMN_MODE_ION_NUMBER].istate);
+    else
+    {
+      printf ("Extracting mass and Hydrogen column density\n");
+    }
   }
   else
   {
-    printf ("Extracting mass and Hydrogen column density\n");
+    printf ("Finding the photosphere location for electron scattering optical depth %f\n", TAU_DEPTH);
   }
 
   /*

@@ -13,7 +13,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 #include "atomic.h"
 #include "python.h"
 #include "py_optical_depth.h"
@@ -29,18 +28,17 @@
 SightLines_t *
 outward_initialize_2d_model_angles (int *n_angles)
 {
-  int i;
-  long mem_req;
   const double default_phase = 0.5;
   const double default_angles[] = { 0.0, 10.0, 30.0, 45.0, 60.0, 75.0, 85.0, 90.0 };
   const int n_default_angles = sizeof default_angles / sizeof default_angles[0];
-  SightLines_t *inclinations = NULL;
 
   /*
    * Use the angles specified for by the user for spectrum generation, this
    * requires for xxspec to be initialised. Otherwise use the pre-defined angles
    * above.
    */
+
+  SightLines_t *inclinations = NULL;
 
   if (xxspec != NULL && geo.nangles > 0)
   {
@@ -49,12 +47,12 @@ outward_initialize_2d_model_angles (int *n_angles)
 
     if (inclinations == NULL)
     {
-      mem_req = geo.nangles * (int) sizeof *inclinations;
+      long mem_req = geo.nangles * (int) sizeof *inclinations;
       printf ("outward_initialize_2d_model_angles: cannot allocate %ld bytes for observers array\n", mem_req);
       exit (EXIT_FAILURE);
     }
 
-    for (i = MSPEC; i < MSPEC + geo.nangles; i++)
+    for (int i = MSPEC; i < MSPEC + geo.nangles; i++)
     {
       strcpy (inclinations[i - MSPEC].name, xxspec[i].name);
       stuff_v (xxspec[i].lmn, inclinations[i - MSPEC].lmn);
@@ -68,14 +66,14 @@ outward_initialize_2d_model_angles (int *n_angles)
 
     if (inclinations == NULL)
     {
-      mem_req = n_default_angles * (int) sizeof *inclinations;
+      long mem_req = n_default_angles * (int) sizeof *inclinations;
       printf ("initialize_inclination_angles: cannot allocate %ld bytes for observers array\n", mem_req);
       exit (EXIT_FAILURE);
     }
 
-    for (i = 0; i < n_default_angles; i++)
+    for (int i = 0; i < n_default_angles; i++)
     {
-      sprintf (inclinations[i].name, "A%02.0fP%04.2f", default_angles[i], default_phase);
+      snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angles[i], default_phase);
       inclinations[i].lmn[0] = sin (default_angles[i] / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
       inclinations[i].lmn[1] = sin (default_angles[i] / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
       inclinations[i].lmn[2] = cos (default_angles[i] / RADIAN);
@@ -99,10 +97,9 @@ outward_initialize_1d_model_angles (int *n_angles)
   const int n_default_angles = 1;
   const double default_angle = 45.0;
   const double default_phase = 0.5;
-  SightLines_t *inclinations = NULL;
 
   *n_angles = n_default_angles;
-  inclinations = calloc (n_default_angles, sizeof (SightLines_t));
+  SightLines_t * inclinations = calloc (n_default_angles, sizeof (SightLines_t));
 
   if (inclinations == NULL)
   {
@@ -110,11 +107,10 @@ outward_initialize_1d_model_angles (int *n_angles)
     exit (EXIT_FAILURE);
   }
 
-  sprintf (inclinations[0].name, "A%02.0fP%04.2f", default_angle, default_phase);
+  snprintf (inclinations[0].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
   inclinations[0].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
   inclinations[0].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
   inclinations[0].lmn[2] = cos (default_angle / RADIAN);
-
 
   return inclinations;
 }
@@ -131,14 +127,12 @@ outward_initialize_1d_model_angles (int *n_angles)
 SightLines_t *
 photosphere_initialize_angles (int *n_angles)
 {
-  int i;
-  const double default_phase = 1;
-  const int n_default_angles = 180;
+  const double default_phase = 1.0;
+  const int n_default_angles = 500;
   const double d_theta = 90.0 / (double) n_default_angles;
-  SightLines_t *inclinations = NULL;
 
   *n_angles = n_default_angles;
-  inclinations = calloc (n_default_angles, sizeof (SightLines_t));
+  SightLines_t *inclinations = calloc (n_default_angles, sizeof (SightLines_t));
 
   if (inclinations == NULL)
   {
@@ -146,10 +140,10 @@ photosphere_initialize_angles (int *n_angles)
     exit (EXIT_FAILURE);
   }
 
-  for (i = 0; i < n_default_angles; i++)
+  for (int i = 0; i < n_default_angles; i++)
   {
-    double default_angle = i * d_theta;
-    sprintf (inclinations[i].name, "A%02.0fP%04.2f", default_angle, default_phase);
+    const double default_angle = i * d_theta;
+    snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
     inclinations[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
     inclinations[i].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
     inclinations[i].lmn[2] = cos (default_angle / RADIAN);
@@ -219,8 +213,6 @@ initialize_inclination_angles (int *n_angles)
 int
 create_photon (PhotPtr p_out, double freq, double *lmn)
 {
-  int n;
-
   if (freq < 0)
   {
     printf ("create_photon: photon can't be created with negative frequency\n");
@@ -243,10 +235,9 @@ create_photon (PhotPtr p_out, double freq, double *lmn)
   else
   {
     move_phot (p_out, zdom[N_DOMAIN].rmax - DFUDGE);
-    printf ("p_out->x [%e, %e, %e] length(x) = %e\n", p_out->x[0], p_out->x[1], p_out->x[2], length (p_out->x));
-    for (n = 0; n < 3; ++n)
+    for (int i = 0; i < 3; ++i)
     {
-      p_out->lmn[n] *= -1.0;
+      p_out->lmn[i] *= -1.0;    // Make the photon point inwards
     }
   }
 

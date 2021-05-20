@@ -16,13 +16,15 @@
  *
  * ************************************************************************** */
 
-#define N_FREQ_BINS 10000
+#define N_FREQ_BINS 1
 
 // Inclination angles structure
 
+#define NAMELEN 32
+
 typedef struct SightLines_s
 {
-  char name[50];
+  char name[NAMELEN];
   double lmn[3];
 } SightLines_t;
 
@@ -33,6 +35,13 @@ typedef struct Edges_s
   char name[50];
   double freq;
 } Edges_t;
+
+// Positions structure
+
+typedef struct Positions_s
+{
+  double x, y, z;
+} Positions_t;
 
 // Control the column density extracted
 
@@ -52,8 +61,8 @@ int N_DOMAIN;
 // Control how the optical depth integration is done
 
 enum {
-  RUN_MODE_OUTWARD,
-  RUN_MODE_PHOTOSPHERE,
+  RUN_MODE_OUTWARD = 0,
+  RUN_MODE_PHOTOSPHERE = 1,
 } MODE;
 
 double TAU_DEPTH;
@@ -68,3 +77,4 @@ void print_optical_depths (SightLines_t *inclinations, int n_inclinations, Edges
                            double *column_density_values);
 void write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, double *tau_spectrum, double freq_min, double d_freq);
 int create_photon (PhotPtr p_out, double freq, double *lmn);
+void write_photosphere_location_to_file(Positions_t *positions, int n_inclinations);
