@@ -194,11 +194,11 @@ main (int argc, char *argv[])
   Log_print_max (1000);
   Log_quit_after_n_errors ((int) 1e8);
   init_rand ((int) time (NULL));
+
   rel_mode = REL_MODE_FULL;     // this is updated in get_arguments if required
   SMAX_FRAC = 0.5;
   DENSITY_PHOT_MIN = 1.e-10;
   COLUMN_MODE = COLUMN_MODE_RHO;
-  N_INCLINATION_ANGLES = 0;
   MODE = RUN_MODE_OUTWARD;
   N_DOMAIN = 0;
 
@@ -269,7 +269,7 @@ main (int argc, char *argv[])
   // Log_close ();
   Log_set_verbosity (5);
 
-  do_optical_depth_diagnostics ();
+  control_program ();
 
   printf ("\n%-20s Optical depth diagnostics completed\n", "TAU");
   printf ("Completed optical depth diagnostics. The elapsed TIME was %f\n", timer ());

@@ -16,8 +16,6 @@
  *
  * ************************************************************************** */
 
-void do_optical_depth_diagnostics(void);
-
 #define N_FREQ_BINS 10000
 
 // Inclination angles structure
@@ -28,18 +26,13 @@ typedef struct SightLines_s
   double lmn[3];
 } SightLines_t;
 
-SightLines_t *INCLINATION_ANGLES;
-int N_INCLINATION_ANGLES;       // The number of inclination angles
-
 // PI edges structure
 
-typedef struct PIEdges_s
+typedef struct Edges_s
 {
   char name[50];
   double freq;
-} PIEdges_t;
-
-#define N_PI_EDGES (int) (sizeof PHOTOION_EDGES_TO_MEASURE / sizeof *PHOTOION_EDGES_TO_MEASURE)     // The number of optical depths for the simple calculation
+} Edges_t;
 
 // Control the column density extracted
 
@@ -64,3 +57,14 @@ enum {
 } MODE;
 
 double TAU_DEPTH;
+
+/*
+ * Functions from other files
+ */
+
+void control_program(void);
+SightLines_t *initialize_inclination_angles (int *n_angles);
+void print_optical_depths (SightLines_t *inclinations, int n_inclinations, Edges_t edges[], int n_edges, double *optical_depth_values,
+                           double *column_density_values);
+void write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, double *tau_spectrum, double freq_min, double d_freq);
+int create_photon (PhotPtr p_out, double freq, double *lmn);

@@ -1,148 +1,22 @@
 /** ************************************************************************* */
 /**
- * @file     py_optical_depth_sub.c
+ * @file     py_optical_depth_transport.c
  * @author   Edward Parkinson
  * @date     April 2019
  *
- * @brief    The main resting place for most functions related to providing
- *           optical depth diagnostics.
+ * @brief
  *
  * ************************************************************************** */
 
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 
 #include "atomic.h"
 #include "python.h"
 #include "py_optical_depth.h"
 
-const PIEdges_t PHOTOION_EDGES_TO_MEASURE[] = {
-  {"HLymanEdge", 3.387485e+15},
-  {"HBalmerEdge", 8.293014e+14},
-  {"HeI24eVEdge", 5.9483e+15},
-  {"HeII54eVEdge", 1.394384e+16}
-};
-
 const double MAXDIFF = VCHECK / VLIGHT; // For linear velocity requirement for photon transport
-
-/* ************************************************************************** */
-/**
- * @brief  Print the various optical depths calculated using this routine
- *
- * @param[in]  optical_depths  The 2d array containing the optical depth for
- *                             each observer and tau
- * @param[in]  column_densities  The 2d array containing the column densities
- *                               for each observer
- *
- * @details
- *
- * Prints the different optical depths for each angle and optical depth.
- * Historically, this used to also print to file. But I found that it was mostly
- * useless to do this.
- *
- * ************************************************************************** */
-
-void
-print_optical_depths (const double *optical_depth_values, const double *column_density_values)
-{
-  int i, j;
-  int c_linelen;
-  char str[LINELENGTH];
-  const int MAX_COL = 120;
-
-  printf ("\nOptical depths along the defined line of sights for domain %i:\n\n", N_DOMAIN);
-
-  for (i = 0; i < N_INCLINATION_ANGLES; i++)
-  {
-    if (COLUMN_MODE == COLUMN_MODE_RHO)
-    {
-      printf ("%-8s: Mass column density     : %3.2e cm^-2\n", INCLINATION_ANGLES[i].name, column_density_values[i]);
-      printf ("%-8s: Hydrogen column density : %3.2e cm^-2\n", "", column_density_values[i] * rho2nh);
-    }
-    else
-    {
-      printf ("%-8s: %s %i column density    : %3.2e cm^-2\n", INCLINATION_ANGLES[i].name, ele[ion[COLUMN_MODE_ION_NUMBER].nelem].name,
-              ion[COLUMN_MODE_ION_NUMBER].istate, column_density_values[i]);
-    }
-
-    c_linelen = 0;
-    for (j = 0; j < N_PI_EDGES; j++)
-    {
-      c_linelen += sprintf (str, "tau_%-9s: %3.2e  ", PHOTOION_EDGES_TO_MEASURE[j].name, optical_depth_values[i * N_PI_EDGES + j]);
-      if (c_linelen > MAX_COL)
-      {
-        c_linelen = 0;
-        printf ("\n");
-      }
-      printf ("%s", str);
-    }
-    printf ("\n\n");
-  }
-}
-
-/* ************************************************************************* */
-/**
- * @brief           Write the various optical depth spectra to file
- *
- * @param[in]  tau_spectrum  The various optical depth spectra
- * @param[in]  freq_min  The smallest frequency in the spectra
- * @param[in]  d_freq  The size of the frequncy bins
-
- *
- * @details
- *
- * Simply write the optical depth spectra to the file named root.tau_spec.diag.
- * This file will be located in the diag folder.
- *
- * ************************************************************************** */
-
-void
-write_optical_depth_spectrum (const double *tau_spectrum, const double freq_min, const double d_freq)
-{
-  int i, j;
-  double c_wavelength, c_frequency;
-  char filename[LINELENGTH + 12];
-  FILE *fp;
-
-  sprintf (filename, "%s.spec_tau", files.root);
-
-  if ((fp = fopen (filename, "w")) == NULL)
-  {
-    printf ("write_optical_depth_spectrum: uh oh, could not open optical depth spectrum output file\n");
-    exit (EXIT_FAILURE);
-  }
-
-  /*
-   * Write out the tau spectrum header
-   */
-
-  fprintf (fp, "%-12s %-12s ", "Freq.", "Lambda");
-  for (j = 0; j < N_INCLINATION_ANGLES; j++)
-    fprintf (fp, "%-12s ", INCLINATION_ANGLES[j].name);
-  fprintf (fp, "\n");
-
-  /*
-   * Write out the tau spectrum for each inclination angle
-   */
-
-  c_frequency = freq_min;
-  for (i = 0; i < N_FREQ_BINS; i++)
-  {
-    c_wavelength = VLIGHT / c_frequency / ANGSTROM;
-    fprintf (fp, "%-12e %-12e ", c_frequency, c_wavelength);
-    for (j = 0; j < N_INCLINATION_ANGLES; j++)
-      fprintf (fp, "%-12e ", tau_spectrum[j * N_FREQ_BINS + i]);
-    fprintf (fp, "\n");
-    c_frequency += d_freq;
-  }
-
-  fflush (fp);                  // probably not required, but was needed when this was part of Python rather than standalone
-
-  if (fclose (fp))
-    printf ("write_optical_depth_spectrum: uh oh, could not close optical depth spectrum output file\n");
-}
 
 /* ************************************************************************* */
 /**
@@ -311,7 +185,7 @@ int
 integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_optical_depth)
 {
   int err;
-  int n_dom;
+  int n_dom, where;
   enum istat_enum p_istat;
   const int max_translate_in_space = 10;
   int n_in_space;
@@ -321,20 +195,13 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
   p_istat = P_INWIND;           // assume photon is in wind for initialisation reasons
   stuff_phot (photon, &p_extract);
 
-  // printf ("\n");
-
   n_in_space = 0;
   while (p_istat == P_INWIND)
   {
-    int where = where_in_wind (p_extract.x, &n_dom);
+    where = where_in_wind (p_extract.x, &n_dom);
+
     if (where < 0)
     {
-      // int i = -1, j = -1;
-      // WindPtr one = &wmain[p_extract.grid];
-      // wind_n_to_ij (n_dom, p_extract.grid, &i, &j);
-      // printf ("p_extract->grid %i length(p_extract->x) = %e geo.rstar %e\n", p_extract.grid, length (p_extract.x), geo.rstar);
-      // printf ("cell coordinates: n %i (%i, %i) r %e theta %f\n", one->nwind, i, j, one->r, one->theta);
-      // printf ("translated in space, inside star? where = %d\n", where);
       translate_in_space (&p_extract);
       if (++n_in_space > max_translate_in_space)
       {
@@ -354,21 +221,19 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
       return EXIT_FAILURE;
     }
 
-    // printf ("before walls: grid %d p_extract->x = [%e, %e, %e]\n", p_extract.grid, p_extract.x[0], p_extract.x[1], p_extract.x[2]);
     p_istat = walls (&p_extract, photon, norm);
-    // printf (" after walls: grid %d p_extract->x = [%e, %e, %e]\n", p_extract.grid, p_extract.x[0], p_extract.x[1], p_extract.x[2]);
 
     if (MODE == RUN_MODE_PHOTOSPHERE)
+    {
       if (*c_optical_depth >= TAU_DEPTH)
       {
-        printf ("Reached optical depth limit of %e %e\n", *c_optical_depth, TAU_DEPTH);
-        printf ("p_extract->x [%e, %e, %e]\n", p_extract.x[0], p_extract.x[1], p_extract.x[2]);
-        printf ("\n");
+        // printf ("Reached optical depth limit of %e %e\n", *c_optical_depth, TAU_DEPTH);
+        // printf ("p_extract->x [%e, %e, %e]\n", p_extract.x[0], p_extract.x[1], p_extract.x[2]);
+        // printf ("\n");
         break;
       }
+    }
   }
-
-  // printf ("istat %d p_extract->grid %i length(p_extract->x) = %e geo.rstar %e\n", p_istat, p_extract.grid, length (p_extract.x), geo.rstar);
 
   /*
    * If we are in RUN_MODE_PHOTOSPHERE, then we shouldn't care about hitting the
@@ -385,148 +250,19 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
   }
   else
   {
+    stuff_phot (&p_extract, photon);
     if (p_istat == P_HIT_DISK)
     {
       printf ("integrate_tau_across_wind: the photon hit the disk whilst in RUN_MODE_PHOTOSPHERE when it should hit the central source\n");
       return EXIT_FAILURE;
     }
-  }
-
-  return EXIT_SUCCESS;
-}
-
-/* ************************************************************************* */
-/**
- * @brief  Generate a photon packet with a given frequency nu for use with the
- *         optical depth diagnostic routines.
- *
- * @param[in,out]  p_out  The photon packet to initialise
- * @param[in]  freq  The frequency of the photon packet
- *
- * @return  EXIT_SUCCESS or EXIT_FAILURE
- *
- * @details
- *
- * This routine assumes that the user wishes for the photon to be generated from
- * the surface of the central source, taking into account the current direction
- * of the sight-line being extracted. It's currently not possible, without a
- * tedious re-write, to place the photon at the very origin of the grid when
- * there is a central source because of how we check boundaries.
- *
- * Note that photons are initialised with a weight of f_tot as photons are
- * required to have weight, but since functions do not care about the weight of
- * the photon, it is set to something large to make sure it does not get
- * destroyed by accident somehow.
- *
- * ************************************************************************** */
-
-int
-create_photon (PhotPtr p_out, double freq, double *lmn)
-{
-  int n;
-
-  if (freq < 0)
-  {
-    printf ("create_photon: photon can't be created with negative frequency\n");
-    return EXIT_FAILURE;
-  }
-
-  p_out->freq = p_out->freq_orig = freq;
-  p_out->origin = p_out->origin_orig = PTYPE_DISK;
-  p_out->istat = P_INWIND;
-  p_out->w = p_out->w_orig = geo.f_tot;
-  p_out->tau = 0.0;
-  p_out->frame = F_OBSERVER;
-  p_out->x[0] = p_out->x[1] = p_out->x[2] = 0.0;
-  stuff_v (lmn, p_out->lmn);
-
-  if (MODE == RUN_MODE_OUTWARD)
-  {
-    move_phot (p_out, geo.rstar + DFUDGE);
-  }
-  else
-  {
-    move_phot (p_out, zdom[N_DOMAIN].rmax - DFUDGE);
-    for (n = 0; n < 3; ++n)
+    if (p_istat == P_HIT_STAR)
     {
-      p_out->lmn[n] *= -1.0;
+      printf ("Hit the star, as we should\n");
     }
   }
 
   return EXIT_SUCCESS;
-}
-
-/* ************************************************************************* */
-/**
- * @brief  Initialise the viewing angles for the optical depth diagnostic
- *         routines.
- *
- * @details
- *
- * This purpose of this function is to initialise the angles of which to extract
- * optical depth information from. If xxspec is initialised, then the optical
- * depth information will be extracted from the observer angles provided in the
- * parameter file for spectrum generation. Otherwise, the routines will instead
- * use a set of pre-defined angles.
- *
- * ************************************************************************** */
-
-void
-initialize_inclination_angles (void)
-{
-  int i;
-  long mem_req;
-  const double default_phase = 0.5;
-  const double default_angles[] = { 0.0, 10.0, 30.0, 45.0, 60.0, 75.0, 85.0, 90.0 };
-  const int n_default_angles = sizeof default_angles / sizeof default_angles[0];
-
-  /*
-   * Use the angles specified for by the user for spectrum generation, this
-   * requires for xxspec to be initialised. Otherwise use the pre-defined angles
-   * above.
-   */
-
-  if (geo.nangles > 0 && xxspec != NULL)
-  {
-    N_INCLINATION_ANGLES = geo.nangles;
-    INCLINATION_ANGLES = calloc (geo.nangles, sizeof *INCLINATION_ANGLES);
-    if (INCLINATION_ANGLES == NULL)
-    {
-      mem_req = geo.nangles * (int) sizeof *INCLINATION_ANGLES;
-      printf ("initialize_inclination_angles: cannot allocate %ld bytes for observers array\n", mem_req);
-      exit (EXIT_FAILURE);
-    }
-    else                        // Use else to avoid compiler warning
-    {
-      for (i = MSPEC; i < MSPEC + geo.nangles; i++)
-      {
-        strcpy (INCLINATION_ANGLES[i - MSPEC].name, xxspec[i].name);
-        stuff_v (xxspec[i].lmn, INCLINATION_ANGLES[i - MSPEC].lmn);
-      }
-    }
-  }
-  else
-  {
-    printf ("tau_spectrum: as there are no spectrum cycles or observers defined, a set of default angles will be used instead\n");
-    N_INCLINATION_ANGLES = n_default_angles;
-    INCLINATION_ANGLES = calloc (n_default_angles, sizeof *INCLINATION_ANGLES);
-    if (INCLINATION_ANGLES == NULL)
-    {
-      mem_req = n_default_angles * (int) sizeof *INCLINATION_ANGLES;
-      printf ("initialize_inclination_angles: cannot allocate %ld bytes for observers array\n", mem_req);
-      exit (EXIT_FAILURE);
-    }
-    else
-    {
-      for (i = 0; i < n_default_angles; i++)
-      {
-        sprintf (INCLINATION_ANGLES[i].name, "A%02.0fP%04.2f", default_angles[i], default_phase);
-        INCLINATION_ANGLES[i].lmn[0] = sin (default_angles[i] / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
-        INCLINATION_ANGLES[i].lmn[1] = sin (default_angles[i] / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
-        INCLINATION_ANGLES[i].lmn[2] = cos (default_angles[i] / RADIAN);
-      }
-    }
-  }
 }
 
 /* ************************************************************************* */
@@ -562,13 +298,16 @@ create_optical_depth_spectrum (void)
   double c_frequency, freq_min, freq_max, d_freq;
   struct photon photon;
 
+  int n_inclinations;
+  SightLines_t *inclinations = initialize_inclination_angles (&n_inclinations);
+
   printf ("Creating optical depth spectra:\n");
 
-  tau_spectrum = calloc (N_INCLINATION_ANGLES * N_FREQ_BINS, sizeof *tau_spectrum);
+  tau_spectrum = calloc (n_inclinations * N_FREQ_BINS, sizeof *tau_spectrum);
   if (tau_spectrum == NULL)
   {
     printf ("create_optical_depth_spectrum: cannot allocate %lu bytes for tau_spectrum\n",
-            N_INCLINATION_ANGLES * N_FREQ_BINS * sizeof *tau_spectrum);
+            n_inclinations * N_FREQ_BINS * sizeof *tau_spectrum);
     exit (EXIT_FAILURE);
   }
 
@@ -607,16 +346,16 @@ create_optical_depth_spectrum (void)
    * Now create the optical depth spectra for each inclination
    */
 
-  for (i = 0; i < N_INCLINATION_ANGLES; i++)
+  for (i = 0; i < n_inclinations; i++)
   {
-    printf ("  - Creating spectrum: %s\n", INCLINATION_ANGLES[i].name);
+    printf ("  - Creating spectrum: %s\n", inclinations[i].name);
     c_frequency = freq_min;
     for (j = 0; j < N_FREQ_BINS; j++)
     {
       c_optical_depth = 0.0;
       c_column_density = 0.0;
 
-      err = create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn);
+      err = create_photon (&photon, c_frequency, inclinations[i].lmn);
       if (err == EXIT_FAILURE)
       {
         printf ("create_optical_depth_spectrum: skipping photon of frequency %e when creating spectrum\n", c_frequency);
@@ -631,8 +370,9 @@ create_optical_depth_spectrum (void)
     }
   }
 
-  write_optical_depth_spectrum (tau_spectrum, freq_min, d_freq);
+  write_optical_depth_spectrum (inclinations, n_inclinations, tau_spectrum, freq_min, d_freq);
   free (tau_spectrum);
+  free (inclinations);
 }
 
 /* ************************************************************************* */
@@ -660,27 +400,39 @@ create_optical_depth_spectrum (void)
  * ************************************************************************** */
 
 void
-optical_depth_photoion (void)
+evaluate_photoionization_edges (void)
 {
   int i, j;
   int err;
   double c_frequency, c_optical_depth, c_column_density;
-  double *optical_depth_values, *column_density_values;
+  double *optical_depth_values = NULL, *column_density_values = NULL;
   struct photon photon;
 
-  optical_depth_values = calloc (N_INCLINATION_ANGLES * N_PI_EDGES, sizeof *optical_depth_values);
+  Edges_t edges[] = {
+    {"HLymanEdge", 3.387485e+15},
+    {"HBalmerEdge", 8.293014e+14},
+    {"HeI24eVEdge", 5.9483e+15},
+    {"HeII54eVEdge", 1.394384e+16}
+  };
+
+  const int n_edges = sizeof edges / sizeof edges[0];
+
+  int n_inclinations;
+  SightLines_t *inclinations = initialize_inclination_angles (&n_inclinations);
+
+  optical_depth_values = calloc (n_inclinations * n_edges, sizeof *optical_depth_values);
   if (optical_depth_values == NULL)
   {
-    printf ("optical_depth_photoion: cannot allocate %lu bytes for optical_depths\n",
-            N_INCLINATION_ANGLES * N_PI_EDGES * sizeof *optical_depth_values);
+    printf ("evaluate_photoionization_edges: cannot allocate %lu bytes for optical_depths\n",
+            n_inclinations * n_edges * sizeof *optical_depth_values);
     exit (EXIT_FAILURE);
   }
 
-  column_density_values = calloc (N_INCLINATION_ANGLES, sizeof *optical_depth_values);
+  column_density_values = calloc (n_inclinations, sizeof *column_density_values);
   if (column_density_values == NULL)
   {
-    printf ("optical_depth_photoion: cannot allocate %lu bytes for column_densities\n",
-            N_INCLINATION_ANGLES * sizeof *optical_depth_values);
+    printf ("evaluate_photoionization_edges: cannot allocate %lu bytes for column_densities\n",
+            n_inclinations * sizeof *column_density_values);
     exit (EXIT_FAILURE);
   }
 
@@ -689,18 +441,18 @@ optical_depth_photoion (void)
    * each PI edge for each inclination angle.
    */
 
-  for (i = 0; i < N_INCLINATION_ANGLES; i++)
+  for (i = 0; i < n_inclinations; i++)
   {
-    for (j = 0; j < N_PI_EDGES; j++)
+    for (j = 0; j < n_edges; j++)
     {
       c_optical_depth = 0.0;
       c_column_density = 0.0;
-      c_frequency = PHOTOION_EDGES_TO_MEASURE[j].freq;
+      c_frequency = edges[j].freq;
 
-      err = create_photon (&photon, c_frequency, INCLINATION_ANGLES[i].lmn);
+      err = create_photon (&photon, c_frequency, inclinations[i].lmn);
       if (err == EXIT_FAILURE)
       {
-        printf ("optical_depth_photoion: skipping photon of frequency %e\n", c_frequency);
+        printf ("evaluate_photoionization_edges: skipping photon of frequency %e\n", c_frequency);
         continue;
       }
 
@@ -708,12 +460,13 @@ optical_depth_photoion (void)
       if (err == EXIT_FAILURE)
         continue;               // do not throw extra warning when one is already thrown in integrate_tau_across_wind
 
-      optical_depth_values[i * N_PI_EDGES + j] = c_optical_depth;
+      optical_depth_values[i * n_edges + j] = c_optical_depth;
       column_density_values[i] = c_column_density;
     }
   }
 
-  print_optical_depths (optical_depth_values, column_density_values);
+  print_optical_depths (inclinations, n_inclinations, edges, n_edges, optical_depth_values, column_density_values);
+  free (inclinations);
   free (optical_depth_values);
   free (column_density_values);
 }
@@ -730,49 +483,75 @@ void
 find_photosphere (void)
 {
   int i, err;
-  const double default_phase = 0.5;
-  const int n_angles = 180;
-  const double d_theta = 90.0 / (double) n_angles;
+  struct photon photon;
+  int n_inclinations;
+  SightLines_t *inclinations;
 
-  N_INCLINATION_ANGLES = n_angles;
-  INCLINATION_ANGLES = calloc (n_angles, sizeof *INCLINATION_ANGLES);
-  if (INCLINATION_ANGLES == NULL)
+  inclinations = initialize_inclination_angles (&n_inclinations);
+
+  typedef struct Positions_s
   {
-    long mem_req = n_angles * (int) sizeof *INCLINATION_ANGLES;
-    printf ("initialize_inclination_angles: cannot allocate %ld bytes for observers array\n", mem_req);
+    double x, y, z;
+  } Positions_t;
+
+  Positions_t *positions = calloc (n_inclinations, sizeof (Positions_t));
+  if (positions == NULL)
+  {
+    printf ("Unable to allocate memory for the positions array\n");
     exit (EXIT_FAILURE);
   }
 
-  for (i = 0; i < n_angles; i++)
-  {
-    double default_angle = i * d_theta;
-    sprintf (INCLINATION_ANGLES[i].name, "A%02.0fP%04.2f", default_angle, default_phase);
-    INCLINATION_ANGLES[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
-    INCLINATION_ANGLES[i].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
-    INCLINATION_ANGLES[i].lmn[2] = cos (default_angle / RADIAN);
-  }
-
-  struct photon photon;
   double tau = 0;
   double nh = 0;
-  const double test_freq = VLIGHT / (100 * ANGSTROM);
+  // const double test_freq = VLIGHT / (100 * ANGSTROM);
+  const double test_freq = 8e14;
 
-  FILE *fp = fopen ("locations.txt", "w");
+  Positions_t *original = calloc (n_inclinations, sizeof (Positions_t));
 
-  for (i = 0; i < N_INCLINATION_ANGLES; i++)
+
+  FILE *fp3 = fopen ("lmn_directions.txt", "w");
+
+  for (i = 0; i < n_inclinations; i++)
   {
-    err = create_photon (&photon, test_freq, INCLINATION_ANGLES[i].lmn);
+    err = create_photon (&photon, test_freq, inclinations[i].lmn);
     if (err)
       printf ("find_photosphere: error creating photon\n");
+
+    original[i].x = photon.x[0];
+    original[i].y = photon.x[1];
+    original[i].z = photon.x[2];
 
     err = integrate_tau_across_wind (&photon, &tau, &nh);
     if (err)
       printf ("find_photosphere: something went wrong with tau integration");
 
-    fprintf (fp, "%e %e %e\n", photon.x[0], photon.x[1], photon.x[2]);
+    positions[i].x = photon.x[0];
+    positions[i].y = photon.x[1];
+    positions[i].z = photon.x[2];
+
+    fprintf (fp3, "%e %e %e\n", photon.lmn[0], photon.lmn[1], photon.lmn[2]);
+
+  }
+
+  fclose (fp3);
+
+  FILE *fp = fopen ("locations.txt", "w");
+  FILE *fp2 = fopen ("original_locations.txt", "w");
+
+  for (i = 0; i < n_inclinations; i++)
+  {
+    printf ("angle %s", inclinations[i].name);
+    printf (" %e %e %e\n", positions[i].x, positions[i].y, positions[i].z);
+
+    printf ("angle %s", inclinations[i].name);
+    printf (" %e %e %e\n\n", original[i].x, original[i].y, original[i].z);
+
+    fprintf (fp, "%e %e %e\n", positions[i].x, positions[i].y, positions[i].z);
+    fprintf (fp2, "%e %e %e\n", original[i].x, original[i].y, original[i].z);
   }
 
   fclose (fp);
+  fclose (fp2);
 }
 
 /* ************************************************************************* */
@@ -787,19 +566,20 @@ find_photosphere (void)
  * ************************************************************************** */
 
 void
-do_optical_depth_diagnostics (void)
+control_program (void)
 {
-  initialize_inclination_angles ();
-
   if (MODE == RUN_MODE_OUTWARD)
   {
-    optical_depth_photoion ();
+    evaluate_photoionization_edges ();
     create_optical_depth_spectrum ();
   }
-  else
+  else if (MODE == RUN_MODE_PHOTOSPHERE)
   {
     find_photosphere ();
   }
-
-  free (INCLINATION_ANGLES);
+  else
+  {
+    printf ("Mode %d is an unknown run mode, not sure how you got here so exiting the program\n", MODE);
+    exit (EXIT_FAILURE);
+  }
 }
