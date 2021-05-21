@@ -59,7 +59,7 @@ create_optical_depth_spectrum (void)
   tau_spectrum = calloc (n_inclinations * N_FREQ_BINS, sizeof *tau_spectrum);
   if (tau_spectrum == NULL)
   {
-    errormsg("cannot allocate %lu bytes for tau_spectrum\n", n_inclinations * N_FREQ_BINS * sizeof *tau_spectrum);
+    errormsg ("cannot allocate %lu bytes for tau_spectrum\n", n_inclinations * N_FREQ_BINS * sizeof *tau_spectrum);
     exit (EXIT_FAILURE);
   }
 
@@ -82,12 +82,12 @@ create_optical_depth_spectrum (void)
     if (sane_check (freq_min))
     {
       freq_min = VLIGHT / (10000 * ANGSTROM);
-      errormsg("freq_min has an invalid value setting to %e\n", freq_min);
+      errormsg ("freq_min has an invalid value setting to %e\n", freq_min);
     }
     if (sane_check (freq_max))
     {
       freq_max = VLIGHT / (100 * ANGSTROM);
-      errormsg("freq_min has an invalid value setting to %e\n", freq_max);
+      errormsg ("freq_min has an invalid value setting to %e\n", freq_max);
     }
   }
 
@@ -111,7 +111,7 @@ create_optical_depth_spectrum (void)
       err = create_photon (&photon, c_frequency, inclinations[i].lmn);
       if (err == EXIT_FAILURE)
       {
-        errormsg("skipping photon of frequency %e\n", c_frequency);
+        errormsg ("skipping photon of frequency %e\n", c_frequency);
         continue;
       }
 
@@ -177,16 +177,14 @@ evaluate_photoionization_edges (void)
   optical_depth_values = calloc (n_inclinations * n_edges, sizeof *optical_depth_values);
   if (optical_depth_values == NULL)
   {
-    errormsg("cannot allocate %lu bytes for optical_depths\n",
-      n_inclinations * n_edges * sizeof *optical_depth_values);
+    errormsg ("cannot allocate %lu bytes for optical_depths\n", n_inclinations * n_edges * sizeof *optical_depth_values);
     exit (EXIT_FAILURE);
   }
 
   column_density_values = calloc (n_inclinations, sizeof *column_density_values);
   if (column_density_values == NULL)
   {
-    errormsg("cannot allocate %lu bytes for column_densities\n",
-      n_inclinations * sizeof *column_density_values);
+    errormsg ("cannot allocate %lu bytes for column_densities\n", n_inclinations * sizeof *column_density_values);
     exit (EXIT_FAILURE);
   }
 
@@ -206,7 +204,7 @@ evaluate_photoionization_edges (void)
       err = create_photon (&photon, c_frequency, inclinations[i].lmn);
       if (err == EXIT_FAILURE)
       {
-        errormsg("skipping photon of frequency %e\n", c_frequency);
+        errormsg ("skipping photon of frequency %e\n", c_frequency);
         continue;
       }
 
@@ -251,13 +249,13 @@ find_photosphere (void)
   Positions_t *positions = calloc (n_inclinations, sizeof (Positions_t));
   if (positions == NULL)
   {
-    errormsg("unable to allocate memory for the positions array\n");
+    errormsg ("unable to allocate memory for the positions array\n");
     exit (EXIT_FAILURE);
   }
 
-  const double test_freq = 8e14;  // todo: this probably need to be a possible input
+  const double test_freq = 8e14;        // todo: this probably need to be a possible input
 
-  printf("Locating electron scattering photosphere surface for tau_es = %f\n", TAU_DEPTH);
+  printf ("Locating electron scattering photosphere surface for tau_es = %f\n", TAU_DEPTH);
 
   for (i = 0; i < n_inclinations; i++)
   {
@@ -557,7 +555,7 @@ main (int argc, char *argv[])
   }
   else
   {
-    errormsg("Mode %d is an unknown run mode, not sure how you got here so exiting the program\n", MODE);
+    errormsg ("Mode %d is an unknown run mode, not sure how you got here so exiting the program\n", MODE);
     exit (EXIT_FAILURE);
   }
 

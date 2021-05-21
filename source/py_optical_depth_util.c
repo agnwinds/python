@@ -58,7 +58,7 @@ outward_initialize_2d_model_angles (int *n_angles)
     inclinations = calloc (geo.nangles, sizeof *inclinations);
     if (inclinations == NULL)
     {
-      errormsg ("cannot allocate %lu bytes for observers array\n",  geo.nangles * sizeof *inclinations);
+      errormsg ("cannot allocate %lu bytes for observers array\n", geo.nangles * sizeof *inclinations);
       exit (EXIT_FAILURE);
     }
 
@@ -66,7 +66,7 @@ outward_initialize_2d_model_angles (int *n_angles)
     {
       strcpy (inclinations[i - MSPEC].name, xxspec[i].name);
       stuff_v (xxspec[i].lmn, inclinations[i - MSPEC].lmn);
-      inclinations[i].angle = -1;  // todo: implement way to get angle xxspec
+      inclinations[i].angle = -1;       // todo: implement way to get angle xxspec
     }
   }
   else
@@ -84,10 +84,10 @@ outward_initialize_2d_model_angles (int *n_angles)
     for (int i = 0; i < n_default_angles; i++)
     {
       len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angles[i], default_phase);
-      if(len < 0)
+      if (len < 0)
       {
-        errormsg("there was an error writing the name to the sight lines array\n");
-        exit(EXIT_FAILURE);
+        errormsg ("there was an error writing the name to the sight lines array\n");
+        exit (EXIT_FAILURE);
       }
 
       inclinations[i].lmn[0] = sin (default_angles[i] / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
@@ -126,19 +126,19 @@ outward_initialize_1d_model_angles (int *n_angles)
   const double default_phase = 0.5;
 
   *n_angles = n_default_angles;
-  SightLines_t * inclinations = calloc (n_default_angles, sizeof (SightLines_t));
+  SightLines_t *inclinations = calloc (n_default_angles, sizeof (SightLines_t));
 
   if (inclinations == NULL)
   {
-    errormsg("unable to allocate %ld bytes for observers array\n", sizeof *inclinations);
+    errormsg ("unable to allocate %ld bytes for observers array\n", sizeof *inclinations);
     exit (EXIT_FAILURE);
   }
 
   len = snprintf (inclinations[0].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
-  if(len < 0)
+  if (len < 0)
   {
-    errormsg("there was an error writing the name to the sight lines array\n");
-    exit(EXIT_FAILURE);
+    errormsg ("there was an error writing the name to the sight lines array\n");
+    exit (EXIT_FAILURE);
   }
 
   inclinations[0].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
@@ -184,7 +184,7 @@ photosphere_initialize_angles (int *n_angles)
 
   if (inclinations == NULL)
   {
-    errormsg("unable to allocate memory for sight lines array\n");
+    errormsg ("unable to allocate memory for sight lines array\n");
     exit (EXIT_FAILURE);
   }
 
@@ -192,10 +192,10 @@ photosphere_initialize_angles (int *n_angles)
   {
     default_angle = i * d_theta;
     len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
-    if(len < 0)
+    if (len < 0)
     {
-      errormsg("There was an error writing the name to the sight lines array\n");
-      exit(EXIT_FAILURE);
+      errormsg ("There was an error writing the name to the sight lines array\n");
+      exit (EXIT_FAILURE);
     }
 
     inclinations[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
@@ -272,7 +272,7 @@ create_photon (PhotPtr p_out, double freq, double *lmn)
 {
   if (freq < 0)
   {
-    errormsg("photon can't be created with negative frequency\n");
+    errormsg ("photon can't be created with negative frequency\n");
     return EXIT_FAILURE;
   }
 

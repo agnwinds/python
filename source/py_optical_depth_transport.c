@@ -81,7 +81,7 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
   smax = smax_in_cell (photon);
   if (smax < 0)
   {
-    errormsg("smax %e < 0 in cell %d\n", smax, photon->grid);
+    errormsg ("smax %e < 0 in cell %d\n", smax, photon->grid);
     return EXIT_FAILURE;
   }
 
@@ -208,7 +208,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
       translate_in_space (&p_extract);
       if (++n_in_space > max_translate_in_space)
       {
-        errormsg("something has gone wrong as this photon has translated in space %d times\n", n_in_space);
+        errormsg ("something has gone wrong as this photon has translated in space %d times\n", n_in_space);
         return EXIT_FAILURE;
       }
     }
@@ -220,7 +220,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
     }
     else
     {
-      errormsg("photon in unknown location grid stat %i\n", p_extract.grid);
+      errormsg ("photon in unknown location grid stat %i\n", p_extract.grid);
       return EXIT_FAILURE;
     }
 
@@ -244,7 +244,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
   {
     if (p_istat == P_HIT_STAR || p_istat == P_HIT_DISK)
     {
-      errormsg("photon hit central source or disk incorrectly istat = %i\n", p_istat);
+      errormsg ("photon hit central source or disk incorrectly istat = %i\n", p_istat);
       return EXIT_FAILURE;
     }
   }
@@ -253,7 +253,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
     stuff_phot (&p_extract, photon);
     if (p_istat == P_HIT_DISK)
     {
-      errormsg("the photon hit the disk whilst in RUN_MODE_PHOTOSPHERE when it should hit the central source\n");
+      errormsg ("the photon hit the disk whilst in RUN_MODE_PHOTOSPHERE when it should hit the central source\n");
       return EXIT_FAILURE;
     }
   }
