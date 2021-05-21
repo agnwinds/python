@@ -4,7 +4,8 @@
  * @author   Edward Parkinson
  * @date     May 2021
  *
- * @brief
+ * @brief    Functions which aren't related to the transport of photons, or
+ *           creation of the results.
  *
  * ************************************************************************** */
 
@@ -19,15 +20,26 @@
 
 /* ************************************************************************* */
 /**
- * @brief
+ * @brief  Initialize the inclination angles for a 2D outward run.
+ *
+ * @param[out]  int n_angles  The number of angles initialized
+ *
+ * @return  SightLines_t *inclinations  The initialize inclinations structure
  *
  * @details
+ *
+ * If xxpsec has been read in, i.e. there were spectral cycles run the model,
+ * then the same inclination angles in xxspec are used. Otherwise, a set of
+ * default angles will be used instead, with a default phase of 0.5. The phase
+ * should not matter, as it works for, i.e., 0.5 and 1 and gives the same
+ * results as of writing this.
  *
  * ************************************************************************** */
 
 SightLines_t *
 outward_initialize_2d_model_angles (int *n_angles)
 {
+  int len;
   const double default_phase = 0.5;
   const double default_angles[] = { 0.0, 10.0, 30.0, 45.0, 60.0, 75.0, 85.0, 90.0 };
   const int n_default_angles = sizeof default_angles / sizeof default_angles[0];
@@ -44,11 +56,9 @@ outward_initialize_2d_model_angles (int *n_angles)
   {
     *n_angles = geo.nangles;
     inclinations = calloc (geo.nangles, sizeof *inclinations);
-
     if (inclinations == NULL)
     {
-      long mem_req = geo.nangles * (int) sizeof *inclinations;
-      printf ("outward_initialize_2d_model_angles: cannot allocate %ld bytes for observers array\n", mem_req);
+      errormsg ("cannot allocate %lu bytes for observers array\n",  geo.nangles * sizeof *inclinations);
       exit (EXIT_FAILURE);
     }
 
@@ -56,27 +66,34 @@ outward_initialize_2d_model_angles (int *n_angles)
     {
       strcpy (inclinations[i - MSPEC].name, xxspec[i].name);
       stuff_v (xxspec[i].lmn, inclinations[i - MSPEC].lmn);
+      inclinations[i].angle = -1;  // todo: implement way to get angle xxspec
     }
   }
   else
   {
-    printf ("outward_initialize_2d_model_angles: No spec.save file has been found, using a default set of inclination angles\n");
+    printf ("\nNo spec.save file has been found, using a default set of inclination angles\n\n");
+
     *n_angles = n_default_angles;
     inclinations = calloc (n_default_angles, sizeof *inclinations);
-
     if (inclinations == NULL)
     {
-      long mem_req = n_default_angles * (int) sizeof *inclinations;
-      printf ("initialize_inclination_angles: cannot allocate %ld bytes for observers array\n", mem_req);
+      errormsg ("cannot allocate %lu bytes for observers array\n", n_default_angles * sizeof *inclinations);
       exit (EXIT_FAILURE);
     }
 
     for (int i = 0; i < n_default_angles; i++)
     {
-      snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angles[i], default_phase);
+      len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angles[i], default_phase);
+      if(len < 0)
+      {
+        errormsg("there was an error writing the name to the sight lines array\n");
+        exit(EXIT_FAILURE);
+      }
+
       inclinations[i].lmn[0] = sin (default_angles[i] / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
       inclinations[i].lmn[1] = sin (default_angles[i] / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
       inclinations[i].lmn[2] = cos (default_angles[i] / RADIAN);
+      inclinations[i].angle = default_angles[i];
     }
   }
 
@@ -85,15 +102,25 @@ outward_initialize_2d_model_angles (int *n_angles)
 
 /* ************************************************************************* */
 /**
- * @brief
+ * @brief  Initialize the inclination angles for a 1D outward run.
+ *
+ * @param[out]  int n_angles  The number of angles initialized
+ *
+ * @return  SightLines_t *inclinations  The initialize inclinations structure
  *
  * @details
+ *
+ * Since this is for a 1D model, it does not matter which inclination angle
+ * we use. We have opted to used an angle of 45 degrees, as this is also the
+ * angle we use to define a 1D spherical grid. It should not matter either
+ * way.
  *
  * ************************************************************************** */
 
 SightLines_t *
 outward_initialize_1d_model_angles (int *n_angles)
 {
+  int len;
   const int n_default_angles = 1;
   const double default_angle = 45.0;
   const double default_phase = 0.5;
@@ -103,30 +130,51 @@ outward_initialize_1d_model_angles (int *n_angles)
 
   if (inclinations == NULL)
   {
-    printf ("outward_initialize_1d_model_angles: unable to allocate %ld bytes for observers array\n", sizeof *inclinations);
+    errormsg("unable to allocate %ld bytes for observers array\n", sizeof *inclinations);
     exit (EXIT_FAILURE);
   }
 
-  snprintf (inclinations[0].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
+  len = snprintf (inclinations[0].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
+  if(len < 0)
+  {
+    errormsg("there was an error writing the name to the sight lines array\n");
+    exit(EXIT_FAILURE);
+  }
+
   inclinations[0].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
   inclinations[0].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
   inclinations[0].lmn[2] = cos (default_angle / RADIAN);
+  inclinations[0].angle = default_angle;
 
   return inclinations;
 }
 
 /* ************************************************************************* */
 /**
- * @brief
+ * @brief  Initialize the inclination angles to find the photosphere.
+ *
+ * @param[out]  int n_angles  The number of angles initialized
+ *
+ * @return  SightLines_t *inclinations  The initialize inclinations structure
  *
  * @details
  *
+ * The same function is called for both 1D and 2D models. This creates extra
+ * work for 1D model, but as the algorithm takes very little time to run, it
+ * does not matter.
+ *
+ * 500 inclination angles are defined, to very finely resolve the photosphere
+ * surface. This is fixed for now. I think 500 is probably far too many, but
+ * it takes absolutely no time to run. The results from 500 angles probably
+ * need smoothing if the grid is coarse.
  *
  * ************************************************************************** */
 
 SightLines_t *
 photosphere_initialize_angles (int *n_angles)
 {
+  int len;
+  double default_angle;
   const double default_phase = 1.0;
   const int n_default_angles = 500;
   const double d_theta = 90.0 / (double) n_default_angles;
@@ -136,17 +184,24 @@ photosphere_initialize_angles (int *n_angles)
 
   if (inclinations == NULL)
   {
-    printf ("photosphere_initialize_angles: unable to allocate memory for sightlines array\n");
+    errormsg("unable to allocate memory for sight lines array\n");
     exit (EXIT_FAILURE);
   }
 
   for (int i = 0; i < n_default_angles; i++)
   {
-    const double default_angle = i * d_theta;
-    snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
+    default_angle = i * d_theta;
+    len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
+    if(len < 0)
+    {
+      errormsg("There was an error writing the name to the sight lines array\n");
+      exit(EXIT_FAILURE);
+    }
+
     inclinations[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
     inclinations[i].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
     inclinations[i].lmn[2] = cos (default_angle / RADIAN);
+    inclinations[i].angle = default_angle;
   }
 
   return inclinations;
@@ -154,10 +209,12 @@ photosphere_initialize_angles (int *n_angles)
 
 /* ************************************************************************* */
 /**
- * @brief
+ * @brief  Wrapper function for initializing the inclination angles depending
+ *         on the run mode of the program.
  *
- * @details
+ * @param[out]  int n_angles  The number of angles initialized
  *
+ * @return  SightLines_t *inclinations  The initialize inclinations structure
  *
  * ************************************************************************** */
 
@@ -215,7 +272,7 @@ create_photon (PhotPtr p_out, double freq, double *lmn)
 {
   if (freq < 0)
   {
-    printf ("create_photon: photon can't be created with negative frequency\n");
+    errormsg("photon can't be created with negative frequency\n");
     return EXIT_FAILURE;
   }
 

@@ -4,31 +4,36 @@
  * @author   Edward Parkinson
  * @date     February 2021
  *
- * @brief    Globals used during optical depth diagnostics.
- *
  * @details
  *
- * Do not include this in any file other than py_optical_depth_sub.c, otherwise
- * there will be double definition errors. If you want to include it in
- * multiple, place MAXDIFF and N_PI_EDGES into py_optical_depth_sub.c to avoid
- * the errors. The reason they are in this header file, and why it exists, is
- * to keep things a bit cleaner in py_optical_depth_sub.c
+ * This header file contains the main constants, macros and types used in
+ * py_optical_depth.
  *
  * ************************************************************************** */
 
-#define N_FREQ_BINS 1
-
-// Inclination angles structure
-
+#define N_FREQ_BINS 10000
 #define NAMELEN 32
+
+// Error message macro, adds the file name and line to the start of the error
+// message
+
+#define errormsg(fmt, ...)                           \
+{                                                    \
+  fprintf(stderr, "(%s:%i): ", __FILE__, __LINE__);  \
+  fprintf(stderr, fmt, ##__VA_ARGS__);               \
+}
+
+// Structure to hold the angles to extract the optical depth/column density from
 
 typedef struct SightLines_s
 {
   char name[NAMELEN];
+  double angle;
   double lmn[3];
 } SightLines_t;
 
-// PI edges structure
+// Structure to hold the name and frequency of a photoionization edge to
+// evaluate the optical depth at
 
 typedef struct Edges_s
 {
@@ -36,14 +41,18 @@ typedef struct Edges_s
   double freq;
 } Edges_t;
 
-// Positions structure
+// Structure to save the angle and position of the electron scattering
+// photosphere surface
 
 typedef struct Positions_s
 {
+  double angle;
   double x, y, z;
 } Positions_t;
 
-// Control the column density extracted
+// Enumerator used to control the column density which is extracted, i.e. by
+// default mass density/N_H is extracted by the density of an ion can also
+// be extracted
 
 enum COLUMN_DENSITY
 {
@@ -54,11 +63,13 @@ enum COLUMN_DENSITY
 int COLUMN_MODE;
 int COLUMN_MODE_ION_NUMBER;
 
-// Control which domain to send photons from
+// Control which domain to initially send photons from
 
 int N_DOMAIN;
 
-// Control how the optical depth integration is done
+// Control how the optical depth integration is done. This can be done in
+// integrated tau mode, which gets the integrated tau along the path. The other
+// mode aims to find the surface of the electron scattering photosphere
 
 enum {
   RUN_MODE_OUTWARD = 0,
@@ -67,14 +78,11 @@ enum {
 
 double TAU_DEPTH;
 
-/*
- * Functions from other files
- */
+// External functions from other files
 
-void control_program(void);
-SightLines_t *initialize_inclination_angles (int *n_angles);
-void print_optical_depths (SightLines_t *inclinations, int n_inclinations, Edges_t edges[], int n_edges, double *optical_depth_values,
-                           double *column_density_values);
-void write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, double *tau_spectrum, double freq_min, double d_freq);
 int create_photon (PhotPtr p_out, double freq, double *lmn);
-void write_photosphere_location_to_file(Positions_t *positions, int n_inclinations);
+SightLines_t *initialize_inclination_angles (int *n_angles);
+int integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_optical_depth);
+void print_optical_depths(SightLines_t *inclinations, int n_inclinations, Edges_t edges[], int n_edges, double *optical_depth, double *column_density);
+void write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, double *tau_spectrum, double freq_min, double d_freq);
+void write_photosphere_location_to_file(Positions_t *positions, int n_angles);
