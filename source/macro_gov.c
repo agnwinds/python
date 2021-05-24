@@ -384,6 +384,18 @@ macro_pops (xplasma, xne)
           Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
         }
 
+        /* Now we take the population array and check to see if anything is very
+         * small and set it to zero. This is basically some pre-emptive cleaning
+         * since we could clean this up later, I suppose. */
+
+        for(i = 0; i < n_macro_lvl; i++)
+        {
+          if(populations[i] < DENSITY_MIN)
+          {
+            populations[i] = DENSITY_MIN;
+          }
+        }
+
         if (OUTPUT_MACRO_DIAG && rank_global == 0)
         {
           if (xplasma->nplasma == MACRO_DIAG_CELL)
@@ -415,8 +427,7 @@ macro_pops (xplasma, xne)
         }
 
         macro_pops_inversion_check = calloc (n_macro_lvl, sizeof (*macro_pops_inversion_check));
-        macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
-        n_inversions = macro_pops_count_inversions ();
+        n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
         if (n_inversions > 0)
           Log ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
@@ -722,12 +733,13 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
  *
  **********************************************************/
 
-void
-macro_pops_check_for_population_inversion (int index_element, double *populations, int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO],
+int
+macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO],
                                            int conf_to_matrix[NLEVELS_MACRO])
 {
   int i, index_ion, index_lvl;
   double inversion_test;
+  int n_total_inversions = 0;
 
   for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
   {
@@ -746,37 +758,13 @@ macro_pops_check_for_population_inversion (int index_element, double *population
 
           if (populations[conf_to_matrix[i]] > inversion_test)
           {
+            n_total_inversions += 1;
             populations[conf_to_matrix[i]] = inversion_test;
             macro_pops_inversion_check[conf_to_matrix[i]] = TRUE;
           }
         }
       }
     }
-  }
-
-}
-
-/**********************************************************/
-/**
- * @brief Count the number of population inversions which occurred and were
- *        cleaned
- *
- * @return int n_total_inversions  The number of populations inversions which
- *                                 were cleaned
- *
- * @details
- *
- * ********************************************************/
-
-int
-macro_pops_count_inversions (void)
-{
-  int i;
-  int n_total_inversions = 0;
-
-  for (i = 0; i < macro_pops_n_levels; i++)
-  {
-    n_total_inversions += macro_pops_inversion_check[i];
   }
 
   return n_total_inversions;
@@ -839,10 +827,6 @@ macro_pops_check_densities_for_numerical_errors (PlasmaPtr xplasma, int index_el
     /* Check that the ion density is positive and finite */
 
     ion_density_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
-    // if (fabs (ion_density_temp) < DENSITY_MIN)
-    // {
-    //   ion_density_temp = DENSITY_MIN;
-    // }
     if (sane_check (ion_density_temp) || ion_density_temp < 0.0)
     {
       Error ("macro_pops: iteration %d: ion %i has calculated a frac. pop. of %8.4e in plasma cell %i\n", n_iterations, index_ion,
@@ -854,10 +838,6 @@ macro_pops_check_densities_for_numerical_errors (PlasmaPtr xplasma, int index_el
 
     for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
     {
-      // if (fabs (populations[conf_to_matrix[index_lvl]]) < DENSITY_MIN)
-      // {
-      //   populations[conf_to_matrix[index_lvl]] = DENSITY_MIN;
-      // }
       if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
       {
         Error ("macro_pops: iteration %d: level %i has a calculated pop. of %8.4e in plasma cell %i\n",

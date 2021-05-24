@@ -526,6 +526,7 @@ normalise_macro_estimators (n)
         Error ("ms_estimator_normalise: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
                upper_density, lower_density, xplasma->levden[config[nlev_upper].nden]);
         macro_pops_check_if_level_inversion (nlev_upper);
+        Exit(1);
         stimfac = 0.0;
       }
       else
