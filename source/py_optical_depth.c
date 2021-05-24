@@ -239,7 +239,7 @@ void
 find_photosphere (void)
 {
   int i, err;
-  double tau, nh;
+  double optical_depth, column_density;
   struct photon photon;
   SightLines_t *inclinations;
 
@@ -266,10 +266,9 @@ find_photosphere (void)
       continue;
     }
 
-    tau = 0;
-    nh = 0;
+    optical_depth = column_density = 0;
 
-    err = integrate_tau_across_wind (&photon, &nh, &tau);
+    err = integrate_tau_across_wind (&photon, &column_density, &optical_depth);
     if (err)
     {
       positions[i].x = positions[i].y = positions[i].z = -1.0;
@@ -296,15 +295,22 @@ find_photosphere (void)
 void
 print_help (void)
 {
-  char *help = "Create optical depth diagnostics for a Python simulation.\n\n"
-    "usage: py_optical_depth [-h] [-cion nion] [-classic] [--version] root\n"
-    "\n"
-    "-h           Print this help message and exit\n"
-    "-d ndom      Set the domain to launch photons from\n"
-    "-p tau_stop  Integrate from outwards to find the electron scattering photosphere\n"
+  char *help =
+    "A utility program to analyse the optical depth in a Python model.\n\n"
+    "usage: py_optical_depth [-h] [-d ndom] [-p tau_stop] [-cion nion] [-classic]\n"
+    "                        [--version] root\n\n"
+    "This program can be used in multiple ways. By default, the integrated optical\n"
+    "depth along the defined observer lines of sight. If none of these have been\n"
+    "defined then a set of default lines of sight are used instead. This program\n"
+    "can also find the surface of the electron scattering photosphere using the -p\n"
+    "option.\n\n"
+    "Please see below for a list of all flags.\n\n"
+    "-h           Print this help message and exit.\n"
+    "-d ndom      Set the domain to launch photons from.\n"
+    "-p tau_stop  Integrate from outwards to find the electron scattering photosphere.\n"
     "-cion nion   Extract the column density for an ion of number nion\n"
-    "-classic     Use linear frequency transforms. Use when Python run in classic mode.\n"
-    "--version    Print the version information and exit.\n";
+    "-classic     Use linear frequency transforms, to be used when Python was run\n"
+    "             in classic mode.\n" "--version    Print the version information and exit.\n";
   printf ("%s", help);
 }
 
@@ -393,7 +399,7 @@ get_arguments (int argc, char *argv[])
     }
     else if (!strcmp (argv[i], "-p"))
     {
-      MODE = RUN_MODE_PHOTOSPHERE;
+      MODE = RUN_MODE_ES_PHOTOSPHERE;
       char *check;
       TAU_DEPTH = (int) strtod (argv[i + 1], &check);
       if (*check != '\0')
@@ -468,7 +474,7 @@ main (int argc, char *argv[])
   SMAX_FRAC = 0.01;
   DENSITY_PHOT_MIN = 1.e-10;
   COLUMN_MODE = COLUMN_MODE_RHO;
-  MODE = RUN_MODE_OUTWARD;
+  MODE = RUN_MODE_TAU_INTEGRATE;
   N_DOMAIN = 0;
 
   get_arguments (argc, argv);
@@ -516,7 +522,7 @@ main (int argc, char *argv[])
    */
 
   printf ("\n");
-  if (MODE != RUN_MODE_PHOTOSPHERE)
+  if (MODE != RUN_MODE_ES_PHOTOSPHERE)
   {
     if (COLUMN_MODE == COLUMN_MODE_ION)
     {
@@ -544,12 +550,12 @@ main (int argc, char *argv[])
    * to atomic data, which we should not need to worry about for this program
    */
 
-  if (MODE == RUN_MODE_OUTWARD)
+  if (MODE == RUN_MODE_TAU_INTEGRATE)
   {
     evaluate_photoionization_edges ();
     create_optical_depth_spectrum ();
   }
-  else if (MODE == RUN_MODE_PHOTOSPHERE)
+  else if (MODE == RUN_MODE_ES_PHOTOSPHERE)
   {
     find_photosphere ();
   }

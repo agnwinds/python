@@ -130,7 +130,7 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
 
   kappa_total = 0;
 
-  if (MODE != RUN_MODE_PHOTOSPHERE)
+  if (MODE != RUN_MODE_ES_PHOTOSPHERE)
   {
     if (geo.rt_mode == RT_MODE_2LEVEL)
     {
@@ -226,7 +226,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
 
     p_istat = walls (&p_extract, photon, norm);
 
-    if (MODE == RUN_MODE_PHOTOSPHERE)
+    if (MODE == RUN_MODE_ES_PHOTOSPHERE)
     {
       if (*c_optical_depth >= TAU_DEPTH)
       {
@@ -236,11 +236,11 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
   }
 
   /*
-   * If we are in RUN_MODE_PHOTOSPHERE, then we shouldn't care about hitting the
+   * If we are in RUN_MODE_ES_PHOTOSPHERE, then we shouldn't care about hitting the
    * star or disc, since we are aiming for the origin of the system
    */
 
-  if (MODE == RUN_MODE_OUTWARD)
+  if (MODE == RUN_MODE_TAU_INTEGRATE)
   {
     if (p_istat == P_HIT_STAR || p_istat == P_HIT_DISK)
     {
@@ -253,7 +253,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
     stuff_phot (&p_extract, photon);
     if (p_istat == P_HIT_DISK)
     {
-      errormsg ("the photon hit the disk whilst in RUN_MODE_PHOTOSPHERE when it should hit the central source\n");
+      errormsg ("the photon hit the disk whilst in RUN_MODE_ES_PHOTOSPHERE when it should hit the central source\n");
       return EXIT_FAILURE;
     }
   }

@@ -39,6 +39,7 @@
 SightLines_t *
 outward_initialize_2d_model_angles (int *n_angles)
 {
+  int i;
   int len;
   const double default_phase = 0.5;
   const double default_angles[] = { 0.0, 10.0, 30.0, 45.0, 60.0, 75.0, 85.0, 90.0 };
@@ -62,7 +63,7 @@ outward_initialize_2d_model_angles (int *n_angles)
       exit (EXIT_FAILURE);
     }
 
-    for (int i = MSPEC; i < MSPEC + geo.nangles; i++)
+    for (i = MSPEC; i < MSPEC + geo.nangles; i++)
     {
       strcpy (inclinations[i - MSPEC].name, xxspec[i].name);
       stuff_v (xxspec[i].lmn, inclinations[i - MSPEC].lmn);
@@ -81,7 +82,7 @@ outward_initialize_2d_model_angles (int *n_angles)
       exit (EXIT_FAILURE);
     }
 
-    for (int i = 0; i < n_default_angles; i++)
+    for (i = 0; i < n_default_angles; i++)
     {
       len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angles[i], default_phase);
       if (len < 0)
@@ -151,6 +152,58 @@ outward_initialize_1d_model_angles (int *n_angles)
 
 /* ************************************************************************* */
 /**
+ * @brief  Initialize the inclination angles to find the photosphere for a
+ *         2d model.
+ *
+ * @param[out]  int n_angles  The number of angles initialized
+ *
+ * @return  SightLines_t *inclinations  The initialize inclinations structure
+ *
+ * @details
+ *
+ * The same function is called for both 1D and 2D models. This creates extra
+ * work for 1D model, but as the algorithm takes very little time to run, it
+ * does not matter.
+ *
+ * 500 inclination angles are defined, to very finely resolve the photosphere
+ * surface. This is fixed for now. I think 500 is probably far too many, but
+ * it takes absolutely no time to run. The results from 500 angles probably
+ * need smoothing if the grid is coarse.
+ *
+ * ************************************************************************** */
+
+SightLines_t *
+photosphere_2d_initialize_angles (int *n_angles)
+{
+  int i;
+  double default_angle;
+  const double default_phase = 1.0;
+  const int n_default_angles = 500;
+  const double d_theta = 90.0 / (double) n_default_angles;
+
+  *n_angles = n_default_angles;
+  SightLines_t *inclinations = calloc (n_default_angles, sizeof (SightLines_t));
+
+  if (inclinations == NULL)
+  {
+    errormsg ("unable to allocate memory for sight lines array\n");
+    exit (EXIT_FAILURE);
+  }
+
+  for (i = 0; i < n_default_angles; i++)
+  {
+    default_angle = i * d_theta;
+    inclinations[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
+    inclinations[i].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
+    inclinations[i].lmn[2] = cos (default_angle / RADIAN);
+    inclinations[i].angle = default_angle;
+  }
+
+  return inclinations;
+}
+
+/* ************************************************************************* */
+/**
  * @brief  Initialize the inclination angles to find the photosphere.
  *
  * @param[out]  int n_angles  The number of angles initialized
@@ -171,13 +224,11 @@ outward_initialize_1d_model_angles (int *n_angles)
  * ************************************************************************** */
 
 SightLines_t *
-photosphere_initialize_angles (int *n_angles)
+photosphere_1d_initialize_angles (int *n_angles)
 {
-  int len;
-  double default_angle;
   const double default_phase = 1.0;
-  const int n_default_angles = 500;
-  const double d_theta = 90.0 / (double) n_default_angles;
+  const int n_default_angles = 1;
+  const double default_angle = 45;
 
   *n_angles = n_default_angles;
   SightLines_t *inclinations = calloc (n_default_angles, sizeof (SightLines_t));
@@ -188,24 +239,14 @@ photosphere_initialize_angles (int *n_angles)
     exit (EXIT_FAILURE);
   }
 
-  for (int i = 0; i < n_default_angles; i++)
-  {
-    default_angle = i * d_theta;
-    len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", default_angle, default_phase);
-    if (len < 0)
-    {
-      errormsg ("There was an error writing the name to the sight lines array\n");
-      exit (EXIT_FAILURE);
-    }
-
-    inclinations[i].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
-    inclinations[i].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
-    inclinations[i].lmn[2] = cos (default_angle / RADIAN);
-    inclinations[i].angle = default_angle;
-  }
+  inclinations[0].lmn[0] = sin (default_angle / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
+  inclinations[0].lmn[1] = sin (default_angle / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
+  inclinations[0].lmn[2] = cos (default_angle / RADIAN);
+  inclinations[0].angle = default_angle;
 
   return inclinations;
 }
+
 
 /* ************************************************************************* */
 /**
@@ -223,7 +264,7 @@ initialize_inclination_angles (int *n_angles)
 {
   SightLines_t *inclinations;
 
-  if (MODE == RUN_MODE_OUTWARD)
+  if (MODE == RUN_MODE_TAU_INTEGRATE)
   {
     if (zdom[N_DOMAIN].coord_type == SPHERICAL)
     {
@@ -236,7 +277,14 @@ initialize_inclination_angles (int *n_angles)
   }
   else
   {
-    inclinations = photosphere_initialize_angles (n_angles);
+    if (zdom[N_DOMAIN].coord_type == SPHERICAL)
+    {
+      inclinations = photosphere_1d_initialize_angles (n_angles);
+    }
+    else
+    {
+      inclinations = photosphere_2d_initialize_angles (n_angles);
+    }
   }
 
   return inclinations;
@@ -285,7 +333,7 @@ create_photon (PhotPtr p_out, double freq, double *lmn)
   p_out->x[0] = p_out->x[1] = p_out->x[2] = 0.0;
   stuff_v (lmn, p_out->lmn);
 
-  if (MODE == RUN_MODE_OUTWARD)
+  if (MODE == RUN_MODE_TAU_INTEGRATE)
   {
     move_phot (p_out, geo.rstar + DFUDGE);
   }

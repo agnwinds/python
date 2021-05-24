@@ -155,10 +155,6 @@ write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, d
   }
   fprintf (fp, "\n");
 
-  /*
-   * Write out the spectrum for each inclination angle, omne line at a time
-   */
-
   c_frequency = freq_min;
   for (i = 0; i < N_FREQ_BINS; i++)
   {
@@ -199,10 +195,11 @@ void
 write_photosphere_location_to_file (Positions_t * positions, int n_angles)
 {
   int i;
+  double pos1d[3];
   char filename[LINELENGTH];
   FILE *fp;
 
-  int len = snprintf (filename, LINELENGTH, "%s.photosphere.txt", files.root);
+  int len = snprintf (filename, LINELENGTH, "%s.photosphere", files.root);
   if (len < 0)
   {
     errormsg ("error when creating filename string\n");
@@ -217,12 +214,30 @@ write_photosphere_location_to_file (Positions_t * positions, int n_angles)
   }
 
   write_generic_file_header (fp);
-  fprintf (fp, "# Electron scatter photosphere locations for tau_es = %f\n", TAU_DEPTH);
-  fprintf (fp, "%-15s %-15s %-15s\n", "x", "y", "z");
+  fprintf (fp, "# Electron scatter photosphere locations for tau_es = %f\n#\n", TAU_DEPTH);
+
+  if (zdom[N_DOMAIN].coord_type != SPHERICAL)
+  {
+    fprintf (fp, "%-15s %-15s %-15s\n", "x", "y", "z");
+  }
+  else
+  {
+    fprintf (fp, "%-15s\n", "r");
+  }
 
   for (i = 0; i < n_angles; i++)
   {
-    fprintf (fp, "%-15e %-15e %-15e\n", positions[i].x, positions[i].y, positions[i].z);
+    if (zdom[N_DOMAIN].coord_type != SPHERICAL)
+    {
+      fprintf (fp, "%-15e %-15e %-15e\n", positions[i].x, positions[i].y, positions[i].z);
+    }
+    else
+    {
+      pos1d[0] = positions[0].x;
+      pos1d[1] = positions[0].y;
+      pos1d[2] = positions[0].z;
+      fprintf (fp, "%-15e\n", length (pos1d));
+    }
   }
 
   if (fclose (fp))

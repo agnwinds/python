@@ -72,8 +72,8 @@ int N_DOMAIN;
 // mode aims to find the surface of the electron scattering photosphere
 
 enum {
-  RUN_MODE_OUTWARD = 0,
-  RUN_MODE_PHOTOSPHERE = 1,
+  RUN_MODE_TAU_INTEGRATE = 0,
+  RUN_MODE_ES_PHOTOSPHERE = 1,
 } MODE;
 
 double TAU_DEPTH;
