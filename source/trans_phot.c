@@ -535,6 +535,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       stuff_phot (&pp, p);
       icell = 0;
+      p->dvds = -1.0;
     }
 
     /* This completes the portion of the code that handles the scattering of a photon.

@@ -1198,6 +1198,7 @@ typedef struct photon
                                    purposes */
   double path;                  /* The total path length of a photon (used for reverberation calcuations) */
   double ds;                    /* the distance a photon has moved since its creation or last interaction */
+  double dvds;
 }
 p_dummy, *PhotPtr;
 
