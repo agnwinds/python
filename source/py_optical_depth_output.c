@@ -39,7 +39,6 @@ write_generic_file_header (FILE * fp)
   fprintf (fp, "#\n");
 }
 
-
 /* ************************************************************************** */
 /**
  * @brief  Print the various optical depths for the photoionization edges

@@ -247,7 +247,6 @@ photosphere_1d_initialize_angles (int *n_angles)
   return inclinations;
 }
 
-
 /* ************************************************************************* */
 /**
  * @brief  Wrapper function for initializing the inclination angles depending

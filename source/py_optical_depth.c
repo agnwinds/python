@@ -285,7 +285,6 @@ find_photosphere (void)
   free (positions);
 }
 
-
 /* ************************************************************************* */
 /**
  * @brief  Help text for the program.
