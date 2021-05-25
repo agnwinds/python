@@ -400,7 +400,7 @@ get_arguments (int argc, char *argv[])
     {
       MODE = RUN_MODE_ES_PHOTOSPHERE;
       char *check;
-      TAU_DEPTH = (int) strtod (argv[i + 1], &check);
+      TAU_DEPTH = strtod (argv[i + 1], &check);
       if (*check != '\0')
       {
         printf ("Unable to convert argument provided for -p into a double\n");
