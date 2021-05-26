@@ -70,7 +70,7 @@ int resonate_number_freq_diff_low = 0;
  *
  **********************************************************/
 
-#define  MAXDIFF  (VCHECK/VLIGHT) /* The same as our old velocity requirement */
+#define  MAXDIFF  (VCHECK/VLIGHT)       /* The same as our old velocity requirement */
 
 double
 calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
@@ -284,6 +284,17 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     {                           /* this particular line is in resonance */
       ds = x * smax;
 
+      /*
+       * If the last interaction was nn and is happening within dfudge
+       * then we flag this as an error and skip over it...
+       */
+
+      if (p_start_cmf.nres == nn && ds < 1e5)
+      {
+        // Error ("calculate_ds: photon trying to interact with same resonance within %e cm of last interaction\n",
+        //        wmain[p_start_cmf.grid].dfudge + ds);
+        continue;
+      }
 
 /* Before checking for a resonant scatter, need to check for scattering
  * due to a continuum

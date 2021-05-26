@@ -438,7 +438,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   struct photon phot_mid, phot_mid_cmf; // Photon at the midpt of its path in the cell
 
   /* First verify that the photon is in the grid, and if not
-  return and record an error */
+     return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
@@ -499,8 +499,9 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   {
     if (ds_current < 1e5)
     {
-      Log_silent ("translate_in_wind: nres %5d repeat after motion of %10.3e for photon %d in plasma cell %d ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
-             *nres, ds_current, p->np, wmain[p->grid].nplasma, geo.wcycle, geo.pcycle, p->istat, istat);
+      Error
+        ("translate_in_wind: nres %5d repeat after motion of %10.3e for photon %d in plasma cell %d ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
+         *nres, ds_current, p->np, wmain[p->grid].nplasma, geo.wcycle, geo.pcycle, p->istat, istat);
 
       if (modes.save_photons)
         save_photons (p, "HitSameResonance");
