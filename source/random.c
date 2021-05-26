@@ -318,7 +318,7 @@ save_gsl_rng_state ()
 
   if ((file = fopen (files.rngsave, "w")) == NULL)
   {
-    Error ("save_gsl_rng_state: unable to open %s\n", files.rngsave);
+    Error ("save_gsl_rng_state: unable to open %s to write RNG to file\n", files.rngsave);
     return;
   }
 
@@ -326,12 +326,13 @@ save_gsl_rng_state ()
   {
     Error ("save_gsl_rng_state: gsl_rng_fwrite failed to write RNG state to file\n");
   }
-
-  Log ("RNG state loaded from %s\n", files.rngsave);
+  {
+    Log("GSL RNG state saved to %s\n", files.rngsave);
+  }
 
   if (fclose (file))
   {
-    Error ("save_gsl_rng_state: problem when closing gsl save file\n");
+    Error ("save_gsl_rng_state: there was a problem when closing %s\n", files.rngsave);
   }
 }
 
@@ -364,21 +365,22 @@ reload_gsl_rng_state ()
 
   if ((file = fopen (files.rngsave, "r")) == NULL)
   {
-    Error ("reload_gsl_rng_state: unable to open %s\n", files.rngsave);
-    Exit (1);
+    Error ("reload_gsl_rng_state: unable to open %s so using a new seed\n", files.rngsave);
+    return;
   }
 
   if (gsl_rng_fread (file, rng))
   {
-    Error ("reload_gsl_rng_state: gsl_rng_fread failed to read RNG state to file\n");
-    Exit (1);
+    Error ("reload_gsl_rng_state: gsl_rng_fread failed to read the RNG state from %s so using a new seed\n", files.rngsave);
   }
-
-  Log ("RNG state loaded from %s\n", files.rngsave);
+  else
+  {
+    Log("GSL RNG state loaded from %s\n", files.rngsave);
+  }
 
   if (fclose (file))
   {
-    Error ("reload_gsl_rng_state: problem when closing gsl save file\n");
+    Error ("reload_gsl_rng_state: there was a problem when closing %s\n", files.rngsave);
   }
 }
 
