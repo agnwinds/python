@@ -249,7 +249,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        position of the photon. */
 
 
-    istat = translate (w, &pp, tau_scat, &tau, &current_nres);
+    translate (w, &pp, tau_scat, &tau, &current_nres);
 
     icell++;
     istat = walls (&pp, p, normal);

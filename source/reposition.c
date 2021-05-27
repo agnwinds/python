@@ -46,8 +46,6 @@ reposition (PhotPtr p)
 {
   int n;
   double s, s_disk, s_star;
-  double l_sob, v_thermal, dvds;
-  PlasmaPtr xplasma;
   int hit_disk;
   int ierr = 0;
 
@@ -59,30 +57,7 @@ reposition (PhotPtr p)
       return (n);
     }
 
-    // if(p->dvds > 0)
-    // {
-    //   dvds = p->dvds;
-    // }
-    // else
-    // {
-    //   dvds = wmain[p->grid].dvds_ave;
-    // }
-    //
-    // xplasma = &plasmamain[wmain[p->grid].nplasma];
-    // v_thermal = sqrt (1.5 * BOLTZMANN * xplasma->t_e / MPROT);
-    // l_sob = v_thermal / dvds;
-    //
-    // if (l_sob < wmain[p->grid].dfudge)
-    // {
-    //   s = wmain[p->grid].dfudge;
-    // }
-    // else
-    // {
-    //   s = l_sob;
-    // }
-
     s = wmain[p->grid].dfudge;
-
     if (geo.disk_type != DISK_NONE)
     {
       s_disk = ds_to_disk (p, 1, &hit_disk);    // Allow negative values
@@ -98,19 +73,16 @@ reposition (PhotPtr p)
       s = 0.1 * s_star;
     }
 
-    ierr = move_phot (p, s);
+    if (s < 0)
+    {
+      Error ("reposition: reposition s %10.3e < 0 so photon has not been repositioned\n", s);
+      return ierr = TRUE;
+    }
 
+    ierr = move_phot (p, s);
     if (ierr)
     {
       Error ("reposition: move_phot error: Photon %d - %10.3e %10.3e %10.3e\n", p->np, p->x[0], p->x[1], p->x[2]);
-    }
-
-    /*XXXX This next test should not be needed, it is placed here
-       so that we catch any error in move_phot */
-    if (s < 0)
-    {
-      Error ("reposition: s (%10.3e) < 0", s);
-      ierr = TRUE;
     }
   }
 
