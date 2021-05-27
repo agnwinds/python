@@ -79,11 +79,11 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      int *istat;
 {
   int kkk;
-  int n, nn, nstart, ndelt;
+  int n, current_res_number, nstart, ndelt;
   double kap_es;
   double freq_inner, freq_outer, dfreq, running_tau, freq_av;
   double mean_freq;
-  double x;
+  double fraction_to_resonance;
   double ds_current, ds;
   double dvds_cmf, density_cmf;
   double dvds1, dvds2;
@@ -143,8 +143,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     move_phot (&p_now, smax * 0.5);
     observer_to_local_frame (&p_now, &p_now_cmf);
     diff = fabs (p_now_cmf.freq - 0.5 * (p_start_cmf.freq + p_stop_cmf.freq)) / p_start_cmf.freq;
-    if (diff < MAXDIFF)  // check vcheck to something small, < 1? or 1
-    {                    // increase dfudge?
+    if (diff < MAXDIFF)         // check vcheck to something small, < 1? or 1
+    {                           // increase dfudge?
       break;
     }
     stuff_phot (&p_now, &p_stop);
@@ -246,21 +246,21 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   for (n = 0; n < nline_delt; n++)
   {
-    nn = nstart + n * ndelt;
-    x = (lin_ptr[nn]->freq - freq_inner) / dfreq;
+    current_res_number = nstart + n * ndelt;
+    fraction_to_resonance = (lin_ptr[current_res_number]->freq - freq_inner) / dfreq;
 
-    if (0.0 < x && x < 1.0)
+    if (0.0 < fraction_to_resonance && fraction_to_resonance < 1.0)
     {                           /* this particular line is in resonance */
-      ds = x * smax;
+      ds = fraction_to_resonance * smax;
 
-      /* If the last interaction (p->nres) was nn and is happening within dfudge
+      /* If the last interaction (p->nres) was current_res_number and is happening within dfudge
        * then we flag this as an error and skip over it...
        */
 
-      if (p_now.nres == nn && ds < wmain[p_now.grid].dfudge)
+      if (p_now.nres == current_res_number && ds < wmain[p_now.grid].dfudge)
       {
-        Error ("calculate_ds: photon trying to interact with same resonance within %e cm of last interaction\n",
-               wmain[p_start_cmf.grid].dfudge + ds);
+        // Error ("calculate_ds: photon trying to interact with same resonance within %e cm of last interaction\n",
+        //        wmain[p_start_cmf.grid].dfudge + ds);
         continue;
       }
 
@@ -286,7 +286,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
         /* increment tau by the continuum optical depth to this point */
         running_tau += kap_cont_obs * (ds - ds_current);
         ds_current = ds;        /* At this point ds_current is exactly the position of the resonance */
-        kkk = lin_ptr[nn]->nion;
+        kkk = lin_ptr[current_res_number]->nion;
 
         /* The density is calculated in the wind array at the center of a cell.
          * We use that as the first estimate of the density.  */
@@ -308,12 +308,12 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
             init_dvds = 1;
           }
 
-          p->dvds = dvds_cmf = (1. - x) * dvds1 + x * dvds2;
+          p->dvds = dvds_cmf = (1. - fraction_to_resonance) * dvds1 + fraction_to_resonance * dvds2;
 
-          /* sobolev does not use x, unless density_cmf is les than 0 */
+          /* sobolev does not use fraction_to_resonance, unless density_cmf is les than 0 */
           // tau_sobolev is invariant, but all inputs must be in the same frame, using cmf  here
 
-          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[nn], dvds_cmf);
+          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[current_res_number], dvds_cmf);
           running_tau += tau_sobolev;
 
           if (geo.rt_mode == RT_MODE_MACRO)     //Macro Atom case (SS)
@@ -342,15 +342,15 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               else if (geo.ioniz_or_extract == CYCLE_IONIZ)
               {
                 observer_to_local_frame (&p_now, &p_now_cmf);
-                if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == FALSE)
+                if (lin_ptr[current_res_number]->macro_info == TRUE && geo.macro_simple == FALSE)
                 {
-                  bb_estimators_increment (two, &p_now_cmf, tau_sobolev, dvds_cmf, nn);
+                  bb_estimators_increment (two, &p_now_cmf, tau_sobolev, dvds_cmf, current_res_number);
                 }
                 else
                 {
                   /* The line is from a simple ion. Record the heating contribution and move on. */
                   xplasma2 = &plasmamain[two->nplasma];
-                  bb_simple_heat (xplasma2, &p_now_cmf, tau_sobolev, nn);
+                  bb_simple_heat (xplasma2, &p_now_cmf, tau_sobolev, current_res_number);
                 }
               }
             }
@@ -365,12 +365,12 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
         if (running_tau > tau_scat)
         {
           *istat = P_SCAT;
-          *nres = nn;
+          *nres = current_res_number;
           *tau = running_tau;
 
           return (ds_current);
         }
-      }         /* End of loop to process an individual resonance */
+      }                         /* End of loop to process an individual resonance */
 
       *tau = running_tau;
     }
@@ -480,7 +480,7 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
     /* use a running sum to find which photoionisation process it was */
     /* If a non-macro-atom run is being done this part should never be reached.
      * Just do a check that all is well - this can be removed eventually (SS)
-    */
+     */
 
     if (geo.rt_mode == RT_MODE_2LEVEL)
     {
