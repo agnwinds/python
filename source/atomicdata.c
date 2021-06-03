@@ -287,9 +287,10 @@ structure does not have this property! */
  *
  * A typical element has the following format
  *
- *  Element    6    C    8.56
+ *  Element    6    C    8.56    12.011
  *
- * where 6 here refers to z of the elemnt, C is the name, and 8.56 is the abundance relative to H at 12
+ * where 6 here refers to z of the elemnt, C is the name, and 8.56 is the number abundance relative to H at 12
+ * and 12.011 is the atomic weight.
  *
  * */
         case 'e':
@@ -300,7 +301,8 @@ structure does not have this property! */
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
           }
-          ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);  /* Immediate replace by number density relative to H */
+          /* Immediate replace by number density relative to H */
+          ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);  
           nelements++;
           if (nelements > NELEMENTS)
           {
@@ -2480,9 +2482,9 @@ to prepare it for use by other programs*/
  */
 
   q = 0.;
-  for (nelem = 1; nelem < nelements; nelem++)
+  for (nelem = 0; nelem < nelements; nelem++)
   {
-    q += ele[nelem].abun * ele[nelem].atomic_weight * ele[nelem].z;
+    q += ele[nelem].abun * ele[nelem].atomic_weight;
   }
 
   q = MPROT * q;
