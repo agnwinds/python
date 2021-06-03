@@ -92,6 +92,7 @@ typedef struct elements
   int lastion;                  /* Index into struct ions ion[lastion] is the higest ionization state of this ion */
   int nions;                    /* The number of ions actually read in from the data file for this element */
   double abun;                  /* Abundance */
+  double atomic_weight;         /* Atomic weight */
   int istate_max;               /* highest ionization stage of element */
 }
 ele_dummy, *ElemPtr;

@@ -293,7 +293,8 @@ structure does not have this property! */
  *
  * */
         case 'e':
-          if (sscanf (aline, "%*s %d %s %le", &ele[nelements].z, ele[nelements].name, &ele[nelements].abun) != 3)
+          if (sscanf (aline, "%*s %d %s %le %le", &ele[nelements].z, ele[nelements].name,
+                      &ele[nelements].abun, &ele[nelements].atomic_weight) != 4)
           {
             Error ("Get_atomic_data: file %s line %d: Element line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
@@ -2473,13 +2474,15 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 /* Now begin a series of calculations with the data that has been read in in order
 to prepare it for use by other programs*/
 
-/* Calculate the conversion factor between rho and nh.  Note that our approximation here is
-somewhat inexact  because it assumes all elements have equal neutrons and protons. */
+/* Calculate the conversion factor between rho and nh.  See #802 where the previous
+ * approximation was improved to use atomc weights and not simply a factor of 2 times
+ * the number of electrons 
+ */
 
-  q = 1.;
+  q = 0.;
   for (nelem = 1; nelem < nelements; nelem++)
   {
-    q += ele[nelem].abun * 2. * ele[nelem].z;
+    q += ele[nelem].abun * ele[nelem].atomic_weight * ele[nelem].z;
   }
 
   q = MPROT * q;
