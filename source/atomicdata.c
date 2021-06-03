@@ -2486,6 +2486,7 @@ to prepare it for use by other programs*/
   }
 
   q = MPROT * q;
+  q /= ele[0].atomic_weight;
   rho2nh = 1. / q;
 
 
