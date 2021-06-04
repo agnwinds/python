@@ -300,8 +300,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
           dvds_cmf = (1. - fraction_to_resonance) * dvds1 + fraction_to_resonance * dvds2;
 
-          /* sobolev does not use fraction_to_resonance, unless density_cmf is les than 0
-             tau_sobolev is invariant, but all inputs must be in the same frame, using cmf here */
+          /* sobolev does not use x, unless density_cmf is les than 0 tau_sobolev is invariant, but all inputs
+           * must be in the same frame, using cmf here */
 
           tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[current_res_number], dvds_cmf);
           running_tau += tau_sobolev;
