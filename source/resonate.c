@@ -175,7 +175,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
    * allow the photon to still try and scatter.
    */
 
-  if (fabs (1 - freq_outer / freq_inner) < EPSILON)
+  if (fabs (dfreq) < EPSILON)
   {
     Error ("calculate_ds: the frequency along the photon %d path's in cell %d is the same\n", one->nwind, p_now.np);
     limit_lines (freq_inner, freq_outer);
@@ -238,7 +238,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     current_res_number = nstart + n * ndelt;
     fraction_to_resonance = (lin_ptr[current_res_number]->freq - freq_inner) / dfreq;
 
-    if (0.0 < fraction_to_resonance && fraction_to_resonance < 1.0)  /* this particular line is in resonance */
+    if (0.0 < fraction_to_resonance && fraction_to_resonance < 1.0)     /* this particular line is in resonance */
     {
       ds = fraction_to_resonance * smax;
 
@@ -283,7 +283,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
         stuff_phot (p, &p_now);
         move_phot (&p_now, ds_current);
-        density_cmf = get_ion_density(ndom, p_now.x, nion_for_resonance);
+        density_cmf = get_ion_density (ndom, p_now.x, nion_for_resonance);
 
         if (density_cmf > LDEN_MIN)
         {
@@ -320,7 +320,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
             {
               two = &w[where_in_grid (wmain[p_now.grid].ndom, p_now.x)];
 
-              if (two->inwind < 0) /* Sometimes DFUDGE pushes a photon into a cell with no volume. */
+              if (two->inwind < 0)      /* Sometimes DFUDGE pushes a photon into a cell with no volume. */
               {
                 Error ("calculate_ds: Macro atom problem when photon moved into cell with no volume\n");
               }
@@ -364,14 +364,14 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
    * last time to see if it was scattered by continuum process.
    */
 
-  if (running_tau + kap_cont_obs * (smax - ds_current) > tau_scat)     /* A scattering event has occurred in the shell and we remain in the same shell */
+  if (running_tau + kap_cont_obs * (smax - ds_current) > tau_scat)      /* A scattering event has occurred in the shell and we remain in the same shell */
   {
     *nres = select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma);
     ds_current += (tau_scat - running_tau) / (kap_cont_obs);
     *istat = P_SCAT;
     running_tau = tau_scat;
   }
-  else  /* Then we did hit the other side of the shell or possibly the another wall of the same shell) */
+  else                          /* Then we did hit the other side of the shell or possibly the another wall of the same shell) */
   {
     *istat = P_INWIND;
     running_tau += kap_cont_obs * (smax - ds_current);
