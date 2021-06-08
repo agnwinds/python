@@ -13,8 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <time.h>               //To allow the used of the clock command without errors!!
-
+#include <time.h>
 #include "atomic.h"
 #include "python.h"
 #include "models.h"
@@ -77,8 +76,8 @@ main (argc, argv)
   FILE *fopen ();
 
   int opar_stat, restart_stat;
-  double time_max;              // The maximum time the program is allowed to run before halting
-  double lstar;                 // The luminosity of the star, iv it exists
+  double time_max;
+  double lstar;
 
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
@@ -155,7 +154,6 @@ main (argc, argv)
 
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
-
   xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK", files.root);
 
   opar_stat = setup_created_files ();
@@ -182,15 +180,14 @@ main (argc, argv)
 
     if (wind_read (files.old_windsave) < 0)
     {
-      Error ("python: Unable to open %s\n", files.old_windsave);        //program will exit if unable to read the file
+      Error ("python: Unable to open %s\n", files.old_windsave);
       Exit (0);
     }
     w = wmain;
 
-    geo.run_type = RUN_TYPE_RESTART;    // We are continuing an old run
+    geo.run_type = RUN_TYPE_RESTART;
 
     xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
-
 
     if (geo.model_count > 0)    //We have previously used models - we need to read them in again
     {
@@ -199,7 +196,7 @@ main (argc, argv)
         get_models (geo.model_list[n], 2, &dummy_spectype);
       }
     }
-    if (geo.disk_tprofile == DISK_TPROFILE_READIN) //We also need to re-read in any previously used disk temperature profile
+    if (geo.disk_tprofile == DISK_TPROFILE_READIN)      //We also need to re-read in any previously used disk temperature profile
     {
       rdstr ("Disk.T_profile_file", files.tprofile);
       geo.diskrad = read_non_standard_disk_profile (files.tprofile);
@@ -235,6 +232,7 @@ main (argc, argv)
          model,(presumably because that run produced a wind close to the one we are looking for,
          but we are going to change some parameters that do not affect the wind geometry,
          We will write use new filenames for the results, so all of the previous work is still saved,
+         Note that wind_read also reads the atomic data file that was used to create the previous run of the data. 
        */
 
       strcpy (files.old_windsave, "earlier.run");
@@ -244,21 +242,19 @@ main (argc, argv)
 
       Log ("Starting a new run from scratch starting using a previous windfile\n");
 
-      /* Note that wind_read also reads the atomic data file that was used to create the previous run of the data. */
 
       if (wind_read (files.old_windsave) < 0)
       {
-        Error ("python: Unable to open %s\n", files.old_windsave);      //program will exit if unable to read the file
+        Error ("python: Unable to open %s\n", files.old_windsave);
         Exit (0);
       }
 
-      geo.run_type = RUN_TYPE_PREVIOUS; // after wind_read one will have a different wind_type otherwise
+      geo.run_type = RUN_TYPE_PREVIOUS;
 
       w = wmain;
       geo.wcycle = 0;
-      geo.pcycle = 0;           /* This is a new run of an old windsave file so we set the nunber of cycles already done to 0 */
+      geo.pcycle = 0;
     }
-
 
 
     if (geo.run_type == RUN_TYPE_NEW || geo.run_type == RUN_TYPE_PREVIOUS)
@@ -266,11 +262,9 @@ main (argc, argv)
       /* This option is the most common one, where we are starting to define a completely new system.
        */
 
-
       if (geo.run_type == RUN_TYPE_NEW)
       {
-        init_geo ();            /* Set values in the geometry structure and the domain stucture to reasonable starting
-                                   values */
+        init_geo ();
       }
 
       /* get_stellar_params gets information like mstar, rstar, tstar etc.
@@ -301,9 +295,7 @@ main (argc, argv)
       /* Describe the wind (or more correctly the various domains).
        */
 
-
       rdpar_comment ("Parameters describing the various winds or coronae in the system");
-
 
       if (geo.run_type == RUN_TYPE_NEW)
       {
@@ -319,11 +311,7 @@ main (argc, argv)
         }
       }
 
-
-
-
     }
-
   }
 
 
@@ -338,19 +326,14 @@ main (argc, argv)
 
   init_photons ();
 
-  /* Define how ionization is going to be calculated */
 
-  /* All operating modes */
   init_ionization ();
-
-
-
 
   /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where
    * one is starting from an early wind file as implemented this is quite restrictive about what one
    * can change in the previous case.   */
 
-  if (geo.run_type == RUN_TYPE_NEW)     // Start of block to define a model for the first time
+  if (geo.run_type == RUN_TYPE_NEW)
   {
 
     /* Describe the wind, by calling get_wind_params one or more times
@@ -371,7 +354,7 @@ main (argc, argv)
   }
 
 
-  /* Calculate additional parameters associated with the binary star system */
+  /* Calculate parameters associated with the binary star system */
 
   if (geo.system_type == SYSTEM_TYPE_CV)
     binary_basics ();
@@ -434,22 +417,9 @@ main (argc, argv)
 
   /* Describe the spectra which will be extracted and the way it will be extracted */
 
-  /* First initialise things to semi-reasonable values */
-/* These two variables have to do with what types of spectra are created n the
- * spectrum files. They are not associated with the nature of the spectra that
- * are generated by say the boundary layer
- */
-
-  geo.select_extract = TRUE;
-  geo.select_spectype = TRUE;
-
-/* Completed initialization of this section.  Note that get_spectype uses the source of the
- * radiation and then value given to return a spectrum type. The output is not the same
- * number as one inputs. It' s not obvious that this is a good idea. */
 
   if (geo.pcycles > 0 && geo.pcycle == 0)
   {
-    // This should only evaluate true for when no spectrum cycles have run (I hope)
 
     rdpar_comment ("Parameters defining the spectra seen by observers\n");
 
@@ -508,7 +478,6 @@ main (argc, argv)
  * it to a more logical location
  */
 
-
   rdpar_comment ("Other parameters");
 
   bands_init (-1, &xband);
@@ -562,10 +531,6 @@ main (argc, argv)
 
   /* INPUTS ARE FINALLY COMPLETE */
 
-  /* Print out some diagnositic infomration about the domains */
-
-
-
 
   Log ("There are %d domains\n", geo.ndomain);
   for (n = 0; n < geo.ndomain; n++)
@@ -574,15 +539,8 @@ main (argc, argv)
   }
 
 
-
-
-
-
   /* Now define the wind cones generically. modifies the global windcone structure */
   setup_windcone ();
-
-
-
 
   /* initialize the random number generator */
   /* By default, the random number generator start with fixed seeds (differnt
@@ -612,7 +570,7 @@ main (argc, argv)
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
 
-  if (geo.run_type == RUN_TYPE_NEW)     // Define the wind and allocate the arrays the first time
+  if (geo.run_type == RUN_TYPE_NEW)
   {
     define_wind ();
   }
@@ -632,8 +590,6 @@ main (argc, argv)
   w = wmain;
   if (modes.extra_diagnostics)
   {
-    /* Open a diagnostic file or files (with hardwired names) */
-
     init_extra_diagnostics ();
   }
 
@@ -674,7 +630,7 @@ main (argc, argv)
 
 /* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
-  /* SWM - Evaluate wind paths for last iteration */
+  /* Evaluate wind paths for last iteration */
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
   {                             //If this is a mode in which we keep wind arrays, update them
     wind_paths_evaluate (w, my_rank);
@@ -721,8 +677,6 @@ main (argc, argv)
   // optical_depth_diagnostics (w);
 
   make_spectra (restart_stat);
-
-
 
   return (0);
 }
