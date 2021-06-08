@@ -179,17 +179,6 @@ parse_command_line (argc, argv)
         Log ("Run ztest, optional code\n");
         j = i;
       }
-      else if (strcmp (argv[i], "-macrotest") == 0)
-      {
-        OUTPUT_MACRO_DIAG = TRUE;
-        if (sscanf (argv[i + 1], "%i", &MACRO_DIAG_CELL) != 1)
-        {
-          Error ("Unable to parse the plasma cell to print macro atom diagnostics for\n");
-          Exit (1);
-        }
-        i++;
-        j = i;
-      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;

@@ -113,8 +113,6 @@ main (argc, argv)
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
   run_ztest = FALSE;
-  OUTPUT_MACRO_DIAG = FALSE;
-  MACRO_DIAG_CELL = -1;
   NWAVE_MAX = (int) NWAVE_IONIZ;
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To

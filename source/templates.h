@@ -448,10 +448,6 @@ double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
 /* matom_diag.c */
 int matom_emiss_report(void);
-void create_matrix_diag_folder(void);
-void write_1d_matrix_to_file(char *filename, double *matrix, int len_i);
-void write_flat_2d_matrix_to_file(char *filename, double *matrix, int len_i, int len_j);
-void write_2d_matrix_to_file(char *filename, double matrix[200][200], int len_i, int len_j);
 /* disk_init.c */
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
