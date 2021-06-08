@@ -271,17 +271,10 @@ macro_pops (xplasma, xne)
    * down the road
    */
 
-  // if (xplasma->ntot == 0)
-  // {
-  //   if (xplasma->w < DILUTION_FACTOR_MINIMUM)
-  //   {
-  //     Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n", n_iterations,
-  //            xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
-  //     xplasma->w = DILUTION_FACTOR_MINIMUM;
-  //   }
-  //
-  //   get_dilute_estimators (xplasma);
-  // }
+  if (xplasma->ntot == 0)
+  {
+    get_dilute_estimators (xplasma);
+  }
 
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
@@ -357,25 +350,6 @@ macro_pops (xplasma, xne)
         /* replace the first entry with 1.0 - this is part of the normalisation constraint */
         b_data[0] = 1.0;
 
-        if (OUTPUT_MACRO_DIAG && rank_global == 0)
-        {
-          if (xplasma->nplasma == MACRO_DIAG_CELL)
-          {
-            char file1[LINELENGTH];
-            char file2[LINELENGTH];
-            char file3[LINELENGTH];
-            char file4[LINELENGTH];
-            sprintf (file1, "matrix_output/b4_a_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            sprintf (file2, "matrix_output/b4_b_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            sprintf (file3, "matrix_output/b4_populations_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            sprintf (file4, "matrix_output/b4_rate_matrix_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            write_flat_2d_matrix_to_file (file1, a_data, n_macro_lvl, n_macro_lvl);
-            write_1d_matrix_to_file (file2, b_data, n_macro_lvl);
-            write_1d_matrix_to_file (file3, populations, n_macro_lvl);
-            write_2d_matrix_to_file (file4, rate_matrix, n_macro_lvl, n_macro_lvl);
-          }
-        }
-
         /* this next routine is a general routine which solves the matrix equation
            via LU decomposition */
         gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
@@ -392,41 +366,13 @@ macro_pops (xplasma, xne)
         {
           if(populations[i] < DENSITY_MIN)
           {
-            populations[i] = DENSITY_MIN;
-          }
-        }
-
-        if (OUTPUT_MACRO_DIAG && rank_global == 0)
-        {
-          if (xplasma->nplasma == MACRO_DIAG_CELL)
-          {
-            char file1[LINELENGTH];
-            char file2[LINELENGTH];
-            char file3[LINELENGTH];
-            char file4[LINELENGTH];
-            sprintf (file1, "matrix_output/af_a_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            sprintf (file2, "matrix_output/af_b_data_element%i_cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            sprintf (file3, "matrix_output/af_populations_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            sprintf (file4, "matrix_output/af_rate_matrix_element%i__cell%i_iter%i.txt", index_element, xplasma->nplasma, n_iterations);
-            write_flat_2d_matrix_to_file (file1, a_data, n_macro_lvl, n_macro_lvl);
-            write_1d_matrix_to_file (file2, b_data, n_macro_lvl);
-            write_1d_matrix_to_file (file3, populations, n_macro_lvl);
-            write_2d_matrix_to_file (file4, rate_matrix, n_macro_lvl, n_macro_lvl);
+            populations[i] = 0.0;
           }
         }
 
         free (a_data);
         free (b_data);
 
-        // todo: debug, in future keep this a local error check.
-        // todo: be wary of possible (probably small) memory leak
-
-        if (macro_pops_inversion_check != NULL)
-        {
-          free (macro_pops_inversion_check);
-        }
-
-        macro_pops_inversion_check = calloc (n_macro_lvl, sizeof (*macro_pops_inversion_check));
         n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
         if (n_inversions > 0)
@@ -448,14 +394,6 @@ macro_pops (xplasma, xne)
           Error
             ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
              n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
-
-          // if (xplasma->w < DILUTION_FACTOR_MINIMUM)
-          // {
-          //   Error ("macro_pops: iteration %d: dilution factor for plasma cell %d less then floor %e, setting xplasma->w = %e\n",
-          //          n_iterations, xplasma->nplasma, DILUTION_FACTOR_MINIMUM, DILUTION_FACTOR_MINIMUM);
-          //   xplasma->w = DILUTION_FACTOR_MINIMUM;
-          // }
-
           get_dilute_estimators (xplasma);
         }
         else
@@ -522,7 +460,6 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
     for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
     {
       conf_to_matrix[index_lvl] = n_macro_lvl;
-      inversion_conf_to_matrix[index_lvl] = n_macro_lvl;
       n_macro_lvl++;
     }
   }
@@ -760,7 +697,6 @@ macro_pops_check_for_population_inversion(int index_element, double *populations
           {
             n_total_inversions += 1;
             populations[conf_to_matrix[i]] = inversion_test;
-            macro_pops_inversion_check[conf_to_matrix[i]] = TRUE;
           }
         }
       }
@@ -768,25 +704,6 @@ macro_pops_check_for_population_inversion(int index_element, double *populations
   }
 
   return n_total_inversions;
-}
-
-/**********************************************************/
-/**
- * @brief Check if a level was cleaned due to a population inversion
- *
- * @param[in] int nlevel  the internal level number
- *
- * @details
- *
- * ********************************************************/
-
-void
-macro_pops_check_if_level_inversion (int nlevel)
-{
-  if (macro_pops_inversion_check[inversion_conf_to_matrix[nlevel]])
-  {
-    Error ("macro_pops_check_if_level_inversion: macro level %d was cleaned due to a population inversion\n");
-  }
 }
 
 /**********************************************************/
