@@ -268,7 +268,8 @@ macro_pops (xplasma, xne)
   /*
    * In cells where there are no photons, we don't have any estimators yet
    * so we should first use dilute estimators to avoid problems further
-   * down the road
+   * down the road -- this should be a sensible choice, but could potentially
+   * hide errors in very extreme cases.
    */
 
   if (xplasma->ntot == 0)
@@ -298,9 +299,7 @@ macro_pops (xplasma, xne)
        matching is probably a bad idea because of the way in which bf
        processes couple different ionisation stages). */
 
-    /* The check is against the first ion of the element. */
-
-    if (ion[ele[index_element].firstion].macro_info == TRUE && geo.macro_simple == FALSE)
+    if (ion[ele[index_element].firstion].macro_info == TRUE && geo.macro_simple == FALSE)       /* The check is against the first ion of the element. */
     {
       n_iterations = 0;
       populations_ok = FALSE;
@@ -325,14 +324,12 @@ macro_pops (xplasma, xne)
           rate_matrix[0][index_lvl] = 1.0;
         }
 
-        /********************************************************************************/
         /* Now we can just invert the matrix to get the fractional level populations.
            The block that follows (down to next line of ***s) is to do the
            matrix inversion. It uses LU decomposition - the code for doing this is
            taken from the GSL manual with very few modifications.
            Here we solve the matrix equation M x = b, where x is our vector containing
            level populations as a fraction w.r.t the whole element */
-        /********************************************************************************/
 
         a_data = (double *) calloc (n_macro_lvl * n_macro_lvl, sizeof (double));
 
@@ -362,9 +359,9 @@ macro_pops (xplasma, xne)
          * small and set it to zero. This is basically some pre-emptive cleaning
          * since we could clean this up later, I suppose. */
 
-        for(i = 0; i < n_macro_lvl; i++)
+        for (i = 0; i < n_macro_lvl; i++)
         {
-          if(populations[i] < DENSITY_MIN)
+          if (populations[i] < DENSITY_MIN)
           {
             populations[i] = 0.0;
           }
@@ -376,8 +373,8 @@ macro_pops (xplasma, xne)
         n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
         if (n_inversions > 0)
-          Log ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
-               n_iterations, n_inversions, xplasma->nplasma);
+          Debug ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
+                 n_iterations, n_inversions, xplasma->nplasma);
 
         /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
            non-finite level population somewhere. If that is the case, then set all the estimators
@@ -671,7 +668,7 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
  **********************************************************/
 
 int
-macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO],
+macro_pops_check_for_population_inversion (int index_element, double *populations, int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO],
                                            int conf_to_matrix[NLEVELS_MACRO])
 {
   int i, index_ion, index_lvl;

@@ -523,10 +523,9 @@ normalise_macro_estimators (n)
            upper level has hit the density floor - the lower level is still allowed to hit this floor because it
            should never cause an inversion */
         Error ("normalise_macro_estimators: bb stimulated correction factor is out of bounds, 0 <= stimfac < 1 but got %g\n", stimfac);
-        Error ("ms_estimator_normalise: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
+        Error ("normalise_macro_estimators: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
                upper_density, lower_density, xplasma->levden[config[nlev_upper].nden]);
-        macro_pops_check_if_level_inversion (nlev_upper);
-        Exit(1);
+        Exit (EXIT_FAILURE);
         stimfac = 0.0;
       }
       else

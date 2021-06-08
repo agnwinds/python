@@ -70,7 +70,7 @@ int resonate_number_freq_diff_low = 0;
  *
  **********************************************************/
 
-#define  MAXDIFF  (VCHECK/VLIGHT) /* The same as our old velocity requirement */
+#define  MAXDIFF  (VCHECK/VLIGHT)       /* The same as our old velocity requirement */
 
 double
 calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
@@ -1121,7 +1121,7 @@ scatter (p, nres, nnscat)
         if (prob_kpkt < 0)
         {
           /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
-          if (prob_kpkt < -1e-3)
+          if (prob_kpkt < -1e-2)
           {
             Error ("scatter: kpkt probability (%8.4e) < 0, zeroing\n", prob_kpkt);
             Log ("scatter: photon edge frequency: %8.4e, comoving frequency %8.4e\n", phot_top[*nres - NLINES - 1].freq[0], freq_comoving);

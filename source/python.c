@@ -107,7 +107,7 @@ main (argc, argv)
                                    a restart */
   time_max = 13.8e9 * 3.2e7;    /* The maximum time the program will run without stopping.  This
                                    is initially set to the lifetime of the universe */
-  time_max = -1;
+
   set_max_time (files.root, time_max);
 
   rel_mode = REL_MODE_FULL;
@@ -116,7 +116,6 @@ main (argc, argv)
   OUTPUT_MACRO_DIAG = FALSE;
   MACRO_DIAG_CELL = -1;
   NWAVE_MAX = (int) NWAVE_IONIZ;
-  macro_pops_inversion_check = NULL;    // TODO: remove when this becomes a local check
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
      get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */
