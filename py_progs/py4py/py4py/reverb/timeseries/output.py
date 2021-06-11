@@ -23,7 +23,10 @@ from py4py.reverb import TransferFunction
 from typing import List, Optional, Tuple
 
 
-def write_caramel_data(lightcurve: Table, spectra: Table, spectra_times: Table, suffix: str):
+def write_caramel_data(
+        lightcurve: Table, spectra: Table, spectra_times: Table,
+        suffix: str, rescale: Optional[bool] = True
+):
     """
     Given a lightcurve, series of spectra and time outputs to CARAMEL format, and then
     compresses the output into a ZIP file.
@@ -33,6 +36,7 @@ def write_caramel_data(lightcurve: Table, spectra: Table, spectra_times: Table, 
         spectra (Table): Table of wavelengths and spectra. Continuum-subtracted.
         spectra_times (Table): Table of spectrum times.
         suffix (str): Suffix appended to filename. Intended to sort outputs as e.g. caramel/qso/caramel_lightcurve_qso.
+        rescale (bool): Whether or not the spectra should be rescaled to 1-100 range, defaults to yes.
 
     Outputs:
         caramel/{suffix}/caramel_lightcurve_{suffix}.txt: Continuum lightcurve.
@@ -78,24 +82,31 @@ def write_caramel_data(lightcurve: Table, spectra: Table, spectra_times: Table, 
     # Spectra file format:
     # First row is # INT, where INT is number of wavelength bins
     # Second row is central pixel wavelength in angstroms
-    # Third row is rescaled flux from 1-100 for spectrum 1
-    # Fourth row is rescaled flux error for spectrum 1
+    # Third row is (rescaled) flux from 1-100 for spectrum 1
+    # Fourth row is (rescaled) flux error for spectrum 1
     to_save = [spectra['wave']]
-    spec_min = 999e99
-    spec_max = -999e99
-    for column in spectra.colnames[1:]:
-        if np.amax(spectra[column]) > spec_max:
-            spec_max = np.amax(spectra[column])
-        if np.amin(spectra[column]) < spec_min:
-            spec_min = np.amin(spectra[column])
+
+    if rescale:
+        spec_min = 999e99
+        spec_max = -999e99
+
+        for column in spectra.colnames[1:]:
+            if np.amax(spectra[column]) > spec_max:
+                spec_max = np.amax(spectra[column])
+            if np.amin(spectra[column]) < spec_min:
+                spec_min = np.amin(spectra[column])
 
     for column in spectra.colnames[5:]:
-        value = (np.array(spectra[column]) - spec_min) / (spec_max - spec_min)
-        value = (value * 9) + 1
-        error = np.array(spectra['error']) / (spec_max - spec_min)
-        error = (error * 9)
-        to_save.append(value)
-        to_save.append(error)
+        if rescale:
+            value = (np.array(spectra[column]) - spec_min) / (spec_max - spec_min)
+            value = (value * 9) + 1
+            error = np.array(spectra['error']) / (spec_max - spec_min)
+            error = (error * 9)
+            to_save.append(value)
+            to_save.append(error)
+        else:
+            to_save.append(spectra[column])
+            to_save.append(spectra['error'])
 
     np.savetxt(
         os.path.join(
