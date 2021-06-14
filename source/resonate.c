@@ -227,7 +227,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * are set by limit_lines()
  */
 
-  /* Compute the contuum opacities
+  /* Compute the continuum opacities
 
      Compute the angle averaged electron scattering cross section.  Note electron scattering  is always
      treated as a scattering event. */
@@ -235,9 +235,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
 
 
-/* If in macro-atom mode, calculate the bf and ff opacities, becuase in macro-atom mode
+/* If in macro-atom mode, calculate the bf and ff opacities, because in macro-atom mode
  * everything including bf is calculated as a scattering process.  The routine
- * kappa_bound stores the individual opacities as well as the total, because when
+ * kappa_bf stores the individual opacities as well as the total, because when
  * there is more than one opacity contributin to the total, these are needed to choose
  * which particular bound-free transition to activate.  
  * For the two level approximation, none of this needed. 
@@ -544,21 +544,23 @@ Just do a check that all is well - this can be removed eventually (SS)
 
 /**********************************************************/
 /**
- * @brief      calculates the bf opacity in a specific
- * 	cell.
+ * @brief      calculate the bf opacity in a specific
+ * 	cell at a specific frequency
  *
  * @param [in] PlasmaPtr  xplasma   The plasma cell of interest
  * @param [in] double  freq   The frequency at which the opacity is calculated
  * @param [in] int  macro_all   1--> macro_atoms only, 0 all topbase ions
- * @return     The bf opacity
+ * @return     The total bf opacity
  *
  * @details
  *
- * The routine calculates the bf opacity in the CMF.
+ * The routine calculates the bf opacity in the CMF.  It populates the external
+ * array kappa_bf (in python.h), which stores kappa for each bf process. 
  *
  * ### Notes ###
  * The routine allows for clumping, reducing kappa_bf by the filling
  * factor.
+ *
  *
  **********************************************************/
 
@@ -579,11 +581,9 @@ kappa_bf (xplasma, freq, macro_all)
   int nn;
   int ndom;
 
-
   kap_bf_tot = 0;
 
   macro_all--;                  // Subtract one from macro_all to avoid >= in for loop below.
-
 
   ndom = wmain[xplasma->nwind].ndom;
 
@@ -596,24 +596,17 @@ kappa_bf (xplasma, freq, macro_all)
 
     if (freq > ft && freq < phot_top[n].freq[phot_top[n].np - 1] && phot_top[n].macro_info > macro_all)
     {
-      /* Need the appropriate density at this point. */
 
-      nconf = phot_top[n].nlev; //Returning lower level = correct (SS)
-
-
-      density = den_config (xplasma, nconf);    //Need to check what this does (SS)
-
+      nconf = phot_top[n].nlev;
+      density = den_config (xplasma, nconf);
 
       if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == TRUE)
       {
-
-        /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
-        kap_bf[nn] = x = sigma_phot (&phot_top[n], freq) * density * zdom[ndom].fill;   //stimulated recombination? (SS)
+        kap_bf[nn] = x = sigma_phot (&phot_top[n], freq) * density * zdom[ndom].fill;
         kap_bf_tot += x;
       }
     }
   }
-
 
   return (kap_bf_tot);
 }
@@ -630,7 +623,7 @@ kappa_bf (xplasma, freq, macro_all)
  *
  * The purpose of this routine is to speed up calculations by idenfifying which
  * bound-free x-sections are important enough to be included when calculationg the
- * bound-fee opacity, and which an be ignored because the density of the particular
+ * bound-fee opacity, and which can be ignored because the density of the particular
  * ion is so low it will not contribute.
  *
  * For each cell, the routine determines what bf transitons are important
@@ -642,16 +635,16 @@ kappa_bf (xplasma, freq, macro_all)
  * @details
  *
  * This routine is now called before various cylces of the Monte Carlo calculation.
- * (in run.c) * It determines which
+ * (in run.c) It determines which
  * bf processes are worth considering during the calculation that follows.
  *
  * To do this
- * is uses the edge position (must be inside, or close to, the spectral region of
+ * it uses the edge position (must be inside, or close to, the spectral region of
  * interest) and the edge opacity (must be greater than a threshold value, currently
  * 10^-6.
  *
  * The need for the routine is just to prevent wasting time on unimportant bf
- * transitions.  It is called (currently from resonate).
+ * transitions.  It is called (currently) from resonate.
  *
  * ### Notes ###
  * The dimensionalty of kbf_use is currently set to NTOP_PHOT, which is large enough
@@ -676,13 +669,13 @@ kbf_need (freq_min, freq_max)
   int nplasma, nion;
 
 
-  for (nplasma = 0; nplasma < NPLASMA; nplasma++)       // Loop over all the cells in the wind
+  for (nplasma = 0; nplasma < NPLASMA; nplasma++)
   {
     xplasma = &plasmamain[nplasma];
     one = &wmain[xplasma->nwind];
     nuse = 0;
 
-    for (n = 0; n < nphot_total; n++)   // Loop over photoionisation processes.
+    for (n = 0; n < nphot_total; n++)
     {
 
       ft = phot_top[n].freq[0]; //This is the edge frequency (SS)
@@ -1114,7 +1107,18 @@ scatter (p, nres, nnscat)
            Need to make decision about making a k-packet. Get the fraction of the energy
            that goes into the electron rather than being stored as ionisation energy: this
            fraction gives the selection probability for creating a k packet. It's given by 
-           (1 - ionization edge frequecy / photon frequency)  */
+           (1 - ionization edge frequecy / photon frequency)  
+
+           Note:  In some cases, one can obtain a negative prob_kpkt below.  This happens because 
+           we use the  mean frequency along the path to calculate continuum opacities 
+           in calculate_ds, whereas here we have the exact frequency at a particular point.
+           This leads to a situation where the co-moving frequency can be less than
+           the edge frequency.  See issues #436 and #867.  
+
+           If the error is large, it suggests that the length of that a photon is allowed
+           to travel in a single step is too large.  
+
+         */
 
         prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
@@ -1123,8 +1127,9 @@ scatter (p, nres, nnscat)
           /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
           if (prob_kpkt < -1e-2)
           {
-            Error ("scatter: kpkt probability (%8.4e) < 0, zeroing\n", prob_kpkt);
-            Log ("scatter: photon edge frequency: %8.4e, comoving frequency %8.4e\n", phot_top[*nres - NLINES - 1].freq[0], freq_comoving);
+            Error ("scatter: kpkt probability (%8.4e) < 0 for phot_top %d, zeroing\n", prob_kpkt, *nres - NLINES - 1);
+            Log ("scatter: photon edge frequency: %8.4e, comoving (observer) frequency %8.4e %8.4e\n", phot_top[*nres - NLINES - 1].freq[0],
+                 freq_comoving, p_orig.freq);
           }
           prob_kpkt = 0.0;
         }
@@ -1150,7 +1155,7 @@ scatter (p, nres, nnscat)
 
         macro_gov (p, nres, 2, &which_out);     //routine to deal with kpkt
 #else
-        /* This is the old apporach.  Process the BF photon for a simple atom.  In this
+        /* This is the old approach.  Process the BF photon for a simple atom.  In this
            approach we generate a kpkt or an r-packet depending on whether the probility
            of creating a kpkt, namely prob_kpkt
          */
@@ -1196,17 +1201,15 @@ scatter (p, nres, nnscat)
   }
 
 
-  /* Now determine the direction of the scattered photon, for electrons scatering (-1), ff emision (-2), or
+  /* Now determine the direction of the scattered photon, for electrons scattering (-1), ff emision (-2), or
      bound free emission (>NLINES), allowing depending on the scattering mode for thermal trapping. 
      Note that this portion of the code is identical for both simple and macro atoms, except for the fact
-     that ff and bf are only treated as scattering processin in macro-atom mode.
+     that ff and bf are only treated as scattering processes in macro-atom mode.
    */
 
   if (*nres == -1)
   {
-
-    compton_dir (p);            // uses the KN formula
-
+    compton_dir (p);
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {
@@ -1215,9 +1218,8 @@ scatter (p, nres, nnscat)
   }
   else
   {
-    randwind_thermal_trapping (p, nnscat);      // the thermal trapping case
+    randwind_thermal_trapping (p, nnscat);
   }
-
 
 
   /* Finally put everything back in the observer frame */
@@ -1251,8 +1253,6 @@ if fixed.
     vsub (p_final, p_init, dp);
 
     project_from_xyz_cyl (p_orig.x, dp, dp_cyl);
-
-
 
     if (p_orig.x[2] < 0)
       dp_cyl[2] *= (-1);
