@@ -283,7 +283,7 @@ in the configuration structure. 01dec ksl */
       /* we call mean intensity with mode 1 - this means we are happy to use the
          dilute blackbody approximation even if we havent run enough spectral cycles
          to have a model for J */
-      J = mean_intensity (xplasma, freq, 1);
+      J = mean_intensity (xplasma, freq, MEAN_INTENSITY_BB_MODEL);
 
       /* this equation is equivalent to equation 4.29 in NSH's thesis with the
          einstein b coefficients replaced by a multiplied by suitable conversion

@@ -69,6 +69,9 @@ int resonate_number_freq_diff_low = 0;
  * shell should be calculated outside of this routine.
  *
  **********************************************************/
+
+#define  MAXDIFF  (VCHECK/VLIGHT)       /* The same as our old velocity requirement */
+
 double
 calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      WindPtr w;
@@ -142,7 +145,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
   diff = 1;
-#define  MAXDIFF  VCHECK/VLIGHT /* The same as our old velocity requirement */
 
   while (smax > DFUDGE)
   {
@@ -1122,7 +1124,8 @@ scatter (p, nres, nnscat)
 
         if (prob_kpkt < 0)
         {
-          if (prob_kpkt < -10e-3)
+          /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
+          if (prob_kpkt < -1e-2)
           {
             Error ("scatter: kpkt probability (%8.4e) < 0 for phot_top %d, zeroing\n", prob_kpkt, *nres - NLINES - 1);
             Log ("scatter: photon edge frequency: %8.4e, comoving (observer) frequency %8.4e %8.4e\n", phot_top[*nres - NLINES - 1].freq[0],

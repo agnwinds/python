@@ -30,8 +30,6 @@ int rel_mode;                   /* How doppler effects and co-moving frames are 
 int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
 int run_ztest;                  /* Provides a way the optionally run certain code within python */
 
-
-
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
 
@@ -74,6 +72,8 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define LDEN_MIN        1e-3    /* The minimum density required for a line to be conidered for scattering
                                    or emission in calculate_ds and lum_lines */
 
+/* The next term globally defines a minimum value for the dilution faction */
+#define DILUTION_FACTOR_MINIMUM 1e-10
 
 /* End of "care factor" definition */
 
@@ -873,6 +873,9 @@ typedef struct plasma
                                    by this ion via recombination. */
   double *lum_rr_ion;           /* The recombination luminosity
                                    by this ion via recombination. */
+
+#define MEAN_INTENSITY_BB_MODEL  1
+#define MEAN_INTENSITY_ESTIMATOR_MODEL 2
 
   double *cool_dr_ion;
   double j, ave_freq;           /* Mean (angle-averaged) total intensity, intensity-averaged frequency */

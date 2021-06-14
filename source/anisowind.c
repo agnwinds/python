@@ -132,8 +132,8 @@ randwind_thermal_trapping (p, nnscat)
 
     if (dvds > dvds_max)
     {
-      Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e in grid %d at %e %e %e\n",
-             dvds, dvds_max, dvds / dvds_max, p->grid, p->x[0], p->x[1], p->x[2]);
+       Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e in grid %d at %e %e %e\n",
+              dvds, dvds_max, dvds / dvds_max, p->grid, p->x[0], p->x[1], p->x[2]);
     }
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
