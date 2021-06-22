@@ -50,12 +50,10 @@ dvwind_ds_cmf (p)
   double v_grad[3][3];
   double lmn[3], dvel_ds[3], dvds;
   int j, k, nn;
-  double dot_tensor_vec ();
   struct photon pp;
   int nnn[4], nelem;
   double frac[4];
   double x;
-
   int ndom;
 
   ndom = wmain[p->grid].ndom;
@@ -69,7 +67,7 @@ dvwind_ds_cmf (p)
 
   stuff_phot (p, &pp);
   if (pp.x[2] < 0.0)
-  {                             /*move the photon to the northen hemisphere */
+  {                             /*move the photon to the northern hemisphere */
     pp.x[2] = -pp.x[2];
     pp.lmn[2] = -pp.lmn[2];
   }
@@ -138,11 +136,11 @@ dvwind_ds_cmf (p)
       }
     }
 
-    /* v_grad is in cylindrical cordinates, or more precisely intended
+    /* v_grad is in cylindrical coordinates, or more precisely intended
        to be azimuthally symmetric.  One could either
        (a) rotate  v_grad to be correct at the position of the photon or
        (b) rotate the direction of photon travel so that is is correct
-       (assuming azimuthal symmetery) in the xz plane.
+       (assuming azimuthal symmetry) in the xz plane.
 
        Possibility b is more straightforward and that is what is done
      */
@@ -211,12 +209,11 @@ dvds_ave ()
   char filename[LINELENGTH];
   int ndom;
 
-
   /* Open a diagnostic file if print_dvds_info is non-zero */
-  strcpy (filename, basename);
-  strcat (filename, ".dvds.diag");
+
   if (modes.print_dvds_info)
   {
+    sprintf (filename, "%s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 
@@ -338,12 +335,11 @@ dvds_max ()
   char filename[LINELENGTH];
   int ndom;
 
-
   /* Open a diagnostic file if print_dvds_info is non-zero */
-  strcpy (filename, basename);
-  strcat (filename, ".dvds.diag");
+
   if (modes.print_dvds_info)
   {
+    sprintf (filename, "%s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 

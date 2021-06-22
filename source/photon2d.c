@@ -305,8 +305,6 @@ ds_to_wind (pp, ndom_current)
 
     else if (zdom[ndom].wind_type == CORONA || (zdom[ndom].wind_type == IMPORT && zdom[ndom].coord_type == CYLIND))
     {
-
-
       x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
       if (x > 0 && x < ds)
       {
@@ -315,7 +313,6 @@ ds_to_wind (pp, ndom_current)
         rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
         if (zdom[ndom].wind_rhomin_at_disk <= rho && rho <= zdom[ndom].wind_rhomax_at_disk)
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_ZMIN;
@@ -329,7 +326,6 @@ ds_to_wind (pp, ndom_current)
         rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
         if (zdom[ndom].wind_rhomin_at_disk <= rho && rho <= zdom[ndom].wind_rhomax_at_disk)
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_ZMAX;
@@ -343,9 +339,7 @@ ds_to_wind (pp, ndom_current)
         move_phot (&qtest, x);
         z = fabs (qtest.x[2]);
         if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
-
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_INNER_RHO;
@@ -360,38 +354,22 @@ ds_to_wind (pp, ndom_current)
         z = fabs (qtest.x[2]);
         if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_OUTER_RHO;
         }
       }
-
     }
     else
     {
       Error ("ds_to_wind:Do not know how to deal with this combination of coordinate type %d and wind_type %d\n", zdom[ndom].coord_type,
              zdom[ndom].wind_type);
       Exit (0);
-
     }
-
   }
-
 
   return (ds);
 }
-
-
-/** Added because there were cases where the number
- * of photons passing through a cell with a neglible volume was becoming
- * too large and stopping the program.  This is a bandaide since if this
- * is occurring a lot we should be doing a better job at calculating the
- * volume
- */
-int neglible_vol_count = 0;
-int translate_in_wind_failure = 0;
-int translate_in_wind_res_count = 0;
 
 /**********************************************************/
 /**
@@ -427,40 +405,30 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      PhotPtr p;
      double tau_scat, *tau;
      int *nres;
-
-
 {
-
   int n;
   double smax, ds_current, ds_cmf;
   int istat;
   int nplasma;
-  int ndom;
-  int inwind;
 
   WindPtr one;
   PlasmaPtr xplasma;
   struct photon phot_mid, phot_mid_cmf; // Photon at the midpt of its path in the cell
 
-
-/* First verify that the photon is in the grid, and if not
-return and record an error */
+  /* First verify that the photon is in the grid, and if not
+     return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
     return (n);                 /* Photon was not in grid */
   }
-/* Assign the pointers for the cell containing the photon */
+  /* Assign the pointers for the cell containing the photon */
 
   one = &wmain[n];              /* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  ndom = one->ndom;
-  inwind = one->inwind;
 
-
-
-/* Calculate the maximum distance the photon can travel in the cell */
+  /* Calculate the maximum distance the photon can travel in the cell */
 
   smax = smax_in_cell (p);
 
@@ -477,13 +445,10 @@ return and record an error */
   if (p->nres > 0)
     xplasma->nscat_res++;
 
-
-
-/* We now increment the radiation field in the cell, translate the photon and wrap
-   things up.  For simple atoms, the routine radiation also reduces
-   the weight of the photon due to continuum absorption, e.g. free free.
+  /* We now increment the radiation field in the cell, translate the photon and wrap
+   * things up.  For simple atoms, the routine radiation also reduces
+   * the weight of the photon due to continuum absorption, e.g. free free.
    */
-
 
   if (geo.rt_mode == RT_MODE_MACRO)
   {
@@ -507,24 +472,20 @@ return and record an error */
   }
 
   move_phot (p, ds_current);
-  translate_in_wind_res_count++;
 
-  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT && translate_in_wind_res_count < 5000)
+  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
   {
-    if (ds_current < 1e5)
+    if (ds_current < wmain[p->grid].dfudge)
     {
-      Error ("translate_in_wind: nres %5d repeat after motion of %10.3e of phot %6d in ion cycle %2d spec cycle %2d stat(%d -> %d)\n",
-             *nres, ds_current, p->np, geo.wcycle, geo.pcycle, p->istat, istat);
-      istat = P_INWIND;
-      *tau = 0;
+      Error
+        ("translate_in_wind: uncaught repeated resonance scattering nres %5d after motion of %10.3e for photon %d in plasma cell %d)\n",
+         *nres, ds_current, p->np, wmain[p->grid].nplasma);
     }
   }
 
-  p->nres = (*nres);
+  p->nres = *nres;
 
   return (p->istat = istat);
-
-
 }
 
 
@@ -583,7 +544,6 @@ smax_in_cell (PhotPtr p)
     smax += one->dfudge;
     move_phot (p, smax);
     return (p->istat);
-
   }
   else if (one->inwind == W_NOT_INWIND)
   {                             /* The cell is not in the wind at all */
@@ -642,26 +602,16 @@ ds_in_cell (ndom, p)
      PhotPtr p;
 
 {
-
   int n;
   double smax;
 
-  WindPtr one;
-
-
-/* First verify that the photon is in the grid, and if not
-return and record an error */
+  /* First verify that the photon is in the grid, and if not
+     return and record an error */
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
     return (n);
   }
-
-/* Assign the pointers for the cell containing the photon */
-
-  one = &wmain[n];              /* one is the grid cell where the photon is */
-
-/* Calculate the maximum distance the photon can travel in the cell */
 
   if (zdom[ndom].coord_type == CYLIND)
   {
@@ -683,7 +633,6 @@ return and record an error */
   {
     Error ("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
     Exit (0);
-    return (0);
   }
 
   return (smax);
