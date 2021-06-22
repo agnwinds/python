@@ -339,7 +339,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
               }
             }
           }
-
         }
 
         /* Check to see whether the photon should scatter at this point */
