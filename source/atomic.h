@@ -340,7 +340,7 @@ extern Topbase_phot phot_top[NLEVELS];
 extern TopPhotPtr phot_top_ptr[NLEVELS];       /* Pointers to phot_top in threshold frequency order - this */
 
 extern Topbase_phot inner_cross[N_INNER * NIONS];
-ex tern TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
+extern TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
 
 /* The structure for electron yield data for inner shell ionization from Kaastra and Mewe */
 
@@ -380,7 +380,7 @@ struct ground_fracs
                                    fractions must have been computed elsewhere */
 };
 
-extern struct ground_gracs ground_frac[NIONS];
+extern struct ground_fracs ground_frac[NIONS];
 
 //081115 nsh New structure and variables to hold the die-lectronic recombination rate data
 //set up to accept the korista data from the university of strahclyde website.
