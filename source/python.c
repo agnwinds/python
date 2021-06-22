@@ -594,23 +594,25 @@ main (argc, argv)
   }
 
 
-/* The next section sets up a structure qdisk to record the effects
- * of illumination on the disk.  disk_init is called primarily to get
+/* The next section sets up two represenations of the disk structure
+ * 
+ * disk_init is called primarily to get
  * a defined set of annular rings which are kept throughout the
- * ionization calculation.  A second structure qdisk is needed
- * because in the process of generating photons in various bands
- * the annular rings are changed
- *
+ * ionization calculation.  
  * disk_init calculates the flux from the disk in the energy range set by
  * freqmin and freqmax, and uses is this to identify the position of the
  * rings in the disk, so that each ring contributes the same amount to
  * the flux
  *
- * */
+ * A second structure qdisk is needed
+ * because in the process of generating photons in various bands
+ * the annular rings are changed
+ *
+ */
 
 
   disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
-  qdisk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot);        /* Initialize a disk qdisk to store the information about photons impinging on the disk */
+  qdisk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot);
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
 

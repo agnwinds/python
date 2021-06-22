@@ -694,16 +694,21 @@ disk, qdisk;                    /* disk defines zones in the disk which in a spe
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 /* the next structure is intended to store a non standard temperature
-   profile for the disk
+   and (optionally gravity) profile for the disk
+
+   n_params should be 1 or 2, depending on whether t, or t and g 
+   are read in
    */
 
 #define NBLMODEL 5000
 
 struct blmodel
 {
+  int n_params;        
   int n_blpts;
   double r[NBLMODEL];
   double t[NBLMODEL];
+  double g[NBLMODEL];
 }
 blmod;
 

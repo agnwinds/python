@@ -204,10 +204,29 @@ geff (g0, x)
      double g0, x;
 {
   double q;
-  q = (1.0e0 - pow (x, -0.5e0));
-  q = pow (x, -1.875e0) * pow (q, 0.125);
-  q = g0 * q;
-  return (q);
+  double r;
+  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && blmod.n_params == 2 && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
+  {
+    /* This is the case where the temperature profile is read in as an array, and so we
+       simply find the array elements that bracket the requested radius and do a linear
+       interpolation to calcualte the temperature at the requested radius. */
+    if ((r = (x * geo.rstar)) < blmod.r[0])
+    {
+      return (blmod.g[0]);
+    }
+    else
+    {
+      linterp (r, &blmod.r[0], &blmod.g[0], blmod.n_blpts, &q, 0);
+      return (q);
+    }
+  }
+  else
+  {
+    q = (1.0e0 - pow (x, -0.5e0));
+    q = pow (x, -1.875e0) * pow (q, 0.125);
+    q = g0 * q;
+    return (q);
+  }
 }
 
 
