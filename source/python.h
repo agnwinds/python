@@ -5,8 +5,6 @@
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
 #define UV_hi 3e16              //The lower frequency bound of the UV band as defined in IOS 21348
 
-int q_test_count;
-
 int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
@@ -32,8 +30,6 @@ int run_ztest;                  /* Provides a way the optionally run certain cod
 
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
-
-char basename[132];             // The root of the parameter file name being used by python
 
 /* These are tunable parameters that control various aspects of python
  * and the assorted programs.  In some cases they affect the "care" with
