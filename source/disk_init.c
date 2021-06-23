@@ -65,8 +65,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
      double rmin, rmax, m, mdot, freqmin, freqmax, *ftot;
      int ioniz_or_final;
 {
-  double t, tref;
-  double log_g, gref;
+  double t;
+  double log_g;
   double v, dr, r;
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
@@ -76,12 +76,9 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double emit;
   double factor;
 
-  /* Calculate the reference temperature and luminosity of the disk */
-  tref = tdisk (m, mdot, rmin);
-  gref = gdisk (m, mdot, rmin);
 
   /*
-   * Now compute the apparent luminosity of the disk.  This is not
+   * Compute the apparent luminosity of the disk.  This is not
    * actually used to determine how annulae are set up.  It is just
    * used to populate geo.ltot. It can change if photons hitting the
    * disk are allowed to raise the temperature
@@ -113,7 +110,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   {
     r = exp (logr);
     dr = exp (logr + logdr) - r;
-    t = teff (tref, (r + 0.5 * dr) / rmin);
+    t = teff ((r + 0.5 * dr) / rmin);
     ltot += t * t * t * t * (2. * r + dr) * dr;
   }
   geo.lum_disk_init = ltot *= 2. * STEFAN_BOLTZMANN * PI;
@@ -144,8 +141,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   {
     r = exp (logr);
     dr = exp (logr + logdr) - r;
-    t = teff (tref, (r + 0.5 * dr) / rmin);
-    log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
+    t = teff ((r + 0.5 * dr) / rmin);
+    log_g = (geff ((r + 0.5 * dr) / rmin));
     v = sqrt (GRAV * geo.mstar / r);
     v /= VLIGHT;
     if (rel_mode == REL_MODE_FULL)
@@ -199,10 +196,11 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   {
     r = exp (logr);
     dr = exp (logr + logdr) - r;
-    t = teff (tref, (r + 0.5 * dr) / rmin);
-    log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
+    t = teff ((r + 0.5 * dr) / rmin);
+    log_g = (geff ((r + 0.5 * dr) / rmin));
     v = sqrt (GRAV * geo.mstar / r);
     v /= VLIGHT;
+
     if (rel_mode == REL_MODE_FULL)
     {
       factor = sqrt (1. - v * v);
@@ -257,8 +255,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   for (nrings = 0; nrings < NRINGS - 1; nrings++)
   {
     r = 0.5 * (disk.r[nrings + 1] + disk.r[nrings]);
-    disk.t[nrings] = teff (tref, r / rmin);
-    disk.g[nrings] = geff (gref, r / rmin);
+    disk.t[nrings] = teff (r / rmin);
+    disk.g[nrings] = geff (r / rmin);
   }
 
   /* Wrap up by zeroing other parameters */
@@ -309,7 +307,6 @@ qdisk_init (rmin, rmax, m, mdot)
   int nrings;
   double log_rmin, log_rmax, dlog_r, log_r;
   double r;
-  double tref, gref;
 
   log_rmin = log10 (disk.r[0]);
   log_rmax = log10 (disk.r[NRINGS - 1]);
@@ -322,9 +319,6 @@ qdisk_init (rmin, rmax, m, mdot)
     qdisk.r[nrings] = pow (10, log_r);
   }
 
-  /* Calculate the reference temperature and luminosity of the disk */
-  tref = tdisk (m, mdot, rmin);
-  gref = gdisk (m, mdot, rmin);
 
   for (nrings = 0; nrings < NRINGS; nrings++)
   {
@@ -336,8 +330,8 @@ qdisk_init (rmin, rmax, m, mdot)
     {
       r = qdisk.r[nrings];
     }
-    qdisk.t[nrings] = teff (tref, r / rmin);
-    qdisk.g[nrings] = geff (gref, r / rmin);
+    qdisk.t[nrings] = teff (r / rmin);
+    qdisk.g[nrings] = geff (r / rmin);
     qdisk.v[nrings] = sqrt (GRAV * geo.mstar / r);
     qdisk.heat[nrings] = 0.0;
     qdisk.nphot[nrings] = 0;
@@ -382,7 +376,7 @@ qdisk_save (diskfile, ztot)
   int n;
   double area, theat, ttot;
   qptr = fopen (diskfile, "w");
-  fprintf (qptr, "r          zdisk      t_disk    heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  fprintf (qptr, "r          zdisk      t_disk    g      heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
 
   for (n = 0; n < NRINGS; n++)
   {
@@ -401,8 +395,8 @@ qdisk_save (diskfile, ztot)
     ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
     ttot = pow (ttot, 0.25);
     fprintf (qptr,
-             "%9.4e %9.4e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
-             qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
+             "%9.4e %9.4e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n], qdisk.g[n],
              qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
   }
 

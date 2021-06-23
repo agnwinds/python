@@ -18,35 +18,6 @@
 #include "python.h"
 
 
-/**********************************************************/
-/** 
- * @brief      Calculate the reference temperarure for a standard Shakura-Sunyaeev disk
- *
- * @param [in] double  m   mass of the central object
- * @param [in] double  mdot   mass accretion rate of the disk
- * @param [in] double  r   radiis of the central object
- * @return     The reference temperature for the disk
- *
- * @details
- * All of the inputs are in cgs units
- *
- * ### Notes ###
- * For an SS disk,  The maximum temperature
- *    actuallly seen in the disk is 0.488 tdisk
- *
- *
- **********************************************************/
-
-double
-tdisk (m, mdot, r)
-     double m, mdot, r;
-{
-  double t;
-  t = 3. * GRAV / (8. * PI * STEFAN_BOLTZMANN) * m * mdot / (r * r * r);
-  t = pow (t, 0.25);
-  return (t);
-}
-
 
 
 
@@ -54,7 +25,6 @@ tdisk (m, mdot, r)
 /** 
  * @brief      Calculate the temperature of the disk at a normalised distance x
  *
- * @param [in] double  t   reference temperature of the disk in degrees
  * @param [in] double  x   distance from center of disk in units of r/rstar
  * @return     The temperature
  *
@@ -82,8 +52,8 @@ tdisk (m, mdot, r)
  **********************************************************/
 
 double
-teff (t, x)
-     double t, x;
+teff (x)
+     double x;
 {
   double q = 0;
   double theat, r;
@@ -117,6 +87,10 @@ teff (t, x)
   }
   else
   {
+    double t, r;
+    r = geo.rstar;
+    t = 3. * GRAV / (8. * PI * STEFAN_BOLTZMANN) * geo.mstar * geo.disk_mdot / (r * r * r);
+    t = pow (t, 0.25);
     /* This is a standard accretion disk */
 
     q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
@@ -149,45 +123,14 @@ teff (t, x)
 }
 
 
-/**********************************************************/
-/** 
- * @brief      Calculate a reference gravity for the disk
- *
- * @param [in] double  mass   Mass of the central object
- * @param [in] double  mdot   Mass accretion rate of the disk
- * @param [in] double  rmin   Minimum radius for the disk
- * @return     A fiducial gravity for the disk
- *
- * The gravity is needed when one constructs a disk spectrum
- * from spectra from a grid of stellar atmospheres
- *
- * The input units are all cgs
- *
- * ###Notes###
- *
- * See Long & Knigge for details
- *
- *
- **********************************************************/
-
-double
-gdisk (mass, mdot, rmin)
-     double mass, rmin, mdot;
-{
-  double g0;
-  g0 = 0.625 * log10 (mass / MSOL) - 1.875 * log10 (rmin / 1.e9) + 0.125 * log10 (mdot / 1.e16);
-  g0 = 5.96e5 * pow (10., g0);
-  return (g0);
-}
 
 
 /**********************************************************/
 /** 
  * @brief      Calculate the effective gravity at a specfic position in the disk
  *
- * @param [in] double  g0  reference gravity in cm s**-2
  * @param [in] double  x   distance from center in units of r/rmin
- * @return     gravity at x in cm s**-2
+ * @return     log of gravity at x in cm s**-2
  *
  * The gravity is needed when one constructs a disk spectrum
  * from spectra from a grid of stellar atmospheres
@@ -200,8 +143,8 @@ gdisk (mass, mdot, rmin)
  **********************************************************/
 
 double
-geff (g0, x)
-     double g0, x;
+geff (x)
+     double x;
 {
   double q;
   double r;
@@ -222,9 +165,15 @@ geff (g0, x)
   }
   else
   {
+    double g0;
+    g0 = 0.625 * log10 (geo.mstar / MSOL) - 1.875 * log10 (geo.rstar / 1.e9) + 0.125 * log10 (geo.disk_mdot / 1.e16);
+    g0 = 5.96e5 * pow (10., g0);
+
     q = (1.0e0 - pow (x, -0.5e0));
     q = pow (x, -1.875e0) * pow (q, 0.125);
     q = g0 * q;
+
+    q = log10 (q);
     return (q);
   }
 }
