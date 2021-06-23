@@ -196,13 +196,12 @@ int
 trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 {
   double tau_scat, tau;
-  int i, n_grid, ierr, ndom;
+  int i, n_grid, ierr;
   enum istat_enum istat;
   int nnscat;
   int current_nres;
   double weight_min;
   struct photon pp, pextract;
-  double x_dfudge_check[3];
   double normal[3];
   double rho, dz;
 

@@ -105,9 +105,9 @@ extract (w, p, itype)
     {
       /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
          First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density 
-         PNORM_FUDGE_FACTROR is a bandaide for a issue #815   */
+       */
 
-      dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (&p_in);
+      dvds_max = get_dvds_max (&p_in);
       tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
       /* then turn into a probability */

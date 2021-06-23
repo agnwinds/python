@@ -86,12 +86,10 @@ randwind_thermal_trapping (p, nnscat)
      probability along the vector of maximum velocity gradient.
      First find the sobolev optical depth along that vector 
 
-     PNORM_FUDGE_FACTOR is a bandaide to address #815.  It should
-     not be the final solution
    */
 
 
-  dvds_max = PNORM_FUDGE_FACTOR * get_dvds_max (p);
+  dvds_max = get_dvds_max (p);
   tau_norm = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds_max);
 
   /* then turn into a probability. p_norm is the probability a
@@ -132,8 +130,8 @@ randwind_thermal_trapping (p, nnscat)
 
     if (dvds > dvds_max)
     {
-       Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e in grid %d at %e %e %e\n",
-              dvds, dvds_max, dvds / dvds_max, p->grid, p->x[0], p->x[1], p->x[2]);
+      Error ("randwind_thermal trapping: dvds (%e) > dvds_max (%e) ratio %e in grid %d at %e %e %e\n",
+             dvds, dvds_max, dvds / dvds_max, p->grid, p->x[0], p->x[1], p->x[2]);
     }
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
