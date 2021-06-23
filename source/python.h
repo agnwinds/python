@@ -25,7 +25,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 int rel_mode;                   /* How doppler effects and co-moving frames are  */
 
 int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
-int run_ztest;                  /* Provides a way the optionally run certain code within python */
+//OLD int run_ztest;                  /* Provides a way the optionally run certain code within python */
 
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
