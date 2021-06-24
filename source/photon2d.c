@@ -631,6 +631,7 @@ ds_in_cell (ndom, p)
   }
   else
   {
+    smax = 0;
     Error ("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
     Exit (0);
   }
