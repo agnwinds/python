@@ -629,15 +629,17 @@ total_free (one, t_e, f1, f2)
  * @details
  *
  * ### Notes ###
- * @bug f_nu is set to 0 for t_e less than 100K.  It's not clear
- * that this limit is applied to other functions anymore.  Was this
- * missed?  Not also that the code having to do with the gaunt factor
- * is duplicated from another routine.  Should a gaunt_ff routine
- * be created for both?
  *
  * Within python, this routine is accessed through one_ff
  *
+ * Most of the computation in this routine arises from calculatin
+ * a the gaunt factor, so this version of the code checks to
+ * see if that can be avoided.
  **********************************************************/
+
+double ff_constant = 0;
+int ff_nplasma = -100;
+double ff_t_e = -100.;
 
 double
 ff (one, t_e, freq)
@@ -652,41 +654,50 @@ ff (one, t_e, freq)
   PlasmaPtr xplasma;
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+
+
   if (t_e < TMIN)
     return (0.0);
-  if (gaunt_n_gsqrd == 0)       //Maintain old behaviour because gaunt factors have not been provided in atomic data files
+
+  if (nplasma != ff_nplasma || t_e != ff_t_e)
   {
-    g_ff_h = g_ff_he = 1.0;
-    if (nelements > 1)
+
+    if (gaunt_n_gsqrd == 0)     //Maintain old behaviour because gaunt factors have not been provided in atomic data files
     {
-      fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h + 4. * xplasma->density[4] * g_ff_he);
-    }
-    else
-    {
-      fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h);
-    }
-  }
-  else
-  {
-    sum = 0.0;
-    for (nion = 0; nion < nions; nion++)
-    {
-      if (ion[nion].istate != 1)        //The neutral ion does not contribute
+      g_ff_h = g_ff_he = 1.0;
+      if (nelements > 1)
       {
-        gsqrd = ((ion[nion].istate - 1) * (ion[nion].istate - 1) * RYD2ERGS) / (BOLTZMANN * t_e);
-        gaunt = gaunt_ff (gsqrd);
-        sum += xplasma->density[nion] * (ion[nion].istate - 1) * (ion[nion].istate - 1) * gaunt;
+        fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h + 4. * xplasma->density[4] * g_ff_he);
       }
       else
       {
-        sum += 0.0;
+        fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h);
       }
     }
-    fnu = BREMS_CONSTANT * xplasma->ne * (sum);
+    else
+    {
+      sum = 0.0;
+      for (nion = 0; nion < nions; nion++)
+      {
+        if (ion[nion].istate != 1)      //The neutral ion does not contribute
+        {
+          gsqrd = ((ion[nion].istate - 1) * (ion[nion].istate - 1) * RYD2ERGS) / (BOLTZMANN * t_e);
+          gaunt = gaunt_ff (gsqrd);
+          sum += xplasma->density[nion] * (ion[nion].istate - 1) * (ion[nion].istate - 1) * gaunt;
+        }
+        else
+        {
+          sum += 0.0;
+        }
+      }
+      fnu = BREMS_CONSTANT * xplasma->ne * (sum);
+    }
+
+    ff_constant = fnu * xplasma->vol;
   }
 
 
-  fnu *= exp (-H_OVER_K * freq / t_e) / sqrt (t_e) * xplasma->vol;
+  fnu = ff_constant * exp (-H_OVER_K * freq / t_e) / sqrt (t_e);
   return (fnu);
 }
 
