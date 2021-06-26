@@ -661,6 +661,8 @@ ff (one, t_e, freq)
 
   if (nplasma != ff_nplasma || t_e != ff_t_e)
   {
+    ff_nplasma = nplasma;
+    ff_t_e = t_e;
 
     if (gaunt_n_gsqrd == 0)     //Maintain old behaviour because gaunt factors have not been provided in atomic data files
     {
