@@ -1475,7 +1475,10 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
-
+/* Used in macro_gov elsewhere to descibe choices between being or going
+   to a kpkt or macro atom state */
+#define KPKT 2
+#define MATOM 1
 /* modes for kpkt calculations */
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */
