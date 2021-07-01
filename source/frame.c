@@ -39,12 +39,8 @@
  * The purpose of this function is to avoid situations where photons are being
  * transformed incorrectly between the local and observer frame.
  *
- * If the photon is in the incorrect frame and save_photons mode is enabled,
- * the photon will be dumped to an external file.
  *
  **********************************************************/
-
-int ncheck_frame = 0;
 
 int
 check_frame (p, desired_frame, msg)
@@ -54,22 +50,15 @@ check_frame (p, desired_frame, msg)
 {
   if (p->frame == desired_frame)
   {
-    return (0);
-  }
-  else if (ncheck_frame < 1000)
-  {
-    Error ("check_frame: %s :Photon (%5d) of istat (%2d) and origin (%2d) not in desired frame %d (0=Loc,1=Obs)\n", msg, p->np, p->istat,
-           p->origin, desired_frame);
-    ncheck_frame++;
-    return (1);
+    return EXIT_SUCCESS;
   }
   else
   {
-    return (0);
+    Error ("check_frame: %s :Photon (%5d) of istat (%2d) and origin (%2d) not in desired frame %d (0=Loc,1=Obs)\n", msg, p->np, p->istat,
+           p->origin, desired_frame);
+    return EXIT_FAILURE;
   }
 }
-
-
 
 /**********************************************************/
 /**

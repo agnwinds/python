@@ -5,8 +5,6 @@
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
 #define UV_hi 3e16              //The lower frequency bound of the UV band as defined in IOS 21348
 
-int q_test_count;
-
 int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
@@ -17,7 +15,6 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 #define FALSE 0
 
 
-#define PNORM_FUDGE_FACTOR     1        /*An extra factor used for fudging the velocity factor See #815 */
 #define USE_GRADIENTS        TRUE       /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
@@ -28,14 +25,10 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 int rel_mode;                   /* How doppler effects and co-moving frames are  */
 
 int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
-int run_ztest;                  /* Provides a way the optionally run certain code within python */
-
-
+//OLD int run_ztest;                  /* Provides a way the optionally run certain code within python */
 
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
-
-char basename[132];             // The root of the parameter file name being used by python
 
 /* These are tunable parameters that control various aspects of python
  * and the assorted programs.  In some cases they affect the "care" with
@@ -74,6 +67,8 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define LDEN_MIN        1e-3    /* The minimum density required for a line to be conidered for scattering
                                    or emission in calculate_ds and lum_lines */
 
+/* The next term globally defines a minimum value for the dilution faction */
+#define DILUTION_FACTOR_MINIMUM 1e-10
 
 /* End of "care factor" definition */
 
@@ -694,16 +689,21 @@ disk, qdisk;                    /* disk defines zones in the disk which in a spe
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 /* the next structure is intended to store a non standard temperature
-   profile for the disk
+   and (optionally gravity) profile for the disk
+
+   n_params should be 1 or 2, depending on whether t, or t and g 
+   are read in
    */
 
 #define NBLMODEL 5000
 
 struct blmodel
 {
+  int n_params;        
   int n_blpts;
   double r[NBLMODEL];
   double t[NBLMODEL];
+  double g[NBLMODEL];
 }
 blmod;
 
@@ -873,6 +873,9 @@ typedef struct plasma
                                    by this ion via recombination. */
   double *lum_rr_ion;           /* The recombination luminosity
                                    by this ion via recombination. */
+
+#define MEAN_INTENSITY_BB_MODEL  1
+#define MEAN_INTENSITY_ESTIMATOR_MODEL 2
 
   double *cool_dr_ion;
   double j, ave_freq;           /* Mean (angle-averaged) total intensity, intensity-averaged frequency */
@@ -1472,7 +1475,10 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
-
+/* Used in macro_gov elsewhere to descibe choices between being or going
+   to a kpkt or macro atom state */
+#define KPKT 2
+#define MATOM 1
 /* modes for kpkt calculations */
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */
