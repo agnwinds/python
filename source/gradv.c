@@ -371,13 +371,11 @@ dvds_max ()
       if (dvds > dvds_max)
       {
         dvds_max = dvds;
-        renorm (p.lmn, 1.0);
         stuff_v (p.lmn, lmn);
       }
       if (dvds < dvds_min)
       {
         dvds_min = dvds;
-        renorm (p.lmn, 1.0);
         stuff_v (p.lmn, lmn_min);
       }
 
