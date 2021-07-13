@@ -164,7 +164,11 @@ def write_memecho_data(lightcurve: Table, spectra: Table, spectra_times: Table, 
     )
 
 
-def trailed_spectrogram(spectra: Table, lightcurve: Table, spectra_times: Table, filename: str):
+def trailed_spectrogram(
+        spectra: Table, lightcurve: Table, spectra_times: Table, filename: str,
+        line_wavelength: float = None,
+        wavelength_range: Optional[Tuple[float, float]] = None
+):
     """
     Generate a trailed spectrogram of both the time series of spectra and difference relative to the mean,
     with the continuum as an adjacent line plot.
@@ -174,10 +178,23 @@ def trailed_spectrogram(spectra: Table, lightcurve: Table, spectra_times: Table,
         spectra_times (Table): Times to plot the TS for.
         lightcurve (Table): The continuum lightcurve.
         filename (String): File to write to.
+        line_wavelength (float): The wavelength of the line being plotted.
+        wavelength_range ([float, float]): The wavelength range to plot.
 
     Outputs:
         {filename}.eps: Time series output.
     """
+    if not wavelength_range:
+        wavelength_range = (
+            spectra.meta["bounds"][0],
+            spectra.meta["bounds"][-1],
+        )
+    if line_wavelength:
+        if line_wavelength > wavelength_range[-1] or line_wavelength < wavelength_range[0]:
+            raise ValueError(
+                f"Line wavelength {line_wavelength} is outside of the wavelength range of the plot."
+            )
+
 
     # We want a pcolour plot for the time series, with an adjacent
     # fig, (ax_ts, ax_c) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]} , sharey=True)
@@ -224,9 +241,9 @@ def trailed_spectrogram(spectra: Table, lightcurve: Table, spectra_times: Table,
         ax.xaxis.set_tick_params(rotation=0, pad=1)
         ax.yaxis.set_tick_params(rotation=45, labelsize=8)
         ax.yaxis.tick_left()
-        ax.set_xlim([6300, 6850])
+        ax.set_xlim(wavelength_range)
 
-    ax_spec.set_xlim([6300, 6850])
+    ax_spec.set_xlim(wavelength_range)
     ax_spec.set_xlabel("λ (Å)")
     ax_spec.set_ylabel(r'$L/L_{\rm max}$')
     ax_spec.plot(spectra['wave'], spectra['value']/np.amax(spectra['value']))
@@ -241,17 +258,17 @@ def trailed_spectrogram(spectra: Table, lightcurve: Table, spectra_times: Table,
 
     ax_c2.set_xlabel(r"ΔC (%)")
 
-    tf_wave = 6562.8
-    ax_ts.axvline(tf_wave, color='red')
-    ax_ts2.axvline(tf_wave, color='red')
-    ax_spec.axvline(tf_wave, color='red')
+    # Add centre line
+    ax_ts.axvline(line_wavelength, color='red')
+    ax_ts2.axvline(line_wavelength, color='red')
+    ax_spec.axvline(line_wavelength, color='red')
 
     ax_vel = ax_spec.twiny()
     ax_vel.set_xlim(ax_spec.get_xlim())
     ax_vel.set_xticks([
-        doppler_shift_wave(tf_wave, -1e7),
-        tf_wave,
-        doppler_shift_wave(tf_wave, +1e7)
+        doppler_shift_wave(line_wavelength, -1e7),
+        line_wavelength,
+        doppler_shift_wave(line_wavelength, +1e7)
     ])
     ax_vel.set_xticklabels([
         r"10", r"0", r"10"
