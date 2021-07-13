@@ -27,7 +27,6 @@
 #include "atomic.h"
 #include "python.h"
 
-
 /**********************************************************/
 /** 
  * @brief      run the ionization cycles for a 
@@ -110,6 +109,12 @@ calculate_ionization (restart_stat)
 
 
 /* BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
+
+  if (modes.load_rng && geo.wcycle > 0)
+  {
+    reload_gsl_rng_state ();
+    modes.load_rng = FALSE;
+  }
 
   while (geo.wcycle < geo.wcycles)
   {                             /* This allows you to build up photons in bunches */
@@ -363,6 +368,11 @@ calculate_ionization (restart_stat)
     MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
+    if (modes.save_rng)
+    {
+      save_gsl_rng_state ();
+    }
+
     check_time (files.root);
     Log_flush ();               /*Flush the logfile */
 
@@ -502,6 +512,11 @@ make_spectra (restart_stat)
     spectrum_restart_renormalise (geo.nangles);
   }
 
+  if (modes.load_rng && geo.pcycle > 0)
+  {
+    reload_gsl_rng_state ();
+    modes.load_rng = FALSE;
+  }
 
   while (geo.pcycle < geo.pcycles)
   {                             /* This allows you to build up photons in bunches */
@@ -589,6 +604,11 @@ make_spectra (restart_stat)
 #ifdef MPI_ON
     }
 #endif
+    if (modes.save_rng)
+    {
+      save_gsl_rng_state ();
+    }
+
     check_time (files.root);
   }
 

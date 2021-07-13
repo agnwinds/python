@@ -105,7 +105,7 @@ set(PYTHON_SOURCE
         source/phot_util.c source/photo_gen_matom.c source/photon2d.c
         source/photon_gen.c source/pi_rates.c source/radiation.c source/random.c
         source/rdpar.c source/rdpar_init.c source/recipes.c source/recomb.c
-        source/reposition.c source/resonate.c source/reverb.c source/roche.c
+        source/resonate.c source/reverb.c source/roche.c
         source/rtheta.c source/run.c source/saha.c source/setup.c
         source/setup_disk.c source/setup_domains.c source/setup_files.c
         source/setup_line_transfer.c source/setup_reverb.c
@@ -133,8 +133,8 @@ set(RAD_HYDRO_SOURCE
         )
 
 set(OPTICAL_DEPTH_SOURCE
-        source/py_optical_depth.c source/py_optical_depth_sub.c
-        )
+        source/py_optical_depth.c source/py_optical_depth_transport.c
+        source/py_optical_depth_util.c source/py_optical_depth_output.c)
 
 # Create the executables for each program, and link the required libraries
 

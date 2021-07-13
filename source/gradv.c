@@ -50,12 +50,10 @@ dvwind_ds_cmf (p)
   double v_grad[3][3];
   double lmn[3], dvel_ds[3], dvds;
   int j, k, nn;
-  double dot_tensor_vec ();
   struct photon pp;
-  int nnn[4], nelem;            // At present the largest number of dimenssion in the grid is 2
+  int nnn[4], nelem;
   double frac[4];
   double x;
-
   int ndom;
 
   ndom = wmain[p->grid].ndom;
@@ -69,7 +67,7 @@ dvwind_ds_cmf (p)
 
   stuff_phot (p, &pp);
   if (pp.x[2] < 0.0)
-  {                             /*move the photon to the northen hemisphere */
+  {                             /*move the photon to the northern hemisphere */
     pp.x[2] = -pp.x[2];
     pp.lmn[2] = -pp.lmn[2];
   }
@@ -88,7 +86,8 @@ dvwind_ds_cmf (p)
     double ds;
     /* choose a small distance which is dependent on the cell size */
     vsub (pp.x, wmain[pp.grid].x, diff);
-    ds = 0.001 * length (diff);
+    vsub (wmain[pp.grid].xcen, wmain[pp.grid].x, diff);
+    ds = 0.000001 * length (diff);
     /* calculate the velocity at the position of the photon */
     /* note we use model velocity, which could potentially be slow,
        but avoids interpolating (see #118) */
@@ -137,11 +136,11 @@ dvwind_ds_cmf (p)
       }
     }
 
-    /* v_grad is in cylindrical cordinates, or more precisely intended
+    /* v_grad is in cylindrical coordinates, or more precisely intended
        to be azimuthally symmetric.  One could either
        (a) rotate  v_grad to be correct at the position of the photon or
        (b) rotate the direction of photon travel so that is is correct
-       (assuming azimuthal symmetery) in the xz plane.
+       (assuming azimuthal symmetry) in the xz plane.
 
        Possibility b is more straightforward and that is what is done
      */
@@ -210,12 +209,11 @@ dvds_ave ()
   char filename[LINELENGTH];
   int ndom;
 
-
   /* Open a diagnostic file if print_dvds_info is non-zero */
-  strcpy (filename, basename);
-  strcat (filename, ".dvds.diag");
+
   if (modes.print_dvds_info)
   {
+    sprintf (filename, "%s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 
@@ -327,29 +325,24 @@ dvds_ave ()
 int
 dvds_max ()
 {
-  struct photon p, pp;
-  double v_zero[3], delta[3], vdelta[3], diff[3];
-  double sum, dvds, ds;
+  struct photon p;
+  double dvds;
   double dvds_max, lmn[3];
   int n;
   int icell;
   double dvds_min, lmn_min[3];
   char filename[LINELENGTH];
-  int ndom;
-
 
   /* Open a diagnostic file if print_dvds_info is non-zero */
-  strcpy (filename, basename);
-  strcat (filename, ".dvds.diag");
+
   if (modes.print_dvds_info)
   {
+    sprintf (filename, "%s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 
   for (icell = 0; icell < NDIM2; icell++)
   {
-    ndom = wmain[icell].ndom;
-
     dvds_max = 0.0;
     dvds_min = 1.e30;
 
@@ -358,28 +351,18 @@ dvds_max ()
 
     stuff_v (wmain[icell].x, p.x);
 
-    /* Define a small length */
+    /* Cannot calculate the velocity gradient along the z axis so fudge this */
+    if (p.x[0] == 0)
+    {
+      p.x[0] = 0.1 * wmain[icell].xcen[0];
+    }
 
-    vsub (wmain[icell].xcen, p.x, diff);
-    ds = 0.000001 * length (diff);
+    p.grid = icell;
 
-    /* Find the velocity at the center of the cell */
-    model_velocity (ndom, p.x, v_zero);
-
-    sum = 0.0;
     for (n = 0; n < N_DVDS_AVE; n++)
     {
-      randvec (delta, ds);
-      if (p.x[2] + delta[2] < 0)
-      {                         // Then the new position would punch through the disk
-        delta[0] = (-delta[0]); // So we reverse the direction of the vector
-        delta[1] = (-delta[1]);
-        delta[2] = (-delta[2]);
-      }
-      vadd (p.x, delta, pp.x);
-      model_velocity (ndom, pp.x, vdelta);
-      vsub (vdelta, v_zero, diff);
-      dvds = length (diff);
+      randvec (p.lmn, 1);
+      dvds = dvwind_ds_cmf (&p);
 
       /* Find the maximum and minimum values of dvds and the direction
        * for this
@@ -388,28 +371,26 @@ dvds_max ()
       if (dvds > dvds_max)
       {
         dvds_max = dvds;
-        renorm (delta, 1.0);
-        stuff_v (delta, lmn);
+        stuff_v (p.lmn, lmn);
       }
       if (dvds < dvds_min)
       {
         dvds_min = dvds;
-        renorm (delta, 1.0);
-        stuff_v (delta, lmn_min);
+        stuff_v (p.lmn, lmn_min);
       }
 
 
     }
 
     /* Store the results in wmain */
-    wmain[icell].dvds_max = dvds_max / ds;
+    wmain[icell].dvds_max = dvds_max;
 
     if (modes.print_dvds_info)
     {
       fprintf (optr,
                "%d %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e \n",
-               icell, p.x[0], p.x[1], p.x[2], dvds_max / ds,
-               dvds_min / ds, lmn[0], lmn[1], lmn[2], lmn_min[0], lmn_min[1], lmn_min[2], dot (lmn, lmn_min));
+               icell, p.x[0], p.x[1], p.x[2], dvds_max,
+               dvds_min, lmn[0], lmn[1], lmn[2], lmn_min[0], lmn_min[1], lmn_min[2], dot (lmn, lmn_min));
     }
 
   }

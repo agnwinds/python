@@ -166,8 +166,8 @@ bands_init (imode, band)
     tmax = geo.tstar;
   if (geo.t_bl > tmax && geo.lum_bl > 0.0)
     tmax = geo.t_bl;
-  if ((0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar)) > tmax)
-    tmax = 0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
+  if ((0.488 * teff (1.)) > tmax)
+    tmax = 0.488 * teff (1.);
   freqmax = BOLTZMANN * tmax / PLANCK * 10.;
   if (freqmax < 2.0 * 54.418 / HEV)
   {
@@ -186,10 +186,11 @@ bands_init (imode, band)
 
   if (imode == -1)
   {
+    // TODO: ideally, the args for rdchoice should be constructed automatically using the enums somehow, to avoid mistakes
     strcpy (answer, "cv");
     mode =
-      rdchoice ("Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)", "0,2,3,7,1,4,5,6,8",
-                answer);
+      rdchoice ("Photon_sampling.approach(T_star,cv,yso,AGN,tde_bb,min_max_freq,user_bands,cloudy_test,wide,logarithmic)",
+                "0,2,3,7,9,1,4,5,6,8", answer);
   }
   else
   {
@@ -517,6 +518,21 @@ bands_init (imode, band)
     band->min_fraction[8] = 0.1;
     band->min_fraction[9] = 0.1;
 
+  }
+  else if (mode == TDE_BB_BAND)
+  {
+    band->nbands = 7;
+    band->f1[0] = 1e14;
+    band->f2[0] = band->f1[1] = 1e15;
+    band->f2[1] = band->f1[2] = 3.162e15;
+    band->f2[2] = band->f1[3] = 1e16;
+    band->f2[3] = band->f1[4] = 3.162e16;
+    band->f2[4] = band->f1[5] = 1e17;
+    band->f2[5] = band->f1[6] = 3.162e17;
+    band->f2[6] = band->f1[7] = 1e18;
+
+    for (ii = 0; ii < band->nbands; ++ii)
+      band->min_fraction[ii] = (int) (1.0 / band->nbands);
   }
   else if (mode == LOG_USER_DEF_BAND)   /* Generalized method to set up logarithmic bands */
   {

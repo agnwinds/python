@@ -143,22 +143,22 @@ length (a)
 
 int
 renorm (a, scalar)
-     double a[], scalar;
+  double a[], scalar;
 {
   double x;
-  double dot ();
-  x = (dot (a, a));
+
+  x = dot (a, a);
   if (x < EPS)
   {
-    Log ("renorm: Cannot renormalize a vector of length 0\n");
-    Log ("renorm: %e %e %e\n", a[0], a[1], a[2]);
-    Log ("renorm returning -1\n");
-    return (-1);
+    Log ("renorm: Cannot renormalize a vector [%e, %e, %e] of length 0\n", a[0], a[1], a[2]);
+    return -EXIT_FAILURE;
   }
+
   x = scalar / sqrt (x);
   a[0] *= x;
   a[1] *= x;
   a[2] *= x;
+
   return (0);
 }
 

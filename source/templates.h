@@ -135,6 +135,8 @@ double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
+double mean_intensity_from_models(PlasmaPtr xplasma, double freq, int mode);
+double mean_intensity_bb_estimate(double freq, double t_r, double w);
 /* estimators_simple.c */
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 int update_flux_estimators(PlasmaPtr xplasma, PhotPtr phot_mid, double ds_obs, double w_ave, int ndom);
@@ -174,12 +176,15 @@ double pillbox(PhotPtr p, double *smin, double *smax);
 double phi(double s, void *params);
 double dphi_ds(double s, void *params);
 double roche_width(double x, void *params);
-double roche2_width_max(void);
+double roche2_half_width(void);
 /* random.c */
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x, void *params);
 int init_rand(int seed);
+void init_rng_directory(void);
+void save_gsl_rng_state(void);
+void reload_gsl_rng_state(void);
 double random_number(double min, double max);
 /* stellar_wind.c */
 int get_stellar_wind_params(int ndom);
@@ -212,10 +217,8 @@ double kn_vzero(double r);
 double kn_wind_mdot_integral(double r, void *params);
 double kn_rho_zero(int ndom, double r);
 /* disk.c */
-double tdisk(double m, double mdot, double r);
-double teff(double t, double x);
-double gdisk(double mass, double mdot, double rmin);
-double geff(double g0, double x);
+double teff(double x);
+double geff(double x);
 double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative, int *hit);
@@ -332,7 +335,7 @@ int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper, double freq_min, doub
 /* estimators_macro.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
-int mc_estimator_normalise(int n);
+int normalise_macro_estimators(int n);
 double total_fb_matoms(PlasmaPtr xplasma, double t_e, double f1, double f2);
 double total_bb_cooling(PlasmaPtr xplasma, double t_e);
 double macro_bb_heating(PlasmaPtr xplasma, double t_e);
@@ -490,6 +493,10 @@ double get_matom_f_accelerate(int mode);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
+int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[200][200], int radiative_flag[200][200], int conf_to_matrix[200]);
+int macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[200][200], int conf_to_matrix[200]);
+int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200], int n_iterations);
+void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200]);
 /* windsave2table_sub.c */
 int do_windsave2table(char *root, int ion_switch);
 int create_master_table(int ndom, char rootname[]);

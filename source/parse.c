@@ -173,24 +173,30 @@ parse_command_line (argc, argv)
         Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
-      else if (strcmp (argv[i], "-ztest") == 0)
-      {
-        run_ztest = TRUE;
-        Log ("Run ztest, optional code\n");
-        j = i;
-      }
+//OLD      else if (strcmp (argv[i], "-ztest") == 0)
+//OLD      {
+//OLD        run_ztest = TRUE;
+//OLD        Log ("Run ztest, optional code\n");
+//OLD        j = i;
+//OLD      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;
         Log ("Invoking fixed temperature mode\n");
         j = i;
       }
-
       else if (strcmp (argv[i], "--rseed") == 0)
       {
         modes.rand_seed_usetime = 1;
         j = i;
         Log ("Using a random seed in random number generator\n");
+      }
+      else if (strcmp (argv[i], "--rng") == 0)
+      {
+        modes.save_rng = 1;
+        modes.load_rng = 1;
+        j = i;
+        Log ("Using a persistent RNG state\n");
       }
       else if (strcmp (argv[i], "-z") == 0)
       {
@@ -250,7 +256,6 @@ parse_command_line (argc, argv)
       exit (1);
     }
 
-
     strcpy (dummy, argv[argc - 1]);
     get_root (files.root, dummy);
 
@@ -265,7 +270,12 @@ parse_command_line (argc, argv)
     strcat (files.diag, files.root);
     strcat (files.diag, dummy);
 
+    /* Set up the directory structure for storing the rng state */
 
+    if (modes.save_rng)
+    {
+      init_rng_directory ();
+    }
   }
 
   return (restart_stat);
@@ -320,6 +330,7 @@ and the switches have the following meanings \n\
  --version      Print out python version, commit hash and if there were files with uncommitted \n\
                 changes and stop \n\
  --rseed        Set the random number seed to be time-based, rather than fixed. \n\
+ --rng          Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
 \n\
 Other switches exist but these are not intended for the general user.\n\
 These are largely diagnostic or for special cases. These include\n\

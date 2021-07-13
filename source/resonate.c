@@ -10,9 +10,8 @@
  *
  * ###Notes###
  * These routines should be made geometry independent and therefore
- * should work with
- * very minor (header only) modifications in other configurations.
- *
+ * should work with very minor (header only) modifications in other
+ * configurations.
  *
  ***********************************************************/
 
@@ -22,8 +21,6 @@
 
 #include "atomic.h"
 #include "python.h"
-
-int resonate_number_freq_diff_low = 0;
 
 /**********************************************************/
 /**
@@ -63,12 +60,15 @@ int resonate_number_freq_diff_low = 0;
  * ### Notes ###
  * Calculate_ds does not modify the p in any way!!
  *
- * Any paramaters that depend explicitly on the
+ * Any parameters that depend explicitly on the
  * coordinate gridding, such as the maximum distance the photon
  * can travel before hitting the edge of the
  * shell should be calculated outside of this routine.
  *
  **********************************************************/
+
+const double MAXDIFF = VCHECK / VLIGHT;
+
 double
 calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      WindPtr w;
@@ -78,12 +78,12 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      double smax;
      int *istat;
 {
-  int kkk;
+  int nion_for_resonance;
+  int n, current_res_number, nstart, ndelt;
   double kap_es;
-  double freq_inner, freq_outer, dfreq, ttau, freq_av;
+  double freq_inner, freq_outer, dfreq, running_tau, freq_av;
   double mean_freq;
-  int n, nn, nstart, ndelt;
-  double x;
+  double fraction_to_resonance;
   double ds_current, ds;
   double dvds_cmf, density_cmf;
   double dvds1, dvds2;
@@ -95,34 +95,31 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   WindPtr one, two;
   int check_in_grid;
   int nplasma;
-  PlasmaPtr xplasma, xplasma2;
+  PlasmaPtr xplasma;
   int ndom;
   double normal[3];
   double diff;
-
 
   one = &w[p->grid];
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   ndom = one->ndom;
 
-  ttau = *tau;
+  running_tau = *tau;
   ds_current = 0;
   init_dvds = 0;
   dvds1 = dvds2 = 0.0;
   *nres = -1;
   *istat = P_INWIND;
 
-  if (ttau < 0.0)
+  if (running_tau < 0.0)
   {
-    Error ("calculate_ds: Photon %d has negative tau  %8.2e at %g entering calculate_ds\n", p->np, ttau, p->freq);
+    Error ("calculate_ds: photon %d has negative tau  %8.2e at %g entering calculate_ds\n", p->np, running_tau, p->freq);
   }
-
 
   /* XFRAME - Next section is a problem, but not directly related to CMF.  ksl thinks we want just the
      frequencies at the ends of the paths, but we do not want photon direction to change to CMF frame
    */
-
 
   stuff_phot (p, &p_start);
   observer_to_local_frame (&p_start, &p_start_cmf);
@@ -131,20 +128,14 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   move_phot (&p_stop, smax);
   observer_to_local_frame (&p_stop, &p_stop_cmf);
 
-
-
-  /* At this point p_start_cmf and pstop_cmf are in the local frame 
+  /* At this point p_start_cmf and p_stop_cmf are in the local frame
    * at the and p_stop is at the maximum distance it can 
-   * travel.  We want to check that the frequncy shift is 
+   * travel. We want to check that the frequency shift is
    * not too great along the path that a linear approximation
    * to the change in frequency is not reasonable
    */
 
-
-  diff = 1;
-#define  MAXDIFF  VCHECK/VLIGHT /* The same as our old velocity requirement */
-
-  while (smax > DFUDGE)
+  while (smax > wmain[p->grid].dfudge)
   {
     stuff_phot (p, &p_now);
     move_phot (&p_now, smax * 0.5);
@@ -164,49 +155,32 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   if (freq_inner < 0 || freq_outer < 0)
   {
-    Error ("Horrors: %d  %e %e\n", p_start_cmf.np, freq_inner, freq_outer);
+    Error ("calculate_ds: photon %d has negative freq_inner %e freq_outer %e\n", p_start_cmf.np, freq_inner, freq_outer);
   }
 
-
-
-/* We use the doppler shifted frequency to compute the Klein-Nishina cross
- * section, if the frequency is high enough, otherwise we just use the
- * Thompson cross section.  For the time being, use the average frequency.
- * If we want true fidelity, perhaps we could compute the cross section
- * for every little path section between resonances */
+  /* We use the doppler shifted frequency to compute the Klein-Nishina cross
+   * section, if the frequency is high enough, otherwise we just use the
+   * Thompson cross section.  For the time being, use the average frequency.
+   * If we want true fidelity, perhaps we could compute the cross section
+   * for every little path section between resonances
+   */
 
   mean_freq = 0.5 * (freq_inner + freq_outer);
   dfreq = freq_outer - freq_inner;
 
+  /* The next section limits the the resonances we have to worry about, and it
+   * checks to see if the frequency difference at the start and end of the path
+   * is very small .If there difference is smaller, then there are no resonances
+   * to consider. Previously, we would have returned at this point but now we
+   * allow the photon to still try and scatter.
+   */
 
-
-/* The next section checks to see if the frequency difference on
- * the two sides is very small and if not limits the resonances
- * one has to worry about
- *
- * 201219 - ksl - Previously resonate simple returned if the frequency
- * difference between two sides was too low and recorded an error.  Now,
- * resonate attempts to calculate opacities anyway, and stops reporting 
- * small dfreq after 1000 examples.  
- */
-
-  if (fabs (dfreq) < EPSILON && resonate_number_freq_diff_low < 1000)
+  if (fabs (dfreq) < EPSILON)
   {
-    /* The frequency difference is very small so there are not resonances to consider in the
-       Sobolev approximation */
-    Error ("calculate_ds: freq same along path in cell %d\n", one->nwind);
-    x = -1;
-
+    Error ("calculate_ds: the frequency along the photon %d path's in cell %d is the same\n", one->nwind, p_now.np);
     limit_lines (freq_inner, freq_outer);
     nstart = nline_min;
     ndelt = 1;
-    resonate_number_freq_diff_low += 1;
-
-    if (resonate_number_freq_diff_low == 1000)
-    {
-      Error ("calculate_ds: reached 1000 examples of freq. same along path in cell.\n");
-    }
-
   }
   else if (dfreq > 0)
   {
@@ -221,231 +195,192 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     ndelt = (-1);
   }
 
-/*nline_min, nline_max, and nline_delt are found in atomic.h and
- * are set by limit_lines()
- */
-
-  /* Compute the contuum opacities
-
-     Compute the angle averaged electron scattering cross section.  Note electron scattering  is always
-     treated as a scattering event. */
+  /* Compute the angle averaged electron scattering cross section. Note
+   * electron scattering is always treated as a scattering event.
+   */
 
   kap_es = klein_nishina (mean_freq) * xplasma->ne * zdom[ndom].fill;
 
-
-/* If in macro-atom mode, calculate the bf and ff opacities, becuase in macro-atom mode
- * everything including bf is calculated as a scattering process.  The routine
- * kappa_bound stores the individual opacities as well as the total, because when
- * there is more than one opacity contributin to the total, these are needed to choose
- * which particular bound-free transition to activate.  
- * For the two level approximation, none of this needed. 
- */
+  /* If in macro-atom mode, calculate the bf and ff opacities, because in
+   * macro-atom mode everything including bf is calculated as a scattering
+   * process. The routine kappa_bound stores the individual opacities as well
+   * as the total, because when there is more than one opacity contributing to
+   * the total, these are needed to choose which particular bound-free
+   * transition to activate. For the two level approximation, none of this
+   * needed.
+   */
 
   kap_bf_tot = 0;
   kap_ff = 0;
 
-
   if (geo.rt_mode == RT_MODE_MACRO)
   {
-
-/* if problems arise with next line, see issue #777. */
-
     freq_av = 0.5 * (freq_inner + freq_outer);
-
     kap_bf_tot = kappa_bf (xplasma, freq_av, 0);
     kap_ff = kappa_ff (xplasma, freq_av);
-
   }
 
   if (one->inwind < 0)
   {
     kap_bf_tot = kap_ff = 0.0;
-    Error_silent ("ds_calculate vol = 0: cell %d position %g %g %g\n", p->grid, p->x[0], p->x[1], p->x[2]);
+    Error_silent ("ds_calculate: wind vol = 0 for cell %d photon position %g %g %g\n", p->grid, p->x[0], p->x[1], p->x[2]);
   }
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity in CMF frame
   kap_cont_obs = kap_cont / observer_to_local_frame_ds (p, 1.); // Multiply by scale factor to get to observer frame
 
-
-
-/* Finally begin the loop over the resonances that can interact
- * with the photon in the cell
- */
+  /* Finally begin the loop over the resonances that can interact
+   * with the photon in the cell
+   */
 
   for (n = 0; n < nline_delt; n++)
   {
-    nn = nstart + n * ndelt;    /* So if the frequency of resonance increases as we travel through
-                                   the grid cell, we go up in the array, otherwise down */
-    x = (lin_ptr[nn]->freq - freq_inner) / dfreq;
+    current_res_number = nstart + n * ndelt;
+    fraction_to_resonance = (lin_ptr[current_res_number]->freq - freq_inner) / dfreq;
 
-    if (0. < x && x < 1.)
-    {                           /* this particular line is in resonance */
-      ds = x * smax;
+    if (0.0 < fraction_to_resonance && fraction_to_resonance < 1.0)     /* this particular line is in resonance */
+    {
+      ds = fraction_to_resonance * smax;
 
+      /* If the last interaction (p->nres) was current_res_number and is happening
+       * within dfudge then we skip over the resonance.
+       */
 
-/* Before checking for a resonant scatter, need to check for scattering
- * due to a continuum
- * process.
- */
-      if (ttau + (kap_cont_obs) * (ds - ds_current) > tau_scat)
+      if (p_now.nres == current_res_number && ds < wmain[p->grid].dfudge)
       {
-/* then the photon was scattered by the continuum before reaching the
- * resonance.  Need to randomly select the continumm process which caused
- * the photon to scatter.  The variable threshold is used for this. */
+        continue;
+      }
+
+      /* Before checking for a resonant scatter, need to check for scattering
+       * due to a continuum process.
+       */
+
+      if (running_tau + (kap_cont_obs) * (ds - ds_current) > tau_scat)
+      {
+        /* A photon was scattered by the continuum before reaching the resonance.
+         * We need to randomly select the continuum process which caused
+         * the photon to scatter. The variable threshold is used for this. */
 
         *nres = select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma);
-        *istat = P_SCAT;        //flag as scattering
-        ds_current += (tau_scat - ttau) / (kap_cont_obs);       //distance travelled
-        ttau = tau_scat;
-        *tau = ttau;
+        *istat = P_SCAT;
+        ds_current += (tau_scat - running_tau) / (kap_cont_obs);
+        running_tau = tau_scat;
+        *tau = running_tau;
+
         return (ds_current);
       }
       else
       {
+        /* ds_current is exactly the position of the resonance. We also
+         * increment tau by the continuum optical depth to this point */
 
-/* increment tau by the continuum optical depth to this point */
-        ttau += kap_cont_obs * (ds - ds_current);
+        running_tau += kap_cont_obs * (ds - ds_current);
+        ds_current = ds;
+        nion_for_resonance = lin_ptr[current_res_number]->nion;
 
-        ds_current = ds;        /* At this point ds_current is exactly the position of the resonance */
-        kkk = lin_ptr[nn]->nion;
-
-
-/* The density is calculated in the wind array at the center of a cell.
- * We use that as the first estimate of the density.  */
+        /* The density is calculated in the wind array at the center of a cell.
+         * We use that as the first estimate of the density.  */
 
         stuff_phot (p, &p_now);
-        move_phot (&p_now, ds_current); // So p_now contains the current position of the photon
-
-
-        density_cmf = get_ion_density (ndom, p_now.x, kkk);
+        move_phot (&p_now, ds_current);
+        density_cmf = get_ion_density (ndom, p_now.x, nion_for_resonance);
 
         if (density_cmf > LDEN_MIN)
         {
-/* If we have reached this point then we have to initalize dvds1 and dvds2.
- * Otherwise there is no need to do this, especially as dvwind_ds_cmf is an
- * expensive calculation time wise */
+          /* If we have reached this point then we have to initalize dvds1 and dvds2.
+           * Otherwise there is no need to do this, especially as dvwind_ds_cmf is an
+           * expensive calculation time wise */
 
-          if (init_dvds == 0)
+          if (init_dvds == FALSE)
           {
             dvds1 = dvwind_ds_cmf (p);
             dvds2 = dvwind_ds_cmf (&p_stop);
-            init_dvds = 1;
+            init_dvds = TRUE;
           }
 
-          dvds_cmf = (1. - x) * dvds1 + x * dvds2;
+          dvds_cmf = (1. - fraction_to_resonance) * dvds1 + fraction_to_resonance * dvds2;
 
+          /* sobolev does not use x, unless density_cmf is les than 0 tau_sobolev is invariant, but all inputs
+           * must be in the same frame, using cmf here */
 
+          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[current_res_number], dvds_cmf);
+          running_tau += tau_sobolev;
 
-          /* sobolev does not use x, unless density_cmf is les than 0 */
-          // tau_sobolev is invariant, but all inputs must be in the same frame, using cmf  here
-
-          tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[nn], dvds_cmf);
-          ttau += tau_sobolev;
-
-
-          if (geo.rt_mode == RT_MODE_MACRO)     //Macro Atom case (SS)
+          if (geo.rt_mode == RT_MODE_MACRO)
           {
-
-/* Because push through distance may take us out of the cell we want,
- * need to make sure that the cell is correct before incrementing the
- * heating rate/estimators. So 1st check if it's still in the wind and
- * second get a pointer to the grid cell where the resonance really happens.
- */
+            /* Because push through distance may take us out of the cell we want,
+             * need to make sure that the cell is correct before incrementing the
+             * heating rate/estimators. So 1st check if it's still in the wind and
+             * second get a pointer to the grid cell where the resonance really happens.
+             */
 
             check_in_grid = walls (&p_now, p, normal);
 
             if (check_in_grid != P_HIT_STAR && check_in_grid != P_HIT_DISK && check_in_grid != P_ESCAPE)
             {
-              /* The next line may be redundant.  */
               two = &w[where_in_grid (wmain[p_now.grid].ndom, p_now.x)];
 
-              if (two->inwind < 0)
+              if (two->inwind < 0)      /* Sometimes DFUDGE pushes a photon into a cell with no volume. */
               {
-                /* See issue #389 - Sometimes DFUDGE pushes a photon into a cell with no volume.  Note that this
-                 * should be very rare, so if this error occurs in significant numbers the problem should be
-                 * investigated further.  ksl -180626
-                 */
                 Error ("calculate_ds: Macro atom problem when photon moved into cell with no volume\n");
               }
               else if (geo.ioniz_or_extract == CYCLE_IONIZ)
               {
                 observer_to_local_frame (&p_now, &p_now_cmf);
-                if (lin_ptr[nn]->macro_info == TRUE && geo.macro_simple == FALSE)
+                if (lin_ptr[current_res_number]->macro_info == TRUE && geo.macro_simple == FALSE)
                 {
-                  bb_estimators_increment (two, &p_now_cmf, tau_sobolev, dvds_cmf, nn);
+                  bb_estimators_increment (two, &p_now_cmf, tau_sobolev, dvds_cmf, current_res_number);
                 }
                 else
                 {
                   /* The line is from a simple ion. Record the heating contribution and move on. */
-                  xplasma2 = &plasmamain[two->nplasma];
-
-                  bb_simple_heat (xplasma2, &p_now_cmf, tau_sobolev, nn);
-
+                  bb_simple_heat (&plasmamain[two->nplasma], &p_now_cmf, tau_sobolev, current_res_number);
                 }
               }
             }
           }
-          /* Completed special calculations for the Macro Atom case */
-
-
         }
 
-
-
         /* Check to see whether the photon should scatter at this point */
-        if (ttau > tau_scat)
+
+        if (running_tau > tau_scat)
         {
           *istat = P_SCAT;
-          *nres = nn;
-          *tau = ttau;
+          *nres = current_res_number;
+          *tau = running_tau;
 
           return (ds_current);
         }
+      }                         /* End of loop to process an individual resonance */
 
-        /* End of loop to process an individual resonance */
-      }
-      *tau = ttau;
+      *tau = running_tau;
     }
   }
 
+  /* If the photon reaches this point it was not scattered by resonances.
+   * ds_current is either 0 if there were no resonances or the position of the
+   * "last" resonance if there were resonances. But we need to check one
+   * last time to see if it was scattered by continuum process.
+   */
 
-
-/* If the photon reaches this point it was not scattered by resonances.
- * ds_current is either 0 if there were no resonances or the position of the
- * "last" resonance if there were resonances.  But we need to check one
- * last time to see if it was scattered by continuum process.
- * Note: ksl -- It is generally a bad policy to have a bunch of repeated code
- * like this.  We should probably rewrite some of this in terms of subroutines
- * for clarity, especially the bit that calculates where the continuum
- * scattering event occurred.  04 apr
- */
-
-  if (ttau + kap_cont_obs * (smax - ds_current) > tau_scat)
+  if (running_tau + kap_cont_obs * (smax - ds_current) > tau_scat)      /* A scattering event has occurred in the shell and we remain in the same shell */
   {
     *nres = select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma);
-
-    /* A scattering event has occurred in the shell  and we
-     * remain in the same shell */
-    ds_current += (tau_scat - ttau) / (kap_cont_obs);
-    *istat = P_SCAT;            /* Flag for scattering (SS) */
-    ttau = tau_scat;
+    ds_current += (tau_scat - running_tau) / (kap_cont_obs);
+    *istat = P_SCAT;
+    running_tau = tau_scat;
   }
-  else
-  {                             /* Then we did hit the other side of the shell
-                                   (or possibly the another wall of the same shell) */
+  else                          /* Then we did hit the other side of the shell or possibly the another wall of the same shell) */
+  {
     *istat = P_INWIND;
-    ttau += kap_cont_obs * (smax - ds_current); /* kap_es replaced with kap_cont (SS) */
+    running_tau += kap_cont_obs * (smax - ds_current);
     ds_current = smax;
-
   }
 
-  *tau = ttau;
-
+  *tau = running_tau;
 
   return (ds_current);
 }
-
-
 
 /**********************************************************/
 /**
@@ -498,16 +433,14 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   double run_tot;
   int ncont;
 
-
   threshold = random_number (0.0, 1.0) * (kap_cont);
-
 
   /* First check for electron scattering. */
   if (kap_es > threshold)
   {                             /* electron scattering event occurred (SS) */
-    nres = -1;                  // flag electron scatterin (SS) */
+    nres = -1;                  // flag electron scatterin (SS)
   }
-  /* Now chech for ff. */
+  /* Now check for ff. */
   else if ((kap_es + kap_ff) > threshold)
   {
     nres = -2;
@@ -515,16 +448,17 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   /* Now check for bf. */
   else
   {
-/* use a running sum to find which photoionisation process it was */
-/*
-If a non-macro-atom run is being done this part should never be reached.
-Just do a check that all is well - this can be removed eventually (SS)
-*/
+    /* use a running sum to find which photoionisation process it was */
+    /* If a non-macro-atom run is being done this part should never be reached.
+     * Just do a check that all is well - this can be removed eventually (SS)
+     */
+
     if (geo.rt_mode == RT_MODE_2LEVEL)
     {
-      Error ("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
+      Error ("calculate_ds: Not using macro atoms but trying to excite one? Abort.\n");
       Exit (0);
     }
+
     run_tot = kap_es + kap_ff;
     ncont = 0;
     while (run_tot < threshold)
@@ -542,21 +476,23 @@ Just do a check that all is well - this can be removed eventually (SS)
 
 /**********************************************************/
 /**
- * @brief      calculates the bf opacity in a specific
- * 	cell.
+ * @brief      calculate the bf opacity in a specific
+ * 	cell at a specific frequency
  *
  * @param [in] PlasmaPtr  xplasma   The plasma cell of interest
  * @param [in] double  freq   The frequency at which the opacity is calculated
  * @param [in] int  macro_all   1--> macro_atoms only, 0 all topbase ions
- * @return     The bf opacity
+ * @return     The total bf opacity
  *
  * @details
  *
- * The routine calculates the bf opacity in the CMF.
+ * The routine calculates the bf opacity in the CMF.  It populates the external
+ * array kappa_bf (in python.h), which stores kappa for each bf process.
  *
  * ### Notes ###
  * The routine allows for clumping, reducing kappa_bf by the filling
  * factor.
+ *
  *
  **********************************************************/
 
@@ -577,11 +513,9 @@ kappa_bf (xplasma, freq, macro_all)
   int nn;
   int ndom;
 
-
   kap_bf_tot = 0;
 
   macro_all--;                  // Subtract one from macro_all to avoid >= in for loop below.
-
 
   ndom = wmain[xplasma->nwind].ndom;
 
@@ -594,24 +528,17 @@ kappa_bf (xplasma, freq, macro_all)
 
     if (freq > ft && freq < phot_top[n].freq[phot_top[n].np - 1] && phot_top[n].macro_info > macro_all)
     {
-      /* Need the appropriate density at this point. */
 
-      nconf = phot_top[n].nlev; //Returning lower level = correct (SS)
-
-
-      density = den_config (xplasma, nconf);    //Need to check what this does (SS)
-
+      nconf = phot_top[n].nlev;
+      density = den_config (xplasma, nconf);
 
       if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == TRUE)
       {
-
-        /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
-        kap_bf[nn] = x = sigma_phot (&phot_top[n], freq) * density * zdom[ndom].fill;   //stimulated recombination? (SS)
+        kap_bf[nn] = x = sigma_phot (&phot_top[n], freq) * density * zdom[ndom].fill;
         kap_bf_tot += x;
       }
     }
   }
-
 
   return (kap_bf_tot);
 }
@@ -628,7 +555,7 @@ kappa_bf (xplasma, freq, macro_all)
  *
  * The purpose of this routine is to speed up calculations by idenfifying which
  * bound-free x-sections are important enough to be included when calculationg the
- * bound-fee opacity, and which an be ignored because the density of the particular
+ * bound-fee opacity, and which can be ignored because the density of the particular
  * ion is so low it will not contribute.
  *
  * For each cell, the routine determines what bf transitons are important
@@ -640,16 +567,16 @@ kappa_bf (xplasma, freq, macro_all)
  * @details
  *
  * This routine is now called before various cylces of the Monte Carlo calculation.
- * (in run.c) * It determines which
+ * (in run.c) It determines which
  * bf processes are worth considering during the calculation that follows.
  *
  * To do this
- * is uses the edge position (must be inside, or close to, the spectral region of
+ * it uses the edge position (must be inside, or close to, the spectral region of
  * interest) and the edge opacity (must be greater than a threshold value, currently
  * 10^-6.
  *
  * The need for the routine is just to prevent wasting time on unimportant bf
- * transitions.  It is called (currently from resonate).
+ * transitions.  It is called (currently) from resonate.
  *
  * ### Notes ###
  * The dimensionalty of kbf_use is currently set to NTOP_PHOT, which is large enough
@@ -674,13 +601,13 @@ kbf_need (freq_min, freq_max)
   int nplasma, nion;
 
 
-  for (nplasma = 0; nplasma < NPLASMA; nplasma++)       // Loop over all the cells in the wind
+  for (nplasma = 0; nplasma < NPLASMA; nplasma++)
   {
     xplasma = &plasmamain[nplasma];
     one = &wmain[xplasma->nwind];
     nuse = 0;
 
-    for (n = 0; n < nphot_total; n++)   // Loop over photoionisation processes.
+    for (n = 0; n < nphot_total; n++)
     {
 
       ft = phot_top[n].freq[0]; //This is the edge frequency (SS)
@@ -1112,17 +1039,29 @@ scatter (p, nres, nnscat)
            Need to make decision about making a k-packet. Get the fraction of the energy
            that goes into the electron rather than being stored as ionisation energy: this
            fraction gives the selection probability for creating a k packet. It's given by 
-           (1 - ionization edge frequecy / photon frequency)  */
+           (1 - ionization edge frequecy / photon frequency)
+
+           Note:  In some cases, one can obtain a negative prob_kpkt below.  This happens because
+           we use the  mean frequency along the path to calculate continuum opacities
+           in calculate_ds, whereas here we have the exact frequency at a particular point.
+           This leads to a situation where the co-moving frequency can be less than
+           the edge frequency.  See issues #436 and #867.
+
+           If the error is large, it suggests that the length of that a photon is allowed
+           to travel in a single step is too large.
+
+         */
 
         prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
         if (prob_kpkt < 0)
         {
           /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
-          if (prob_kpkt < -1e-3)
+          if (prob_kpkt < -1e-2)
           {
-            Error ("scatter: kpkt probability (%8.4e) < 0, zeroing\n", prob_kpkt);
-            Log ("scatter: photon edge frequency: %8.4e, comoving frequency %8.4e\n", phot_top[*nres - NLINES - 1].freq[0], freq_comoving);
+            Error ("scatter: kpkt probability (%8.4e) < 0 for phot_top %d, zeroing\n", prob_kpkt, *nres - NLINES - 1);
+            Log ("scatter: photon edge frequency: %8.4e, comoving (observer) frequency %8.4e %8.4e\n", phot_top[*nres - NLINES - 1].freq[0],
+                 freq_comoving, p_orig.freq);
           }
           prob_kpkt = 0.0;
         }
@@ -1148,7 +1087,7 @@ scatter (p, nres, nnscat)
 
         macro_gov (p, nres, 2, &which_out);     //routine to deal with kpkt
 #else
-        /* This is the old apporach.  Process the BF photon for a simple atom.  In this
+        /* This is the old approach.  Process the BF photon for a simple atom.  In this
            approach we generate a kpkt or an r-packet depending on whether the probility
            of creating a kpkt, namely prob_kpkt
          */
@@ -1194,17 +1133,15 @@ scatter (p, nres, nnscat)
   }
 
 
-  /* Now determine the direction of the scattered photon, for electrons scatering (-1), ff emision (-2), or
+  /* Now determine the direction of the scattered photon, for electrons scattering (-1), ff emision (-2), or
      bound free emission (>NLINES), allowing depending on the scattering mode for thermal trapping. 
      Note that this portion of the code is identical for both simple and macro atoms, except for the fact
-     that ff and bf are only treated as scattering processin in macro-atom mode.
+     that ff and bf are only treated as scattering processes in macro-atom mode.
    */
 
   if (*nres == -1)
   {
-
-    compton_dir (p);            // uses the KN formula
-
+    compton_dir (p);
   }
   else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {
@@ -1213,9 +1150,8 @@ scatter (p, nres, nnscat)
   }
   else
   {
-    randwind_thermal_trapping (p, nnscat);      // the thermal trapping case
+    randwind_thermal_trapping (p, nnscat);
   }
-
 
 
   /* Finally put everything back in the observer frame */
@@ -1249,8 +1185,6 @@ if fixed.
     vsub (p_final, p_init, dp);
 
     project_from_xyz_cyl (p_orig.x, dp, dp_cyl);
-
-
 
     if (p_orig.x[2] < 0)
       dp_cyl[2] *= (-1);

@@ -5,8 +5,6 @@
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
 #define UV_hi 3e16              //The lower frequency bound of the UV band as defined in IOS 21348
 
-int q_test_count;
-
 int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
@@ -17,7 +15,6 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 #define FALSE 0
 
 
-#define PNORM_FUDGE_FACTOR     1        /*An extra factor used for fudging the velocity factor See #815 */
 #define USE_GRADIENTS        TRUE       /*IF true use interpolated velcity gradients to calculate dv_ds */
 
 
@@ -28,14 +25,10 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 int rel_mode;                   /* How doppler effects and co-moving frames are  */
 
 int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
-int run_ztest;                  /* Provides a way the optionally run certain code within python */
-
-
+//OLD int run_ztest;                  /* Provides a way the optionally run certain code within python */
 
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
-
-char basename[132];             // The root of the parameter file name being used by python
 
 /* These are tunable parameters that control various aspects of python
  * and the assorted programs.  In some cases they affect the "care" with
@@ -74,6 +67,8 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define LDEN_MIN        1e-3    /* The minimum density required for a line to be conidered for scattering
                                    or emission in calculate_ds and lum_lines */
 
+/* The next term globally defines a minimum value for the dilution faction */
+#define DILUTION_FACTOR_MINIMUM 1e-10
 
 /* End of "care factor" definition */
 
@@ -178,9 +173,13 @@ typedef struct plane
   double x[3];                  /* A position included in the plane (usually the "center" */
   double lmn[3];                /* A unit vector perpendicular to the plane (usually in the "positive" direction */
 } plane_dummy, *PlanePtr;
-plane_dummy plane_l1, plane_sec, plane_m2_far;  /* these all define planes which are perpendicular to the line of sight from the 
-                                                   primary to the seconday */
 
+
+/* These planes define the ends of a cylinder/pillbox which encapsulate the secondary with respect to the origin
+ which also the location of the central source.  The values are defined in the routin binary_basics*/
+
+// plane_dummy plane_l1, plane_sec, plane_m2_far;  
+plane_dummy plane_m2_near, plane_m2_far;  
 
 typedef struct cone
 {
@@ -591,7 +590,7 @@ struct geometry
   double period;                /* Period of the systems in seconds */
   double a, l1, l2, phi;        /* Separation of primary and secondary, distance of l1 from primary,phi at l1 */
   double l1_from_m2, r2_far;    /* Distance to l1 from m2, distance to far side of secondary from primary */
-  double r2_width;              /* Maximum width of Roche surface of secondary in the plane of orbit */
+  double r2_width;              /* Maximum half width of Roche surface of secondary in the plane of orbit */
 
   double t_bl;                  /*temperature of the boundary layer */
   double weight;                /*weight factor for photons/defined in define_phot */
@@ -661,7 +660,8 @@ enum band_definition_enum
   CLOUDY_TEST_BAND = 5,
   WIDE_BAND = 6,
   AGN_BAND = 7,
-  LOG_USER_DEF_BAND = 8
+  LOG_USER_DEF_BAND = 8,
+  TDE_BB_BAND = 9
 };
 
 /* xdisk is a structure that is used to store information about the disk in a system */
@@ -689,16 +689,21 @@ disk, qdisk;                    /* disk defines zones in the disk which in a spe
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 /* the next structure is intended to store a non standard temperature
-   profile for the disk
+   and (optionally gravity) profile for the disk
+
+   n_params should be 1 or 2, depending on whether t, or t and g 
+   are read in
    */
 
 #define NBLMODEL 5000
 
 struct blmodel
 {
+  int n_params;        
   int n_blpts;
   double r[NBLMODEL];
   double t[NBLMODEL];
+  double g[NBLMODEL];
 }
 blmod;
 
@@ -868,6 +873,9 @@ typedef struct plasma
                                    by this ion via recombination. */
   double *lum_rr_ion;           /* The recombination luminosity
                                    by this ion via recombination. */
+
+#define MEAN_INTENSITY_BB_MODEL  1
+#define MEAN_INTENSITY_ESTIMATOR_MODEL 2
 
   double *cool_dr_ion;
   double j, ave_freq;           /* Mean (angle-averaged) total intensity, intensity-averaged frequency */
@@ -1419,6 +1427,8 @@ struct advanced_modes
   int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
   int photon_speedup;
+  int save_rng;                 // save the GSL RNG stage
+  int load_rng;                 // load the GSL RNG state
 }
 modes;
 
@@ -1451,6 +1461,7 @@ struct filenames
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
+  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
 }
 files;
 
@@ -1464,7 +1475,10 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
-
+/* Used in macro_gov elsewhere to descibe choices between being or going
+   to a kpkt or macro atom state */
+#define KPKT 2
+#define MATOM 1
 /* modes for kpkt calculations */
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */

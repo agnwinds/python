@@ -122,7 +122,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 #Note that version should be a single string without spaces.
 
 
-VERSION = 85g
+VERSION = 85h
 
 INDENT = yes
 
@@ -169,7 +169,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
-		sv.o ionization.o  levels.o gradv.o reposition.o \
+		sv.o ionization.o  levels.o gradv.o \
 		anisowind.o wind_util.o density.o  bands.o time.o \
 		matom.o estimators_macro.o wind_sum.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o  \
@@ -193,7 +193,7 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		wind_updates2d.c windsave.c extract.c cdf.c roche.c random.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
-		sv.c ionization.c  levels.c gradv.c reposition.c \
+		sv.c ionization.c  levels.c gradv.c \
 		anisowind.c wind_util.c density.c  bands.c time.c \
 		matom.c estimators_macro.c wind_sum.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c  \
@@ -337,14 +337,14 @@ modify_wind:  $(modify_wind_objects)
 	mv $@ $(BIN)/modify_wind$(VERSION)                                         
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
 
-py_optical_depth_objects = py_optical_depth.o py_optical_depth_sub.o \
+py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_optical_depth_output.o py_optical_depth_util.o \
 		bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o estimators_simple.o\
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
-		sv.o ionization.o  levels.o gradv.o reposition.o \
+		sv.o ionization.o  levels.o gradv.o \
 		anisowind.o wind_util.o density.o  bands.o time.o \
 		matom.o estimators_macro.o wind_sum.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o  \
