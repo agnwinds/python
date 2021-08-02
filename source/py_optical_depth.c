@@ -18,6 +18,13 @@
 #include "python.h"
 #include "py_optical_depth.h"
 
+struct CommandlineArguments
+{
+  double u_freq_min;
+  double u_freq_max;
+};
+
+
 /* ************************************************************************* */
 /**
  * @brief  Create spectra of tau vs lambda for each observer angle
@@ -42,7 +49,7 @@
  * ************************************************************************** */
 
 void
-create_optical_depth_spectrum (void)
+create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
 {
   int i, j;
   int err;
@@ -64,30 +71,61 @@ create_optical_depth_spectrum (void)
   }
 
   /*
-   * Define the limits of the spectra in frequency space. If xxpsec is NULL,
-   * then the frequency range will be over a default 100 - 10,000 Angstrom
-   * band.
+   * We have a complicated if statement first, though. If a freq_min
+   * or a freq_max was provided, then we need to get this first and set
+   * the frequency limits appropriately. If neither are defined, then we will
+   * use some hardwired limits. The frequency range of the extracted will be
+   * used, however if xxpsec is NULL (no observer spectrum exists), then the
+   * frequency range will be over a default 100 - 10,000 Angstrom band.
    */
 
-  if ((geo.nangles == 0 && xxspec == NULL) || (geo.swavemax == 0 && geo.swavemin == 0))
+  if (u_freq_min > 0 || u_freq_max > 0)
   {
-    printf ("\nxxspec is uninitialized, defaulting spectral wavelength range to 100 - 10,000 Angstrom\n\n");
-    freq_min = VLIGHT / (10000 * ANGSTROM);
-    freq_max = VLIGHT / (100 * ANGSTROM);
+    if (u_freq_min > 0)
+    {
+      freq_min = u_freq_min;
+    }
+    else
+    {
+      freq_min = VLIGHT / (10000 * ANGSTROM);
+    }
+
+    if (u_freq_max > 0)
+    {
+      freq_max = u_freq_max;
+    }
+    else
+    {
+      freq_max = VLIGHT / (100 * ANGSTROM);
+    }
+
+    if (freq_max < freq_min)
+    {
+      errormsg ("frequency range given has set freq_max (%e) < freq_min (%e) \n", freq_max, freq_min);
+      exit (EXIT_FAILURE);
+    }
   }
   else
   {
-    freq_min = VLIGHT / (geo.swavemax * ANGSTROM);
-    freq_max = VLIGHT / (geo.swavemin * ANGSTROM);
-    if (sane_check (freq_min))
+    if ((geo.nangles == 0 && xxspec == NULL) || (geo.swavemax == 0 && geo.swavemin == 0))
     {
       freq_min = VLIGHT / (10000 * ANGSTROM);
-      errormsg ("freq_min has an invalid value setting to %e\n", freq_min);
-    }
-    if (sane_check (freq_max))
-    {
       freq_max = VLIGHT / (100 * ANGSTROM);
-      errormsg ("freq_min has an invalid value setting to %e\n", freq_max);
+    }
+    else
+    {
+      freq_min = VLIGHT / (geo.swavemax * ANGSTROM);
+      freq_max = VLIGHT / (geo.swavemin * ANGSTROM);
+      if (sane_check (freq_min))
+      {
+        freq_min = VLIGHT / (10000 * ANGSTROM);
+        errormsg ("freq_min has an invalid value setting to %e\n", freq_min);
+      }
+      if (sane_check (freq_max))
+      {
+        freq_max = VLIGHT / (100 * ANGSTROM);
+        errormsg ("freq_min has an invalid value setting to %e\n", freq_max);
+      }
     }
   }
 
@@ -304,12 +342,14 @@ print_help (void)
     "can also find the surface of the electron scattering photosphere using the -p\n"
     "option.\n\n"
     "Please see below for a list of all flags.\n\n"
-    "-h           Print this help message and exit.\n"
-    "-d ndom      Set the domain to launch photons from.\n"
-    "-p tau_stop  Integrate from outwards to find the electron scattering photosphere.\n"
-    "-cion nion   Extract the column density for an ion of number nion\n"
-    "-classic     Use linear frequency transforms, to be used when Python was run\n"
-    "             in classic mode.\n" "--version    Print the version information and exit.\n";
+    "-h             Print this help message and exit.\n"
+    "-d ndom        Set the domain to launch photons from.\n"
+    "-p tau_stop    Integrate from outwards to find the electron scattering photosphere.\n"
+    "-cion nion     Extract the column density for an ion of number nion\n"
+    "-freq_min min  The lower frequency boundary for optical depth spectra\n"
+    "-freq_max max  The upper frequency boundary for optical depth spectra\n"
+    "-classic       Use linear frequency transforms, to be used when Python was run\n"
+    "               in classic mode.\n" "--version    Print the version information and exit.\n";
   printf ("%s", help);
 }
 
@@ -328,12 +368,15 @@ print_help (void)
  *
  * ************************************************************************** */
 
-void
+#define ARGUMENT_LENGTH 24
+
+struct CommandlineArguments
 get_arguments (int argc, char *argv[])
 {
   int i;
   int n_read;
   char input[LINELENGTH];
+  struct CommandlineArguments arguments = { -1.0, -1.0 };
 
   /*
    * If no command line arguments are provided, then use fgets to query the
@@ -349,7 +392,7 @@ get_arguments (int argc, char *argv[])
       exit (EXIT_FAILURE);
     }
     get_root (files.root, input);
-    return;
+    return arguments;
   }
 
   /*
@@ -393,8 +436,7 @@ get_arguments (int argc, char *argv[])
         printf ("Argument for -cion cannot be negative\n");
         exit (EXIT_FAILURE);
       }
-      i++;
-      n_read = i;
+      n_read = i++;
     }
     else if (!strcmp (argv[i], "-p"))
     {
@@ -406,8 +448,7 @@ get_arguments (int argc, char *argv[])
         printf ("Unable to convert argument provided for -p into a double\n");
         exit (EXIT_FAILURE);
       }
-      i++;
-      n_read = i;
+      n_read = i++;
     }
     else if (!strcmp (argv[i], "-d"))
     {
@@ -418,8 +459,29 @@ get_arguments (int argc, char *argv[])
         printf ("Unable to convert argument provided for -d into an integer\n");
         exit (EXIT_FAILURE);
       }
-      i++;
-      n_read = i;
+      n_read = i++;
+    }
+    else if (!strcmp (argv[i], "-freq_min"))
+    {
+      char *check;
+      arguments.u_freq_min = strtod (argv[i + 1], &check);
+      if (*check != '\0')
+      {
+        printf ("Unable to convert argument provided for -freq_min to a double\n");
+        exit (EXIT_FAILURE);
+      }
+      n_read = i++;
+    }
+    else if (!strcmp (argv[i], "-freq_max"))
+    {
+      char *check;
+      arguments.u_freq_max = strtod (argv[i + 1], &check);
+      if (*check != '\0')
+      {
+        printf ("Unable to convert argument provided for -freq_max to a double\n");
+        exit (EXIT_FAILURE);
+      }
+      n_read = i++;
     }
     else if (!strncmp (argv[i], "-", 1))
     {
@@ -431,11 +493,13 @@ get_arguments (int argc, char *argv[])
 
   if (n_read + 1 == argc)
   {
-    printf ("All command line arguments have been consumed without specifying a root name\n");
+    printf ("All command line arguments have been processed and did not find a root name\n");
     exit (EXIT_FAILURE);
   }
 
   get_root (files.root, argv[argc - 1]);
+
+  return arguments;
 }
 
 /* ************************************************************************* */
@@ -476,7 +540,8 @@ main (int argc, char *argv[])
   MODE = RUN_MODE_TAU_INTEGRATE;
   N_DOMAIN = 0;
 
-  get_arguments (argc, argv);
+  struct CommandlineArguments arguments;
+  arguments = get_arguments (argc, argv);
   printf ("%-20s Optical depth diagnostics beginning\n", "TAU");
   strcpy (windsave_filename, files.root);
   strcat (windsave_filename, ".wind_save");
@@ -552,7 +617,7 @@ main (int argc, char *argv[])
   if (MODE == RUN_MODE_TAU_INTEGRATE)
   {
     evaluate_photoionization_edges ();
-    create_optical_depth_spectrum ();
+    create_optical_depth_spectrum (arguments.u_freq_min, arguments.u_freq_max);
   }
   else if (MODE == RUN_MODE_ES_PHOTOSPHERE)
   {

@@ -11,7 +11,7 @@
  *
  * ************************************************************************** */
 
-#define N_FREQ_BINS 10000
+#define N_FREQ_BINS 100000  // todo: make this variable, as well
 #define NAMELEN 32
 
 // Error message macro, adds the file name and line to the start of the error
