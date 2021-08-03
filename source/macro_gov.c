@@ -101,10 +101,29 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     uplvl = nlevels_macro;
   }
 
+  if (geo.matom_radiation == 1)
+  {
+    /* During the spectrum cycles we want to throw these photons away. */
+    p->w = 0.0;
+    escape = TRUE;
+    return (0);
+  }
+
   new_uplvl = matom_deactivation_from_matrix (xplasma, uplvl);
-  emit_matom (wmain, p, nres, new_uplvl, 0, VERY_BIG);
+
+  /* XMACRO -- need to deal with kpackets */
+  if (new_uplvl == nlevels_macro)
+  {
+    kpkt (p, nres, &escape, KPKT_MODE_CONTINUUM);
+  }
+  else
+  {
+    emit_matom (wmain, p, nres, new_uplvl, 0, VERY_BIG);
+  }
+
   escape = TRUE;
   return (0);
+
 #else
   escape = FALSE;               //start with it not being ready to escape as an r-packet
 

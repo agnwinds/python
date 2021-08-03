@@ -1024,7 +1024,7 @@ matom_deactivation_from_matrix (xplasma, uplvl)
     j++;
   }
 
-  /* This added to prevent case where z is essentially 0. */
+  /* This if statement is added to prevent case where z is essentially 0. */
   if (j > 0)
   {
     j = j - 1;
