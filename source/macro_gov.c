@@ -68,6 +68,44 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
   int n_jump_tot = 0;
   int n_loop = 0;
 
+#if (MATOM_TRANSITION_MODE == MATRIX)
+  PlasmaPtr xplasma;
+  WindPtr one;
+  one = &wmain[p->grid];
+  int new_uplvl, uplvl;
+
+  xplasma = &plasmamain[one->nplasma];
+
+  if (matom_or_kpkt == MATOM)
+  {
+    uplvl = 0;
+    if (*nres < NLINES)
+    {
+      uplvl = lin_ptr[*nres]->nconfigu;
+    }
+    else if (*nres > NLINES)
+    {
+      uplvl = phot_top[*nres - NLINES - 1].uplev;
+    }
+    else
+    {
+      Error ("matom: upper level not identified. nres = %d in photon %d of cycle %d/%d in thread %d\n",
+             *nres, p->np, geo.wcycle, geo.pcycle, rank_global);
+      escape = TRUE;
+      p->istat = P_ERROR_MATOM;
+      return (-1);
+    }
+  }
+  else
+  {
+    uplvl = nlevels_macro;
+  }
+
+  new_uplvl = matom_deactivation_from_matrix (xplasma, uplvl);
+  emit_matom (wmain, p, nres, new_uplvl, 0, VERY_BIG);
+  escape = TRUE;
+  return (0);
+#else
   escape = FALSE;               //start with it not being ready to escape as an r-packet
 
   /* Beginning of the main loop for processing a macro-atom */
@@ -105,10 +143,16 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         }
       }
 
+      /*  XMACRO -- Need to include simple/fake ions in matrix scheme */
       /*  if it's a bb transition  without the full macro atom treatment. */
       else if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
       {
+#if (MATOM_TRANSITION_MODE == MATRIX)
+        Error ("Simple ions don't work with matrix scheme! Abort!");
+        Exit (0);
+#else
         fake_matom_bb (p, nres, &escape);
+#endif
       }
 
       /* if it's bf tranisition of a full macro atom. */
@@ -160,7 +204,14 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
         Exit (0);
 #endif
+
+        /*  XMACRO -- Need to include simple/fake ions in matrix scheme */
+#if (MATOM_TRANSITION_MODE == MATRIX)
+        Error ("Simple ions don't work with matrix scheme! Abort!");
+        Exit (0);
+#else
         fake_matom_bf (p, nres, &escape);
+#endif
       }
 
       /* If it did not escape then it must have had a
@@ -212,12 +263,13 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     n_loop++;
   }
 
+  *which_out = KPKT;
+#endif
+
   /* End of main matom processing loop that began with while (escape==FALSE)
 
      If it gets here, the escape is as a KPKT    
    */
-
-  *which_out = KPKT;
 
   /* Update the the photon origin to indicate the packet has been processed
      by a macro atom */

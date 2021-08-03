@@ -975,3 +975,60 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   }
 
 }
+
+/**********************************************************/
+/**
+ * @brief  Choose a deactivation process using the matrix scheme
+ *         for macro-atom transition probabilities
+ *
+ * @param[in] PlasmaPtr xplasma        The plasma cell in question
+ * @param[in] int       uplvl          The level the macro-atom was activated with
+ *
+ * @return  int   j  the level the macro-atom will deactivate from 
+ *
+ * @details 
+ *
+ **********************************************************/
+
+int
+matom_deactivation_from_matrix (xplasma, uplvl)
+     PlasmaPtr xplasma;
+     int uplvl;
+{
+  double z, total;
+  int j;
+  int nrows = nlevels_macro + 1;
+#if (STORE_B_MATRIX == FALSE)
+  /* we aren't storing the macro-atom matrix, so we need to allocate and calculate it */
+  double **matom_matrix = (double **) calloc (sizeof (double *), nrows);
+
+  for (j = 0; j < nrows; j++)
+  {
+    matom_matrix[j] = (double *) calloc (sizeof (double), nrows);
+  }
+  calc_matom_matrix (xplasma, matom_matrix);
+#else
+  double **matom_matrix;
+  Error ("No capability to store B matrix yet!\n");
+  Exit (0);
+#endif
+
+  /* Now use the B matrix to calculate the outgoing state from activating state "uplvl" */
+  /* we draw a random number and sample from the column in the matrix corresponding to uplvl */
+  z = random_number (0.0, 1.0);
+  j = 0;
+  total = 0.0;
+  while (total < z)
+  {
+    total += matom_matrix[uplvl][j];
+    j++;
+  }
+
+  /* This added to prevent case where z is essentially 0. */
+  if (j > 0)
+  {
+    j = j - 1;
+  }
+
+  return (j);
+}

@@ -302,8 +302,6 @@ double dvwind_ds_cmf(PhotPtr p);
 int dvds_ave(void);
 int dvds_max(void);
 double get_dvds_max(PhotPtr p);
-/* reposition.c */
-int reposition(PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* wind_util.c */
@@ -619,6 +617,7 @@ void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
 double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double freq_min, double freq_max);
 double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double freq_min, double freq_max);
+int matom_deactivation_from_matrix(PlasmaPtr xplasma, int uplvl);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
