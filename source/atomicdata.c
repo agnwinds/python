@@ -15,6 +15,8 @@
 #include <math.h>
 
 #include "atomic.h"
+#include "python.h"
+
 #include "log.h"
 // If routines are added cproto > atomic_proto.h should be run
 #include "atomic_proto.h"
@@ -302,7 +304,7 @@ structure does not have this property! */
             exit (0);
           }
           /* Immediate replace by number density relative to H */
-          ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);  
+          ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);
           nelements++;
           if (nelements > NELEMENTS)
           {
@@ -2589,6 +2591,19 @@ or zero so that simple checks of true and false can be used for them */
     }
   }
 
+
+  if (geo.ioniz_mode > 4)       //Only do this check if we are requiring an ionization mode that needs PI rates
+  {
+    for (n = 0; n < nions; n++)
+    {
+      if (ion[n].phot_info < 0 && ion[n].istate != ion[n].z + 1)
+      {
+        Error ("There is no PI rate associated with ion %d (element %d ion %d) - use a simpler ionization scheme or add PI rates\n", n,
+               ion[n].z, ion[n].istate);
+        exit (0);
+      }
+    }
+  }
 
 
 
