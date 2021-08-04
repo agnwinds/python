@@ -508,33 +508,6 @@ check_xsections ()
 }
 
 
-
-
-/*
-
-   q21 calculates and returns the collisional de-excitation coefficient q21
-
-   Notes:  This uses a simple approximation for the effective_collision_strength omega.
-   ?? I am not sure where this came from at present and am indeed no sure that
-   omega is omega(2->1) as it should be.  This should be carefully checked.??
-   This has no been improved, and wherever possible we use tabulated collision
-   stength data from Chianti (after Burgess and Tully 1992)
-
-   c21=n_e * q21
-   q12 = g_2/g_1 q21 exp(-h nu / kT )
-
-   History:
-   98aug        ksl     Recoded from other routines so that one always calculates q21 in
-			the same way.
-	01nov	ksl	Add tracking mechanism so if called with same conditions it
-			returns without recalculation
-	12oct	nsh	Added, then commented out approximate gaunt factor given in
-			hazy 2.
-	17jan	nsh Added code to use the actual collision strength date from chianti
-
- */
-
-
 /// (8*PI)/(sqrt(3) *nu_1Rydberg
 #define ECS_CONSTANT 4.773691e16
 
@@ -544,10 +517,10 @@ double q21_a, q21_t_old;
 
 /**********************************************************/
 /**
- * @brief      calculates and returns the collisional de-excitation coefficient q21
+ * @brief      Calculates the collisional de-excitation coefficient q21
  *
  * @param [in] struct lines *  line_ptr   A single line
- * @param [in] double  t   The temperature at wich to calculate the coefficient
+ * @param [in] double  t   The temperature at which to calculate the coefficient
  * @return    The collisional de-excitiation coefficient
  *
  * @details
@@ -555,8 +528,9 @@ double q21_a, q21_t_old;
  * approximation if we do not.
  *
  * ### Notes ###
- * the relevant paper to consult here is Van Regemorter 1962 (ApJ 136 906). We use an effective gaunt
- * factor to calculate collision strengths. There is one regime in which kt < hnu. 
+ * The relevant paper to consult here is 
+ * [Van Regemorter 1962 (ApJ 136 906)](https://ui.adsabs.harvard.edu/abs/1962ApJ...136..906V/abstract). 
+ * We use an effective gaunt factor to calculate collision strengths.  
  * 
 ************************************************************/
 
@@ -574,18 +548,18 @@ q21 (line_ptr, t)
   if (q21_line_ptr != line_ptr || t != q21_t_old)
   {
 
-
     u0 = (BOLTZMANN * t) / (PLANCK * line_ptr->freq);
-
-    if (line_ptr->istate == 1 && u0 < 2)        // neutrals at low energy. Used 2 to give continuous function.
-      gaunt = u0 / 10.0;
-    else                        // low energy electrons, positive ions
-      gaunt = 0.2;
-
 
 
     if (line_ptr->coll_index < 0)       //if we do not have a collision strength for this line use the g-bar formulation
     {
+
+      /* Use the gaunt factor approximatation suggested by Van Regemorter, which makes neutrals a special case. */
+      if (line_ptr->istate == 1 && u0 < 2)
+        gaunt = u0 / 10.0;
+      else
+        gaunt = 0.2;
+
       omega = ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
     }
     else                        //otherwise use the collision strength directly. NB what we call omega, most people including hazy call upsilon.
@@ -596,6 +570,13 @@ q21 (line_ptr, t)
 
     q21_a = 8.629e-6 / (sqrt (t) * line_ptr->gu) * omega;
     q21_t_old = t;
+  }
+
+
+  if (q21_a < 0.0)
+  {
+    Error ("q21: Calculated q21 (%e) < 0. Setting to 0", q21_a);
+    q21_a = 0.0;
   }
 
   return (q21_a);
@@ -628,17 +609,17 @@ q12 (line_ptr, t)
 
   x = line_ptr->gu / line_ptr->gl * q21 (line_ptr, t) * exp (-H_OVER_K * line_ptr->freq / t);
 
+  // Not clear that this check is needed; it should only occure if q21 is less than 0
+  if (x < 0.0)
+  {
+    Error ("q12: Calculated q12 (%e) < 0. Setting to 0", x);
+    x = 0.0;
+  }
+
   return (x);
 }
 
 
-/*
-   a21 alculates and returns the Einstein A coefficient
-   History:
-   98aug        ksl     Coded and debugged
-   99jan        ksl Modified so would shortcircuit calculation if
-   called multiple times for same a
- */
 #define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
 
 struct lines *a21_line_ptr;

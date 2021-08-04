@@ -89,6 +89,8 @@ WindPtr (w);
   struct photon ptest;          //We need a test photon structure in order to compute t
   double kappa_es;              //The electron scattering opacity used for t
 
+  fptr = fptr2 = fptr3 = fptr4 = fptr5 = NULL;
+
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer, size_of_specbuffer;
@@ -178,7 +180,7 @@ WindPtr (w);
 
     if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
     {
-      mc_estimator_normalise (nwind);
+      normalise_macro_estimators(nwind);
       macromain[n].kpkt_rates_known = -1;
     }
 

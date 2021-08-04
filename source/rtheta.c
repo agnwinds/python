@@ -87,8 +87,11 @@ rtheta_ds_in_cell (ndom, p)
 
   if (smax <= 0)
   {
-    Error ("rtheta: ds_in_cell %f\n", smax);
+    int i, j;
+    wind_n_to_ij (ndom, p->grid, &i, &j);
+    Error ("rtheta_ds_in_cell: smax %g <= 0 wind cell %i (%d, %d) with inwind %d\n", smax, p->grid, i, j, wmain[p->grid].inwind);
   }
+
   return (smax);
 }
 
@@ -410,7 +413,7 @@ rtheta_volumes (ndom, w)
       cell_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
 
 
-      if (w[n].inwind == W_NOT_INWIND)
+      if (w[n].inwind == W_NOT_INWIND || w[n].inwind == W_IGNORE)
       {
         w[n].vol = 0.0;
       }

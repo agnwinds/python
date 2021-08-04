@@ -653,6 +653,10 @@ error_summary (message)
      char *message;
 {
   int n;
+
+  if (nerrors == 0)
+    return 0;
+
   Log ("\nError summary: %s\n", message);
   Log ("Recurrences --  Description\n");
   for (n = 0; n < nerrors; n++)
@@ -684,6 +688,9 @@ int
 error_summary_parallel (char *msg)
 {
   int i;
+
+  if (nerrors == 0)
+    return 0;
 
   Log_parallel ("\nError summary for thread %i: %s\n", my_rank, msg);
   Log_parallel ("Recurrences --  Description\n");
@@ -870,16 +877,18 @@ Debug (char *format, ...)
  *
  *  ### Notes ###
  *
+ *  Exit codes should be non-zero. In the past, we used to warn the user that
+ *  a non-zero exit code was sent, but we found that this confused non-expert
+ *  users (and us sometimes). Hence we silently now change the exit code to
+ *  EXIT_FAILURE and move on with our lives.
+ *
  **********************************************************/
 
 void
 Exit (int error_code)
 {
   if (error_code == 0)
-  {
-    Log_parallel ("!!Exit: error codes should be non-zero!\n", my_rank);
     error_code = EXIT_FAILURE;
-  }
 
   Log_flush ();
 

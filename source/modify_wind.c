@@ -347,6 +347,31 @@ apply_model (ndom, filename)
         }
       }
     }
+    else if (zdom[ndom].coord_type == RTHETA)
+    {
+      printf ("We have an r-theta model %i %i\n", ndim, mdim);
+      for (n = 0; n < imported_model[ndom].ncell; n++)  //Loop over all the cells in the model
+      {
+        wmain[n].v[0] = imported_model[ndom].v_x[n];    //we need a value for v_r for all cells including ghosts
+        wmain[n].v[1] = imported_model[ndom].v_y[n];    //we need a value for v_r for all cells including ghosts
+        wmain[n].v[2] = imported_model[ndom].v_z[n];    //we need a value for v_r for all cells including ghosts
+        if (wmain[n].inwind > -1)
+        {
+          for (nion = 0; nion < nions; nion++)  //Change the absolute number densities, fractions remain the same
+          {
+            nplasma = wmain[n].nplasma;
+            plasmamain[nplasma].density[nion] =
+              plasmamain[nplasma].density[nion] * (imported_model[ndom].mass_rho[n] / plasmamain[nplasma].rho);
+          }
+          plasmamain[nplasma].rho = imported_model[ndom].mass_rho[n];
+          if (imported_model[ndom].init_temperature == FALSE)
+          {
+            plasmamain[nplasma].t_e = imported_model[ndom].t_e[n];
+            plasmamain[nplasma].t_r = imported_model[ndom].t_r[n];
+          }
+        }
+      }
+    }
   }
   else
   {

@@ -10,6 +10,17 @@ temperature distribution.
 An option is provide for a vertically extended disk, whose thickness increases
 as with distance from the central object object.   
 
+The parameters involved in describing a flat disk are::
+
+    Disk.type(none,flat,vertically.extended)                 flat
+    Disk.radiation(yes,no)                          yes
+    Disk.rad_type_to_make_wind(bb,models)                   bb
+    Disk.temperature.profile(standard,readin)             standard
+    Disk.mdot(msol/yr)                         5
+    Disk.radmax(cm)                            1e17
+
+
+
 Vertically Extended disk (Details)
 ##################################
 
@@ -36,3 +47,21 @@ disk.   The choices we have made are (intended to be) as follows:
 (Note that the in the KWD case, there is a slight inconsistency/inaccuracy  in calculating desired mass loss rates, because the mass loss rate is calculate as if the disk
 were flat, but the stream line directions are not exactly the same as due to the vertical extension of the disk.  There are also issues more generally because we do
 not take into account the fact that the disk area of a vertically extended disk is not exactly the same as that of a flat disk.)
+
+
+Non-Standard Temperature Profile
+================================
+
+If desired the user can read the temperature profile for the disk from a file. Each
+line in the file should consist of a radius and a temperature (and optionally a value of log g)
+separated by whitespace (in the
+first two columns)  The values are assumed to be entered in a logical order, that is in 
+ascending values of radius. Lines, such as comments or header names of an astropy table, will be ignored.
+
+The log g value is not required to generate BB spectra, but is required if the spectrum from the disk is to be generated from a 
+two-dimensional grid of models, usually a set of spectra generated to represent the spectra from a set of stellar 
+atmospheres calculations.  
+
+With this option, the radius of the disk will be set to the maximum radius (the last value of r) in 
+the file.  
+

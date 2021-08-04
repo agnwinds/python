@@ -50,12 +50,10 @@ dvwind_ds_cmf (p)
   double v_grad[3][3];
   double lmn[3], dvel_ds[3], dvds;
   int j, k, nn;
-  double dot_tensor_vec ();
   struct photon pp;
-  int nnn[4], nelem;            // At present the largest number of dimenssion in the grid is 2
+  int nnn[4], nelem;
   double frac[4];
   double x;
-
   int ndom;
 
   ndom = wmain[p->grid].ndom;
@@ -69,7 +67,7 @@ dvwind_ds_cmf (p)
 
   stuff_phot (p, &pp);
   if (pp.x[2] < 0.0)
-  {                             /*move the photon to the northen hemisphere */
+  {                             /*move the photon to the northern hemisphere */
     pp.x[2] = -pp.x[2];
     pp.lmn[2] = -pp.lmn[2];
   }
@@ -81,14 +79,15 @@ dvwind_ds_cmf (p)
      tensor ought to be rotated in order to give the right answer for spherical
      coordinates. */
 
-  if (zdom[ndom].coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL || USE_GRADIENTS == FALSE)
   {
     struct photon pnew;
     double v1[3], v2[3], dv[3], diff[3];
     double ds;
     /* choose a small distance which is dependent on the cell size */
     vsub (pp.x, wmain[pp.grid].x, diff);
-    ds = 0.001 * length (diff);
+    vsub (wmain[pp.grid].xcen, wmain[pp.grid].x, diff);
+    ds = 0.000001 * length (diff);
     /* calculate the velocity at the position of the photon */
     /* note we use model velocity, which could potentially be slow,
        but avoids interpolating (see #118) */
@@ -97,6 +96,12 @@ dvwind_ds_cmf (p)
     /* copy the photon and move it by ds, and evaluate the velocity
        at the new point */
     stuff_phot (&pp, &pnew);
+    /*
+     * Put the photon into the observer frame, this way move_phot won't throw
+     * an error. Should be ok since we are only using move_photon to move a
+     * photon some vector ds.
+     * */
+    pnew.frame = F_OBSERVER;
     move_phot (&pnew, ds);
     model_velocity (ndom, pnew.x, v2);
 
@@ -131,11 +136,11 @@ dvwind_ds_cmf (p)
       }
     }
 
-    /* v_grad is in cylindrical cordinates, or more precisely intended
+    /* v_grad is in cylindrical coordinates, or more precisely intended
        to be azimuthally symmetric.  One could either
        (a) rotate  v_grad to be correct at the position of the photon or
        (b) rotate the direction of photon travel so that is is correct
-       (assuming azimuthal symmetery) in the xz plane.
+       (assuming azimuthal symmetry) in the xz plane.
 
        Possibility b is more straightforward and that is what is done
      */
@@ -160,7 +165,6 @@ dvwind_ds_cmf (p)
 
 
 
-
 #define N_DVDS_AVE	10000
 
 /**********************************************************/
@@ -175,8 +179,6 @@ dvwind_ds_cmf (p)
  * the aveage value of dv_ds at the center of the wind cell by randomly
  * generating directions and then calculating dv_ds in these directions
  *
- * It not only finds the average value, it also keeps track of the maximum
- * value of dvds and its direction
  *
  *
  * ### Notes ###
@@ -184,11 +186,13 @@ dvwind_ds_cmf (p)
  * the following elements of wmain
  *
  *  * dvds_ave - the average dvds
- *  * dvds_max - the maximum value of dvds
- *  * lmn - the direction of the maximum value
  *
  * There is an advanced mode which prints this information to
  * file.
+ *
+ * 210303 - ksl - Removed calculation of dvds_max from this 
+ * routine because we want this at the edges of cells, so one 
+ * can interpolate.  Portions of the old routine still remain.
  **********************************************************/
 
 
@@ -205,12 +209,11 @@ dvds_ave ()
   char filename[LINELENGTH];
   int ndom;
 
-
   /* Open a diagnostic file if print_dvds_info is non-zero */
-  strcpy (filename, basename);
-  strcat (filename, ".dvds.diag");
+
   if (modes.print_dvds_info)
   {
+    sprintf (filename, "%s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 
@@ -232,7 +235,7 @@ dvds_ave ()
     ds = 0.001 * length (diff);
 
     /* Find the velocity at the center of the cell */
-    vwind_xyz (ndom, &p, v_zero);
+    model_velocity (ndom, p.x, v_zero);
 
     sum = 0.0;
     for (n = 0; n < N_DVDS_AVE; n++)
@@ -245,7 +248,7 @@ dvds_ave ()
         delta[2] = (-delta[2]);
       }
       vadd (p.x, delta, pp.x);
-      vwind_xyz (ndom, &pp, vdelta);
+      model_velocity (ndom, pp.x, vdelta);
       vsub (vdelta, v_zero, diff);
       dvds = length (diff);
 
@@ -272,8 +275,6 @@ dvds_ave ()
 
     /* Store the results in wmain */
     wmain[icell].dvds_ave = sum / (N_DVDS_AVE * ds);
-    wmain[icell].dvds_max = dvds_max / ds;
-    stuff_v (lmn, wmain[icell].lmn);
 
     if (modes.print_dvds_info)
     {
@@ -290,4 +291,163 @@ dvds_ave ()
     fclose (optr);
 
   return (0);
+}
+
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the maximum
+ * dv_ds in each grid cell of the wind
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * The routine cycles through all of the cells in the wind, and calculates
+ * the maxium value of dv_ds at the corner of the wind cell by randomly
+ * generating directions and then calculating dv_ds in these directions
+ *
+ *
+ * ### Notes ###
+ * The routine is called during the intialization process and fills
+ * the following elements of wmain
+ *
+ *  * dvds_max - the maximum value of dvds
+ *
+ * Unlike dvds_ave, these values are at the corners of cells,
+ * and are intended to be interpolated.
+ *
+ * There is an advanced mode which prints this information to
+ * file.
+ **********************************************************/
+
+
+int
+dvds_max ()
+{
+  struct photon p;
+  double dvds;
+  double dvds_max, lmn[3];
+  int n;
+  int icell;
+  double dvds_min, lmn_min[3];
+  char filename[LINELENGTH];
+
+  /* Open a diagnostic file if print_dvds_info is non-zero */
+
+  if (modes.print_dvds_info)
+  {
+    sprintf (filename, "%s.dvds.diag", files.root);
+    optr = fopen (filename, "w");
+  }
+
+  for (icell = 0; icell < NDIM2; icell++)
+  {
+    dvds_max = 0.0;
+    dvds_min = 1.e30;
+
+
+    /*  x is the corner of the cell */
+
+    stuff_v (wmain[icell].x, p.x);
+
+    /* Cannot calculate the velocity gradient along the z axis so fudge this */
+    if (p.x[0] == 0)
+    {
+      p.x[0] = 0.1 * wmain[icell].xcen[0];
+    }
+
+    p.grid = icell;
+
+    for (n = 0; n < N_DVDS_AVE; n++)
+    {
+      randvec (p.lmn, 1);
+      dvds = dvwind_ds_cmf (&p);
+
+      /* Find the maximum and minimum values of dvds and the direction
+       * for this
+       */
+
+      if (dvds > dvds_max)
+      {
+        dvds_max = dvds;
+        stuff_v (p.lmn, lmn);
+      }
+      if (dvds < dvds_min)
+      {
+        dvds_min = dvds;
+        stuff_v (p.lmn, lmn_min);
+      }
+
+
+    }
+
+    /* Store the results in wmain */
+    wmain[icell].dvds_max = dvds_max;
+
+    if (modes.print_dvds_info)
+    {
+      fprintf (optr,
+               "%d %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e \n",
+               icell, p.x[0], p.x[1], p.x[2], dvds_max,
+               dvds_min, lmn[0], lmn[1], lmn[2], lmn_min[0], lmn_min[1], lmn_min[2], dot (lmn, lmn_min));
+    }
+
+  }
+
+
+  if (modes.print_dvds_info)
+    fclose (optr);
+
+  return (0);
+}
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the maximum
+ * dv_ds at a particular position in a grid
+ *
+ * @param [in] PhotPtr  p   A photon
+
+ * @return     Returns dvds_max at the position of the photon
+ *
+ * @details
+ * The routine interpolates dvds_max given the position of
+ * a photon in a cell
+ *
+ * dvds_max at the vertex points of cells must have been
+ * initialized using the routine dvds_max
+ *
+ * ### Notes ###
+ *
+ * The routine uses both the position of the photon and 
+ * the grid cell in which the photon exitsts, so this
+ * must be acurrate.
+ **********************************************************/
+
+
+double
+get_dvds_max (p)
+     PhotPtr p;
+{
+  int ndom, nn, nnn[4], nelem;
+  double frac[4];
+  double dvds;
+
+  ndom = wmain[p->grid].ndom;
+
+  coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
+
+  dvds = 0;
+
+  for (nn = 0; nn < nelem; nn++)
+  {
+    dvds += wmain[nnn[nn]].dvds_max;
+  }
+
+  return dvds;
+
 }

@@ -79,7 +79,7 @@ where_in_wind (x, ndomain)
      double x[];
      int *ndomain;
 {
-  double rho, rad, rho_min, rho_max, z;
+  double rho, rad, z;
   int ireturn;
   int ndom, n;
   DomainPtr one_dom;
@@ -143,7 +143,7 @@ where_in_wind (x, ndomain)
     }
 
     /* Check if one is inside the inner windcone */
-    if (rho < (rho_min = one_dom->wind_rhomin_at_disk + z * tan (one_dom->wind_thetamin)))
+    if (rho < (one_dom->wind_rhomin_at_disk + z * tan (one_dom->wind_thetamin)))
     {
       continue;
     }
@@ -154,7 +154,7 @@ where_in_wind (x, ndomain)
 
     if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)        /* Only perform the next check if thetamax is not equal to pi/2 */
     {
-      if (rho > (rho_max = one_dom->wind_rhomax_at_disk + z * tan (one_dom->wind_thetamax)))
+      if (rho > (one_dom->wind_rhomax_at_disk + z * tan (one_dom->wind_thetamax)))
       {
         continue;
       }
@@ -170,13 +170,11 @@ where_in_wind (x, ndomain)
 
     if (one_dom->wind_type == IMPORT)
     {
-      one_dom = &zdom[ndom];
-
       n = where_in_grid (ndom, x);
       if (n >= 0)
       {
         *ndomain = ndom;
-        ireturn = W_ALL_INWIND;
+        ireturn = wmain[n].inwind;
         break;
       }
     }
@@ -196,20 +194,6 @@ where_in_wind (x, ndomain)
 
 
 
-/* model_velocity(ndom, x,v)
-
-Calculate the wind velocity at a specific point in space from the original 
-usually analytic expressions
-
- History
-
-	04aug	ksl	52 -- adapted from wind2d.c as part of effort to 
- 			handle multiple coordinate systems
-	15Aug	ksl	Updated for domains
- */
-
-
-
 /**********************************************************/
 /** 
  * @brief      Calculate the wind velocity at a specific point in space from the original 
@@ -217,8 +201,8 @@ usually analytic expressions
  *
  * @param [out] int  ndom   The domain of interest
  * @param [out] double  x[]   A position (nominally in the domain)
- * @param [out] double  v[]   The resulting velicity
- * @return  The speed at that postion  
+ * @param [out] double  v[]   The resulting 3 velicity 
+ * @return  The speed at that position  
  *
  * @details
  * 
@@ -237,7 +221,11 @@ usually analytic expressions
  * The routine works for imported models as well, even in the case
  * the model velocity is actually one of the inputs.
  *
- * This routine calculates velocities in the observer frame.
+ * This routine calculates velocities in the observer frame.  
+ * 
+ * The routine has a check to see that the velocities do not exceed
+ * the speed of light; if they do the velocity is rescaled to 0.99
+ * C
  **********************************************************/
 
 double
@@ -350,7 +338,7 @@ model_vgrad (ndom, x, v_grad)
   {
     stuff_v (zero_vector, v_grad[0]);
     stuff_v (zero_vector, v_grad[1]);
-    stuff_v (zero_vector, v_grad[1]);
+    stuff_v (zero_vector, v_grad[2]);
     return (0);
   }
 

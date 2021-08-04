@@ -50,7 +50,8 @@ matom_emiss_report ()
       abs_sum += macromain[n].matom_abs[m];
     }
 
-    Log ("Macro Atom level emissivities (summed over cells): n %d matom_abs %8.4e matom_emiss %8.4e\n", m, abs_sum, emiss_sum);
+    Log ("Macro Atom level emissivities (summed): z %2d i %2d macro %2d n %2d matom_abs %8.4e matom_emiss %8.4e\n",
+         config[m].z, config[m].istate, config[m].macro_info, m, abs_sum, emiss_sum);
   }
 
 

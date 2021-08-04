@@ -61,6 +61,7 @@ Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   b
 Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
 
 ### The minimum and maximum wavelengths in the final spectra
+Spectrum.nwave                    10000
 Spectrum.wavemin(Angstroms)                800
 Spectrum.wavemax(Angstroms)                1850
 
@@ -83,4 +84,4 @@ Spectrum.type(flambda,fnu,basic)              flambda
 Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
-Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv
+Photon_sampling.approach(T_star,cv,yso,AGN,tde_bb,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                    cv

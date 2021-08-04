@@ -1,4 +1,3 @@
-
 /***********************************************************/
 /** @file  radiation.c
  * @author ksl
@@ -16,24 +15,30 @@
 #include "atomic.h"
 #include "python.h"
 
-#define COLMIN	0.01
+#define COLMIN  0.01
 
 int iicount = 0;
 
 
 /**********************************************************/
-/** 
- * @brief      updates the  field parameters in the wind and reduces 
- * the weight of the photon as a result of the effects of  free free, bound-free and 
- * Compton scattering. The routine  
+/**
+ * @brief      updates the  field parameters in the wind and reduces
+ * the weight of the photon as a result of the effects of  free free, bound-free and
+ * Compton scattering. The routine
  * also keeps track of the number of photoionizations for H and He in the
  * cell.
  *
  * @param [in,out] PhotPtr  p   the photon
  * @param [in] double  ds   the distance the photon has travelled in the cell
- * @return     Always returns 0.  The pieces of the wind structure which are updated are
- * 	j,ave_freq,ntot, heat_photo, heat_ff, heat_h, heat_he1, heat_he2, heat_z,
- * 	nioniz, and ioniz[].
+ * @param [out] double *kappa_tot_return  The total opacity in the CMF(?) frame
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * The pieces of the wind structure which are updated in each call to radiation
+ * are:
+ *   j,ave_freq,ntot, heat_photo, heat_ff, heat_h, heat_he1, heat_he2, heat_z,
+ *   nioniz, and ioniz[].
  *
  * @details
  *
@@ -44,17 +49,15 @@ int iicount = 0;
  * n_i sigma and h nu can be brought outside the integral.  Hence the integral is just over w(s),
  * but that is just given by (w(0)-w(smax))/kappa_tot.)  The routine calculates the number of ionizations per
  * unit volume.
- * 	
+ *
  * Inputs to radiation are assumed to be in the observer frame.  kappas are calculated
  * in the CMF frame, as elsewhere.  Where tau is calculted from kappa ds, one needs to
  * account for the difference in length in the two frames
  *
  **********************************************************/
 
-int
-radiation (p, ds)
-     PhotPtr p;
-     double ds;
+double
+radiation (PhotPtr p, double ds)
 {
   TopPhotPtr x_top_ptr;
 
@@ -90,6 +93,9 @@ radiation (p, ds)
   double ds_cmf, w_ave_cmf;
 
 
+  z = frac_path = freq_xs = 0;  // Initialize to avoid compiler warnings
+
+
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
   ndom = one->ndom;
@@ -108,9 +114,9 @@ radiation (p, ds)
   stuff_v (p->lmn, p_in);       //Get the direction
   renorm (p_in, p->w / VLIGHT); //Renormalise to momentum
 
-  /* Create phot, a photon at the position we are moving to 
-   *  note that the actual movement of the photon gets done after 
-   *  the call to radiation 
+  /* Create phot, a photon at the position we are moving to
+   *  note that the actual movement of the photon gets done after
+   *  the call to radiation
    */
 
   stuff_phot (p, &phot);        // copy photon ptr
@@ -148,17 +154,17 @@ radiation (p, ds)
   phot_mid_cmf.freq = freq = 0.5 * (freq_inner + freq_outer);
   phot_mid.freq = 0.5 * (p->freq + phot.freq);
 
-  /* calculate free-free, Compton and induced-Compton opacities 
+  /* calculate free-free, Compton and induced-Compton opacities
      note that we also call these with the average frequency along ds */
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);       /* Add ff opacity */
-  kappa_tot += frac_comp = kappa_comp (xplasma, freq);  /* Calculate Compton opacity, 
-                                                           store it in kappa_comp and also add it to kappa_tot, 
+  kappa_tot += frac_comp = kappa_comp (xplasma, freq);  /* Calculate Compton opacity,
+                                                           store it in kappa_comp and also add it to kappa_tot,
                                                            the total opacity for the photon path */
 
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
 
-  frac_tot = frac_z = 0;        /* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
+  frac_tot = frac_z = 0;        /* 59a - ksl - Moved this line out of loop to avoid warning, but notes
                                    indicate this is all diagnostic and might be removed */
   frac_auger = 0;
   frac_tot_abs = frac_auger_abs = 0.0;
@@ -198,7 +204,7 @@ radiation (p, ds)
        of the energy that goes into heating electrons carefully.  */
 
     /* JM 1405 -- I've added a check here that checks if a photoionization edge has been crossed.
-       If it has, then we multiply sigma*density by a factor frac_path, which is equal to the how far along 
+       If it has, then we multiply sigma*density by a factor frac_path, which is equal to the how far along
        ds the edge occurs in frequency space  [(ft - freq_min) / (freq_max - freq_min)] */
 
 
@@ -213,7 +219,7 @@ radiation (p, ds)
         ft = x_top_ptr->freq[0];
         if (ft > freq_min && ft < freq_max)
         {
-          /* then the shifting of the photon causes it to cross an edge. 
+          /* then the shifting of the photon causes it to cross an edge.
              Find out where between fmin and fmax the edge would be in freq space.
              frac_path is the fraction of the total path length above the absorption edge
              freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */
@@ -232,8 +238,8 @@ radiation (p, ds)
 
         if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
         {
-          /* Need the appropriate density at this point. 
-             how we get this depends if we have a topbase (level by level) 
+          /* Need the appropriate density at this point.
+             how we get this depends if we have a topbase (level by level)
              or vfky cross-section (ion by ion) */
 
           nion = x_top_ptr->nion;
@@ -345,9 +351,8 @@ radiation (p, ds)
 
 
 
-  /* finished looping over cross-sections to calculate bf opacity 
+  /* finished looping over cross-sections to calculate bf opacity
      we can now reduce weights and record certain estimators */
-
 
 
   kappa_tot_obs = kappa_tot / observer_to_local_frame_ds (p, 1);
@@ -414,7 +419,7 @@ radiation (p, ds)
   }
 
   if (geo.ioniz_or_extract == CYCLE_EXTRACT)
-    return (0);
+    return kappa_tot;           // 57h -- ksl -- 060715
 
 /* Everything after this point is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
@@ -477,7 +482,7 @@ radiation (p, ds)
       xplasma->heat_tot += z * frac_auger;      //All the inner shell opacities
 
       q = (z) / (PLANCK * freq * xplasma->vol);
-      /* So xplasma->ioniz for each species is just 
+      /* So xplasma->ioniz for each species is just
          (energy_abs)*kappa_h/kappa_tot / PLANCK*freq / volume
          or the number of photons absorbed in this bundle per unit volume by this ion
        */
@@ -490,7 +495,7 @@ radiation (p, ds)
       for (n = 0; n < n_inner_tot; n++)
       {
         xplasma->heat_inner_ion[inner_cross_ptr[n]->nion] += frac_inner_ion[n] * z;     //This quantity is per ion - the ion number comes from the freq ordered cross section
-        xplasma->inner_ioniz[n] += kappa_inner_ion[n] * q;      //This is the number of ionizations from this innershell cross section - at this point, inner_ioniz is ordered by frequency                
+        xplasma->inner_ioniz[n] += kappa_inner_ion[n] * q;      //This is the number of ionizations from this innershell cross section - at this point, inner_ioniz is ordered by frequency
       }
     }
   }
@@ -498,19 +503,19 @@ radiation (p, ds)
   z_obs = z * p_cmf.freq / p->freq;
   update_force_estimators (xplasma, p, &phot_mid, ds, w_ave_obs, ndom, z_obs, frac_ff, frac_auger, frac_tot);
 
-  return (0);
+  return kappa_tot;
 }
 
 
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      calculates the free-free opacity allowing for stimulated emission
  *
  * @param [in] PlasmaPtr  xplasma   The plasma cell where the free-free optacity is to be calculated
  * @param [in] double  freq   The frequency at which kappa_ff is to be calculated
- * @return     kappa           
+ * @return     kappa
  *
  * @details
  * Uses the formula from Allen
@@ -520,10 +525,10 @@ radiation (p, ds)
  * The routine originally only includes the effect of singly ionized H and doubly ionized He
  * and did not include a gaunt factor
  *
- * More recent versions include all ions and a gaunt factor, as calculated in 
+ * More recent versions include all ions and a gaunt factor, as calculated in
  * pop_kappa_ff_array and stored in kappa_ff_factor. The gaunt factor as currewntly
- * implemented is a frequency averaged one, and so is approximate (but better than 
- * just using 1). A future upgrade would use a more complex implementation where we 
+ * implemented is a frequency averaged one, and so is approximate (but better than
+ * just using 1). A future upgrade would use a more complex implementation where we
  * use the frequency dependant gaunt factor.
  *
  **********************************************************/
@@ -567,20 +572,20 @@ kappa_ff (xplasma, freq)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      calculates the
- * 	photionization crossection due to a Topbase level associated with
- * 	x_ptr at frequency freq
+ *  photionization crossection due to a Topbase level associated with
+ *  x_ptr at frequency freq
  *
  * @param [in,out] struct topbase_phot *  x_ptr   The structure that contains
  * TopBase information about the photoionization x-section
  * @param [in] double  freq   The frequency where the x-section is to be calculated
  *
- * @return     The x-section   
+ * @return     The x-section
  *
  * @details
  * sigma_phot uses the Topbase x-sections to calculate the bound free
- * (or photoionization) xsection.	The data must have been into the
+ * (or photoionization) xsection.   The data must have been into the
  * photoionization structures xphot with get_atomic_data and the
  * densities of individual ions must have been calculated previously.
  *
@@ -638,12 +643,12 @@ sigma_phot (x_ptr, freq)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      returns the precalculated density
- * 	of a particular "nlte" level.	
+ *  of a particular "nlte" level.
  *
  * @param [in] PlasmaPtr  xplasma   The Plasma structure containing information about
- * the cell of interest. 
+ * the cell of interest.
  * @param [in] int  nconf   The running index that describes which level we are interested in
  * @return     The density for a particular level of an ion in the cell
  *
@@ -677,7 +682,7 @@ den_config (xplasma, nconf)
   }
   else if (nconf == ion[nion].firstlevel)
   {
-/* Then we are using a Topbase photoionization x-section for this ion, 
+/* Then we are using a Topbase photoionization x-section for this ion,
 but we are not storing any densities, and so we assume it is completely in the
 in the ground state */
     density = xplasma->density[nion];
@@ -695,8 +700,8 @@ in the ground state */
 
 
 /**********************************************************/
-/** 
- * @brief      populates the multiplicative 	
+/**
+ * @brief      populates the multiplicative
  * constant, including a gaunt factor, to be  used in the 
  * calculating free free  emission (and absorption). 
  *
@@ -754,143 +759,182 @@ pop_kappa_ff_array ()
   return (0);
 }
 
-
-
-
 /**********************************************************/
 /** 
- * @brief      returns a value for the mean intensity
+ * @brief      returns a value for the mean intensity for a specific cell
+ *             at a specific frequency
  *
- * @param [in] PlasmaPtr  xplasma   PlasmaPtr for the cell - supplies spectral model
- * @param [in] double  freq   the frequency at which we want to get a value of J
- * @param [in] int  mode   mode 1=use BB if we have not yet completed a cycle
- * @return     The mean intensity at a specific frequency
+ * @param[in] PlasmaPtr xplasma  The plasma cell
+ * @param[in] double freq        The frequency at which we want j_bar
+ * @param[in] int mode           If mode == MEAN_INTENSITY_BB_MODEL (1) then we
+ *                               are happy to use a BB model as a fallback. Otherwise,
+ *                               j_bar = 0 can be returned when there is not
+ *                               a decent model.
+ *
+ * @return     The mean intensity j_bar at a specific frequency for the cell
  *
  * @details
  * This subroutine returns a value for the mean intensity J at a 
  * given frequency, using either a dilute blackbody model
- * or a spectral model depending on the value of geo.ioniz_mode. 
- * to avoid code duplication.
+ * or a spectral model depending on the value of geo.spec_mod, which counts the
+ * number of spectral models available.
  *
  * For ionization models that make use of the crude spectra accumulated
  * in crude spectral bands, the routine uses these bands to
  * get the mean intensity.  If however, one is using one of the other
- * (older) ionization modes, then the input variable mode drives how
- * the mean intensity is calculated.mode appears to be used 
+ * (older) ionization modes, then a dilute blackbody estimate is used instead.
  *
  * ### Notes ###
- * This subroutine was produced
- * when we started to use a spectral model to populate the upper state of a
- * two level atom, as well as to calculate induced Compton heating. 
- *
- * @bug   The routine refers to a mode 5, which does not appear to 
- * exist, or at least it is not one that is included in python.h
- * Note also that the logic of this appears overcomplicated, reflecting
- * the evolution of banding, and various ionization modes being added
- * without looking at trying to make this simpler.
+ * This subroutine was produced when we started to use a spectral model to
+ * populate the upper state of a two level atom, as well as to calculate induced
+ * Compton heating.
  *
  **********************************************************/
 
 double
 mean_intensity (xplasma, freq, mode)
-     PlasmaPtr xplasma;         // Pointer to current plasma cell
-     double freq;               // Frequency of the current photon being tracked
-     int mode;                  // mode 1=use BB if no model, mode 2=never use BB
+     PlasmaPtr xplasma;
+     double freq;
+     int mode;
+{
+  double j_bar;
 
+  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL || geo.ioniz_mode == IONMODE_MATRIX_ESTIMATORS)
+  {
+    j_bar = mean_intensity_from_models (xplasma, freq, mode);
+  }
+  else
+  {
+    j_bar = mean_intensity_bb_estimate (freq, xplasma->t_r, xplasma->w);
+  }
+
+  return j_bar;
+}
+
+/**********************************************************/
+/**
+ * @brief  Get the mean intensity using the power law descriptions of the
+ *         radiation field
+ *
+ * @param[in] PlasmaPtr xplasma  The specific plasma cell in question
+ * @param[in] double freq        The frequency to calculate j_bar at
+ * @param[in] int mode           Indicates whether to use BB estimator as a
+ *                               fallback or not, use mode == 1 ==
+ *                               MEAN_INTENSITY_BB_MODEL for this.
+ *
+ * @return  double j_bar  The mean intensity at a specific frequency
+ *
+ * @details
+ *
+ **********************************************************/
+
+double
+mean_intensity_from_models (PlasmaPtr xplasma, double freq, int mode)
 {
   int i;
-  double J;
-  double expo;
+  double j_bar = 0.0;
 
-  J = 0.0;                      // Avoid 03 error
-
-
-
-  if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL || geo.ioniz_mode == IONMODE_MATRIX_ESTIMATORS)    /*If we are using power law ionization, use PL estimators */
+  if (geo.spec_mod > 0)
   {
-    if (geo.spec_mod > 0)       /* do we have a spectral model yet */
+    /*
+     * Thus we have some spectral models, since we have run some ionization
+     * cycles.
+     */
+
+    for (i = 0; i < geo.nxfreq; i++)
     {
-      for (i = 0; i < geo.nxfreq; i++)
+      // Check that the band has the correct frequency range
+      if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])
       {
-        if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])    //We have found the correct model band
+        // Check we have a model for this band
+        if (xplasma->spec_mod_type[i] > 0)
         {
-          if (xplasma->spec_mod_type[i] > 0)    //Only bother if we have a model in this band
+          // Check the spectral model is defined for the frequency in question
+          // todo: this seems redundant, but possibly can be important if the model
+          //       in question isn't complete due to photon statistics
+          if (freq > xplasma->fmin_mod[i] && freq < xplasma->fmax_mod[i])
           {
-
-            if (freq > xplasma->fmin_mod[i] && freq < xplasma->fmax_mod[i])     //The spectral model is defined for the frequency in question
+            if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)
             {
-
-              if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)     //Power law model
-              {
-                J = pow (10, (xplasma->pl_log_w[i] + log10 (freq) * xplasma->pl_alpha[i]));
-              }
-
-              else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)       //Exponential model
-              {
-                J = xplasma->exp_w[i] * exp ((-1 * PLANCK * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
-              }
-              else
-              {
-                Error ("mean_intensity: unknown spectral model (%i) in band %i\n", xplasma->spec_mod_type[i], i);
-                J = 0.0;        //Something has gone wrong
-              }
+              j_bar = pow (10, (xplasma->pl_log_w[i] + log10 (freq) * xplasma->pl_alpha[i]));
             }
-
+            else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)
+            {
+              j_bar = xplasma->exp_w[i] * exp ((-1 * PLANCK * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
+            }
             else
             {
-              /* We have a spectral model, but it doesnt apply to the frequency 
-                 in question. clearly this is a slightly odd situation, where last
-                 time we didnt get a photon of this frequency, but this time we did. 
-                 Still this should only happen in very sparse cells, so induced Compton 
-                 is unlikely to be important in such cells. We generate a warning, just 
-                 so we can see if this is happening a lot */
-              J = 0.0;
-
-              /* JM140723 -- originally we threw an error here. No we count these errors and 
-                 in wind_updates because you actually expect 
-                 it to happen in a converging run */
-              nerr_Jmodel_wrong_freq++;
+              Error ("mean_intensity: unknown spectral model (%i) in band %i\n", xplasma->spec_mod_type[i], i);
+              j_bar = 0.0;
             }
           }
-          else                  /* There is no model in this band - this should not happen very often  */
+          else
           {
-            J = 0.0;            //There is no model in this band, so the best we can do is assume zero J
-
-            /* JM140723 -- originally we threw an error here. No we count these errors and 
-               in wind_updates because you actually expect 
-               it to happen in a converging run */
-            nerr_no_Jmodel++;
+            /* We have a spectral model, but it doesnt apply to the frequency
+               in question. clearly this is a slightly odd situation, where last
+               time we didnt get a photon of this frequency, but this time we did.
+               Still this should only happen in very sparse cells, so induced Compton
+               is unlikely to be important in such cells. We generate a warning, just
+               so we can see if this is happening a lot */
+            j_bar = 0.0;
+            nerr_Jmodel_wrong_freq++;
           }
-
-
-
+        }
+        else                    /* There is no model in this band - this should not happen very often  */
+        {
+          j_bar = 0.0;
+          nerr_no_Jmodel++;
         }
       }
     }
-    else                        //We have not completed an ionization cycle, so no chance of a model
-    {
-      if (mode == 1)            //We need a guess, so we use the initial guess of a dilute BB
-      {
-        expo = (PLANCK * freq) / (BOLTZMANN * xplasma->t_r);
-        J = (2 * PLANCK * freq * freq * freq) / (VLIGHT * VLIGHT);
-        J *= 1 / (exp (expo) - 1);
-        J *= xplasma->w;
-      }
-      else                      //A guess is not a good idea (i.e. we need the model for induced Compton), so we return zero.
-      {
-        J = 0.0;
-      }
+  }
+  else
+  {
+    /*
+     * We have not run any ionization cycles, so we either return j_bar = 0
+     * or we can use a BB estimate if that mode is enabled
+     */
 
+    if (mode == MEAN_INTENSITY_BB_MODEL)
+    {
+      j_bar = mean_intensity_bb_estimate (freq, xplasma->t_r, xplasma->w);
+    }
+    else
+    {
+      j_bar = 0.0;
     }
   }
 
-  else                          /*Else, use dilute BB estimator of J */
-  {
-    expo = (PLANCK * freq) / (BOLTZMANN * xplasma->t_r);
-    J = (2 * PLANCK * freq * freq * freq) / (VLIGHT * VLIGHT);
-    J *= 1 / (exp (expo) - 1);
-    J *= xplasma->w;
-  }
+  return j_bar;
+}
 
-  return J;
+/**********************************************************/
+/**
+ * @brief Calculate the mean intensity of the field at a specific frequency
+ *        for a specific cell.
+ *
+ * @param[in] double freq  The frequency to calculate j_bar at
+ * @param[in] double t_r   The (radiation) temperature of the black body
+ * @param[in] double w     The blackbody dilution factor for the cell
+ *
+ * @return  double j_bar  The mean intensity at a specific frequency
+ *
+ * @details
+ *
+ * The temperature of the blackbody is the radiation temperature of the cell,
+ * as such we also pass the dilution factor of the same cell.
+ *
+ **********************************************************/
+
+double
+mean_intensity_bb_estimate (double freq, double t_r, double w)
+{
+  double j_bar, exponent;
+
+  exponent = PLANCK * freq / BOLTZMANN / t_r;
+  j_bar = 2 * PLANCK * pow (freq, 3) / VLIGHT / VLIGHT;
+  j_bar *= 1 / (exp (exponent) - 1);
+  j_bar *= w;
+
+  return j_bar;
 }

@@ -305,8 +305,6 @@ ds_to_wind (pp, ndom_current)
 
     else if (zdom[ndom].wind_type == CORONA || (zdom[ndom].wind_type == IMPORT && zdom[ndom].coord_type == CYLIND))
     {
-
-
       x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
       if (x > 0 && x < ds)
       {
@@ -315,7 +313,6 @@ ds_to_wind (pp, ndom_current)
         rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
         if (zdom[ndom].wind_rhomin_at_disk <= rho && rho <= zdom[ndom].wind_rhomax_at_disk)
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_ZMIN;
@@ -329,7 +326,6 @@ ds_to_wind (pp, ndom_current)
         rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
         if (zdom[ndom].wind_rhomin_at_disk <= rho && rho <= zdom[ndom].wind_rhomax_at_disk)
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_ZMAX;
@@ -343,9 +339,7 @@ ds_to_wind (pp, ndom_current)
         move_phot (&qtest, x);
         z = fabs (qtest.x[2]);
         if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
-
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_INNER_RHO;
@@ -360,37 +354,22 @@ ds_to_wind (pp, ndom_current)
         z = fabs (qtest.x[2]);
         if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
         {
-
           ds = x;
           *ndom_current = ndom;
           xxxbound = BOUND_OUTER_RHO;
         }
       }
-
     }
     else
     {
       Error ("ds_to_wind:Do not know how to deal with this combination of coordinate type %d and wind_type %d\n", zdom[ndom].coord_type,
              zdom[ndom].wind_type);
       Exit (0);
-
     }
-
   }
-
 
   return (ds);
 }
-
-
-/** Added because there were cases where the number
- * of photons passing through a cell with a neglible volume was becoming
- * too large and stopping the program.  This is a bandaide since if this
- * is occurring a lot we should be doing a better job at calculating the
- * volume
- */
-int neglible_vol_count = 0;
-int translate_in_wind_failure = 0;
 
 /**********************************************************/
 /**
@@ -426,48 +405,126 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      PhotPtr p;
      double tau_scat, *tau;
      int *nres;
-
-
 {
-
   int n;
-  double smax, s, ds_current, ds_cmf;
+  double smax, ds_current, ds_cmf;
   int istat;
   int nplasma;
-  int ndom, ndom_current;
-  int inwind;
-  int hit_disk;
 
   WindPtr one;
   PlasmaPtr xplasma;
   struct photon phot_mid, phot_mid_cmf; // Photon at the midpt of its path in the cell
 
-
-/* First verify that the photon is in the grid, and if not
-return and record an error */
+  /* First verify that the photon is in the grid, and if not
+     return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
-//OLD    if (translate_in_wind_failure < 1000)
-//OLD    {
-//OLD     if (modes.save_photons)
-//OLD       {
-//OLD         save_photons (p, "NotInGrid_translate_in_wind");
-//OLD       }
-//OLD    }
     return (n);                 /* Photon was not in grid */
   }
-/* Assign the pointers for the cell containing the photon */
+  /* Assign the pointers for the cell containing the photon */
 
   one = &wmain[n];              /* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+
+  /* Calculate the maximum distance the photon can travel in the cell */
+
+  smax = smax_in_cell (p);
+
+  /* We now determine whether scattering prevents the photon from reaching the far edge of
+     the cell.  calculate_ds calculates whether there are scatterings and makes use of the
+     current position of the photon and the position of the photon at the far edge of the
+     shell.  It needs a "trial photon at the maximum distance however...
+     Note that ds_current does not alter p in any way */
+
+  ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
+
+  if (p->nres < 0)
+    xplasma->nscat_es++;
+  if (p->nres > 0)
+    xplasma->nscat_res++;
+
+  /* We now increment the radiation field in the cell, translate the photon and wrap
+   * things up.  For simple atoms, the routine radiation also reduces
+   * the weight of the photon due to continuum absorption, e.g. free free.
+   */
+
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    /* In the macro-method, b-f and other continuum processes do not reduce the photon
+       weight, but are treated as as scattering processes.  Therefore most of what was in
+       subroutine radiation for the simple atom case can be avoided.  
+     */
+    if (geo.ioniz_or_extract == CYCLE_IONIZ)
+    {
+      /* Provide inputs to bf_estimators in the local frame  */
+      stuff_phot (p, &phot_mid);
+      move_phot (&phot_mid, 0.5 * ds_current);
+      observer_to_local_frame (&phot_mid, &phot_mid_cmf);
+      ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
+      bf_estimators_increment (&w[p->grid], &phot_mid_cmf, ds_cmf);
+    }
+  }
+  else
+  {
+    radiation (p, ds_current);
+  }
+
+  move_phot (p, ds_current);
+
+  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
+  {
+    if (ds_current < wmain[p->grid].dfudge)
+    {
+      Error
+        ("translate_in_wind: uncaught repeated resonance scattering nres %5d after motion of %10.3e for photon %d in plasma cell %d)\n",
+         *nres, ds_current, p->np, wmain[p->grid].nplasma);
+    }
+  }
+
+  p->nres = *nres;
+
+  return (p->istat = istat);
+}
+
+
+
+
+/* ************************************************************************* */
+/**
+ * @brief           Calculate the maximum distance a photon can travel in its
+ *                  current cell.
+ *
+ * @param[in]       PhotPtr   p       The currently transported photon packet
+ *
+ * @return          double    smax    The maximum distance the photon packet
+ *                                    can move
+ *
+ * @details
+ *
+ * smax can be found in various ways depending on if the photon is in the wind
+ * or not.
+ *
+ * This section of code was put into its own function in an attempt to avoid
+ * code duplication for the optical depth diagnostic ray tracing thing.
+ *
+ * ************************************************************************** */
+
+double
+smax_in_cell (PhotPtr p)
+{
+  int n, ndom, ndom_current;
+  double s, smax;
+  int hit_disk;
+
+  WindPtr one;
+
+  n = p->grid;
+  one = &wmain[n];              /* one is the grid cell where the photon is */
   ndom = one->ndom;
-  inwind = one->inwind;
 
-
-
-/* Calculate the maximum distance the photon can travel in the cell */
+  /* Calculate the maximum distance the photon can travel in the cell */
 
   if ((smax = ds_in_cell (ndom, p)) < 0)
   {
@@ -487,7 +544,6 @@ return and record an error */
     smax += one->dfudge;
     move_phot (p, smax);
     return (p->istat);
-
   }
   else if (one->inwind == W_NOT_INWIND)
   {                             /* The cell is not in the wind at all */
@@ -499,84 +555,22 @@ return and record an error */
 
   }
 
-//OLD  if (modes.save_photons)
-//OLD  {
-//OLD    Diag ("smax  %10.3e tau_scat %10.3e tau %10.3e\n", smax, tau_scat, *tau);
-//OLD  }
-
-
-/* At this point we now know how far the photon can travel in it's current grid cell */
+  /* At this point we now know how far the photon can travel in it's current grid cell */
 
   smax += one->dfudge;          /* dfudge is to force the photon through the cell boundaries. */
 
-/* Set limits the distance a photon can travel.  There are
-a good many photons which travel more than this distance without this
-limitation, at least in the standard 30 x 30 instantiation.  It does
-make small differences in the structure of lines in some cases.
-The choice of SMAX_FRAC can affect execution time.*/
+  /* Set limits the distance a photon can travel.  There are
+     a good many photons which travel more than this distance without this
+     limitation, at least in the standard 30 x 30 instantiation.  It does
+     make small differences in the structure of lines in some cases.
+     The choice of SMAX_FRAC can affect execution time. */
 
   if (smax > SMAX_FRAC * length (p->x))
   {
     smax = SMAX_FRAC * length (p->x);
   }
 
-  /* We now determine whether scattering prevents the photon from reaching the far edge of
-     the cell.  calculate_ds calculates whether there are scatterings and makes use of the
-     current position of the photon and the position of the photon at the far edge of the
-     shell.  It needs a "trial photon at the maximum distance however */
-
-
-/* Note that ds_current does not alter p in any way */
-
-  ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-
-  if (p->nres < 0)
-    xplasma->nscat_es++;
-  if (p->nres > 0)
-    xplasma->nscat_res++;
-
-
-
-/* We now increment the radiation field in the cell, translate the photon and wrap
-   things up.  For simple atoms, the routine radiation also reduces
-   the weight of the photon due to continuum absorption, e.g. free free.
-   */
-
-
-  if (geo.rt_mode == RT_MODE_MACRO)
-  {
-    /* In the macro-method, b-f and other continuum processes do not reduce the photon
-       weight, but are treated as as scattering processes.  Therefore most of what was in
-       subroutine radiation for the simple atom case can be avoided.  
-     */
-
-    one = &w[p->grid];
-    nplasma = one->nplasma;
-    xplasma = &plasmamain[nplasma];
-
-    /* Provide inputs to bf_estimators in the local frame  */
-    stuff_phot (p, &phot_mid);
-    move_phot (&phot_mid, 0.5 * ds_current);
-    observer_to_local_frame (&phot_mid, &phot_mid_cmf);
-    ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
-
-    if (geo.ioniz_or_extract == CYCLE_IONIZ)
-    {
-      bf_estimators_increment (one, &phot_mid_cmf, ds_cmf);
-    }
-  }
-  else
-  {
-    radiation (p, ds_current);
-  }
-
-  move_phot (p, ds_current);
-
-  p->nres = (*nres);
-
-  return (p->istat = istat);
-
-
+  return smax;
 }
 
 
@@ -608,30 +602,16 @@ ds_in_cell (ndom, p)
      PhotPtr p;
 
 {
-
   int n;
   double smax;
 
-  WindPtr one;
-
-
-/* First verify that the photon is in the grid, and if not
-return and record an error */
+  /* First verify that the photon is in the grid, and if not
+     return and record an error */
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
-//OLD      if (modes.save_photons)
-//OLD   {
-//OLD     save_photons (p, "NotInGrid_ds_in_cell");
-//OLD   }
     return (n);
   }
-
-/* Assign the pointers for the cell containing the photon */
-
-  one = &wmain[n];              /* one is the grid cell where the photon is */
-
-/* Calculate the maximum distance the photon can travel in the cell */
 
   if (zdom[ndom].coord_type == CYLIND)
   {
@@ -651,9 +631,9 @@ return and record an error */
   }
   else
   {
+    smax = 0;
     Error ("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
     Exit (0);
-    return (0);
   }
 
   return (smax);

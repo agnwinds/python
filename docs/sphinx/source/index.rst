@@ -20,7 +20,10 @@ The name Python is today unfortunate, and changing the name is an ongoing debate
 The program is written in C and can be compiled on systems runining various flavors of linux, including OSX on Macs.
 
 
-The code is is available on `github <https://github.com/agnwinds/python>`_
+The code is is available on `github <https://github.com/agnwinds/python>`_  Issues regarding the code and suggestions for improvement the code regarding the should be reported there.  We actively 
+encourage other to make use of the code for their own science.  If anyone has questions about 
+whether the code might be useful for a project, we encourage you to contact one of the authors of
+the code.
 
 
 -------------
@@ -53,7 +56,7 @@ Nick Higginbottom
   Department of Physics and Astronomy, University of Southampton, Southampton, SO17 1BJ, UK
 
 James Matthews
-  University of Oxford, Astrophysics, Keble Road, Oxford, OX1 3RH, UK
+  Institute of Astronomy, University of Cambridge, Cambridge, CB3 0HA, UK
 
 Sam Mangham
   Department of Physics and Astronomy, University of Southampton, Southampton, SO17 1BJ, UK
@@ -72,9 +75,16 @@ Mandy Hewitt
    :hidden:
    :caption: Documentation
 
+   quick
    installation
    running_python
    input
    output
+   evaluation
+   wind_models
+   radiation_sources
    examples
+   disk
+   ionization_cycles
+   spectral_cycles
    *

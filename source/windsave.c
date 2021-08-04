@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <sys/stat.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -53,8 +54,8 @@ int
 wind_save (filename)
      char filename[];
 {
-  FILE *fptr, *fopen ();
-  char line[LINELENGTH];
+  FILE *fptr;
+  char header[LINELENGTH];
   int n, m;
 
   if ((fptr = fopen (filename, "w")) == NULL)
@@ -63,8 +64,8 @@ wind_save (filename)
     Exit (0);
   }
 
-  sprintf (line, "Version %s\n", VERSION);
-  n = fwrite (line, sizeof (line), 1, fptr);
+  sprintf (header, "Version %s\n", VERSION);
+  n = fwrite (header, sizeof (header), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
   n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
@@ -178,18 +179,19 @@ int
 wind_read (filename)
      char filename[];
 {
-  FILE *fptr, *fopen ();
+  FILE *fptr;
   int n, m;
-  char line[LINELENGTH];
+  char header[LINELENGTH];
   char version[LINELENGTH];
+  struct stat file_stat;        // Used to check the atomic data exists
 
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     return (-1);
   }
 
-  n = fread (line, sizeof (line), 1, fptr);
-  sscanf (line, "%*s %s", version);
+  n = fread (header, sizeof (header), 1, fptr);
+  sscanf (header, "%*s %s", version);
   Log ("Reading Windfile %s created with python version %s with python version %s\n", filename, version, VERSION);
 
   /* Now read in the geo structure */
@@ -202,8 +204,16 @@ wind_read (filename)
    * with macro atoms, especially but likely to be a good idea ovrall
    */
 
-  get_atomic_data (geo.atomic_filename);
+  if (stat (geo.atomic_filename, &file_stat))
+  {
+    if (system ("Setup_Py_Dir"))
+    {
+      Error ("Unable to open %s or create link for atomic data\n", geo.atomic_filename);
+      Exit (1);
+    }
+  }
 
+  get_atomic_data (geo.atomic_filename);
 
 /* Now allocate space for the wind array */
 
@@ -385,22 +395,34 @@ spec_save (filename)
      char filename[];
 {
 
-  FILE *fptr, *fopen ();
-  char line[LINELENGTH];
-  int n;
+  FILE *fptr;
+  char header[LINELENGTH];
+  int count;
+  int i;
 
   if ((fptr = fopen (filename, "w")) == NULL)
   {
     Error ("spec_save: Unable to open %s\n", filename);
-    Exit (0);
+    Exit (EXIT_FAILURE);
   }
 
-  sprintf (line, "Version %s  nspectra %d\n", VERSION, nspectra);
-  n = fwrite (line, sizeof (line), 1, fptr);
-  n += fwrite (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
+  sprintf (header, "Version %s  nspectra %d NWAVE_IONIZ %d NWAVE_EXTRACT %d NWAVE_MAX %d\n", VERSION, nspectra, NWAVE_IONIZ,
+           NWAVE_EXTRACT, NWAVE_MAX);
+
+  count = (int) fwrite (header, sizeof (header), 1, fptr);
+  count += (int) fwrite (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
+
+  for (i = 0; i < nspectra; ++i)
+  {
+    count += (int) fwrite (xxspec[i].f, sizeof (*xxspec[i].f), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE_MAX, fptr);
+    count += (int) fwrite (xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE_MAX, fptr);
+  }
+
   fclose (fptr);
 
-  return (n);
+  return (count);
 }
 
 
@@ -430,41 +452,62 @@ int
 spec_read (filename)
      char filename[];
 {
-  FILE *fptr, *fopen ();
-  int n;
-
-  char line[LINELENGTH];
+  FILE *fptr;
+  int nhead, nwave_ioniz_check;
+  int count;
+  int i;
+  char header[LINELENGTH];
   char version[LINELENGTH];
 
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("spec_read: Unable to open %s\n", filename);
-    Exit (0);
+    Exit (1);
   }
 
-  n = fread (line, sizeof (line), 1, fptr);
+  count = (int) fread (header, sizeof (header), 1, fptr);
 
-  sscanf (line, "%*s %s %*s %d", version, &nspectra);
-  Log ("Reading specfile %s with %d spectra created with python version %s with python version %s\n", filename, nspectra, version, VERSION);
+  nhead = sscanf (header, "%*s %s %*s %d %*s %d %*s %d %*s %d", version, &nspectra, &nwave_ioniz_check, &NWAVE_EXTRACT, &NWAVE_MAX);
+  if (nhead != 5)
+  {
+    Error ("Incorrect header format in %s\n", files.specsave);
+    Exit (EXIT_FAILURE);
+  }
+  if (nwave_ioniz_check != (int) NWAVE_IONIZ)
+  {
+    Error ("The current NWAVE_IONIZ (%d) value is incompatible with the spec_save file which has NWAVE_IONIZ = %d\n", NWAVE_IONIZ,
+           nwave_ioniz_check);
+    Exit (EXIT_FAILURE);
+  }
 
+  Log ("Reading specfile %s with %d spectra and %d wavelength bins, created with python version %s and currently using python version %s\n",
+       filename, nspectra, NWAVE_EXTRACT, version, VERSION);
 
   /* First allocate space */
 
-  xxspec = calloc (sizeof (spectrum_dummy), nspectra);
+  xxspec = calloc (nspectra, sizeof (spectrum_dummy));
   if (xxspec == NULL)
   {
-    Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspectra, NWAVE);
-    Exit (0);
+    Error ("spectrum_init: Could not allocate memory for %d spectra\n", nspectra);
+    Exit (EXIT_FAILURE);
   }
+  count += (int) fread (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
 
-/* Now read the rest of the file */
+  /* Now read the rest of the file */
 
-  n += fread (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
+  spectrum_allocate (nspectra);
+  for (i = 0; i < nspectra; ++i)
+  {
+    count += (int) fread (xxspec[i].f, sizeof (*xxspec[i].f), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].lf, sizeof (*xxspec[i].lf), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].f_wind, sizeof (*xxspec[i].f_wind), NWAVE_MAX, fptr);
+    count += (int) fread (xxspec[i].lf_wind, sizeof (*xxspec[i].lf_wind), NWAVE_MAX, fptr);
+  }
 
   fclose (fptr);
 
   Log ("Read spec structures from specfile %s\n", filename);
 
-  return (n);
+  return (count);
 
 }

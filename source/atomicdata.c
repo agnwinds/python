@@ -15,12 +15,18 @@
 #include <math.h>
 
 #include "atomic.h"
+#include "python.h"
+
 #include "log.h"
 // If routines are added cproto > atomic_proto.h should be run
 #include "atomic_proto.h"
 
 #define LINELENGTH 400
 #define MAXWORDS    20
+#define TRUE         1
+#define FALSE        0
+#define UNKNOWN     -1
+
 
 
 /**********************************************************/
@@ -283,19 +289,22 @@ structure does not have this property! */
  *
  * A typical element has the following format
  *
- *  Element    6    C    8.56
+ *  Element    6    C    8.56    12.011
  *
- * where 6 here refers to z of the elemnt, C is the name, and 8.56 is the abundance relative to H at 12
+ * where 6 here refers to z of the elemnt, C is the name, and 8.56 is the number abundance relative to H at 12
+ * and 12.011 is the atomic weight.
  *
  * */
         case 'e':
-          if (sscanf (aline, "%*s %d %s %le", &ele[nelements].z, ele[nelements].name, &ele[nelements].abun) != 3)
+          if (sscanf (aline, "%*s %d %s %le %le", &ele[nelements].z, ele[nelements].name,
+                      &ele[nelements].abun, &ele[nelements].atomic_weight) != 4)
           {
             Error ("Get_atomic_data: file %s line %d: Element line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
           }
-          ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);  /* Immediate replace by number density relative to H */
+          /* Immediate replace by number density relative to H */
+          ele[nelements].abun = pow (10., ele[nelements].abun - 12.0);
           nelements++;
           if (nelements > NELEMENTS)
           {
@@ -372,10 +381,10 @@ structure does not have this property! */
           ion[nions].ip = p * EV2ERGS;
           ion[nions].nmax = nmax;
 /* Use the keyword IonM to classify the ion as a macro-ion (IonM) or not (simply Ion) */
-          if (ion[nions].g != 1 && ion[nions].istate == (ion[nions].z + 1)) // RG addressing bug #749
+          if (ion[nions].g != 1 && ion[nions].istate == (ion[nions].z + 1))     // RG addressing bug #749
           {
-              Error("g is >1 for bare ion! setting to 1\n");
-              ion[nions].g = 1;
+            Error ("g is >1 for bare ion! setting to 1\n");
+            ion[nions].g = 1;
           }
           if (strncmp (word, "IonM", 4) == 0)
           {
@@ -544,7 +553,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             istate = iistate;
             z = zz;
             gg = ggg;
-            exx *= EV2ERGS;     // Convert energy to ergs
+            exx *= EV2ERGS;
           }
           else
           {
@@ -553,7 +562,10 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             exit (0);
             return (0);
           }
-// Now check that the ion for this level is already known.  If not break out
+
+/* Now check that the ion for this level is known, and that the number of levels does not exceed the maximum
+   specified..  If not break out */
+
           n = 0;
           while ((ion[n].z != z || ion[n].istate != istate) && n < nions)
             n++;
@@ -564,21 +576,16 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             break;
           }
 
-          /* Check that for a non-lte (macro atom) that the configuration level is not greater than was allowed for in the
-           * ion line
-           */
 
           if (lev_type == 1 && ilv > ion[n].n_lte_max)
           {
             Error ("get_atomic_data: macro level %3d ge %3d for z %3d  istate %3d\n", ilv, ion[n].n_lte_max, ion[n].z, ion[n].istate);
-            //exit(0);
             break;
           }
 
-/*  So now we know that this level can be associated with an ion
-
-Now either set the type of level that will be used for this ion or set it if
-a level type has not been established
+/*  So now we know that this level can be associated with an ion.  Now either
+    verify that the level type is the same that has been established previouly
+    or set the level type for this ion.
 		   */
 
           if (ion[n].lev_type == (-1))
@@ -611,7 +618,6 @@ a level type has not been established
           }
 
 
-          // case where data will be used (SS)
           if (mflag == 1)
           {
             config[nlevels].macro_info = 1;
@@ -644,25 +650,17 @@ a level type has not been established
           config[nlevels].istate = istate;
           config[nlevels].isp = islp;
           config[nlevels].ilv = ilv;
-          config[nlevels].nion = n;     //Internal index to ion structure
+          config[nlevels].nion = n;
           config[nlevels].q_num = qqnum;
           config[nlevels].g = gg;
           config[nlevels].ex = exx;
           config[nlevels].rad_rate = rl;
-          /* SS Aug 2005
-             Previously, the line above set the rad_rate to 0 and is was never used.
-             Now I'm setting it to the radiative lifetime of the level.
-             It will now be used in the macro atom calculation - if the lifetime is
-             set to be long (infinite) in the input data, the level is assumed to be
-             collisional supported by the ground state (i.e. has the LTE excitation
-             fraction relative to ground).
-           */
 
 
           if (ion[n].n_lte_max > 0)
-          {                     // Then this ion wants nlte levels
+          {
             if (ion[n].first_nlte_level < 0)
-            {                   // Then this is the first one that has been found
+            {
               ion[n].first_nlte_level = nlevels;
               ion[n].nlte = 1;
               config[nlevels].nden = ion[n].first_levden;
@@ -683,10 +681,7 @@ a level type has not been established
           }
 
 
-/* Now associate this config with the levden array where appropriate.  The -1 is because ion[].nlte
-is already incremented
-
-*/
+/* Now associate this config with the levden array where appropriate.  */
 
           if (ion[n].firstlevel < 0)
           {
@@ -695,8 +690,6 @@ is already incremented
           }
           else
             ion[n].nlevels++;
-
-
 
           nlevels++;
 
@@ -2485,16 +2478,19 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 /* Now begin a series of calculations with the data that has been read in in order
 to prepare it for use by other programs*/
 
-/* Calculate the conversion factor between rho and nh.  Note that our approximation here is
-somewhat inexact  because it assumes all elements have equal neutrons and protons. */
+/* Calculate the conversion factor between rho and nh.  See #802 where the previous
+ * approximation was improved to use atomc weights and not simply a factor of 2 times
+ * the number of electrons 
+ */
 
-  q = 1.;
-  for (nelem = 1; nelem < nelements; nelem++)
+  q = 0.;
+  for (nelem = 0; nelem < nelements; nelem++)
   {
-    q += ele[nelem].abun * 2. * ele[nelem].z;
+    q += ele[nelem].abun * ele[nelem].atomic_weight;
   }
 
   q = MPROT * q;
+  q /= ele[0].atomic_weight;
   rho2nh = 1. / q;
 
 
@@ -2595,6 +2591,19 @@ or zero so that simple checks of true and false can be used for them */
     }
   }
 
+
+  if (geo.ioniz_mode > 4)       //Only do this check if we are requiring an ionization mode that needs PI rates
+  {
+    for (n = 0; n < nions; n++)
+    {
+      if (ion[n].phot_info < 0 && ion[n].istate != ion[n].z + 1)
+      {
+        Error ("There is no PI rate associated with ion %d (element %d ion %d) - use a simpler ionization scheme or add PI rates\n", n,
+               ion[n].z, ion[n].istate);
+        exit (0);
+      }
+    }
+  }
 
 
 

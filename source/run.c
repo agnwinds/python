@@ -27,14 +27,13 @@
 #include "atomic.h"
 #include "python.h"
 
-
 /**********************************************************/
 /** 
  * @brief      run the ionization cycles for a 
  * python model
  *
- * @param [in] int  restart_stat   0 if the is run is beginning from
- * scratch,  non-zero if this was a restart
+ * @param [in] int  restart_stat   FALSE if the is run is beginning from
+ * scratch,  TRUE if this was a restart
  * @return     Always returns 0 
  *
  * @details
@@ -62,9 +61,6 @@ calculate_ionization (restart_stat)
   int iwind;
 
 
-//OLD #ifdef MPI_ON
-//OLD   int ioniz_spec_helpers;
-//OLD #endif
 
   /* Save the the windfile before the first ionization cycle in order to
    * allow investigation of issues that may have arisen at the very beginning
@@ -87,11 +83,6 @@ calculate_ionization (restart_stat)
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
-//OLD #ifdef MPI_ON
-//OLD   /* the length of the big arrays to help with the MPI reductions of the spectra
-//OLD      the variables for the estimator arrays are set up in the subroutines themselves */
-//OLD   ioniz_spec_helpers = 2 * MSPEC * NWAVE;       //we need space for log and lin spectra for MSPEC XNWAVE
-//OLD #endif
 
 /* THE CALCULATION OF THE IONIZATION OF THE WIND */
 
@@ -118,6 +109,12 @@ calculate_ionization (restart_stat)
 
 
 /* BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
+
+  if (modes.load_rng && geo.wcycle > 0)
+  {
+    reload_gsl_rng_state ();
+    modes.load_rng = FALSE;
+  }
 
   while (geo.wcycle < geo.wcycles)
   {                             /* This allows you to build up photons in bunches */
@@ -162,7 +159,7 @@ calculate_ionization (restart_stat)
       }
     }
 
-    Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle);
+    Log ("!!Python: %1.2e photons will be transported for cycle %i\n", (double) NPHOT, geo.wcycle + 1);
 
     /* Create the photons that need to be transported through the wind
      *
@@ -371,6 +368,11 @@ calculate_ionization (restart_stat)
     MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
+    if (modes.save_rng)
+    {
+      save_gsl_rng_state ();
+    }
+
     check_time (files.root);
     Log_flush ();               /*Flush the logfile */
 
@@ -396,8 +398,8 @@ calculate_ionization (restart_stat)
 /** 
  * @brief      generates the detailed spectra
  *
- * @param [in, out] int  restart_stat   0 if the is run is beginning from
- * scratch, non-zero if this was a restart 
+ * @param [in] int  restart_stat   FALSE if the is run is beginning from
+ * scratch, TRUE if this was a restart
  * @return     Always returns EXIT_SUCCESS
  *
  * @details
@@ -423,7 +425,6 @@ make_spectra (restart_stat)
 
 #ifdef MPI_ON
   char dummy[LINELENGTH];
-  int spec_spec_helpers;
 #endif
 
   int icheck;
@@ -431,14 +432,8 @@ make_spectra (restart_stat)
   p = photmain;
   w = wmain;
 
-  freqmax = VLIGHT / (geo.swavemin * 1.e-8);
-  freqmin = VLIGHT / (geo.swavemax * 1.e-8);
-
-#ifdef MPI_ON
-  /* the length of the big arrays to help with the MPI reductions of the spectra
-     the variables for the estimator arrays are set up in the subroutines themselves */
-  spec_spec_helpers = (NWAVE * (MSPEC + geo.nangles));  //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
-#endif
+  freqmax = VLIGHT / (geo.swavemin * ANGSTROM);
+  freqmin = VLIGHT / (geo.swavemax * ANGSTROM);
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
      calculation of the spectrum.  
@@ -502,8 +497,7 @@ make_spectra (restart_stat)
   /* the next condition should only occur when one has nothing more to do */
 
   else if (geo.pcycle >= geo.pcycles)
-    xsignal (files.root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
-
+    xsignal (files.root, "%-20s No spectrum needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
   else
   {
     /* Then we are restarting a run with more spectral cycles, but we 
@@ -512,19 +506,22 @@ make_spectra (restart_stat)
        on the original run, so we just need to renormalise the saved spectrum */
     /* See issue #134 and #503  */
 
-    if (restart_stat == 0)
+    if (restart_stat == FALSE)
       Error ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n", geo.pcycle);
 
     spectrum_restart_renormalise (geo.nangles);
   }
 
+  if (modes.load_rng && geo.pcycle > 0)
+  {
+    reload_gsl_rng_state ();
+    modes.load_rng = FALSE;
+  }
 
   while (geo.pcycle < geo.pcycles)
   {                             /* This allows you to build up photons in bunches */
 
     xsignal (files.root, "%-20s Starting %3d of %3d spectrum cycles \n", "NOK", geo.pcycle + 1, geo.pcycles);
-
-
 
     Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle + 1, geo.pcycles);
     Log_flush ();
@@ -550,13 +547,6 @@ make_spectra (restart_stat)
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
-//OLD    if (modes.save_photons)
-//OLD    {
-//OLD      for (n = 0; n < NPHOT; n++)
-//OLD      {
-//OLD        save_photons (&p[n], "CREATE");
-//OLD      }
-//OLD    }
 
     for (icheck = 0; icheck < NPHOT; icheck++)
     {
@@ -578,7 +568,6 @@ make_spectra (restart_stat)
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-//OLD    gather_spectra_para (spec_spec_helpers, nspectra);
     gather_spectra_para ();
 #endif
 
@@ -615,6 +604,11 @@ make_spectra (restart_stat)
 #ifdef MPI_ON
     }
 #endif
+    if (modes.save_rng)
+    {
+      save_gsl_rng_state ();
+    }
+
     check_time (files.root);
   }
 
