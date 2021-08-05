@@ -774,7 +774,8 @@ kpkt (p, nres, escape, mode)
   cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;
   cooling_adiabatic = 0.0;
 
-  if (mode == KPKT_MODE_ALL)
+  /* if kpkt mode is all processes, or continuum + adiabatic, then include adiabatic cooling */
+  if (mode == KPKT_MODE_ALL || mode == KPKT_MODE_CONT_PLUS_ADIABATIC)
   {
     if (KPKT_NET_HEAT_MODE && geo.nonthermal)
     {
@@ -789,6 +790,18 @@ kpkt (p, nres, escape, mode)
     }
   }
   cooling_normalisation += cooling_adiabatic;
+
+  // if (mode == KPKT_MODE_ALL)
+  // {
+  //   cooling_bb = mplasma->cooling_bb;
+  //   cooling_bf_col = mplasma->cooling_bf_col;
+  // }
+  // else
+  // {
+  //   cooling_bb = cooling_bf_col = 0.0;
+  //   cooling_normalisation -= mplasma->cooling_bb;
+  //   cooling_normalisation -= mplasma->cooling_bf_col;
+  // }
 
 
   /* The cooling rates for the recombination and collisional processes are now known. 
@@ -875,6 +888,7 @@ kpkt (p, nres, escape, mode)
         {
           *escape = TRUE;
           p->freq = line[i].freq;
+          printf ("COLL FAKE MATOM nres %d escape %d %8.4e\n", *nres, *escape, VLIGHT / line[i].freq / 1e-8);
         }
         return (0);
       }
@@ -909,7 +923,7 @@ kpkt (p, nres, escape, mode)
   {
     /* It is a k-packat that is destroyed by adiabatic cooling */
 
-    if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
+    if (geo.adiabatic == 0 || mode == KPKT_MODE_CONTINUUM)
     {
       Error ("kpkt: Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }

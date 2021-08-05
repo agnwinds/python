@@ -1482,6 +1482,7 @@ files;
 /* modes for kpkt calculations */
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */
+#define KPKT_MODE_CONT_PLUS_ADIABATIC 2 /* account for k->r and adiabatic destruction */
 
 /* this variable controls whether to use the 
    Altered mode for bound-free in "simple-macro mode" */

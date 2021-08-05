@@ -68,6 +68,60 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
   int n_jump_tot = 0;
   int n_loop = 0;
 
+  /* before we do anything else we look to see if we are exciting 
+     simple/fake two-level ions */
+  if (matom_or_kpkt == MATOM)
+  {
+    escape = FALSE;
+
+    /*  it's a bb transition  without the full macro atom treatment. */
+    if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
+    {
+      fake_matom_bb (p, nres, &escape);
+    }
+
+    /* if it's bf continuum without the full macro atom treatment. 
+
+       In the pre-2018 approach, we process the photon in a way that makes it return a bf photon of the same type
+       as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
+       In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
+       is thrown and we exit. */
+
+    else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
+    {
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+      Error ("Macro_gov: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+      Exit (0);
+#endif
+      fake_matom_bf (p, nres, &escape);
+    }
+
+    /* at this point it has either generated an r-packet (escape == TRUE)
+       or a k-packet (escape == FALSE) */
+    if (escape == TRUE)
+    {
+      return (0);
+    }
+    else
+    {
+      matom_or_kpkt = KPKT;
+    }
+  }
+
+  /* if we got here then we know we are exciting a macro-atom or creating a kpkt */
+  if (geo.matom_radiation == 1)
+  {
+    /* During the spectrum cycles we want to throw these photons away. */
+    p->w = 0.0;
+    escape = TRUE;
+    return (0);
+  }
+  else
+  {
+    /* start with it not being ready to escape as an r-packet */
+    escape = FALSE;
+  }
+
 #if (MATOM_TRANSITION_MODE == MATRIX)
   PlasmaPtr xplasma;
   WindPtr one;
@@ -101,32 +155,30 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     uplvl = nlevels_macro;
   }
 
-  if (geo.matom_radiation == 1)
-  {
-    /* During the spectrum cycles we want to throw these photons away. */
-    p->w = 0.0;
-    escape = TRUE;
-    return (0);
-  }
-
   new_uplvl = matom_deactivation_from_matrix (xplasma, uplvl);
 
-  /* XMACRO -- need to deal with kpackets */
   if (new_uplvl == nlevels_macro)
   {
-    kpkt (p, nres, &escape, KPKT_MODE_CONTINUUM);
+    /* XMACRO improve this so that kpkt only deals with k->r in certain modes */
+    while (escape == FALSE)
+    {
+      kpkt (p, nres, &escape, KPKT_MODE_ALL);
+    }
+
+    *which_out = KPKT;
   }
+  /* XMACRO -- what do we do about frequency boundaries here? */
+  /* XMACRO -- change wmain to be one? */
   else
   {
     emit_matom (wmain, p, nres, new_uplvl, 0, VERY_BIG);
+    *which_out = MATOM;
   }
 
   escape = TRUE;
   return (0);
 
 #else
-  escape = FALSE;               //start with it not being ready to escape as an r-packet
-
   /* Beginning of the main loop for processing a macro-atom */
   while (escape == FALSE)
   {
@@ -136,101 +188,45 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       /* if it's a bb transition of a full macro atom  */
       if (*nres > (-1) && *nres < NLINES && geo.macro_simple == FALSE && lin_ptr[*nres]->macro_info == TRUE)
       {
+        n_jump = matom (p, nres, &escape);
 
-        if (geo.matom_radiation == 1)
+        if (escape == TRUE)
         {
-          /* During the spectrum cycles we want to throw these photons away. */
-          p->w = 0.0;
-          escape = TRUE;
-        }
-        else
-        {
-          n_jump = matom (p, nres, &escape);
+          /* It escapes as a r-packet that was created by de-activation of a macro atom.
+           */
+          *which_out = MATOM;
 
-          if (escape == TRUE)
-          {
-            /* It escapes as a r-packet that was created by de-activation of a macro atom.
-             */
-            *which_out = MATOM;
-
-            /* Update the the photon origin to indicate the packet has been processed
-               by a macro atom */
-            if (p->origin < 10)
-              p->origin += 10;
-            return (0);
-          }
+          /* Update the the photon origin to indicate the packet has been processed
+             by a macro atom */
+          if (p->origin < 10)
+            p->origin += 10;
+          return (0);
         }
       }
 
-      /*  XMACRO -- Need to include simple/fake ions in matrix scheme */
-      /*  if it's a bb transition  without the full macro atom treatment. */
-      else if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
-      {
-#if (MATOM_TRANSITION_MODE == MATRIX)
-        Error ("Simple ions don't work with matrix scheme! Abort!");
-        Exit (0);
-#else
-        fake_matom_bb (p, nres, &escape);
-#endif
-      }
-
-      /* if it's bf tranisition of a full macro atom. */
+      /* if it's bf transition of a full macro atom. */
       else if (*nres > NLINES && phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == FALSE)
       {
+        n_jump = matom (p, nres, &escape);
 
-        if (geo.matom_radiation == 1)
+        if (escape == TRUE)
         {
-          /* During the spectrum cycles we want to throw these photons away. */
-          p->w = 0.0;
-          escape = TRUE;
-        }
-        else
-        {
-          n_jump = matom (p, nres, &escape);
+          /* It  escapes as a r-packet that was created by de-activation of a macro atom.
+           */
+          *which_out = MATOM;
+          /* Update the the photon origin to indicate the packet has been processed
+             by a macro atom */
+          if (p->origin < 10)
+            p->origin += 10;
 
-          if (escape == TRUE)
+          //If reverb is on, and this is the last ionisation cycle, then track the photon path
+          if (geo.reverb == REV_MATOM && geo.ioniz_or_extract == CYCLE_IONIZ && geo.fraction_converged > geo.reverb_fraction_converged)
           {
-            /* It  escapes as a r-packet that was created by de-activation of a macro atom.
-             */
-            *which_out = MATOM;
-            /* Update the the photon origin to indicate the packet has been processed
-               by a macro atom */
-            if (p->origin < 10)
-              p->origin += 10;
-
-            //If reverb is on, and this is the last ionisation cycle, then track the photon path
-            if (geo.reverb == REV_MATOM && geo.ioniz_or_extract == CYCLE_IONIZ && geo.fraction_converged > geo.reverb_fraction_converged)
-            {
-              line_paths_add_phot (&(wmain[p->grid]), p, nres);
-            }
-
-            return (0);
+            line_paths_add_phot (&(wmain[p->grid]), p, nres);
           }
+
+          return (0);
         }
-      }
-
-      /* if it's bf continuum without the full macro atom treatment. 
-
-         In the pre-2018
-         approach, we process the photon in a way that makes it return a bf photon of the same type
-         as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
-         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
-         is thrown and we exit. */
-
-      else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
-      {
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
-        Exit (0);
-#endif
-
-        /*  XMACRO -- Need to include simple/fake ions in matrix scheme */
-#if (MATOM_TRANSITION_MODE == MATRIX)
-        Error ("Simple ions don't work with matrix scheme! Abort!");
-        Exit (0);
-#else
-        fake_matom_bf (p, nres, &escape);
-#endif
       }
 
       /* If it did not escape then it must have had a
@@ -245,16 +241,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
        section of the loop that deals with kpts */
     else if (matom_or_kpkt == KPKT)
     {
-      if (geo.matom_radiation == 1)
-      {
-        /* During the spectrum cycles we want to throw these photons away. */
-        p->w = 0.0;
-        escape = TRUE;          /* This doesn't matter but it breaks us out of the loop */
-      }
-      else
-      {
-        kpkt (p, nres, &escape, KPKT_MODE_ALL); // 1 implies include the possibility of deactivation due to non-thermal processes
-      }
+      kpkt (p, nres, &escape, KPKT_MODE_ALL);   // 1 implies include the possibility of deactivation due to non-thermal processes
 
       /* if it did not escape then the k-packet must have been
          destroyed by collisionally exciting a macro atom so...
@@ -266,6 +253,8 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       Error ("macro_gov: Unknown choice for next action. Abort.\n");
       Exit (0);
     }
+
+
     /*XXXX test */
     if (n_jump > -1)
     {
