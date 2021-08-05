@@ -137,6 +137,19 @@ get_line_transfer_mode ()
     Exit (0);
   }
 
+  /* read in variables to set the transition mode form macro-atoms */
+  /* an adaptive mode might be added in future */
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    /* XMACRO -- these options MUST be consistent with the define statements in python.h */
+    geo.matom_transition_mode = rdchoice ("Matom_transition_mode(mc_jumps,matrix)", "0,1", answer);
+
+    if (geo.matom_transition_mode == MATRIX && geo.store_matom_matrix == TRUE)
+    {
+      Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n")
+    }
+  }
+
   /* With the macro atom approach we won't want to generate photon 
      bundles in the wind so switch it off here. If not in macro atom mode
      ask the user whether we want the wind to radiate
@@ -149,8 +162,9 @@ get_line_transfer_mode ()
   {
     strcpy (answer, "yes");
     geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
-
   }
+  
+
 
   /* Note the only other variable read in in this section is that for the atomic data,
      which can only be specified for a new model, becuase of various structures
