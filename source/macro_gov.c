@@ -78,6 +78,17 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
     {
       fake_matom_bb (p, nres, &escape);
+
+      /* at this point it has either generated an r-packet (escape == TRUE)
+         or a k-packet (escape == FALSE) */
+      if (escape == TRUE)
+      {
+        return (0);
+      }
+      else
+      {
+        matom_or_kpkt = KPKT;
+      }
     }
 
     /* if it's bf continuum without the full macro atom treatment. 
@@ -94,17 +105,17 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       Exit (0);
 #endif
       fake_matom_bf (p, nres, &escape);
-    }
 
-    /* at this point it has either generated an r-packet (escape == TRUE)
-       or a k-packet (escape == FALSE) */
-    if (escape == TRUE)
-    {
-      return (0);
-    }
-    else
-    {
-      matom_or_kpkt = KPKT;
+      /* at this point it has either generated an r-packet (escape == TRUE)
+         or a k-packet (escape == FALSE) */
+      if (escape == TRUE)
+      {
+        return (0);
+      }
+      else
+      {
+        matom_or_kpkt = KPKT;
+      }
     }
   }
 

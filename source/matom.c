@@ -888,7 +888,6 @@ kpkt (p, nres, escape, mode)
         {
           *escape = TRUE;
           p->freq = line[i].freq;
-          printf ("COLL FAKE MATOM nres %d escape %d %8.4e\n", *nres, *escape, VLIGHT / line[i].freq / 1e-8);
         }
         return (0);
       }
