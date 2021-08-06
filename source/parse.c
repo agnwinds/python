@@ -169,7 +169,7 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-no-matrix-storage") == 0)
       {
-        geo.store_matrix = FALSE;
+        geo.store_matom_matrix; = FALSE;
         Log ("Not storing the macro-atom matrix (on-the-fly method) if Matom.ransition_mode is matrix.\n");
         j = i;
       }
