@@ -999,15 +999,15 @@ matom_deactivation_from_matrix (xplasma, uplvl)
      int uplvl;
 {
   double z, total;
-  int j;
+  int j, i;
   int nrows = nlevels_macro + 1;
 #if (STORE_B_MATRIX == FALSE)
   /* we aren't storing the macro-atom matrix, so we need to allocate and calculate it */
   double **matom_matrix = (double **) calloc (sizeof (double *), nrows);
 
-  for (j = 0; j < nrows; j++)
+  for (i = 0; i < nrows; i++)
   {
-    matom_matrix[j] = (double *) calloc (sizeof (double), nrows);
+    matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
   }
   calc_matom_matrix (xplasma, matom_matrix);
 #else
@@ -1032,6 +1032,13 @@ matom_deactivation_from_matrix (xplasma, uplvl)
   {
     j = j - 1;
   }
+
+  /* need to free each calloc-ed row of the matrixes */
+  for (i = 0; i < nrows; i++)
+  {
+    free (matom_matrix[i]);
+  }
+  free (matom_matrix);
 
   return (j);
 }
