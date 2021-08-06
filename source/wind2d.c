@@ -314,7 +314,7 @@ define_wind ()
        this allows for a flexible scheme in future */
     for (n = 0; n < NPLASMA; n++)
     {
-      macromain[n].store_matom_matrix = geo.store_matom_matrix;
+      macromain[n].store_matom_matrix = modes.store_matom_matrix;
       macromain[n].matom_transition_mode = geo.matom_transition_mode;
     }
     calloc_matom_matrix (NPLASMA);

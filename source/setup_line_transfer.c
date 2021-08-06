@@ -142,11 +142,12 @@ get_line_transfer_mode ()
   if (geo.rt_mode == RT_MODE_MACRO)
   {
     /* XMACRO -- these options MUST be consistent with the define statements in python.h */
+    strcpy (answer, "mc_jumps");
     geo.matom_transition_mode = rdchoice ("Matom_transition_mode(mc_jumps,matrix)", "0,1", answer);
 
-    if (geo.matom_transition_mode == MATRIX && geo.store_matom_matrix == TRUE)
+    if (geo.matom_transition_mode == MATOM_MATRIX && modes.store_matom_matrix == TRUE)
     {
-      Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n")
+      Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n");
     }
   }
 
@@ -163,7 +164,7 @@ get_line_transfer_mode ()
     strcpy (answer, "yes");
     geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
   }
-  
+
 
 
   /* Note the only other variable read in in this section is that for the atomic data,

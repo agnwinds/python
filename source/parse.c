@@ -169,11 +169,11 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-no-matrix-storage") == 0)
       {
-        geo.store_matom_matrix = FALSE;
+        modes.store_matom_matrix = FALSE;
         Log ("Not storing the macro-atom matrix (on-the-fly method) if Matom.ransition_mode is matrix.\n");
         j = i;
       }
-      
+
       else if (strcmp (argv[i], "--version") == 0)
       {
         /* give information about the pyhon version, such as commit hash */
@@ -184,7 +184,7 @@ parse_command_line (argc, argv)
         if (git_diff_status > 0)
           Log ("This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
         exit (1);
-      } 
+      }
 
       else if (strcmp (argv[i], "-xtest") == 0)
       {

@@ -485,7 +485,8 @@ struct geometry
   int rt_mode;                  /* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
 
   /* define a global transition mode for macro-atoms */
-  int matom_transition_mode, store_matom_matrix;
+  /* the global storage mode is set in the modes structure */
+  int matom_transition_mode;
 
   /* Define the choices for calculating the FB, see, e.g. integ_fb */ 
 
@@ -1082,6 +1083,7 @@ typedef struct macro
      and used to select destruction rates for kpkts */
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
+  double cooling_bb_simple_tot;
   double cooling_ff, cooling_ff_lofreq;
   double cooling_adiabatic;     // this is just cool_adiabatic / vol / ne
 
@@ -1437,6 +1439,7 @@ struct advanced_modes
   int photon_speedup;
   int save_rng;                 // save the GSL RNG stage
   int load_rng;                 // load the GSL RNG state
+  int store_matom_matrix;       // store the macro-atom matrix 
 }
 modes;
 

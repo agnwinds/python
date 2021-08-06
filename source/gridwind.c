@@ -726,7 +726,9 @@ calloc_matom_matrix (nelem)
     }
   }
 
-  Log ("Allocated %10.4f Mb for MA matrix \n", 1.e-6 * (nelem + 1) * (nrows * nrows) * sizeof (double));
-
+  if (nlevels_macro > 0 && macromain[n].store_matom_matrix == TRUE)
+  {
+    Log ("Allocated %10.4f Mb for MA matrix \n", 1.e-6 * (nelem + 1) * (nrows * nrows) * sizeof (double));
+  }
   return (0);
 }

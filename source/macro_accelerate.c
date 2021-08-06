@@ -473,6 +473,7 @@ fill_kpkt_rates (xplasma, escape, p)
     cooling_bbtot = 0.0;
     cooling_ff = 0.0;
     cooling_bf_coltot = 0.0;
+    mplasma->cooling_bb_simple_tot = 0.0;
 
     /* Start of BF calculation */
     /* JM 1503 -- we used to loop over ntop_phot here, 
@@ -558,6 +559,7 @@ fill_kpkt_rates (xplasma, escape, p)
 
         cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
         mplasma->cooling_bb[i] = cooling_bb[i];
+        mplasma->cooling_bb_simple_tot += cooling_bb[i];
       }
 
       if (cooling_bb[i] < 0)
@@ -1014,7 +1016,7 @@ matom_deactivation_from_matrix (xplasma, uplvl)
       matom_matrix = (double **) calloc (sizeof (double *), nrows);
       for (i = 0; i < nrows; i++)
       {
-        matom_matrix[i = (double *) calloc (sizeof (double), nrows);
+        matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
       }
     }
     else
@@ -1025,7 +1027,7 @@ matom_deactivation_from_matrix (xplasma, uplvl)
     calc_matom_matrix (xplasma, matom_matrix);
 
     /* if we are storing the matrix, flag that we know the rates now */
-    if (mplasma->store_matom_matrix)
+    if (mplasma->store_matom_matrix == TRUE)
     {
       mplasma->matrix_rates_known = TRUE;
     }
@@ -1052,12 +1054,15 @@ matom_deactivation_from_matrix (xplasma, uplvl)
     j = j - 1;
   }
 
-  /* need to free each calloc-ed row of the matrixes */
-  for (i = 0; i < nrows; i++)
+  if (mplasma->store_matom_matrix == FALSE)
   {
-    free (matom_matrix[i]);
+    /* need to free each calloc-ed row of the matrixes */
+    for (i = 0; i < nrows; i++)
+    {
+      free (matom_matrix[i]);
+    }
+    free (matom_matrix);
   }
-  free (matom_matrix);
 
   return (j);
 }
