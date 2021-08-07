@@ -698,6 +698,7 @@ calloc_matom_matrix (nelem)
   int nrows = nlevels_macro + 1;
   int j, n;
   n = j = 0;
+  int nmatrices_allocated = 0;
   if (nlevels_macro == 0 && geo.nmacro == 0)
   {
     geo.nmacro = 0;
@@ -723,12 +724,13 @@ calloc_matom_matrix (nelem)
           Exit (0);
         }
       }
+      nmatrices_allocated += 1;
     }
   }
 
-  if (nlevels_macro > 0 && macromain[n].store_matom_matrix == TRUE)
+  if (nlevels_macro > 0 && nmatrices_allocated > 0)
   {
-    Log ("Allocated %10.4f Mb for MA matrix \n", 1.e-6 * (nelem + 1) * (nrows * nrows) * sizeof (double));
+    Log ("Allocated %10.4f Mb for MA matrix \n", 1.e-6 * (nmatrices_allocated + 1) * (nrows * nrows) * sizeof (double));
   }
   return (0);
 }
