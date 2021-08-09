@@ -133,6 +133,12 @@ calculate_ionization (restart_stat)
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
 
 
+    /* calculate the B matrices if we are using the matrix macro-atom transition mode */
+    if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0)
+    {
+      calc_all_matom_matrices ();
+    }
+
     geo.n_ioniz = 0.0;
     geo.cool_tot_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
