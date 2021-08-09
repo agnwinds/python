@@ -776,7 +776,7 @@ communicate_matom_matrices ()
   Log_parallel ("communicate_matom_matrices: communicting matom matrices.", rank_global, my_nmin, my_nmax);
 
   nrows = nlevels_macro + 1;
-  size_of_commbuffer = 8 * ((NPLASMA * nrows * nrows) + 2);
+  size_of_commbuffer = 8 * ((nrows * nrows) + 2) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
@@ -791,7 +791,7 @@ communicate_matom_matrices ()
         MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         for (i = 0; i < nrows; i++)
         {
-          MPI_Pack (macromain[n].matom_matrix[i], 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+          MPI_Pack (macromain[n].matom_matrix[i], nrows, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         }
       }
     }
@@ -810,7 +810,7 @@ communicate_matom_matrices ()
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
         for (i = 0; i < nrows; i++)
         {
-          MPI_Unpack (commbuffer, size_of_commbuffer, &position, macromain[n].matom_matrix[i], 1, MPI_DOUBLE, MPI_COMM_WORLD);
+          MPI_Unpack (commbuffer, size_of_commbuffer, &position, macromain[n].matom_matrix[i], nrows, MPI_DOUBLE, MPI_COMM_WORLD);
         }
       }
     }
