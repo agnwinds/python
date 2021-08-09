@@ -789,9 +789,14 @@ communicate_matom_matrices ()
       for (n = my_nmin; n < my_nmax; n++)
       {
         MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        for (i = 0; i < nrows; i++)
+
+        /* we only communicate the matrix if it is being stored in this cell */
+        if (macromain[n].store_matom_matrix == TRUE)
         {
-          MPI_Pack (macromain[n].matom_matrix[i], nrows, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+          for (i = 0; i < nrows; i++)
+          {
+            MPI_Pack (macromain[n].matom_matrix[i], nrows, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+          }
         }
       }
     }
@@ -808,9 +813,14 @@ communicate_matom_matrices ()
       for (n_mpi2 = 0; n_mpi2 < num_comm; n_mpi2++)
       {
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
-        for (i = 0; i < nrows; i++)
+
+        /* we only communicate the matrix if it is being stored in this cell */
+        if (macromain[n].store_matom_matrix == TRUE)
         {
-          MPI_Unpack (commbuffer, size_of_commbuffer, &position, macromain[n].matom_matrix[i], nrows, MPI_DOUBLE, MPI_COMM_WORLD);
+          for (i = 0; i < nrows; i++)
+          {
+            MPI_Unpack (commbuffer, size_of_commbuffer, &position, macromain[n].matom_matrix[i], nrows, MPI_DOUBLE, MPI_COMM_WORLD);
+          }
         }
       }
     }

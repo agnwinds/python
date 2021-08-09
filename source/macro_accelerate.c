@@ -1101,7 +1101,11 @@ calc_all_matom_matrices ()
   {
     xplasma = &plasmamain[n];
     mplasma = &macromain[n];
-    calc_matom_matrix (xplasma, mplasma->matom_matrix);
+
+    if (mplasma->store_matom_matrix == TRUE)
+    {
+      calc_matom_matrix (xplasma, mplasma->matom_matrix);
+    }
   }
 
   /* print the time taken for this thread to complete */
