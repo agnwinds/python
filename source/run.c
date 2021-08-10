@@ -139,6 +139,7 @@ calculate_ionization (restart_stat)
     if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0 && modes.store_matom_matrix)
     {
       calc_all_matom_matrices ();
+      xsignal (files.root, "%-20s Finished state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
     }
 
     geo.n_ioniz = 0.0;
