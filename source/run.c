@@ -301,7 +301,9 @@ calculate_ionization (restart_stat)
 
 /* Note that this step is parallelized */
 
+    xsignal (files.root, "%-20s Start wind update\n", "NOK");
     wind_update (w);
+    xsignal (files.root, "%-20s Finishe wind update\n", "NOK");
 
 
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle + 1, timer ());
