@@ -87,6 +87,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int nreport;
   struct timeval timer_t0;
 
+  xsignal (files.root, "%-20s Photon transport started\n", "NOK");
+
   nreport = NPHOT / 10;
   Log ("\n");
 

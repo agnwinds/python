@@ -730,7 +730,7 @@ calloc_matom_matrix (nelem)
 
   if (nlevels_macro > 0 && nmatrices_allocated > 0)
   {
-    Log ("Allocated %10.4f Mb for MA matrix \n", 1.e-6 * (nmatrices_allocated + 1) * (nrows * nrows) * sizeof (double));
+    Log ("Allocated %10.1f Mb for MA matrix \n", 1.e-6 * (nmatrices_allocated + 1) * (nrows * nrows) * sizeof (double));
   }
   return (0);
 }

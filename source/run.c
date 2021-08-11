@@ -138,6 +138,7 @@ calculate_ionization (restart_stat)
        macro-atom levels */
     if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0 && modes.store_matom_matrix)
     {
+      xsignal (files.root, "%-20s Begin state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
       calc_all_matom_matrices ();
       xsignal (files.root, "%-20s Finished state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
     }
@@ -303,7 +304,7 @@ calculate_ionization (restart_stat)
 
     xsignal (files.root, "%-20s Start wind update\n", "NOK");
     wind_update (w);
-    xsignal (files.root, "%-20s Finishe wind update\n", "NOK");
+    xsignal (files.root, "%-20s Finished wind update\n", "NOK");
 
 
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle + 1, timer ());
