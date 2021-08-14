@@ -30,8 +30,7 @@ int iicount = 0;
  *
  * @param [in,out] PhotPtr  p   the photon
  * @param [in] double  ds   the distance the photon has travelled in the cell
- * @param [out] double *kappa_tot_return  The total opacity in the CMF(?) frame
- * @return     Always returns 0
+ * @return     Usually regurns kappa_tot 
  *
  * @details
  *
@@ -67,7 +66,7 @@ radiation (PhotPtr p, double ds)
 
   double freq;
   double kappa_tot, kappa_tot_obs, frac_tot, frac_ff;
-  /* Variables named frak are very pooorly named; they are actually opaciites due to individual
+  /* Variables named frac are very pooorly named; they are actually opacities due to individual
      processes, not fractions of anything
    */
   double frac_z, frac_comp;     /* frac_comp - the heating in the cell due to Compton heating */
@@ -93,6 +92,7 @@ radiation (PhotPtr p, double ds)
   double ds_cmf, w_ave_cmf;
 
 
+
   z = frac_path = freq_xs = 0;  // Initialize to avoid compiler warnings
 
 
@@ -100,7 +100,12 @@ radiation (PhotPtr p, double ds)
 
   ndom = one->ndom;
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "radiation");
+
+  if (check_plasma (xplasma, "radiation"))
+  {
+    Error ("Radiation: Photon %d is in wind cell %d which has no volume in the wind\n", p->np, p->grid);
+    return (0);
+  }
 
   /* JM 140321 -- #73 Bugfix
      In previous version we were comparing these frequencies in the global rest frame
@@ -124,10 +129,7 @@ radiation (PhotPtr p, double ds)
   stuff_phot (p, &phot_mid);
   move_phot (&phot_mid, ds / 2.);
 
-
-
   /* calculate photon frequencies in rest frame of cell */
-
 
   if (observer_to_local_frame (&phot, &phot_cmf))
   {
@@ -145,10 +147,8 @@ radiation (PhotPtr p, double ds)
   }
 
 
-
   freq_inner = p_cmf.freq;
   freq_outer = phot_cmf.freq;
-
 
   /* take the average of the frequencies at original position and original+ds */
   phot_mid_cmf.freq = freq = 0.5 * (freq_inner + freq_outer);
@@ -164,8 +164,7 @@ radiation (PhotPtr p, double ds)
 
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
 
-  frac_tot = frac_z = 0;        /* 59a - ksl - Moved this line out of loop to avoid warning, but notes
-                                   indicate this is all diagnostic and might be removed */
+  frac_tot = frac_z = 0;
   frac_auger = 0;
   frac_tot_abs = frac_auger_abs = 0.0;
 
@@ -264,7 +263,6 @@ radiation (PhotPtr p, double ds)
             /* Note that this includes a filling factor  */
             kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
 
-
             if (geo.ioniz_or_extract == CYCLE_IONIZ)
             {
 
@@ -283,7 +281,6 @@ radiation (PhotPtr p, double ds)
             }
 
           }
-
 
         }
       }
@@ -350,10 +347,8 @@ radiation (PhotPtr p, double ds)
   }
 
 
-
   /* finished looping over cross-sections to calculate bf opacity
      we can now reduce weights and record certain estimators */
-
 
   kappa_tot_obs = kappa_tot / observer_to_local_frame_ds (p, 1);
   tau = kappa_tot_obs * ds;
@@ -379,14 +374,12 @@ radiation (PhotPtr p, double ds)
 
   }
 
-
   energy_abs_cmf = energy_abs_obs * phot_mid_cmf.freq / phot_mid.freq;
 
   /* Calculate the reduction in weight - Compton scattering is not included, it is now included at scattering
      however induced Compton heating is not implemented at scattering, so it should remain here for the time being
      to maimtain consistency. */
 
-//  tau = (kappa_tot - frac_comp) * ds;
   tau = kappa_tot_obs * (1. - frac_comp / kappa_tot) * ds;
 
   if (sane_check (tau))
@@ -419,7 +412,7 @@ radiation (PhotPtr p, double ds)
   }
 
   if (geo.ioniz_or_extract == CYCLE_EXTRACT)
-    return kappa_tot;           // 57h -- ksl -- 060715
+    return kappa_tot;
 
 /* Everything after this point is only needed for ionization calculations */
 /* Update the radiation parameters used ultimately in calculating t_r */
@@ -431,7 +424,6 @@ radiation (PhotPtr p, double ds)
   {
     save_photon_stats (one, p, ds, w_ave_obs);  // save photon statistics (extra diagnostics)
   }
-
 
   /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
      which also updates the ionization parameters and scattered and direct contributions */
@@ -482,6 +474,7 @@ radiation (PhotPtr p, double ds)
       xplasma->heat_tot += z * frac_auger;      //All the inner shell opacities
 
       q = (z) / (PLANCK * freq * xplasma->vol);
+
       /* So xplasma->ioniz for each species is just
          (energy_abs)*kappa_h/kappa_tot / PLANCK*freq / volume
          or the number of photons absorbed in this bundle per unit volume by this ion
@@ -505,7 +498,6 @@ radiation (PhotPtr p, double ds)
 
   return kappa_tot;
 }
-
 
 
 
@@ -543,7 +535,6 @@ kappa_ff (xplasma, freq)
   double x1, x2, x3;
   int ndom;
 
-  /* get the domain number */
   ndom = wmain[xplasma->nwind].ndom;
 
   if (gaunt_n_gsqrd == 0)       //Maintain old behaviour
@@ -564,7 +555,7 @@ kappa_ff (xplasma, freq)
   x *= x2 = (1. - exp (-H_OVER_K * freq / xplasma->t_e));
   x /= x3 = (sqrt (xplasma->t_e) * freq * freq * freq);
 
-  x *= zdom[ndom].fill;         // multiply by the filling factor- should cancel with density enhancement
+  x *= zdom[ndom].fill;
 
   return (x);
 }
@@ -590,6 +581,9 @@ kappa_ff (xplasma, freq)
  * densities of individual ions must have been calculated previously.
  *
  * ### Notes ###
+ * The x-section and frequency are stored in the topbase_phot struture
+ * so that if one requests the same xsection with the same frequency  
+ * again, then the calculation of the x-section is avoided.
  *
  **********************************************************/
 
@@ -616,22 +610,19 @@ sigma_phot (x_ptr, freq)
     {
       frac = (log (freq) - log (fbot)) / (log (ftop) - log (fbot));
       xsection = exp ((1. - frac) * log (x_ptr->x[nlast]) + frac * log (x_ptr->x[nlast + 1]));
-      //Store the results
+
       x_ptr->sigma = xsection;
       x_ptr->f = freq;
       return (xsection);
     }
   }
 
-/* If got to here, have to go the whole hog in calculating the x-section */
+/* Calculate the x-section */
   nmax = x_ptr->np;
   x_ptr->nlast = linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection, 1);     //call linterp in log space
 
-
-  //Store the results
   x_ptr->sigma = xsection;
   x_ptr->f = freq;
-
 
   return (xsection);
 
@@ -694,7 +685,6 @@ in the ground state */
 
   return (density);
 
-
 }
 
 
@@ -706,11 +696,8 @@ in the ground state */
  * calculating free free  emission (and absorption). 
  *
  *
- *
- *
  * @details
  * The routine populates plasmamain[].kappa_ff_factor
- *
  *
  * The free-free multiplicative constant  depends only
  * on the densities of ions in the cell, and the electron
@@ -732,7 +719,7 @@ pop_kappa_ff_array ()
   int i, j;
 
 
-  for (i = 0; i < NPLASMA; i++) //Changed to loop only up to NPLASMA, not NPLASMA+1
+  for (i = 0; i < NPLASMA; i++)
   {
     sum = 0.0;
     for (j = 0; j < nions; j++)
