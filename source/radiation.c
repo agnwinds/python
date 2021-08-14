@@ -93,14 +93,15 @@ radiation (PhotPtr p, double ds)
 
 
 
-  z = frac_path = freq_xs = 0;  // Initialize to avoid compiler warnings
+  z = frac_path = freq_xs = 0;
 
 
-  one = &wmain[p->grid];        /* So one is the grid cell of interest */
+  one = &wmain[p->grid];
 
   ndom = one->ndom;
   xplasma = &plasmamain[one->nplasma];
 
+  /* See #870 if this next error is triggered many times ksl 210614 */
   if (check_plasma (xplasma, "radiation"))
   {
     Error ("Radiation: Photon %d is in wind cell %d which has no volume in the wind\n", p->np, p->grid);
@@ -124,8 +125,8 @@ radiation (PhotPtr p, double ds)
    *  the call to radiation
    */
 
-  stuff_phot (p, &phot);        // copy photon ptr
-  move_phot (&phot, ds);        // move it by ds
+  stuff_phot (p, &phot);
+  move_phot (&phot, ds);
   stuff_phot (p, &phot_mid);
   move_phot (&phot_mid, ds / 2.);
 
@@ -150,18 +151,14 @@ radiation (PhotPtr p, double ds)
   freq_inner = p_cmf.freq;
   freq_outer = phot_cmf.freq;
 
-  /* take the average of the frequencies at original position and original+ds */
   phot_mid_cmf.freq = freq = 0.5 * (freq_inner + freq_outer);
   phot_mid.freq = 0.5 * (p->freq + phot.freq);
 
   /* calculate free-free, Compton and induced-Compton opacities
      note that we also call these with the average frequency along ds */
 
-  kappa_tot = frac_ff = kappa_ff (xplasma, freq);       /* Add ff opacity */
-  kappa_tot += frac_comp = kappa_comp (xplasma, freq);  /* Calculate Compton opacity,
-                                                           store it in kappa_comp and also add it to kappa_tot,
-                                                           the total opacity for the photon path */
-
+  kappa_tot = frac_ff = kappa_ff (xplasma, freq);
+  kappa_tot += frac_comp = kappa_comp (xplasma, freq);
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
 
   frac_tot = frac_z = 0;
@@ -209,7 +206,7 @@ radiation (PhotPtr p, double ds)
 
     /* Next steps are a way to avoid the loop over photoionization x sections when it should not matter */
     if (DENSITY_PHOT_MIN > 0)
-    {                           // Initialize during ionization cycles only
+    {
 
       /* Loop over all photoionization xsections */
       for (n = 0; n < nphot_total; n++)
@@ -294,7 +291,7 @@ radiation (PhotPtr p, double ds)
           if (ion[inner_cross_ptr[n]->nion].phot_info != 1)
           {
             x_top_ptr = inner_cross_ptr[n];
-            if (x_top_ptr->n_elec_yield != -1)  //Only any point in doing this if we know the energy of elecrons
+            if (x_top_ptr->n_elec_yield != -1)
             {
               ft = x_top_ptr->freq[0];
 
@@ -362,16 +359,14 @@ radiation (PhotPtr p, double ds)
 /* Calculate the heating effect*/
 
   if (tau > 0.0001)
-  {                             /* Need differentiate between thick and thin cases */
+  {
     x = exp (-tau);
     energy_abs_obs = w_in * (1. - x);
-
   }
   else
   {
     tau2 = tau * tau;
     energy_abs_obs = w_in * (tau - 0.5 * tau2);
-
   }
 
   energy_abs_cmf = energy_abs_obs * phot_mid_cmf.freq / phot_mid.freq;
@@ -390,7 +385,7 @@ radiation (PhotPtr p, double ds)
      weight in the cell */
 
   if (tau > 0.0001)
-  {                             /* Need differentiate between thick and thin cases */
+  {
     x = exp (-tau);
     p->w = w_out = w_in * x;
     w_ave_obs = (w_in - w_out) / tau;
@@ -398,7 +393,7 @@ radiation (PhotPtr p, double ds)
   else
   {
     tau2 = tau * tau;
-    p->w = w_out = w_in * (1. - tau + 0.5 * tau2);      /*Calculate to second order */
+    p->w = w_out = w_in * (1. - tau + 0.5 * tau2);
     w_ave_obs = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
   }
 
@@ -426,12 +421,10 @@ radiation (PhotPtr p, double ds)
   }
 
   /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
-     which also updates the ionization parameters and scattered and direct contributions */
-
-
-  /*Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
+   * which also updates the ionization parameters and scattered and direct contributions 
+   *
+   * Following bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
    * Update_banded_estimators requires photon freq and ds and w_ave in cmf frame */
-
 
   ds_cmf = observer_to_local_frame_ds (&phot_mid, ds);
   update_banded_estimators (xplasma, &phot_mid_cmf, ds_cmf, w_ave_cmf, ndom);
@@ -446,7 +439,7 @@ radiation (PhotPtr p, double ds)
   if (kappa_tot > 0)
   {
 
-    // We use the cmf value of the energy aborbed since everything is supposed to be in CMF frame
+    // Use the cmf value of the energy aborbed 
 
     z = (energy_abs_cmf) / kappa_tot;
     xplasma->heat_ff += z * frac_ff;
@@ -627,10 +620,6 @@ sigma_phot (x_ptr, freq)
   return (xsection);
 
 }
-
-
-
-
 
 
 /**********************************************************/
