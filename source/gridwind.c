@@ -269,7 +269,7 @@ calloc_plasma (nelem)
  * @param [in] char  message[]   A message which is printed out if 
  * one has tried to access the dummy Plsma element
  * @return     0 (FALSE) if one is not in the empty plasma cell, 1 
- * (TRUE) if you have gooten there.
+ * (TRUE) if you have gotten there.
  *
  * @details
  * Wind cells that have no associated volume are assigned to
@@ -290,7 +290,7 @@ check_plasma (xplasma, message)
 {
   if (xplasma->nplasma == NPLASMA)
   {
-    Error ("check_plasma -- %s \n", message);
+    Error ("check_plasma: In Dummy Plasma Cell when probably don't want to be:  %s \n", message);
     return (TRUE);
   }
   else

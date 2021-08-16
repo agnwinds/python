@@ -625,13 +625,11 @@ kbf_need (freq_min, freq_max)
         {
           nconf = phot_top[n].nlev;     //Returning lower level = correct (SS)
 
-          // XXX This if for debugging 
           if (nconf < 0)
           {
             Error ("kbf_need: nconf %d for phot_top %d for ion %d of z %d and istate %d\n", nconf, n, nion, phot_top[n].z,
                    phot_top[n].istate);
           }
-          // XXX This if for debugging 
 
           density = den_config (xplasma, nconf);
         }

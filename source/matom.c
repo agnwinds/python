@@ -97,10 +97,13 @@ matom (p, nres, escape)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "matom");
+  if (check_plasma (xplasma, "matom"))
+  {
+    Error ("matom:Working in dummy plasma cell\n");
+    return (-1);
+  }
 
   mplasma = &macromain[xplasma->nplasma];
-
 
   t_e = xplasma->t_e;
   ne = xplasma->ne;
@@ -739,7 +742,11 @@ kpkt (p, nres, escape, mode)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "kpkt");
+  if (check_plasma (xplasma, "kpkt"))
+  {
+    Error ("kpkt:Photon appears to be having interaction in wind cell associated with dummy plasma structure\n");
+  }
+
   mplasma = &macromain[xplasma->nplasma];
 
   electron_temperature = xplasma->t_e;

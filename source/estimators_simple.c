@@ -220,7 +220,6 @@ update_banded_estimators (xplasma, p, ds, w_ave, ndom)
 
 
 
-
   return (0);
 }
 
@@ -474,7 +473,8 @@ normalise_simple_estimators (xplasma)
     xplasma->ave_freq /= xplasma->j;    /* Normalization to frequency moment */
     if (sane_check (xplasma->ave_freq))
     {
-      Error ("normalise_simple_estimators:sane_check %d ave_freq %e j %e ntot %d\n", xplasma->nplasma, wtest, xplasma->j, xplasma->ntot);
+      Error ("normalise_simple_estimators:sane_check nwind %d nplasma %d ave_freq %e j %e ntot %d\n", nwind, xplasma->nplasma, wtest,
+             xplasma->j, xplasma->ntot);
     }
 
     xplasma->j /= (4. * PI * invariant_volume_time);
