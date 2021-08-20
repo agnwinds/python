@@ -736,7 +736,7 @@ pop_kappa_ff_array ()
       }
       else
       {
-        sum += 0.0;    
+        sum += 0.0;
       }
 
     }
