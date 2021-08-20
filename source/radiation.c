@@ -503,19 +503,24 @@ radiation (PhotPtr p, double ds)
  * @return     kappa
  *
  * @details
- * Uses the formula from Allen
+ * Uses the formula from Allen, Astrophysical Quantities 3rd Edition, p 102.
  *
  * ### Notes ###
  *
- * The routine originally only includes the effect of singly ionized H and doubly ionized He
- * and did not include a gaunt factor
+ * Early versions of this routine included only singly ionized H and doubly ionized He
+ * in the calculation and did not include a gaunt factorim and the routine will 
+ * fall back to this if Sutherland's temperature averaged gaunt factors are not
+ * included as part of the atomic data.
  *
- * More recent versions include all ions and a gaunt factor, as calculated in
- * pop_kappa_ff_array and stored in kappa_ff_factor. The gaunt factor as currewntly
- * implemented is a frequency averaged one, and so is approximate (but better than
+ * Normally, Surtherland's data is part of the atomic data, and all all ions included 
+ * in the calculation of the ff opancity.  The relevant prefactor fo kappa_ff is calculated in
+ * the routine pop_kappa_ff_array and stored in kappa_ff_factor. The gaunt factor as currently
+ * implemented is a frequency averaged one due to Sutherland (see the routine gaunt_ff), and so is 
+ * approximate (but better than
  * just using 1). A future upgrade would use a more complex implementation where we
  * use the frequency dependant gaunt factor.
  *
+ * See issue #750 for a bit more discussion.
  **********************************************************/
 
 double
@@ -530,7 +535,7 @@ kappa_ff (xplasma, freq)
 
   ndom = wmain[xplasma->nwind].ndom;
 
-  if (gaunt_n_gsqrd == 0)       //Maintain old behaviour
+  if (gaunt_n_gsqrd == 0)       //Maintain old behaviour if Sutherland gaunt factors are unavailable
   {
     if (nelements > 1)
     {
@@ -684,11 +689,12 @@ in the ground state */
  * constant, including a gaunt factor, to be  used in the 
  * calculating free free  emission (and absorption). 
  *
+ * @return  Always returns 0
  *
  * @details
  * The routine populates plasmamain[].kappa_ff_factor
  *
- * The free-free multiplicative constant  depends only
+ * The free-free multiplicative constant depends only
  * on the densities of ions in the cell, and the electron
  * temperature (which feeds into the gaunt factor) so it
  * saves time to calculate all this just the once. 
@@ -697,6 +703,11 @@ in the ground state */
  * This routine
  * is called just before the photons are 
  * sent through the wind.
+ *
+ * The gaunt factor is calculated in gaunt_ff (and uses
+ * Sutherlands interpolation formula)  
+ *
+ * See #750 for more explanation
  *
  **********************************************************/
 
@@ -725,7 +736,7 @@ pop_kappa_ff_array ()
       }
       else
       {
-        sum += 0.0;             //add nothing to the sum if we have a neutral ion
+        sum += 0.0;     /add nothing to the sum if we have a neutral ion
       }
 
     }
