@@ -850,7 +850,11 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   penorm = 0.0;
   penorm_band = 0.0;
 
-  check_plasma (xplasma, "f_kpkt_emit_accelerate");
+  if (check_plasma (xplasma, "f_kpkt_emit_accelerate"))
+  {
+    Error ("f_kpkt_emit_accelrate: Calculating emissivity for the dummy plasma cell\n");
+    return (0);
+  }
   mplasma = &macromain[xplasma->nplasma];
 
   electron_temperature = xplasma->t_e;

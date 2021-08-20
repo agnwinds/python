@@ -300,8 +300,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
           dvds_cmf = (1. - fraction_to_resonance) * dvds1 + fraction_to_resonance * dvds2;
 
-          /* sobolev does not use x, unless density_cmf is les than 0 tau_sobolev is invariant, but all inputs
-           * must be in the same frame, using cmf here */
+          /* sobolev does not use x, unless density_cmf is less than 0. tau_sobolev is invariant, but all inputs
+           * must be in the same frame, using cmf here.  Note that dvds_cmf could be negative, but this is
+           * fixed in sobolev. 
+           */
 
           tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[current_res_number], dvds_cmf);
           running_tau += tau_sobolev;
@@ -620,18 +622,15 @@ kbf_need (freq_min, freq_max)
         {
           density = xplasma->density[nion];
         }
-        // else if (ion[nion].phot_info > 0)  // topbase or hybrid
         else
         {
-          nconf = phot_top[n].nlev;     //Returning lower level = correct (SS)
+          nconf = phot_top[n].nlev;     //Returning lower level 
 
-          // XXX This if for debugging 
           if (nconf < 0)
           {
             Error ("kbf_need: nconf %d for phot_top %d for ion %d of z %d and istate %d\n", nconf, n, nion, phot_top[n].z,
                    phot_top[n].istate);
           }
-          // XXX This if for debugging 
 
           density = den_config (xplasma, nconf);
         }
@@ -679,13 +678,13 @@ int sobolev_error_counter = 0;
  *
  * ### Notes ###
  *
- * The routine includes a correcton for the filling factor which
+ * The routine includes a correction for the filling factor which
  * reduces tau
  *
  **********************************************************/
 double
 sobolev (one, x, den_ion, lptr, dvds)
-     WindPtr one;               // This is a single cell in the wind
+     WindPtr one;
      double x[];
      double den_ion;
      struct lines *lptr;
@@ -704,11 +703,11 @@ sobolev (one, x, den_ion, lptr, dvds)
   ndom = wmain[plasmamain->nwind].ndom;
   nion = lptr->nion;
 
-  levden_upper = 0;             // initialize to avoid compiler warning
+  levden_upper = 0;
 
   if ((dvds = fabs (dvds)) == 0.0)      // This forces dvds to be positive -- a good thing!
   {
-    d1 = d2 = 0.;               // Eliminate warning when complied with clang
+    d1 = d2 = 0.;
     tau = VERY_BIG;
     Error ("Sobolev: Surprise tau = VERY_BIG as dvds is 0\n");
   }
