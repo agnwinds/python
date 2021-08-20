@@ -736,7 +736,7 @@ pop_kappa_ff_array ()
       }
       else
       {
-        sum += 0.0;     /add nothing to the sum if we have a neutral ion
+        sum += 0.0;    
       }
 
     }
