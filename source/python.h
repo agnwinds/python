@@ -1488,14 +1488,6 @@ files;
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */
 
-//OLD /* this variable controls whether to use the 
-//OLD    Altered mode for bound-free in "simple-macro mode" */
-//OLD #define BF_SIMPLE_EMISSIVITY_APPROACH 1
-
-// OLD /* whether or not to use the implicit/accelerated macro-atom scheme, in which 
-// OLD    a matrix inversion is used in the emissivity calcualtion rather than 
-// OLD    a MC sampling of the transition probabilities */
-// OLD #define ACCELERATED_MACRO  TRUE
 
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */

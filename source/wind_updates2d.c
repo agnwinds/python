@@ -854,7 +854,6 @@ WindPtr (w);
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
      cool_sum, geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
-//OLD #if BF_SIMPLE_EMISSIVITY_APPROACH
   if (!modes.turn_off_upweighting_of_simple_macro_atoms)
   {
     /* If we have "indivisible packet" mode on but are using the 
@@ -862,7 +861,6 @@ WindPtr (w);
     if (geo.rt_mode == RT_MODE_MACRO)
       report_bf_simple_ionpool ();
   }
-//OLD #endif
 
 
 

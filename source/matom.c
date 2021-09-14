@@ -845,7 +845,6 @@ kpkt (p, nres, escape, mode)
            and we force a kpkt to be created */
         if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
-//OLD#if BF_SIMPLE_EMISSIVITY_APPROACH
           if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
           {
             upweight_factor = xplasma->recomb_simple_upweight[i];
@@ -855,7 +854,6 @@ kpkt (p, nres, escape, mode)
             xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
           }
         }
-// OLD #endif
 
         return (0);
       }

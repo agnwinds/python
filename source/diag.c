@@ -119,7 +119,7 @@ get_standard_care_factors ()
 
   if (modes.iadvanced)
   {
-    strcpy (answer, "no");
+    strcpy (answer, "yes");
     istandard = rdchoice ("@Diag.use_standard_care_factors(yes,no)", "1,0", answer);
 
     if (!istandard)

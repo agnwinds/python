@@ -1074,7 +1074,6 @@ scatter (p, nres, nnscat)
            then the photon weight gets multiplied down by a factor (nu-nu_0)/nu
            and we force a kpkt to be created */
 
-//OLD #if BF_SIMPLE_EMISSIVITY_APPROACH
         if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
           /* This is the new approach which does not explicityly conserve energy.
@@ -1090,7 +1089,6 @@ scatter (p, nres, nnscat)
         }
         else
         {
-//OLD#else
           /* This is the old approach.  Process the BF photon for a simple atom.  In this
              approach we generate a kpkt or an r-packet depending on whether the probility
              of creating a kpkt, namely prob_kpkt
@@ -1105,7 +1103,6 @@ scatter (p, nres, nnscat)
             macro_gov (p, nres, 1, &which_out); //routine to deal with fake macro atom bf excitation
           }
         }
-//OLD #endif
 
       }
       else
