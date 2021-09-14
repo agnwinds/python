@@ -1434,12 +1434,17 @@ struct advanced_modes
   int keep_photoabs;            // keep photoabsorption in final spectrum
   int quit_after_inputs;        // quit after inputs read in, testing mode
   int fixed_temp;               // do not alter temperature from that set in the parameter file
-  int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
+  int zeus_connect;             // We are connecting to zeus, do not seek new temp and output 
+                                // a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
   int photon_speedup;
   int save_rng;                 // save the GSL RNG stage
   int load_rng;                 // load the GSL RNG state
   int store_matom_matrix;       // store the macro-atom matrix 
+  int jumps_for_detailed_spectra;   // use the older jump method for calculating emissivities 
+                                    // in detailed spectra
+  int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
+                                // in macro scheme
 }
 modes;
 
@@ -1495,9 +1500,6 @@ files;
 #define KPKT_MODE_ALL        1          /* account for all cooling processes */
 #define KPKT_MODE_CONT_PLUS_ADIABATIC 2 /* account for k->r and adiabatic destruction */
 
-/* this variable controls whether to use the 
-   Altered mode for bound-free in "simple-macro mode" */
-#define BF_SIMPLE_EMISSIVITY_APPROACH 1
 
 /* whether or not to use the implicit/accelerated macro-atom scheme, in which 
    a matrix inversion is used in the emissivity calcualtion rather than 
