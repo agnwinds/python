@@ -1074,32 +1074,38 @@ scatter (p, nres, nnscat)
            then the photon weight gets multiplied down by a factor (nu-nu_0)/nu
            and we force a kpkt to be created */
 
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        /* This is the new approach which does not explicityly conserve energy.
-           Re record the amount of energy going into the simple ion ionization pool.  This
-           version does not produce nan if prob_kpt is 0 and then reduce the photon weight
-           to allow for the portion of the energy that went into the ionization pool before
-           generating a kpkt.  In this approach we always generate a kpkt */
-
-        xplasma->bf_simple_ionpool_in += p->w * (1 - prob_kpkt);
-        p->w *= prob_kpkt;
-
-        macro_gov (p, nres, 2, &which_out);     //routine to deal with kpkt
-#else
-        /* This is the old approach.  Process the BF photon for a simple atom.  In this
-           approach we generate a kpkt or an r-packet depending on whether the probility
-           of creating a kpkt, namely prob_kpkt
-         */
-
-        if (prob_kpkt > kpkt_choice)
+//OLD #if BF_SIMPLE_EMISSIVITY_APPROACH
+        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
+          /* This is the new approach which does not explicityly conserve energy.
+             Re record the amount of energy going into the simple ion ionization pool.  This
+             version does not produce nan if prob_kpt is 0 and then reduce the photon weight
+             to allow for the portion of the energy that went into the ionization pool before
+             generating a kpkt.  In this approach we always generate a kpkt */
+
+          xplasma->bf_simple_ionpool_in += p->w * (1 - prob_kpkt);
+          p->w *= prob_kpkt;
+
           macro_gov (p, nres, 2, &which_out);   //routine to deal with kpkt
         }
         else
         {
-          macro_gov (p, nres, 1, &which_out);   //routine to deal with fake macro atom bf excitation
+//OLD#else
+          /* This is the old approach.  Process the BF photon for a simple atom.  In this
+             approach we generate a kpkt or an r-packet depending on whether the probility
+             of creating a kpkt, namely prob_kpkt
+           */
+
+          if (prob_kpkt > kpkt_choice)
+          {
+            macro_gov (p, nres, 2, &which_out); //routine to deal with kpkt
+          }
+          else
+          {
+            macro_gov (p, nres, 1, &which_out); //routine to deal with fake macro atom bf excitation
+          }
         }
-#endif
+//OLD #endif
 
       }
       else
