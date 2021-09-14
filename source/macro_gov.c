@@ -156,10 +156,11 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
       {
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
-        Exit (0);
-#endif
+        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
+        {
+          Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+          Exit (0);
+        }
         fake_matom_bf (p, nres, &escape);
       }
 

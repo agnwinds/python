@@ -843,16 +843,17 @@ kpkt (p, nres, escape, mode)
            approach to choosing photon weights - this means we 
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
+        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
-          upweight_factor = xplasma->recomb_simple_upweight[i];
-          p->w *= upweight_factor;
+          if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
+          {
+            upweight_factor = xplasma->recomb_simple_upweight[i];
+            p->w *= upweight_factor;
 
-          /* record the amount of energy being extracted from the simple ion ionization pool */
-          xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+            /* record the amount of energy being extracted from the simple ion ionization pool */
+            xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+          }
         }
-#endif
 
         return (0);
       }
