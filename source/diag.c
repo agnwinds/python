@@ -119,7 +119,7 @@ get_standard_care_factors ()
 
   if (modes.iadvanced)
   {
-    strcpy (answer, "no");
+    strcpy (answer, "yes");
     istandard = rdchoice ("@Diag.use_standard_care_factors(yes,no)", "1,0", answer);
 
     if (!istandard)
@@ -160,40 +160,49 @@ int
 get_extra_diagnostics ()
 {
   char answer[LINELENGTH];
-  if (modes.iadvanced == 0)
+  int n = 0;
+
+  if (modes.iadvanced == FALSE)
     Error ("Getting extra_diagnostics but advanced mode is off!\n");
 
   Log ("get_extra_diagnostics: Getting extra diagnostics as requested...\n");
 
   /* read the options. */
   strcpy (answer, "no");
-  modes.save_cell_stats = rdchoice ("@Diag.save_cell_statistics(yes,no)", "1,0", answer);
+  n += modes.save_cell_stats = rdchoice ("@Diag.save_cell_statistics(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
-  modes.keep_ioncycle_windsaves = rdchoice ("@Diag.keep_ioncycle_windsaves(yes,no)", "1,0", answer);
+  n += modes.keep_ioncycle_windsaves = rdchoice ("@Diag.keep_ioncycle_windsaves(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
-  modes.make_tables = rdchoice ("@Diag.make_ioncycle_tables(yes,no)", "1,0", answer);
+  n += modes.make_tables = rdchoice ("@Diag.make_ioncycle_tables(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
-  modes.save_photons = rdchoice ("@Diag.save_photons(yes,no)", "1,0", answer);
+  n += modes.save_photons = rdchoice ("@Diag.save_photons(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
-  modes.save_extract_photons = rdchoice ("@Diag.save_extract_photons(yes,no)", "1,0", answer);
+  n += modes.save_extract_photons = rdchoice ("@Diag.save_extract_photons(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
-  modes.print_dvds_info = rdchoice ("@Diag.print_dvds_info(yes,no)", "1,0", answer);
+  n += modes.print_dvds_info = rdchoice ("@Diag.print_dvds_info(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
-  modes.track_resonant_scatters = rdchoice ("@Diag.track_resonant_scatters(yes,no)", "1,0", answer);
+  n += modes.track_resonant_scatters = rdchoice ("@Diag.track_resonant_scatters(yes,no)", "1,0", answer);
 
-  if (modes.save_cell_stats || modes.save_photons || modes.save_extract_photons || modes.track_resonant_scatters)
+  strcpy (answer, "no");
+  n += modes.jumps_for_detailed_spectra = rdchoice ("@Diag.use_jumps_for_emissivities_in_detailed_spectra(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
+  n += modes.turn_off_upweighting_of_simple_macro_atoms =
+    rdchoice ("@Diag.turn_off_upweighting_of_simple_macro_atoms(yes,no)", "1,0", answer);
+
+  if (n > 0)
   {
-    modes.extra_diagnostics = 1;
+    modes.extra_diagnostics = TRUE;
   }
   else
   {
-    modes.extra_diagnostics = 0;
+    modes.extra_diagnostics = FALSE;
   }
 
   return 0;

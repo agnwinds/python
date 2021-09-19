@@ -97,10 +97,13 @@ matom (p, nres, escape)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "matom");
+  if (check_plasma (xplasma, "matom"))
+  {
+    Error ("matom:Working in dummy plasma cell\n");
+    return (-1);
+  }
 
   mplasma = &macromain[xplasma->nplasma];
-
 
   t_e = xplasma->t_e;
   ne = xplasma->ne;
@@ -739,7 +742,11 @@ kpkt (p, nres, escape, mode)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "kpkt");
+  if (check_plasma (xplasma, "kpkt"))
+  {
+    Error ("kpkt:Photon appears to be having interaction in wind cell associated with dummy plasma structure\n");
+  }
+
   mplasma = &macromain[xplasma->nplasma];
 
   electron_temperature = xplasma->t_e;
@@ -836,16 +843,17 @@ kpkt (p, nres, escape, mode)
            approach to choosing photon weights - this means we 
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
+        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
-          upweight_factor = xplasma->recomb_simple_upweight[i];
-          p->w *= upweight_factor;
+          if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
+          {
+            upweight_factor = xplasma->recomb_simple_upweight[i];
+            p->w *= upweight_factor;
 
-          /* record the amount of energy being extracted from the simple ion ionization pool */
-          xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+            /* record the amount of energy being extracted from the simple ion ionization pool */
+            xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+          }
         }
-#endif
 
         return (0);
       }

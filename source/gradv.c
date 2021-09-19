@@ -41,6 +41,12 @@
  * actually is, and one might want to consider the on-the-
  * fly appoach for all systems.
  *
+ * Note that as calculated here dvds can be negative, although
+ * in many cases what one wants is the absolute value of dvds.
+ * But this has to be calculated at the spot where dvds is used,
+ * since oftend dvds is calculated at two positions and interperlated.
+ * So it would be a mistake to calculate the absolute value here.
+ *
  **********************************************************/
 
 double
@@ -176,7 +182,7 @@ dvwind_ds_cmf (p)
  *
  * @details
  * The routine cycles through all of the cells in the wind, and calculates
- * the aveage value of dv_ds at the center of the wind cell by randomly
+ * the aveage value of |dv_ds| at the center of the wind cell by randomly
  * generating directions and then calculating dv_ds in these directions
  *
  *
@@ -185,14 +191,11 @@ dvwind_ds_cmf (p)
  * The routine is called during the intialization process and fills
  * the following elements of wmain
  *
- *  * dvds_ave - the average dvds
+ *  * dvds_ave - the average the absolute value of dvds
  *
  * There is an advanced mode which prints this information to
  * file.
  *
- * 210303 - ksl - Removed calculation of dvds_max from this 
- * routine because we want this at the edges of cells, so one 
- * can interpolate.  Portions of the old routine still remain.
  **********************************************************/
 
 
@@ -221,9 +224,8 @@ dvds_ave ()
   {
     ndom = wmain[icell].ndom;
 
-    dvds_max = 0.0;             // Set dvds_max to zero for the cell.
-    dvds_min = 1.e30;           // TEST
-
+    dvds_max = 0.0;
+    dvds_min = 1.e30;
 
     /* Find the center of the cell */
 
@@ -273,7 +275,6 @@ dvds_ave ()
 
     }
 
-    /* Store the results in wmain */
     wmain[icell].dvds_ave = sum / (N_DVDS_AVE * ds);
 
     if (modes.print_dvds_info)
@@ -304,7 +305,7 @@ dvds_ave ()
  *
  * @details
  * The routine cycles through all of the cells in the wind, and calculates
- * the maxium value of dv_ds at the corner of the wind cell by randomly
+ * the maximum value of the absolute value of dv_ds at the corner of the wind cell by randomly
  * generating directions and then calculating dv_ds in these directions
  *
  *
@@ -312,13 +313,16 @@ dvds_ave ()
  * The routine is called during the intialization process and fills
  * the following elements of wmain
  *
- *  * dvds_max - the maximum value of dvds
+ *  * dvds_max - the maximum value of |dvds|
  *
  * Unlike dvds_ave, these values are at the corners of cells,
- * and are intended to be interpolated.
+ * and are intended to be interpolated.  
  *
  * There is an advanced mode which prints this information to
  * file.
+ * 
+ * See #888 for a discussion of why the absolute value is used
+ *
  **********************************************************/
 
 
@@ -362,7 +366,7 @@ dvds_max ()
     for (n = 0; n < N_DVDS_AVE; n++)
     {
       randvec (p.lmn, 1);
-      dvds = dvwind_ds_cmf (&p);
+      dvds = fabs (dvwind_ds_cmf (&p));
 
       /* Find the maximum and minimum values of dvds and the direction
        * for this
@@ -424,7 +428,7 @@ dvds_max ()
  * ### Notes ###
  *
  * The routine uses both the position of the photon and 
- * the grid cell in which the photon exitsts, so this
+ * the grid cell in which the photon exists, so this
  * must be acurrate.
  **********************************************************/
 
