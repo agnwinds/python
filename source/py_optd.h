@@ -11,7 +11,7 @@
  *
  * ************************************************************************** */
 
-#define N_FREQ_BINS 100000  // todo: make this variable, as well
+#define N_FREQ_BINS 10000
 #define NAMELEN 32
 
 // Error message macro, adds the file name and line to the start of the error
@@ -74,7 +74,8 @@ int N_DOMAIN;
 enum {
   RUN_MODE_TAU_INTEGRATE = 0,
   RUN_MODE_ES_PHOTOSPHERE = 1,
-} MODE;
+  RUN_MODE_NO_ES_OPACITY = 2,
+} RUN_MODE;
 
 double TAU_DEPTH;
 
