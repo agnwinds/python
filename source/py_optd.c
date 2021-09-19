@@ -199,6 +199,8 @@ evaluate_photoionization_edges (void)
   double c_frequency, c_optical_depth, c_column_density;
   double *optical_depth_values = NULL, *column_density_values = NULL;
   struct photon photon;
+  enum RunModeEnum original_run_mode = RUN_MODE;
+  RUN_MODE = RUN_MODE_NO_ES_OPACITY;
 
   Edges_t edges[] = {
     {"HLymanEdge", 3.387485e+15},
@@ -259,6 +261,7 @@ evaluate_photoionization_edges (void)
   free (inclinations);
   free (optical_depth_values);
   free (column_density_values);
+  RUN_MODE = original_run_mode;
 }
 
 /* ************************************************************************* */

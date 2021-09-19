@@ -71,7 +71,7 @@ int N_DOMAIN;
 // integrated tau mode, which gets the integrated tau along the path. The other
 // mode aims to find the surface of the electron scattering photosphere
 
-enum {
+enum RunModeEnum {
   RUN_MODE_TAU_INTEGRATE = 0,
   RUN_MODE_ES_PHOTOSPHERE = 1,
   RUN_MODE_NO_ES_OPACITY = 2,
