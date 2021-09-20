@@ -477,7 +477,7 @@ get_arguments (int argc, char *argv[])
       }
       n_read = i++;
     }
-    else if (!strcmp (argv[i], "-freq_min"))    //NOTE: lower frequency boundary for optical depth spectrum
+    else if (!strcmp (argv[i], "-freq-min"))    //NOTE: lower frequency boundary for optical depth spectrum
     {
       char *check;
       arguments.u_freq_min = strtod (argv[i + 1], &check);
@@ -488,7 +488,7 @@ get_arguments (int argc, char *argv[])
       }
       n_read = i++;
     }
-    else if (!strcmp (argv[i], "-freq_max"))    //NOTE: upper frequency boundary for optical depth spectrum
+    else if (!strcmp (argv[i], "-freq-max"))    //NOTE: upper frequency boundary for optical depth spectrum
     {
       char *check;
       arguments.u_freq_max = strtod (argv[i + 1], &check);
