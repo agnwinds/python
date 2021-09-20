@@ -293,8 +293,6 @@ wind_read (filename)
       n += fread (macromain[m].matom_emiss, sizeof (double), nlevels_macro, fptr);
       n += fread (macromain[m].matom_abs, sizeof (double), nlevels_macro, fptr);
 
-      /* XMACRO need to read in matom_matrix here? */
-
       /* Force recalculation of kpkt_rates and matrix rates */
 
       macromain[m].kpkt_rates_known = FALSE;

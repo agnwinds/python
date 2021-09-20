@@ -136,6 +136,7 @@ calculate_ionization (restart_stat)
     /* calculate the B matrices if we are using the matrix macro-atom transition mode, 
        and we are choosing to store the matrix in at least some cells and there are 
        macro-atom levels */
+
     if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0 && modes.store_matom_matrix)
     {
       xsignal (files.root, "%-20s Begin state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);

@@ -50,6 +50,7 @@ get_line_transfer_mode ()
   char answer[LINELENGTH];
 
   int user_line_mode = 0;
+  int n;
 
   /* 181010-ksl-There a several line transfer modes which are diagnostic in nature which 
      cannot be reached by rdchoice easily, except as numbers.  
@@ -149,6 +150,36 @@ get_line_transfer_mode ()
     {
       Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n");
     }
+
+
+    if (geo.run_type == RUN_TYPE_PREVIOUS)
+    {
+      if (geo.matom_transition_mode == MATOM_MATRIX)
+      {
+        Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n");
+
+
+        {
+          for (n = 0; n < NPLASMA; n++)
+          {
+            macromain[n].store_matom_matrix = modes.store_matom_matrix;
+            macromain[n].matom_transition_mode = geo.matom_transition_mode;
+          }
+
+        }
+      }
+      else
+      {
+        for (n = 0; n < NPLASMA; n++)
+        {
+          macromain[n].store_matom_matrix = modes.store_matom_matrix = FALSE;
+          macromain[n].matom_transition_mode = geo.matom_transition_mode;
+        }
+
+      }
+
+    }
+
   }
 
   /* With the macro atom approach we won't want to generate photon 
