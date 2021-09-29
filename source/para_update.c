@@ -773,7 +773,8 @@ communicate_matom_matrices ()
   int my_nmax, my_nmin, ndo, n, position, i;
   char *commbuffer;
   ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
-  Log_parallel ("communicate_matom_matrices: communicting matom matrices.", rank_global, my_nmin, my_nmax);
+  Log_parallel ("communicate_matom_matrices: Thread %d is communicating matom matrices for cells %d to %d.\n", rank_global, my_nmin,
+                my_nmax);
 
   nrows = nlevels_macro + 1;
   size_of_commbuffer = 8 * ((nrows * nrows) + 2) * (floor (NPLASMA / np_mpi_global) + 1);
