@@ -133,7 +133,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
      double rho_select[], z_select[], az_select[], r_select[];
 {
   int i, n;
-  int nspec, nbins;
+  int nspec;
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;
   double x1, x2;
@@ -169,20 +169,20 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
 
   if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
-    nbins = NWAVE_IONIZ;
+    NWAVE_NOW = NWAVE_IONIZ;
   }
   else
   {
-    nbins = NWAVE_EXTRACT;
+    NWAVE_NOW = NWAVE_EXTRACT;
   }
 
   freqmin = f1;
   freqmax = f2;
-  dfreq = (freqmax - freqmin) / nbins;
+  dfreq = (freqmax - freqmin) / NWAVE_NOW;
 
   lfreqmin = log10 (freqmin);
   lfreqmax = log10 (freqmax);
-  ldfreq = (lfreqmax - lfreqmin) / nbins;
+  ldfreq = (lfreqmax - lfreqmin) / NWAVE_NOW;
 
   for (n = 0; n < nspec; n++)
   {
@@ -765,8 +765,8 @@ spec_add_one (p, spec_type)
 
   k = (freq - xxspec[spec_type].freqmin) / xxspec[spec_type].dfreq;
 
-  if (k > NWAVE_EXTRACT - 1)
-    k = NWAVE_EXTRACT - 1;
+  if (k > NWAVE_NOW - 1)
+    k = NWAVE_NOW - 1;
   else if (k < 0)
     k = 0;
 
@@ -779,8 +779,8 @@ spec_add_one (p, spec_type)
 
   k = (log10 (freq) - xxspec[spec_type].lfreqmin) / xxspec[spec_type].ldfreq;
 
-  if (k > NWAVE_EXTRACT - 1)
-    k = NWAVE_EXTRACT - 1;
+  if (k > NWAVE_NOW - 1)
+    k = NWAVE_NOW - 1;
   else if (k < 0)
     k = 0;
 
