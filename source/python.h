@@ -103,8 +103,9 @@ int NPHOT;                      /* The number of photon bundles created, defined
 
 int NWAVE_MAX;
 int NWAVE_EXTRACT;              //The number of wavelength bins for spectra during the spectrum cycles
+int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT depending on whether in ionizaiton of spectrum cycles
 #define NWAVE_IONIZ 10000       //The number of wavelength bins for spectra during the ionization cycles
-#define NWAVE_MIN 10
+#define NWAVE_MIN 100           //The minimum number of wavelength bins in during spectral cycles
 #define MAXSCAT 			2000
 
 /* Define the structures */
