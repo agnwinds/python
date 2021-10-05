@@ -298,25 +298,30 @@ get_spectype (yesno, question, spectype)
 int
 init_advanced_modes ()
 {
-  modes.iadvanced = 0;          // this is controlled by the -d flag, global mode control.
-  modes.extra_diagnostics = 0;  //  when set, want to save some extra diagnostic info
-  modes.save_cell_stats = 0;    // want to save photons statistics by cell
-  modes.keep_ioncycle_windsaves = 0;    // want to save wind file each ionization cycle
-  modes.track_resonant_scatters = 0;    // want to track resonant scatters
-  modes.save_extract_photons = 0;       // we want to save details on extracted photons
-  modes.adjust_grid = 0;        // the user wants to adjust the grid scale
-  modes.diag_on_off = 0;        // extra diagnostics
-  modes.use_debug = 0;
-  modes.print_dvds_info = 0;    // print out information on velocity gradients
-  modes.quit_after_inputs = 0;  // testing mode which quits after reading in inputs
-  modes.fixed_temp = 0;         // do not attempt to change temperature - used for testing
-  modes.zeus_connect = 0;       // connect with zeus
+  modes.iadvanced = FALSE;      // this is controlled by the -d flag, global mode control.
+  modes.extra_diagnostics = FALSE;      //  when set, want to save some extra diagnostic info
+  modes.save_cell_stats = FALSE;        // want to save photons statistics by cell
+  modes.keep_ioncycle_windsaves = FALSE;        // want to save wind file each ionization cycle
+  modes.track_resonant_scatters = FALSE;        // want to track resonant scatters
+  modes.save_extract_photons = FALSE;   // we want to save details on extracted photons
+  modes.adjust_grid = FALSE;    // the user wants to adjust the grid scale
+  modes.diag_on_off = FALSE;    // extra diagnostics
+  modes.use_debug = FALSE;
+  modes.print_dvds_info = FALSE;        // print out information on velocity gradients
+  modes.quit_after_inputs = FALSE;      // testing mode which quits after reading in inputs
+  modes.fixed_temp = FALSE;     // do not attempt to change temperature - used for testing
+  modes.zeus_connect = FALSE;   // connect with zeus
 
   //note write_atomicdata  is defined in atomic.h, rather than the modes structure
-  write_atomicdata = 0;         // print out summary of atomic data
+  write_atomicdata = FALSE;     // print out summary of atomic data
 
 
-  modes.keep_photoabs = 1;      // keep photoabsorption in final spectrum
+  modes.keep_photoabs = TRUE;   // keep photoabsorption in final spectrum
+
+  modes.jumps_for_detailed_spectra = FALSE;     //use old jumps mode for calculating macro atom
+  //emissivites
+  modes.turn_off_upweighting_of_simple_macro_atoms = FALSE;     //use old mode for handling 
+  //bf interactions with simple macro atoms
 
   return (0);
 }

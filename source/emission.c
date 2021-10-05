@@ -779,8 +779,8 @@ one_ff (one, f1, f2)
 
 /**********************************************************/
 /**
- * @brief      computes the frequency averaged gaunt factor for ff emissionat
- * 		scaled temperature from Sutherland (1988).
+ * @brief      computes the frequency averaged gaunt factor for ff emissiona
+ * 	       based on scaled value of the temperature from Sutherland (1988).
  *
  * @param [in] double  gsquared   The variable on which
  * Sutherland's ff gaunt factors are interpolated.
@@ -797,12 +797,12 @@ one_ff (one, f1, f2)
  * gsquared is the scaled inverse temperature experienced by an ion,
  * Z**2/kT(Ry).
  *
- * The Sutherland interpolation data is a spline fit to the gaunt function. 
+ * See issue #750 for more explanation
  **********************************************************/
 
 double
 gaunt_ff (gsquared)
-     double gsquared;           /* the gamma squared variable */
+     double gsquared;           
 {
   int i, index;
   double gaunt;
