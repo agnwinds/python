@@ -150,7 +150,7 @@ extract (w, p, itype)
 
     extract_photon = TRUE;
 
-    if ((mscat = xxspec[n].nscat) > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
+    if ((mscat = xxspec[n].nscat) >= MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
       extract_photon = TRUE;
     else
       extract_photon = FALSE;
