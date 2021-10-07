@@ -607,7 +607,7 @@ communicate_matom_estimators_para ()
   }
 
   MPI_Barrier (MPI_COMM_WORLD);
-  MPI_Bcast (cell_helper2, NPLASMA * 7, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast (cell_helper2, NPLASMA * 8, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (level_helper2, NPLASMA * nlevels_macro, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (gamma_helper2, NPLASMA * 4 * size_gamma_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
