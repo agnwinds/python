@@ -109,7 +109,7 @@ char *new_names[] = { "Central_object.mass", "Central_object.radius",
   NULL
 };
 
-int number_of_names = 121;
+int number_of_names = 122;
 int synonyms_validated = 0;
 
 #define MIN(a,b) ((a)<b ? a:b)
