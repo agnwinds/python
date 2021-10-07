@@ -870,7 +870,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;
     p[i].grid = 0;
     p[i].tau = 0.0;
-    p[i].nres = -1;             // It's a continuum photon
+    p[i].nres = p[i].line_res = -1;     // It's a continuum photon
     p[i].nnscat = 1;
 
     if (spectype == SPECTYPE_BB)
@@ -978,7 +978,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].w = weight;
     p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;
     p[i].tau = 0;
-    p[i].nres = -1;             // It's a continuum photon
+    p[i].nres = p[i].line_res = -1;     // It's a continuum photon
     p[i].nnscat = 1;
     if (geo.reverb_disk == REV_DISK_UNCORRELATED)
       p[i].path = 0;            //If we're assuming disk photons are uncorrelated, leave them at 0
