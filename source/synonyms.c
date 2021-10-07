@@ -59,7 +59,7 @@ char *old_names[] = { "mstar", "rstar", "Disk.illumination.treatment", "disk.typ
   "BH.rad_type_to_make_wind", "BH.rad_type_in_final_spectrum", "BH.power_law_index",
   "low_energy_break", "high_energy_break",
   "lum_agn", "AGN.power_law_index", "@AGN.power_law_cutoff",
-  "AGN.lamp_post_height",
+  "AGN.lamp_post_height", "Reverb.filter_lines(0=off,-1=continuum,>0=count)",
   NULL
 };
 
@@ -105,7 +105,7 @@ char *new_names[] = { "Central_object.mass", "Central_object.radius",
   "Central_object.rad_type_to_make_wind", "Central_object.rad_type_in_final_spectrum", "Central_object.power_law_index",
   "Central_object.cloudy.low_energy_break", "Central_object.cloudy.high_energy_break",
   "Boundary_layer.luminosity", "Boundary_layer.power_law_index", "@Boundary_layer.power_law_cutoff",
-  "Central_object.lamp_post_height",
+  "Central_object.lamp_post_height","Reverb.filter_lines(0=off,-1=continuum,-2=dumpall,>0=count)",
   NULL
 };
 
