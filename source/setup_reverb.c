@@ -193,8 +193,9 @@ get_meta_params (void)
   {
     //Should we filter any lines out?
     //If -1, blacklist continuum, if >0 specify lines as above and whitelist
+    //-2 dumps everything to disk, can be big!
     //Automatically include matom_lines
-    rdint ("Reverb.filter_lines(0=off,-1=continuum,>0=count)", &geo.reverb_filter_lines);
+    rdint ("Reverb.filter_lines(0=off,-1=continuum,-2=dumpall,>0=count)", &geo.reverb_filter_lines);
     if (geo.reverb_filter_lines > 0)
     {                           //If we're given a whitelist, allocate temp storage (up to 256 lines!)
       int temp[256], bFound;
