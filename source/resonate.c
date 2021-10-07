@@ -1113,7 +1113,7 @@ scatter (p, nres, nnscat)
         Exit (0);
       }
     }
-    else if (*nres == -2)
+    else if (*nres == NRES_FF)
     {                           /* This is a ff event (SS). */
       macro_gov (p, nres, 2, &which_out);       //ff always make a k-packet
     }
@@ -1129,7 +1129,7 @@ scatter (p, nres, nnscat)
      for a resonanant scatter. Note that nres may have changed especially for macro-atoms */
 
   p->nres = *nres;
-  if (*nres > -1 && *nres < nlines)
+  if (*nres > NRES_ES && *nres < nlines)
   {
     p->freq = lin_ptr[*nres]->freq;
   }
@@ -1141,11 +1141,11 @@ scatter (p, nres, nnscat)
      that ff and bf are only treated as scattering processes in macro-atom mode.
    */
 
-  if (*nres == -1)
+  if (*nres == NRES_ES)
   {
     compton_dir (p);
   }
-  else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
+  else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {
     randvec (z_prime, 1.0);
     stuff_v (z_prime, p->lmn);
@@ -1164,7 +1164,7 @@ scatter (p, nres, nnscat)
   /* If we are in macro-atom mode, add the photon to the created wind spectrum.  For simple
      atoms the wind spectrum is constructed in sectra.c */
 
-  if (geo.rt_mode == RT_MODE_MACRO && *nres != -1)
+  if (geo.rt_mode == RT_MODE_MACRO && *nres != NRES_ES)
   {
     p->nmacro++;
     spec_add_one (p, SPEC_CWIND);

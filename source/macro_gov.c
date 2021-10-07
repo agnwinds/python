@@ -77,10 +77,10 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     {
 
       /* if it's a bb transition of a full macro atom  */
-      if (*nres > (-1) && *nres < NLINES && geo.macro_simple == FALSE && lin_ptr[*nres]->macro_info == TRUE)
+      if (*nres > NRES_ES && *nres < NRES_BF && geo.macro_simple == FALSE && lin_ptr[*nres]->macro_info == TRUE)
       {
 
-        if (geo.matom_radiation == 1)
+        if (geo.matom_radiation == TRUE)
         {
           /* During the spectrum cycles we want to throw these photons away. */
           p->w = 0.0;
@@ -106,16 +106,16 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       }
 
       /*  if it's a bb transition  without the full macro atom treatment. */
-      else if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
+      else if (*nres > NRES_ES && *nres < NRES_BF && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
       {
         fake_matom_bb (p, nres, &escape);
       }
 
       /* if it's bf tranisition of a full macro atom. */
-      else if (*nres > NLINES && phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == FALSE)
+      else if (*nres > NRES_BF && phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == FALSE)
       {
 
-        if (geo.matom_radiation == 1)
+        if (geo.matom_radiation == TRUE)
         {
           /* During the spectrum cycles we want to throw these photons away. */
           p->w = 0.0;
@@ -154,7 +154,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
          In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
          is thrown and we exit. */
 
-      else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
+      else if (*nres > NRES_BF && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
       {
         if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
@@ -176,7 +176,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
        section of the loop that deals with kpts */
     else if (matom_or_kpkt == KPKT)
     {
-      if (geo.matom_radiation == 1)
+      if (geo.matom_radiation == TRUE)
       {
         /* During the spectrum cycles we want to throw these photons away. */
         p->w = 0.0;

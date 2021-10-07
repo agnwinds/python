@@ -1166,6 +1166,8 @@ typedef struct photon
                                    for continuum scattering, meaning 
                                    depends on matom vs non-matom. See headers of emission.c 
                                    or matom.c for details. */
+  int line_res;                 /* The line which a photon belongs to. A photon can tagged as a line, then continuum
+                                   scatter. line_res will still be tagged as the same line until it scatters off another line. */
   int nnscat;                   /* Used for the thermal trapping model of
                                    anisotropic scattering to carry the number of
                                    scattering to "extract" when needed for wind
@@ -1203,6 +1205,11 @@ typedef struct photon
   double ds;                    /* the distance a photon has moved since its creation or last interaction */
 }
 p_dummy, *PhotPtr;
+
+#define NRES_ES (-1)
+#define NRES_FF (-2)
+#define NRES_NOT_SET (-3)
+#define NRES_BF NLINES
 
 PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
                                    breaking the main routine of python into separate rooutines for inputs and 
