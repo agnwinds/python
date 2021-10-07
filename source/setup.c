@@ -354,7 +354,6 @@ init_observers ()
   int n;
   int ichoice;
   char answer[LINELENGTH];
-  double spec_nwave_default_double;
 
   geo.nangles = 4;
   geo.angle[0] = 10;
@@ -373,23 +372,18 @@ init_observers ()
   geo.swavemax = 1850;
 
   rdpar_comment ("The minimum and maximum wavelengths in the final spectra and the number of wavelength bins");
-  spec_nwave_default_double = 10000;
-  rddoub ("Spectrum.nwave", &spec_nwave_default_double);
-  NWAVE_EXTRACT = (int) spec_nwave_default_double;
-
-  /*
-   * First, do some safety checks to make sure NWAVE_EXTRACT will not cause
-   * problems -- namely, NWAVE has to be positive and more then NWAVE_MIN
-   */
+  NWAVE_EXTRACT = NWAVE_IONIZ;
+  rdint ("Spectrum.nwave", &NWAVE_EXTRACT);
 
   if (NWAVE_EXTRACT < 0)
   {
-    NWAVE_EXTRACT *= -1;
+    Error ("The number of bins in the extracted spectra must be positive\n");
+    Exit (0);
   }
 
   if (NWAVE_EXTRACT < NWAVE_MIN)
   {
-    Error ("Minimum number of spectrum bins is %d\n", NWAVE_MIN);
+    Error ("Minimum number of spectrum bins for detailed spectra is %d\n", NWAVE_MIN);
     NWAVE_EXTRACT = NWAVE_MIN;
   }
 
