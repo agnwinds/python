@@ -158,6 +158,11 @@ WindPtr (w);
   {
     t_r_ave_old += plasmamain[n].t_r;
     t_e_ave_old += plasmamain[n].t_e;
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
+    {
+      normalise_macro_estimators (plasmamain[n].nwind);
+      macromain[n].kpkt_rates_known = -1;
+    }
   }
 
   /* we now know how many cells this thread has to process - note this will be
@@ -178,11 +183,7 @@ WindPtr (w);
        terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
 
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
-    {
-      normalise_macro_estimators (nwind);
-      macromain[n].kpkt_rates_known = -1;
-    }
+
 
     /* Store some information so one can determine how much the temps are changing */
     t_r_old = plasmamain[n].t_r;
