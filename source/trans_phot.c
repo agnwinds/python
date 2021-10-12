@@ -87,6 +87,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   int nreport;
   struct timeval timer_t0;
 
+  xsignal (files.root, "%-20s Photon transport started\n", "NOK");
+
   nreport = NPHOT / 10;
   Log ("\n");
 
@@ -130,6 +132,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   Log ("\n");
 
   print_timer_duration ("!!python: photon transport completed in", timer_t0);
+  //XXXX Delete when understand what is going on with state machines
+  xsignal (files.root, "%-20s Photon transport completed\n", "NOK");
 
   /* Sometimes a photon will scatter near the edge of the wind and get pushed
    * out by DFUDGE. We record these. */

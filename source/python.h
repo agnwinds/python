@@ -485,8 +485,11 @@ struct geometry
 
   int rt_mode;                  /* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
 
+  /* define a global transition mode for macro-atoms */
+  /* the global storage mode is set in the modes structure */
+  int matom_transition_mode;
 
-  /* Define the choices for calculating the FB, see, e.g. integ_fb */
+  /* Define the choices for calculating the FB, see, e.g. integ_fb */ 
 
 #define FB_FULL         0       /* Calculate fb emissivity including energy associated with the threshold */
 #define FB_REDUCED      1       /* Calculqate the fb emissivity without the threshold energy */
@@ -875,6 +878,7 @@ typedef struct plasma
   double *lum_rr_ion;           /* The recombination luminosity
                                    by this ion via recombination. */
 
+
 #define MEAN_INTENSITY_BB_MODEL  1
 #define MEAN_INTENSITY_ESTIMATOR_MODEL 2
 
@@ -1080,10 +1084,16 @@ typedef struct macro
      and used to select destruction rates for kpkts */
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
+  double cooling_bb_simple_tot;
   double cooling_ff, cooling_ff_lofreq;
   double cooling_adiabatic;     // this is just cool_adiabatic / vol / ne
 
-
+#define MATOM_MC_JUMPS 0
+#define MATOM_MATRIX   1
+  int matom_transition_mode;    /* what mode to use for the macro-atom transition probabilities */
+  int store_matom_matrix;
+  int matrix_rates_known;
+  double **matom_matrix;        /* array to store transitions probabilities */
 } macro_dummy, *MacroPtr;
 
 MacroPtr macromain;
@@ -1431,6 +1441,7 @@ struct advanced_modes
   int photon_speedup;
   int save_rng;                 // save the GSL RNG stage
   int load_rng;                 // load the GSL RNG state
+  int store_matom_matrix;       // store the macro-atom matrix 
   int jumps_for_detailed_spectra;   // use the older jump method for calculating emissivities 
                                     // in detailed spectra
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
@@ -1486,10 +1497,17 @@ files;
 #define KPKT 2
 #define MATOM 1
 /* modes for kpkt calculations */
-#define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
-#define KPKT_MODE_ALL        1  /* account for all cooling processes */
+#define KPKT_MODE_CONTINUUM  0          /* only account for k->r processes */
+#define KPKT_MODE_ALL        1          /* account for all cooling processes */
+#define KPKT_MODE_CONT_PLUS_ADIABATIC 2 /* account for k->r and adiabatic destruction */
 
 
+/* whether or not to use the implicit/accelerated macro-atom scheme, in which 
+   a matrix inversion is used in the emissivity calcualtion rather than 
+   a MC sampling of the transition probabilities */
+#define MATOM_MATRIX_EMISSIVITIES  TRUE
+#define STORE_B_MATRIX TRUE
+#define MATOM_TRANSITION_MODE MATOM_MATRIX
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
 #define ALPHA_MATOM_NUMAX_LIMIT 30      /* maximum value for h nu / k T to be considered in integrals */

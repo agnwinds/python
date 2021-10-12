@@ -92,7 +92,7 @@ WindPtr (w);
   fptr = fptr2 = fptr3 = fptr4 = fptr5 = NULL;
 
 #ifdef MPI_ON
-  int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
+  int position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer, size_of_specbuffer;
   char *commbuffer;
 
@@ -134,22 +134,7 @@ WindPtr (w);
   my_nmin = 0;
   my_nmax = NPLASMA;
 #ifdef MPI_ON
-  num_mpi_cells = floor (NPLASMA / np_mpi_global);
-  num_mpi_extra = NPLASMA - (np_mpi_global * num_mpi_cells);
-
-  /* this section distributes the remainder over the threads if the cells
-     do not divide evenly by thread */
-  if (rank_global < num_mpi_extra)
-  {
-    my_nmin = rank_global * (num_mpi_cells + 1);
-    my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
-  }
-  else
-  {
-    my_nmin = num_mpi_extra * (num_mpi_cells + 1) + (rank_global - num_mpi_extra) * (num_mpi_cells);
-    my_nmax = num_mpi_extra * (num_mpi_cells + 1) + (rank_global - num_mpi_extra + 1) * (num_mpi_cells);
-  }
-  ndo = my_nmax - my_nmin;
+  ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #endif
 
   /* Before we do anything let's record the average tr and te from the last cycle */
@@ -158,6 +143,18 @@ WindPtr (w);
   {
     t_r_ave_old += plasmamain[n].t_r;
     t_e_ave_old += plasmamain[n].t_e;
+
+    /* macro-atom estimators need to be normalised for all cells. 
+       Note they should have already been averaged over threads here */
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      
+    {
+      nwind = plasmamain[n].nwind;
+      normalise_macro_estimators (nwind);
+
+      /* force recalculation of kpacket rates and matrices, if applicable */
+      macromain[n].kpkt_rates_known = FALSE;
+      macromain[n].matrix_rates_known = FALSE;
+    }
   }
 
   /* we now know how many cells this thread has to process - note this will be
@@ -177,12 +174,6 @@ WindPtr (w);
        some of the estimators include temperature terms (stimulated correction
        terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
-
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
-    {
-      normalise_macro_estimators (nwind);
-      macromain[n].kpkt_rates_known = -1;
-    }
 
     /* Store some information so one can determine how much the temps are changing */
     t_r_old = plasmamain[n].t_r;
@@ -1134,7 +1125,9 @@ wind_rad_init ()
 
 
     if (geo.rt_mode == RT_MODE_MACRO)
-      macromain[n].kpkt_rates_known = -1;
+    {
+      macromain[n].kpkt_rates_known = FALSE;
+    }
 
 /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell*/
 

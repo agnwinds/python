@@ -50,6 +50,7 @@ get_line_transfer_mode ()
   char answer[LINELENGTH];
 
   int user_line_mode = 0;
+  int n;
 
   /* 181010-ksl-There a several line transfer modes which are diagnostic in nature which 
      cannot be reached by rdchoice easily, except as numbers.  
@@ -137,6 +138,50 @@ get_line_transfer_mode ()
     Exit (0);
   }
 
+  /* read in variables to set the transition mode form macro-atoms */
+  /* an adaptive mode might be added in future */
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    /* XMACRO -- these options MUST be consistent with the define statements in python.h */
+    strcpy (answer, "mc_jumps");
+    geo.matom_transition_mode = rdchoice ("Matom_transition_mode(mc_jumps,matrix)", "0,1", answer);
+
+    if (geo.matom_transition_mode == MATOM_MATRIX && modes.store_matom_matrix == TRUE)
+    {
+      Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n");
+    }
+
+
+    if (geo.run_type == RUN_TYPE_PREVIOUS)
+    {
+      if (geo.matom_transition_mode == MATOM_MATRIX)
+      {
+        Log ("Warning: Storing macro-atom matrices -- be careful of high memory usage.\n");
+
+
+        {
+          for (n = 0; n < NPLASMA; n++)
+          {
+            macromain[n].store_matom_matrix = modes.store_matom_matrix;
+            macromain[n].matom_transition_mode = geo.matom_transition_mode;
+          }
+
+        }
+      }
+      else
+      {
+        for (n = 0; n < NPLASMA; n++)
+        {
+          macromain[n].store_matom_matrix = modes.store_matom_matrix = FALSE;
+          macromain[n].matom_transition_mode = geo.matom_transition_mode;
+        }
+
+      }
+
+    }
+
+  }
+
   /* With the macro atom approach we won't want to generate photon 
      bundles in the wind so switch it off here. If not in macro atom mode
      ask the user whether we want the wind to radiate
@@ -149,8 +194,9 @@ get_line_transfer_mode ()
   {
     strcpy (answer, "yes");
     geo.wind_radiation = rdchoice ("Wind.radiation(yes,no)", "1,0", answer);
-
   }
+
+
 
   /* Note the only other variable read in in this section is that for the atomic data,
      which can only be specified for a new model, becuase of various structures
