@@ -143,6 +143,18 @@ WindPtr (w);
   {
     t_r_ave_old += plasmamain[n].t_r;
     t_e_ave_old += plasmamain[n].t_e;
+
+    /* macro-atom estimators need to be normalised for all cells. 
+       Note they should have already been averaged over threads here */
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      
+    {
+      nwind = plasmamain[n].nwind;
+      normalise_macro_estimators (nwind);
+
+      /* force recalculation of kpacket rates and matrices, if applicable */
+      macromain[n].kpkt_rates_known = FALSE;
+      macromain[n].matrix_rates_known = FALSE;
+    }
   }
 
   /* we now know how many cells this thread has to process - note this will be
@@ -162,15 +174,6 @@ WindPtr (w);
        some of the estimators include temperature terms (stimulated correction
        terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
-
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
-    {
-      normalise_macro_estimators (nwind);
-
-      /* force recalculation of kpacket rates and matrices, if applicable */
-      macromain[n].kpkt_rates_known = FALSE;
-      macromain[n].matrix_rates_known = FALSE;
-    }
 
     /* Store some information so one can determine how much the temps are changing */
     t_r_old = plasmamain[n].t_r;
