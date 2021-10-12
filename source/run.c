@@ -351,7 +351,14 @@ calculate_ionization (restart_stat)
 
 
 /* Save only the windsave file from thread 0, to prevent many processors from writing to the same
- * file. */
+ * file. 
+  
+ Note that if one wants to write out the files from all threads, then one should comment out the
+ MPI specific if statements below, leving MPI_Barrier, and replace the sprintf statment with
+
+ sprintf (dummy, "python%02d.%02d.wind_save", geo.wcycle, rank_global);
+
+ */
 
 #ifdef MPI_ON
     if (rank_global == 0)
