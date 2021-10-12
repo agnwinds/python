@@ -475,7 +475,6 @@ init_observers ()
     ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
 
     if (ichoice)
-
     {
       Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
       for (n = 0; n < geo.nangles; n++)
