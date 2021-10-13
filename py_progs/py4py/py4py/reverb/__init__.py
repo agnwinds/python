@@ -501,7 +501,7 @@ class TransferFunction:
         Todo:
             Catch doublets.
         """
-        if response and not self._response:
+        if response and self._response is None:
             raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
 
         if velocity:
@@ -532,7 +532,7 @@ class TransferFunction:
         Todo:
             Implement fractional bounds. Should just be able to call the centroid_delay function!
         """
-        if response and not self._response:
+        if response and self._response is None:
             raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
         if threshold >= 1 or threshold < 0:
             raise ValueError("Threshold is a multiplier to the peak flux! It must be between 0 and 1")
@@ -568,7 +568,7 @@ class TransferFunction:
         Returns:
             float: The peak delay.
         """
-        if response and not self._response:
+        if response and self._response is None:
             raise RuntimeError(
                 "Must generate the response map using `response_map_from_tf()` before attempting to use it!"
             )
@@ -749,7 +749,7 @@ class TransferFunction:
         Returns:
             float: Total response.
         """
-        if not self._response:
+        if self._response is None:
             raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
         return np.sum(self._response)
 
@@ -781,7 +781,7 @@ class TransferFunction:
         Todo:
             Allow for only wavelength to be provided?
         """
-        if not self._response:
+        if self._response is None:
             raise RuntimeError("Must generate the response map using `response_map_from_tf()` before attempting to use it!")
         return self._return_array(self._response, delay=delay, wave=wave, delay_index=delay_index)
 
@@ -846,7 +846,7 @@ class TransferFunction:
             np.ndarray: A [bins, 2]-d array containing the midpoints of the delay bins,
                 and the value of the 1-d transfer or response function in each bin.
         """
-        if response and not self._response:
+        if response and self._response is None:
             raise RuntimeError(
                 "Must generate the response map using `response_map_from_tf()` before attempting to use it!"
             )
@@ -1269,7 +1269,7 @@ def open_database(file_root: str, user: str = None, password: str = None, batch_
                 print("Malformed line: '{}'".format(line))
                 continue
 
-            if len(values) is not 12:
+            if len(values) != 12:
                 # There should be 13 values per line in our base formatting!
                 print("Incorrect number of values in line: '{}'".format(line))
                 continue
