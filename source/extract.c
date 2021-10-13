@@ -150,7 +150,7 @@ extract (w, p, itype)
 
     extract_photon = TRUE;
 
-    if ((mscat = xxspec[n].nscat) > 999 || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
+    if ((mscat = xxspec[n].nscat) >= MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
       extract_photon = TRUE;
     else
       extract_photon = FALSE;
@@ -217,16 +217,6 @@ extract (w, p, itype)
       /*At this point photons of type DISK or WIND are in the local frame, but others
          are in the global frame
        */
-
-      if (modes.save_photons && 1180. < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1240.0)
-      {
-        save_photons (&pp, "Extract_start");
-      }
-
-      if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
-      {
-        save_extract_photons (n, p, &pp);
-      }
 
       extract_one (w, &pp, itype, n);
     }
@@ -351,13 +341,6 @@ extract_one (w, pp, itype, nspec)
              pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
     }
 
-//OLD    if (run_ztest == FALSE)
-//OLD    {
-//OLD      if ((ierr = reposition (pp)))
-//OLD      {
-//OLD        Error ("extract_one: reposition returned error %d\n", ierr);    //BEFORE
-//OLD      }                         //AFTER
-//OLD    }
     pstart.lmn[0] = pp->lmn[0];
     pstart.lmn[1] = pp->lmn[1];
     pstart.lmn[2] = pp->lmn[2];
@@ -404,25 +387,6 @@ extract_one (w, pp, itype, nspec)
         pp->w *= p_escape_from_tau (tau);
       tau = 0.0;
     }
-
-    /* XXX - It is unclear why reposition needs to be here, but at present this
-     * produces  better agreement with live or die than below */
-//OLD    if (run_ztest == TRUE)
-//OLD    {
-//OLD      /* Fudge to be able to reposition photon while it is in the local frame */
-//OLD      pp->frame = F_OBSERVER;
-//OLD      if ((ierr = reposition (pp)))
-//OLD        Error ("extract_one: reposition returned error %d\n", ierr);    //BEFORE
-//OLD      pp->frame = F_LOCAL;
-//OLD    }
-//HOLD    if (pp->x[2] * pstart.x[2] < 0)
-//HOLD    {
-//HOLD      Error ("Extract_one: Went through xz plane on reposition\n");
-//HOLD      Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD             pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
-//HOLD      Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD             pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
-//HOLD    }
   }
 
   stuff_phot (pp, &pdummy);     // Actually not clear to me why we do/need this dummy photon at this stage
@@ -434,67 +398,18 @@ extract_one (w, pp, itype, nspec)
   }
   else if (geo.binary == TRUE)
   {
-    istat = hit_secondary (pp); /* Check to see if it hit secondary */
-//HOLD    if (istat)
-//HOLD    {
-//HOLD      Log ("extract: Hit secondary %3d %5d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD           geo.pcycle, pp->np, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
-//HOLD    }
+    istat = hit_secondary(pp); /* Check to see if it hit secondary */
   }
-
-//HOLD  if (pp->x[2] * pstart.x[2] < 0)
-//HOLD  {
-//HOLD    Error ("Extract_one: Went through xz plane after hit secondary \n");
-//HOLD    Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD           pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
-//HOLD    Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD           pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
-//HOLD    Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-//HOLD           pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
-//HOLD  }
-
-
-  if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
-  {
-    save_photons (pp, "AfterRepoObs");
-  }
-
-  double xdot, xxang;
-  xdot = dot (pp->lmn, xlmn);
-  xxang = acos (xdot) * 57.29578;
-  if (xxang > 0.1)
-  {
-
-    Log ("gotcha type %d nphot %8d lmn  %10.3e %10.3e %10.3e -> %10.3e %10.3e %10.3e not equal theta %.6f\n",
-         itype, pp->np, xlmn[0], xlmn[1], xlmn[2], pp->lmn[0], pp->lmn[1], pp->lmn[2], xxang);
-
-  }
-
-//HOLD  pp->lmn[0] = xlmn[0];
-//HOLD  pp->lmn[1] = xlmn[1];
-//HOLD  pp->lmn[2] = xlmn[2];
-
-
-
-
 
 /* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
-
-
-  if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
-  {
-    save_photons (pp, "BeforeExtract");
-  }
-
-  tau = 0;
+ tau = 0;
   pp->ds = 0;
   icell = 0;
 /* Now we can actually extract the reweighted photon */
 
-//HOLD  istat = walls (pp, &pstart, normal);
   stuff_phot (pp, &pdummy_orig);
 
   ierr = check_frame (pp, F_OBSERVER, "extract_one: photon not in observer frame at start");
@@ -544,11 +459,6 @@ extract_one (w, pp, itype, nspec)
     {                           /* Cause the photon to scatter and reinitilize */
       break;
     }
-  }
-
-  if (modes.save_photons && 1180. < 2.997925e18 / pp->freq && 2.997925e18 / pp->freq < 1240.0)
-  {
-    save_photons (pp, "AfterExtract");
   }
 
   if (istat == P_ESCAPE)
@@ -618,7 +528,6 @@ extract_one (w, pp, itype, nspec)
     }
 
   }
-
 
   if (istat > -1 && istat < 9)
     xxspec[nspec].nphot[istat]++;

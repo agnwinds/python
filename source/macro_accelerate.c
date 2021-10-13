@@ -466,13 +466,14 @@ fill_kpkt_rates (xplasma, escape, p)
   /* If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
    * every time the wind is updated */
 
-  if (mplasma->kpkt_rates_known != 1)
+  if (mplasma->kpkt_rates_known != TRUE)
   {
     cooling_normalisation = 0.0;
     cooling_bftot = 0.0;
     cooling_bbtot = 0.0;
     cooling_ff = 0.0;
     cooling_bf_coltot = 0.0;
+    mplasma->cooling_bb_simple_tot = 0.0;
 
     /* Start of BF calculation */
     /* JM 1503 -- we used to loop over ntop_phot here, 
@@ -558,6 +559,7 @@ fill_kpkt_rates (xplasma, escape, p)
 
         cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
         mplasma->cooling_bb[i] = cooling_bb[i];
+        mplasma->cooling_bb_simple_tot += cooling_bb[i];
       }
 
       if (cooling_bb[i] < 0)
@@ -636,7 +638,7 @@ fill_kpkt_rates (xplasma, escape, p)
     mplasma->cooling_bf_coltot = cooling_bf_coltot;
     mplasma->cooling_adiabatic = cooling_adiabatic;
     mplasma->cooling_normalisation = cooling_normalisation;
-    mplasma->kpkt_rates_known = 1;
+    mplasma->kpkt_rates_known = TRUE;
 
   }
 
@@ -981,4 +983,147 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
     return (0.0);
   }
 
+}
+
+/**********************************************************/
+/**
+ * @brief  Choose a deactivation process using the matrix scheme
+ *         for macro-atom transition probabilities
+ *
+ * @param[in] PlasmaPtr xplasma        The plasma cell in question
+ * @param[in] int       uplvl          The level the macro-atom was activated with
+ *
+ * @return  int   j  the level the macro-atom will deactivate from 
+ *
+ * @details 
+ *
+ **********************************************************/
+
+int
+matom_deactivation_from_matrix (xplasma, uplvl)
+     PlasmaPtr xplasma;
+     int uplvl;
+{
+  double z, total;
+  int j, i;
+  int nrows = nlevels_macro + 1;
+  double **matom_matrix;
+  MacroPtr mplasma;
+
+  mplasma = &macromain[xplasma->nplasma];
+
+  if (mplasma->matrix_rates_known == FALSE)
+  {
+    if (mplasma->store_matom_matrix == FALSE)
+    {
+      /* we aren't storing the macro-atom matrix, so we need to allocate and calculate it */
+      matom_matrix = (double **) calloc (sizeof (double *), nrows);
+      for (i = 0; i < nrows; i++)
+      {
+        matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
+      }
+    }
+    else
+    {
+      matom_matrix = mplasma->matom_matrix;
+    }
+
+    calc_matom_matrix (xplasma, matom_matrix);
+
+    /* if we are storing the matrix, flag that we know the rates now */
+    if (mplasma->store_matom_matrix == TRUE)
+    {
+      mplasma->matrix_rates_known = TRUE;
+    }
+  }
+  else if (mplasma->store_matom_matrix == TRUE)
+  {
+    matom_matrix = mplasma->matom_matrix;
+  }
+
+  /* Now use the B matrix to calculate the outgoing state from activating state "uplvl" */
+  /* we draw a random number and sample from the column in the matrix corresponding to uplvl */
+  z = random_number (0.0, 1.0);
+  j = 0;
+  total = 0.0;
+  while (total < z)
+  {
+    total += matom_matrix[uplvl][j];
+    j++;
+  }
+
+  /* This if statement is added to prevent case where z is essentially 0. */
+  if (j > 0)
+  {
+    j = j - 1;
+  }
+
+  if (mplasma->store_matom_matrix == FALSE)
+  {
+    /* need to free each calloc-ed row of the matrixes */
+    for (i = 0; i < nrows; i++)
+    {
+      free (matom_matrix[i]);
+    }
+    free (matom_matrix);
+  }
+
+  return (j);
+}
+
+/**********************************************************/
+/**
+ * @brief calculate all the macro-atom matrices in advance 
+ * @return  0
+ * 
+ * @details calculate all the macro-atom B matrices in advance 
+ * of the ionization cycles, and communicate them between 
+ * parallel threads if necessary. Populates matom_matrix in 
+ * macromain.
+ **********************************************************/
+
+int
+calc_all_matom_matrices ()
+{
+  int ndo, my_nmin, my_nmax, n;
+  struct timeval timer_t0;
+  char message[LINELENGTH];
+  MacroPtr mplasma;
+  PlasmaPtr xplasma;
+#ifdef MPI_ON
+  ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
+  Log_parallel ("calc_all_matom_matrices: thread %d calculating matrix for cells %d to %d %d \n", rank_global, my_nmin, my_nmax, ndo);
+#else
+  my_nmin = 0;
+  my_nmax = NPLASMA;
+  ndo = NPLASMA;
+#endif
+
+  timer_t0 = init_timer_t0 ();
+
+  for (n = my_nmin; n < my_nmax; n++)
+  {
+    xplasma = &plasmamain[n];
+    mplasma = &macromain[n];
+
+    if (mplasma->store_matom_matrix == TRUE)
+    {
+      calc_matom_matrix (xplasma, mplasma->matom_matrix);
+    }
+  }
+
+  /* print the time taken for this thread to complete */
+  sprintf (message, "calc_all_matom_matrices: thread %d calculated %d matrices in", rank_global, ndo);
+  print_timer_duration (message, timer_t0);
+
+  /* this deals with communicating the matrices between threads (does nothing in serial mode) */
+  communicate_matom_matrices ();
+
+  /* flag the matrix rates as known */
+  for (n = 0; n < NPLASMA; n++)
+  {
+    macromain[n].matrix_rates_known = TRUE;
+  }
+
+  return (0);
 }

@@ -122,7 +122,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 #Note that version should be a single string without spaces.
 
 
-VERSION = 85h
+VERSION = 85i
 
 INDENT = yes
 
@@ -240,7 +240,7 @@ D:
 	@echo 'Debugging Mode'
 
 py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_wind_sub.o windsave.o py_wind_ion.o \
-		emission.o recomb.o wind_util.o  \
+		emission.o recomb.o wind_util.o para_update.o \
 		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
@@ -267,7 +267,7 @@ py_wind: startup $(py_wind_objects)
 
 table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o wind_util.o  \
-		cdf.o random.o recipes.o saha.o \
+		cdf.o random.o recipes.o saha.o para_update.o\
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
@@ -282,7 +282,7 @@ table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_in
 
 rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o wind_util.o  \
-		cdf.o random.o recipes.o saha.o \
+		cdf.o random.o recipes.o saha.o para_update.o\
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o spectra.o density.o \
@@ -317,7 +317,7 @@ rad_hydro_files: $(rhf_objects)
 
 modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		emission.o recomb.o wind_util.o  \
-		cdf.o random.o recipes.o saha.o \
+		cdf.o random.o recipes.o saha.o para_update.o\
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o density.o \
@@ -336,6 +336,31 @@ modify_wind:  $(modify_wind_objects)
 	cp $@ $(BIN)                                                               
 	mv $@ $(BIN)/modify_wind$(VERSION)                                         
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
+
+
+
+inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
+		emission.o recomb.o wind_util.o  \
+		cdf.o random.o recipes.o saha.o para_update.o\
+		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
+		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
+		radiation.o estimators_simple.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		matom.o estimators_macro.o photon2d.o cylindrical.o rtheta.o spherical.o \
+		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
+		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
+		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
+		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
+		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
+		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o
+
+
+inspect_wind:  $(inspect_wind_objects)
+	$(CC) $(CFLAGS) $(inspect_wind_objects) $(LDFLAGS)  -o inspect_wind               
+	cp $@ $(BIN)                                                               
+	mv $@ $(BIN)/inspect_wind$(VERSION)                                         
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
+
 
 py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_optical_depth_output.o py_optical_depth_util.o \
 		bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
@@ -368,7 +393,7 @@ py_optical_depth: startup $(py_optical_depth_objects)
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
 
-all: clean python windsave2table py_wind indent rad_hydro_files modify_wind py_optical_depth
+all: clean python windsave2table py_wind indent rad_hydro_files modify_wind inspect_wind py_optical_depth
 
 
 FILE = atomicdata.o atomicdata_init.o atomicdata_sub.o atomic.o

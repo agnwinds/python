@@ -1122,7 +1122,6 @@ scatter (p, nres, nnscat)
 
   }
 
-
   /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
 
   /* Set nres  correctly and make sure the frequency is correct

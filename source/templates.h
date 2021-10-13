@@ -302,8 +302,6 @@ double dvwind_ds_cmf(PhotPtr p);
 int dvds_ave(void);
 int dvds_max(void);
 double get_dvds_max(PhotPtr p);
-/* reposition.c */
-int reposition(PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* wind_util.c */
@@ -400,6 +398,7 @@ int check_plasma(PlasmaPtr xplasma, char message[]);
 int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
 int calloc_dyn_plasma(int nelem);
+int calloc_matom_matrix(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
 int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp, double weight);
@@ -472,6 +471,8 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplas
 int communicate_estimators_para(void);
 int gather_spectra_para(void);
 int communicate_matom_estimators_para(void);
+int get_parallel_nrange(int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax);
+int communicate_matom_matrices(void);
 /* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);
@@ -619,6 +620,8 @@ void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
 double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double freq_min, double freq_max);
 double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double freq_min, double freq_max);
+int matom_deactivation_from_matrix(PlasmaPtr xplasma, int uplvl);
+int calc_all_matom_matrices(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -105,6 +105,7 @@ init_geo ()
 
   geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
   geo.line_mode = LINE_MODE_ESC_PROB;   /* default is escape probabilites */
+  geo.matom_transition_mode = MATOM_MC_JUMPS;   /* default for macro-atom transition mode is jumping not matrix */
 
   geo.star_radiation = TRUE;    /* 1 implies star will radiate */
   geo.disk_radiation = TRUE;    /* 1 implies disk will radiate */
@@ -323,6 +324,8 @@ init_advanced_modes ()
   modes.turn_off_upweighting_of_simple_macro_atoms = FALSE;     //use old mode for handling 
   //bf interactions with simple macro atoms
 
+  modes.store_matom_matrix = TRUE;      /* default is to store the macro-atom matrix */
+
   return (0);
 }
 
@@ -475,7 +478,6 @@ init_observers ()
     ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
 
     if (ichoice)
-
     {
       Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
       for (n = 0; n < geo.nangles; n++)

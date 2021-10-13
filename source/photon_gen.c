@@ -410,7 +410,6 @@ iwind = -1 	Don't generate any wind photons at all
 
     if (!modes.jumps_for_detailed_spectra)
     {
-//OLD #if ACCELERATED_MACRO == TRUE
       Log ("Using accelerated calculation of emissivities\n");
       if (geo.pcycle == 0)
       {
@@ -421,7 +420,6 @@ iwind = -1 	Don't generate any wind photons at all
     }
     else
     {
-// OLD#else
       Log ("Using old slow calculation of emissivities\n");
       if (geo.pcycle == 0)
       {
@@ -431,7 +429,6 @@ iwind = -1 	Don't generate any wind photons at all
         geo.f_matom = get_matom_f (USE_STORED_MATOM_EMISSIVITIES);
     }
 
-//OLD #endif
 
 
     geo.f_kpkt = get_kpkt_f (); /* This returns the specific luminosity
