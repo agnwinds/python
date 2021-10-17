@@ -1424,10 +1424,11 @@ struct advanced_modes
   int extra_diagnostics;        // when set various extra files will be written out depending what one wants to check
   int save_cell_stats;          // want to save photons statistics by cell
   int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
+  int keep_ioncycle_spectra;    // save the spectrum for  each ionization cycle
   int make_tables;              // create tables showing various parameters for each cycle
   int track_resonant_scatters;  // want to track resonant scatters
   int save_photons;             // want to track photons (in photon2d)
-  int save_extract_photons;     // we want to save details on extracted photons
+  int save_extract_photons;     // save details on extracted photons
   int adjust_grid;              // the user wants to adjust the grid scale
   int diag_on_off;              // extra diagnostics
   int use_debug;                // print out debug statements

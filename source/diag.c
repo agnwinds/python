@@ -175,6 +175,9 @@ get_extra_diagnostics ()
   n += modes.keep_ioncycle_windsaves = rdchoice ("@Diag.keep_ioncycle_windsaves(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");
+  n += modes.keep_ioncycle_spectra = rdchoice ("@Diag.keep_ioncycle_spectra(yes,no)", "1,0", answer);
+
+  strcpy (answer, "no");
   n += modes.make_tables = rdchoice ("@Diag.make_ioncycle_tables(yes,no)", "1,0", answer);
 
   strcpy (answer, "no");

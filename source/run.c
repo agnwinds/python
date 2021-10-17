@@ -383,6 +383,14 @@ calculate_ionization (restart_stat)
         do_windsave2table (dummy, 0);
       }
 
+      if (modes.keep_ioncycle_spectra)
+      {
+        strcpy (dummy, "");
+        sprintf (dummy, "python%02d.log_spec_tot", geo.wcycle);
+        spectrum_summary (dummy, 0, 6, SPECTYPE_RAW, 1., 1, 0); /* .log_spec_tot */
+
+      }
+
 #ifdef MPI_ON
     }
     MPI_Barrier (MPI_COMM_WORLD);
