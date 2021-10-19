@@ -5,11 +5,11 @@
 #define UV_low 7.4e14           //The lower frequency bound of the UV band as defined in IOS 21348
 #define UV_hi 3e16              //The lower frequency bound of the UV band as defined in IOS 21348
 
-int np_mpi_global;              // Global variable which holds the number of MPI processes
+extern int np_mpi_global;              // Global variable which holds the number of MPI processes
 
-int rank_global;
+extern int rank_global;
 
-int verbosity;                  /* verbosity level. 0 low, 10 is high */
+extern int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
 #define TRUE  1
 #define FALSE 0
@@ -1403,16 +1403,16 @@ double kap_bf[NLEVELS];
 
 // 12jun nsh - some commands to enable photon logging in given cells. There is also a pointer in the geo
 
-FILE *pstatptr;                 // pointer to a diagnostic file that will contain photon data for given cells
-int cell_phot_stats;            //1=do  it, 0=dont do it
+extern FILE *pstatptr;                 // pointer to a diagnostic file that will contain photon data for given cells
+extern int cell_phot_stats;            //1=do  it, 0=dont do it
 #define  NCSTAT 10              //The maximum number of cells we are going to log
-int ncstat;                     // the actual number we are going to log
-int ncell_stats[NCSTAT];        //the numbers of the cells we are going to log
+extern int ncstat;                     // the actual number we are going to log
+extern int ncell_stats[NCSTAT];        //the numbers of the cells we are going to log
 
 
 /* Added variables which count number of times two situations occur (See #91) */
-int nerr_no_Jmodel;
-int nerr_Jmodel_wrong_freq;
+extern int nerr_no_Jmodel;
+extern int nerr_Jmodel_wrong_freq;
 
 
 
@@ -1533,7 +1533,7 @@ files;
 #define BOUND_INNER_RHO 7
 #define BOUND_OUTER_RHO 8
 
-int xxxbound;
+extern int xxxbound;
 
 
 /* Structures associated with rdchoice.  This 
