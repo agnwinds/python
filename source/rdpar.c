@@ -146,7 +146,7 @@
 #include <ctype.h>
 
 #include "log.h"
-#include "strict.h"
+//OLD #include "strict.h"
 
 #define LINELEN		256
 #define	OLD		100
@@ -193,6 +193,9 @@ struct rdpar_raw
   int icheck;                   // Check off to indicate a line has been used
 }
 input[MAX_RECORDS];
+
+
+int strict = 0;                 // Initialize to a value that indicates everyting is OK
 
 
 
@@ -1508,4 +1511,13 @@ rdpar_set_verbose (vlevel)
   if (vlevel < 2)
     verbose = 0;
   return (0);
+}
+
+
+/* Check that inputs were correctly updated */
+
+int
+rdpar_check ()
+{
+  return (strict);
 }

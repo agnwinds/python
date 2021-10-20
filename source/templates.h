@@ -622,6 +622,8 @@ double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double freq_min, do
 double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double freq_min, double freq_max);
 int matom_deactivation_from_matrix(PlasmaPtr xplasma, int uplvl);
 int calc_all_matom_matrices(void);
+/* atomic_extern_init.c */
+/* python_extern_init.o */
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

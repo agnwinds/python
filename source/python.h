@@ -1565,6 +1565,6 @@ extern struct rdpar_choices zz_spec;
    declare separately from templates. This is because some functions
    only use log.h and don't use python.h due to repeated definitions */
 #include "log.h"
-#include "strict.h"
+//OLD #include "strict.h"
 #include "version.h"
 #include "templates.h"
