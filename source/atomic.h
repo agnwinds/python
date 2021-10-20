@@ -377,8 +377,9 @@ struct ground_fracs
                                    to the ground state as a function of temperature. ground_frac[0] is or t=5000
                                    and then we go in steps of 5000 to ground_frac[19] which is for t=1e5. these
                                    fractions must have been computed elsewhere */
-}
-ground_frac[NIONS];
+};
+
+extern struct ground_fracs ground_frac[NIONS];
 
 
 //081115 nsh New structure and variables to hold the dielectronic recombination rate data

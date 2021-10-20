@@ -53,6 +53,8 @@ Inner_elec_yield inner_elec_yield[N_INNER * NIONS];
 
 Inner_fluor_yield inner_fluor_yield[N_INNER * NIONS];
 
+struct ground_fracs ground_frac[NIONS];
+
 int ndrecomb;                   //This is the actual number of DR parameters
 
 Drecomb drecomb[NIONS];         //set up the actual structure

@@ -1,10 +1,11 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
-
 #include "atomic.h"
+
 #include "python.h"
 
 
@@ -62,6 +63,13 @@ double z_axis[3];
 DomainPtr zdom;                 //This is the array pointer that contains the domains
 int current_domain;             // This integer is used by py_wind only
 
+struct geometry geo;
+
+struct xdisk disk, qdisk;       /* disk defines zones in the disk which in a specified frequency band emit equal amounts
+                                   of radiation. disk gets reinitialized whenever the frequency interval of interest
+                                   is changed.  qdisk stores the amount of heating of the disk as a result of
+                                   illumination by the star or wind. It's boundaries are fixed throughout a cycle */
+
 WindPtr wmain;
 
 PlasmaPtr plasmamain;
@@ -100,6 +108,8 @@ int itest, jtest;
 
 char hubeny_list[132];          //Location of listing of files representing hubeny atmospheres
 
+struct xbands xband;
+
 double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
 double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficients
 
@@ -115,6 +125,8 @@ int ncell_stats[NCSTAT];        //the numbers of the cells we are going to log
 
 int nerr_no_Jmodel;
 int nerr_Jmodel_wrong_freq;
+
+struct advanced_modes modes;
 
 int xxxbound;
 

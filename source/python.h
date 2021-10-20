@@ -650,8 +650,10 @@ struct geometry
   int reverb_lines, *reverb_line;       //Number of lines to track, and array of line 'nres' values
 
   int spec_mod;                 //A flag to say that we do hav spectral models  ??? What does this mean???
-}
-geo;
+};
+
+
+extern struct geometry geo;
 
 /******************************END GEOMETRY STRUCTURE, BEGIN XDISK*********************************/
 enum band_definition_enum
@@ -686,8 +688,8 @@ struct xdisk
   double t_hit[NRINGS];         /* The effective T of photons hitting the disk */
   int nphot[NRINGS];            /*The number of photons created in each annulus */
   int nhit[NRINGS];             /*The number of photons which hit each annulus */
-}
-disk, qdisk;                    /* disk defines zones in the disk which in a specified frequency band emit equal amounts
+};
+extern struct xdisk disk, qdisk;   /* disk defines zones in the disk which in a specified frequency band emit equal amounts
                                    of radiation. disk gets reinitialized whenever the frequency interval of interest
                                    is changed.  qdisk stores the amount of heating of the disk as a result of
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
@@ -1361,8 +1363,9 @@ struct xbands
   double weight[NBANDS];
   int nphot[NBANDS];
   int nbands;                   // Actual number of bands in use
-}
-xband;
+};
+
+extern struct xbands xband;
 
 
 /***************************FBSTRUC ***********************************/
@@ -1447,8 +1450,9 @@ struct advanced_modes
                                     // in detailed spectra
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
-}
-modes;
+};
+
+extern struct advanced_modes modes;
 
 
 FILE *optr;                     //pointer to a diagnostic file that will contain dvds information

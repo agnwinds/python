@@ -34,6 +34,17 @@ import numpy as np
 import shutil
 
 
+python_header='''
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include "atomic.h"
+
+'''
+
+
 
 def doit(filename='atomic.h',outputfile=''):
     '''
@@ -69,6 +80,9 @@ def doit(filename='atomic.h',outputfile=''):
 
 
     g=open(outputfile,'w')
+
+    if filename=='python.h':
+        g.write(python_header)
     g.write('#include "%s" \n\n '  % filename)
 
     comment=False
