@@ -26,7 +26,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "import.h"
+//OLD #include "import.h"
 
 
 char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH];

@@ -27,7 +27,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "import.h"
+//OLD #include "import.h"
 
 
 /**********************************************************/
