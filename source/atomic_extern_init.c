@@ -1,6 +1,6 @@
-#include "atomic.h" 
+#include "atomic.h"
 
- 
+
 int nelements;                  /* The actual number of ions read from the data file */
 int nions;                      /*The actual number of ions read from the datafile */
 int nlevels;                    /*These are the actual number of levels which were read in */
@@ -34,7 +34,7 @@ int nline_min, nline_max, nline_delt;   /* Used to select a range of lines in a 
 
 int n_coll_stren;
 
-Coll_stren coll_stren[NLINES];  
+Coll_stren coll_stren[NLINES];
 
 int nxphot;                     /*The actual number of ions for which there are VFKY photoionization x-sections */
 double phot_freq_min;           /*The lowest frequency for which photoionization can occur */
@@ -59,3 +59,30 @@ Drecomb drecomb[NIONS];         //set up the actual structure
 
 double dr_coeffs[NIONS];        //this will be an array to temprarily store the volumetric dielectronic recombination rate coefficients for the current cell under interest. We may want to make this 2D and store the coefficients for a range of temperatures to interpolate.
 
+int n_total_rr;
+
+Total_rr total_rr[NIONS];       //Set up the structure
+
+int n_bad_gs_rr;
+
+Bad_gs_rr bad_gs_rr[NIONS];     //Set up the structure
+
+int n_dere_di_rate;
+
+Dere_di_rate dere_di_rate[NIONS];       //Set up the structure
+
+double di_coeffs[NIONS];        //This is an array to store the di_coeffs 
+double qrecomb_coeffs[NIONS];   //JM 1508 analogous array for three body recombination 
+
+int gaunt_n_gsqrd;              //The actual number of scaled temperatures
+
+Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
+
+int n_charge_exchange;          //The actual number of scaled temperatures
+
+Charge_exchange charge_exchange[MAX_CHARGE_EXCHANGE];   //Set up the structure
+
+double charge_exchange_recomb_rates[NIONS];     //An array to store the actual recombination rates for a given temperature - 
+double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE];        //An array to store the actual ionization rates for a given temperature
+
+int write_atomicdata;

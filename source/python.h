@@ -22,13 +22,13 @@ extern int verbosity;                  /* verbosity level. 0 low, 10 is high */
 #define REL_MODE_FULL   1       /*Make full corrections for special relativity including co-moving frame effects */
 #define REL_MODE_SR_FREQ 2      /*Make full corrects for special relativity frequency shifts, but ignore co-moving frame effects */
 
-int rel_mode;                   /* How doppler effects and co-moving frames are  */
+extern int rel_mode;                   /* How doppler effects and co-moving frames are  */
 
-int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
+extern int run_xtest;                  /* Variable if TRUE causes a special test mode to be run */
 //OLD int run_ztest;                  /* Provides a way the optionally run certain code within python */
 
-int NDIM2;                      //The total number of wind cells in wmain
-int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
+extern int NDIM2;                      //The total number of wind cells in wmain
+extern int NPLASMA;                    //The number of cells with non-zero volume or the size of plasma structure
 
 /* These are tunable parameters that control various aspects of python
  * and the assorted programs.  In some cases they affect the "care" with
@@ -39,13 +39,13 @@ int NPLASMA;                    //The number of cells with non-zero volume or th
  * 
  * */
 
-double DFUDGE;
+extern double DFUDGE;
 #define XFUDGE   1e-5           // The scale factor used in setting up cell x cell dfudge
 
 #define VCHECK	1.e6            // The maximum allowable error in calculation of the velocity in calculate_ds
 
 
-double SMAX_FRAC;               /* In translate_in_wind, a limit is placed on the maximum distance a
+extern double SMAX_FRAC;               /* In translate_in_wind, a limit is placed on the maximum distance a
                                    photon can travel in one step.  It is a fraction SMAX_FRAC of the
                                    distance of the photon from the origin.  This had been hardwired to
                                    0.1 for up to 57h.  Changing it to 0.5 speeds up the current version
@@ -58,7 +58,7 @@ double SMAX_FRAC;               /* In translate_in_wind, a limit is placed on th
                                    one can travel a long distance within a hoop if the direction of the photon
                                    is not more or less radial, but if moving along the hoop. 
                                  */
-double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the purpose of calculating
+extern double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the purpose of calculating
                                    photoionization heating and recombination cooling.  It is important that heating and cooling
                                    be calculated self-consistently.  Program speed is somewhat sensitive 
                                    to this parameter, at the 10% level if raised from 1e-3 to 1.  There is a 
@@ -94,16 +94,16 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define DANG_LIVE_OR_DIE   0.2  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
-double PHOT_RANGE;              /* When a variable number of photons are called in different ionization
+extern double PHOT_RANGE;              /* When a variable number of photons are called in different ionization
                                    cycles this is the log of the difference between NPHOT_MAX
                                    and the value in the first cycle
                                  */
-int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
-int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
+extern int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
+extern int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 
-int NWAVE_MAX;
-int NWAVE_EXTRACT;              //The number of wavelength bins for spectra during the spectrum cycles
-int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT depending on whether in ionizaiton of spectrum cycles
+extern int NWAVE_MAX;
+extern int NWAVE_EXTRACT;              //The number of wavelength bins for spectra during the spectrum cycles
+extern int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT depending on whether in ionizaiton of spectrum cycles
 #define NWAVE_IONIZ 10000       //The number of wavelength bins for spectra during the ionization cycles
 #define NWAVE_MIN 100           //The minimum number of wavelength bins in during spectral cycles
 #define MAXSCAT 			2000
@@ -180,7 +180,7 @@ typedef struct plane
  which also the location of the central source.  The values are defined in the routin binary_basics*/
 
 // plane_dummy plane_l1, plane_sec, plane_m2_far;  
-plane_dummy plane_m2_near, plane_m2_far;  
+extern plane_dummy plane_m2_near, plane_m2_far;  
 
 typedef struct cone
 {
@@ -202,9 +202,9 @@ basis_cartesian;
 these are initialized in main, and used in anisowind  */
 
 
-double x_axis[3];
-double y_axis[3];
-double z_axis[3];
+extern double x_axis[3];
+extern double y_axis[3];
+extern double z_axis[3];
 
 
 
@@ -289,8 +289,8 @@ typedef struct domain
 }
 domain_dummy, *DomainPtr;       // One structure for each domain
 
-DomainPtr zdom;                 //This is the array pointer that contains the domains
-int current_domain;             // This integer is used by py_wind only
+extern DomainPtr zdom;                 //This is the array pointer that contains the domains
+extern int current_domain;             // This integer is used by py_wind only
 
 
 /*******************GEOMETRY structure*********************************************/
@@ -778,7 +778,7 @@ typedef struct wind
 }
 wind_dummy, *WindPtr;
 
-WindPtr wmain;
+extern WindPtr wmain;
 
 /*****************************PLASMA STRUCTURE**************************/
 /* Plasma is a structure that contains information about the properties of the
@@ -992,7 +992,7 @@ typedef struct plasma
   double xi;                    /* Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
-PlasmaPtr plasmamain;
+extern PlasmaPtr plasmamain;
 
 /*******************************PHOTON_STORE*********************************************/
 /* A storage area for photons.  The idea is that it is sometimes time-consuming to create the
@@ -1019,7 +1019,7 @@ typedef struct matom_photon_store
 
 } matom_photon_store_dummy, *MatomPhotStorePtr;
 
-MatomPhotStorePtr matomphotstoremain;
+extern MatomPhotStorePtr matomphotstoremain;
 #define MATOM_BF_PDF 1000       //number of points to use in a macro atom bf PDF
 
 
@@ -1096,11 +1096,11 @@ typedef struct macro
   double **matom_matrix;        /* array to store transitions probabilities */
 } macro_dummy, *MacroPtr;
 
-MacroPtr macromain;
+extern MacroPtr macromain;
 
-int xxxpdfwind;                 // When 1, line luminosity calculates pdf
+extern int xxxpdfwind;                 // When 1, line luminosity calculates pdf
 
-int size_Jbar_est, size_gamma_est, size_alpha_est;
+extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 
 
 //These constants are used in the various routines which compute ionization state
@@ -1215,7 +1215,7 @@ typedef struct photon
 }
 p_dummy, *PhotPtr;
 
-PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
+extern PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
                                    breaking the main routine of python into separate rooutines for inputs and 
                                    running the program */
 
@@ -1237,7 +1237,7 @@ PhotPtr photmain;               /* A pointer to all of the photons that have bee
 #define SPECTYPE_FNU        2
 #define D_SOURCE 100.0          // distance to the source in parsecs for genearating spectra
 
-int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or
+extern int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or
                                    alternatively the number of spectra one has to work with.  Note that
                                    general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
                                    while elements higher than this will contain spectra as seen by different observers */
@@ -1254,7 +1254,7 @@ int nspectra;                   /* After create_spectrum, the number of elements
 #define SPEC_SCATTERED      7   /* The spectrum of photons which were scattered at least once in the wind - the weight used is the final
                                  * weight after transmission through the wind */
 
-int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
+extern int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
 
 typedef struct spectrum
 {
@@ -1290,7 +1290,7 @@ typedef struct spectrum
 spectrum_dummy, *SpecPtr;
 
 
-SpecPtr xxspec;
+extern SpecPtr xxspec;
 
 /* Parameters used only by py_wind
  * py_wind_projecti	0 -> simply print the various parameters without 
@@ -1298,8 +1298,8 @@ SpecPtr xxspec;
  * 			1 -> project onto a yz plane.
  */
 
-int py_wind_min, py_wind_max, py_wind_delta, py_wind_project;
-double *aaa;                    // A pointer to an array used by py_wind
+extern int py_wind_min, py_wind_max, py_wind_delta, py_wind_project;
+extern double *aaa;                    // A pointer to an array used by py_wind
 
 /***************************CDF STRUCTURE*****************************/
 /* This is the structure for storing cumulative distribution functions. The CDFs are
@@ -1330,18 +1330,18 @@ typedef struct Cdf
 }
  *CdfPtr, cdf_dummy;
 
-struct Cdf cdf_ff;
-struct Cdf cdf_fb;
-struct Cdf cdf_vcos;
-struct Cdf cdf_bb;
-struct Cdf cdf_brem;
+extern struct Cdf cdf_ff;
+extern struct Cdf cdf_fb;
+extern struct Cdf cdf_vcos;
+extern struct Cdf cdf_bb;
+extern struct Cdf cdf_brem;
 
 
 /* Variable used to allow something to be printed out the first few times
    an event occurs */
-int itest, jtest;
+extern int itest, jtest;
 
-char hubeny_list[132];          //Location of listing of files representing hubeny atmospheres
+extern char hubeny_list[132];          //Location of listing of files representing hubeny atmospheres
 
 
 /* ***********************XBAND STRUCTURE *********************/
@@ -1385,11 +1385,11 @@ struct fbstruc
 }
 freebound[NFB];
 
-double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
-double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficients
+extern double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
+extern double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficients
 
-double fb_t[NTEMPS];
-int nfb;                        // Actual number of freqency intervals calculated
+extern double fb_t[NTEMPS];
+extern int nfb;                        // Actual number of freqency intervals calculated
 
 /* kap_bf stores opacities for a single cell and as calculated by the routine kappa_bf. 
  * It was made an external array to avoid having to pass it between various calling routines
@@ -1397,7 +1397,7 @@ int nfb;                        // Actual number of freqency intervals calculate
  * macro-atoms where bf is a scattering process, but not for the simple case.
  */
 
-double kap_bf[NLEVELS];
+extern double kap_bf[NLEVELS];
 
 
 
@@ -1554,7 +1554,7 @@ typedef struct rdpar_choices
   int n;
 } dummy_choices, *ChoicePtr;
 
-struct rdpar_choices zz_spec;
+extern struct rdpar_choices zz_spec;
 
 /* the functions contained in log., rdpar.c and lineio.c are
    declare separately from templates. This is because some functions

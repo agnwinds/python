@@ -28,8 +28,10 @@ History:
 '''
 
 import sys
+import os
 from astropy.io import ascii
-import numpy
+import numpy as np
+import shutil
 
 
 
@@ -60,6 +62,11 @@ def doit(filename='atomic.h',outputfile=''):
 
     if outputfile=='':
         outputfile=filename.replace('.h','_extern_init.c')
+
+    if os.path.exists(outputfile):
+        xout=outputfile.replace('.c','.old.c')
+        shutil.copyfile(outputfile,xout)
+
 
     g=open(outputfile,'w')
     g.write('#include "%s" \n\n '  % filename)

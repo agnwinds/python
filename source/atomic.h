@@ -408,7 +408,7 @@ extern double dr_coeffs[NIONS];        //this will be an array to temprarily sto
 #define T_RR_PARAMS         6           //This is the number of parameters.
 #define RRTYPE_BADNELL	    0
 #define RRTYPE_SHULL	    1
-int n_total_rr;
+extern int n_total_rr;
 typedef struct total_rr
 {
   int nion;                     //Internal cross reference to the ion that this refers to
@@ -419,10 +419,10 @@ typedef struct total_rr
   int type;                     /* NSH 23/7/2012 - What type of parampeters we have for this ion */
 } Total_rr, *total_rrptr;
 
-Total_rr total_rr[NIONS];       //Set up the structure
+extern Total_rr total_rr[NIONS];       //Set up the structure
 
 #define BAD_GS_RR_PARAMS 19     //This is the number of points in the fit.
-int n_bad_gs_rr;
+extern int n_bad_gs_rr;
 typedef struct badnell_gs_rr
 {
   int nion;                     //Internal cross reference to the ion that this refers to
@@ -430,11 +430,11 @@ typedef struct badnell_gs_rr
   double rates[BAD_GS_RR_PARAMS];       //rates corresponding to those temperatures
 } Bad_gs_rr, *Bad_gs_rrptr;
 
-Bad_gs_rr bad_gs_rr[NIONS];     //Set up the structure
+extern Bad_gs_rr bad_gs_rr[NIONS];     //Set up the structure
 
 
 #define DERE_DI_PARAMS 20       //This is the maximum number of points in the fit.
-int n_dere_di_rate;
+extern int n_dere_di_rate;
 typedef struct dere_di_rate
 {
   int nion;                     //Internal cross reference to the ion that this refers to
@@ -445,14 +445,14 @@ typedef struct dere_di_rate
   double min_temp;
 } Dere_di_rate, *Dere_di_rateptr;
 
-Dere_di_rate dere_di_rate[NIONS];       //Set up the structure
+extern Dere_di_rate dere_di_rate[NIONS];       //Set up the structure
 
-double di_coeffs[NIONS];        //This is an array to store the di_coeffs 
-double qrecomb_coeffs[NIONS];   //JM 1508 analogous array for three body recombination 
+extern double di_coeffs[NIONS];        //This is an array to store the di_coeffs 
+extern double qrecomb_coeffs[NIONS];   //JM 1508 analogous array for three body recombination 
 
 #define MAX_GAUNT_N_GSQRD 100   //Space set aside for the number of parameters for scaled inverse temperature
 
-int gaunt_n_gsqrd;              //The actual number of scaled temperatures
+extern int gaunt_n_gsqrd;              //The actual number of scaled temperatures
 
 typedef struct gaunt_total
 {
@@ -461,13 +461,13 @@ typedef struct gaunt_total
   float s1, s2, s3;
 } Gaunt_total, *Gaunt_totalptr;
 
-Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
+extern Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
 
 
 
 #define MAX_CHARGE_EXCHANGE 100 //Space set aside for charge exchange parameters
 
-int n_charge_exchange;          //The actual number of scaled temperatures
+extern int n_charge_exchange;          //The actual number of scaled temperatures
 
 typedef struct charge_exchange
 {
@@ -481,14 +481,14 @@ typedef struct charge_exchange
 
 } Charge_exchange, *Charge_exchange_ptr;
 
-Charge_exchange charge_exchange[MAX_CHARGE_EXCHANGE];   //Set up the structure
+extern Charge_exchange charge_exchange[MAX_CHARGE_EXCHANGE];   //Set up the structure
 
-double charge_exchange_recomb_rates[NIONS];     //An array to store the actual recombination rates for a given temperature - 
+extern double charge_exchange_recomb_rates[NIONS];     //An array to store the actual recombination rates for a given temperature - 
 //there is an estimated rate for ions without an actual rate, so we need to dimneions for ions.
-double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE];        //An array to store the actual ionization rates for a given temperature
+extern double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE];        //An array to store the actual ionization rates for a given temperature
 
 
 
 /* a variable which controls whether to save a summary of atomic data
    this is defined in atomic.h, rather than the modes structure */
-int write_atomicdata;
+extern int write_atomicdata;

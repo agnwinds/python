@@ -253,7 +253,7 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
 		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o \
-		macro_accelerate.o
+		macro_accelerate.o  atomic_extern_init.o python_extern_init.o
 
 
 
@@ -292,7 +292,8 @@ rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o 
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
-		cooling.o import_calloc.o frame.o walls.o charge_exchange.o macro_accelerate.o
+		cooling.o import_calloc.o frame.o walls.o charge_exchange.o macro_accelerate.o \
+		atomic_extern_init.o python_extern_init.o
 
 
 run_indent:
@@ -328,7 +329,8 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
-		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o
+		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
+		atomic_extern_init.o python_extern_init.o
 
 
 modify_wind:  $(modify_wind_objects)
@@ -352,7 +354,9 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
-		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o
+		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
+		atomic_extern_init.o python_extern_init.o
+		
 
 
 inspect_wind:  $(inspect_wind_objects)
@@ -380,7 +384,8 @@ py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_op
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
-		macro_accelerate.o
+		macro_accelerate.o \
+		atomic_extern_init.o python_extern_init.o
 
 py_optical_depth: startup $(py_optical_depth_objects)
 	$(CC) $(CFLAGS) $(py_optical_depth_objects) $(LDFLAGS)  -o py_optical_depth
