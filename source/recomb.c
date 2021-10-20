@@ -31,12 +31,36 @@
 
 #include "atomic.h"
 #include "python.h"
-//OLD #include "recipes.h"
+
+/***************************FBSTRUC ***********************************/
+/* The next section contains the freebound structures that can be used for both the
+ * specific emissivity of a free-bound transition, and for the recombination coefficient
+ * assuming the array has been initialized, which can take a few minutes
+*/
+
+#define NTEMPS  60              // The number of temperatures which are stored in each fbstruct
+                                /* NSH this was increased from 30 to 60 to take account of 3 extra OOM
+                                   intemperature we wanted to have in fb */
+#define NFB 20                  // The maximum number of frequency intervals for which the fb emission is calculated
 
 
-/** Next line is required for proper initialization
- * Actual number of freqency intervals calculated */
+struct fbstruc
+{
+  double f1, f2;
+  double cool[NIONS][NTEMPS];   //cooling rate due to radiative recombination
+  double lum[NIONS][NTEMPS];    //emissivity due to radiative recombinaion
+  double cool_inner[NIONS][NTEMPS];     //cooling rate due to recombinations to inner shells
+}
+freebound[NFB];
+
+
+
+double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
+double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficient
+
+double fb_t[NTEMPS];
 int nfb = 0;
+
 
 /** FBEMISS was calculated as follows:
  * x= 2. * PI * MELEC * BOLTZMANN / (H*H);

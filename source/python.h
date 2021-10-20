@@ -1010,7 +1010,7 @@ typedef struct photon_store
 
 } photon_store_dummy, *PhotStorePtr;
 
-PhotStorePtr photstoremain;
+extern PhotStorePtr photstoremain;
 
 /* A second photon store: this is very similar to photon_store above but for use 
    in generating macro atom bf photons from cfds*/
@@ -1368,31 +1368,33 @@ struct xbands
 extern struct xbands xband;
 
 
-/***************************FBSTRUC ***********************************/
-/* The next section contains the freebound structures that can be used for both the
- * specific emissivity of a free-bound transition, and for the recombination coefficient
- * assuming the array has been initialized, which can take a few minutes
+/***************************FBSTRUC ***********************************
+* The next section contains the freebound structures that can be used for both the
+*
+* ksl - 211030 most of the FBSTRUC was moved into recomb.c, since that is the only place
+* these structures were used 
+* However kap_bf remains becuase it is used in the macro atom routines
 */
 
-#define NTEMPS	60              // The number of temperatures which are stored in each fbstruct
+//#define NTEMPS	60              // The number of temperatures which are stored in each fbstruct
                                 /* NSH this was increased from 30 to 60 to take account of 3 extra OOM 
                                    intemperature we wanted to have in fb */
-#define NFB	20              // The maximum number of frequency intervals for which the fb emission is calculated
+//#define NFB	20              // The maximum number of frequency intervals for which the fb emission is calculated
 
-struct fbstruc
-{
-  double f1, f2;
-  double cool[NIONS][NTEMPS];   //cooling rate due to radiative recombination
-  double lum[NIONS][NTEMPS];    //emissivity due to radiative recombinaion
-  double cool_inner[NIONS][NTEMPS];     //cooling rate due to recombinations to inner shells
-}
-freebound[NFB];
+//struct fbstruc
+//{
+//  double f1, f2;
+//  double cool[NIONS][NTEMPS];   //cooling rate due to radiative recombination
+//  double lum[NIONS][NTEMPS];    //emissivity due to radiative recombinaion
+//  double cool_inner[NIONS][NTEMPS];     //cooling rate due to recombinations to inner shells
+//}
+//freebound[NFB];
 
-extern double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
-extern double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficients
+//extern double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
+//extern double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficients
 
-extern double fb_t[NTEMPS];
-extern int nfb;                        // Actual number of freqency intervals calculated
+// extern double fb_t[NTEMPS];
+// extern int nfb;                        // Actual number of freqency intervals calculated
 
 /* kap_bf stores opacities for a single cell and as calculated by the routine kappa_bf. 
  * It was made an external array to avoid having to pass it between various calling routines
