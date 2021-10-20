@@ -710,8 +710,8 @@ struct blmodel
   double r[NBLMODEL];
   double t[NBLMODEL];
   double g[NBLMODEL];
-}
-blmod;
+};
+extern struct blmodel blmod;
 
 
 /*************************WIND_PATHS for Reveberation Mapping *****************************************/
@@ -1455,7 +1455,7 @@ struct advanced_modes
 extern struct advanced_modes modes;
 
 
-FILE *optr;                     //pointer to a diagnostic file that will contain dvds information
+extern FILE *optr;                     //pointer to a diagnostic file that will contain dvds information
 
 
 

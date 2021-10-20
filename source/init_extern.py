@@ -83,6 +83,10 @@ def doit(filename='atomic.h',outputfile=''):
 
     if filename=='python.h':
         g.write(python_header)
+    if filename=='models.h':
+        g.write(python_header)
+
+
     g.write('#include "%s" \n\n '  % filename)
 
     comment=False
