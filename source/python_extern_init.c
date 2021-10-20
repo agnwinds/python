@@ -6,9 +6,9 @@
 #include <time.h>
 #include "atomic.h"
 
-#include "python.h"
+#include "python.h" 
 
-
+ 
 int np_mpi_global;              // Global variable which holds the number of MPI processes
 
 int rank_global;
@@ -54,7 +54,7 @@ int NWAVE_MAX;
 int NWAVE_EXTRACT;              //The number of wavelength bins for spectra during the spectrum cycles
 int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT depending on whether in ionizaiton of spectrum cycles
 
-plane_dummy plane_m2_near, plane_m2_far;
+plane_dummy plane_m2_near, plane_m2_far;  
 
 double x_axis[3];
 double y_axis[3];
@@ -65,7 +65,7 @@ int current_domain;             // This integer is used by py_wind only
 
 struct geometry geo;
 
-struct xdisk disk, qdisk;       /* disk defines zones in the disk which in a specified frequency band emit equal amounts
+struct xdisk disk, qdisk;   /* disk defines zones in the disk which in a specified frequency band emit equal amounts
                                    of radiation. disk gets reinitialized whenever the frequency interval of interest
                                    is changed.  qdisk stores the amount of heating of the disk as a result of
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
@@ -128,6 +128,9 @@ int nerr_Jmodel_wrong_freq;
 
 struct advanced_modes modes;
 
+struct filenames files;
+
 int xxxbound;
 
 struct rdpar_choices zz_spec;
+
