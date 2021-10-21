@@ -216,7 +216,7 @@ dvds_ave ()
 
   if (modes.print_dvds_info)
   {
-    sprintf (filename, "%s.dvds.diag", files.root);
+    sprintf (filename, "%.100s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 
@@ -341,7 +341,7 @@ dvds_max ()
 
   if (modes.print_dvds_info)
   {
-    sprintf (filename, "%s.dvds.diag", files.root);
+    sprintf (filename, "%.100s.dvds.diag", files.root);
     optr = fopen (filename, "w");
   }
 

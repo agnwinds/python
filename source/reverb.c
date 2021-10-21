@@ -77,11 +77,11 @@ delay_dump_prep (int restart_stat)
   //Get output filename
   if (rank_global > 0)
   {
-    sprintf (delay_dump_file, "%s.delay_dump%d", files.root, rank_global);
+    sprintf (delay_dump_file, "%.100s.delay_dump%d", files.root, rank_global);
   }
   else
   {
-    sprintf (delay_dump_file, "%s.delay_dump", files.root);
+    sprintf (delay_dump_file, "%.100s.delay_dump", files.root);
   }
 
   //Allocate and zero dump files and set extract status
@@ -178,14 +178,14 @@ delay_dump_combine (int i_ranks)
 	fclose(f_base);
 */
   //Yes this is done as a system call and won 't work on Windows machines. Lazy solution!
-  sprintf (c_call, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
+  sprintf (c_call, "cat %.50s[0-9]* >> %.100s", delay_dump_file, delay_dump_file);
   if (system (c_call) < 0)
   {
     Error ("delay_dump_combine: Error calling system command '%s'", c_call);
   }
   else
   {
-    sprintf (c_call, "rm %s[0-9]*", delay_dump_file);
+    sprintf (c_call, "rm %.50s[0-9]*", delay_dump_file);
     if (system (c_call) < 0)
     {
       Error ("delay_dump_combine: Error calling system command '%s'", c_call);

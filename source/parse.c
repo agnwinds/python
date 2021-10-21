@@ -282,8 +282,9 @@ parse_command_line (argc, argv)
 
     /* Create a subdirectory to store diaganostic files */
 
-    sprintf (files.diagfolder, "diag_%s/", files.root);
+    sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
+
     strcpy (files.diag, files.diagfolder);
     sprintf (dummy, "_%d.diag", rank_global);
     strcat (files.diag, files.root);
