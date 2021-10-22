@@ -163,17 +163,19 @@ sv_velocity (x, v, ndom)
   double xtest[3];
   double s;
   double vzero;
-  double ldist_orig, rzero_orig;
+//OLD  double ldist_orig, rzero_orig;
   int hit_disk;
 
   zzz = v_escape = vzero = -99.;
 
 
-  rzero_orig = rzero = sv_find_wind_rzero (ndom, x);
+//OLD  rzero_orig = rzero = sv_find_wind_rzero (ndom, x);
+  rzero = sv_find_wind_rzero (ndom, x);
   theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
-  ldist_orig = ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
+//OLD  ldist_orig = ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
+  ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED && rzero < zdom[ndom].sv_rmax)

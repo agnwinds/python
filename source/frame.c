@@ -424,7 +424,8 @@ observer_to_local_frame_ds (p_obs, ds_obs)
 {
   WindPtr one;
   int ndom;
-  double v[3], vel;
+//OLD  double v[3], vel;
+  double v[3];
   double gamma;
   double ds_cmf;
 
@@ -437,7 +438,7 @@ observer_to_local_frame_ds (p_obs, ds_obs)
   one = &wmain[p_obs->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_obs, v);
-  vel = dot (p_obs->lmn, v);
+//OLD  vel = dot (p_obs->lmn, v);
 
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
@@ -483,7 +484,8 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
 {
   WindPtr one;
   int ndom;
-  double v[3], vel;
+//OLD  double v[3], vel;
+  double v[3];
   double gamma;
   double ds_obs;
 
@@ -496,7 +498,7 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
   one = &wmain[p_obs->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_obs, v);
-  vel = dot (p_obs->lmn, v);
+//OLD  vel = dot (p_obs->lmn, v);
 
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
