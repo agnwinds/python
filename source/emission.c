@@ -260,7 +260,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell, icell_old;
   int nplasma = 0;
   int nnscat;
-  int ndom;
+//OLD  int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
 
   dt_cmf = 0.0;
@@ -303,7 +303,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     /* At this point we know the cell in which the photon will be generated */
 
     nplasma = wmain[icell].nplasma;
-    ndom = wmain[icell].ndom;
+//OLD    ndom = wmain[icell].ndom;
     plasmamain[nplasma].nrad += 1;
 
 
@@ -344,7 +344,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     photstop = photstart + ptype[n][FREE_FREE] + ptype[n][FREE_BOUND] + ptype[n][BOUND_BOUND];
 
     icell = plasmamain[n].nwind;
-    ndom = wmain[icell].ndom;
+//OLD    ndom = wmain[icell].ndom;
 
     for (np = photstart; np < photstop; np++)
     {
@@ -802,7 +802,7 @@ one_ff (one, f1, f2)
 
 double
 gaunt_ff (gsquared)
-     double gsquared;           
+     double gsquared;
 {
   int i, index;
   double gaunt;

@@ -90,13 +90,13 @@ num_int (func, a, b, eps)
   int status = 0;
   int status2 = 0;
 
-  int npoints;
+//OLD  int npoints;
   size_t neval;
   gsl_function F;
   F.function = func;
   F.params = &alpha;
   zflag = 1;
-  npoints = 1000;
+//OLD  npoints = 1000;
   if (func (a, test) == 0.0 && func (b, test) == 0.0)
   {
     zflag = 0;
@@ -169,7 +169,7 @@ zero_find (func, x_lo, x_hi, tol)
 {
   double result;
   double alpha = 0.0;
-  double r = 0;
+//OLD  double r = 0;
   const gsl_root_fsolver_type *T;
   gsl_root_fsolver *s;
   int iter = 0, max_iter = 100;
@@ -192,7 +192,8 @@ zero_find (func, x_lo, x_hi, tol)
   {
     iter++;
     status = gsl_root_fsolver_iterate (s);
-    r = gsl_root_fsolver_root (s);
+//OLF    r = gsl_root_fsolver_root (s);
+    gsl_root_fsolver_root (s);
     x_lo = gsl_root_fsolver_x_lower (s);
     x_hi = gsl_root_fsolver_x_upper (s);
     status = gsl_root_test_interval (x_lo, x_hi, tol, 0);
