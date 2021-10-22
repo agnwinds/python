@@ -71,7 +71,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
   double q1;
-  int nrings, i, icheck;
+//OLD  int nrings, i, icheck;
+  int nrings, i;
   int spectype;
   double emit;
   double factor;
@@ -134,7 +135,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   q1 = 2. * PI;
 
   (*ftot) = 0;
-  icheck = 0;
+//OLD  icheck = 0;
 
 
   for (logr = logrmin; logr < logrmax; logr += logdr)
