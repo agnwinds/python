@@ -110,3 +110,27 @@ together.  So for example, all of the variables associated with the central obje
 
 
 that is, they all begin with Central_object.  This convention should be followed.
+
+
+External variables
+==================
+
+Python uses lots (and likely too many), what are properly know as  external variables.   (In C, a global
+variable is a variable whose scope is all of the routines in a speciric file.  An external varriable
+is one that is shared across multiple files.)
+
+In the latest generations of gcc,  the standards for extenral variiables have been tightened.
+
+If one wishes to define an external variable, one must first declare it as eternal, and then one
+must initialize it outside a specific routine exactly in one place.
+
+The standard convention is that the variables are declared as external in a header file, e.g python.h, 
+and then intialized in a separate .c file, e.g python_extern_init.c.   Unless, a variable is actually
+initialized, no space will be allocated for the variable.
+
+So if variables are added (or subtracted), one must make a change both in the relavant .h file.
+
+Currently has three.c files atomic_extern_init.c, models_extern_init.c, python_extern_init.c
+corresponding to the three main .h files, atommic.h, models.h and python.h
+
+
