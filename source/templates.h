@@ -624,6 +624,7 @@ int matom_deactivation_from_matrix(PlasmaPtr xplasma, int uplvl);
 int calc_all_matom_matrices(void);
 /* atomic_extern_init.c */
 /* python_extern_init.o */
+/* models_extern_init.c */
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

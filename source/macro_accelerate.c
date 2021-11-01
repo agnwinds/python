@@ -787,6 +787,7 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
       else
       {
         Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+        bf_int_inrange = 0;
       }
       penorm_band += eprbs_band[m] * bf_int_inrange / bf_int_full;
       m++;
@@ -917,6 +918,7 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
       else
       {
         Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+        bf_int_inrange = 0;
       }
       penorm_band += eprbs_band * bf_int_inrange / bf_int_full;
     }
@@ -1040,7 +1042,8 @@ matom_deactivation_from_matrix (xplasma, uplvl)
       mplasma->matrix_rates_known = TRUE;
     }
   }
-  else if (mplasma->store_matom_matrix == TRUE)
+//OLD  else if (mplasma->store_matom_matrix == TRUE)
+  else
   {
     matom_matrix = mplasma->matom_matrix;
   }

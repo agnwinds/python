@@ -122,7 +122,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 #Note that version should be a single string without spaces.
 
 
-VERSION = 85x
+VERSION = 85j
 
 INDENT = yes
 
@@ -386,7 +386,7 @@ py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_op
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
 		macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o py_optical_depth_extern_init.o
 
 py_optical_depth: startup $(py_optical_depth_objects)
 	$(CC) $(CFLAGS) $(py_optical_depth_objects) $(LDFLAGS)  -o py_optical_depth

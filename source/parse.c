@@ -285,10 +285,12 @@ parse_command_line (argc, argv)
     sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
 
-    strcpy (files.diag, files.diagfolder);
+//OLD    strcpy (files.diag, files.diagfolder);
     sprintf (dummy, "_%d.diag", rank_global);
-    strcat (files.diag, files.root);
-    strcat (files.diag, dummy);
+//OLD    strcat (files.diag, files.root);
+//OLD    strcat (files.diag, dummy);
+
+    sprintf (files.diag, "%.50s/%.50s%.50s", files.diagfolder, files.root, dummy);
 
     /* Set up the directory structure for storing the rng state */
 

@@ -187,8 +187,8 @@ main (argc, argv)
 
   xparse_command_line (argc, argv);
 
-  sprintf (infile, "%s.wind_save", inroot);
-  sprintf (outfile, "%s.txt", inroot);
+  sprintf (infile, "%.150s.wind_save", inroot);
+  sprintf (outfile, "%.150s.txt", inroot);
 
   printf ("Reading %s and writing to %s\n", infile, outfile);
 

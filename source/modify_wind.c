@@ -201,8 +201,8 @@ main (argc, argv)
   xparse_command_line (argc, argv);
 
 
-  sprintf (infile, "%s.wind_save", inroot);
-  sprintf (outfile, "%s.wind_save", outroot);
+  sprintf (infile, "%.150s.wind_save", inroot);
+  sprintf (outfile, "%.150s.wind_save", outroot);
 
   printf ("Reading %s and writing to %s\n", infile, outfile);
 
@@ -312,7 +312,8 @@ apply_model (ndom, filename)
      char *filename;
 {
   int ndim, mdim;
-  int nstart, n, nion, nplasma;
+//OLD  int nstart, n, nion, nplasma;
+  int n, nion, nplasma;
 
   printf ("We have been given a model file - we will be using this for new densities in domain 0\n");
   ndim = zdom[ndom].ndim;
@@ -326,15 +327,15 @@ apply_model (ndom, filename)
     if (zdom[ndom].coord_type == SPHERICAL)
     {
       printf ("We have a spherical model\n");
-      nstart = zdom[ndom].nstart;
+//OLD      nstart = zdom[ndom].nstart;
       for (n = 0; n < ndim; n++)
       {
         wmain[n].v[0] = imported_model[ndom].v_r[n];    //we need a value for v_r for all cells including ghosts
         if (wmain[n].inwind > -1)
         {
+          nplasma = wmain[n].nplasma;
           for (nion = 0; nion < nions; nion++)  //Change the absolute number densities, fractions remain the same
           {
-            nplasma = wmain[n].nplasma;
             plasmamain[nplasma].density[nion] =
               plasmamain[nplasma].density[nion] * (imported_model[ndom].mass_rho[n] / plasmamain[nplasma].rho);
           }
@@ -357,9 +358,9 @@ apply_model (ndom, filename)
         wmain[n].v[2] = imported_model[ndom].v_z[n];    //we need a value for v_r for all cells including ghosts
         if (wmain[n].inwind > -1)
         {
+          nplasma = wmain[n].nplasma;
           for (nion = 0; nion < nions; nion++)  //Change the absolute number densities, fractions remain the same
           {
-            nplasma = wmain[n].nplasma;
             plasmamain[nplasma].density[nion] =
               plasmamain[nplasma].density[nion] * (imported_model[ndom].mass_rho[n] / plasmamain[nplasma].rho);
           }
@@ -429,7 +430,8 @@ frame_transform (ndom)
   {
     if (cmf2obs_flag)
       factor = 1. / wmain[n].xgamma_cen;
-    else if (obs2cmf_flag)
+//OLD    else if (obs2cmf_flag)
+    else
       factor = wmain[n].xgamma_cen;
     wmain[n].vol *= factor;
     if (wmain[n].inwind == W_ALL_INWIND || wmain[n].inwind == W_PART_INWIND)

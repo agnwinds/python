@@ -149,7 +149,8 @@ main (argc, argv)
   char parameter_file[LINELENGTH];
   int ion_switch, nwind, nplasma;
   int i, j, ii, domain;
-  double vol, kappa_es, lum_sum, cool_sum;
+//OLD  double vol, kappa_es, lum_sum, cool_sum;
+  double vol, kappa_es;
   double t_opt, t_UV, t_Xray, v_th, fhat[3];    /*This is the dimensionless optical depth parameter computed for communication to rad-hydro. */
 
   struct photon ptest;          //We need a test photon structure in order to compute t
@@ -196,8 +197,10 @@ main (argc, argv)
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
 
 
-  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
-  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /*and we also call wind_luminosity to get the luminosities */
+//OLD  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  wind_cooling ();              /*We call wind_cooling here to obtain an up to date set of cooling rates */
+//OLD  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /*and we also call wind_luminosity to get the luminosities */
+  wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);       /*and we also call wind_luminosity to get the luminosities */
 
   fptr = fopen ("py_heatcool.dat", "w");
   fptr2 = fopen ("py_driving.dat", "w");
