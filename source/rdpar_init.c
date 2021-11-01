@@ -256,7 +256,7 @@ get_choices (question, choices, qstruct)
   sprintf (cur_string, "%d", cur_values[0]);
   for (i = 1; i < cur_num; i++)
   {
-    sprintf (cur_string, "%s,%d", cur_string, cur_values[i]);
+    sprintf (cur_string, "%.100s,%d", cur_string, cur_values[i]);
   }
 
   strcpy (choices, cur_string);

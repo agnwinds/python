@@ -43,9 +43,9 @@
 
 int ninit_planck = 0;           //A flag to say wether we have computed our stored blackbody integral
 
-double old_t = 0;
-double old_freqmin = 0;
-double old_freqmax = 0;
+double bb_old_t = 0;
+double bb_old_freqmin = 0;
+double bb_old_freqmax = 0;
 double alphamin, alphamax;
 double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;        // The precise boundaries in the the bb cdf
 double cdf_bb_ylo, cdf_bb_yhi;  // The places in the CDF defined by freqmin & freqmax
@@ -149,15 +149,15 @@ planck (t, freqmin, freqmax)
  * redefine various limits, including the portion of the cdf to be used
 */
 
-  if (t != old_t || freqmin != old_freqmin || freqmax != old_freqmax)
+  if (t != bb_old_t || freqmin != bb_old_freqmin || freqmax != bb_old_freqmax)
   {
 
     alphamin = PLANCK * freqmin / (BOLTZMANN * t);
     alphamax = PLANCK * freqmax / (BOLTZMANN * t);
 
-    old_t = t;
-    old_freqmin = freqmin;
-    old_freqmax = freqmax;
+    bb_old_t = t;
+    bb_old_freqmin = freqmin;
+    bb_old_freqmax = freqmax;
 
     cdf_bb_ylo = cdf_bb_yhi = 1.0;
 

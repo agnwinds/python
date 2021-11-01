@@ -77,7 +77,7 @@ matrix_ion_populations (xplasma, mode)
   int ierr, niterate;           //counters for errors and the number of iterations we have tried to get a converged electron density
   double xnew;
   int xion[nions];              // This array keeps track of what ion is in each line
-  int xelem[nions];             // This array keeps track of the element for each ion
+//OLD  int xelem[nions];             // This array keeps track of the element for each ion
   double pi_rates[nions];       //photoionization rate coefficients
   double rr_rates[nions];       //radiative recombination rate coefficients
   double inner_rates[n_inner_tot];      //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
@@ -148,15 +148,16 @@ matrix_ion_populations (xplasma, mode)
       }
     }
 
-    for (nn = 0; nn < nelements; nn++)
-    {
-      if (ion[mm].z == ele[nn].z)
-      {
-        xelem[mm] = nn;         /* xelem logs which element each row in the arrays refers to. This is important because we need
-                                   to know what the total density will be for a group of rows all representing the same
-                                   element. */
-      }
-    }
+/* ksl: This whole lope is not actually used, and produces warnings in gcc11 */
+//OLD    for (nn = 0; nn < nelements; nn++)
+//OLD    {
+//OLD      if (ion[mm].z == ele[nn].z)
+//OLD      {
+//OLD        xelem[mm] = nn;         /* xelem logs which element each row in the arrays refers to. This is important because we need
+//OLD                                   to know what the total density will be for a group of rows all representing the same
+//OLD                                   element. */
+//OLD      }
+//OLD    }
   }
 
 
@@ -478,7 +479,8 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
      double nh1, nh2;
 
 {
-  int nn, mm, zcount;
+//  int nn, mm, zcount;
+  int nn, mm;
   int n_elec, d_elec, ion_out;  //The number of electrons left in a current ion
 
 
@@ -654,7 +656,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
      densities which the solver computes are just the actual number densities for each ion. This does mean that different rows
      are orders of magnitude different, so one can imagine numerical issues. However each element is essentially solved for
      seperately.. Something to watch */
-  zcount = 0;
+//OLD  zcount = 0;
   for (nn = 0; nn < nions; nn++)
   {
     if (nn == ele[ion[nn].nelem].firstion)

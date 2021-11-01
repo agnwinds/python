@@ -20,10 +20,9 @@
 #define LINELEN 160             //This should always be the same as LINELENGTH in python.h!
 
 
-//#include      "pdf.h"
 
-int ncomps;                     // The number of components that have been read.  
-int nmods_tot;                  // The total number of models that have been read in 
+extern int ncomps;                     // The number of components that have been read.  
+extern int nmods_tot;                  // The total number of models that have been read in 
 
 
 /* This is the structure that describes an individual continuum model. 
@@ -36,8 +35,8 @@ struct Model
   double w[NWAVES];
   double f[NWAVES];
   int nwaves;
-}
-mods[NMODS];
+};
+extern struct Model mods[NMODS];
 
 /* There is one element of comp for each set of models of the same type, i.e. if
 one reads in a list of WD atmosphers this will occupy one componenet here */
@@ -52,8 +51,9 @@ struct ModSum
   int nwaves;                   //All models in each comp should have same wavelengths;
   struct Model xmod;            //The current intepolated model of this type 
   struct Cdf xcdf;              //The current cumulative distribution function for this component
-}
-comp[NCOMPS];
+};
+
+extern struct ModSum comp[NCOMPS];
 
 
 

@@ -1178,13 +1178,13 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
      double lum_bl, t_bl, freqmin, freqmax, *f;
      int ioniz_or_final;
 {
-  double q1;
+//OLD  double q1;
   double integ_planck_d ();
-  double alphamin, alphamax;
+//OLD  double alphamin, alphamax;
 
-  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
-  alphamin = PLANCK * freqmin / (BOLTZMANN * t_bl);
-  alphamax = PLANCK * freqmax / (BOLTZMANN * t_bl);
+//OLD  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
+//OLD  alphamin = PLANCK * freqmin / (BOLTZMANN * t_bl);
+//OLD  alphamax = PLANCK * freqmax / (BOLTZMANN * t_bl);
 //  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
 
   *f = emittance_bb (freqmin, freqmax, t_bl) * lum_bl / (t_bl * t_bl * t_bl * t_bl * STEFAN_BOLTZMANN);

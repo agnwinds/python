@@ -71,7 +71,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
   double q1;
-  int nrings, i, icheck;
+//OLD  int nrings, i, icheck;
+  int nrings, i;
   int spectype;
   double emit;
   double factor;
@@ -134,7 +135,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   q1 = 2. * PI;
 
   (*ftot) = 0;
-  icheck = 0;
+//OLD  icheck = 0;
 
 
   for (logr = logrmin; logr < logrmax; logr += logdr)
@@ -380,7 +381,14 @@ qdisk_save (diskfile, ztot)
 
   for (n = 0; n < NRINGS; n++)
   {
-    area = (2. * PI * (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
+    if (n < NRINGS - 1)
+    {
+      area = (2. * PI * (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
+    }
+    else
+    {
+      area = 0;
+    }
     theat = qdisk.heat[n] / area;
     theat = pow (theat / STEFAN_BOLTZMANN, 0.25);
     //theat is temperature if no internal energy production

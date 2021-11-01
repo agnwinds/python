@@ -286,7 +286,7 @@ main (argc, argv)
     {
       if (geo.ndomain > 1)
       {
-        sprintf (xroot, "%s.%d", root, ndom);
+        sprintf (xroot, "%.200s.%d", root, ndom);
       }
       else
       {
