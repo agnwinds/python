@@ -4,7 +4,7 @@
 # 			 make [CC=...] [D] all to remake all of the routines, and assure they
 # 			 					are properly indented.
 #
-# Adding D causes the routine to be run in a way that profiling and ddd can be used.
+# Adding D causes the routine to be run in a way that profiling and debuggers  can be used more easily.
 # Otherwise the run will be optimized to run as fast as possible. CC is an option to choose
 # a different compiler other than mpicc.
 #
@@ -15,27 +15,25 @@ CC = mpicc
 # CC = gcc	can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-# speciify any extra compiler flags here
+# specify any extra compiler flags here
 EXTRA_FLAGS =
 LDFLAGS =
+
+# Use the next line if you want to change the c compiler that mpicc uses, or 
+# better, set this outside the Makefile. Use unset to go back to the default cc
+# export OMPI_MPICC=gcc-11
 
 
 # COMPILER_VERSION := $(shell expr `gcc -dumpversion`)
 ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
 	XVERSION := $(shell cc -v 2>&1 | head -1 )
-	COMPILER_VERSION := $(shell $(CC) -v 2>&1 | head -1 )
+#	COMPILER_VERSION := $(shell $(CC) -v 2>&1 | head -1 )
 else
-	COMPILER_VERSION := $(shell expr `gcc -dumpversion`)
+#	COMPILER_VERSION := $(shell expr `gcc -dumpversion`)
 	XVERSION:= gcc $(shell expr `gcc -dumpversion`)
 endif
 
 
-# @echo 'Gotcha=' $(XVERSION)
-
-# COMPILER_PRINT_STRING = Compiling with mpicc wrapper, for compiler $(COMPILER_VERSION)
-# @echo  $(COMPILER_PRINT_STRING)
-
-# Check a load of compiler options
 # This is mostly to address GitHub issues #100
 ifeq (mpicc, $(CC))
 	# you're using mpicc, so we'll compile with the DMPI_ON flag

@@ -5,7 +5,7 @@
 
 Synopsis:  
 
-Create a .c file which initializes all of the exters
+Create a .c file which initializes all of the externs
 in a .h file
 
 
@@ -15,11 +15,25 @@ Command line usage (if any):
 
 Description:  
 
+    This routine allows one to generate
+    a .c file that intialized global 
+    variables that have been classified as .h 
+
 Primary routines:
 
     doit
 
 Notes:
+
+     This was used in 2111 to create ..extern_init.c files
+     from various .h files where global variables
+     had been declared as extern, in accordance
+     with the modern anssi standard.
+
+     It may not be needed in future, since if a
+     change is made to a .h file, it will likely
+     be more exeditions to modify the .c file 
+     by hand
                                        
 History:
 

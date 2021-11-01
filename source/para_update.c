@@ -46,7 +46,8 @@ communicate_estimators_para ()
   double *redhelper, *redhelper2, *qdisk_helper, *qdisk_helper2;
   double *ion_helper, *ion_helper2;
   double *inner_ion_helper, *inner_ion_helper2;
-  int nspec, size_of_commbuffer;
+//OLD  int nspec, size_of_commbuffer;
+  int size_of_commbuffer;
 
   int *iredhelper, *iredhelper2, *iqdisk_helper, *iqdisk_helper2;
   // int size_of_helpers;
@@ -356,7 +357,7 @@ communicate_estimators_para ()
   {
     MPI_Barrier (MPI_COMM_WORLD);
     size_of_commbuffer = NPLASMA * NBINS_IN_CELL_SPEC;
-    nspec = NPLASMA;
+//OLD    nspec = NPLASMA;
 
     redhelper = calloc (sizeof (double), size_of_commbuffer);
     redhelper2 = calloc (sizeof (double), size_of_commbuffer);
