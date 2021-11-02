@@ -77,7 +77,7 @@ typedef enum RunModeEnum {
   RUN_MODE_NO_ES_OPACITY = 2,
 } RunMode_t;
 
-extern RunMode_t MODE;
+extern RunMode_t RUN_MODE;
 
 extern double TAU_DEPTH;
 

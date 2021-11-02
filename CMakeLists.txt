@@ -116,7 +116,8 @@ set(PYTHON_SOURCE
         source/wind2d.c source/wind_sum.c source/wind_updates2d.c
         source/wind_util.c source/windsave.c source/windsave2table_sub.c
         source/xlog.c source/xtest.c source/zeta.c source/macro_accelerate.c
-        source/macro_gen_f.c
+        source/macro_gen_f.c source/atomic_extern_init.c source/python_extern_init.c
+        source/models_extern_init.c
         )
 
 set(PY_WIND_SOURCE
@@ -132,9 +133,13 @@ set(RAD_HYDRO_SOURCE
         source/rad_hydro_files.c
         )
 
+set(INSPECT_WIND_SOURCE
+        source/inspect_wind.c
+        )
+
 set(OPTICAL_DEPTH_SOURCE
-        source/py_optd.c source/py_optd_trans.c
-        source/py_optd_util.c source/py_optd_output.c)
+        source/py_optd.c source/py_optd_trans.c source/py_optd_util.c
+        source/py_optd_output.c source/py_optd_extern_init.c)
 
 # Create the executables for each program, and link the required libraries
 

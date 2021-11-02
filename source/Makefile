@@ -338,8 +338,6 @@ modify_wind:  $(modify_wind_objects)
 	mv $@ $(BIN)/modify_wind$(VERSION)                                         
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
 
-py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
-
 
 inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 		emission.o recomb.o wind_util.o  \
@@ -366,7 +364,7 @@ inspect_wind:  $(inspect_wind_objects)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
-py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_optical_depth_output.o py_optical_depth_util.o \
+py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o estimators_simple.o\
@@ -384,8 +382,8 @@ py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_op
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
-		macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o py_optical_depth_extern_init.o
+		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o \
+		py_optd_extern_init.o
 
 py_optd: startup $(py_optd_obj)
 	$(CC) $(CFLAGS) $(py_optd_obj) $(LDFLAGS) -o $@
