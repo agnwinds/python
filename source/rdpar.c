@@ -502,7 +502,9 @@ string_process_from_command_line (question, dummy)
   }
   else if (tdummy[0] == '!')
   {
-    system (&tdummy[1]);        /* Send a command to the system */
+    if (system (&tdummy[1]) == -1)      /* Send a command to the system */
+      Error ("string_process_from_command_line: '%s' returned error code", tdummy[1]);
+
     return (REISSUE);
   }
   else if (strncmp (tdummy, "done", 4) == 0)
