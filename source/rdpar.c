@@ -490,7 +490,6 @@ string_process_from_command_line (question, dummy)
   {
     printf ("Exiting since rdpar got EOF in interactive mode\n");
     exit (0);
-    return (0);
   }
   else if (tdummy[0] == '\n')
   {                             //Use the current value
