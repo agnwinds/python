@@ -398,14 +398,14 @@ extract_one (w, pp, itype, nspec)
   }
   else if (geo.binary == TRUE)
   {
-    istat = hit_secondary(pp); /* Check to see if it hit secondary */
+    istat = hit_secondary (pp); /* Check to see if it hit secondary */
   }
 
 /* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
- tau = 0;
+  tau = 0;
   pp->ds = 0;
   icell = 0;
 /* Now we can actually extract the reweighted photon */
@@ -516,7 +516,7 @@ extract_one (w, pp, itype, nspec)
       /* Records the total distance travelled by extracted photon if in reverberation mode */
       if (geo.reverb != REV_NONE)
       {
-        if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
+        if (geo.reverb_filter_lines == -2 || pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
         {                       //If this photon has scattered, been reprocessed, or originated in the wind it's important
           pstart.w = pp->w * exp (-(tau));
           stuff_v (xxspec[nspec].lmn, pstart.lmn);

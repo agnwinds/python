@@ -180,7 +180,7 @@ typedef struct plane
  which also the location of the central source.  The values are defined in the routin binary_basics*/
 
 // plane_dummy plane_l1, plane_sec, plane_m2_far;  
-extern plane_dummy plane_m2_near, plane_m2_far;  
+extern plane_dummy plane_m2_near, plane_m2_far;
 
 typedef struct cone
 {
@@ -489,7 +489,7 @@ struct geometry
   /* the global storage mode is set in the modes structure */
   int matom_transition_mode;
 
-  /* Define the choices for calculating the FB, see, e.g. integ_fb */ 
+  /* Define the choices for calculating the FB, see, e.g. integ_fb */
 
 #define FB_FULL         0       /* Calculate fb emissivity including energy associated with the threshold */
 #define FB_REDUCED      1       /* Calculqate the fb emissivity without the threshold energy */
@@ -1179,6 +1179,8 @@ typedef struct photon
                                    for continuum scattering, meaning 
                                    depends on matom vs non-matom. See headers of emission.c 
                                    or matom.c for details. */
+  int line_res;                 /* The line which a photon belongs to. A photon can tagged as a line, then continuum
+                                   scatter. line_res will still be tagged as the same line until it scatters off another line. */
   int nnscat;                   /* Used for the thermal trapping model of
                                    anisotropic scattering to carry the number of
                                    scattering to "extract" when needed for wind
@@ -1217,9 +1219,14 @@ typedef struct photon
 }
 p_dummy, *PhotPtr;
 
-extern PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
-                                   breaking the main routine of python into separate rooutines for inputs and 
-                                   running the program */
+#define NRES_ES (-1)
+#define NRES_FF (-2)
+#define NRES_NOT_SET (-3)
+#define NRES_BF NLINES
+
+extern PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease
+                                        breaking the main routine of python into separate rooutines for inputs and
+                                        running the program */
 
 /**************************************SPECTRUM STRUCTURE ***********************/
     /* The next section defines the spectrum arrays.  The spectrum structure contains
@@ -1372,7 +1379,7 @@ extern struct xbands xband;
 * The next section contains the freebound structures that can be used for both the
 *
 * ksl - 211030 most of the FBSTRUC was moved into recomb.c, since that is the only place
-* these structures were used 
+* these structures were used
 * However kap_bf remains becuase it is used in the macro atom routines
 */
 
@@ -1447,8 +1454,8 @@ struct advanced_modes
   int photon_speedup;
   int save_rng;                 // save the GSL RNG stage
   int load_rng;                 // load the GSL RNG state
-  int store_matom_matrix;       // store the macro-atom matrix 
-  int jumps_for_detailed_spectra;   // use the older jump method for calculating emissivities 
+  int store_matom_matrix;       // store the macro-atom matrix
+  int jumps_for_detailed_spectra;   // use the older jump method for calculating emissivities
                                     // in detailed spectra
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
@@ -1510,8 +1517,8 @@ extern struct filenames files;
 #define KPKT_MODE_CONT_PLUS_ADIABATIC 2 /* account for k->r and adiabatic destruction */
 
 
-/* whether or not to use the implicit/accelerated macro-atom scheme, in which 
-   a matrix inversion is used in the emissivity calcualtion rather than 
+/* whether or not to use the implicit/accelerated macro-atom scheme, in which
+   a matrix inversion is used in the emissivity calcualtion rather than
    a MC sampling of the transition probabilities */
 #define MATOM_MATRIX_EMISSIVITIES  TRUE
 #define STORE_B_MATRIX TRUE

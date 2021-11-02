@@ -924,7 +924,7 @@ kpkt (p, nres, escape, mode)
     /* If reached this point, it is a FF destruction event */
     /* consult issues #187, #492 regarding free-free */
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->freq = one_ff (one, freqmin, freqmax);
     return (0);
   }
@@ -932,7 +932,7 @@ kpkt (p, nres, escape, mode)
   {
     /*this is ff at a frequency that is so low frequency that it is not worth tracking further */
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->istat = P_LOFREQ_FF;
     return (0);
   }
@@ -948,7 +948,7 @@ kpkt (p, nres, escape, mode)
       Error ("kpkt: Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->istat = P_ADIABATIC;
 
     return (0);

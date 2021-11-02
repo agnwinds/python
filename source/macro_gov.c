@@ -77,7 +77,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
   xplasma = &plasmamain[one->nplasma];
   mplasma = &macromain[one->nplasma];
 
-  /* before we do anything else we look to see if we are exciting 
+  /* before we do anything else we look to see if we are exciting
      simple/fake two-level ions */
   if (matom_or_kpkt == MATOM)
   {
@@ -100,7 +100,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       }
     }
 
-    /* if it's bf continuum without the full macro atom treatment. 
+    /* if it's bf continuum without the full macro atom treatment.
 
        In the pre-2018 approach, we process the photon in a way that makes it return a bf photon of the same type
        as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
@@ -200,7 +200,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     /* Beginning of the main loop for processing a macro-atom */
     while (escape == FALSE)
     {
-      if (matom_or_kpkt == MATOM)       //excite a macro atom 
+      if (matom_or_kpkt == MATOM)       //excite a macro atom
       {
 
         /* if it's a bb transition of a full macro atom  */
@@ -248,7 +248,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         }
 
         /* If it did not escape then it must have had a
-           de-activation by collision processes, and so we label it a kpkt.  
+           de-activation by collision processes, and so we label it a kpkt.
          */
 
         matom_or_kpkt = KPKT;
