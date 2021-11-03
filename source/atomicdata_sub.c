@@ -927,3 +927,31 @@ linterp (x, xarray, yarray, xdim, y, mode)
   return (nelem);
 
 }
+
+
+
+
+/**********************************************************/
+/**
+ * @brief Skip the specified number of lines in a file
+ *
+ * @param[in, out] FILE *fptr  The file to skip lines for
+ * @param[in] int nskip        The number of lines to skip
+ *
+ * @details
+ * Reads a line in character by character until reaching the end of the line
+ * (denoted by a new line character \n) or until reaching the end of the
+ * file.
+ *
+ **********************************************************/
+
+void
+skiplines (FILE * fptr, int nskip)
+{
+  int i, c;
+
+  for (i = 0; i < nskip; ++i)
+  {
+    while (c = fgetc (fptr), c != '\n' && c != EOF);
+  }
+}

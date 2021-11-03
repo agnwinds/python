@@ -26,6 +26,7 @@ double a21(struct lines *line_ptr);
 double upsilon(int n_coll, double u0);
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+void skiplines(FILE *fptr, int nskip);
 /* python.c */
 int main(int argc, char *argv[]);
 /* photon2d.c */

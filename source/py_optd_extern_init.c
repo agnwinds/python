@@ -6,15 +6,14 @@
 #include "atomic.h"
 #include "python.h"
 
-#include "py_optical_depth.h" 
+#include "py_optd.h"
 
- 
+
 int COLUMN_MODE;
 int COLUMN_MODE_ION_NUMBER;
 
 int N_DOMAIN;
 
-xmode MODE;
+RunMode_t RUN_MODE;
 
 double TAU_DEPTH;
-

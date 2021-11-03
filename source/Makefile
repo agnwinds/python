@@ -19,7 +19,7 @@ FC = g77
 EXTRA_FLAGS =
 LDFLAGS =
 
-# Use the next line if you want to change the c compiler that mpicc uses, or 
+# Use the next line if you want to change the c compiler that mpicc uses, or
 # better, set this outside the Makefile. Use unset to go back to the default cc
 # export OMPI_MPICC=gcc-11
 
@@ -333,11 +333,10 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 
 
 modify_wind:  $(modify_wind_objects)
-	$(CC) $(CFLAGS) $(modify_wind_objects) $(LDFLAGS)  -o modify_wind               
+	$(CC) $(CFLAGS) $(modify_wind_objects) $(LDFLAGS) -o modify_wind
 	cp $@ $(BIN)                                                               
 	mv $@ $(BIN)/modify_wind$(VERSION)                                         
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
-
 
 
 inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
@@ -355,17 +354,17 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o
-		
+
 
 
 inspect_wind:  $(inspect_wind_objects)
-	$(CC) $(CFLAGS) $(inspect_wind_objects) $(LDFLAGS)  -o inspect_wind               
-	cp $@ $(BIN)                                                               
-	mv $@ $(BIN)/inspect_wind$(VERSION)                                         
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
+	$(CC) $(CFLAGS) $(inspect_wind_objects) $(LDFLAGS)  -o inspect_wind
+	cp $@ $(BIN)
+	mv $@ $(BIN)/inspect_wind$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
-py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_optical_depth_output.o py_optical_depth_util.o \
+py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o estimators_simple.o\
@@ -383,13 +382,13 @@ py_optical_depth_objects = py_optical_depth.o py_optical_depth_transport.o py_op
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
-		macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o py_optical_depth_extern_init.o
+		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o \
+		py_optd_extern_init.o
 
-py_optical_depth: startup $(py_optical_depth_objects)
-	$(CC) $(CFLAGS) $(py_optical_depth_objects) $(LDFLAGS)  -o py_optical_depth
+py_optd: startup $(py_optd_obj)
+	$(CC) $(CFLAGS) $(py_optd_obj) $(LDFLAGS) -o $@
 	cp $@ $(BIN)
-	mv $@ $(BIN)/py_optical_depth$(VERSION)
+	mv $@ $(BIN)/py_optd$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
@@ -397,7 +396,7 @@ py_optical_depth: startup $(py_optical_depth_objects)
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
 
-all: clean python windsave2table py_wind indent rad_hydro_files modify_wind inspect_wind py_optical_depth
+all: clean python windsave2table py_wind indent rad_hydro_files modify_wind inspect_wind py_optd
 
 
 FILE = atomicdata.o atomicdata_init.o atomicdata_sub.o atomic.o
