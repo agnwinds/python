@@ -747,7 +747,7 @@ init_ionization ()
   /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
-    geo.macro_simple = 1;       // Make everything simple if no macro atoms -- 57h
+    geo.macro_simple = TRUE;       // Make everything simple if no macro atoms -- 57h
 
   /* initialise the choice of handling for macro pops. */
   if (geo.run_type == RUN_TYPE_PREVIOUS)

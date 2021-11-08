@@ -769,7 +769,7 @@ WindPtr (w);
         ptest.grid = nwind;     //We need our test photon to know where it is 
         kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
 
-        //First for the optcial band (up to 4000AA)     
+        //First for the optical band (up to 4000AA)     
         if (length (plasmamain[nplasma].F_vis) > 0.0)   //Only makes sense if flux in this band is non-zero
         {
           stuff_v (plasmamain[nplasma].F_vis, fhat);
