@@ -28,8 +28,9 @@ int sv_zero_r_ndom;
  * @param [in] int  ndom   The domain number
  * @return     Always returns 0
  *
- *  Gets mdot for this wind component, initialize the parameters needed to define a SV wind, and then request those
- *  parameters as inputs.   Calculate the normalization factor needed to convert the global mass loss rate to the
+ *  Initialize the parameters needed to define a SV wind and then request those
+ *  parameters as inputs.   Calculate the normalization factor needed to convert 
+ *  the global mass loss rate to the
  *  mass loss rate per unit area.
  *
  * ###Notes###
@@ -66,8 +67,6 @@ get_sv_wind_params (ndom)
   windmax = 12;
   rddoub ("SV.diskmin(units_of_rstar)", &windmin);
   rddoub ("SV.diskmax(units_of_rstar)", &windmax);
-
-
   zdom[ndom].sv_rmin = windmin * geo.rstar;
   zdom[ndom].sv_rmax = windmax * geo.rstar;
 
@@ -116,7 +115,6 @@ get_sv_wind_params (ndom)
     zdom[ndom].zlog_scale = geo.rstar;
   }
 
-
   /*Now calculate the normalization factor for the wind */
 
   sdom = ndom;
@@ -163,18 +161,15 @@ sv_velocity (x, v, ndom)
   double xtest[3];
   double s;
   double vzero;
-//OLD  double ldist_orig, rzero_orig;
   int hit_disk;
 
   zzz = v_escape = vzero = -99.;
 
 
-//OLD  rzero_orig = rzero = sv_find_wind_rzero (ndom, x);
   rzero = sv_find_wind_rzero (ndom, x);
   theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
-//OLD  ldist_orig = ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
@@ -393,7 +388,7 @@ sv_find_wind_rzero (ndom, p)
 
 
   sv_zero_init (p);             /* This initializes the routine sv_zero_r.  It is not
-                                   actually needed unless zbrent is called, but it
+                                   actually needed unless zero_find is called, but it
                                    does allow you to check your answer otherwize
                                  */
   /* The next lines provide a graceful answer in the case where the
@@ -407,21 +402,23 @@ sv_find_wind_rzero (ndom, p)
 
   if (rho <= rho_min)
   {
-    x = zdom[ndom].sv_rmin * rho / rho_min;
+//OLD    x = zdom[ndom].sv_rmin * rho / rho_min;
+    x = zdom[ndom].sv_rmin;
+
     return (x);
   }
   if (rho >= rho_max)
   {
-    x = zdom[ndom].sv_rmax + rho - rho_max;
+//    x = zdom[ndom].sv_rmax + rho - rho_max;
+    x = zdom[ndom].sv_rmax;
     return (x);
   }
 
-  /* 100 here means that zbrent will end if one has a guess of rzero which is
+  /* 100 here means that zero_find will end if one has a guess of rzero which is
      correct at 100 cm */
 
-  /* change the global variable sv_zero_r_ndom before we call zbrent */
+  /* change the global variable sv_zero_r_ndom before we call zero_find */
   sv_zero_r_ndom = ndom;
-//  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
   x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
 
 
@@ -466,7 +463,7 @@ sv_zero_init (p)
 
 /**********************************************************/
 /** 
- * @brief      Routine used by zbrent to find a footpoint of a streamline in an SV model
+ * @brief      Routine used by zero_find to find a footpoint of a streamline in an SV model
  *
  * @param [in] double  r   A position along the surface of the disk
  * @return     0 if r is the footpoint
@@ -474,8 +471,8 @@ sv_zero_init (p)
  * This routine is used to test whether a guess of r_zero is correct.  If
  * you have the answer exactly then sv_zero_r will return 0
  *
- * sv_zero_r is the routine called by
- * the numerical recipes routine zbrent to walk down on the actual value
+ * sv_zero_r is the routine called by zero_find
+ * walk down on the actual value
  * of r in the disk.   
  *
  * sv_zero_r returns the difference
@@ -525,7 +522,7 @@ sv_zero_r (double r, void *params)
  *
  * ###Notes###
  *
- * Theta is measuered from the z axis.
+ * Theta is measured from the z axis.
  *
  **********************************************************/
 

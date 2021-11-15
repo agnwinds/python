@@ -1459,6 +1459,7 @@ struct advanced_modes
                                     // in detailed spectra
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
+  int run_xtest_diagnostics;     // Switch so that xtest can enable print outs just while xtest is being run
 };
 
 extern struct advanced_modes modes;
