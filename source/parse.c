@@ -192,6 +192,12 @@ parse_command_line (argc, argv)
         Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
+      else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
+      {
+        modes.ignore_partial_cells = TRUE;
+        Log ("Cells partially in the wind will be ingnored.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;
@@ -365,7 +371,10 @@ These are largely diagnostic or for special cases. These include\n\
                 effects are not taken into account.\n\
  -srclassic     Use Python with full special relativity for Doppler shits, etc., but do not include any co-moving frame\n\
                 effects.\n\
+ -ignore partial_cells   Ignore wind cells that are only partially filed by the wind (see Issue #900) \n\
 \n\
+ -xtest         Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\
+                setup.  This is only useful to devlopers \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\
 \n\

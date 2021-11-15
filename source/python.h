@@ -762,7 +762,6 @@ typedef struct wind
   double div_v;                 /*Divergence of v at center of cell in the co-moving frame */
   double dvds_ave;              /* Average value of dvds */
   double dvds_max;              /*The maximum value of dvds */
-//OLD  double dvds_max; //, lmn[3];      /*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;                   /* valid volume of this cell (that is the volume of the cell that is considered
                                    to be in the wind.  This differs from the volume in the Plasma structure
                                    where the volume is the volume that is actually filled with material. 
@@ -1460,6 +1459,7 @@ struct advanced_modes
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
   int run_xtest_diagnostics;     // Switch so that xtest can enable print outs just while xtest is being run
+  int ignore_partial_cells;      // Switch to ignore cells which are not completely in the wind.
 };
 
 extern struct advanced_modes modes;
