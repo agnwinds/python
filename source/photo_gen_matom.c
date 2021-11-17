@@ -139,7 +139,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int n;
   double test;
   int nnscat;
-  int nplasma, ndom;
+//OLD  int nplasma, ndom;
+  int nplasma;
   int kpkt_mode;
   double freq_min, freq_max;
 
@@ -212,7 +213,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     }
 
     p[n].freq = pp.freq;
-    p[n].nres = nres;
+    p[n].nres = p[n].line_res = nres;
     p[n].w = pp.w;
 
 
@@ -243,7 +244,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     p[n].nnscat = nnscat;
 
 
-    ndom = wmain[icell].ndom;
+//OLD    ndom = wmain[icell].ndom;
 
     /* Make an in-place transformation to the observer frame */
     if (local_to_observer_frame (&p[n], &p[n]))
@@ -319,7 +320,7 @@ photo_gen_matom (p, weight, photstart, nphot)
   int upper;
   int nnscat;
   int nplasma;
-  int ndom;
+//OLD  int ndom;
 
 
 
@@ -394,7 +395,7 @@ photo_gen_matom (p, weight, photstart, nphot)
 
 
     p[n].freq = pp.freq;
-    p[n].nres = nres;
+    p[n].nres = p[n].line_res = nres;
     p[n].frame = F_LOCAL;
 
 
@@ -431,7 +432,7 @@ photo_gen_matom (p, weight, photstart, nphot)
     /* The next two lines correct the frequency to first order, but do not result in
        forward scattering of the distribution */
 
-    ndom = wmain[icell].ndom;
+//OLD    ndom = wmain[icell].ndom;
 
 
     /* Make an in-place transformation to the observer frame */

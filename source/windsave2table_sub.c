@@ -244,7 +244,7 @@ create_master_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -282,7 +282,7 @@ create_master_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -321,7 +321,7 @@ create_master_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -510,7 +510,7 @@ create_heat_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -547,7 +547,7 @@ create_heat_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -711,7 +711,7 @@ create_convergence_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -748,7 +748,7 @@ create_convergence_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -894,7 +894,7 @@ create_velocity_gradient_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -931,7 +931,7 @@ create_velocity_gradient_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -1043,7 +1043,7 @@ create_ion_table (ndom, rootname, iz, ion_switch)
 
   /* Open the output file */
 
-  sprintf (filename, "%s.%s.%s.txt", rootname, element_name, name);
+  sprintf (filename, "%.100s.%.10s.%.10s.txt", rootname, element_name, name);
 
   fptr = fopen (filename, "w");
 
@@ -1816,7 +1816,7 @@ create_spec_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -1858,7 +1858,7 @@ create_spec_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -1902,7 +1902,7 @@ create_spec_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;

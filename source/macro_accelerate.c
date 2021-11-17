@@ -348,7 +348,8 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_matrix *inverse_matrix;
   gsl_permutation *p;
 
-  int ierr, s;
+//OLD  int ierr, s;
+  int s;
 
   /* create a view into the array we just created */
   N = gsl_matrix_view_array (a_data, nrows, nrows);
@@ -359,10 +360,12 @@ calc_matom_matrix (xplasma, matom_matrix)
   inverse_matrix = gsl_matrix_alloc (nrows, nrows);
 
   /* first we do the LU decomposition */
-  ierr = gsl_linalg_LU_decomp (&N.matrix, p, &s);
+//OLD  ierr = gsl_linalg_LU_decomp (&N.matrix, p, &s);
+  gsl_linalg_LU_decomp (&N.matrix, p, &s);
 
   /* from the decomposition, get the inverse of the Q matrix */
-  ierr = gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+//OLD  ierr = gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+  gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
 
   /* We now copy our rate matrix into the prepared matrix */
   for (mm = 0; mm < nrows; mm++)
@@ -678,11 +681,12 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
-  double t_e, ne;
+//OLD  double t_e, ne;
+  double ne;
   double bb_cont;
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
-  t_e = xplasma->t_e;           //electron temperature 
+//OLD  t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
 
   /* The first step is to identify the configuration that has been excited. */
@@ -783,6 +787,7 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
       else
       {
         Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+        bf_int_inrange = 0;
       }
       penorm_band += eprbs_band[m] * bf_int_inrange / bf_int_full;
       m++;
@@ -836,7 +841,7 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   int i;
   int escape_dummy;
   struct topbase_phot *cont_ptr;
-  double electron_temperature;
+//OLD  double electron_temperature;
   MacroPtr mplasma;
   WindPtr one;
   struct photon pdummy;
@@ -857,7 +862,7 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   }
   mplasma = &macromain[xplasma->nplasma];
 
-  electron_temperature = xplasma->t_e;
+//OLD  electron_temperature = xplasma->t_e;
 
   /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
      generation (see call to one_ff below) */
@@ -913,6 +918,7 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
       else
       {
         Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+        bf_int_inrange = 0;
       }
       penorm_band += eprbs_band * bf_int_inrange / bf_int_full;
     }
@@ -1036,7 +1042,8 @@ matom_deactivation_from_matrix (xplasma, uplvl)
       mplasma->matrix_rates_known = TRUE;
     }
   }
-  else if (mplasma->store_matom_matrix == TRUE)
+//OLD  else if (mplasma->store_matom_matrix == TRUE)
+  else
   {
     matom_matrix = mplasma->matom_matrix;
   }

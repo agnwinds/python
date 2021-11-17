@@ -158,7 +158,7 @@ get_hydro (ndom)
   double theta, theta_edge, temp;
   double vr, vtheta, vphi;
   int irmax, ithetamax, itest;
-  int ndim, mdim;
+//OLD  int ndim, mdim;
 
 /*Write something into the file name strings */
 
@@ -259,7 +259,8 @@ get_hydro (ndom)
     ihydro_theta = ithetamax;
     zdom[ndom].wind_thetamax = 90. / RADIAN;
     hydro_thetamax = 90.0 / RADIAN;
-    mdim = zdom[ndom].mdim = ihydro_theta + 2;
+//OLD    mdim = zdom[ndom].mdim = ihydro_theta + 2;
+    zdom[ndom].mdim = ihydro_theta + 2;
   }
   else
   {
@@ -268,7 +269,8 @@ get_hydro (ndom)
        j_hydro_thetamax, hydro_theta_cent[j_hydro_thetamax] * RADIAN, hydro_theta_cent[j_hydro_thetamax + 1] * RADIAN);
     ihydro_theta = j_hydro_thetamax;
     zdom[ndom].wind_thetamax = hydro_thetamax;
-    mdim = zdom[ndom].mdim = ihydro_theta + 2;
+//OLD    mdim = zdom[ndom].mdim = ihydro_theta + 2;
+    zdom[ndom].mdim = ihydro_theta + 2;
   }
 
 
@@ -289,7 +291,8 @@ get_hydro (ndom)
   /* Set a couple of last tags */
 
   zdom[ndom].coord_type = RTHETA;       //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
-  ndim = zdom[ndom].ndim = ihydro_r + 3;        //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+//OLD  ndim = zdom[ndom].ndim = ihydro_r + 3;        //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+  zdom[ndom].ndim = ihydro_r + 3;       //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
   zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim; // Make ndim2 consistent with the individual dimensions
 
 
@@ -839,13 +842,14 @@ hydro_restart (ndom)
   int nwind;
   double x[3];
   double old_density;
-  int nstart, nstop, ndim2;
+//OLD  int nstart, nstop, ndim2;
+  int nstart, nstop;
 
   zdom[ndom].wind_type = 3;     //Temporarily set the wind type to hydro, so we can use the normal routines
   /* note that we will have passed the hydro domain number as default */
   nstart = zdom[ndom].nstart;
   nstop = zdom[ndom].nstop;
-  ndim2 = zdom[ndom].ndim2;
+//OLD  ndim2 = zdom[ndom].ndim2;
 
   for (n = nstart; n < nstop; n++)
   {

@@ -64,7 +64,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   int nplasma;
   double nh;
 
-
+  x = 0;
 
   nion = 0;
   while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))

@@ -26,6 +26,7 @@ double a21(struct lines *line_ptr);
 double upsilon(int n_coll, double u0);
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+void skiplines(FILE *fptr, int nskip);
 /* python.c */
 int main(int argc, char *argv[]);
 /* photon2d.c */
@@ -622,6 +623,9 @@ double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double freq_min, do
 double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double freq_min, double freq_max);
 int matom_deactivation_from_matrix(PlasmaPtr xplasma, int uplvl);
 int calc_all_matom_matrices(void);
+/* atomic_extern_init.c */
+/* python_extern_init.o */
+/* models_extern_init.c */
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

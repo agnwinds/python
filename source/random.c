@@ -283,7 +283,7 @@ init_rng_directory (void)
   char dir_name[LINELENGTH];
   char file_name[LINELENGTH];
 
-  sprintf (dir_name, ".rng_%s/", files.root);
+  sprintf (dir_name, ".rng_%.100s/", files.root);
 
   err = mkdir (dir_name, 0777);
   if (err)
@@ -295,7 +295,7 @@ init_rng_directory (void)
     }
   }
 
-  sprintf (file_name, "%s%s_%d.rng_save", dir_name, files.root, rank_global);
+  sprintf (file_name, "%.50s%.50s_%d.rng_save", dir_name, files.root, rank_global);
   strcpy (files.rngsave, file_name);
 }
 
@@ -327,7 +327,7 @@ save_gsl_rng_state ()
     Error ("save_gsl_rng_state: gsl_rng_fwrite failed to write RNG state to file\n");
   }
   {
-    Log("GSL RNG state saved to %s\n", files.rngsave);
+    Log ("GSL RNG state saved to %s\n", files.rngsave);
   }
 
   if (fclose (file))
@@ -375,7 +375,7 @@ reload_gsl_rng_state ()
   }
   else
   {
-    Log("GSL RNG state loaded from %s\n", files.rngsave);
+    Log ("GSL RNG state loaded from %s\n", files.rngsave);
   }
 
   if (fclose (file))

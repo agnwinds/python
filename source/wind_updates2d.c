@@ -81,7 +81,8 @@ WindPtr (w);
   int first, last, m;
   double tot, agn_ip;
   double lum_h_line, lum_he_line, lum_c_line, lum_n_line, lum_o_line, lum_fe_line;
-  double h_dr, he_dr, c_dr, n_dr, o_dr, fe_dr;
+//OLD  double h_dr, he_dr, c_dr, n_dr, o_dr, fe_dr;
+  double c_dr, n_dr, o_dr, fe_dr;
   int my_nmin, my_nmax;         //Note that these variables are still used even without MPI on
   int ndom;
   FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fopen ();        /*This is the file to communicate with zeus */
@@ -145,7 +146,7 @@ WindPtr (w);
     t_e_ave_old += plasmamain[n].t_e;
     /* macro-atom estimators need to be normalised for all cells. 
        Note they should have already been averaged over threads here */
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
     {
       nwind = plasmamain[n].nwind;
       normalise_macro_estimators (nwind);
@@ -772,7 +773,7 @@ WindPtr (w);
         ptest.grid = nwind;     //We need our test photon to know where it is 
         kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
 
-        //First for the optcial band (up to 4000AA)     
+        //First for the optical band (up to 4000AA)     
         if (length (plasmamain[nplasma].F_vis) > 0.0)   //Only makes sense if flux in this band is non-zero
         {
           stuff_v (plasmamain[nplasma].F_vis, fhat);
@@ -976,7 +977,8 @@ WindPtr (w);
 
       c_rec = n_rec = o_rec = fe_rec = 0.0;
       c_lum = n_lum = o_lum = fe_lum = 0.0;
-      h_dr = he_dr = c_dr = n_dr = o_dr = fe_dr = 0.0;
+//OLD      h_dr = he_dr = c_dr = n_dr = o_dr = fe_dr = 0.0;
+      c_dr = n_dr = o_dr = fe_dr = 0.0;
       cool_dr_metals = 0.0;
 
       for (nn = 0; nn < nions; nn++)

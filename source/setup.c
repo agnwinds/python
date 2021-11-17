@@ -281,8 +281,8 @@ get_spectype (yesno, question, spectype)
  * ### Notes ###
  * modes is a structure declared in python.h
  *
- * Most of the modes are initialized to 0, which means that
- * activites that could be uddertaken for this mode, will
+ * Most of the modes are initialized to FALSE, which means that
+ * activites that could be undertaken for this mode, will
  * not be.
  *
  * Advanced modes are turned off by default, unless the
@@ -301,16 +301,17 @@ init_advanced_modes ()
 {
   modes.iadvanced = FALSE;      // this is controlled by the -d flag, global mode control.
   modes.extra_diagnostics = FALSE;      //  when set, want to save some extra diagnostic info
-  modes.save_cell_stats = FALSE;        // want to save photons statistics by cell
-  modes.keep_ioncycle_windsaves = FALSE;        // want to save wind file each ionization cycle
-  modes.track_resonant_scatters = FALSE;        // want to track resonant scatters
-  modes.save_extract_photons = FALSE;   // we want to save details on extracted photons
+  modes.save_cell_stats = FALSE;        // save photons statistics by cell
+  modes.keep_ioncycle_windsaves = FALSE;        // save wind file each ionization cycle
+  modes.keep_ioncycle_spectra = FALSE;  // to save spectrum file each ionization cycle
+  modes.track_resonant_scatters = FALSE;        // track resonant scatters
+  modes.save_extract_photons = FALSE;   // save details on extracted photons
   modes.adjust_grid = FALSE;    // the user wants to adjust the grid scale
   modes.diag_on_off = FALSE;    // extra diagnostics
   modes.use_debug = FALSE;
-  modes.print_dvds_info = FALSE;        // print out information on velocity gradients
-  modes.quit_after_inputs = FALSE;      // testing mode which quits after reading in inputs
-  modes.fixed_temp = FALSE;     // do not attempt to change temperature - used for testing
+  modes.print_dvds_info = FALSE;        // print information on velocity gradients
+  modes.quit_after_inputs = FALSE;      // check inputs and quit
+  modes.fixed_temp = FALSE;     // do not attempt to change temperature 
   modes.zeus_connect = FALSE;   // connect with zeus
 
   //note write_atomicdata  is defined in atomic.h, rather than the modes structure
@@ -746,7 +747,7 @@ init_ionization ()
   /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
-    geo.macro_simple = 1;       // Make everything simple if no macro atoms -- 57h
+    geo.macro_simple = TRUE;       // Make everything simple if no macro atoms -- 57h
 
   /* initialise the choice of handling for macro pops. */
   if (geo.run_type == RUN_TYPE_PREVIOUS)

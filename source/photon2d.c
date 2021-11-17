@@ -484,6 +484,8 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   }
 
   p->nres = *nres;
+  if (p->nres > -1 && p->nres < nlines)
+    p->line_res = p->nres;
 
   return (p->istat = istat);
 }

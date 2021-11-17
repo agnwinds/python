@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -76,7 +77,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
   xplasma = &plasmamain[one->nplasma];
   mplasma = &macromain[one->nplasma];
 
-  /* before we do anything else we look to see if we are exciting 
+  /* before we do anything else we look to see if we are exciting
      simple/fake two-level ions */
   if (matom_or_kpkt == MATOM)
   {
@@ -99,7 +100,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       }
     }
 
-    /* if it's bf continuum without the full macro atom treatment. 
+    /* if it's bf continuum without the full macro atom treatment.
 
        In the pre-2018 approach, we process the photon in a way that makes it return a bf photon of the same type
        as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
@@ -199,7 +200,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     /* Beginning of the main loop for processing a macro-atom */
     while (escape == FALSE)
     {
-      if (matom_or_kpkt == MATOM)       //excite a macro atom 
+      if (matom_or_kpkt == MATOM)       //excite a macro atom
       {
 
         /* if it's a bb transition of a full macro atom  */
@@ -247,7 +248,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         }
 
         /* If it did not escape then it must have had a
-           de-activation by collision processes, and so we label it a kpkt.  
+           de-activation by collision processes, and so we label it a kpkt.
          */
 
         matom_or_kpkt = KPKT;
@@ -422,65 +423,74 @@ macro_pops (xplasma, xne)
           }
         }
 
-        b_data = (double *) calloc (n_macro_lvl, sizeof (double));
-        populations = (double *) calloc (n_macro_lvl, sizeof (double));
-
-        /* replace the first entry with 1.0 - this is part of the normalisation constraint */
-        b_data[0] = 1.0;
-
-        /* this next routine is a general routine which solves the matrix equation
-           via LU decomposition */
-        gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
-        if (gsl_err)
+        /* 211101 - ksl - Check added to avoid gcc11 warning */
+        if (n_macro_lvl > SIZE_MAX / sizeof (double))
         {
-          Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
-        }
-
-        /* Now we take the population array and check to see if anything is very
-         * small and set it to zero. This is basically some pre-emptive cleaning
-         * since we could clean this up later, I suppose. */
-
-        for (i = 0; i < n_macro_lvl; i++)
-        {
-          if (populations[i] < DENSITY_MIN)
-          {
-            populations[i] = 0.0;
-          }
-        }
-
-        free (a_data);
-        free (b_data);
-
-        n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
-
-        if (n_inversions > 0)
-          Debug ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
-                 n_iterations, n_inversions, xplasma->nplasma);
-
-        /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
-           non-finite level population somewhere. If that is the case, then set all the estimators
-           to dilute blackbodies instead and go through the solution again.
-           2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
-           populations_ok to 1 to break the while loop, and copy the populations into the arrays
-         */
-
-        numerical_error =
-          macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix, n_iterations);
-
-        if (numerical_error)
-        {
-          Error
-            ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
-             n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
-          get_dilute_estimators (xplasma);
+          Error ("macro_gov:n_macro_lvl %d too large for calloc\n", n_macro_lvl);
+          Exit (0);
         }
         else
         {
-          populations_ok = TRUE;
-          macro_pops_copy_to_xplasma (xplasma, index_element, populations, conf_to_matrix);
-        }
+          b_data = (double *) calloc (n_macro_lvl, sizeof (double));
+          populations = (double *) calloc (n_macro_lvl, sizeof (double));
 
-        free (populations);
+          /* replace the first entry with 1.0 - this is part of the normalisation constraint */
+          b_data[0] = 1.0;
+
+          /* this next routine is a general routine which solves the matrix equation
+             via LU decomposition */
+          gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
+          if (gsl_err)
+          {
+            Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
+          }
+
+          /* Now we take the population array and check to see if anything is very
+           * small and set it to zero. This is basically some pre-emptive cleaning
+           * since we could clean this up later, I suppose. */
+
+          for (i = 0; i < n_macro_lvl; i++)
+          {
+            if (populations[i] < DENSITY_MIN)
+            {
+              populations[i] = 0.0;
+            }
+          }
+
+          free (a_data);
+          free (b_data);
+
+          n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
+
+          if (n_inversions > 0)
+            Debug ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
+                   n_iterations, n_inversions, xplasma->nplasma);
+
+          /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
+             non-finite level population somewhere. If that is the case, then set all the estimators
+             to dilute blackbodies instead and go through the solution again.
+             2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
+             populations_ok to 1 to break the while loop, and copy the populations into the arrays
+           */
+
+          numerical_error =
+            macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix, n_iterations);
+
+          if (numerical_error)
+          {
+            Error
+              ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
+               n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
+            get_dilute_estimators (xplasma);
+          }
+          else
+          {
+            populations_ok = TRUE;
+            macro_pops_copy_to_xplasma (xplasma, index_element, populations, conf_to_matrix);
+          }
+
+          free (populations);
+        }
       }                         // end of populations_ok == FALSE sane loop
     }                           // end of if statement for macro-atoms
   }                             // end of elements loop

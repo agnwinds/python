@@ -2357,8 +2357,11 @@ J_summary (w, rootname, ochoice)
   int uplvl, llvl, njump, lu, ll;
   struct lines *line_ptr;
 
+  njump = 0;
+  line_ptr = NULL;
 
   i = 1;
+
   rdint ("Band number for J or macro atom J (0), or backup (-1)", &i);
 
 
@@ -2387,8 +2390,6 @@ J_summary (w, rootname, ochoice)
         lu = line_ptr->nconfigu;
         ll = line_ptr->nconfigl;
 
-        // printf("ll %i lu %i llvl %i uplvl %i njump %i\n",
-        //         ll, lu, llvl, uplvl, njump);
         if (ll == llvl && lu == uplvl)
           break;
         njump++;
@@ -2965,9 +2966,9 @@ heatcool_summary (w, rootname, ochoice)
   int n;
   int nplasma;
   char filename[LINELENGTH];
-  float x;
+//OLD  float x;
 
-  x = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
+//OLD  x = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
 
   for (n = 0; n < NDIM2; n++)
   {
@@ -3320,6 +3321,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 
   Log ("py_wind_sub does not work yet\n");
   ndom = 0;
+  np = 0;
   for (n = 0; n < NDIM2; n++)
   {
     wind_n_to_ij (ndom, n, &ii, &jj);
@@ -3792,8 +3794,10 @@ flux_summary (w, rootname, ochoice)
   char filename[LINELENGTH];
   int ii, jj;
   FILE *fptr, *fopen ();
-  PlasmaPtr xplasma;
+//OLD  PlasmaPtr xplasma;
   int ndom, m;
+
+  np = 0;
 
 
   if (ochoice)
@@ -3833,7 +3837,7 @@ flux_summary (w, rootname, ochoice)
     if (w[n].inwind >= 0)
     {
       np = w[n].nplasma;
-      xplasma = &plasmamain[np];
+//OLD      xplasma = &plasmamain[np];
       if (ochoice)
       {
         fprintf (fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e ", n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], w[n].rcen,

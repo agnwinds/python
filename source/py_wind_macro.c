@@ -95,7 +95,7 @@ macro_summary (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  int nmacro;
+//OLD  int nmacro;
   int nconfig;
   int icell;
   int choose;
@@ -127,7 +127,8 @@ emissivities (2) P_escapes (3) Detailed Pops (4) taus (5) estimators (6)", &choo
     {
       if (nconfig >= 0)
       {
-        nmacro = config_overview (nconfig, icell);
+        config_overview (nconfig, icell);
+//OLD        nmacro = config_overview (nconfig, icell);
       }
       else
       {
@@ -231,6 +232,8 @@ ion_overview (icell)
 {
   int n;
   IonPtr p;
+
+  p = &ion[0];
 
 
   printf (" Z Ion I.Potent f.lte  n.lte f.nlte n.nlte  macro\n");

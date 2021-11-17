@@ -181,7 +181,9 @@ xsignal_rm (char *root)
 
     strcpy (command, "rm ");
     strcat (command, filename);
-    system (command);
+
+    if (system (command) == -1)
+      Error ("xsignal_rm: '%s' returned error status\n", command);
 
 #ifdef MPI_ON
   }

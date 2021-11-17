@@ -379,8 +379,16 @@ calculate_ionization (restart_stat)
       if (modes.make_tables)
       {
         strcpy (dummy, "");
-        sprintf (dummy, "diag_%s/%s.%02d", files.root, files.root, geo.wcycle);
+        sprintf (dummy, "diag_%.100s/%.100s.%02d", files.root, files.root, geo.wcycle);
         do_windsave2table (dummy, 0);
+      }
+
+      if (modes.keep_ioncycle_spectra)
+      {
+        strcpy (dummy, "");
+        sprintf (dummy, "python%02d.log_spec_tot", geo.wcycle);
+        spectrum_summary (dummy, 0, 6, SPECTYPE_RAW, 1., 1, 0); /* .log_spec_tot */
+
       }
 
 #ifdef MPI_ON

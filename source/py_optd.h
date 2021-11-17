@@ -60,23 +60,26 @@ enum COLUMN_DENSITY
   COLUMN_MODE_ION,
 };
 
-int COLUMN_MODE;
-int COLUMN_MODE_ION_NUMBER;
+extern int COLUMN_MODE;
+extern int COLUMN_MODE_ION_NUMBER;
 
 // Control which domain to initially send photons from
 
-int N_DOMAIN;
+extern int N_DOMAIN;
 
 // Control how the optical depth integration is done. This can be done in
 // integrated tau mode, which gets the integrated tau along the path. The other
 // mode aims to find the surface of the electron scattering photosphere
 
-enum {
+typedef enum RunModeEnum {
   RUN_MODE_TAU_INTEGRATE = 0,
   RUN_MODE_ES_PHOTOSPHERE = 1,
-} MODE;
+  RUN_MODE_NO_ES_OPACITY = 2,
+} RunMode_t;
 
-double TAU_DEPTH;
+extern RunMode_t RUN_MODE;
+
+extern double TAU_DEPTH;
 
 // External functions from other files
 

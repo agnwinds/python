@@ -355,7 +355,8 @@ ds_to_disk (p, allow_negative, hit)
   double delta_z;
 
   /* The next set of variables represent rho at various positions */
-  double r_diskplane, r_top, r_bot, r_hit;
+//OLD  double r_diskplane, r_top, r_bot, r_hit;
+  double r_diskplane, r_hit;
   double r_phot;
 
   double smin, smax;
@@ -455,12 +456,12 @@ ds_to_disk (p, allow_negative, hit)
   s_top = ds_to_plane (&disktop, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_top);
-  r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+//OLD  r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
   s_bot = ds_to_plane (&diskbottom, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_bot);
-  r_bot = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+//OLD  r_bot = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
   /* When a photon is outside of the cylinder of the disk
      there are instances where we need to know 

@@ -77,7 +77,7 @@ matom (p, nres, escape)
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
   int uplvl, uplvl_old;
-  int icheck;
+//OLD  int icheck;
   double jprbs[2 * (NBBJUMPS + NBFJUMPS)];
   double eprbs[NBBJUMPS + NBFJUMPS];
   double pjnorm, penorm;
@@ -338,26 +338,26 @@ matom (p, nres, escape)
     }
 
     /* n now identifies the jump that occurs - now set the new level. */
-    icheck = 0;
+//OLD    icheck = 0;
     if (n < nbbd)
     {                           /* bb downwards jump */
       uplvl = line[config[uplvl].bbd_jump[n]].nconfigl;
-      icheck = 1;
+//OLD      icheck = 1;
     }
     else if (n < (nbbd + nbfd))
     {                           /* bf downwards jump */
       uplvl = phot_top[config[uplvl].bfd_jump[n - nbbd]].nlev;
-      icheck = 2;
+//OLD      icheck = 2;
     }
     else if (n < (nbbd + nbfd + nbbu))
     {                           /* bb upwards jump */
       uplvl = line[config[uplvl].bbu_jump[n - nbbd - nbfd]].nconfigu;
-      icheck = 3;
+//OLD      icheck = 3;
     }
     else if (n < (nbbd + nbfd + nbbu + nbfu))
     {                           /* bf upwards jump */
       uplvl = phot_top[config[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
-      icheck = 4;
+//OLD      icheck = 4;
     }
     else
     {
@@ -720,7 +720,7 @@ kpkt (p, nres, escape, mode)
   double cooling_adiabatic;
   double cooling_normalisation;
   double destruction_choice;
-  double electron_temperature;
+//OLD  double electron_temperature;
   double upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
@@ -750,7 +750,7 @@ kpkt (p, nres, escape, mode)
 
   mplasma = &macromain[xplasma->nplasma];
 
-  electron_temperature = xplasma->t_e;
+//OLD  electron_temperature = xplasma->t_e;
 
   /* Set maximum and minimum frequency limits.  See #187. We need band limits for free free packet
      generation (see call to one_ff below). A bandaid is applied if there is not enough
@@ -924,7 +924,7 @@ kpkt (p, nres, escape, mode)
     /* If reached this point, it is a FF destruction event */
     /* consult issues #187, #492 regarding free-free */
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->freq = one_ff (one, freqmin, freqmax);
     return (0);
   }
@@ -932,7 +932,7 @@ kpkt (p, nres, escape, mode)
   {
     /*this is ff at a frequency that is so low frequency that it is not worth tracking further */
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->istat = P_LOFREQ_FF;
     return (0);
   }
@@ -948,7 +948,7 @@ kpkt (p, nres, escape, mode)
       Error ("kpkt: Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->istat = P_ADIABATIC;
 
     return (0);
@@ -1136,10 +1136,10 @@ fake_matom_bf (p, nres, escape)
      int *escape;
 {
   WindPtr one;
-  PlasmaPtr xplasma;
+//OLD  PlasmaPtr xplasma;
 
   one = &wmain[p->grid];
-  xplasma = &plasmamain[one->nplasma];
+//OLD  xplasma = &plasmamain[one->nplasma];
 
   *escape = TRUE;
 
@@ -1195,7 +1195,8 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
-  double t_e, ne;
+//OLD  double t_e, ne;
+  double ne;
   double bb_cont;
   WindPtr one;
   PlasmaPtr xplasma;
@@ -1204,7 +1205,7 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
   one = &w[p->grid];
   xplasma = &plasmamain[one->nplasma];
 
-  t_e = xplasma->t_e;
+//OLD  t_e = xplasma->t_e;
   ne = xplasma->ne;
 
   uplvl = upper;
@@ -1275,7 +1276,7 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
 
   double xfreq;
-  xfreq = -1; /* need to be below 0 to allow for case when freq_min = 0 */
+  xfreq = -1;                   /* need to be below 0 to allow for case when freq_min = 0 */
   while (xfreq < freq_min || xfreq > freq_max)
   {
     threshold = random_number (0.0, 1.0);
