@@ -1200,10 +1200,12 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
   double bb_cont;
   WindPtr one;
   PlasmaPtr xplasma;
+  MacroPtr mplasma;
 
 
   one = &w[p->grid];
   xplasma = &plasmamain[one->nplasma];
+  mplasma = &macromain[one->nplasma];
 
 //OLD  t_e = xplasma->t_e;
   ne = xplasma->ne;
@@ -1261,7 +1263,8 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
     if (cont_ptr->freq[0] < freq_max)
     {
-      sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
+//OLD      sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
+      sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];
 
       eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
       penorm += eprbs[m];
