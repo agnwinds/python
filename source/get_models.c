@@ -58,6 +58,48 @@
 /// Needed so can initialize nmods_tot the first time this routine is called
 int get_models_init = 0;
 
+
+/**********************************************************/
+/**
+ * @brief      Allocate space for detialed models
+ *
+ * @param [in] nmods   The number of elements in the model domain to allocate
+ * @return     Returns 0 unless there is insufficient space, in which
+ * case the routine will call the program to exits
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+int
+calloc_models (nmods)
+     int nmods;
+{
+
+  if (mods != NULL)
+  {
+    free (mods);
+  }
+
+  mods = (ModelPtr) calloc (sizeof (model_dummy), nmods);
+
+  if (mods == NULL)
+  {
+    Error ("There is a problem in allocating memory for the detailed model spectra\n");
+    Exit (0);
+  }
+  else
+  {
+    Log
+      ("Allocated %10d bytes for each of %5d elements of             totaling %10.1f Mb\n",
+       sizeof (model_dummy), nmods, 1.e-6 * nmods * sizeof (model_dummy));
+  }
+
+  return (0);
+}
+
 /**********************************************************/
 /**
  * @brief     This routine reads in a set of models for use in generation of spectra,
@@ -139,6 +181,7 @@ get_models (modellist, npars, spectype)
     nmods_tot = 0;
     ncomps = 0;                 // The number of different sets of models that have been read in
     get_models_init = 1;
+    calloc_models (NMODS);
   }
 
   /* Now check if this set of models has been read in previously.  If so return the
