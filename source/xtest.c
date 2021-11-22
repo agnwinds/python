@@ -91,6 +91,10 @@ xtest ()
   }
 
 
+  wind_save (files.windsave);
+  do_windsave2table (files.root, 0);
+
+
 
 
 //OLD  double x[3];

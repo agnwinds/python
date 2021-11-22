@@ -177,12 +177,23 @@ zero_find (func, x_lo, x_hi, tol)
      double tol;
 {
   double result;
+  double x_below, x_above;
   double alpha = 0.0;
-//OLD  double r = 0;
   const gsl_root_fsolver_type *T;
   gsl_root_fsolver *s;
   int iter = 0, max_iter = 100;
   int status;
+
+
+  // Check that the interval is bracketed
+
+  x_below = func (x_lo, (void *) &alpha);
+  x_above = func (x_hi, (void *) &alpha);
+
+  if (x_below * x_above > 0.0)
+  {
+    Error ("zero_find: function not bracketed x_lo %e -> %e, x_hi %e -> %e\n", x_lo, x_below, x_hi, x_above);
+  }
 
 
   gsl_function F;
@@ -201,7 +212,6 @@ zero_find (func, x_lo, x_hi, tol)
   {
     iter++;
     status = gsl_root_fsolver_iterate (s);
-//OLD    r = gsl_root_fsolver_root (s);
     gsl_root_fsolver_root (s);
     x_lo = gsl_root_fsolver_x_lower (s);
     x_hi = gsl_root_fsolver_x_upper (s);
@@ -211,6 +221,11 @@ zero_find (func, x_lo, x_hi, tol)
 
   }
   while (status == GSL_CONTINUE && iter < max_iter);
+
+  if (status != GSL_SUCCESS)
+  {
+    Error ("zero_find failed: %d of %D\n", iter, max_iter);
+  }
 
   result = (x_lo + x_hi) / 2.0;
 
