@@ -28,9 +28,8 @@ int sv_zero_r_ndom;
  * @param [in] int  ndom   The domain number
  * @return     Always returns 0
  *
- *  Initialize the parameters needed to define a SV wind and then request those
- *  parameters as inputs.   Calculate the normalization factor needed to convert 
- *  the global mass loss rate to the
+ *  Gets mdot for this wind component, initialize the parameters needed to define a SV wind, and then request those
+ *  parameters as inputs.   Calculate the normalization factor needed to convert the global mass loss rate to the
  *  mass loss rate per unit area.
  *
  * ###Notes###
@@ -67,6 +66,8 @@ get_sv_wind_params (ndom)
   windmax = 12;
   rddoub ("SV.diskmin(units_of_rstar)", &windmin);
   rddoub ("SV.diskmax(units_of_rstar)", &windmax);
+
+
   zdom[ndom].sv_rmin = windmin * geo.rstar;
   zdom[ndom].sv_rmax = windmax * geo.rstar;
 
@@ -114,6 +115,7 @@ get_sv_wind_params (ndom)
     zdom[ndom].xlog_scale = zdom[ndom].sv_rmin;
     zdom[ndom].zlog_scale = geo.rstar;
   }
+
 
   /*Now calculate the normalization factor for the wind */
 
@@ -396,12 +398,6 @@ sv_find_wind_rzero (ndom, p)
   /* The next lines provide a graceful answer in the case where the
    * position is actually outside the wind so that rzero returned is
    * continuous
-   * if rho is equal to rho_min then one wold expect the streamline
-   * to arise from sv_rmin.  If rho is equal to rmax then one would 
-   * expect the streamline aris from sv_rmax.  
-   *
-   * if rho is outside rho_max, then we expect the stream_line to hit
-   * somewhere between sv_rmax and sv_rmax+(rho-rho_max)
    */
 
   rho_min = zdom[ndom].sv_rmin + z * tan (zdom[ndom].sv_thetamin);
@@ -413,21 +409,13 @@ sv_find_wind_rzero (ndom, p)
 
   if (rho <= rho_min)
   {
-//OLD    x = zdom[ndom].sv_rmin * rho / rho_min;
-    x = zdom[ndom].sv_rmin;
-
+    x = zdom[ndom].sv_rmin * rho / rho_min;
     return (x);
   }
   if (rho >= rho_max)
   {
-//    x = zdom[ndom].sv_rmax + rho - rho_max;
-    x = zdom[ndom].sv_rmax;
+    x = zdom[ndom].sv_rmax + rho - rho_max;
     return (x);
-//    xxmin = 0.99 * zdom[ndom].sv_rmax;
-//    xxmax = zdom[ndom].sv_rmax + (rho - rho_max);
-//    xxmax = 2 * zdom[ndom].sv_rmax + (rho - rho_max);
-//    xxmin = zdom[ndom].sv_rmin;
-//    xxmax = 2 * zdom[ndom].sv_rmax + (rho_max);
   }
 
   /* 100 here means that zero_find will end if one has a guess of rzero which is
@@ -435,6 +423,7 @@ sv_find_wind_rzero (ndom, p)
 
   /* change the global variable sv_zero_r_ndom before we call zero_find */
   sv_zero_r_ndom = ndom;
+//  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
   x = zero_find (sv_zero_r, xxmin, xxmax, 100.);
 
 
@@ -488,7 +477,7 @@ sv_zero_init (p)
  * you have the answer exactly then sv_zero_r will return 0
  *
  * sv_zero_r is the routine called by zero_find
- * walk down on the actual value
+ * to walk down on the actual value
  * of r in the disk.   
  *
  * sv_zero_r returns the difference
@@ -552,9 +541,8 @@ sv_theta_wind (ndom, r)
 
   if (r <= zdom[ndom].sv_rmin)
     return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
-
-//OLD  if (r >= zdom[ndom].sv_rmax)
-//OLD    return (zdom[ndom].sv_thetamax);
+  if (r >= zdom[ndom].sv_rmax)
+    return (zdom[ndom].sv_thetamax);
 
   theta = zdom[ndom].sv_thetamin +
     (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) *
