@@ -175,11 +175,6 @@ WindPtr (w);
        terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 8fb3a94b4251339afce65c25ac45d6fb90b3f4b7
     /* Store some information so one can determine how much the temps are changing */
     t_r_old = plasmamain[n].t_r;
     t_e_old = plasmamain[n].t_e;

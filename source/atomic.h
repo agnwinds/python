@@ -299,15 +299,10 @@ extern double phot_freq_min;           /*The lowest frequency for which photoion
 extern double inner_freq_min;          /*The lowest frequency for which inner shell ionization can take place */
 
 #define NCROSS 2000             /* Maximum number of x-sections for a single photionization process */
-<<<<<<< HEAD
-#define NTOP_PHOT 4000           /* Maximum number of photoionisation processes.  */
-int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
-int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
-=======
+
 #define NTOP_PHOT 400           /* Maximum number of photoionisation processes.  */
 extern int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
 extern int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
->>>>>>> 655cb4666ff98f4139975f3e063ec5bc45c463a1
 
 typedef struct topbase_phot
 {                               /* If the old topbase treatment is to be replaced by Macro Atoms perhaps this
