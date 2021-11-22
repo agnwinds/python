@@ -28,15 +28,15 @@ extern int nmods_tot;                  // The total number of models that have b
 /* This is the structure that describes an individual continuum model. 
  * mods is the set of all models that are read
  */
-struct Model
+typedef struct Model
 {
   char name[LINELEN];
   double par[NPARS];
   double w[NWAVES];
   double f[NWAVES];
   int nwaves;
-};
-extern struct Model mods[NMODS];
+} model_dummy, *ModelPtr;
+extern ModelPtr  mods;
 
 /* There is one element of comp for each set of models of the same type, i.e. if
 one reads in a list of WD atmosphers this will occupy one componenet here */
