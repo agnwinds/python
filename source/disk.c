@@ -355,7 +355,6 @@ ds_to_disk (p, allow_negative, hit)
   double delta_z;
 
   /* The next set of variables represent rho at various positions */
-//OLD  double r_diskplane, r_top, r_bot, r_hit;
   double r_diskplane, r_hit;
   double r_phot;
 
@@ -365,6 +364,7 @@ ds_to_disk (p, allow_negative, hit)
 
   int location = -1;
   smin = smax = 0.0;
+  int ierr = FALSE;
 
 
   /* Simply return is there is no disk */
@@ -456,12 +456,10 @@ ds_to_disk (p, allow_negative, hit)
   s_top = ds_to_plane (&disktop, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_top);
-//OLD  r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
   s_bot = ds_to_plane (&diskbottom, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_bot);
-//OLD  r_bot = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
   /* When a photon is outside of the cylinder of the disk
      there are instances where we need to know 
@@ -751,12 +749,18 @@ ds_to_disk (p, allow_negative, hit)
 
   if ((smax - smin) > 0.)
   {
-    s = zero_find (disk_height, 0.0, smax - smin, 1e-8);
+    s = zero_find (disk_height, 0.0, smax - smin, 1e-8, &ierr);
   }
   else
   {
-    s = zero_find (disk_height, smax - smin, 0.0, 1e-8);
+    s = zero_find (disk_height, smax - smin, 0.0, 1e-8, &ierr);
   }
+
+  if (ierr)
+  {
+    Error ("ds_to_disk: zero find falied to find distance\n");
+  }
+
 
   /* Check if our solution is the maxium or the minimum distance.
      This could mean that we have not selected smin or smax

@@ -145,16 +145,17 @@ num_int (func, a, b, eps)
 * @brief      A wrapper function that finds the root of a function between two limits
 *
 *
-* @param [in] func - the function we want to find the root of
-* @param [in] a - lower bound
-* @param [in] b - upper bound
-* @param [in] eps - the relative accuracy desired.
+* @param [in] *func - the function we want to find the root of
+* @param [in] double x_lo - lower bound
+* @param [in] double x_hi - upper bound
+* @param [in] double bol - the relative accuracy desired.
+* @param [out] int * ierr An error return, TRUE if an error
 * @return   The location between a and b of the zero point                         .
 *
 * @details
-* This routine finds the root  of the function func from a to b. It currently
+* This routine finds the root  of the function func from x_lo to x_hi. It currently
 * uses the gsl implementation of the BRENT root finding scheme. This replaced the 
-* zbrent * numerical recipie, and the call is intended to be identical
+* zbrentnumerical recipes, and the call is intended to be identical
 *
 * ### Notes ###
 *
@@ -171,10 +172,11 @@ num_int (func, a, b, eps)
 
 
 double
-zero_find (func, x_lo, x_hi, tol)
+zero_find (func, x_lo, x_hi, tol, ierr)
      double (*func) (double, void *);
      double x_lo, x_hi;
      double tol;
+     int *ierr;
 {
   double result;
   double x_below, x_above;
@@ -185,6 +187,7 @@ zero_find (func, x_lo, x_hi, tol)
   int status;
 
 
+  *ierr = FALSE;
   // Check that the interval is bracketed
 
   x_below = func (x_lo, (void *) &alpha);
@@ -193,6 +196,7 @@ zero_find (func, x_lo, x_hi, tol)
   if (x_below * x_above > 0.0)
   {
     Error ("zero_find: function not bracketed x_lo %e -> %e, x_hi %e -> %e\n", x_lo, x_below, x_hi, x_above);
+    *ierr = TRUE;
   }
 
 
@@ -224,7 +228,10 @@ zero_find (func, x_lo, x_hi, tol)
 
   if (status != GSL_SUCCESS)
   {
-    Error ("zero_find failed: %d of %D\n", iter, max_iter);
+    x_below = func (x_lo, (void *) &alpha);
+    x_above = func (x_hi, (void *) &alpha);
+    Error ("zero_find failed: %d of %d brackets x_lo %e -> %e, x_hi %e -> %e\n", iter, max_iter, x_lo, x_below, x_hi, x_above);
+    *ierr = TRUE;
   }
 
   result = (x_lo + x_hi) / 2.0;

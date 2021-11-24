@@ -60,6 +60,7 @@ spectral_estimators (xplasma)
                                    we must not use this model, +1 means it is OK */
   double genmin, genmax;        /*The min and max frequencies over which we have made photons originally (actually band ends) */
   double dfreq;                 /* A number to help work out if we have fully filled a band */
+  int ierr = FALSE;
 
   /* This call is after a photon flight, so we *should* have access to j and ave_freq,
      and so we can calculate proper values for W and alpha
@@ -197,8 +198,11 @@ spectral_estimators (xplasma)
 
       else                      //We have bracketed alpha
       {
-//        pl_alpha_temp = zbrent (pl_alpha_func_log, pl_alpha_min, pl_alpha_max, 0.00001);        //find the actual value of alpha that matches our mean frequency
-        pl_alpha_temp = zero_find (pl_alpha_func_log2, pl_alpha_min, pl_alpha_max, 0.00001);    //find the actual value of alpha that matches our mean frequency
+        pl_alpha_temp = zero_find (pl_alpha_func_log2, pl_alpha_min, pl_alpha_max, 0.00001, &ierr);     //find the actual value of alpha that matches our mean frequency
+        if (ierr)
+        {
+          Error ("spectral_estimators: alpha not bracketed\n");
+        }
 
         /* This next line computes the PL weight using an external function. */
 
@@ -262,7 +266,11 @@ spectral_estimators (xplasma)
         }
         /* Solve for the effective temperature */
 
-        exp_temp_temp = zero_find (exp_temp_func2, exp_temp_min, exp_temp_max, 0.00001);
+        exp_temp_temp = zero_find (exp_temp_func2, exp_temp_min, exp_temp_max, 0.00001, &ierr);
+        if (ierr)
+        {
+          Error ("spectral_estimators: temp not bracketed\n");
+        }
 
         /* Calculate the weight */
         exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);

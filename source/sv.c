@@ -378,15 +378,20 @@ sv_find_wind_rzero (ndom, p)
   double rho_min, rho_max, rho;
 
   double xxmin, xxmax;
+  int ierr = FALSE;
 
   /* thetamin and theta max are defined w.r.t  z axis */
 
   z = fabs (p[2]);              /* This is necessary to get correct answer above
                                    and below plane */
 
-  if (z == 0)
+  /* If p is in the xy plane or along the z axis, 
+     there is no need to think further
+   */
+
+  x = (sqrt (p[0] * p[0] + p[1] * p[1]));
+  if (z == 0 || x == 0)
   {
-    x = (sqrt (p[0] * p[0] + p[1] * p[1]));     // If p is in the xy plane, there is no need to think further
     return (x);
   }
 
@@ -404,18 +409,28 @@ sv_find_wind_rzero (ndom, p)
   rho_max = zdom[ndom].sv_rmax + z * tan (zdom[ndom].sv_thetamax);
   rho = sqrt (p[0] * p[0] + p[1] * p[1]);
 
+
+
+
   xxmin = zdom[ndom].sv_rmin;
   xxmax = zdom[ndom].sv_rmax;
 
+  if (rho < 0.5 * rho_min)
+  {
+    return (x);
+  }
   if (rho <= rho_min)
   {
-    x = zdom[ndom].sv_rmin * rho / rho_min;
-    return (x);
+    xxmin = 0.01 * zdom[ndom].sv_rmin;
+    xxmax = 1.01 * zdom[ndom].sv_rmin;
+//ORIG    x = zdom[ndom].sv_rmin * rho / rho_min;
+//ORIG    return (x);
   }
   if (rho >= rho_max)
   {
-    x = zdom[ndom].sv_rmax + rho - rho_max;
-    return (x);
+//ORIG    x = zdom[ndom].sv_rmax + rho - rho_max;
+//ORIG    return (x);
+    xxmax = rho;
   }
 
   /* 100 here means that zero_find will end if one has a guess of rzero which is
@@ -424,7 +439,12 @@ sv_find_wind_rzero (ndom, p)
   /* change the global variable sv_zero_r_ndom before we call zero_find */
   sv_zero_r_ndom = ndom;
 //  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
-  x = zero_find (sv_zero_r, xxmin, xxmax, 100.);
+  x = zero_find (sv_zero_r, xxmin, xxmax, 100., &ierr);
+
+  if (ierr)
+  {
+    Error ("sv_find_wind_rzero: failed at rho %e and z%e\n", rho, z);
+  }
 
 
   return (x);
@@ -539,14 +559,24 @@ sv_theta_wind (ndom, r)
   double theta;
 
 
-  if (r <= zdom[ndom].sv_rmin)
-    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
-  if (r >= zdom[ndom].sv_rmax)
-    return (zdom[ndom].sv_thetamax);
+//ORIG  if (r <= zdom[ndom].sv_rmin)
+//ORIG    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
+//ORIG  if (r >= zdom[ndom].sv_rmax)
+//ORIG    return (zdom[ndom].sv_thetamax);
 
   theta = zdom[ndom].sv_thetamin +
     (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) *
     pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin), zdom[ndom].sv_gamma);
+
+
+  if (theta < 0.001 / 57.29578)
+  {
+    theta = 0.001 / 57.29578;
+  }
+  if (theta > 89. / 57.29578)
+  {
+    theta = 89. / 57.29578;
+  }
 
   return (theta);
 
