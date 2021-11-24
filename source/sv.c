@@ -443,7 +443,9 @@ sv_find_wind_rzero (ndom, p)
 
   if (ierr)
   {
-    Error ("sv_find_wind_rzero: failed at rho %e and z%e\n", rho, z);
+    Error ("sv_find_wind_rzero: failed at rho %e and z %e\n", rho, z);
+    Error ("sv_find_wind_rzero: xxmin %e --> theta %f xxmax %e --> theta %f\n", xxmin, sv_theta_wind (ndom, xxmin) * RADIAN,
+           xxmax, sv_theta_wind (ndom, xxmax) * RADIAN);
   }
 
 
@@ -557,26 +559,41 @@ sv_theta_wind (ndom, r)
      double r;
 {
   double theta;
+  double x, xmin;
+
+  x = (r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
 
 
-//ORIG  if (r <= zdom[ndom].sv_rmin)
-//ORIG    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
-//ORIG  if (r >= zdom[ndom].sv_rmax)
-//ORIG    return (zdom[ndom].sv_thetamax);
 
-  theta = zdom[ndom].sv_thetamin +
-    (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) *
-    pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin), zdom[ndom].sv_gamma);
-
-
-  if (theta < 0.001 / 57.29578)
+  if (x >= 0)
   {
-    theta = 0.001 / 57.29578;
+    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * pow (x, zdom[ndom].sv_gamma);
   }
-  if (theta > 89. / 57.29578)
+  else
   {
-    theta = 89. / 57.29578;
+    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * x;
   }
+
+
+  if (theta < 0.001 / RADIAN)
+  {
+    theta = 0.001 / RADIAN;
+  }
+  if (theta > 89.9 / RADIAN)
+  {
+    theta = 89.9 / RADIAN;
+  }
+
+/* Now handle the case where we are inside sv_rmin to assure that all of space is covered.
+ We want theta to be 90 degrees when r is 0, and sv.theta_min when it is at r_min, which is x
+ of 0*/
+
+  if (x < 0)
+  {
+    xmin = (-zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
+    theta *= sin ((x - xmin) / xmin * 90 / RADIAN);
+  }
+
 
   return (theta);
 
