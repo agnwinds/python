@@ -749,16 +749,19 @@ ds_to_disk (p, allow_negative, hit)
 
   if ((smax - smin) > 0.)
   {
-    s = zero_find (disk_height, 0.0, smax - smin, 1e-8, &ierr);
+//OLD    s = zero_find (disk_height, 0.0, smax - smin, 1e-8, &ierr);
+    s = zero_find (disk_height, 0.0, smax - smin, 1., &ierr);
   }
   else
   {
-    s = zero_find (disk_height, smax - smin, 0.0, 1e-8, &ierr);
+//OLD    s = zero_find (disk_height, smax - smin, 0.0, 1e-8, &ierr);
+    s = zero_find (disk_height, smax - smin, 0.0, 1., &ierr);
   }
 
   if (ierr)
   {
-    Error ("ds_to_disk: zero find falied to find distance\n");
+    Error ("ds_to_disk: zero find failed to find distance for position %.2e %.2e %.2e and dir  %.3f %.3f %.3f\n",
+           p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
   }
 
 
