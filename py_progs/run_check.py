@@ -266,9 +266,12 @@ def check_completion(root):
         message='WARNING: RUN %s HAS NOT COMPLETED SUCCESSFULLY' % root
         complete_message.append(message)
         word=complete_string.split()
-        message='If not running, Python stopped after about %s s in  %s of %s %s cycles' % (word[5],word[8],word[10],word[11])
+        try:
+            message='If not running, it stopped after about %s s in  %s of %s %s cycles' % (word[5],word[8],word[10],word[11])
+        except IndexError: # add catch for when the above can't be read 
+            message='could not read cycle information'
+            pass 
         complete_message.append(message)
-
 
     return complete_message
 

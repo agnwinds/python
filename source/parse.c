@@ -327,9 +327,13 @@ parse_command_line (argc, argv)
 void
 help ()
 {
-  char *some_help;
+#ifdef MPI_ON
+  if (rank_global == 0)
+  {
+#endif
+    char *some_help;
 
-  some_help = "\
+    some_help = "\
 \n\
 This program simulates radiative transfer in a (biconical) CV, YSO, quasar, TDE or (spherical) stellar wind \n\
 \n\
@@ -378,7 +382,10 @@ of the parameter file and inputs will be requested from the command line. \n\
 \n\
 ";                              // End of string to provide one with help
 
-  printf ("%s\n", some_help);
+    printf ("%s\n", some_help);
+#ifdef MPI_ON
+  }
+#endif
 
-  exit (0);                     // Note that here we simply do want to exit, not use Exit
+  Exit (0);                     // Note that here we simply do want to exit, not use Exit
 }
