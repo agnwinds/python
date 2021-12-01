@@ -1,4 +1,4 @@
-The Shlosman & Vitello prescription of a bi-conical wind
+SV93 biconical wind prescription
 ########################################################
 
 In the `SV93 <https://ui.adsabs.harvard.edu/abs/1993ApJ...409..372S/abstract>`_ prescription, the wind emerges between :math:`r_{min}` and 
