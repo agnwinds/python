@@ -253,6 +253,7 @@ main (argc, argv)
       w = wmain;
       geo.wcycle = 0;
       geo.pcycle = 0;
+      geo.model_count = 0;
     }
 
 
