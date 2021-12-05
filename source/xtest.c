@@ -66,12 +66,15 @@ xtest ()
   double rzero, theta, vel[3];
   FILE *fopen (), *fptr;
   modes.run_xtest_diagnostics = TRUE;
+  double v_escape;
 
-  z = 1.23e+15;
+  z = 1.e15;
+// z = 1e+14;
   y = 0;
   xmin = 0;
   xmax = 5.67e17;
   xmax = 2e16;
+  xmax = 10. * z;
 
   pos[1] = y;
   pos[2] = z;
@@ -85,8 +88,11 @@ xtest ()
     pos[0] = x;
     rzero = sv_find_wind_rzero (0, pos);
     theta = sv_theta_wind (0, rzero);
+
+    v_escape = zdom[0].sv_v_infinity * sqrt (2. * GRAV * geo.mstar / rzero);
     sv_velocity (pos, vel, 0);
-    fprintf (fptr, "%.3e %.3e %.3e   %.3e %.3e  %.3e %.3e %.3e\n", pos[0], pos[1], pos[2], rzero, theta, vel[0], vel[1], vel[2]);
+    fprintf (fptr, "%.3e %.3e %.3e   %.3e %.3e  %.3e %.3e %.3e %.3e\n", pos[0], pos[1], pos[2], rzero, theta, vel[0], vel[1], vel[2],
+             v_escape);
 
   }
 

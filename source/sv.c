@@ -547,34 +547,68 @@ sv_theta_wind (ndom, r)
      double r;
 {
   double theta;
-  double x, xmin;
+//  double x, xmin;
+  double x;
 
   x = (r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
 
-
-  if (x >= 0)
-  {
-    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * pow (x, zdom[ndom].sv_gamma);
-  }
-  else
+  if (zdom[ndom].sv_gamma == 1 || x <= 0)
   {
     theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * x;
   }
+  else
+  {
+    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * pow (x, zdom[ndom].sv_gamma);
+  }
 
 
-  if (theta < 0.001 / RADIAN)
+//  if (x >= 0)
+//  {
+//    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * pow (x, zdom[ndom].sv_gamma);
+//  }
+//  else
+//  {
+//    double delta_r, delta_theta;
+//    double thetamax2;
+//    double thetamin2 = 0;
+//    double rmin2, rmax2;
+
+//    delta_r = (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
+//    delta_theta = (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin);
+
+//    rmin2 = zdom[ndom].sv_rmin - delta_r / delta_theta * (zdom[ndom].sv_thetamin - thetamin2);
+
+//    rmax2 = rmin2 + delta_r;
+//    thetamax2 = thetamin2 + delta_theta;
+
+//    x = (r - rmin2) / (rmax2 - rmin2);
+//    theta = thetamin2 + (thetamax2 - thetamin2) * x;
+
+//  }
+
+
+  if (theta < 0)
   {
-    theta = 0.001 / RADIAN;
+    theta = 0;
   }
-  if (theta > 89.9999 / RADIAN)
+  if (theta > 90. / RADIAN)
   {
-    theta = 89.9999 / RADIAN;
+    theta = 90. / RADIAN;
   }
+//  if (theta < 0.001 / RADIAN)
+//  {
+//    theta = 0.001 / RADIAN;
+//  }
+//  if (theta > 89.9999 / RADIAN)
+//  {
+//    theta = 89.9999 / RADIAN;
+//  }
 
 /* Now handle the case where we are inside sv_rmin to assure that all of space is covered.
  We want theta to be 90 degrees when r is 0, and sv.theta_min when it is at r_min, which is x
  of 0.  Multiplying by the sin does this, and makes the value of theta and dtheta/dr match*/
 
+  double xmin;
   if (x < 0)
   {
     xmin = (-zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
