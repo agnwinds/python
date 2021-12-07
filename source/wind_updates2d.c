@@ -1214,6 +1214,11 @@ wind_rad_init ()
       {                         //we want a macro approach, but not for this ion so need recomb_simple
         plasmamain[n].recomb_simple[i] = alpha_store = alpha_sp (&phot_top[i], &plasmamain[n], 2);
         plasmamain[n].recomb_simple_upweight[i] = alpha_sp (&phot_top[i], &plasmamain[n], 1) / alpha_store;
+        if (plasmamain[n].recomb_simple_upweight[i] > 10.)
+        {
+          Log ("Upweight   %d  %d  %.3e  %e\n  ", n, i, plasmamain[n].recomb_simple_upweight[i], alpha_store);
+          plasmamain[n].recomb_simple_upweight[i] = 10.;
+        }
       }
     }
 

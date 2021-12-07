@@ -197,31 +197,43 @@ main (argc, argv)
 
   fptr = fopen (outfile, "w");
 
-  fprintf (fptr, "Results for %s\n", infile);
+  fprintf (fptr, "# Results for %s\n", infile);
 
-  fprintf (fptr, "Size  %d  %d %d \n", size_Jbar_est, size_gamma_est, size_alpha_est);
+//  fprintf (fptr, "Size  %d  %d %d \n", size_Jbar_est, size_gamma_est, size_alpha_est);
+
+//  for (n = 0; n < NPLASMA; n++)
+//  {
+//    fprintf (fptr, "jbar ");
+//    fprintf (fptr, "%d ", n);
+//    for (i = 0; i < 10; i++)
+//    {
+//      fprintf (fptr, "%8.2e ", macromain[n].jbar[i]);
+//    }
+//    fprintf (fptr, "\n");
+//  }
+
+
+
+//  for (n = 0; n < NPLASMA; n++)
+//  {
+//    fprintf (fptr, "jbar_old ");
+//    fprintf (fptr, "%d ", n);
+//    for (i = 0; i < 10; i++)
+//    {
+//      fprintf (fptr, "%8.2e ", macromain[n].jbar_old[i]);
+//    }
+//    fprintf (fptr, "\n");
+//  }
 
   for (n = 0; n < NPLASMA; n++)
   {
-    fprintf (fptr, "jbar ");
-    fprintf (fptr, "%d ", n);
-    for (i = 0; i < 10; i++)
+    fprintf (fptr, "%3d %3d ", n, plasmamain[n].nwind);
+
+    for (i = 0; i < ntop_phot; i++)
     {
-      fprintf (fptr, "%8.2e ", macromain[n].jbar[i]);
+      fprintf (fptr, "%8.3e ", plasmamain[n].recomb_simple_upweight[n]);
     }
-    fprintf (fptr, "\n");
-  }
 
-
-
-  for (n = 0; n < NPLASMA; n++)
-  {
-    fprintf (fptr, "jbar_old ");
-    fprintf (fptr, "%d ", n);
-    for (i = 0; i < 10; i++)
-    {
-      fprintf (fptr, "%8.2e ", macromain[n].jbar_old[i]);
-    }
     fprintf (fptr, "\n");
   }
 
