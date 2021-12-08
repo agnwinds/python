@@ -67,14 +67,14 @@
  * ### Notes ###
  * Normally, there are fewer plasma elements than wind elements, since
  * plasma elements are created only for those wind elements which have 
- * finite volume in the wind.  For each domain, a coordinate grid is
- * created that covers a region of space, e.g a portion of a cylindrical
- * grid.  However some cells in this region are empty or matter, e.g
- * in a bi-conical flow.  
+ * determined to be in the wind.  
  * 
  * wmain and plasmamain will already have been allocated memory by
  * the time this routine is called.
  *
+ * All the wind cells that are not to be considered part of the
+ * actual wind are assigned to a dummy structure, which is located
+ * at the end of plasma main
  *
  *
  **********************************************************/
@@ -83,12 +83,25 @@ int
 create_maps ()
 {
   int i, j;
+  int true_false;
+
   j = 0;
 
   for (i = 0; i < NDIM2; i++)
   {
     wmain[i].nwind = i;
-    if (wmain[i].vol > 0)
+
+    true_false = FALSE;
+    if (modes.ignore_partial_cells && wmain[i].inwind == W_ALL_INWIND)
+    {
+      true_false = TRUE;
+    }
+    else if (!modes.ignore_partial_cells && wmain[i].vol > 0.0)
+    {
+      true_false = TRUE;
+    }
+
+    if (true_false)
     {
       wmain[i].nplasma = j;
       plasmamain[j].nplasma = j;
@@ -105,12 +118,12 @@ create_maps ()
     else
     {
       wmain[i].nplasma = NPLASMA;
-      if (wmain[i].inwind >= 0)
-      {
-        Error
-          ("create_maps: wind cell %d has zero volume but flagged inwind! Critical error, could cause undefined behaviour. Exiting.\n", i);
-        Exit (0);
-      }
+//OLD      if (wmain[i].inwind >= 0)
+//OLD      {
+//OLD        Error
+//OLD          ("create_maps: wind cell %d has zero volume but flagged inwind! Critical error, could cause undefined behaviour. Exiting.\n", i);
+//OLD        Exit (0);
+//OLD      }
     }
   }
   if (j != NPLASMA)

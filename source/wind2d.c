@@ -233,7 +233,7 @@ define_wind ()
  * and also assigned the variables w[].inwind at least insofar as the wind is concerned.
  */
 
-/* Perform some consistency checks of the wind */
+/* Perform determine the number of plasma cells and perforem some consistency checks of the wind */
 
   NPLASMA = 0;
   for (ndom = 0; ndom < geo.ndomain; ndom++)
@@ -246,10 +246,25 @@ define_wind ()
       if (w[n].inwind == W_ALL_INWIND)
         n_inwind++;
       if (w[n].inwind == W_PART_INWIND)
+      {
         n_part++;
+        if (modes.ignore_partial_cells)
+        {
+          w[n].inwind = W_IGNORE;
+        }
+      }
 
     }
-    NPLASMA += n_vol;
+
+    if (modes.ignore_partial_cells)
+    {
+      NPLASMA += n_inwind;
+    }
+    else
+    {
+      NPLASMA += (n_inwind + n_part);
+    }
+
     Log
       ("wind2d: For domain %d there are %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
        ndom, zdom[ndom].ndim2, n_inwind, n_part, n_vol);
@@ -257,12 +272,11 @@ define_wind ()
     if (n_inwind == 0)
     {
       Error ("wind2d: There are no wind cells in domain %d.  This seems unreasonble\n", ndom);
-      if (n_part > 0)
-      {
-        Log ("wind2d: partially in wind cells have been found, so consider increasing resolution\n");
-      }
+      Error ("wind2d: There are %d cells partially in the wind been found, but these normally are ignored\n", n_part);
+      Log ("wind2d: Please increase the number of cells\n");
       Exit (1);
     }
+
 
     if (zdom[ndom].coord_type != SPHERICAL && zdom[ndom].wind_type != IMPORT)
     {
