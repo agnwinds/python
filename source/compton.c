@@ -311,6 +311,7 @@ compton_dir (p)
   double lmn[3];                /* the individual direction cosines in the rotated frame */
   double x[3];                  /*photon direction in the frame of reference of the original photon */
   double dummy[3], c[3];
+  int ierr = FALSE;
 
   x1 = PLANCK * p->freq / MELEC / VLIGHT / VLIGHT;      //compute the ratio of photon energy to electron energy. In the electron rest frame this is just the electron rest mass energy
 
@@ -328,8 +329,11 @@ compton_dir (p)
     f_min = 1.;                 //The minimum energy change - i.e. no energy loss - the scattering angle is zero - the photon does not chage direction
     f_max = 1. + (2. * x1);     //The maximum energy change - this occurs if the scattering angle is 180 degrees (i.e. the photon bounces straight back.) f=e_old/e_new
     sigma_max = sigma_compton_partial (f_max, x1);      //Communicated externally to the integrand function in the zbrent call below, this is the maximum cross section, used to scale the K_N function to lie between 0 and 1. This is essentually the chance of a photon scattering through 180 degrees - or the angle giving the maximum energy loss
-    f = zero_find (compton_func, f_min, f_max, 1e-8);   //Find the zero point of the function compton_func - this finds the point in the KN function that represents our randomised fractional energy loss z_rand.
-
+    f = zero_find (compton_func, f_min, f_max, 1e-8, &ierr);    //Find the zero point of the function compton_func - this finds the point in the KN function that represents our randomised fractional energy loss z_rand.
+    if (ierr)
+    {
+      Error ("compton_dir: zero_find failed\n");
+    }
 /*We now have the fractional energy change f - we use the 'normal' equation for Compton scattering to obtain the angle cosine n=cos(\theta)	for the scattering direction*/
 
     n = (1. - ((f - 1.) / x1)); //This is the angle cosine of the new direction in the frame of reference of the photon - this gives a 2D scattering angle

@@ -192,12 +192,12 @@ parse_command_line (argc, argv)
         Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
-//OLD      else if (strcmp (argv[i], "-ztest") == 0)
-//OLD      {
-//OLD        run_ztest = TRUE;
-//OLD        Log ("Run ztest, optional code\n");
-//OLD        j = i;
-//OLD      }
+      else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
+      {
+        modes.ignore_partial_cells = TRUE;
+        Log ("Cells partially in the wind will be ingnored.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;
@@ -327,9 +327,13 @@ parse_command_line (argc, argv)
 void
 help ()
 {
-  char *some_help;
+#ifdef MPI_ON
+  if (rank_global == 0)
+  {
+#endif
+    char *some_help;
 
-  some_help = "\
+    some_help = "\
 \n\
 This program simulates radiative transfer in a (biconical) CV, YSO, quasar, TDE or (spherical) stellar wind \n\
 \n\
@@ -371,14 +375,20 @@ These are largely diagnostic or for special cases. These include\n\
                 effects are not taken into account.\n\
  -srclassic     Use Python with full special relativity for Doppler shits, etc., but do not include any co-moving frame\n\
                 effects.\n\
+ -ignore partial_cells   Ignore wind cells that are only partially filed by the wind (see Issue #900) \n\
 \n\
+ -xtest         Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\
+                setup.  This is only useful to devlopers \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\
 \n\
 \n\
 ";                              // End of string to provide one with help
 
-  printf ("%s\n", some_help);
+    printf ("%s\n", some_help);
+#ifdef MPI_ON
+  }
+#endif
 
-  exit (0);                     // Note that here we simply do want to exit, not use Exit
+  Exit (0);                     // Note that here we simply do want to exit, not use Exit
 }

@@ -211,13 +211,24 @@ def check_completion(root):
 
     ion_string=[]
     spec_string=[]
+    restart=False
+    tot=0
 
+    i=0
     for line in lines:
         if line.count('Finished'):
             if line.count('ionization'):
                 ion_string=line
             elif line.count('spectrum'):
                 spec_string=line
+        elif line.count('RESTART'):
+            restart=True
+            ion_string=[]
+            spec_string=[]
+            word=lines[i-1].split()
+            print(word)
+            tot+=eval(word[5])
+        i+=1
 
     complete_string=lines[len(lines)-1]
 
@@ -225,13 +236,19 @@ def check_completion(root):
 
     ion_time=0 # To handle the case where there were no ionization cycles
 
+    if restart:
+        message='%s was restarted. The earlier run(s) took %.1f s. ' % (root,tot)
+        complete_message.append(message)
+        message='Here we report times and progress since the (last) restart.'
+        complete_message.append(message)
+
     if line.count('COMPLETE'):
         word=complete_string.split()
-        message='%s ran to completion in %s s' % (root,word[5])
+        message='%s ran to completion in %s s.' % (root,word[5])
         complete_message.append(message)
         try:
             word=ion_string.split()
-            message='%s ionization cycles were completed in %s s' % (word[8],word[5])
+            message='%s ionization cycles were completed in %s s.' % (word[8],word[5])
             ion_time=eval(word[5])
         except:
             message='There were no ionization cycles for this run'
@@ -249,8 +266,13 @@ def check_completion(root):
         message='WARNING: RUN %s HAS NOT COMPLETED SUCCESSFULLY' % root
         complete_message.append(message)
         word=complete_string.split()
-        message='If not running, it stopped after about %s s in  %s of %s %s cycles' % (word[5],word[8],word[10],word[11])
+        try:
+            message='If not running, it stopped after about %s s in  %s of %s %s cycles' % (word[5],word[8],word[10],word[11])
+        except IndexError: # add catch for when the above can't be read 
+            message='could not read cycle information'
+            pass 
         complete_message.append(message)
+
     return complete_message
 
 convergence_message='''

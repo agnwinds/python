@@ -94,10 +94,23 @@ create_maps ()
       plasmamain[j].nplasma = j;
       plasmamain[j].nwind = i;
       j++;
+      if (wmain[i].inwind < 0)
+      {
+        Error
+          ("create_maps: wind cell %d (nplasma %d) has volume but not flagged as in wind! Critical error, could cause undefined behaviour. Exiting.\n",
+           i, j);
+        Exit (0);
+      }
     }
     else
     {
       wmain[i].nplasma = NPLASMA;
+      if (wmain[i].inwind >= 0)
+      {
+        Error
+          ("create_maps: wind cell %d has zero volume but flagged inwind! Critical error, could cause undefined behaviour. Exiting.\n", i);
+        Exit (0);
+      }
     }
   }
   if (j != NPLASMA)
