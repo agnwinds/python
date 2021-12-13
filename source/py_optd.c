@@ -21,8 +21,10 @@
 
 struct CommandlineArguments
 {
-  double u_freq_min;
-  double u_freq_max;
+  double freq_min;
+  double freq_max;
+  double n_freq;
+  double inclinations[MAX_CUSTOM_ANGLES];
 };
 
 /* ************************************************************************* */
@@ -42,14 +44,14 @@ struct CommandlineArguments
  * frequency.
  *
  * This processes can take some time compared to tau_evalulate_photo_edges. But,
- * since N_FREQ_BINS photons are being generated for each spectrum and the fact
+ * since NUM_FREQUENCY_BINS photons are being generated for each spectrum and the fact
  * that these photons do not interact, the spectra does not actually take that
  * long to complete.
  *
  * ************************************************************************** */
 
 void
-create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
+create_optical_depth_spectrum (double u_freq_min, double u_freq_max, double *input_inclinations)
 {
   int i, j;
   int err;
@@ -59,14 +61,14 @@ create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
   struct photon photon;
 
   int n_inclinations;
-  SightLines_t *inclinations = initialize_inclination_angles (&n_inclinations);
+  SightLines_t *inclinations = initialize_inclination_angles (&n_inclinations, input_inclinations);
 
   printf ("Creating optical depth spectra:\n");
 
-  tau_spectrum = calloc (n_inclinations * N_FREQ_BINS, sizeof *tau_spectrum);
+  tau_spectrum = calloc (n_inclinations * NUM_FREQUENCY_BINS, sizeof *tau_spectrum);
   if (tau_spectrum == NULL)
   {
-    errormsg ("cannot allocate %lu bytes for tau_spectrum\n", n_inclinations * N_FREQ_BINS * sizeof *tau_spectrum);
+    errormsg ("cannot allocate %lu bytes for tau_spectrum\n", n_inclinations * NUM_FREQUENCY_BINS * sizeof *tau_spectrum);
     exit (EXIT_FAILURE);
   }
 
@@ -129,7 +131,7 @@ create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
     }
   }
 
-  d_freq = (log10 (freq_max) - log10 (freq_min)) / N_FREQ_BINS;
+  d_freq = (log10 (freq_max) - log10 (freq_min)) / NUM_FREQUENCY_BINS;
   kbf_need (freq_min, freq_max);
 
   /*
@@ -141,7 +143,7 @@ create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
     printf ("  - Creating spectrum: %s\n", inclinations[i].name);
     c_frequency = log10 (freq_min);
 
-    for (j = 0; j < N_FREQ_BINS; j++)
+    for (j = 0; j < NUM_FREQUENCY_BINS; j++)
     {
       c_optical_depth = 0.0;
       c_column_density = 0.0;
@@ -157,7 +159,7 @@ create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
       if (err == EXIT_FAILURE)
         continue;
 
-      tau_spectrum[i * N_FREQ_BINS + j] = c_optical_depth;
+      tau_spectrum[i * NUM_FREQUENCY_BINS + j] = c_optical_depth;
       c_frequency += d_freq;
     }
   }
@@ -192,7 +194,7 @@ create_optical_depth_spectrum (double u_freq_min, double u_freq_max)
  * ************************************************************************** */
 
 void
-evaluate_photoionization_edges (void)
+evaluate_photoionization_edges (double *input_inclinations)
 {
   int i, j;
   int err;
@@ -212,7 +214,7 @@ evaluate_photoionization_edges (void)
   const int n_edges = sizeof edges / sizeof edges[0];
 
   int n_inclinations;
-  SightLines_t *inclinations = initialize_inclination_angles (&n_inclinations);
+  SightLines_t *inclinations = initialize_inclination_angles (&n_inclinations, input_inclinations);
 
   optical_depth_values = calloc (n_inclinations * n_edges, sizeof *optical_depth_values);
   if (optical_depth_values == NULL)
@@ -283,9 +285,13 @@ find_photosphere (void)
   double optical_depth, column_density;
   struct photon photon;
   SightLines_t *inclinations;
+  double input_inclinations[MAX_CUSTOM_ANGLES];
+
+  for (i = 0; i < MAX_CUSTOM_ANGLES; ++i)       // required for initialize_inclination_angles, even though unused
+    input_inclinations[i] = -1.0;
 
   int n_inclinations;
-  inclinations = initialize_inclination_angles (&n_inclinations);
+  inclinations = initialize_inclination_angles (&n_inclinations, input_inclinations);
 
   Positions_t *positions = calloc (n_inclinations, sizeof (Positions_t));
   if (positions == NULL)
@@ -337,26 +343,28 @@ print_help (void)
 {
   char *help =
     "A utility program to analyse the optical depth in a Python model.\n\n"
-    "usage: py_optical_depth [-h] [-d ndom] [-p tau_stop] [-cion nion] [-classic]\n"
-    "                        [--version] root\n\n"
-    "This program can be used in multiple ways. By default, the integrated optical\n"
-    "depth along the defined observer lines of sight. If none of these have been\n"
-    "defined then a set of default lines of sight are used instead. This program\n"
-    "can also find the surface of the electron scattering photosphere using the -p\n"
-    "option.\n\n"
+    "usage: py_optical_depth [-h] [-d ndom] [-p tau_stop] [-cion nion] \n"
+    "                        [-freq_min min] [-freq_max max] [-i i1 i2 ...]\n"
+    "                        [--classic] [--smax frac] [--no-es] [--version]\n"
+    "                        root\n\n"
+    "This program can be used in multiple ways. By default, the integrated continuum\n"
+    "optical depth along the defined observer lines of sight for the model are returned.\n"
+    "If none of these have been defined, then a set of default lines of sight are used\n"
+    "instead or can be specified using -i. This program can also find the surface of\n"
+    "constant electron scattering optical using the -p option.\n\n"
     "Please see below for a list of all flags.\n\n"
-    "-h             Print this help message and exit\n"
-    "-d ndom        Set the domain to launch photons from\n"
-    "-p tau_stop    Integrate from outwards to find the electron scattering photosphere\n"
-    "-cion nion     Extract the column density for an ion of number nion\n"
-    "-freq_min min  The lower frequency boundary for optical depth spectra\n"
-    "-freq_max max  The upper frequency boundary for optical depth spectra\n"
-    "-classic       Use linear frequency transforms, to be used when Python was run\n"
-    "               in classic mode\n"
-    "--smax frac    Set the maximum fraction a photon can move in terms of cell distances\n"
-    "--version      Print the version information and exit.\n"
-    "--no-es        Do not include opacity contributions from electron scattering\n";
-
+    "-h               Print this help message and exit\n"
+    "-d ndom          Set the domain to launch photons from\n"
+    "-p tau_stop      Integrate from outwards to find the electron scattering photosphere\n"
+    "-cion nion       Extract the column density for an ion of number nion\n"
+    "-freq_min min    The lower frequency boundary for optical depth spectra\n"
+    "-freq_max max    The upper frequency boundary for optical depth spectra\n"
+    "-i i1 i2 i3 ...  Calculate the optical depth for the given space seperated list of sight lines\n"
+    "--classic        Use linear frequency transforms, to be used when Python was run\n"
+    "                 in classic mode\n"
+    "--smax frac      Set the maximum fraction a photon can move in terms of cell distances\n"
+    "--no-es          Do not include opacity contributions from electron scattering\n"
+    "--version        Print the version information and exit.\n";
   printf ("%s", help);
 }
 
@@ -379,9 +387,14 @@ struct CommandlineArguments
 get_arguments (int argc, char *argv[])
 {
   int i;
-  int n_read;
+  int n_args_read;
   char input[LINELENGTH];
-  struct CommandlineArguments arguments = { -1.0, -1.0 };
+  struct CommandlineArguments arguments;
+
+  arguments.freq_min = arguments.freq_max = 0;
+  arguments.n_freq = NUM_FREQUENCY_BINS;
+  for (i = 0; i < MAX_CUSTOM_ANGLES; ++i)
+    arguments.inclinations[i] = -1.0;
 
   /*
    * If no command line arguments are provided, then use fgets to query the
@@ -405,7 +418,7 @@ get_arguments (int argc, char *argv[])
    * variables
    */
 
-  n_read = 0;
+  n_args_read = 0;
   for (i = 1; i < argc; ++i)
   {
     if (!strcmp (argv[i], "-h"))        //NOTE: print help text
@@ -413,10 +426,11 @@ get_arguments (int argc, char *argv[])
       print_help ();
       exit (EXIT_SUCCESS);
     }
-    else if (!strcmp (argv[i], "-classic"))     //NOTE: use linear frequency transforms
+    else if (!strcmp (argv[i], "--classic"))    //NOTE: use linear frequency transforms
     {
+      printf ("Using linear approximations for Doppler shifts\n");
       rel_mode = REL_MODE_LINEAR;
-      n_read = i;
+      n_args_read = i;
     }
     else if (!strcmp (argv[i], "--version"))    //NOTE: print version number
     {
@@ -441,7 +455,42 @@ get_arguments (int argc, char *argv[])
         printf ("Argument for -cion cannot be negative\n");
         exit (EXIT_FAILURE);
       }
-      n_read = i++;
+      n_args_read = i++;
+    }
+    else if (!strcmp (argv[i], "-i"))
+    {
+      int k;
+      char *stdtod_check;
+      int n_angles_provided = 0;
+
+      for (k = 1; k < MAX_CUSTOM_ANGLES + 2; k++)
+      {
+        double inclination = strtod (argv[i + k], &stdtod_check);
+        if (inclination < 0 || inclination > 90)
+        {
+          printf ("Invalid inclination angle of %f. Has to be 0 < inclination < 90\n", inclination);
+          exit (EXIT_FAILURE);
+        }
+        if (k > MAX_CUSTOM_ANGLES)
+        {
+          errormsg ("Maximum number of inclination angles provided: only %d are allowed\n", MAX_CUSTOM_ANGLES);
+          exit (EXIT_FAILURE);
+        }
+        if (strcmp (argv[i + k], stdtod_check) == 0)    // conversion error indicates no more numbers
+        {
+          break;
+        }
+        arguments.inclinations[k - 1] = inclination;
+        n_angles_provided += 1;
+      }
+      if (n_angles_provided == 0)
+      {
+        errormsg ("Invalid input: no inclination were provided for -i option\n");
+        exit (EXIT_FAILURE);
+      }
+
+      n_args_read = i++;
+      i += n_angles_provided - 1;
     }
     else if (!strcmp (argv[i], "-p"))   //NOTE: run in photosphere mode
     {
@@ -453,7 +502,7 @@ get_arguments (int argc, char *argv[])
         printf ("Unable to convert argument provided for -p into a double\n");
         exit (EXIT_FAILURE);
       }
-      n_read = i++;
+      n_args_read = i++;
     }
     else if (!strcmp (argv[i], "--smax"))
     {
@@ -464,7 +513,7 @@ get_arguments (int argc, char *argv[])
         printf ("Unable to convert argument for -smax into a double");
         exit (EXIT_FAILURE);
       }
-      n_read = i++;
+      n_args_read = i++;
     }
     else if (!strcmp (argv[i], "-d"))   //NOTE: change the lanching domain for photons
     {
@@ -475,34 +524,34 @@ get_arguments (int argc, char *argv[])
         printf ("Unable to convert argument provided for -d into an integer\n");
         exit (EXIT_FAILURE);
       }
-      n_read = i++;
+      n_args_read = i++;
     }
     else if (!strcmp (argv[i], "-freq-min"))    //NOTE: lower frequency boundary for optical depth spectrum
     {
       char *check;
-      arguments.u_freq_min = strtod (argv[i + 1], &check);
+      arguments.freq_min = strtod (argv[i + 1], &check);
       if (*check != '\0')
       {
         printf ("Unable to convert argument provided for -freq_min to a double\n");
         exit (EXIT_FAILURE);
       }
-      n_read = i++;
+      n_args_read = i++;
     }
     else if (!strcmp (argv[i], "-freq-max"))    //NOTE: upper frequency boundary for optical depth spectrum
     {
       char *check;
-      arguments.u_freq_max = strtod (argv[i + 1], &check);
+      arguments.freq_max = strtod (argv[i + 1], &check);
       if (*check != '\0')
       {
         printf ("Unable to convert argument provided for -freq_max to a double\n");
         exit (EXIT_FAILURE);
       }
-      n_read = i++;
+      n_args_read = i++;
     }
     else if (!strcmp (argv[i], "--no-es"))
     {
       RUN_MODE = RUN_MODE_NO_ES_OPACITY;
-      n_read = i++;
+      n_args_read = i++;
     }
     else if (!strncmp (argv[i], "-", 1))
     {
@@ -512,7 +561,7 @@ get_arguments (int argc, char *argv[])
     }
   }
 
-  if (n_read + 1 == argc)
+  if (n_args_read + 1 == argc)
   {
     printf ("All command line arguments have been processed and did not find a root name\n");
     exit (EXIT_FAILURE);
@@ -523,18 +572,18 @@ get_arguments (int argc, char *argv[])
   return arguments;
 }
 
-  /* ************************************************************************* */
-  /**
-   * @brief  The main function of the program.
-   *
-   * @param  argc  The number of command line arguments
-   * @param  argv  The command line arguments
-   *
-   * @return  EXIT_SUCCESS
-   *
-   * @details
-   *
-   * ************************************************************************** */
+/* ************************************************************************* */
+/**
+ * @brief  The main function of the program.
+ *
+ * @param  argc  The number of command line arguments
+ * @param  argv  The command line arguments
+ *
+ * @return  EXIT_SUCCESS
+ *
+ * @details
+ *
+ * ************************************************************************** */
 
 int
 main (int argc, char *argv[])
@@ -637,8 +686,8 @@ main (int argc, char *argv[])
 
   if (RUN_MODE == RUN_MODE_TAU_INTEGRATE || RUN_MODE == RUN_MODE_NO_ES_OPACITY)
   {
-    evaluate_photoionization_edges ();
-    create_optical_depth_spectrum (arguments.u_freq_min, arguments.u_freq_max);
+    evaluate_photoionization_edges (arguments.inclinations);
+    create_optical_depth_spectrum (arguments.freq_min, arguments.freq_max, arguments.inclinations);
   }
   else if (RUN_MODE == RUN_MODE_ES_PHOTOSPHERE)
   {

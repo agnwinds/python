@@ -327,6 +327,9 @@ init_advanced_modes ()
 
   modes.store_matom_matrix = TRUE;      /* default is to store the macro-atom matrix */
 
+  modes.run_xtest_diagnostics = FALSE;  /* allow special xtest_diagnostics in the various routines */
+  modes.ignore_partial_cells = FALSE;   /* Default is to include partial cells in calculation */
+
   return (0);
 }
 
@@ -747,7 +750,7 @@ init_ionization ()
   /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
-    geo.macro_simple = TRUE;       // Make everything simple if no macro atoms -- 57h
+    geo.macro_simple = TRUE;    // Make everything simple if no macro atoms -- 57h
 
   /* initialise the choice of handling for macro pops. */
   if (geo.run_type == RUN_TYPE_PREVIOUS)

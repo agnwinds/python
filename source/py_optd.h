@@ -11,7 +11,8 @@
  *
  * ************************************************************************** */
 
-#define N_FREQ_BINS 10000
+#define MAX_CUSTOM_ANGLES 10
+#define NUM_FREQUENCY_BINS 10000
 #define NAMELEN 32
 
 // Error message macro, adds the file name and line to the start of the error
@@ -84,7 +85,7 @@ extern double TAU_DEPTH;
 // External functions from other files
 
 int create_photon (PhotPtr p_out, double freq, double *lmn);
-SightLines_t *initialize_inclination_angles (int *n_angles);
+SightLines_t *initialize_inclination_angles (int *n_angles, double *input_inclinations);
 int integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_optical_depth);
 void print_optical_depths(SightLines_t *inclinations, int n_inclinations, Edges_t edges[], int n_edges, double *optical_depth, double *column_density);
 void write_optical_depth_spectrum (SightLines_t * inclinations, int n_inclinations, double *tau_spectrum, double freq_min, double d_freq);

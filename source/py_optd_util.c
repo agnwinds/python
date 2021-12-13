@@ -37,13 +37,28 @@
  * ************************************************************************** */
 
 SightLines_t *
-outward_initialize_2d_model_angles (int *n_angles)
+outward_initialize_2d_model_angles (int *n_angles, double *input_inclinations)
 {
   int i;
   int len;
   const double default_phase = 0.5;
   const double default_angles[] = { 0.0, 10.0, 30.0, 45.0, 60.0, 75.0, 85.0, 90.0 };
   const int n_default_angles = sizeof default_angles / sizeof default_angles[0];
+
+  /*
+   * Count the number of inclination angles provided by the -i command. Since
+   * the array is initialized as -1, this assumes any values > -1 is a valid
+   * inclination angle.
+   */
+
+  int n_input = 0;
+  for (i = 0; i < MAX_CUSTOM_ANGLES; ++i)
+  {
+    if (input_inclinations[i] > -1)
+    {
+      n_input++;
+    }
+  }
 
   /*
    * Use the angles specified for by the user for spectrum generation, this
@@ -53,7 +68,32 @@ outward_initialize_2d_model_angles (int *n_angles)
 
   SightLines_t *inclinations = NULL;
 
-  if (xxspec != NULL && geo.nangles > 0)
+  if (n_input > 0)
+  {
+    *n_angles = n_input;
+    inclinations = calloc (n_input, sizeof *inclinations);
+    if (inclinations == NULL)
+    {
+      errormsg ("cannot allocate %lu bytes for observers array\n", n_input * sizeof *inclinations);
+      exit (EXIT_FAILURE);
+    }
+
+    for (i = 0; i < n_input; i++)
+    {
+      len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", input_inclinations[i], default_phase);
+      if (len < 0)
+      {
+        errormsg ("there was an error writing the name to the sight lines array\n");
+        exit (EXIT_FAILURE);
+      }
+
+      inclinations[i].lmn[0] = sin (input_inclinations[i] / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
+      inclinations[i].lmn[1] = sin (input_inclinations[i] / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
+      inclinations[i].lmn[2] = cos (input_inclinations[i] / RADIAN);
+      inclinations[i].angle = input_inclinations[i];
+    }
+  }
+  else if (xxspec != NULL && geo.nangles > 0)
   {
     *n_angles = geo.nangles;
     inclinations = calloc (geo.nangles, sizeof *inclinations);
@@ -259,7 +299,7 @@ photosphere_1d_initialize_angles (int *n_angles)
  * ************************************************************************** */
 
 SightLines_t *
-initialize_inclination_angles (int *n_angles)
+initialize_inclination_angles (int *n_angles, double *input_inclinations)
 {
   SightLines_t *inclinations;
 
@@ -282,7 +322,7 @@ initialize_inclination_angles (int *n_angles)
     }
     else
     {
-      inclinations = outward_initialize_2d_model_angles (n_angles);
+      inclinations = outward_initialize_2d_model_angles (n_angles, input_inclinations);
     }
   }
 

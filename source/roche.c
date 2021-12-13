@@ -78,6 +78,7 @@ binary_basics ()
 {
   double x;
   void *dummy_par = NULL;
+  int ierr;
 
   /* Calculate a the separation of the primary and the secondary */
 
@@ -88,12 +89,6 @@ binary_basics ()
 
   geo.q = geo.m_sec / geo.mstar;
 
-  /* Define the position of the secondary with respect to the primary.  */
-
-//OLD  plane_sec.x[0] = geo.a;
-//OLD  plane_sec.x[1] = plane_sec.x[2] = 0;
-//OLD  plane_sec.lmn[0] = 1;
-//OLD  plane_sec.lmn[1] = plane_sec.lmn[2] = 0;
 
   /* Find the position of the L1 point with respect to the primary */
 
@@ -109,7 +104,12 @@ binary_basics ()
   p_roche.lmn[1] = p_roche.lmn[2] = 0;
   p_roche.frame = F_OBSERVER;
 
-  geo.l1 = x = zero_find (dphi_ds, 0.01 * geo.a, 0.99 * geo.a, geo.a / 1000.);
+  geo.l1 = x = zero_find (dphi_ds, 0.01 * geo.a, 0.99 * geo.a, geo.a / 1000., &ierr);
+
+  if (ierr)
+  {
+    Error ("binary_basics: Did not find L1\n");
+  }
 
   geo.l1_from_m2 = geo.a - geo.l1;
 
@@ -120,7 +120,12 @@ binary_basics ()
 
   /* Similarly, find l2, the Lagrangian point behind the secondary */
 
-  geo.l2 = x = zero_find (dphi_ds, 1.01 * geo.a, 10.0 * geo.a, geo.a / 1000.);
+  geo.l2 = x = zero_find (dphi_ds, 1.01 * geo.a, 10.0 * geo.a, geo.a / 1000., &ierr);
+
+  if (ierr)
+  {
+    Error ("binary_basics: Did not find L2\n");
+  }
 
   /* Now find the position of the far side of the star */
 
@@ -129,7 +134,14 @@ binary_basics ()
 
   /* Set geo.r2_far to be the radius of the secondary on the backside of the secondary */
 
-  geo.r2_far = x = zero_find (phi, 1.01 * geo.a, geo.l2, geo.a / 1000.) - geo.a;
+  geo.r2_far = x = zero_find (phi, 1.01 * geo.a, geo.l2, geo.a / 1000., &ierr) - geo.a;
+
+
+  if (ierr)
+  {
+    Error ("binary_basics: Did not find r2_far\n");
+  }
+
 
   /* Define a plane on the backside of the secondary */
 
@@ -513,6 +525,7 @@ double
 roche_width (double x, void *params)
 {
   double rho, smax;
+  int ierr;
 
   if (x < geo.l1)
     smax = geo.l1;
@@ -525,8 +538,8 @@ roche_width (double x, void *params)
   p_roche.lmn[1] = 1;
   p_roche.lmn[2] = 0;
 
-  rho = zero_find (phi, 1000., smax, geo.a / 1000.);
-  if (rho < 0)
+  rho = zero_find (phi, 1000., smax, geo.a / 1000., &ierr);
+  if (rho < 0 || ierr)
   {
     Error ("roche_with : zero_find failure x=%6.2e\n", x);
   }

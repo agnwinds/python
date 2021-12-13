@@ -273,7 +273,7 @@ def get_data(filename='fiducial_agn_master.txt', var='t_r',grid='ij',inwind='',s
     return x,y,xvar,title,xlabel,ylabel
 
 
-def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1):
+def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1,vmin=0,vmax=0):
     '''
     This routine simply is produces a plot of a variable from
     that has been printed to an astropy table with a routine like
@@ -289,7 +289,11 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1):
     cmap.set_bad(color='white')
 
     ax.tick_params(labelsize=14)
-    im=ax.pcolormesh(x,y,xvar,cmap=cmap,shading='auto')
+    if vmin==0 and vmax==0:
+        im=ax.pcolormesh(x,y,xvar,cmap=cmap,shading='auto')
+    else:
+        im=ax.pcolormesh(x,y,xvar,cmap=cmap,shading='auto',vmin=vmin,vmax=vmax)
+
     pylab.title(title,size=16)
     pylab.xlabel(xlabel,size=16)
     pylab.ylabel(ylabel,size=16)
@@ -334,7 +338,19 @@ def doit(filename='fiducial_agn.master.txt', var='t_r',grid='ij',inwind='',scale
     if plot_dir!='':
         root='%s/%s' % (plot_dir,root)
     # print(len(x),len(y),len(xvar))
-    plotfile=just_plot(x,y,xvar,root,title,xlabel,ylabel)
+
+    if zmin==-1e50 and zmax==1e50:
+        autoscale=True
+        vmin=vmax=0
+    else:
+        autoscale=False
+        vmin=zmin
+        vmax=zmax
+        if title.count('log'):
+            vmin=numpy.log10(vmin)
+            vmax=numpy.log10(vmax)
+
+    plotfile=just_plot(x,y,xvar,root,title,xlabel,ylabel,vmin=vmin,vmax=vmax)
 
     return plotfile
 

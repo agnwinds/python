@@ -105,7 +105,7 @@ int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], 
 double *vector(int i, int j);
 void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
-double zero_find(double (*func)(double, void *), double x_lo, double x_hi, double tol);
+double zero_find(double (*func)(double, void *), double x_lo, double x_hi, double tol, int *ierr);
 double func_minimiser(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
