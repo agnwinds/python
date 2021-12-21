@@ -163,15 +163,18 @@ sv_velocity (x, v, ndom)
   double xtest[3];
   double s;
   double vzero;
+//OLD  double ldist_orig, rzero_orig;
   int hit_disk;
 
   zzz = v_escape = vzero = -99.;
 
 
+//OLD  rzero_orig = rzero = sv_find_wind_rzero (ndom, x);
   rzero = sv_find_wind_rzero (ndom, x);
   theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
+//OLD  ldist_orig = ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
@@ -376,27 +379,25 @@ sv_find_wind_rzero (ndom, p)
 {
   double x, z;
   double rho_min, rho_max, rho;
+  int ierr;
 
-  double xxmin, xxmax;
-  int ierr = FALSE;
+
+
 
   /* thetamin and theta max are defined w.r.t  z axis */
 
   z = fabs (p[2]);              /* This is necessary to get correct answer above
                                    and below plane */
 
-  /* If p is in the xy plane or along the z axis, 
-     there is no need to think further
-   */
-
-  x = (sqrt (p[0] * p[0] + p[1] * p[1]));
-  if (z == 0 || x == 0)
+  if (z == 0)
   {
+    x = (sqrt (p[0] * p[0] + p[1] * p[1]));     // If p is in the xy plane, there is no need to think further
     return (x);
   }
 
+
   sv_zero_init (p);             /* This initializes the routine sv_zero_r.  It is not
-                                   actually needed unless zero_find is called, but it
+                                   actually needed unless zbrent is called, but it
                                    does allow you to check your answer otherwize
                                  */
   /* The next lines provide a graceful answer in the case where the
@@ -408,33 +409,31 @@ sv_find_wind_rzero (ndom, p)
   rho_max = zdom[ndom].sv_rmax + z * tan (zdom[ndom].sv_thetamax);
   rho = sqrt (p[0] * p[0] + p[1] * p[1]);
 
-
-  xxmin = zdom[ndom].sv_rmin;
-  xxmax = zdom[ndom].sv_rmax;
-
   if (rho <= rho_min)
   {
-    xxmin = 0;
-    xxmax = 1.01 * zdom[ndom].sv_rmin;
+    x = zdom[ndom].sv_rmin * rho / rho_min;
+    return (x);
   }
-  else if (rho >= rho_max)
+  if (rho >= rho_max)
   {
-    xxmax = rho;
+    x = zdom[ndom].sv_rmax + rho - rho_max;
+    return (x);
   }
 
-  /* 100 here means that zero_find will end if one has a guess of rzero which is
+  /* 100 here means that zbrent will end if one has a guess of rzero which is
      correct at 100 cm */
 
-  /* change the global variable sv_zero_r_ndom before we call zero_find */
+  /* change the global variable sv_zero_r_ndom before we call zbrent */
   sv_zero_r_ndom = ndom;
-  x = zero_find (sv_zero_r, xxmin, xxmax, 100., &ierr);
+//  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100., &ierr);
 
   if (ierr)
   {
-    Error ("sv_find_wind_rzero: failed at rho %e and z %e\n", rho, z);
-    Error ("sv_find_wind_rzero: xxmin %e --> theta %f xxmax %e --> theta %f\n", xxmin, sv_theta_wind (ndom, xxmin) * RADIAN,
-           xxmax, sv_theta_wind (ndom, xxmax) * RADIAN);
+    Error ("sv_find_rzero: zero_find error at rho %.3e and z %.3e\n", rho, z);
+
   }
+
 
   return (x);
 
@@ -477,7 +476,7 @@ sv_zero_init (p)
 
 /**********************************************************/
 /** 
- * @brief      Routine used by zero_find to find a footpoint of a streamline in an SV model
+ * @brief      Routine used by zbrent to find a footpoint of a streamline in an SV model
  *
  * @param [in] double  r   A position along the surface of the disk
  * @return     0 if r is the footpoint
@@ -485,8 +484,8 @@ sv_zero_init (p)
  * This routine is used to test whether a guess of r_zero is correct.  If
  * you have the answer exactly then sv_zero_r will return 0
  *
- * sv_zero_r is the routine called by zero_find
- * to walk down on the actual value
+ * sv_zero_r is the routine called by
+ * the numerical recipes routine zbrent to walk down on the actual value
  * of r in the disk.   
  *
  * sv_zero_r returns the difference
@@ -527,17 +526,16 @@ sv_zero_r (double r, void *params)
  *
  * As long as r is between sv_rmin and sv_rmax, sv_theta_wind returns the
  * angle given by the SV prescription.
- *
- * Outside of sv_rmax, there is no problem in extending the calculation
- * of theta, but inside the sv_rmin how to extrapolate is not straight
- * forward.
  * 	
- * Inside sv_rmin, we want a theta to go smoothly from thetamin to 0
- * as the radius goes to 0.  This is enforced
+ * Inside sv_rmin, it returns a value which smoothly goes from thetamin to 0
+ * as the radius goes to 0.
+ * 	
+ * Outside sv_rmax, it returns sv_thetamax
+ *
  *
  * ###Notes###
  *
- * Theta is measured from the z axis.
+ * Theta is measuered from the z axis.
  *
  **********************************************************/
 
@@ -547,74 +545,16 @@ sv_theta_wind (ndom, r)
      double r;
 {
   double theta;
-//  double x, xmin;
-  double x;
-
-  x = (r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
-
-  if (zdom[ndom].sv_gamma == 1 || x <= 0)
-  {
-    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * x;
-  }
-  else
-  {
-    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * pow (x, zdom[ndom].sv_gamma);
-  }
 
 
-//  if (x >= 0)
-//  {
-//    theta = zdom[ndom].sv_thetamin + (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) * pow (x, zdom[ndom].sv_gamma);
-//  }
-//  else
-//  {
-//    double delta_r, delta_theta;
-//    double thetamax2;
-//    double thetamin2 = 0;
-//    double rmin2, rmax2;
+  if (r <= zdom[ndom].sv_rmin)
+    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
+  if (r >= zdom[ndom].sv_rmax)
+    return (zdom[ndom].sv_thetamax);
 
-//    delta_r = (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
-//    delta_theta = (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin);
-
-//    rmin2 = zdom[ndom].sv_rmin - delta_r / delta_theta * (zdom[ndom].sv_thetamin - thetamin2);
-
-//    rmax2 = rmin2 + delta_r;
-//    thetamax2 = thetamin2 + delta_theta;
-
-//    x = (r - rmin2) / (rmax2 - rmin2);
-//    theta = thetamin2 + (thetamax2 - thetamin2) * x;
-
-//  }
-
-
-  if (theta < 0)
-  {
-    theta = 0;
-  }
-  if (theta > 90. / RADIAN)
-  {
-    theta = 90. / RADIAN;
-  }
-//  if (theta < 0.001 / RADIAN)
-//  {
-//    theta = 0.001 / RADIAN;
-//  }
-//  if (theta > 89.9999 / RADIAN)
-//  {
-//    theta = 89.9999 / RADIAN;
-//  }
-
-/* Now handle the case where we are inside sv_rmin to assure that all of space is covered.
- We want theta to be 90 degrees when r is 0, and sv.theta_min when it is at r_min, which is x
- of 0.  Multiplying by the sin does this, and makes the value of theta and dtheta/dr match*/
-
-  double xmin;
-  if (x < 0)
-  {
-    xmin = (-zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin);
-    theta *= sin ((xmin - x) / xmin * 90. / RADIAN);
-  }
-
+  theta = zdom[ndom].sv_thetamin +
+    (zdom[ndom].sv_thetamax - zdom[ndom].sv_thetamin) *
+    pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin), zdom[ndom].sv_gamma);
 
   return (theta);
 
