@@ -744,24 +744,35 @@ ds_to_disk (p, allow_negative, hit)
 
 
   stuff_phot (p, &ds_to_disk_photon);
-  move_phot (&ds_to_disk_photon, smin);
+//  move_phot (&ds_to_disk_photon, smin);
 
 
-  if ((smax - smin) > 0.)
-  {
-//OLD    s = zero_find (disk_height, 0.0, smax - smin, 1e-8, &ierr);
-    s = zero_find (disk_height, 0.0, smax - smin, 1., &ierr);
-  }
-  else
-  {
-//OLD    s = zero_find (disk_height, smax - smin, 0.0, 1e-8, &ierr);
-    s = zero_find (disk_height, smax - smin, 0.0, 1., &ierr);
-  }
+//  if ((smax - smin) > 0.)
+//  {
+//    s = zero_find (disk_height, 0.0, smax - smin, 1., &ierr);
+//  }
+//  else
+//  {
+//    s = zero_find (disk_height, smax - smin, 0.0, 1., &ierr);
+//  }
+
+  s = zero_find (disk_height, smin, smax, 1, &ierr);
 
   if (ierr)
   {
-    Error ("ds_to_disk: zero find failed to find distance for position %.2e %.2e %.2e and dir  %.3f %.3f %.3f\n",
-           p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2]);
+    Error
+      ("ds_to_disk: zero find failed to find distance for position %.2e %.2e %.2e and dir  %.3f %.3f %.3f using %.2e -- %.2e %.2e %.2e bt %.2e %.2e cyl %.2e %.2e for nphot %d loc %d \n",
+       p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], s, smin, smax, s_diskplane, s_bot, s_top, s_cyl, s_cyl2, p->np,
+       location);
+    struct photon p_smin, p_smax;
+    stuff_phot (p, &p_smin);
+    stuff_phot (p, &p_smax);
+    move_phot (&p_smax, smax);
+    move_phot (&p_smin, smin);
+    Error ("xxx %.2e %.2e %.2e   %.3f %.3f %.3f %.2e %.2e %.2e  %.2e %.2e %.2e \n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+           p->lmn[2], p_smin.x[0], p_smin.x[1], p_smin.x[2], p_smax.x[0], p_smax.x[1], p_smax.x[2]);
+
+
   }
 
 
@@ -799,7 +810,7 @@ ds_to_disk (p, allow_negative, hit)
   }
 
 
-  s += smin;
+//  s += smin;
 
 
 
