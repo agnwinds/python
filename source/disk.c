@@ -361,6 +361,8 @@ ds_to_disk (p, allow_negative, hit)
   double smin, smax;
 
   struct photon phit;
+  struct photon p_smin, p_smax, p_cyl;
+  double z_smin, z_smax, z_cylx;
 
   int location = -1;
   smin = smax = 0.0;
@@ -592,10 +594,8 @@ ds_to_disk (p, allow_negative, hit)
 
   }
 
-  /* At this point we haave settled on the limits for solving
+  /* At this point we have settled on the limits for solving
      for the intercept for the case where the photon was inside 
-     the disk.  We now address the case where the 
-     This is the case where the photon location is outside 
      the disk.  
 
      Begin work on case where the photon is OUTSIDE the 
@@ -709,7 +709,7 @@ ds_to_disk (p, allow_negative, hit)
 
   }
 
-  /* This is a failure bexause it implies we have a case we have not accounted for */
+  /* This is a failure because it implies we have a case we have not accounted for */
   else
   {
     Error ("ds_to_disk: Unknnown situation\n");
@@ -734,7 +734,7 @@ ds_to_disk (p, allow_negative, hit)
    * disk.  Most of the time it will hit the disk face so we will
    * calculate this first, and then check if s is less than s_diskplanerad.
    * 
-   * To setup rtsafe, we have to find distances which bracket what we
+   * To setup zero_find, we have to find distances which bracket what we
    * want.  smax should be no more than the distance to the disk plane
    * (assuming we have a photon headed toward the plane)
    * 
@@ -764,13 +764,26 @@ ds_to_disk (p, allow_negative, hit)
       ("ds_to_disk: zero find failed to find distance for position %.2e %.2e %.2e and dir  %.3f %.3f %.3f using %.2e -- %.2e %.2e %.2e bt %.2e %.2e cyl %.2e %.2e for nphot %d loc %d \n",
        p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], s, smin, smax, s_diskplane, s_bot, s_top, s_cyl, s_cyl2, p->np,
        location);
-    struct photon p_smin, p_smax;
     stuff_phot (p, &p_smin);
     stuff_phot (p, &p_smax);
+    stuff_phot (p, &p_cyl);
     move_phot (&p_smax, smax);
     move_phot (&p_smin, smin);
-    Error ("xxx %.2e %.2e %.2e   %.3f %.3f %.3f %.2e %.2e %.2e  %.2e %.2e %.2e \n", p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
-           p->lmn[2], p_smin.x[0], p_smin.x[1], p_smin.x[2], p_smax.x[0], p_smax.x[1], p_smax.x[2]);
+    move_phot (&p_cyl, s_cyl);
+
+    stuff_phot (&p_smin, &ds_to_disk_photon);
+    z_smin = disk_height (0, &p_smin);
+    stuff_phot (&p_smax, &ds_to_disk_photon);
+    z_smax = disk_height (0, &p_smax);
+    stuff_phot (&p_cyl, &ds_to_disk_photon);
+    z_cylx = disk_height (0, &p_smax);
+
+    printf ("%.3e  %.3e %.3e\n", z_smin, z_smax, z_cylx);
+
+
+
+    Error ("xxx %.2e %.2e %.2e   %.3f %.3f %.3f %.2e %.2e %.2e  %.2e %.2e %.2e -> %.2e %.23 \n", p->x[0], p->x[1], p->x[2], p->lmn[0],
+           p->lmn[1], p->lmn[2], p_smin.x[0], p_smin.x[1], p_smin.x[2], p_smax.x[0], p_smax.x[1], p_smax.x[2], z_smin, z_smax);
 
 
   }
