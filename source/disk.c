@@ -358,7 +358,7 @@ ds_to_disk (p, allow_negative, hit)
   struct photon phit;
 
   double smin, smax;
-  struct photon p_smin, p_smax, p_cyl;
+  struct photon p_smin, p_smax, p_diskplane, p_cyl;
   double z_smin, z_smax, z_cylx;
 
   int location = -1;
@@ -552,6 +552,24 @@ ds_to_disk (p, allow_negative, hit)
         smax = s_cyl;
       }
 
+/* We need to check that we have a valid bracket here because if the disk has a significant powerlaw
+exponent then, with this approximation we can end up back in the diski */
+      stuff_phot (p, &phit);
+      move_phot (&phit, smax);
+      if (zdisk (sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1])) > fabs (phit.x[2]))
+      {
+        Error ("ds_to_disk: Reducing distance for photon inside disk moving away location %d\n", location);
+        smax /= 2.;
+        stuff_phot (p, &phit);
+        move_phot (&phit, smax);
+        if (zdisk (sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1])) > fabs (phit.x[2]))
+        {
+          Error ("ds_to_disk: Reducing distance did not help %d\n", location);
+        }
+
+      }
+
+
     }
     else
     {
@@ -589,9 +607,50 @@ ds_to_disk (p, allow_negative, hit)
       {
         smin = s_cyl;
       }
+
+/* We need to check that we have a valid bracket here because if the disk has a significant powerlaw
+exponent then, with this approximation we can end up back in the disk */
+
+      stuff_phot (p, &phit);
+      move_phot (&phit, smin);
+      if (zdisk (sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1])) > fabs (phit.x[2]))
+      {
+        Error ("ds_to_disk: Reducing distance for photon in the disk headed dowwnward %d\n", location);
+        smin /= 2.;
+        stuff_phot (p, &phit);
+        move_phot (&phit, smin);
+        if (zdisk (sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1])) > fabs (phit.x[2]))
+        {
+          Error ("ds_to_disk: Reducing distance did not help\n");
+        }
+
+
+      }
+
     }
 
+    /* At this point we have settled on the limits for solving
+       for the intercept for the case where the photon was inside 
+       the disk.  
+
+       Begin work on case where the photon is OUTSIDE the 
+       disk
+
+       The strategy here is to first try to eliminate the 
+       possibility that the photon hits the disk and 
+       to return a large value.  Only if we cannot do this
+       will we actually set limits for where the photon might hit
+       and calculate the intersection.
+
+       This includes the case where the photon is inside the
+       pillbox that encases the disk.
+     */
+
+
+
+
   }
+
 
   /* At this point we have settled on the limits for solving
      for the intercept for the case where the photon was inside 
@@ -605,10 +664,35 @@ ds_to_disk (p, allow_negative, hit)
      to return a large value.  Only if we cannot do this
      will we actually set limits for where the photon might hit
      and calculate the intersection.
+
+     This includes the case where the photon is inside the
+     pillbox that encases the disk.
    */
+
+  else if (r_phot < geo.diskrad && fabs (p->x[2]) < disktop.x[2])
+  {
+/* This is the case where the photon is outside the disk, but inside the pillbox */
+    location = 2;
+
+    if (s_diskplane < 0 && fabs (z_cyl) > disktop.x[2])
+    {
+      *hit = DISK_MISSED;
+      return (VERY_BIG);
+    }
+
+    smin = 0;
+    smax = s_cyl;
+    if (s_diskplane < smax)
+    {
+      smax = s_diskplane;
+    }
+
+
+  }
 
   else if (r_phot > geo.diskrad || fabs (p->x[2]) > zdisk (r_phot))
   {
+    location = 3;
 
     /* Identify photons moving away from the disk that do not hit 
        the edge of the disk */
@@ -628,9 +712,10 @@ ds_to_disk (p, allow_negative, hit)
       return (VERY_BIG);
     }
 
-    /* Identify photons that are soutside the disk radius and the photon hits 
+    /* Identify photons that are outside the disk radius and the photon hits 
        the outer cylindrical edge of the disk */
-    else if (r_diskplane > geo.diskrad && fabs (z_cyl) < disktop.x[2])
+    // else if (r_diskplane > geo.diskrad && fabs (z_cyl) < disktop.x[2])
+    else if (r_phot > geo.diskrad && fabs (z_cyl) < disktop.x[2])
     {
       *hit = DISK_HIT_EDGE;
       return (s_cyl);
@@ -656,7 +741,6 @@ ds_to_disk (p, allow_negative, hit)
     else
     {
 
-      location = 0;
 
 
       /* We certainly do not need to go further than
@@ -761,8 +845,8 @@ ds_to_disk (p, allow_negative, hit)
   {
     Error
       ("ds_to_disk: zero find failed to find distance for position %.2e %.2e %.2e and dir  %.3f %.3f %.3f using %.2e -- %.2e %.2e %.2e bt %.2e %.2e cyl %.2e %.2e for nphot %d loc %d \n",
-       p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], s, smin, smax, s_diskplane, s_bot, s_top, s_cyl, s_cyl2, p->np,
-       location);
+       p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], s, smin,
+       smax, s_diskplane, s_bot, s_top, s_cyl, s_cyl2, p->np, location);
     stuff_phot (p, &p_smin);
     stuff_phot (p, &p_smax);
     stuff_phot (p, &p_cyl);
@@ -777,12 +861,35 @@ ds_to_disk (p, allow_negative, hit)
     stuff_phot (&p_cyl, &ds_to_disk_photon);
     z_cylx = disk_height (0, &p_smax);
 
-    printf ("%.3e  %.3e %.3e\n", z_smin, z_smax, z_cylx);
 
+    Error
+      ("ds_to_disk: a  %.2e %.2e %.2e   %.3f %.3f %.3f %.2e %.2e %.2e  %.2e %.2e %.2e -> %.2e %.2e %.2e\n",
+       p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2],
+       p_smin.x[0], p_smin.x[1], p_smin.x[2], p_smax.x[0], p_smax.x[1], p_smax.x[2], z_smin, z_smax, z_cylx);
 
+    stuff_phot (p, &p_diskplane);
+    move_phot (&p_diskplane, s_diskplane);
 
-    Error ("xxx %.2e %.2e %.2e   %.3f %.3f %.3f %.2e %.2e %.2e  %.2e %.2e %.2e -> %.2e %.23 \n", p->x[0], p->x[1], p->x[2], p->lmn[0],
-           p->lmn[1], p->lmn[2], p_smin.x[0], p_smin.x[1], p_smin.x[2], p_smax.x[0], p_smax.x[1], p_smax.x[2], z_smin, z_smax);
+    Error
+      ("ds_to_disk: b %.2e %.2e %.2e   %.3f %.3f %.3f %.2e %.2e %.2e  %.2e %.2e %.2e \n",
+       p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2],
+       p_cyl.x[0], p_cyl.x[1], p_cyl.x[2], p_diskplane.x[0], p_diskplane.x[1], p_diskplane.x[2]);
+
+    int xdisk, xcyl, xcyl2;
+
+    xdisk = xcyl = xcyl2 = FALSE;
+
+    if (r_diskplane < geo.diskrad)
+    {
+      xdisk = TRUE;
+    }
+    if (z_cyl < disktop.x[2])
+    {
+      xcyl = TRUE;
+    }
+
+    Error ("disk_to_disk: c  %.2e  %.2e  %d %d %d %d %.2e %.2e %.2e\n", r_phot, r_diskplane, location, xdisk, xcyl, xcyl2, s_diskplane,
+           s_cyl, s_cyl2);
 
 
   }
@@ -802,13 +909,15 @@ ds_to_disk (p, allow_negative, hit)
     r_hit = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
 
-    Error ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
-           p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
+    Error
+      ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
+       p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
     if (modes.save_photons)
     {
       save_photons (p, "ds_to_disk");
-      Diag ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
-            p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
+      Diag
+        ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
+         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
     }
   }
 
