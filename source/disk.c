@@ -349,18 +349,15 @@ ds_to_disk (p, allow_negative, hit)
    */
 
   double s_diskplane, s_top, s_bot, s_cyl, s_cyl2, s;
+  double r_phot, r_diskplane, r_top, r_bot, r_cyl, r_cyl2, r_hit;
   double z_cyl, z_cyl2;
 
   /* A variable used to describe whether the photon is inside a vertically extended disk */
   double delta_z;
 
-  /* The next set of variables represent rho at various positions */
-  double r_diskplane, r_hit;
-  double r_phot;
+  struct photon phit;
 
   double smin, smax;
-
-  struct photon phit;
   struct photon p_smin, p_smax, p_cyl;
   double z_smin, z_smax, z_cylx;
 
@@ -378,31 +375,6 @@ ds_to_disk (p, allow_negative, hit)
   }
 
 
-  /*
-   * Initialize 3 structures that define the plane of the disk, and two
-   * other planes that encompass the disk.  
-   */
-
-  if (ds_to_disk_init == 0)
-  {
-    diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
-    diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
-    diskplane.lmn[2] = 1.0;
-
-
-    disktop.x[0] = disktop.x[1] = 0.0;
-    disktop.x[2] = geo.diskrad * geo.disk_z0;
-    disktop.lmn[0] = disktop.lmn[1] = 0.0;
-    disktop.lmn[2] = 1.0;
-
-    diskbottom.x[0] = diskbottom.x[1] = 0.0;
-    diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
-    diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
-    diskbottom.lmn[2] = 1.0;
-
-    ds_to_disk_init++;
-
-  }
 
   /* Find where the photon would hit the disk for the case of a FLAT disk */
 
@@ -440,8 +412,35 @@ ds_to_disk (p, allow_negative, hit)
 
 
   /*
-   * Begin the calculation for a VERTICALLY EXTENDED DISK. 
-   * 
+   * Begin the calculation for a VERTICALLY EXTENDED DISK.  */
+
+  /*
+   * Initialize 3 structures that define the plane of the disk, and two
+   * other planes that encompass the disk.  
+   */
+
+  if (ds_to_disk_init == 0)
+  {
+    diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
+    diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
+    diskplane.lmn[2] = 1.0;
+
+
+    disktop.x[0] = disktop.x[1] = 0.0;
+    disktop.x[2] = geo.diskrad * geo.disk_z0;
+    disktop.lmn[0] = disktop.lmn[1] = 0.0;
+    disktop.lmn[2] = 1.0;
+
+    diskbottom.x[0] = diskbottom.x[1] = 0.0;
+    diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
+    diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
+    diskbottom.lmn[2] = 1.0;
+
+    ds_to_disk_init++;
+
+  }
+
+  /* 
    * For the vertically extended disk we have to keep track of the
    * smallest positive value and the smallest (in absolute terms
    * negative value).
