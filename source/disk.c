@@ -672,7 +672,7 @@ ds_to_disk (p, allow_negative, hit)
 
   }
 
-  else if (r_phot > geo.diskrad || fabs (p->x[2]) > zdisk (r_phot))
+  else if (r_phot > geo.diskrad || fabs (p->x[2]) > disktop.x[2])
   {
     /* Begin the case where we are OUTSIDE THE PILLBOX */
 
