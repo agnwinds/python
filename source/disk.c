@@ -317,8 +317,7 @@ struct plane diskplane, disktop, diskbottom;
  *
  * The z-height of a vertically extended disk is defined by
  * zdisk.  The outside edge of the disk is assumed to be
- * a cylinder at geo.diskrad.  The routine does not indicate which
- * surface of the disk has been hit. 
+ * a cylinder at geo.diskrad.  
  *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
@@ -331,7 +330,7 @@ struct plane diskplane, disktop, diskbottom;
  * in this situation.  For very large distances one may need to worry
  * about round off errors if moving a photon to the disk position.
  *
- * In 2112, the portion of the routine that handles veritically
+ * In Dec. 21, the portion of the routine that handles veritically
  * extended disks was revised (#924), Conceptually, the approach
  * that is used divides space into three separate regions, (1)
  * inside the disk, (2) outside the disk, but inside the pillbox
@@ -381,11 +380,9 @@ ds_to_disk (p, allow_negative, hit)
   /* Simply return is there is no disk */
   if (geo.disk_type == DISK_NONE)
   {
-
     *hit = DISK_MISSED;
     return (VERY_BIG);
   }
-
 
 
   /* Begin the calculation for the case of a FLAT disk */
@@ -424,10 +421,9 @@ ds_to_disk (p, allow_negative, hit)
 
 
   /*
-   * Begin the calculation for a VERTICALLY EXTENDED DISK.  */
+   * Begin the calculation for a VERTICALLY EXTENDED DISK.  
 
-  /*
-   * Initialize 3 structures that define the plane of the disk, and two
+   * If necessary, initialize 3 structures that define the plane of the disk, and two
    * other planes that encompass the disk.  
    */
 
@@ -595,8 +591,9 @@ ds_to_disk (p, allow_negative, hit)
         smin = s_bot;
       }
 
-      /* This ignores the possibility that a photon inside the disk goes out 
-         the edge of the disk, so we have to deal with this possibility */
+      /* Consider the possibility that a photon inside the disk goes out 
+         the edge of the disk */
+
       stuff_phot (p, &phit);
       phit.lmn[0] *= (-1);
       phit.lmn[1] *= (-1);
@@ -613,7 +610,7 @@ ds_to_disk (p, allow_negative, hit)
         smin = s_cyl;
       }
 
-/* We need to check that we have a valid bracket, for the same reasons
+/* Check that we have a valid bracket, for the same reasons
    as above. */
 
       stuff_phot (p, &phit);
@@ -677,6 +674,8 @@ ds_to_disk (p, allow_negative, hit)
 
   else if (r_phot > geo.diskrad || fabs (p->x[2]) > zdisk (r_phot))
   {
+    /* Begin the case where we are OUTSIDE THE PILLBOX */
+
     location = 3;
 
     /* Identify photons moving away from the disk that do not hit 
@@ -726,13 +725,6 @@ ds_to_disk (p, allow_negative, hit)
     else
     {
 
-
-
-      /* We certainly do not need to go further than
-         the distance to the disk and (if we are inside the cylinder) 
-         the distance to the cylinder wall.
-       */
-
       smax = VERY_BIG;
       if (s_diskplane > 0)
       {
@@ -780,7 +772,7 @@ ds_to_disk (p, allow_negative, hit)
   /* This is a failure because it implies we have a case we have not accounted for */
   else
   {
-    Error ("ds_to_disk: Unknnown situation\n");
+    Error ("ds_to_disk: Unknown situation for photon %d\n", p->np);
 
   }
 
@@ -805,24 +797,11 @@ ds_to_disk (p, allow_negative, hit)
    * To setup zero_find, we have to find distances which bracket what we
    * want.  smax should be no more than the distance to the disk plane
    * (assuming we have a photon headed toward the plane)
-   * 
-   * Note that the next little section is intended to select between the
-   * top and bottom face of the disk
+   *
    */
 
 
   stuff_phot (p, &ds_to_disk_photon);
-//  move_phot (&ds_to_disk_photon, smin);
-
-
-//  if ((smax - smin) > 0.)
-//  {
-//    s = zero_find (disk_height, 0.0, smax - smin, 1., &ierr);
-//  }
-//  else
-//  {
-//    s = zero_find (disk_height, smax - smin, 0.0, 1., &ierr);
-//  }
 
   s = zero_find (disk_height, smin, smax, 1, &ierr);
 
@@ -832,6 +811,7 @@ ds_to_disk (p, allow_negative, hit)
       ("ds_to_disk: zero find failed to find distance for position %.2e %.2e %.2e and dir  %.3f %.3f %.3f using %.2e -- %.2e %.2e %.2e bt %.2e %.2e cyl %.2e %.2e for nphot %d loc %d \n",
        p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1], p->lmn[2], s, smin,
        smax, s_diskplane, s_bot, s_top, s_cyl, s_cyl2, p->np, location);
+
     stuff_phot (p, &p_smin);
     stuff_phot (p, &p_smax);
     stuff_phot (p, &p_cyl);
@@ -873,8 +853,8 @@ ds_to_disk (p, allow_negative, hit)
       xcyl = TRUE;
     }
 
-    Error ("disk_to_disk: c  %.2e  %.2e  %d %d %d %d %.2e %.2e %.2e\n", r_phot, r_diskplane, location, xdisk, xcyl, xcyl2, s_diskplane,
-           s_cyl, s_cyl2);
+    Error ("disk_to_disk: c  %.2e  %.2e  %d %d %d %d %.2e %.2e %.2e\n",
+           r_phot, r_diskplane, location, xdisk, xcyl, xcyl2, s_diskplane, s_cyl, s_cyl2);
 
 
   }
@@ -916,9 +896,6 @@ ds_to_disk (p, allow_negative, hit)
   }
 
 
-//  s += smin;
-
-
 
   return (s);
 }
@@ -932,18 +909,13 @@ ds_to_disk (p, allow_negative, hit)
  * @param [in] double  s  A distance along the path of a photon
  *           void params  unused variable required to present the correct function to gsl
 
- * @param [out] double *  value   the disk height at s
- * @return     N/A
+ * @return     The difference between the height of the disk and the z height of
+ *             the photon at a particular position along its pbth
  *
- * Used in ds_to_disk by zero_find
+ * The function Used in ds_to_disk by zero_find to locate 
  * the place a photon hits a vertically extended disk
  *
  * ###Notes###
- *
- *
- *  The function we are trying to zero is the
- *  difference between the height of the disk and the z height of the photon.
- *  Modified 2019 to allow use of gsl rather than old numerical recipies
  *
  *  Note that the disk height is defined even outside or the region
  *  actually occupied by the disk, so one needs to make sure
@@ -963,7 +935,6 @@ disk_height (double s, void *params)
   move_phot (&phit, s);
   r1 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
   z1 = zdisk (r1) - fabs (phit.x[2]);
-  //this is the function
 
   return (z1);
 
