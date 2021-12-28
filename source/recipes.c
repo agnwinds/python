@@ -172,9 +172,9 @@ num_int (func, a, b, eps)
 
 
 double
-zero_find (func, x_lo, x_hi, tol, ierr)
+zero_find (func, x1, x2, tol, ierr)
      double (*func) (double, void *);
-     double x_lo, x_hi;
+     double x1, x2;
      double tol;
      int *ierr;
 {
@@ -185,6 +185,21 @@ zero_find (func, x_lo, x_hi, tol, ierr)
   gsl_root_fsolver *s;
   int iter = 0, max_iter = 100;
   int status;
+  double x_lo, x_hi;
+
+// If necessary, reorder the inputs to the gsl function
+
+  if (x1 < x2)
+  {
+    x_lo = x1;
+    x_hi = x2;
+  }
+  else
+  {
+    x_lo = x2;
+    x_hi = x1;
+  }
+
 
 
   *ierr = FALSE;
@@ -244,29 +259,32 @@ zero_find (func, x_lo, x_hi, tol, ierr)
 
 /**********************************************************/
 /**
-* @brief      A routine that mimimizes a function f
+* @brief      Find the mimimum value of a function in an interval
 *
 *
-* @param [in] ax - lower bound
-* @param [in] bx - guess where the minimum is found
-* @param [in] cx - upper bound
+* @param [in] a - lower bound
+* @param [in] b - guess for the minumum
+* @param [in] c - upper bound
 * @param [in] f  the function to minimize
 * @param [in] tol A tolerance
 * @param [out] * xmin - The place where the minimum occors
 * @return   The minimum of the function f                           .
 *
 * @details
-* This is a wrapper routine which uses gsl calls to find the minimum of a function
+* This is a wrapper routine which uses gsl routines to 
+* find the minimum of a function
 *
 * ### Notes ###
-* added in 2019 to replace the function 'golden' which is a numerical recipie
+*
+* At of  212222, this routine is only use by the roche lobe 
+* realated routines
 * 
 **********************************************************/
 
 
 
 double
-func_minimiser (a, m, b, func, tol, xmin)
+find_function_minimum (a, m, b, func, tol, xmin)
      double (*func) (double, void *);
      double a, m, b;
      double tol, *xmin;
@@ -275,17 +293,13 @@ func_minimiser (a, m, b, func, tol, xmin)
   int status = 0;
   void *test = NULL;
 
-
   int iter = 0, max_iter = 100;
   const gsl_min_fminimizer_type *T;
   gsl_min_fminimizer *s;
 
-
   gsl_function F;
   F.function = func;
   F.params = 0;
-
-
 
   T = gsl_min_fminimizer_brent;
 
@@ -299,7 +313,6 @@ func_minimiser (a, m, b, func, tol, xmin)
       return fmin (func (a, test), func (b, test));     //keep old behaviour
     }
   }
-
 
   do
   {

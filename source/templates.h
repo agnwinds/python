@@ -106,7 +106,7 @@ double *vector(int i, int j);
 void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
 double zero_find(double (*func)(double, void *), double x_lo, double x_hi, double tol, int *ierr);
-double func_minimiser(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
+double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);

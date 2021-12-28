@@ -24,10 +24,8 @@
  * The secondary is located along the x, i.e. 0, axis
  *
  *    To utilize the routines you must stuff the photon of interest into the external photon "p_roche".
- *    This is necessary because the program makes use of two Numerical Recipes Routines rtsafe
- *    and golden to find zeroes and minima respectively.  Note that it is possible (likely) that these are
- *    not the very best choices of Numerical Recipes routines to use.  In particular it is possible that
- *    BRENT could replace both routines.
+ *    This is necessary because the program makes use of the gsl-based routines find_rzero    
+ *    and find_function_miniumum to find zeroes and minima respectively.  
  *
  *    The routines adopt the same approach as in Keith Horne's routines dealing with the Roche
  *    geometry, that is a pillbox is defined around the secondary.  The radius of the pillbox is
@@ -55,8 +53,8 @@
 
 /**********************************************************/
 /** p_roche provides a way to pass a photon structure to roche() and roche_derive which
- * are in turn used by the Numerical Recipes Routine rtsafe to find the zero either to dphi_ds
- * or to phi along the path lenght of the photon
+ * are in turn used  to find the zero either to dphi_ds
+ * or to phi along the path lenght of the photon. p_roche is intialized in binary_basics
  **********************************************************/
 struct photon p_roche;
 
@@ -69,6 +67,8 @@ struct photon p_roche;
  * @return     Always returns 0
  *
  *
+ * Notes
+ * Initailizes p_roche
  *
  *
  **********************************************************/
@@ -89,11 +89,9 @@ binary_basics ()
 
   geo.q = geo.m_sec / geo.mstar;
 
-
   /* Find the position of the L1 point with respect to the primary */
 
   geo.l1 = 0;
-  geo.phi = 0;
 
   /* p_roche is used here to provide an external way to pass a photon structure to find_l1 */
   /* p_roche is (near) origin of primary and pointing at secondary */
@@ -127,8 +125,8 @@ binary_basics ()
     Error ("binary_basics: Did not find L2\n");
   }
 
-  /* Now find the position of the far side of the star */
 
+  geo.phi = 0;
   geo.phi = phi (geo.l1, dummy_par);    /* Set geo.phi so phi will be zero on Roche lobes */
 
 
@@ -229,7 +227,7 @@ hit_secondary (p)
       {
         smid = smax - idelt * (smax - smin);    //the function at this point, just inside smax should be lower than the function at smax
       }
-      potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);   //call the minimuser            
+      potential = find_function_minimum (smin, smid, smax, phi, 0.0001, &s);    //call the minimuser            
     }
     else
     {
@@ -238,7 +236,7 @@ hit_secondary (p)
   }
   else
   {
-    potential = func_minimiser (smin, smid, smax, phi, 0.0001, &s);
+    potential = find_function_minimum (smin, smid, smax, phi, 0.0001, &s);
   }
 
 
@@ -410,11 +408,18 @@ double phi_gm1, phi_gm2, phi_3, phi_4;
  *
  * @param [in] double  s   The distance from the current position of the photon to the point where one wishes to calculate the Roche potential
  *              void * params  An unused variable required to make the function compatible with the gsl routine used to minimise it
- * @return     The Roche potential at the postiong given by the photon moved by a distance s
+ * @return     The Roche potential at the position given by the photon moved by a distance s
  *
  * Given a photon stored in p_roche and a distance s to move the photone, phi returns the roche potentail at that point
  *
  * ###Notes###
+ * This routine is used in a number of locations for calculating either where the
+ * Roche surface is, or whether a photon has or will cross the Roche
+ * lobe of the secondary star
+ * 
+ * The external variable p_roche gives the initial position and direction
+ * of a photon, and s the distance along the path length at 
+ * which the potential is calculated.
  *
  *
  **********************************************************/
@@ -437,12 +442,13 @@ phi (double s, void *params)
   }
 
   stuff_phot (&p_roche, &pp);
-  move_phot (&pp, s);           /* So now we have the actuaal position of the photon relative to the WD */
+  move_phot (&pp, s);
 
   if ((x1 = length (&pp.x[0])) == 0)
     return (-VERY_BIG);
+
   z1 = -phi_gm1 / x1;
-  z3 = -phi_3 * ((pp.x[0] - phi_4) * (pp.x[0] - phi_4) + pp.x[1] * pp.x[1]) - geo.phi;
+  z3 = -phi_3 * ((pp.x[0] - phi_4) * (pp.x[0] - phi_4) + pp.x[1] * pp.x[1]);
 
   pp.x[0] -= geo.a;             /* Here we make pp refer to the positions w.r.t. the secondary */
   if ((x2 = length (&pp.x[0])) == 0)
@@ -450,13 +456,14 @@ phi (double s, void *params)
 
   z2 = -phi_gm2 / x2;
 
-  z = z1 + z2 + z3;
+  z = z1 + z2 + z3 - geo.phi;
+
+  //printf ("foo %e %e %e %e \n", z1, z2, z3, geo.phi);
 
   if (z < -1.e20)
     z = -1.e20;
 
   return (z);
-
 
 }
 
@@ -502,8 +509,8 @@ dphi_ds (double s, void *params)
 /**
  * @brief      Calculate the half width of the Roche potential at a position x along the x axis
  *
- * @param [in] double  x   The distance the photon has traveled from its initial position
- *                  void params  unused variable required to present the correct function to gsl
+ * @param [in] double  x   A position (distance from the primary) along the positive x axis                            
+ *             void params  unused variable required to present the correct function to gsl
  *
  * @return     the half width (or actually the negative of the half width)
  *
@@ -526,6 +533,17 @@ roche_width (double x, void *params)
 {
   double rho, smax;
   int ierr;
+  void *dummy_par = NULL;
+
+  p_roche.x[1] = p_roche.x[2] = 0.0;
+  p_roche.lmn[0] = 0;
+  p_roche.lmn[1] = 1;
+  p_roche.lmn[2] = 0;
+
+//OLD  geo.phi = 0;
+//OLD  p_roche.x[0] = geo.l1;
+//OLD  geo.phi = phi (0, dummy_par);
+
 
   if (x < geo.l1)
     smax = geo.l1;
@@ -533,15 +551,12 @@ roche_width (double x, void *params)
     smax = geo.l1_from_m2;
 
   p_roche.x[0] = x;
-  p_roche.x[1] = p_roche.x[2] = 0.0;
-  p_roche.lmn[0] = 0;
-  p_roche.lmn[1] = 1;
-  p_roche.lmn[2] = 0;
 
   rho = zero_find (phi, 1000., smax, geo.a / 1000., &ierr);
   if (rho < 0 || ierr)
   {
-    Error ("roche_with : zero_find failure x=%6.2e\n", x);
+    p_roche.x[0] = geo.l1;
+    Error ("roche_width : zero_find failure x=%6.2e rho %.2e phi(l2) %.2e\n", x, rho, phi (0, dummy_par));
   }
   return (-rho);
 }
@@ -566,7 +581,7 @@ roche2_half_width ()
 {
   double xmin, xmax, xmid, xbest;
   double rmin;
-  double roche_width (), golden ();
+  double roche_width ();
 
   xmin = geo.l1 + 1.e5;
   xmax = geo.r2_far + geo.a - 1.e5;
@@ -574,10 +589,8 @@ roche2_half_width ()
 
   Log_silent ("roche2_half_width: Search from %6.2e %6.2e %6.2e\n", xmin, xmid, xmax);
 
-  /* func_minimiser returns the miniumum value of the function it is evaluating; xbest is the position of the minimum
-     Note that  "func_minimiser" is designed to find a minimum rather than a maximum! */
 
-  rmin = func_minimiser (xmin, xmid, xmax, roche_width, 0.0001, &xbest);
+  rmin = find_function_minimum (xmin, xmid, xmax, roche_width, 0.0001, &xbest);
 
   Log_silent ("roche2_half_width: Max half width of %6.2e is located at %6.2e\n", -rmin, xbest);
 
