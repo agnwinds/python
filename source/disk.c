@@ -96,10 +96,14 @@ teff (x)
     q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
     q = t * pow (q, 0.25e0);
 
-    if (geo.absorb_reflect == BACK_RAD_ABSORB_AND_HEAT && geo.wcycle > 0)       /* Absorb photons and increase t so that heat is radiated
-                                                                                   but only do this if there has been at least one
-                                                                                   ionization cycle */
+    if (geo.absorb_reflect == BACK_RAD_ABSORB_AND_HEAT && geo.wcycle > 0)
+
+
+      /* Absorb photons and increase t so that heat is radiated
+         but only do this if there has been at least one
+         ionization cycle */
     {
+
       /* qdisk is initialized only once (in init_qdisk) and does not generally have the same
        * values for r as does the disk structure, whose annulae vary as the 
        * frequency limits are set. Here we just search for a radius that is just above
@@ -193,7 +197,7 @@ double north[] = { 0.0, 0.0, 1.0 };
  *
  * This routine interpolates the velocities from a grid which gives
  * the run of velocity with radius. Although the we generally
- * assume keplerian velocities for the disk those velocities
+ * assume Keplerian velocities for the disk those velocities
  * are not calculated here.
  *
  * ###Notes###
@@ -201,15 +205,11 @@ double north[] = { 0.0, 0.0, 1.0 };
  * The routine projects the input variable x on to the xy plane
  * before it calculates velocities
  *
- * It then takes the xproduct of a unit vector pointing north and
- * the position, to determine the direction of motion at this point
+ * It then takes the x-product of a unit vector pointing north and
+ * the position to determine the direction of motion at this point
  * in the disk
  *
- *
- *  Finally it rescales this to get the actual velocity.
- *
- *
- *
+ * Finally it rescales this to get the actual velocity.
  *
  **********************************************************/
 
@@ -245,19 +245,19 @@ vdisk (x, v)
  * If the disk is vertically extended then the disk surface is
  * defined in terms of the h the fraction of the disk radius
  * at the edge of the disk, and a power law exponent.  So
- * a disk thst us a sunoke wedgge wiykd gave an exponent
+ * a disk thst is a simple wedge has an exponent        
  * of 1. A flat but thick disk would have an exponent of 0.
  * A flared disk wouuld generally have an exponent greater than
  * 1.
  *
  * ###Notes###
  *
- * 	zdisk returns a number that will positive or zero, so one
- * 	often needs to take this account if for example one has
- * 	a photon that hits the disk below the z=0 plane.
+ * zdisk returns a number that will positive or zero, so one
+ * often needs to take this account if for example one has
+ * a photon that hits the disk below the z=0 plane.
  *
- *      zdisk does not take the maximum radius of the disk
- *      into account
+ * zdisk does not take the maximum radius of the disk
+ * into account
  *
  **********************************************************/
 
@@ -279,7 +279,8 @@ struct plane diskplane, disktop, diskbottom;
 /**********************************************************/
 /**
  * @brief      Calculates the distance that a photon
- *  	would need to travel from its current position to hit disk.
+ *  	would need to travel from its current position 
+ *      to hit the disk.
  *
  * @param [in] struct photon *  p   a photon pointer.
  * @param [in] int  allow_negative   if nonzero, permits a
@@ -300,7 +301,7 @@ struct plane diskplane, disktop, diskbottom;
  * Usually, ds_to_disk returns the distance along the line of
  * sight to the disk in the direction a photon is currently travelling.
  *
- * Usually, if the photon misses the disk going in the positive
+ * If the photon misses the disk going in the positive
  * direction, a very large number is returned.
  *
  * If allow_negative is non-zero (true), then ds_to_disk returns
@@ -316,9 +317,8 @@ struct plane diskplane, disktop, diskbottom;
  *
  * The z-height of a vertically extended disk is defined by
  * zdisk.  The outside edge of the disk is assumed to be
- * a cylinder at geo.diskrad.  The routine does not say which
- * surface of the disk has been hit (although for vertically
- * extended disks this might be a good idea).
+ * a cylinder at geo.diskrad.  The routine does not indicate which
+ * surface of the disk has been hit. 
  *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
@@ -330,6 +330,18 @@ struct plane diskplane, disktop, diskbottom;
  * 0 and it is up to the calling routine to interpret what to do
  * in this situation.  For very large distances one may need to worry
  * about round off errors if moving a photon to the disk position.
+ *
+ * In 2112, the portion of the routine that handles veritically
+ * extended disks was revised (#924), Conceptually, the approach
+ * that is used divides space into three separate regions, (1)
+ * inside the disk, (2) outside the disk, but inside the pillbox
+ * that bounds the disk, and (3) outside the pill box.   If a
+ * photon is inside the disk, we generally assume that one wants
+ * the position where the photon entered the disk; otherwise we
+ * generally want to find the the forward direction of the photon,
+ * the exception being when wants to find velocities in the SV and
+ * KWD models.
+ * 
  **********************************************************/
 
 double
@@ -349,7 +361,7 @@ ds_to_disk (p, allow_negative, hit)
    */
 
   double s_diskplane, s_top, s_bot, s_cyl, s_cyl2, s;
-  double r_phot, r_diskplane, r_top, r_bot, r_cyl, r_cyl2, r_hit;
+  double r_phot, r_diskplane, r_hit;
   double z_cyl, z_cyl2;
 
   /* A variable used to describe whether the photon is inside a vertically extended disk */
@@ -376,7 +388,7 @@ ds_to_disk (p, allow_negative, hit)
 
 
 
-  /* Find where the photon would hit the disk for the case of a FLAT disk */
+  /* Begin the calculation for the case of a FLAT disk */
 
   s_diskplane = ds_to_plane (&diskplane, p);
   stuff_phot (p, &phit);
@@ -462,16 +474,9 @@ ds_to_disk (p, allow_negative, hit)
   stuff_phot (p, &phit);
   move_phot (&phit, s_bot);
 
-  /* When a photon is outside of the cylinder of the disk
-     there are instances where we need to know 
-     both of the cylinder boundaries.   
-
-     In this case s_cyl will be the distance to the closest
-     intersection and s_cyl2 will be the distance to the further
-     intersection.  
-
-     z_cyl and z_cyl2 are the zheights of the intersections with
-     the cylinders
+  /* Initialize various distances needed 
+     for determing if and where  a photon 
+     hits the disk
    */
 
   s_cyl = ds_to_cylinder (geo.diskrad, p);
@@ -507,8 +512,7 @@ ds_to_disk (p, allow_negative, hit)
 
   delta_z = zdisk (r_phot) - fabs (p->x[2]);
 
-  /* We assume if we are within a cm of the disk surface we don't need 
-   * do anything.
+  /* Return if if we are within a cm of the disk surface 
    */
 
   if ((r_phot < geo.diskrad) && (fabs (delta_z) < 1.0))
@@ -517,10 +521,8 @@ ds_to_disk (p, allow_negative, hit)
   }
 
   /*
-   * Handle the case where the photon is already inside the
-   * disk.  The main issue here is we want to push the
-   * photon back where it came from now allow it to go
-   * forward.
+   * Handle the case where the photon is already INSIDE THE
+   * DISK.  
    *  
    * We will make the assumption that if you are moving away from 
    * the disk plane (z=0) you want to go
@@ -552,8 +554,10 @@ ds_to_disk (p, allow_negative, hit)
         smax = s_cyl;
       }
 
-/* We need to check that we have a valid bracket here because if the disk has a significant powerlaw
-exponent then, with this approximation we can end up back in the diski */
+/* Check that we have a valid bracket here, and adjust the smax if necessary
+   If the disk has a significant powerlaw exponent/curvature then, smax can 
+   be in the disk. We make a one time attempt to fix this. */
+
       stuff_phot (p, &phit);
       move_phot (&phit, smax);
       if (zdisk (sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1])) > fabs (phit.x[2]))
@@ -573,7 +577,8 @@ exponent then, with this approximation we can end up back in the diski */
     }
     else
     {
-      /* We are moving toward the disk plane, and we want to go back to a position on the disk */
+      /* We are moving toward the disk plane, and we want to go back 
+         the point whre the photon entered the disk. */
 
       location = 2;
 
@@ -608,8 +613,8 @@ exponent then, with this approximation we can end up back in the diski */
         smin = s_cyl;
       }
 
-/* We need to check that we have a valid bracket here because if the disk has a significant powerlaw
-exponent then, with this approximation we can end up back in the disk */
+/* We need to check that we have a valid bracket, for the same reasons
+   as above. */
 
       stuff_phot (p, &phit);
       move_phot (&phit, smin);
@@ -629,26 +634,6 @@ exponent then, with this approximation we can end up back in the disk */
 
     }
 
-    /* At this point we have settled on the limits for solving
-       for the intercept for the case where the photon was inside 
-       the disk.  
-
-       Begin work on case where the photon is OUTSIDE the 
-       disk
-
-       The strategy here is to first try to eliminate the 
-       possibility that the photon hits the disk and 
-       to return a large value.  Only if we cannot do this
-       will we actually set limits for where the photon might hit
-       and calculate the intersection.
-
-       This includes the case where the photon is inside the
-       pillbox that encases the disk.
-     */
-
-
-
-
   }
 
 
@@ -657,7 +642,8 @@ exponent then, with this approximation we can end up back in the disk */
      the disk.  
 
      Begin work on case where the photon is OUTSIDE the 
-     disk
+     disk.  It can be outside the disk, but inside the
+     pillbox, or outside the pillbox
 
      The strategy here is to first try to eliminate the 
      possibility that the photon hits the disk and 
@@ -665,13 +651,12 @@ exponent then, with this approximation we can end up back in the disk */
      will we actually set limits for where the photon might hit
      and calculate the intersection.
 
-     This includes the case where the photon is inside the
-     pillbox that encases the disk.
    */
 
   else if (r_phot < geo.diskrad && fabs (p->x[2]) < disktop.x[2])
   {
-/* This is the case where the photon is outside the disk, but inside the pillbox */
+/* Begin the case where the photon is OUTSIDE THE DISK, BUT INSIDE THE PILLBOX */
+
     location = 2;
 
     if (s_diskplane < 0 && fabs (z_cyl) > disktop.x[2])
