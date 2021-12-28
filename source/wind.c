@@ -462,11 +462,8 @@ model_rho (ndom, x)
   double rho = 0;
   int n = 0;
 
-  /*211115-ksl-Check if we want to ignore cells and if so return
-     0 for the density
-   */
 
-  if (modes.ignore_partial_cells == TRUE)
+  if (modes.include_partial_cells == FALSE)
   {
     n = where_in_grid (ndom, x);
 

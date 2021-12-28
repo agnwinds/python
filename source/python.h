@@ -1459,7 +1459,7 @@ struct advanced_modes
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
   int run_xtest_diagnostics;     // Switch so that xtest can enable print outs just while xtest is being run
-  int ignore_partial_cells;      // Switch to ignore cells which are not completely in the wind.
+  int include_partial_cells;     // Switch to include cells which are not completely in the wind.
 };
 
 extern struct advanced_modes modes;
