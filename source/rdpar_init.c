@@ -163,6 +163,7 @@ get_choices (question, choices, qstruct)
   int cur_values[10] = { -999 };
   int cur_num;
   char cur_string[LINELENGTH];
+  char xcur_string[LINELENGTH];
 
 
   if (xinit_choices == 0)
@@ -256,7 +257,8 @@ get_choices (question, choices, qstruct)
   sprintf (cur_string, "%d", cur_values[0]);
   for (i = 1; i < cur_num; i++)
   {
-    sprintf (cur_string, "%.100s,%d", cur_string, cur_values[i]);
+    sprintf (xcur_string, "%.100s,%d", cur_string, cur_values[i]);
+    sprintf (cur_string, "%.200s", xcur_string);
   }
 
   strcpy (choices, cur_string);
