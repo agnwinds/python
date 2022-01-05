@@ -150,6 +150,14 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     smax *= 0.5;
   }
 
+
+
+  //DEBUG if (modes.include_partial_cells == FALSE && wmain[p->grid].inwind == W_PART_INWIND)
+  //DEBUG  {
+//DEBUG    *istat = P_INWIND;
+//DEBUG    return (smax);
+//DEBUG  }
+
   freq_inner = p_start_cmf.freq;
   freq_outer = p_stop_cmf.freq;
 
@@ -379,7 +387,16 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     ds_current = smax;
   }
 
+//DEBUG  if (modes.include_partial_cells == FALSE && wmain[p->grid].inwind == W_PART_INWIND)
+//DEBUG  {
+//DEBUG    if (ds_current != smax)
+//DEBUG    {
+//DEBUG      Error ("Debug: %d  %10.3e %10.3e  tau %10.3e %10.3e \n", p->np, ds_current, smax, running_tau, *tau);
+//DEBUG    }
+//DEBUG  }
+
   *tau = running_tau;
+
 
   return (ds_current);
 }
