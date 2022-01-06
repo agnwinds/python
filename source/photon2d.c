@@ -86,12 +86,22 @@ translate (w, pp, tau_scat, tau, nres)
 {
   int istat;
   int ndomain;
+  int ichoose;
+//DEBUG  double ds;
 
+  ichoose = where_in_wind (pp->x, &ndomain);
 
+//DEBUG  if (modes.exclude_partial_cells && (wmain[pp->grid].inwind == W_PART_INWIND))
+//DEBUG  {
+//DEBUG    ds = ds_in_cell (ndomain, pp);
+//DEBUG    move_phot (pp, ds + DFUDGE);
+//DEBUG    istat = pp->istat;
+//DEBUG  }
 
-  if (where_in_wind (pp->x, &ndomain) < 0)      //If the return is negative, this means we are outside the wind
+//DEBUG  else if (ichoose < 0)
+  if (ichoose < 0)
   {
-    istat = translate_in_space (pp);    //And so we should translate in space
+    istat = translate_in_space (pp);
 
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
@@ -148,7 +158,7 @@ translate_in_space (pp)
    * not really in the wind, so we have to address this situtation here.  The first problem
    * we have though is that we do not know what domain we are in.*/
 
-  if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
+  if (ndom >= 0 && (zdom[ndom].wind_type == IMPORT))
   {
     stuff_phot (pp, &ptest);
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
@@ -157,8 +167,8 @@ translate_in_space (pp)
 
 
 
-    /* Note there is a possiblity that we reach the other side 
-     * of the grid without actually encoutering a
+    /* Note there is a possibility that we reach the other side 
+     * of the grid without actually encountering a
      * wind cell
      */
 
@@ -241,6 +251,8 @@ translate_in_space (pp)
  * cylindrical models.  Additionally for imported models we skip all of the
  * of the wind_cones.  This is inefficient, and needs to be corrected for
  * rtheta and spherical models which can easily be handled using wind cones.
+ *
+ * ksl 2201 - It is unclear what the comment I made in 1802 actually means anymore.
  *
  **********************************************************/
 
