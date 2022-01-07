@@ -87,18 +87,12 @@ translate (w, pp, tau_scat, tau, nres)
   int istat;
   int ndomain;
   int ichoose;
-//DEBUG  double ds;
+  double smax;
+
 
   ichoose = where_in_wind (pp->x, &ndomain);
 
-//DEBUG  if (modes.exclude_partial_cells && (wmain[pp->grid].inwind == W_PART_INWIND))
-//DEBUG  {
-//DEBUG    ds = ds_in_cell (ndomain, pp);
-//DEBUG    move_phot (pp, ds + DFUDGE);
-//DEBUG    istat = pp->istat;
-//DEBUG  }
 
-//DEBUG  else if (ichoose < 0)
   if (ichoose < 0)
   {
     istat = translate_in_space (pp);
@@ -106,7 +100,20 @@ translate (w, pp, tau_scat, tau, nres)
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
   {
-    istat = translate_in_wind (w, pp, tau_scat, tau, nres);
+    if (modes.exclude_partial_cells && wmain[pp->grid].inwind == W_PART_INWIND)
+    {
+      smax = smax_in_cell (pp) / 20.;
+      move_phot (pp, smax);
+      pp->grid = where_in_grid (ndomain, pp->x);
+      istat = pp->istat;
+      //   istat = translate_in_wind (w, pp, tau_scat, tau, nres);
+
+    }
+    else
+    {
+
+      istat = translate_in_wind (w, pp, tau_scat, tau, nres);
+    }
   }
   else
   {
