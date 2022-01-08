@@ -464,15 +464,15 @@ model_rho (ndom, x)
   int n = 0;
 
 
-  if (modes.exclude_partial_cells)
-  {
-    n = where_in_grid (ndom, x);
-
-    if (wmain[n].inwind != W_ALL_INWIND)
-    {
-      return (0);
-    }
-  }
+//DEBUG  if (modes.exclude_partial_cells)
+//DEBUG  {
+//DEBUG    n = where_in_grid (ndom, x);
+//DEBUG
+//DEBUG    if (wmain[n].inwind != W_ALL_INWIND)
+//DEBUG    {
+//DEBUG      return (0);
+//DEBUG    }
+//DEBUG  }
 
   if (zdom[ndom].wind_type == SV)
   {
