@@ -87,7 +87,6 @@ translate (w, pp, tau_scat, tau, nres)
   int istat;
   int ndomain;
   int ichoose;
-  double smax;
 
 
   ichoose = where_in_wind (pp->x, &ndomain);
@@ -100,20 +99,8 @@ translate (w, pp, tau_scat, tau, nres)
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
   {
-    if (modes.exclude_partial_cells && wmain[pp->grid].inwind == W_PART_INWIND)
-    {
-      smax = smax_in_cell (pp) / 20.;
-      move_phot (pp, smax);
-      pp->grid = where_in_grid (ndomain, pp->x);
-      istat = pp->istat;
-      //   istat = translate_in_wind (w, pp, tau_scat, tau, nres);
 
-    }
-    else
-    {
-
-      istat = translate_in_wind (w, pp, tau_scat, tau, nres);
-    }
+    istat = translate_in_wind (w, pp, tau_scat, tau, nres);
   }
   else
   {
@@ -458,53 +445,65 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      Note that ds_current does not alter p in any way */
 
 
-
-  ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-
-  if (p->nres < 0)
-    xplasma->nscat_es++;
-  if (p->nres > 0)
-    xplasma->nscat_res++;
-
-  /* We now increment the radiation field in the cell, translate the photon and wrap
-   * things up.  For simple atoms, the routine radiation also reduces
-   * the weight of the photon due to continuum absorption, e.g. free free.
-   */
-
-  if (geo.rt_mode == RT_MODE_MACRO)
+  if (modes.exclude_partial_cells && one->inwind == W_PART_INWIND)
   {
-    /* In the macro-method, b-f and other continuum processes do not reduce the photon
-       weight, but are treated as as scattering processes.  Therefore most of what was in
-       subroutine radiation for the simple atom case can be avoided.  
-     */
-    if (geo.ioniz_or_extract == CYCLE_IONIZ)
+    ds_current = smax;
+    istat = 0;
+    if (smax < 0)
     {
-      /* Provide inputs to bf_estimators in the local frame  */
-      stuff_phot (p, &phot_mid);
-      move_phot (&phot_mid, 0.5 * ds_current);
-      observer_to_local_frame (&phot_mid, &phot_mid_cmf);
-      ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
-      bf_estimators_increment (&w[p->grid], &phot_mid_cmf, ds_cmf);
+      Error ("Houston, there is a problem %e\n", smax);
     }
   }
   else
   {
-    radiation (p, ds_current);
-  }
+    ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
+//  }
 
-  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
-  {
-    if (ds_current < wmain[p->grid].dfudge)
+    if (p->nres < 0)
+      xplasma->nscat_es++;
+    if (p->nres > 0)
+      xplasma->nscat_res++;
+
+    /* We now increment the radiation field in the cell, translate the photon and wrap
+     * things up.  For simple atoms, the routine radiation also reduces
+     * the weight of the photon due to continuum absorption, e.g. free free.
+     */
+
+    if (geo.rt_mode == RT_MODE_MACRO)
     {
-      Error
-        ("translate_in_wind: found repeated resonance scattering nres %5d after motion of %10.3e for photon %d in plasma cell %d)\n",
-         *nres, ds_current, p->np, wmain[p->grid].nplasma);
+      /* In the macro-method, b-f and other continuum processes do not reduce the photon
+         weight, but are treated as as scattering processes.  Therefore most of what was in
+         subroutine radiation for the simple atom case can be avoided.  
+       */
+      if (geo.ioniz_or_extract == CYCLE_IONIZ)
+      {
+        /* Provide inputs to bf_estimators in the local frame  */
+        stuff_phot (p, &phot_mid);
+        move_phot (&phot_mid, 0.5 * ds_current);
+        observer_to_local_frame (&phot_mid, &phot_mid_cmf);
+        ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
+        bf_estimators_increment (&w[p->grid], &phot_mid_cmf, ds_cmf);
+      }
     }
-  }
+    else
+    {
+      radiation (p, ds_current);
+    }
 
-  p->nres = *nres;
-  if (p->nres > -1 && p->nres < nlines)
-    p->line_res = p->nres;
+    if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
+    {
+      if (ds_current < wmain[p->grid].dfudge)
+      {
+        Error
+          ("translate_in_wind: found repeated resonance scattering nres %5d after motion of %10.3e for photon %d in plasma cell %d)\n",
+           *nres, ds_current, p->np, wmain[p->grid].nplasma);
+      }
+    }
+
+    p->nres = *nres;
+    if (p->nres > -1 && p->nres < nlines)
+      p->line_res = p->nres;
+  }
 
   p->istat = istat;
 
