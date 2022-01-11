@@ -198,6 +198,12 @@ parse_command_line (argc, argv)
         Log ("Cells partially in the wind will be ingnored.\n");
         j = i;
       }
+      else if (strcmp (argv[i], "-include_partial_cells") == 0)
+      {
+        modes.ignore_partial_cells = FALSE;
+        Log ("Cells partially in the wind will be ingnored.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;
