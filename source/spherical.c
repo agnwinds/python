@@ -510,7 +510,9 @@ spherical_extend_density (ndom, w)
   for (j = 0; j < ndim - 1; j++)
   {
     n = nstart + j;
-    if (w[n].vol == 0)          // Then the grid point is not in the wind
+    if (w[n].vol == 0 || (modes.exclude_partial_cells && w[n].inwind == W_PART_INWIND))
+
+//DEBUG    if (w[n].vol == 0)          // Then the grid point is not in the wind
 
     {
       m = n + 1;
