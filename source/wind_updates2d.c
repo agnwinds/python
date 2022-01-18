@@ -168,7 +168,7 @@ WindPtr (w);
     /* Skip cells that are partially in the wind these are not to be included
        in the calculation */
 
-    if (modes.exclude_partial_cells && wmain[nwind].inwind == W_PART_INWIND)
+    if (modes.partial_cells == PC_EXTEND && wmain[nwind].inwind == W_PART_INWIND)
     {
       continue;
     }

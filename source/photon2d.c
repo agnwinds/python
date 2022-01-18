@@ -445,7 +445,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      Note that ds_current does not alter p in any way */
 
 
-  if (modes.exclude_partial_cells && one->inwind == W_PART_INWIND)
+  if (modes.partial_cells == PC_EXTEND && one->inwind == W_PART_INWIND)
   {
     ds_current = smax;
     istat = 0;

@@ -328,7 +328,8 @@ init_advanced_modes ()
   modes.store_matom_matrix = TRUE;      /* default is to store the macro-atom matrix */
 
   modes.run_xtest_diagnostics = FALSE;  /* allow special xtest_diagnostics in the various routines */
-  modes.exclude_partial_cells = TRUE;   /* Default is to omit partial cells in calculation */
+  // XXXX Ulitimately this wants to be PC_ZERO_DEN
+  modes.partial_cells = PC_EXTEND;      /* Default is to omit partial cells in calculation */
 
   return (0);
 }

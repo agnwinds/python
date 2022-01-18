@@ -1427,6 +1427,13 @@ extern int nerr_Jmodel_wrong_freq;
 
 
 
+enum partial_cells_enum
+{ PC_INCLUDE = 0,   // Include partial cells, as has been done historically
+  PC_ZERO_DEN = 1,  // Exclude partial cells, by setting their density to 0
+  PC_EXTEND = 2     // Exclude partial cells, by extending the density of a full cell, into a partial cell
+};
+
+
 /***********************ADVANCED_MODES STRUCTURE **********************/
 struct advanced_modes
 {
@@ -1459,7 +1466,7 @@ struct advanced_modes
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
   int run_xtest_diagnostics;     // Switch so that xtest can enable print outs just while xtest is being run
-  int exclude_partial_cells;     // Switch to exclude cells which are not completely in the wind.
+  int partial_cells;             // Switch to decribe treatment of partial cells.                 
 };
 
 extern struct advanced_modes modes;
