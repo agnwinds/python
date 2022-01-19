@@ -230,10 +230,6 @@ define_wind ()
       geo.frame = OBS_FRAME;    //relevant quantities are defined in the observer faems
     }
 
-//DEBUG    if (modes.exclude_partial_cells && w[n].inwind == W_PART_INWIND)
-//DEBUG    {
-//DEBUG      w[n].vol = 0;
-//DEBUG    }
   }
 
 

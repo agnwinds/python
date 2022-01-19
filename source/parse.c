@@ -200,8 +200,7 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
       {
-        //XXXX This needs adjusting to PC_ZERO_DEN ultimately
-        modes.partial_cells = PC_EXTEND;
+        modes.partial_cells = PC_ZERO_DEN;
         Log ("Cells partially in the wind will be ingnored.\n");
         j = i;
       }
