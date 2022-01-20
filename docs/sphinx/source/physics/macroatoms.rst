@@ -3,16 +3,11 @@ Macro Atoms
 
 .. todo:: This page shoud contain a description of how macro atoms work. The below is copied from JM's thesis.
 
-The macro-atom scheme was created by Leon Lucy and is outlined in 
-his 2002/03 papers. It was implemented in Python by Stuart Sim, initially
-for the study of recombination lines in YSOs (Sim et al. 2005).
+The macro-atom scheme was created by Leon Lucy and is outlined in his 2002/03 papers. It was implemented in Python by Stuart Sim, initially for the study of recombination lines in YSOs (Sim et al. 2005).
 
 Lucy (2002,2004) hereafter L02, L03) has shown that it is possible to calculate the emissivity of a gas in statistical equilibrium without approximation for problems with large departures from LTE. His `macro-atom` scheme allows for all possible transition paths from a given level, dispensing with the two-level approximation, and provides a full non-LTE solution for the level populations based on Monte Carlo estimators. The macro-atom technique has already been used to model Wolf-Rayet star winds (Sim 2004), AGN disc winds (Sim et al. 2008), supernovae (Kromer and Sim 2009, Kerzendorf and Sim 2014) and YSOs (Sim et al. 2005). A full description of the approach can be found in L02 and L03. 
 
-Following L02, let us consider an atomic species interacting with a radiation field.
-If the quantity :math:`\epsilon_j` represents the ionization plus excitation energy of 
-a level :math:`j` then the rates at which the level absorbs and emits radiant energy 
-are given by
+Following L02, let us consider an atomic species interacting with a radiation field. If the quantity :math:`\epsilon_j` represents the ionization plus excitation energy of a level :math:`j` then the rates at which the level absorbs and emits radiant energy are given by
 
 .. math::
 
@@ -66,6 +61,25 @@ Although the equation above assumes strict radiative equilbrium,it is trivial to
 A Hybrid Scheme
 =============================
 
+A pure macro-atom approach with only H and He can be easily used for some situations -- for example, in the YSO application described by, which uses a H-only model. However, in accretion disc winds, the densities can be very high, and higher :math:`Z` elements must be  included. Including all these elements as macro-atoms is not currently computationally feasible in the code for anything but the simplest models. We thus often use a `hybrid scheme`, which treats H and He with the macro-atom approach, but models all other atoms as `simple-atoms`. 
+
+Simple-atoms still interact with :math:`r`- and :math:`k`-packets but do not possess internal transition probabilities. As a result, they are analogous to the two-level atom treatment, as any excitation is immediately followed by a deactivation into an :math:`r`- or :math:`k`-packet. The choice of radiative or kinetic deactivation is made according to the relative rates in the two-level atom formalism. For a bound-bound transition :math:`u\to j`, these two probabilities
+
+are then
+
+.. math::
+    p_{uj}^{S,R} = \frac{ A_{uj} \beta_{uj} } { A_{uj} \beta_{uj} + C_{uj} \exp(-h\nu_{uj} / k T_e) } = 1 - q
+
+and
+
+.. math::
+    p_{uj}^{S,C} = \frac{ C_{uj} \exp(-h\nu_{uj} / k T_e) } { A_{uj} \beta_{uj} + C_{uj} \exp(-h\nu_{uj} / k T_e) } = q.
+
+
+For a bound-free transition, the code assumes radiative recombination, and thus any bound-free simple-atom activation is immediately followed by the creation of an :math:`r`-packet. This approximates the bound-free continuunm, even when compared to other two-level atom radiative transfer schemes. This is discussed further and tested in section~\ref{sec:line_test}.
+
+This hybrid approach preserves the fast treatment of, for example, UV resonance lines, while accurately modelling the recombination cascades that populate the levels responsible for, e.g., H and He line emission. As a result of this hybrid scheme, a separate set of estimators must be recorded for simple-atoms,  and the ionization and excitation of these elements is calculated with a different, approximate approach. In order to include simple-atoms, we must add in a few extra pathways, so that energy packets can also activate simple-atoms, through either bound-free or bound-bound processes. The relative probabilities of these channels are set in proportion with the simple-atom opacities.
+
 .. todo:: Describe.
 
 
@@ -82,6 +96,6 @@ This result in two changes to the code for ionization cycles:
 
 In the spectral cycles, interactions with simple bound-free continua now kill the photon, and :math:`k \to r` follow the same behaviour as above, because in these cycles we introduce a precalculated band-limited :math:`k`-packet emissivity. 
 
-**It is possible for some numerical problems to occur.** For example, there is nothing to stop the value of :math:`f_{\rm up}` being quite large, if the photon is being emitted close to the edge. This is most likely to happen when the electron temperature $T_e$ is quite low, but there is nothing to stop it happening anywhere. This is most likely to lead to problems when the factor :math:`f_{\rm up}` is comparable to the typical number of photon passages per cell, since then a single photon can dominate the heating or ionization estimators in a given cell and lead to convergence problems by dramatically exacerbating shot noise. 
+**It is possible for some numerical problems to occur.** For example, there is nothing to stop the value of :math:`f_{\rm up}` being quite large, if the photon is being emitted close to the edge. This is most likely to happen when the electron temperature :math:`T_e` is quite low, but there is nothing to stop it happening anywhere. This is most likely to lead to problems when the factor :math:`f_{\rm up}` is comparable to the typical number of photon passages per cell, since then a single photon can dominate the heating or ionization estimators in a given cell and lead to convergence problems by dramatically exacerbating shot noise. 
 
 .. todo:: Finish documentation of upweighting scheme with some basic explanation.
