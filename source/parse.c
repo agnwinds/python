@@ -192,9 +192,15 @@ parse_command_line (argc, argv)
         Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
+      else if (strcmp (argv[i], "-include_partial_cells") == 0)
+      {
+        modes.partial_cells = PC_INCLUDE;
+        Log ("Cells partially in the wind will be included.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
       {
-        modes.ignore_partial_cells = TRUE;
+        modes.partial_cells = PC_ZERO_DEN;
         Log ("Cells partially in the wind will be ingnored.\n");
         j = i;
       }
@@ -378,8 +384,10 @@ These are largely diagnostic or for special cases. These include\n\
                         effects are not taken into account.\n\
  -srclassic             Use Python with full special relativity for Doppler shifts, etc., but do not include any co-moving frame\n\
                         effects.\n\
- -ignore_partial_cells  Ignore wind cells that are only partially filled by the wind  \n\
- -include_partial_cells Include wind cells that are only partially filled by the wind (also the default)  \n\
+
+ -ignore_partial_cells  Ignore wind cells that are only partially filled by the wind (This is now the default)  \n\
+ -include_partial_cells Include wind cells that are only partially filled by the wind   \n\
+
  -no-matrix-storage     Do not store macro-atom transition matrices if using the macro-atom line transfer and the matrix matom_transition_mode.\n\
 \n\
  -xtest                 Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\

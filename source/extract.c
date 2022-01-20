@@ -533,8 +533,8 @@ extract_one (w, pp, itype, nspec)
     xxspec[nspec].nphot[istat]++;
   else
     Error
-      ("Extract: Abnormal photon %d %8.2e %8.2e %8.2e %8.2e %8.2e %8.2e\n",
-       istat, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
+      ("Extract: Abnormal photon %5d  %d %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e\n",
+       pp->np, istat, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
 
   return (istat);
 }
