@@ -176,7 +176,7 @@ parse_command_line (argc, argv)
 
       else if (strcmp (argv[i], "--version") == 0)
       {
-        /* give information about the pyhon version, such as commit hash */
+        /* give information about the python version, such as commit hash */
         Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
         Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
         /* warn the user if there are uncommited changes */
@@ -201,6 +201,12 @@ parse_command_line (argc, argv)
       else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
       {
         modes.partial_cells = PC_ZERO_DEN;
+        Log ("Cells partially in the wind will be ingnored.\n");
+        j = i;
+      }
+      else if (strcmp (argv[i], "-include_partial_cells") == 0)
+      {
+        modes.ignore_partial_cells = FALSE;
         Log ("Cells partially in the wind will be ingnored.\n");
         j = i;
       }
@@ -291,10 +297,7 @@ parse_command_line (argc, argv)
     sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
 
-//OLD    strcpy (files.diag, files.diagfolder);
     sprintf (dummy, "_%d.diag", rank_global);
-//OLD    strcat (files.diag, files.root);
-//OLD    strcat (files.diag, dummy);
 
     sprintf (files.diag, "%.50s/%.50s%.50s", files.diagfolder, files.root, dummy);
 
@@ -379,9 +382,12 @@ These are largely diagnostic or for special cases. These include\n\
                         number of photons will in the first cycle will be one order of magniude less than in the last cycle \n\
  -classic               Use Python in its classic configuration, with linear Doppler shifts, etc., and where co-moving frame\n\
                         effects are not taken into account.\n\
- -srclassic             Use Python with full special relativity for Doppler shits, etc., but do not include any co-moving frame\n\
+ -srclassic             Use Python with full special relativity for Doppler shifts, etc., but do not include any co-moving frame\n\
                         effects.\n\
- -include_partial_cells  Include  wind cells that are only partially filled by the wind (see Issue #900) \n\
+
+ -ignore_partial_cells  Ignore wind cells that are only partially filled by the wind (This is now the default)  \n\
+ -include_partial_cells Include wind cells that are only partially filled by the wind   \n\
+
  -no-matrix-storage     Do not store macro-atom transition matrices if using the macro-atom line transfer and the matrix matom_transition_mode.\n\
 \n\
  -xtest                 Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\
