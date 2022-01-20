@@ -460,6 +460,21 @@ model_rho (ndom, x)
      double x[];
 {
   double rho = 0;
+  int n = 0;
+
+  /*211115-ksl-Check if we want to ignore cells and if so return
+     0 for the density
+   */
+
+  if (modes.ignore_partial_cells == TRUE)
+  {
+    n = where_in_grid (ndom, x);
+
+    if (wmain[n].inwind != W_ALL_INWIND)
+    {
+      return (0);
+    }
+  }
 
   if (zdom[ndom].wind_type == SV)
   {

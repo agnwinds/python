@@ -309,6 +309,15 @@ define_wind ()
   {
     calloc_macro (NPLASMA);
     calloc_estimators (NPLASMA);
+
+    /* at present the mode is stored per cell, but set to a global value.
+       this allows for a flexible scheme in future */
+    for (n = 0; n < NPLASMA; n++)
+    {
+      macromain[n].store_matom_matrix = modes.store_matom_matrix;
+      macromain[n].matom_transition_mode = geo.matom_transition_mode;
+    }
+    calloc_matom_matrix (NPLASMA);
   }
 
 
@@ -845,9 +854,9 @@ wind_div_v ()
   double x_zero[3];
   double div;
   int ndom;
-  double scaling;
+//OLD  double scaling;
 
-  scaling = 1e-3;               //The scaling factor applied to 'delta' the distance away from the central point that the div_v calcs are done
+//OLD  scaling = 1e-3;               //The scaling factor applied to 'delta' the distance away from the central point that the div_v calcs are done
 
 
   for (icell = 0; icell < NDIM2; icell++)
@@ -1214,7 +1223,8 @@ int
 check_grid ()
 {
   int ndom, n;
-  double l_sob, vth, lambda_t, nh;
+//OLD  double l_sob, vth, lambda_t, nh;
+  double lambda_t, nh;
   double delta_r, delta_x, delta_z, delta_vz, delta_vx;
   double v1[3], v2[3];
   WindPtr one;
@@ -1234,10 +1244,10 @@ check_grid ()
     nh = xplasma->rho * rho2nh;
 
     /* thermal speed */
-    vth = sqrt (1.5 * BOLTZMANN * xplasma->t_e / MPROT);
+//OLD    vth = sqrt (1.5 * BOLTZMANN * xplasma->t_e / MPROT);
 
     /* sobolev length -- this could be used for a check but isn't yet */
-    l_sob = vth / one->dvds_ave;
+//OLD    l_sob = vth / one->dvds_ave;
 
     /* get approximate cell extents */
     delta_z = 2.0 * (one->xcen[2] - one->x[2]);

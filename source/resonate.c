@@ -300,8 +300,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
           dvds_cmf = (1. - fraction_to_resonance) * dvds1 + fraction_to_resonance * dvds2;
 
-          /* sobolev does not use x, unless density_cmf is les than 0 tau_sobolev is invariant, but all inputs
-           * must be in the same frame, using cmf here */
+          /* sobolev does not use x, unless density_cmf is less than 0. tau_sobolev is invariant, but all inputs
+           * must be in the same frame, using cmf here.  Note that dvds_cmf could be negative, but this is
+           * fixed in sobolev. 
+           */
 
           tau_sobolev = sobolev (one, p_now.x, density_cmf, lin_ptr[current_res_number], dvds_cmf);
           running_tau += tau_sobolev;
@@ -620,18 +622,15 @@ kbf_need (freq_min, freq_max)
         {
           density = xplasma->density[nion];
         }
-        // else if (ion[nion].phot_info > 0)  // topbase or hybrid
         else
         {
-          nconf = phot_top[n].nlev;     //Returning lower level = correct (SS)
+          nconf = phot_top[n].nlev;     //Returning lower level 
 
-          // XXX This if for debugging 
           if (nconf < 0)
           {
             Error ("kbf_need: nconf %d for phot_top %d for ion %d of z %d and istate %d\n", nconf, n, nion, phot_top[n].z,
                    phot_top[n].istate);
           }
-          // XXX This if for debugging 
 
           density = den_config (xplasma, nconf);
         }
@@ -679,13 +678,13 @@ int sobolev_error_counter = 0;
  *
  * ### Notes ###
  *
- * The routine includes a correcton for the filling factor which
+ * The routine includes a correction for the filling factor which
  * reduces tau
  *
  **********************************************************/
 double
 sobolev (one, x, den_ion, lptr, dvds)
-     WindPtr one;               // This is a single cell in the wind
+     WindPtr one;
      double x[];
      double den_ion;
      struct lines *lptr;
@@ -704,11 +703,11 @@ sobolev (one, x, den_ion, lptr, dvds)
   ndom = wmain[plasmamain->nwind].ndom;
   nion = lptr->nion;
 
-  levden_upper = 0;             // initialize to avoid compiler warning
+  levden_upper = 0;
 
   if ((dvds = fabs (dvds)) == 0.0)      // This forces dvds to be positive -- a good thing!
   {
-    d1 = d2 = 0.;               // Eliminate warning when complied with clang
+    d1 = d2 = 0.;
     tau = VERY_BIG;
     Error ("Sobolev: Surprise tau = VERY_BIG as dvds is 0\n");
   }
@@ -1075,32 +1074,35 @@ scatter (p, nres, nnscat)
            then the photon weight gets multiplied down by a factor (nu-nu_0)/nu
            and we force a kpkt to be created */
 
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        /* This is the new approach which does not explicityly conserve energy.
-           Re record the amount of energy going into the simple ion ionization pool.  This
-           version does not produce nan if prob_kpt is 0 and then reduce the photon weight
-           to allow for the portion of the energy that went into the ionization pool before
-           generating a kpkt.  In this approach we always generate a kpkt */
-
-        xplasma->bf_simple_ionpool_in += p->w * (1 - prob_kpkt);
-        p->w *= prob_kpkt;
-
-        macro_gov (p, nres, 2, &which_out);     //routine to deal with kpkt
-#else
-        /* This is the old approach.  Process the BF photon for a simple atom.  In this
-           approach we generate a kpkt or an r-packet depending on whether the probility
-           of creating a kpkt, namely prob_kpkt
-         */
-
-        if (prob_kpkt > kpkt_choice)
+        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
+          /* This is the new approach which does not explicityly conserve energy.
+             Re record the amount of energy going into the simple ion ionization pool.  This
+             version does not produce nan if prob_kpt is 0 and then reduce the photon weight
+             to allow for the portion of the energy that went into the ionization pool before
+             generating a kpkt.  In this approach we always generate a kpkt */
+
+          xplasma->bf_simple_ionpool_in += p->w * (1 - prob_kpkt);
+          p->w *= prob_kpkt;
+
           macro_gov (p, nres, 2, &which_out);   //routine to deal with kpkt
         }
         else
         {
-          macro_gov (p, nres, 1, &which_out);   //routine to deal with fake macro atom bf excitation
+          /* This is the old approach.  Process the BF photon for a simple atom.  In this
+             approach we generate a kpkt or an r-packet depending on whether the probility
+             of creating a kpkt, namely prob_kpkt
+           */
+
+          if (prob_kpkt > kpkt_choice)
+          {
+            macro_gov (p, nres, 2, &which_out); //routine to deal with kpkt
+          }
+          else
+          {
+            macro_gov (p, nres, 1, &which_out); //routine to deal with fake macro atom bf excitation
+          }
         }
-#endif
 
       }
       else
@@ -1111,7 +1113,7 @@ scatter (p, nres, nnscat)
         Exit (0);
       }
     }
-    else if (*nres == -2)
+    else if (*nres == NRES_FF)
     {                           /* This is a ff event (SS). */
       macro_gov (p, nres, 2, &which_out);       //ff always make a k-packet
     }
@@ -1120,14 +1122,13 @@ scatter (p, nres, nnscat)
 
   }
 
-
   /* END OF SECTION FOR HANDLING ASPECTS OF SCATTERING PROCESSES THAT ARE SPECIFIC TO MACRO-ATOMS. */
 
   /* Set nres  correctly and make sure the frequency is correct
      for a resonanant scatter. Note that nres may have changed especially for macro-atoms */
 
   p->nres = *nres;
-  if (*nres > -1 && *nres < nlines)
+  if (*nres > NRES_ES && *nres < nlines)
   {
     p->freq = lin_ptr[*nres]->freq;
   }
@@ -1139,11 +1140,11 @@ scatter (p, nres, nnscat)
      that ff and bf are only treated as scattering processes in macro-atom mode.
    */
 
-  if (*nres == -1)
+  if (*nres == NRES_ES)
   {
     compton_dir (p);
   }
-  else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
+  else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {
     randvec (z_prime, 1.0);
     stuff_v (z_prime, p->lmn);
@@ -1162,7 +1163,7 @@ scatter (p, nres, nnscat)
   /* If we are in macro-atom mode, add the photon to the created wind spectrum.  For simple
      atoms the wind spectrum is constructed in sectra.c */
 
-  if (geo.rt_mode == RT_MODE_MACRO && *nres != -1)
+  if (geo.rt_mode == RT_MODE_MACRO && *nres != NRES_ES)
   {
     p->nmacro++;
     spec_add_one (p, SPEC_CWIND);

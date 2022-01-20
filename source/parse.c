@@ -167,18 +167,43 @@ parse_command_line (argc, argv)
         Log ("Using only old approach with linear Doppler shifts, etc. and not considering co-moving frame effects.\n");
         j = i;
       }
+      else if (strcmp (argv[i], "-no-matrix-storage") == 0)
+      {
+        modes.store_matom_matrix = FALSE;
+        Log ("Not storing the macro-atom matrix (on-the-fly method) if Matom.ransition_mode is matrix.\n");
+        j = i;
+      }
+
+      else if (strcmp (argv[i], "--version") == 0)
+      {
+        /* give information about the python version, such as commit hash */
+        Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
+        Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
+        /* warn the user if there are uncommited changes */
+        int git_diff_status = GIT_DIFF_STATUS;
+        if (git_diff_status > 0)
+          Log ("This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
+        exit (1);
+      }
+
       else if (strcmp (argv[i], "-xtest") == 0)
       {
         run_xtest = TRUE;
         Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
-//OLD      else if (strcmp (argv[i], "-ztest") == 0)
-//OLD      {
-//OLD        run_ztest = TRUE;
-//OLD        Log ("Run ztest, optional code\n");
-//OLD        j = i;
-//OLD      }
+      else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
+      {
+        modes.ignore_partial_cells = TRUE;
+        Log ("Cells partially in the wind will be ingnored.\n");
+        j = i;
+      }
+      else if (strcmp (argv[i], "-include_partial_cells") == 0)
+      {
+        modes.ignore_partial_cells = FALSE;
+        Log ("Cells partially in the wind will be ingnored.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;
@@ -263,12 +288,12 @@ parse_command_line (argc, argv)
 
     /* Create a subdirectory to store diaganostic files */
 
-    sprintf (files.diagfolder, "diag_%s/", files.root);
+    sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
-    strcpy (files.diag, files.diagfolder);
+
     sprintf (dummy, "_%d.diag", rank_global);
-    strcat (files.diag, files.root);
-    strcat (files.diag, dummy);
+
+    sprintf (files.diag, "%.50s/%.50s%.50s", files.diagfolder, files.root, dummy);
 
     /* Set up the directory structure for storing the rng state */
 
@@ -305,9 +330,13 @@ parse_command_line (argc, argv)
 void
 help ()
 {
-  char *some_help;
+#ifdef MPI_ON
+  if (rank_global == 0)
+  {
+#endif
+    char *some_help;
 
-  some_help = "\
+    some_help = "\
 \n\
 This program simulates radiative transfer in a (biconical) CV, YSO, quasar, TDE or (spherical) stellar wind \n\
 \n\
@@ -317,46 +346,54 @@ where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
 \n\
 and the switches have the following meanings \n\
 \n\
- -h             Print this help message and stop \n\
- -r             Restart a run of the progarm reading the file xxx.windsave \n\
- -t time_max    Limit the total time to approximately time_max seconds.  Note that the program checks \n\
-                for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
-                is attempting to save the program outputs so that the program can be restarted with \n\
-                -r if that is desired. \n\
- -v n           Increase or decrease the amount of print out.  The default is 5.  Larger numbers increase  \n\
-                the amount printed; smaller numbers decrease it.   \n\
- --dry-run      Create a new .pf file and stop \n\
- -i             Same as --dry-run \n\
- --version      Print out python version, commit hash and if there were files with uncommitted \n\
-                changes and stop \n\
- --rseed        Set the random number seed to be time-based, rather than fixed. \n\
- --rng          Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
+ -h                     Print this help message and stop \n\
+ -r                     Restart a run of the progarm reading the file xxx.windsave \n\
+ -t time_max            Limit the total time to approximately time_max seconds.  Note that the program checks \n\
+                        for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
+                        is attempting to save the program outputs so that the program can be restarted with \n\
+                        -r if that is desired. \n\
+ -v n                   Increase or decrease the amount of print out.  The default is 5.  Larger numbers increase  \n\
+                        the amount printed; smaller numbers decrease it.   \n\
+ --dry-run              Create a new .pf file and stop \n\
+ -i                     Same as --dry-run \n\
+ --version              Print out python version, commit hash and if there were files with uncommitted \n\
+                        changes and stop \n\
+ --rseed                Set the random number seed to be time-based, rather than fixed. \n\
+ --rng                  Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
 \n\
 Other switches exist but these are not intended for the general user.\n\
 These are largely diagnostic or for special cases. These include\n\
- -d             Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
-                Python will then query the user for information about what to do with a series of \n\
-                inputs beginning with @ \n\
- -e             Change the maximum number of errors of one type (by default 100,000) before the program will quit\n\
- -e_write 	Change the maximum number of errors of one type (by default 100) to print out before recording errors silently\n\
- -f             Invoke a fixed temperature mode, used for runs with Zeus or Plutu \n\
- -z             Invoke a special mode for that causes Python to start with a run from Zeus or Plutu\n\
- -p [range]     Vary the number of photons in ionization cycles logarthmically building up to the final value\n\
-                Range is in powers of 10, the difference beween the number of photons in the first cycle \n\
-                compared to the last. If range is missing, range is assumed to be 1, in which case the  \n\
-                number of photons will in the first cycle will be one order of magniude less than in the last cycle \n\
- -classic       Use Python in it's classic configuration, with linear Doppler shifts, etc., and where co-moving frame\n\
-                effects are not taken into account.\n\
- -srclassic     Use Python with full special relativity for Doppler shits, etc., but do not include any co-moving frame\n\
-                effects.\n\
+ -d                     Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
+                        Python will then query the user for information about what to do with a series of \n\
+                        inputs beginning with @ \n\
+ -e                     Change the maximum number of errors of one type (by default 100,000) before the program will quit\n\
+ -e_write               Change the maximum number of errors of one type (by default 100) to print out before recording errors silently\n\
+ -f                     Invoke a fixed temperature mode, used for runs with Zeus or Plutu \n\
+ -z                     Invoke a special mode for that causes Python to start with a run from Zeus or Plutu\n\
+ -p [range]             Vary the number of photons in ionization cycles logarthmically building up to the final value\n\
+                        Range is in powers of 10, the difference beween the number of photons in the first cycle \n\
+                        compared to the last. If range is missing, range is assumed to be 1, in which case the  \n\
+                        number of photons will in the first cycle will be one order of magniude less than in the last cycle \n\
+ -classic               Use Python in its classic configuration, with linear Doppler shifts, etc., and where co-moving frame\n\
+                        effects are not taken into account.\n\
+ -srclassic             Use Python with full special relativity for Doppler shifts, etc., but do not include any co-moving frame\n\
+                        effects.\n\
+ -ignore_partial_cells  Ignore wind cells that are only partially filled by the wind  \n\
+ -include_partial_cells Include wind cells that are only partially filled by the wind (also the default)  \n\
+ -no-matrix-storage     Do not store macro-atom transition matrices if using the macro-atom line transfer and the matrix matom_transition_mode.\n\
 \n\
+ -xtest                 Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\
+                        setup.  This is only useful to devlopers \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\
 \n\
 \n\
 ";                              // End of string to provide one with help
 
-  printf ("%s\n", some_help);
+    printf ("%s\n", some_help);
+#ifdef MPI_ON
+  }
+#endif
 
-  exit (0);                     // Note that here we simply do want to exit, not use Exit
+  Exit (0);                     // Note that here we simply do want to exit, not use Exit
 }

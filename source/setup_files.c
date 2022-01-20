@@ -173,9 +173,11 @@ setup_created_files ()
 
   /* save python.phot and disk.diag files under diag_root folder */
   strcpy (files.phot, files.diagfolder);
-  strcpy (files.disk, files.diagfolder);
+//OLD  strcpy (files.disk, files.diagfolder);
   strcat (files.phot, "python");
-  strcat (files.disk, files.root);
+//OLD  strcat (files.disk, files.root);
+
+  sprintf (files.disk, "%.100s/%.100s", files.diagfolder, files.root);
 
   strcat (files.wspec, ".spec_tot");
   strcat (files.lwspec, ".log_spec_tot");

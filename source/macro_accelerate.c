@@ -243,7 +243,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     if (phot_top[i].macro_info == 1 && geo.macro_simple == 0)   //part of macro atom
     {
       target_level = phot_top[i].uplev;
-      Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bf[i];
+      Q_matrix[nlevels_macro][target_level] += Qcont = mplasma->cooling_bf_col[i];
       Q_norm[nlevels_macro] += Qcont;
 
     }
@@ -348,7 +348,8 @@ calc_matom_matrix (xplasma, matom_matrix)
   gsl_matrix *inverse_matrix;
   gsl_permutation *p;
 
-  int ierr, s;
+//OLD  int ierr, s;
+  int s;
 
   /* create a view into the array we just created */
   N = gsl_matrix_view_array (a_data, nrows, nrows);
@@ -359,10 +360,12 @@ calc_matom_matrix (xplasma, matom_matrix)
   inverse_matrix = gsl_matrix_alloc (nrows, nrows);
 
   /* first we do the LU decomposition */
-  ierr = gsl_linalg_LU_decomp (&N.matrix, p, &s);
+//OLD  ierr = gsl_linalg_LU_decomp (&N.matrix, p, &s);
+  gsl_linalg_LU_decomp (&N.matrix, p, &s);
 
   /* from the decomposition, get the inverse of the Q matrix */
-  ierr = gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+//OLD  ierr = gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+  gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
 
   /* We now copy our rate matrix into the prepared matrix */
   for (mm = 0; mm < nrows; mm++)
@@ -466,13 +469,14 @@ fill_kpkt_rates (xplasma, escape, p)
   /* If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
    * every time the wind is updated */
 
-  if (mplasma->kpkt_rates_known != 1)
+  if (mplasma->kpkt_rates_known != TRUE)
   {
     cooling_normalisation = 0.0;
     cooling_bftot = 0.0;
     cooling_bbtot = 0.0;
     cooling_ff = 0.0;
     cooling_bf_coltot = 0.0;
+    mplasma->cooling_bb_simple_tot = 0.0;
 
     /* Start of BF calculation */
     /* JM 1503 -- we used to loop over ntop_phot here, 
@@ -558,6 +562,7 @@ fill_kpkt_rates (xplasma, escape, p)
 
         cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
         mplasma->cooling_bb[i] = cooling_bb[i];
+        mplasma->cooling_bb_simple_tot += cooling_bb[i];
       }
 
       if (cooling_bb[i] < 0)
@@ -636,7 +641,7 @@ fill_kpkt_rates (xplasma, escape, p)
     mplasma->cooling_bf_coltot = cooling_bf_coltot;
     mplasma->cooling_adiabatic = cooling_adiabatic;
     mplasma->cooling_normalisation = cooling_normalisation;
-    mplasma->kpkt_rates_known = 1;
+    mplasma->kpkt_rates_known = TRUE;
 
   }
 
@@ -676,11 +681,12 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
-  double t_e, ne;
+//OLD  double t_e, ne;
+  double ne;
   double bb_cont;
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
-  t_e = xplasma->t_e;           //electron temperature 
+//OLD  t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
 
   /* The first step is to identify the configuration that has been excited. */
@@ -781,6 +787,7 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
       else
       {
         Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+        bf_int_inrange = 0;
       }
       penorm_band += eprbs_band[m] * bf_int_inrange / bf_int_full;
       m++;
@@ -834,7 +841,7 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   int i;
   int escape_dummy;
   struct topbase_phot *cont_ptr;
-  double electron_temperature;
+//OLD  double electron_temperature;
   MacroPtr mplasma;
   WindPtr one;
   struct photon pdummy;
@@ -848,10 +855,14 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   penorm = 0.0;
   penorm_band = 0.0;
 
-  check_plasma (xplasma, "f_kpkt_emit_accelerate");
+  if (check_plasma (xplasma, "f_kpkt_emit_accelerate"))
+  {
+    Error ("f_kpkt_emit_accelrate: Calculating emissivity for the dummy plasma cell\n");
+    return (0);
+  }
   mplasma = &macromain[xplasma->nplasma];
 
-  electron_temperature = xplasma->t_e;
+//OLD  electron_temperature = xplasma->t_e;
 
   /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
      generation (see call to one_ff below) */
@@ -907,59 +918,63 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
       else
       {
         Error ("Something wrong here: f_matom_emit_accelerate broke the law!");
+        bf_int_inrange = 0;
       }
       penorm_band += eprbs_band * bf_int_inrange / bf_int_full;
     }
+  }
 
-    for (i = 0; i < nlines; i++)
+  for (i = 0; i < nlines; i++)
+  {
+    if (line[i].macro_info == 1 && geo.macro_simple == 0)       //line is for a macro atom
     {
-      if (line[i].macro_info == 1 && geo.macro_simple == 0)     //line is for a macro atom
+      eprbs = 0.0;              //these are not deactivations in this approach any more but jumps to macro atom levels
+    }
+    else                        //line is not for a macro atom - use simple method
+    {
+      penorm += eprbs = mplasma->cooling_bb[i];
+      if ((line[i].freq > freq_min) && (line[i].freq < freq_max))       // correct range
       {
-        eprbs = 0.0;            //these are not deactivations in this approach any more but jumps to macro atom levels
-      }
-      else                      //line is not for a macro atom - use simple method
-      {
-        penorm += eprbs = mplasma->cooling_bb[i];
-        if ((line[i].freq > freq_min) && (line[i].freq < freq_max))     // correct range
-        {
-          penorm_band += eprbs_band = eprbs;
-        }
+        penorm_band += eprbs_band = eprbs;
       }
     }
+  }
 
 
 
-    /* consult issues #187, #492 regarding free-free */
-    penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
+  /* consult issues #187, #492 regarding free-free */
+  penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
 
-    total_ff_lofreq = total_free (one, xplasma->t_e, 0, ff_freq_min);
-    total_ff = total_free (one, xplasma->t_e, ff_freq_min, ff_freq_max);
+  total_ff_lofreq = total_free (one, xplasma->t_e, 0, ff_freq_min);
+  total_ff = total_free (one, xplasma->t_e, ff_freq_min, ff_freq_max);
 
-    /*
-     * Do not increment penorm_band when the total free-free luminosity is zero
-     */
+  /*
+   * Do not increment penorm_band when the total free-free luminosity is zero
+   */
 
-    if (freq_min > ff_freq_min)
-    {
-      if (total_ff > 0)
-        penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff * mplasma->cooling_ff;
-    }
-    else if (freq_max > ff_freq_min)
-    {
-      if (total_ff > 0)
-        penorm_band += total_free (one, xplasma->t_e, ff_freq_min, freq_max) / total_ff * mplasma->cooling_ff;
-      if (total_ff_lofreq > 0)
-        penorm_band += total_free (one, xplasma->t_e, freq_min, ff_freq_min) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
-    }
-    else
-    {
-      if (total_ff_lofreq > 0)
-        penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
-    }
+  if (freq_min > ff_freq_min)
+  {
+    if (total_ff > 0)
+      penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff * mplasma->cooling_ff;
+  }
+  else if (freq_max > ff_freq_min)
+  {
+    if (total_ff > 0)
+      penorm_band += total_free (one, xplasma->t_e, ff_freq_min, freq_max) / total_ff * mplasma->cooling_ff;
+    if (total_ff_lofreq > 0)
+      penorm_band += total_free (one, xplasma->t_e, freq_min, ff_freq_min) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
+  }
+  else
+  {
+    if (total_ff_lofreq > 0)
+      penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
+  }
 
-    penorm += eprbs = mplasma->cooling_adiabatic;
+  penorm += eprbs = mplasma->cooling_adiabatic;
 
-    for (i = 0; i < nphot_total; i++)
+  for (i = 0; i < nphot_total; i++)
+  {
+    if (phot_top[i].macro_info == 0 || geo.macro_simple == 1)
     {
       penorm += eprbs = mplasma->cooling_bf_col[i];
     }
@@ -974,4 +989,148 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
     return (0.0);
   }
 
+}
+
+/**********************************************************/
+/**
+ * @brief  Choose a deactivation process using the matrix scheme
+ *         for macro-atom transition probabilities
+ *
+ * @param[in] PlasmaPtr xplasma        The plasma cell in question
+ * @param[in] int       uplvl          The level the macro-atom was activated with
+ *
+ * @return  int   j  the level the macro-atom will deactivate from 
+ *
+ * @details 
+ *
+ **********************************************************/
+
+int
+matom_deactivation_from_matrix (xplasma, uplvl)
+     PlasmaPtr xplasma;
+     int uplvl;
+{
+  double z, total;
+  int j, i;
+  int nrows = nlevels_macro + 1;
+  double **matom_matrix;
+  MacroPtr mplasma;
+
+  mplasma = &macromain[xplasma->nplasma];
+
+  if (mplasma->matrix_rates_known == FALSE)
+  {
+    if (mplasma->store_matom_matrix == FALSE)
+    {
+      /* we aren't storing the macro-atom matrix, so we need to allocate and calculate it */
+      matom_matrix = (double **) calloc (sizeof (double *), nrows);
+      for (i = 0; i < nrows; i++)
+      {
+        matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
+      }
+    }
+    else
+    {
+      matom_matrix = mplasma->matom_matrix;
+    }
+
+    calc_matom_matrix (xplasma, matom_matrix);
+
+    /* if we are storing the matrix, flag that we know the rates now */
+    if (mplasma->store_matom_matrix == TRUE)
+    {
+      mplasma->matrix_rates_known = TRUE;
+    }
+  }
+//OLD  else if (mplasma->store_matom_matrix == TRUE)
+  else
+  {
+    matom_matrix = mplasma->matom_matrix;
+  }
+
+  /* Now use the B matrix to calculate the outgoing state from activating state "uplvl" */
+  /* we draw a random number and sample from the column in the matrix corresponding to uplvl */
+  z = random_number (0.0, 1.0);
+  j = 0;
+  total = 0.0;
+  while (total < z)
+  {
+    total += matom_matrix[uplvl][j];
+    j++;
+  }
+
+  /* This if statement is added to prevent case where z is essentially 0. */
+  if (j > 0)
+  {
+    j = j - 1;
+  }
+
+  if (mplasma->store_matom_matrix == FALSE)
+  {
+    /* need to free each calloc-ed row of the matrixes */
+    for (i = 0; i < nrows; i++)
+    {
+      free (matom_matrix[i]);
+    }
+    free (matom_matrix);
+  }
+
+  return (j);
+}
+
+/**********************************************************/
+/**
+ * @brief calculate all the macro-atom matrices in advance 
+ * @return  0
+ * 
+ * @details calculate all the macro-atom B matrices in advance 
+ * of the ionization cycles, and communicate them between 
+ * parallel threads if necessary. Populates matom_matrix in 
+ * macromain.
+ **********************************************************/
+
+int
+calc_all_matom_matrices ()
+{
+  int ndo, my_nmin, my_nmax, n;
+  struct timeval timer_t0;
+  char message[LINELENGTH];
+  MacroPtr mplasma;
+  PlasmaPtr xplasma;
+#ifdef MPI_ON
+  ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
+  Log_parallel ("calc_all_matom_matrices: thread %d calculating matrix for cells %d to %d %d \n", rank_global, my_nmin, my_nmax, ndo);
+#else
+  my_nmin = 0;
+  my_nmax = NPLASMA;
+  ndo = NPLASMA;
+#endif
+
+  timer_t0 = init_timer_t0 ();
+
+  for (n = my_nmin; n < my_nmax; n++)
+  {
+    xplasma = &plasmamain[n];
+    mplasma = &macromain[n];
+
+    if (mplasma->store_matom_matrix == TRUE)
+    {
+      calc_matom_matrix (xplasma, mplasma->matom_matrix);
+    }
+  }
+
+  /* print the time taken for this thread to complete */
+  sprintf (message, "calc_all_matom_matrices: thread %d calculated %d matrices in", rank_global, ndo);
+  print_timer_duration (message, timer_t0);
+
+  /* this deals with communicating the matrices between threads (does nothing in serial mode) */
+  communicate_matom_matrices ();
+
+  /* flag the matrix rates as known */
+  for (n = 0; n < NPLASMA; n++)
+  {
+    macromain[n].matrix_rates_known = TRUE;
+  }
+
+  return (0);
 }

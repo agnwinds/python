@@ -77,7 +77,7 @@ matom (p, nres, escape)
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
   int uplvl, uplvl_old;
-  int icheck;
+//OLD  int icheck;
   double jprbs[2 * (NBBJUMPS + NBFJUMPS)];
   double eprbs[NBBJUMPS + NBFJUMPS];
   double pjnorm, penorm;
@@ -97,10 +97,13 @@ matom (p, nres, escape)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "matom");
+  if (check_plasma (xplasma, "matom"))
+  {
+    Error ("matom:Working in dummy plasma cell\n");
+    return (-1);
+  }
 
   mplasma = &macromain[xplasma->nplasma];
-
 
   t_e = xplasma->t_e;
   ne = xplasma->ne;
@@ -335,26 +338,26 @@ matom (p, nres, escape)
     }
 
     /* n now identifies the jump that occurs - now set the new level. */
-    icheck = 0;
+//OLD    icheck = 0;
     if (n < nbbd)
     {                           /* bb downwards jump */
       uplvl = line[config[uplvl].bbd_jump[n]].nconfigl;
-      icheck = 1;
+//OLD      icheck = 1;
     }
     else if (n < (nbbd + nbfd))
     {                           /* bf downwards jump */
       uplvl = phot_top[config[uplvl].bfd_jump[n - nbbd]].nlev;
-      icheck = 2;
+//OLD      icheck = 2;
     }
     else if (n < (nbbd + nbfd + nbbu))
     {                           /* bb upwards jump */
       uplvl = line[config[uplvl].bbu_jump[n - nbbd - nbfd]].nconfigu;
-      icheck = 3;
+//OLD      icheck = 3;
     }
     else if (n < (nbbd + nbfd + nbbu + nbfu))
     {                           /* bf upwards jump */
       uplvl = phot_top[config[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
-      icheck = 4;
+//OLD      icheck = 4;
     }
     else
     {
@@ -717,12 +720,13 @@ kpkt (p, nres, escape, mode)
   double cooling_adiabatic;
   double cooling_normalisation;
   double destruction_choice;
-  double electron_temperature;
+//OLD  double electron_temperature;
   double upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   double freqmin, freqmax;
+  double cooling_bbtot, cooling_bf_coltot, cooling_bb_use;
 
 
   /* Idea is to calculated the cooling
@@ -739,10 +743,14 @@ kpkt (p, nres, escape, mode)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  check_plasma (xplasma, "kpkt");
+  if (check_plasma (xplasma, "kpkt"))
+  {
+    Error ("kpkt:Photon appears to be having interaction in wind cell associated with dummy plasma structure\n");
+  }
+
   mplasma = &macromain[xplasma->nplasma];
 
-  electron_temperature = xplasma->t_e;
+//OLD  electron_temperature = xplasma->t_e;
 
   /* Set maximum and minimum frequency limits.  See #187. We need band limits for free free packet
      generation (see call to one_ff below). A bandaid is applied if there is not enough
@@ -771,10 +779,11 @@ kpkt (p, nres, escape, mode)
    The next little section deals whith handling adiabatic cooling and shock heating.
    */
 
-  cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;
+  cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic - mplasma->cooling_bbtot - mplasma->cooling_bf_coltot;
   cooling_adiabatic = 0.0;
 
-  if (mode == KPKT_MODE_ALL)
+  /* if kpkt mode is all processes, or continuum + adiabatic, then include adiabatic cooling */
+  if (mode == KPKT_MODE_ALL || mode == KPKT_MODE_CONT_PLUS_ADIABATIC)
   {
     if (KPKT_NET_HEAT_MODE && geo.nonthermal)
     {
@@ -789,6 +798,19 @@ kpkt (p, nres, escape, mode)
     }
   }
   cooling_normalisation += cooling_adiabatic;
+
+  if (mode == KPKT_MODE_ALL)
+  {
+    cooling_bbtot = mplasma->cooling_bbtot;
+    cooling_bf_coltot = mplasma->cooling_bf_coltot;
+  }
+  else
+  {
+    cooling_bbtot = mplasma->cooling_bb_simple_tot;
+    cooling_bf_coltot = 0.0;
+    /* we don't conaider collisional ionization of simple ions as a cooling process */
+  }
+  cooling_normalisation += cooling_bbtot + cooling_bf_coltot;
 
 
   /* The cooling rates for the recombination and collisional processes are now known. 
@@ -836,16 +858,17 @@ kpkt (p, nres, escape, mode)
            approach to choosing photon weights - this means we 
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
+        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
         {
-          upweight_factor = xplasma->recomb_simple_upweight[i];
-          p->w *= upweight_factor;
+          if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
+          {
+            upweight_factor = xplasma->recomb_simple_upweight[i];
+            p->w *= upweight_factor;
 
-          /* record the amount of energy being extracted from the simple ion ionization pool */
-          xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+            /* record the amount of energy being extracted from the simple ion ionization pool */
+            xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+          }
         }
-#endif
 
         return (0);
       }
@@ -855,7 +878,7 @@ kpkt (p, nres, escape, mode)
       }
     }
   }
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot))
+  else if (destruction_choice < (mplasma->cooling_bftot + cooling_bbtot))
   {
     /* a collisional destruction has occurred and so, if the line is  associated with
        a macro atom, it  must be excited.
@@ -864,7 +887,18 @@ kpkt (p, nres, escape, mode)
     destruction_choice = destruction_choice - mplasma->cooling_bftot;
     for (i = 0; i < nlines; i++)
     {
-      if (destruction_choice < mplasma->cooling_bb[i])
+      /* this is a bit inelegant, but whether we want to consider the contribution 
+         here depends on the mode and type of line */
+      if (mode == KPKT_MODE_ALL || line[i].macro_info == FALSE || geo.macro_simple == TRUE)
+      {
+        cooling_bb_use = mplasma->cooling_bb[i];
+      }
+      else
+      {
+        cooling_bb_use = 0.0;
+      }
+
+      if (destruction_choice < cooling_bb_use && cooling_bb_use != 0.0)
       {
         *nres = line[i].where_in_list;
         if (line[i].macro_info == TRUE && geo.macro_simple == FALSE)
@@ -880,41 +914,41 @@ kpkt (p, nres, escape, mode)
       }
       else
       {
-        destruction_choice = destruction_choice - mplasma->cooling_bb[i];
+        destruction_choice = destruction_choice - cooling_bb_use;
       }
     }
   }
 
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff))
+  else if (destruction_choice < (mplasma->cooling_bftot + cooling_bbtot + mplasma->cooling_ff))
   {
     /* If reached this point, it is a FF destruction event */
     /* consult issues #187, #492 regarding free-free */
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->freq = one_ff (one, freqmin, freqmax);
     return (0);
   }
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq))
+  else if (destruction_choice < (mplasma->cooling_bftot + cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq))
   {
     /*this is ff at a frequency that is so low frequency that it is not worth tracking further */
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->istat = P_LOFREQ_FF;
     return (0);
   }
 
 
   else if (destruction_choice <
-           (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq + cooling_adiabatic))
+           (mplasma->cooling_bftot + cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq + cooling_adiabatic))
   {
     /* It is a k-packat that is destroyed by adiabatic cooling */
 
-    if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
+    if (geo.adiabatic == 0 || mode == KPKT_MODE_CONTINUUM)
     {
       Error ("kpkt: Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }
     *escape = TRUE;
-    *nres = -2;
+    *nres = NRES_FF;
     p->istat = P_ADIABATIC;
 
     return (0);
@@ -925,8 +959,7 @@ kpkt (p, nres, escape, mode)
   {
     /* It is a k-packed destroyed by collisional ionization in a macro atom. */
     destruction_choice =
-      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_ff_lofreq -
-      cooling_adiabatic;
+      destruction_choice - mplasma->cooling_bftot - cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_ff_lofreq - cooling_adiabatic;
 
     for (i = 0; i < nphot_total; i++)
     {
@@ -957,8 +990,8 @@ kpkt (p, nres, escape, mode)
   Error ("kpkt: Failed to select a destruction process in kpkt. Abort.\n");
   Error
     ("kpkt: choice %8.4e norm %8.4e cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_ff_lofreq %g, cooling_bf_coltot %g cooling_adiabatic %g cooling_adiabatic %g\n",
-     destruction_choice, cooling_normalisation, mplasma->cooling_bftot, mplasma->cooling_bbtot, mplasma->cooling_ff,
-     mplasma->cooling_ff_lofreq, mplasma->cooling_bf_coltot, mplasma->cooling_adiabatic, cooling_adiabatic);
+     destruction_choice, cooling_normalisation, mplasma->cooling_bftot, cooling_bbtot, mplasma->cooling_ff,
+     mplasma->cooling_ff_lofreq, cooling_bf_coltot, mplasma->cooling_adiabatic, cooling_adiabatic);
 
   *escape = TRUE;
   p->istat = P_ERROR_MATOM;
@@ -1103,10 +1136,10 @@ fake_matom_bf (p, nres, escape)
      int *escape;
 {
   WindPtr one;
-  PlasmaPtr xplasma;
+//OLD  PlasmaPtr xplasma;
 
   one = &wmain[p->grid];
-  xplasma = &plasmamain[one->nplasma];
+//OLD  xplasma = &plasmamain[one->nplasma];
 
   *escape = TRUE;
 
@@ -1162,16 +1195,19 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
   double sp_rec_rate;
   int n, m;
   int nbbd, nbfd;
-  double t_e, ne;
+//OLD  double t_e, ne;
+  double ne;
   double bb_cont;
   WindPtr one;
   PlasmaPtr xplasma;
+  MacroPtr mplasma;
 
 
   one = &w[p->grid];
   xplasma = &plasmamain[one->nplasma];
+  mplasma = &macromain[one->nplasma];
 
-  t_e = xplasma->t_e;
+//OLD  t_e = xplasma->t_e;
   ne = xplasma->ne;
 
   uplvl = upper;
@@ -1227,7 +1263,8 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
     if (cont_ptr->freq[0] < freq_max)
     {
-      sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
+//OLD      sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
+      sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];
 
       eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
       penorm += eprbs[m];
@@ -1242,7 +1279,7 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
 
   double xfreq;
-  xfreq = 0;
+  xfreq = -1;                   /* need to be below 0 to allow for case when freq_min = 0 */
   while (xfreq < freq_min || xfreq > freq_max)
   {
     threshold = random_number (0.0, 1.0);

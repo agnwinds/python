@@ -453,6 +453,7 @@ double
 calc_te (PlasmaPtr xplasma, double tmin, double tmax)
 {
   double z1, z2;
+  int ierr = FALSE;
 
 
   /* we assign a plasma pointer here to a fixed structure because
@@ -475,7 +476,11 @@ calc_te (PlasmaPtr xplasma, double tmin, double tmax)
 
   if ((z1 * z2 < 0.0))
   {                             // Then the interval is bracketed
-    xplasma->t_e = zero_find (zero_emit2, tmin, tmax, 50.);
+    xplasma->t_e = zero_find (zero_emit2, tmin, tmax, 50., &ierr);
+    if (ierr)
+    {
+      Error ("calc_te: zero_find failed to find a temperature\n");
+    }
 
   }
   else if (fabs (z1) < fabs (z2))

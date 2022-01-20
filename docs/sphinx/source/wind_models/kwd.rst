@@ -1,4 +1,4 @@
-The Knigge, Wood, and Drew prescription of a bi-conical wind
+KWD biconical wind prescription
 ############################################################
 
 `Knigge, Woods & Drew (1995) <https://ui.adsabs.harvard.edu/abs/1995MNRAS.273..225K/abstract>`_ developed a parameterization for a bi-conical flow, which in slightly modified form is built into Python.  

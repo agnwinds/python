@@ -1,10 +1,11 @@
+# This file allows one to specify switches to be used in the regression tests.
 # py 1d_sn.pf
-py -classic agn_macro.pf
-py -classic agn_short.pf
+# py -classic agn_macro.pf
+py -classic agn_classic.pf
 py -gamma agn_gamma.pf
-py -gamma agn_macro_gamma.pf
-py cv.pf
-py -classic cv_kur.pf
-py cv_vert.pf
-py star.pf
-py two.pf
+# py -gamma agn_macro_gamma.pf
+# py cv.pf
+# py -classic cv_kur.pf
+# py cv_vert.pf
+# py star.pf
+# py two.pf

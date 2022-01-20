@@ -51,21 +51,21 @@
 
 
 #define NELEMENTS		50      /* Maximum number of elements to consider */
-int nelements;                  /* The actual number of ions read from the data file */
+extern int nelements;                  /* The actual number of ions read from the data file */
 #define NIONS		500     /* Maximum number of ions to consider */
-int nions;                      /*The actual number of ions read from the datafile */
+extern int nions;                      /*The actual number of ions read from the datafile */
 #define NLEVELS 	12000   /* Maximum number of levels for all elements and ions */
-int nlevels;                    /*These are the actual number of levels which were read in */
+extern int nlevels;                    /*These are the actual number of levels which were read in */
 #define NLTE_LEVELS	12000   /* Maximum number of levels to treat explicitly */
-int nlte_levels;                /* Actual number of levels to treat explicityly */
+extern int nlte_levels;                /* Actual number of levels to treat explicityly */
 #define NLEVELS_MACRO   200     /* Maximum number of macro atom levels. (SS, June 04) */
-int nlevels_macro;              /* Actual number of macro atom levels. (SS, June 04) */
+extern int nlevels_macro;              /* Actual number of macro atom levels. (SS, June 04) */
 #define NLINES 		200000  /* Maximum number of lines to be read */
-int nlines;                     /* Actual number of lines that were read in */
-int nlines_macro;               /* Actual number of Macro Atom lines that were read in.  New version of get_atomic
+extern int nlines;                     /* Actual number of lines that were read in */
+extern int nlines_macro;               /* Actual number of Macro Atom lines that were read in.  New version of get_atomic
                                    data assumes that macro lines are read in before non-macro lines */
 #define N_INNER     10          /*Maximum number of inner shell ionization cross sections per ion */
-int n_inner_tot;                /*The actual number of inner shell ionization cross sections in total */
+extern int n_inner_tot;                /*The actual number of inner shell ionization cross sections in total */
 
 
 #define NBBJUMPS         100    /* Maximum number of Macro Atom bound-bound jumps from any one configuration (SS) */
@@ -78,7 +78,7 @@ int n_inner_tot;                /*The actual number of inner shell ionization cr
 // #define MAXJUMPS          10000      /* The maximum number of Macro Atom jumps before emission (if this is exceeded
 //                                           it gives up (SS) */
 #define NAUGER 2                /*Maximum number of "auger" processes */
-int nauger;                     /*Actual number of innershell edges for which autoionization is to be computed */
+extern int nauger;                     /*Actual number of innershell edges for which autoionization is to be computed */
 
 
 
@@ -99,9 +99,9 @@ typedef struct elements
 }
 ele_dummy, *ElemPtr;
 
-ElemPtr ele;
+extern ElemPtr ele;
 
-double rho2nh;                  /* Conversion constant from rho to nh the number of H atoms per unit volume */
+extern double rho2nh;                  /* Conversion constant from rho to nh the number of H atoms per unit volume */
 
 /* ions is the basic structure describing individual ions.  It is filled from 0 up to nions. 
  */
@@ -180,7 +180,7 @@ typedef struct ions
 }
 ion_dummy, *IonPtr;
 
-IonPtr ion;
+extern IonPtr ion;
 
 
 /* The structrued descibing the  energy levels.  
@@ -219,7 +219,7 @@ typedef struct configurations
 }
 config_dummy, *ConfigPtr;
 
-ConfigPtr config;
+extern ConfigPtr config;
 
 
 /* Structure to describe the lines */
@@ -255,13 +255,13 @@ typedef struct lines
 line_dummy, *LinePtr;
 
 
-LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that contains all the data, *lin_ptr
+extern LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that contains all the data, *lin_ptr
                                    is an array which contains a frequency ordered set of ptrs to line */
                                 /* fast_line (added by SS August 05) is going to be a hypothetical
                                    rapid transition used in the macro atoms to stabilise level populations */
-struct lines fast_line;
+extern struct lines fast_line;
 
-int nline_min, nline_max, nline_delt;   /* Used to select a range of lines in a frequency band from the lin_ptr array 
+extern int nline_min, nline_max, nline_delt;   /* Used to select a range of lines in a frequency band from the lin_ptr array 
                                            in situations where the frequency range of interest is limited, including for defining which
                                            lines come into play for resonant scattering along a line of sight, and in
                                            calculating band_limit luminosities.  The limits are established by the
@@ -273,7 +273,7 @@ int nline_min, nline_max, nline_delt;   /* Used to select a range of lines in a 
 
 
 #define N_COLL_STREN_PTS	20      //The maximum number of parameters in the interpolations
-int n_coll_stren;
+extern int n_coll_stren;
 
 typedef struct coll_stren
 {
@@ -290,18 +290,18 @@ typedef struct coll_stren
   double scups[N_COLL_STREN_PTS];       //The sclaed coll sttengths in ythe fit.
 } Coll_stren, *Coll_strenptr;
 
-Coll_stren coll_stren[NLINES];  
+extern Coll_stren coll_stren[NLINES];  
 
 
 
-int nxphot;                     /*The actual number of ions for which there are VFKY photoionization x-sections */
-double phot_freq_min;           /*The lowest frequency for which photoionization can occur */
-double inner_freq_min;          /*The lowest frequency for which inner shell ionization can take place */
+extern int nxphot;                     /*The actual number of ions for which there are VFKY photoionization x-sections */
+extern double phot_freq_min;           /*The lowest frequency for which photoionization can occur */
+extern double inner_freq_min;          /*The lowest frequency for which inner shell ionization can take place */
 
 #define NCROSS 2000             /* Maximum number of x-sections for a single photionization process */
-#define NTOP_PHOT 4000           /* Maximum number of photoionisation processes.  */
-int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
-int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
+#define NTOP_PHOT 400           /* Maximum number of photoionisation processes.  */
+extern int ntop_phot;                  /* The actual number of TopBase photoionzation x-sections */
+extern int nphot_total;                /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
 typedef struct topbase_phot
 {                               /* If the old topbase treatment is to be replaced by Macro Atoms perhaps this
@@ -334,11 +334,11 @@ typedef struct topbase_phot
   double f, sigma;              /*last freq, last x-section */
 } Topbase_phot, *TopPhotPtr;
 
-Topbase_phot phot_top[NLEVELS];
-TopPhotPtr phot_top_ptr[NLEVELS];       /* Pointers to phot_top in threshold frequency order - this */
+extern Topbase_phot phot_top[NLEVELS];
+extern TopPhotPtr phot_top_ptr[NLEVELS];       /* Pointers to phot_top in threshold frequency order - this */
 
-Topbase_phot inner_cross[N_INNER * NIONS];
-TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
+extern Topbase_phot inner_cross[N_INNER * NIONS];
+extern TopPhotPtr inner_cross_ptr[N_INNER * NIONS];
 
 
 
@@ -353,7 +353,7 @@ typedef struct inner_elec_yield
   double Ea;                    /*Average electron energy */
 } Inner_elec_yield, Inner_elec_yieldPtr;
 
-Inner_elec_yield inner_elec_yield[N_INNER * NIONS];
+extern Inner_elec_yield inner_elec_yield[N_INNER * NIONS];
 
 /* This structure for the flourescent photon yield following inner shell ionization from Kaastra and Mewe*/
 typedef struct inner_fluor_yield
@@ -365,7 +365,7 @@ typedef struct inner_fluor_yield
   double yield;                 /*number of photons per ionization */
 } Inner_fluor_yield, Inner_fluor_yieldPtr;
 
-Inner_fluor_yield inner_fluor_yield[N_INNER * NIONS];
+extern Inner_fluor_yield inner_fluor_yield[N_INNER * NIONS];
 
 
 
@@ -377,8 +377,9 @@ struct ground_fracs
                                    to the ground state as a function of temperature. ground_frac[0] is or t=5000
                                    and then we go in steps of 5000 to ground_frac[19] which is for t=1e5. these
                                    fractions must have been computed elsewhere */
-}
-ground_frac[NIONS];
+};
+
+extern struct ground_fracs ground_frac[NIONS];
 
 
 //081115 nsh New structure and variables to hold the dielectronic recombination rate data
@@ -387,7 +388,7 @@ ground_frac[NIONS];
 #define MAX_DR_PARAMS 9         //This is the maximum number of c or e parameters.
 #define DRTYPE_BADNELL	    0
 #define DRTYPE_SHULL	    1
-int ndrecomb;                   //This is the actual number of DR parameters
+extern int ndrecomb;                   //This is the actual number of DR parameters
 
 typedef struct dielectronic_recombination
 {
@@ -400,15 +401,15 @@ typedef struct dielectronic_recombination
 } Drecomb, *Drecombptr;
 
 
-Drecomb drecomb[NIONS];         //set up the actual structure
+extern Drecomb drecomb[NIONS];         //set up the actual structure
 
-double dr_coeffs[NIONS];        //this will be an array to temprarily store the volumetric dielectronic recombination rate coefficients for the current cell under interest. We may want to make this 2D and store the coefficients for a range of temperatures to interpolate.
+extern double dr_coeffs[NIONS];        //this will be an array to temprarily store the volumetric dielectronic recombination rate coefficients for the current cell under interest. We may want to make this 2D and store the coefficients for a range of temperatures to interpolate.
 
 
 #define T_RR_PARAMS         6           //This is the number of parameters.
 #define RRTYPE_BADNELL	    0
 #define RRTYPE_SHULL	    1
-int n_total_rr;
+extern int n_total_rr;
 typedef struct total_rr
 {
   int nion;                     //Internal cross reference to the ion that this refers to
@@ -419,10 +420,10 @@ typedef struct total_rr
   int type;                     /* NSH 23/7/2012 - What type of parampeters we have for this ion */
 } Total_rr, *total_rrptr;
 
-Total_rr total_rr[NIONS];       //Set up the structure
+extern Total_rr total_rr[NIONS];       //Set up the structure
 
 #define BAD_GS_RR_PARAMS 19     //This is the number of points in the fit.
-int n_bad_gs_rr;
+extern int n_bad_gs_rr;
 typedef struct badnell_gs_rr
 {
   int nion;                     //Internal cross reference to the ion that this refers to
@@ -430,11 +431,11 @@ typedef struct badnell_gs_rr
   double rates[BAD_GS_RR_PARAMS];       //rates corresponding to those temperatures
 } Bad_gs_rr, *Bad_gs_rrptr;
 
-Bad_gs_rr bad_gs_rr[NIONS];     //Set up the structure
+extern Bad_gs_rr bad_gs_rr[NIONS];     //Set up the structure
 
 
 #define DERE_DI_PARAMS 20       //This is the maximum number of points in the fit.
-int n_dere_di_rate;
+extern int n_dere_di_rate;
 typedef struct dere_di_rate
 {
   int nion;                     //Internal cross reference to the ion that this refers to
@@ -445,14 +446,14 @@ typedef struct dere_di_rate
   double min_temp;
 } Dere_di_rate, *Dere_di_rateptr;
 
-Dere_di_rate dere_di_rate[NIONS];       //Set up the structure
+extern Dere_di_rate dere_di_rate[NIONS];       //Set up the structure
 
-double di_coeffs[NIONS];        //This is an array to store the di_coeffs 
-double qrecomb_coeffs[NIONS];   //JM 1508 analogous array for three body recombination 
+extern double di_coeffs[NIONS];        //This is an array to store the di_coeffs 
+extern double qrecomb_coeffs[NIONS];   //JM 1508 analogous array for three body recombination 
 
 #define MAX_GAUNT_N_GSQRD 100   //Space set aside for the number of parameters for scaled inverse temperature
 
-int gaunt_n_gsqrd;              //The actual number of scaled temperatures
+extern int gaunt_n_gsqrd;              //The actual number of scaled temperatures
 
 typedef struct gaunt_total
 {
@@ -461,13 +462,13 @@ typedef struct gaunt_total
   float s1, s2, s3;
 } Gaunt_total, *Gaunt_totalptr;
 
-Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
+extern Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];     //Set up the structure
 
 
 
 #define MAX_CHARGE_EXCHANGE 100 //Space set aside for charge exchange parameters
 
-int n_charge_exchange;          //The actual number of scaled temperatures
+extern int n_charge_exchange;          //The actual number of scaled temperatures
 
 typedef struct charge_exchange
 {
@@ -481,14 +482,14 @@ typedef struct charge_exchange
 
 } Charge_exchange, *Charge_exchange_ptr;
 
-Charge_exchange charge_exchange[MAX_CHARGE_EXCHANGE];   //Set up the structure
+extern Charge_exchange charge_exchange[MAX_CHARGE_EXCHANGE];   //Set up the structure
 
-double charge_exchange_recomb_rates[NIONS];     //An array to store the actual recombination rates for a given temperature - 
+extern double charge_exchange_recomb_rates[NIONS];     //An array to store the actual recombination rates for a given temperature - 
 //there is an estimated rate for ions without an actual rate, so we need to dimneions for ions.
-double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE];        //An array to store the actual ionization rates for a given temperature
+extern double charge_exchange_ioniz_rates[MAX_CHARGE_EXCHANGE];        //An array to store the actual ionization rates for a given temperature
 
 
 
 /* a variable which controls whether to save a summary of atomic data
    this is defined in atomic.h, rather than the modes structure */
-int write_atomicdata;
+extern int write_atomicdata;

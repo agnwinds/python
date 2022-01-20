@@ -15,15 +15,13 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "py_optical_depth.h"
-
+#include "py_optd.h"
 static const double MAXDIFF = VCHECK / VLIGHT;  // For linear velocity requirement for photon transport
 
 /* ************************************************************************* */
 /**
  * @brief  Calculate the total optical depth a photon experiences across the
  *         cell of distance SMAX_FRAC * smax.
-
  * @param[in]  photon  The photon packet
  * @param[in,out]  *c_column_density  The column density the photon has moved
  *                                    through
@@ -78,7 +76,7 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
     density = c_plasma_cell->density[COLUMN_MODE_ION_NUMBER];
   }
 
-  smax = smax_in_cell (photon);
+  smax = smax_in_cell (photon) * SMAX_FRAC;
   if (smax < 0)
   {
     errormsg ("smax %e < 0 in cell %d\n", smax, photon->grid);
@@ -130,7 +128,7 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
 
   kappa_total = 0;
 
-  if (MODE != RUN_MODE_ES_PHOTOSPHERE)
+  if (RUN_MODE != RUN_MODE_ES_PHOTOSPHERE)
   {
     if (geo.rt_mode == RT_MODE_2LEVEL)
     {
@@ -146,7 +144,10 @@ integrate_tau_across_cell (PhotPtr photon, double *c_column_density, double *c_o
     }
   }
 
-  kappa_total += klein_nishina (mean_freq) * c_plasma_cell->ne * zdom[n_domain].fill;
+  if (RUN_MODE != RUN_MODE_NO_ES_OPACITY)
+  {
+    kappa_total += klein_nishina (mean_freq) * c_plasma_cell->ne * zdom[n_domain].fill;
+  }
 
   /*
    * Increment the optical depth and column density variables and move the
@@ -226,7 +227,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
 
     p_istat = walls (&p_extract, photon, norm);
 
-    if (MODE == RUN_MODE_ES_PHOTOSPHERE)
+    if (RUN_MODE == RUN_MODE_ES_PHOTOSPHERE)
     {
       if (*c_optical_depth >= TAU_DEPTH)
       {
@@ -240,7 +241,7 @@ integrate_tau_across_wind (PhotPtr photon, double *c_column_density, double *c_o
    * star or disc, since we are aiming for the origin of the system
    */
 
-  if (MODE == RUN_MODE_TAU_INTEGRATE)
+  if (RUN_MODE == RUN_MODE_TAU_INTEGRATE)
   {
     if (p_istat == P_HIT_STAR || p_istat == P_HIT_DISK)
     {

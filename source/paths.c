@@ -88,6 +88,7 @@ int
 reverb_init (WindPtr wind)
 {
   char linelist[LINELENGTH];
+  char xlinelist[LINELENGTH];
   int i, n;
   double x[3];
   double r_rad_min = 99e99, r_rad_max = 0.0, r_rad_min_log, r_rad_max_log, r_delta;
@@ -139,7 +140,8 @@ reverb_init (WindPtr wind)
       sprintf (linelist, "reverb_init: Macro-atom line path tracking is enabled for lines %d", geo.reverb_line[0]);
       for (i = 1; i < geo.reverb_lines; i++)
       {
-        sprintf (linelist, "%s, %d", linelist, geo.reverb_line[i]);
+        sprintf (xlinelist, "%.100s, %d", linelist, geo.reverb_line[i]);
+        sprintf (linelist, "%.200s", xlinelist);
       }
       Log ("%s\n", linelist);
 
@@ -586,7 +588,7 @@ wind_paths_dump (WindPtr wind, int rank_global)
   int j, k;
 
   //Setup file name and open the file
-  sprintf (c_file, "%s.wind_paths_%d.%d.csv", files.root, wind->nwind, rank_global);
+  sprintf (c_file, "%.100s.wind_paths_%d.%d.csv", files.root, wind->nwind, rank_global);
   fptr = fopen (c_file, "w");
 
   //Print out metadata header specifying the domain and position
@@ -735,7 +737,7 @@ wind_paths_output_vtk (WindPtr wind, int ndom)
   DomainPtr dom;
 
   //Get output filename
-  sprintf (c_file, "%s.%d.wind_paths.vtk", files.root, ndom);
+  sprintf (c_file, "%.100s.%d.wind_paths.vtk", files.root, ndom);
 
   if ((fptr = fopen (c_file, "w")) == NULL)
   {                             //If this file can't be opened, error out

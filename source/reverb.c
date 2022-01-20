@@ -77,11 +77,11 @@ delay_dump_prep (int restart_stat)
   //Get output filename
   if (rank_global > 0)
   {
-    sprintf (delay_dump_file, "%s.delay_dump%d", files.root, rank_global);
+    sprintf (delay_dump_file, "%.100s.delay_dump%d", files.root, rank_global);
   }
   else
   {
-    sprintf (delay_dump_file, "%s.delay_dump", files.root);
+    sprintf (delay_dump_file, "%.100s.delay_dump", files.root);
   }
 
   //Allocate and zero dump files and set extract status
@@ -108,7 +108,8 @@ delay_dump_prep (int restart_stat)
       fprintf (fptr, "# Python Version %s\n", VERSION);
       get_time (s_time);
       fprintf (fptr, "# Date	%s\n#  \n", s_time);
-      fprintf (fptr, "# \n#    Freq.     Lambda     Weight      Last X      Last Y      Last Z Scat. RScat      Delay Spec. Orig.  Res.\n");
+      fprintf (fptr, "#\n# %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s\n", "Np", "Freq.", "Lambda",
+               "Weight", "LastX", "LastY", "LastZ", "Scat.", "RScat.", "Delay", "Spec.", "Orig.", "Res.", "LineRes.");
     }
     fclose (fptr);
     Log ("delay_dump_prep: Thread %d successfully prepared file '%s' for writing\n", rank_global, delay_dump_file);
@@ -178,14 +179,14 @@ delay_dump_combine (int i_ranks)
 	fclose(f_base);
 */
   //Yes this is done as a system call and won 't work on Windows machines. Lazy solution!
-  sprintf (c_call, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
+  sprintf (c_call, "cat %.50s[0-9]* >> %.100s", delay_dump_file, delay_dump_file);
   if (system (c_call) < 0)
   {
     Error ("delay_dump_combine: Error calling system command '%s'", c_call);
   }
   else
   {
-    sprintf (c_call, "rm %s[0-9]*", delay_dump_file);
+    sprintf (c_call, "rm %.50s[0-9]*", delay_dump_file);
     if (system (c_call) < 0)
     {
       Error ("delay_dump_combine: Error calling system command '%s'", c_call);
@@ -241,7 +242,7 @@ delay_dump (PhotPtr p, int np)
      * more scatters
      */
     i = delay_dump_spec[nphot];
-    if (((mscat = xxspec[i].nscat) > MAXSCAT ||
+    if (((mscat = xxspec[i].nscat) >= MAXSCAT ||
          p[nphot].nscat == mscat ||
          (mscat < 0 && p[nphot].nscat >= (-mscat))) && ((mtopbot = xxspec[i].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
     {
@@ -249,11 +250,9 @@ delay_dump (PhotPtr p, int np)
       if (delay < 0)
         subzero++;
 
-      fprintf (fptr,
-               "%10.5g %12.7g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d\n",
-               p[nphot].freq, VLIGHT * 1e8 / p[nphot].freq, p[nphot].w,
-               p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
-               p[nphot].nscat, p[nphot].nrscat, delay, i - MSPEC, p[nphot].origin, p[nphot].nres);
+      fprintf (fptr, "%-12d %-12.5g %-12.7g %-12.5g %-12.5g %-12.5g %-12.5g %-12d %-12d %-12.5g %-12d %-12d %-12d %-12d\n",
+               p[nphot].np, p[nphot].freq, VLIGHT * 1e8 / p[nphot].freq, p[nphot].w, p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
+               p[nphot].nscat, p[nphot].nrscat, delay, i - MSPEC, p[nphot].origin, p[nphot].nres, p[nphot].line_res);
     }
   }
 

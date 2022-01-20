@@ -163,17 +163,19 @@ sv_velocity (x, v, ndom)
   double xtest[3];
   double s;
   double vzero;
-  double ldist_orig, rzero_orig;
+//OLD  double ldist_orig, rzero_orig;
   int hit_disk;
 
   zzz = v_escape = vzero = -99.;
 
 
-  rzero_orig = rzero = sv_find_wind_rzero (ndom, x);
+//OLD  rzero_orig = rzero = sv_find_wind_rzero (ndom, x);
+  rzero = sv_find_wind_rzero (ndom, x);
   theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
-  ldist_orig = ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
+//OLD  ldist_orig = ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
+  ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED && rzero < zdom[ndom].sv_rmax)
@@ -377,6 +379,10 @@ sv_find_wind_rzero (ndom, p)
 {
   double x, z;
   double rho_min, rho_max, rho;
+  int ierr;
+
+
+
 
   /* thetamin and theta max are defined w.r.t  z axis */
 
@@ -420,7 +426,13 @@ sv_find_wind_rzero (ndom, p)
   /* change the global variable sv_zero_r_ndom before we call zbrent */
   sv_zero_r_ndom = ndom;
 //  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
-  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
+  x = zero_find (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100., &ierr);
+
+  if (ierr)
+  {
+    Error ("sv_find_rzero: zero_find error at rho %.3e and z %.3e\n", rho, z);
+
+  }
 
 
   return (x);

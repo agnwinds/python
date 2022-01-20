@@ -195,6 +195,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     p[n].origin_orig = p[n].origin;
     p[n].np = n;
     p[n].ds = 0;
+    p[n].line_res = NRES_NOT_SET;
     p[n].frame = F_OBSERVER;
     if (geo.reverb != REV_NONE && p[n].path < 0.0)      // SWM - Set path lengths for disk, star etc.
       simple_paths_gen_phot (&p[n]);
@@ -408,24 +409,27 @@ iwind = -1 	Don't generate any wind photons at all
        can use the saved emissivities.  The routine  returns the specific luminosity
        in the spectral band of interest */
 
-#if ACCELERATED_MACRO == TRUE
-    Log ("Using accelerated calculation of emissivities\n");
-    if (geo.pcycle == 0)
+    if (!modes.jumps_for_detailed_spectra)
     {
-      geo.f_matom = get_matom_f_accelerate (CALCULATE_MATOM_EMISSIVITIES);
+      Log ("Using accelerated calculation of emissivities\n");
+      if (geo.pcycle == 0)
+      {
+        geo.f_matom = get_matom_f_accelerate (CALCULATE_MATOM_EMISSIVITIES);
+      }
+      else
+        geo.f_matom = get_matom_f_accelerate (USE_STORED_MATOM_EMISSIVITIES);
     }
     else
-      geo.f_matom = get_matom_f_accelerate (USE_STORED_MATOM_EMISSIVITIES);
-#else
-    Log ("Using old slow calculation of emissivities\n");
-    if (geo.pcycle == 0)
     {
-      geo.f_matom = get_matom_f (CALCULATE_MATOM_EMISSIVITIES);
+      Log ("Using old slow calculation of emissivities\n");
+      if (geo.pcycle == 0)
+      {
+        geo.f_matom = get_matom_f (CALCULATE_MATOM_EMISSIVITIES);
+      }
+      else
+        geo.f_matom = get_matom_f (USE_STORED_MATOM_EMISSIVITIES);
     }
-    else
-      geo.f_matom = get_matom_f (USE_STORED_MATOM_EMISSIVITIES);
 
-#endif
 
 
     geo.f_kpkt = get_kpkt_f (); /* This returns the specific luminosity
@@ -863,7 +867,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;
     p[i].grid = 0;
     p[i].tau = 0.0;
-    p[i].nres = -1;             // It's a continuum photon
+    p[i].nres = p[i].line_res = -1;     // It's a continuum photon
     p[i].nnscat = 1;
 
     if (spectype == SPECTYPE_BB)
@@ -971,7 +975,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].w = weight;
     p[i].istat = p[i].nscat = p[i].nrscat = p[i].nmacro = 0;
     p[i].tau = 0;
-    p[i].nres = -1;             // It's a continuum photon
+    p[i].nres = p[i].line_res = -1;     // It's a continuum photon
     p[i].nnscat = 1;
     if (geo.reverb_disk == REV_DISK_UNCORRELATED)
       p[i].path = 0;            //If we're assuming disk photons are uncorrelated, leave them at 0
@@ -1175,13 +1179,13 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
      double lum_bl, t_bl, freqmin, freqmax, *f;
      int ioniz_or_final;
 {
-  double q1;
+//OLD  double q1;
   double integ_planck_d ();
-  double alphamin, alphamax;
+//OLD  double alphamin, alphamax;
 
-  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
-  alphamin = PLANCK * freqmin / (BOLTZMANN * t_bl);
-  alphamax = PLANCK * freqmax / (BOLTZMANN * t_bl);
+//OLD  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (PLANCK * PLANCK * PLANCK * VLIGHT * VLIGHT);
+//OLD  alphamin = PLANCK * freqmin / (BOLTZMANN * t_bl);
+//OLD  alphamax = PLANCK * freqmax / (BOLTZMANN * t_bl);
 //  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
 
   *f = emittance_bb (freqmin, freqmax, t_bl) * lum_bl / (t_bl * t_bl * t_bl * t_bl * STEFAN_BOLTZMANN);

@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -67,26 +68,143 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
   int n_jump = 0;
   int n_jump_tot = 0;
   int n_loop = 0;
+  int new_uplvl, uplvl;
+  PlasmaPtr xplasma;
+  MacroPtr mplasma;
+  WindPtr one;
 
-  escape = FALSE;               //start with it not being ready to escape as an r-packet
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+  mplasma = &macromain[one->nplasma];
 
-  /* Beginning of the main loop for processing a macro-atom */
-  while (escape == FALSE)
+  /* before we do anything else we look to see if we are exciting
+     simple/fake two-level ions */
+  if (matom_or_kpkt == MATOM)
   {
-    if (matom_or_kpkt == MATOM) //excite a macro atom 
-    {
+    escape = FALSE;
 
-      /* if it's a bb transition of a full macro atom  */
-      if (*nres > (-1) && *nres < NLINES && geo.macro_simple == FALSE && lin_ptr[*nres]->macro_info == TRUE)
+    /*  it's a bb transition  without the full macro atom treatment. */
+    if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
+    {
+      fake_matom_bb (p, nres, &escape);
+
+      /* at this point it has either generated an r-packet (escape == TRUE)
+         or a k-packet (escape == FALSE) */
+      if (escape == TRUE)
+      {
+        return (0);
+      }
+      else
+      {
+        matom_or_kpkt = KPKT;
+      }
+    }
+
+    /* if it's bf continuum without the full macro atom treatment.
+
+       In the pre-2018 approach, we process the photon in a way that makes it return a bf photon of the same type
+       as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
+       In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
+       is thrown and we exit. */
+
+    else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
+    {
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+      Error ("Macro_gov: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+      Exit (0);
+#endif
+      fake_matom_bf (p, nres, &escape);
+
+      /* at this point it has either generated an r-packet (escape == TRUE)
+         or a k-packet (escape == FALSE) */
+      if (escape == TRUE)
+      {
+        return (0);
+      }
+      else
+      {
+        matom_or_kpkt = KPKT;
+      }
+    }
+  }
+
+  /* if we got here then we know we are exciting a macro-atom or creating a kpkt */
+  if (geo.matom_radiation == 1)
+  {
+    /* During the spectrum cycles we want to throw these photons away. */
+    p->w = 0.0;
+    escape = TRUE;
+    return (0);
+  }
+  else
+  {
+    /* start with it not being ready to escape as an r-packet */
+    escape = FALSE;
+  }
+
+  if (mplasma->matom_transition_mode == MATOM_MATRIX)
+  {
+    if (matom_or_kpkt == MATOM)
+    {
+      uplvl = 0;
+      if (*nres < NLINES)
+      {
+        uplvl = lin_ptr[*nres]->nconfigu;
+      }
+      else if (*nres > NLINES)
+      {
+        uplvl = phot_top[*nres - NLINES - 1].uplev;
+      }
+      else
+      {
+        Error ("matom: upper level not identified. nres = %d in photon %d of cycle %d/%d in thread %d\n",
+               *nres, p->np, geo.wcycle, geo.pcycle, rank_global);
+        escape = TRUE;
+        p->istat = P_ERROR_MATOM;
+        return (-1);
+      }
+    }
+    else
+    {
+      uplvl = nlevels_macro;
+    }
+
+    new_uplvl = matom_deactivation_from_matrix (xplasma, uplvl);
+
+    if (new_uplvl == nlevels_macro)
+    {
+      /* XMACRO improve this so that kpkt only deals with k->r in certain modes */
+      kpkt (p, nres, &escape, KPKT_MODE_CONT_PLUS_ADIABATIC);
+
+      *which_out = KPKT;
+    }
+    /* XMACRO -- what do we do about frequency boundaries here? */
+    /* XMACRO -- change wmain to be one? */
+    else
+    {
+      emit_matom (wmain, p, nres, new_uplvl, 0, VERY_BIG);
+      *which_out = MATOM;
+    }
+
+    if (p->origin < 10)
+      p->origin += 10;
+
+    escape = TRUE;
+    return (0);
+
+  }
+
+  /* using the old MATOM_MC_JUMPS scheme */
+  else if (mplasma->matom_transition_mode == MATOM_MC_JUMPS)
+  {
+    /* Beginning of the main loop for processing a macro-atom */
+    while (escape == FALSE)
+    {
+      if (matom_or_kpkt == MATOM)       //excite a macro atom
       {
 
-        if (geo.matom_radiation == 1)
-        {
-          /* During the spectrum cycles we want to throw these photons away. */
-          p->w = 0.0;
-          escape = TRUE;
-        }
-        else
+        /* if it's a bb transition of a full macro atom  */
+        if (*nres > (-1) && *nres < NLINES && geo.macro_simple == FALSE && lin_ptr[*nres]->macro_info == TRUE)
         {
           n_jump = matom (p, nres, &escape);
 
@@ -103,25 +221,9 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
             return (0);
           }
         }
-      }
 
-      /*  if it's a bb transition  without the full macro atom treatment. */
-      else if (*nres > (-1) && *nres < NLINES && (geo.macro_simple == TRUE || lin_ptr[*nres]->macro_info == FALSE))
-      {
-        fake_matom_bb (p, nres, &escape);
-      }
-
-      /* if it's bf tranisition of a full macro atom. */
-      else if (*nres > NLINES && phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == FALSE)
-      {
-
-        if (geo.matom_radiation == 1)
-        {
-          /* During the spectrum cycles we want to throw these photons away. */
-          p->w = 0.0;
-          escape = TRUE;
-        }
-        else
+        /* if it's bf transition of a full macro atom. */
+        else if (*nres > NLINES && phot_top[*nres - NLINES - 1].macro_info == TRUE && geo.macro_simple == FALSE)
         {
           n_jump = matom (p, nres, &escape);
 
@@ -144,80 +246,56 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
             return (0);
           }
         }
+
+        /* If it did not escape then it must have had a
+           de-activation by collision processes, and so we label it a kpkt.
+         */
+
+        matom_or_kpkt = KPKT;
       }
 
-      /* if it's bf continuum without the full macro atom treatment. 
 
-         In the pre-2018
-         approach, we process the photon in a way that makes it return a bf photon of the same type
-         as caused the excitation.  In the old approach, escape will be set to 1, and we will escape.
-         In the new "simple emissivity" approach, we should never satisfy the do loop, and so an error
-         is thrown and we exit. */
-
-      else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == FALSE || geo.macro_simple == TRUE))
+      /* This the end of the section of the loop that deals with matom excitations. next domes the
+         section of the loop that deals with kpts */
+      else if (matom_or_kpkt == KPKT)
       {
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
-        Exit (0);
-#endif
-        fake_matom_bf (p, nres, &escape);
-      }
+        kpkt (p, nres, &escape, KPKT_MODE_ALL); // 1 implies include the possibility of deactivation due to non-thermal processes
 
-      /* If it did not escape then it must have had a
-         de-activation by collision processes, and so we label it a kpkt.  
-       */
-
-      matom_or_kpkt = KPKT;
-    }
-
-
-    /* This the end of the section of the loop that deals with matom excitations. next domes the
-       section of the loop that deals with kpts */
-    else if (matom_or_kpkt == KPKT)
-    {
-      if (geo.matom_radiation == 1)
-      {
-        /* During the spectrum cycles we want to throw these photons away. */
-        p->w = 0.0;
-        escape = TRUE;          /* This doesn't matter but it breaks us out of the loop */
+        /* if it did not escape then the k-packet must have been
+           destroyed by collisionally exciting a macro atom so...
+         */
+        matom_or_kpkt = MATOM;
       }
       else
       {
-        kpkt (p, nres, &escape, KPKT_MODE_ALL); // 1 implies include the possibility of deactivation due to non-thermal processes
+        Error ("macro_gov: Unknown choice for next action. Abort.\n");
+        Exit (0);
       }
 
-      /* if it did not escape then the k-packet must have been
-         destroyed by collisionally exciting a macro atom so...
-       */
-      matom_or_kpkt = MATOM;
-    }
-    else
-    {
-      Error ("macro_gov: Unknown choice for next action. Abort.\n");
-      Exit (0);
-    }
-    /*XXXX test */
-    if (n_jump > -1)
-    {
-      //XXXX This is a test that fails many times for the agn_macro model.  Just set to n_mump it is the same as in matom
-      n_jump_tot += n_jump;
-      if (n_jump > MAXJUMPS)
+
+      /*XXXX test */
+      if (n_jump > -1)
       {
-        Error ("macro_gov: Exceed MAXJUMPS (last %d tot %d) in n_loops %d for phot %d in cell %d\n", n_jump, n_jump_tot, n_loop, p->np,
-               p->grid);
-        escape = TRUE;
-        p->istat = P_ERROR_MATOM;
+        //XXXX This is a test that fails many times for the agn_macro model.  Just set to n_mump it is the same as in matom
+        n_jump_tot += n_jump;
+        if (n_jump > MAXJUMPS)
+        {
+          Error ("macro_gov: Exceed MAXJUMPS (last %d tot %d) in n_loops %d for phot %d in cell %d\n", n_jump, n_jump_tot, n_loop, p->np,
+                 p->grid);
+          escape = TRUE;
+          p->istat = P_ERROR_MATOM;
+        }
       }
+      n_loop++;
     }
-    n_loop++;
+
+    *which_out = KPKT;
   }
 
   /* End of main matom processing loop that began with while (escape==FALSE)
 
      If it gets here, the escape is as a KPKT    
    */
-
-  *which_out = KPKT;
 
   /* Update the the photon origin to indicate the packet has been processed
      by a macro atom */
@@ -345,65 +423,74 @@ macro_pops (xplasma, xne)
           }
         }
 
-        b_data = (double *) calloc (n_macro_lvl, sizeof (double));
-        populations = (double *) calloc (n_macro_lvl, sizeof (double));
-
-        /* replace the first entry with 1.0 - this is part of the normalisation constraint */
-        b_data[0] = 1.0;
-
-        /* this next routine is a general routine which solves the matrix equation
-           via LU decomposition */
-        gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
-        if (gsl_err)
+        /* 211101 - ksl - Check added to avoid gcc11 warning */
+        if (n_macro_lvl > SIZE_MAX / sizeof (double))
         {
-          Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
-        }
-
-        /* Now we take the population array and check to see if anything is very
-         * small and set it to zero. This is basically some pre-emptive cleaning
-         * since we could clean this up later, I suppose. */
-
-        for (i = 0; i < n_macro_lvl; i++)
-        {
-          if (populations[i] < DENSITY_MIN)
-          {
-            populations[i] = 0.0;
-          }
-        }
-
-        free (a_data);
-        free (b_data);
-
-        n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
-
-        if (n_inversions > 0)
-          Debug ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
-                 n_iterations, n_inversions, xplasma->nplasma);
-
-        /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
-           non-finite level population somewhere. If that is the case, then set all the estimators
-           to dilute blackbodies instead and go through the solution again.
-           2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
-           populations_ok to 1 to break the while loop, and copy the populations into the arrays
-         */
-
-        numerical_error =
-          macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix, n_iterations);
-
-        if (numerical_error)
-        {
-          Error
-            ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
-             n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
-          get_dilute_estimators (xplasma);
+          Error ("macro_gov:n_macro_lvl %d too large for calloc\n", n_macro_lvl);
+          Exit (0);
         }
         else
         {
-          populations_ok = TRUE;
-          macro_pops_copy_to_xplasma (xplasma, index_element, populations, conf_to_matrix);
-        }
+          b_data = (double *) calloc (n_macro_lvl, sizeof (double));
+          populations = (double *) calloc (n_macro_lvl, sizeof (double));
 
-        free (populations);
+          /* replace the first entry with 1.0 - this is part of the normalisation constraint */
+          b_data[0] = 1.0;
+
+          /* this next routine is a general routine which solves the matrix equation
+             via LU decomposition */
+          gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
+          if (gsl_err)
+          {
+            Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
+          }
+
+          /* Now we take the population array and check to see if anything is very
+           * small and set it to zero. This is basically some pre-emptive cleaning
+           * since we could clean this up later, I suppose. */
+
+          for (i = 0; i < n_macro_lvl; i++)
+          {
+            if (populations[i] < DENSITY_MIN)
+            {
+              populations[i] = 0.0;
+            }
+          }
+
+          free (a_data);
+          free (b_data);
+
+          n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
+
+          if (n_inversions > 0)
+            Debug ("macro_pops: iteration %d: there were %d levels which were cleaned due to population inversions in plasma cell %d\n",
+                   n_iterations, n_inversions, xplasma->nplasma);
+
+          /* 1 - IF the variable numerical_error has been set to TRUE then that means we had either a negative or
+             non-finite level population somewhere. If that is the case, then set all the estimators
+             to dilute blackbodies instead and go through the solution again.
+             2 - IF we didn't set numerical_error to TRUE then we have a realistic set of populations, so set
+             populations_ok to 1 to break the while loop, and copy the populations into the arrays
+           */
+
+          numerical_error =
+            macro_pops_check_densities_for_numerical_errors (xplasma, index_element, populations, conf_to_matrix, n_iterations);
+
+          if (numerical_error)
+          {
+            Error
+              ("macro_pops: iteration %d: unreasonable population(s) in plasma cell %i. Using dilute BBody excitation with w %8.4e t_r %8.4e\n",
+               n_iterations, xplasma->nplasma, xplasma->w, xplasma->t_r);
+            get_dilute_estimators (xplasma);
+          }
+          else
+          {
+            populations_ok = TRUE;
+            macro_pops_copy_to_xplasma (xplasma, index_element, populations, conf_to_matrix);
+          }
+
+          free (populations);
+        }
       }                         // end of populations_ok == FALSE sane loop
     }                           // end of if statement for macro-atoms
   }                             // end of elements loop

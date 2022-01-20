@@ -23,6 +23,8 @@
 #include "atomic.h"
 #include "python.h"
 
+int xedge = FALSE;
+
 
 /**********************************************************/
 /**
@@ -30,6 +32,8 @@
  * various other routines which write individual files
  *
  * @param [in] char *  root   The rootname of the windsave file
+ * @param [in] int     ion_switch Choose what type of ion data to print
+ * @param [in] int    edge_switch If TRUE, include edge cells          
  * @return     Always returns 0
  *
  * @details
@@ -42,17 +46,19 @@
  * that write the individual files for each domain.
  *
  *
- *
  **********************************************************/
 
 int
-do_windsave2table (root, ion_switch)
+do_windsave2table (root, ion_switch, edge_switch)
      char *root;
      int ion_switch;
+     int edge_switch;
 {
   int ndom, i;
   char rootname[LINELENGTH];
   int all[7] = { 0, 4, 5, 6, 7, 8, 9 };
+
+  xedge = edge_switch;          //if TRUE include edge cells
 
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
@@ -108,7 +114,7 @@ do_windsave2table (root, ion_switch)
 /**********************************************************/
 /**
  * @brief      writes specific  variables of a windsaave
- * which are intended to be of general interest to
+ * that are intended to be of general interest to
  * file which has the format of an astropy table
  *
  * 	It is intended to be easily modifible.
@@ -208,18 +214,21 @@ create_master_table (ndom, rootname)
   c[13] = get_one (ndom, "ip");
   strcpy (column_name[13], "ip");
 
-  c[14] = get_one (ndom, "ntot");
-  strcpy (column_name[14], "ntot");
+  c[14] = get_one (ndom, "xi");
+  strcpy (column_name[14], "xi");
 
-  c[15] = get_one (ndom, "nrad");
-  strcpy (column_name[15], "nrad");
+  c[15] = get_one (ndom, "ntot");
+  strcpy (column_name[15], "ntot");
 
-  c[16] = get_one (ndom, "nioniz");
-  strcpy (column_name[16], "nioniz");
+  c[16] = get_one (ndom, "nrad");
+  strcpy (column_name[16], "nrad");
+
+  c[17] = get_one (ndom, "nioniz");
+  strcpy (column_name[17], "nioniz");
 
 
   /* This should be the maxium number above +1 */
-  ncols = 17;
+  ncols = 18;
 
 
   converge = get_one (ndom, "converge");
@@ -244,7 +253,7 @@ create_master_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -282,7 +291,7 @@ create_master_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -321,7 +330,7 @@ create_master_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -366,7 +375,7 @@ create_master_table (ndom, rootname)
 
 /**********************************************************/
 /**
- * @brief      writes a selected variables related to heating and cooling
+ * @brief      writes selected variables related to heating and cooling
  * processes to an ascii file which can be read as an astropy table
  *
  *
@@ -510,7 +519,7 @@ create_heat_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -547,7 +556,7 @@ create_heat_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -586,7 +595,7 @@ create_heat_table (ndom, rootname)
 
 /**********************************************************/
 /**
- * @brief      writes a selected variables related to issues about
+ * @brief      writes selected variables related to issues about
  * convergence to an ascii file which can be read as an astropy table
  *
  *
@@ -711,7 +720,7 @@ create_convergence_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -748,7 +757,7 @@ create_convergence_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -786,8 +795,8 @@ create_convergence_table (ndom, rootname)
 
 /**********************************************************/
 /**
- * @brief      writes a selected variables related to issues about
- * velocity gratients to an ascii file which can be read as an astropy table
+ * @brief      writes selected variables related to issues about
+ * velocity gradients to an ascii file which can be read as an astropy table
  *
  *
  * @param [in] int  ndom   The domain of interest
@@ -894,7 +903,7 @@ create_velocity_gradient_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -931,7 +940,7 @@ create_velocity_gradient_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -991,9 +1000,7 @@ create_ion_table (ndom, rootname, iz, ion_switch)
      int ndom;
      char rootname[];
      int iz;
-//Where z is the element
      int ion_switch;
-//Determines what is actually printed out
 {
   char filename[132];
   double *c[100];
@@ -1009,10 +1016,6 @@ create_ion_table (ndom, rootname, iz, ion_switch)
   int i, ii, jj, n;
   FILE *fptr;
 
-  /*
-   * First we actually need to determine what ions exits, but we will
-   * ignore this for now
-   */
 
   i = 0;
   while (i < nelements)
@@ -1029,7 +1032,6 @@ create_ion_table (ndom, rootname, iz, ion_switch)
   number_ions = ele[i].nions;
   strcpy (element_name, ele[i].name);
 
-  //Log("element %d %d %s\n", first_ion, number_ions, element_name);
 
   i = 0;
   while (i < number_ions)
@@ -1043,7 +1045,7 @@ create_ion_table (ndom, rootname, iz, ion_switch)
 
   /* Open the output file */
 
-  sprintf (filename, "%s.%s.%s.txt", rootname, element_name, name);
+  sprintf (filename, "%.100s.%.10s.%.10s.txt", rootname, element_name, name);
 
   fptr = fopen (filename, "w");
 
@@ -1283,6 +1285,9 @@ get_ion (ndom, element, istate, iswitch, name)
  * to a variable in the PlasmaPtr.
  *
  * ### Notes ###
+ * Normally returns non-zero values only if a cell is in the wind
+ * but this can be changed if external variable xedge is TRUE.
+ *
  * Only selected variables are returned, but new variables are easy
  * to add using the template of the other variables
  *
@@ -1307,7 +1312,7 @@ get_one (ndom, variable_name)
   for (n = 0; n < ndim2; n++)
   {
     x[n] = 0;
-    if (wmain[n + nstart].inwind >= 0)
+    if (wmain[n + nstart].inwind >= 0 || xedge)
     {
       nplasma = wmain[n + nstart].nplasma;
 
@@ -1379,6 +1384,10 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "ip") == 0)
       {
         x[n] = plasmamain[nplasma].ip;
+      }
+      else if (strcmp (variable_name, "xi") == 0)
+      {
+        x[n] = plasmamain[nplasma].xi;
       }
       else if (strcmp (variable_name, "heat_tot") == 0)
       {
@@ -1550,7 +1559,7 @@ get_one (ndom, variable_name)
  * @return  Always returns 0   
  *  The values in the plasma pointer for this variable. A double
  * 	will be returned even if the PlasmaPtr variable is an integer
- *      The reults are a 1-d array, where the various array elements
+ *      The results are a 1-d array, where the various array elements
  *      have effectively been concatenated
  *
  *
@@ -1563,7 +1572,7 @@ get_one (ndom, variable_name)
  * 
  * The values in the plasma pointer for this variable. A double
  * will be returned even if the PlasmaPtr variable is an integer
- * The reults are a 1-d array, where the various array elements
+ * The results are a 1-d array, where the various array elements
  * have effectively been concatenated
  *
  * ### Notes ###
@@ -1724,7 +1733,6 @@ create_spec_table (ndom, rootname)
   double *c[50], *converge;
   char column_name[50][20];
   char one_line[1024], start[1024], one_value[20];
-//  char name[132];               /* file name extension */
 
   int nxfreq;
 
@@ -1816,7 +1824,7 @@ create_spec_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -1858,7 +1866,7 @@ create_spec_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -1902,7 +1910,7 @@ create_spec_table (ndom, rootname)
     n = 0;
     while (n < ncols)
     {
-      sprintf (one_value, "%9s ", column_name[n]);
+      sprintf (one_value, "%9.9s ", column_name[n]);
       strcat (one_line, one_value);
 
       n++;
@@ -2033,7 +2041,7 @@ create_detailed_cell_spec_table (ncell, rootname)
  * large.  Whether this is a real limit or not is debatable.
  *
  * If there are multiple domains, the domain number needs
- * to be incoprated into the rootname.
+ * to be incorporated into the rootname.
  *
  **********************************************************/
 
@@ -2115,9 +2123,6 @@ create_big_detailed_spec_table (ndom, rootname)
     }
 
     fptr = fopen (filename, "w");
-    printf ("XTEST %s %d %d\n", filename, nstart, nstop);
-
-    printf ("Printing spectra %d to %d to %s\n", nstart, nstop, filename);
 
     fprintf (fptr, "Freq.       ");
     for (n = nstart; n < nstop; n++)

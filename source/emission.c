@@ -260,7 +260,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell, icell_old;
   int nplasma = 0;
   int nnscat;
-  int ndom;
+//OLD  int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
 
   dt_cmf = 0.0;
@@ -303,7 +303,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     /* At this point we know the cell in which the photon will be generated */
 
     nplasma = wmain[icell].nplasma;
-    ndom = wmain[icell].ndom;
+//OLD    ndom = wmain[icell].ndom;
     plasmamain[nplasma].nrad += 1;
 
 
@@ -344,7 +344,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     photstop = photstart + ptype[n][FREE_FREE] + ptype[n][FREE_BOUND] + ptype[n][BOUND_BOUND];
 
     icell = plasmamain[n].nwind;
-    ndom = wmain[icell].ndom;
+//OLD    ndom = wmain[icell].ndom;
 
     for (np = photstart; np < photstop; np++)
     {
@@ -779,8 +779,8 @@ one_ff (one, f1, f2)
 
 /**********************************************************/
 /**
- * @brief      computes the frequency averaged gaunt factor for ff emissionat
- * 		scaled temperature from Sutherland (1988).
+ * @brief      computes the frequency averaged gaunt factor for ff emissiona
+ * 	       based on scaled value of the temperature from Sutherland (1988).
  *
  * @param [in] double  gsquared   The variable on which
  * Sutherland's ff gaunt factors are interpolated.
@@ -797,12 +797,12 @@ one_ff (one, f1, f2)
  * gsquared is the scaled inverse temperature experienced by an ion,
  * Z**2/kT(Ry).
  *
- * The Sutherland interpolation data is a spline fit to the gaunt function. 
+ * See issue #750 for more explanation
  **********************************************************/
 
 double
 gaunt_ff (gsquared)
-     double gsquared;           /* the gamma squared variable */
+     double gsquared;
 {
   int i, index;
   double gaunt;

@@ -71,7 +71,7 @@ write_array (filename, choice)
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
   nstart = zdom[ndom].nstart;
-  float rin[ndim], zin[mdim];
+//OLD  float rin[ndim], zin[mdim];
 
 
 
@@ -117,11 +117,11 @@ write_array (filename, choice)
 
 
 // Put the r and z coord. grid  into easier to understand arrays
-  for (i = 0; i < ndim; i++)
-  {
-    zin[i] = wmain[nstart + i].x[2];
-    rin[i] = wmain[nstart + i * mdim].x[0];
-  }
+//OLD  for (i = 0; i < ndim; i++)
+//OLD  {
+//OLD    zin[i] = wmain[nstart + i].x[2];
+//OLD    rin[i] = wmain[nstart + i * mdim].x[0];
+//OLD  }
 
 
 /* In py_wind the filenames are set to start with z if the output coordinates
@@ -257,10 +257,11 @@ display (name)
      char name[];
 {
   int i, j, n;
-  int ndom, ndim, mdim, nstart;
+//OLD  int ndom, ndim, mdim, nstart;
+  int ndom, mdim, nstart;
 
   ndom = current_domain;
-  ndim = zdom[ndom].ndim;
+//OLD  ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
   nstart = zdom[ndom].nstart;
 

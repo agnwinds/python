@@ -21,6 +21,7 @@ int rdchoice(char question[], char answers[], char *answer);
 int get_root(char root[], char total[]);
 int rdpar_set_mpi_rank(int rank);
 int rdpar_set_verbose(int vlevel);
+int rdpar_check(void);
 /* xlog.c */
 int Log_init(char *filename);
 int Log_append(char *filename);

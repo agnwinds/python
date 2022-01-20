@@ -15,7 +15,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "recipes.h"
+//OLD #include "recipes.h"
 
 
 /**********************************************************/
@@ -108,14 +108,14 @@ total_dr (one, t_e)
      double t_e;                //Current electron temperature of the cell
 {
   double x;                     //The returned variable
-  double meanv, meanke;         //The mean velocity and kinetic energy of electrons in the cell
-  int nplasma;                  //The cell number in the plasma array
-  PlasmaPtr xplasma;            //pointer to the relevant cell in the plasma structure
+//OLD  double meanv, meanke;         //The mean velocity and kinetic energy of electrons in the cell
+//OLD  int nplasma;                  //The cell number in the plasma array
+//OLD  PlasmaPtr xplasma;            //pointer to the relevant cell in the plasma structure
   int n;                        //loop pointers
 
 
-  nplasma = one->nplasma;       //Get the correct plasma cell related to this wind cell
-  xplasma = &plasmamain[nplasma];       //copy the plasma structure for that cell to local variable
+//OLD  nplasma = one->nplasma;       //Get the correct plasma cell related to this wind cell
+//OLD  xplasma = &plasmamain[nplasma];       //copy the plasma structure for that cell to local variable
   x = 0;                        //zero the luminosity
 
 
@@ -123,8 +123,8 @@ total_dr (one, t_e)
 
 /* The next two lines calculate the mean K.E. of electrons - it was an early attempt to
   estimate the energy released in a DR. It hugely over estimates the energy release */
-  meanv = pow ((2 * BOLTZMANN * t_e / MELEC), 0.5);
-  meanke = 0.5 * MELEC * meanv * meanv;
+//OLD  meanv = pow ((2 * BOLTZMANN * t_e / MELEC), 0.5);
+//OLD  meanke = 0.5 * MELEC * meanv * meanv;
 
 /* In ordet to compute tht total luminosity for a cell, we loop over all ions */
 

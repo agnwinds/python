@@ -133,6 +133,17 @@ calculate_ionization (restart_stat)
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
 
 
+    /* calculate the B matrices if we are using the matrix macro-atom transition mode, 
+       and we are choosing to store the matrix in at least some cells and there are 
+       macro-atom levels */
+
+    if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0 && modes.store_matom_matrix)
+    {
+      xsignal (files.root, "%-20s Begin state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
+      calc_all_matom_matrices ();
+      xsignal (files.root, "%-20s Finished state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
+    }
+
     geo.n_ioniz = 0.0;
     geo.cool_tot_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
@@ -292,7 +303,9 @@ calculate_ionization (restart_stat)
 
 /* Note that this step is parallelized */
 
+    xsignal (files.root, "%-20s Start wind update\n", "NOK");
     wind_update (w);
+    xsignal (files.root, "%-20s Finished wind update\n", "NOK");
 
 
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle + 1, timer ());
@@ -338,7 +351,14 @@ calculate_ionization (restart_stat)
 
 
 /* Save only the windsave file from thread 0, to prevent many processors from writing to the same
- * file. */
+ * file. 
+  
+ Note that if one wants to write out the files from all threads, then one should comment out the
+ MPI specific if statements below, leving MPI_Barrier, and replace the sprintf statment with
+
+ sprintf (dummy, "python%02d.%02d.wind_save", geo.wcycle, rank_global);
+
+ */
 
 #ifdef MPI_ON
     if (rank_global == 0)
@@ -359,8 +379,16 @@ calculate_ionization (restart_stat)
       if (modes.make_tables)
       {
         strcpy (dummy, "");
-        sprintf (dummy, "diag_%s/%s.%02d", files.root, files.root, geo.wcycle);
-        do_windsave2table (dummy, 0);
+        sprintf (dummy, "diag_%.100s/%.100s.%02d", files.root, files.root, geo.wcycle);
+        do_windsave2table (dummy, 0, FALSE);
+      }
+
+      if (modes.keep_ioncycle_spectra)
+      {
+        strcpy (dummy, "");
+        sprintf (dummy, "python%02d.log_spec_tot", geo.wcycle);
+        spectrum_summary (dummy, 0, 6, SPECTYPE_RAW, 1., 1, 0); /* .log_spec_tot */
+
       }
 
 #ifdef MPI_ON
@@ -464,12 +492,13 @@ make_spectra (restart_stat)
 
   kbf_need (freqmin, freqmax);
 
-  /* force recalculation of kpacket rates */
+  /* force recalculation of kpacket rates and matrices, if applicable */
   if (geo.rt_mode == RT_MODE_MACRO)
   {
     for (n = 0; n < NPLASMA; n++)
     {
-      macromain[n].kpkt_rates_known = -1;
+      macromain[n].kpkt_rates_known = FALSE;
+      macromain[n].matrix_rates_known = FALSE;
     }
   }
 

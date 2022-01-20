@@ -18,7 +18,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "recipes.h"
+//OLD #include "recipes.h"
 
 /* Ratio of hnu / kT beyond which we don't bother calculating
    see #197 */
@@ -316,10 +316,11 @@ q_recomb_dere (cont_ptr, electron_temperature)
 {
   int nion;
   double u0;
-  double gaunt, coeff;
+//OLD  double gaunt, coeff;
+  double coeff;
   double root_etemp;
 
-  gaunt = 0.1;                  //for now - from Mihalas for hydrogen
+//OLD  gaunt = 0.1;                  //for now - from Mihalas for hydrogen
   u0 = cont_ptr->freq[0] * H_OVER_K / electron_temperature;
   nion = cont_ptr->nion;
 

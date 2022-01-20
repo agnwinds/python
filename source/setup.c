@@ -105,6 +105,7 @@ init_geo ()
 
   geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
   geo.line_mode = LINE_MODE_ESC_PROB;   /* default is escape probabilites */
+  geo.matom_transition_mode = MATOM_MC_JUMPS;   /* default for macro-atom transition mode is jumping not matrix */
 
   geo.star_radiation = TRUE;    /* 1 implies star will radiate */
   geo.disk_radiation = TRUE;    /* 1 implies disk will radiate */
@@ -280,8 +281,8 @@ get_spectype (yesno, question, spectype)
  * ### Notes ###
  * modes is a structure declared in python.h
  *
- * Most of the modes are initialized to 0, which means that
- * activites that could be uddertaken for this mode, will
+ * Most of the modes are initialized to FALSE, which means that
+ * activites that could be undertaken for this mode, will
  * not be.
  *
  * Advanced modes are turned off by default, unless the
@@ -298,25 +299,36 @@ get_spectype (yesno, question, spectype)
 int
 init_advanced_modes ()
 {
-  modes.iadvanced = 0;          // this is controlled by the -d flag, global mode control.
-  modes.extra_diagnostics = 0;  //  when set, want to save some extra diagnostic info
-  modes.save_cell_stats = 0;    // want to save photons statistics by cell
-  modes.keep_ioncycle_windsaves = 0;    // want to save wind file each ionization cycle
-  modes.track_resonant_scatters = 0;    // want to track resonant scatters
-  modes.save_extract_photons = 0;       // we want to save details on extracted photons
-  modes.adjust_grid = 0;        // the user wants to adjust the grid scale
-  modes.diag_on_off = 0;        // extra diagnostics
-  modes.use_debug = 0;
-  modes.print_dvds_info = 0;    // print out information on velocity gradients
-  modes.quit_after_inputs = 0;  // testing mode which quits after reading in inputs
-  modes.fixed_temp = 0;         // do not attempt to change temperature - used for testing
-  modes.zeus_connect = 0;       // connect with zeus
+  modes.iadvanced = FALSE;      // this is controlled by the -d flag, global mode control.
+  modes.extra_diagnostics = FALSE;      //  when set, want to save some extra diagnostic info
+  modes.save_cell_stats = FALSE;        // save photons statistics by cell
+  modes.keep_ioncycle_windsaves = FALSE;        // save wind file each ionization cycle
+  modes.keep_ioncycle_spectra = FALSE;  // to save spectrum file each ionization cycle
+  modes.track_resonant_scatters = FALSE;        // track resonant scatters
+  modes.save_extract_photons = FALSE;   // save details on extracted photons
+  modes.adjust_grid = FALSE;    // the user wants to adjust the grid scale
+  modes.diag_on_off = FALSE;    // extra diagnostics
+  modes.use_debug = FALSE;
+  modes.print_dvds_info = FALSE;        // print information on velocity gradients
+  modes.quit_after_inputs = FALSE;      // check inputs and quit
+  modes.fixed_temp = FALSE;     // do not attempt to change temperature 
+  modes.zeus_connect = FALSE;   // connect with zeus
 
   //note write_atomicdata  is defined in atomic.h, rather than the modes structure
-  write_atomicdata = 0;         // print out summary of atomic data
+  write_atomicdata = FALSE;     // print out summary of atomic data
 
 
-  modes.keep_photoabs = 1;      // keep photoabsorption in final spectrum
+  modes.keep_photoabs = TRUE;   // keep photoabsorption in final spectrum
+
+  modes.jumps_for_detailed_spectra = FALSE;     //use old jumps mode for calculating macro atom
+  //emissivites
+  modes.turn_off_upweighting_of_simple_macro_atoms = FALSE;     //use old mode for handling 
+  //bf interactions with simple macro atoms
+
+  modes.store_matom_matrix = TRUE;      /* default is to store the macro-atom matrix */
+
+  modes.run_xtest_diagnostics = FALSE;  /* allow special xtest_diagnostics in the various routines */
+  modes.ignore_partial_cells = FALSE;   /* Default is to include partial cells in calculation */
 
   return (0);
 }
@@ -349,7 +361,6 @@ init_observers ()
   int n;
   int ichoice;
   char answer[LINELENGTH];
-  double spec_nwave_default_double;
 
   geo.nangles = 4;
   geo.angle[0] = 10;
@@ -368,23 +379,18 @@ init_observers ()
   geo.swavemax = 1850;
 
   rdpar_comment ("The minimum and maximum wavelengths in the final spectra and the number of wavelength bins");
-  spec_nwave_default_double = 10000;
-  rddoub ("Spectrum.nwave", &spec_nwave_default_double);
-  NWAVE_EXTRACT = (int) spec_nwave_default_double;
-
-  /*
-   * First, do some safety checks to make sure NWAVE_EXTRACT will not cause
-   * problems -- namely, NWAVE has to be positive and more then NWAVE_MIN
-   */
+  NWAVE_EXTRACT = NWAVE_IONIZ;
+  rdint ("Spectrum.nwave", &NWAVE_EXTRACT);
 
   if (NWAVE_EXTRACT < 0)
   {
-    NWAVE_EXTRACT *= -1;
+    Error ("The number of bins in the extracted spectra must be positive\n");
+    Exit (0);
   }
 
   if (NWAVE_EXTRACT < NWAVE_MIN)
   {
-    Error ("Minimum number of spectrum bins is %d\n", NWAVE_MIN);
+    Error ("Minimum number of spectrum bins for detailed spectra is %d\n", NWAVE_MIN);
     NWAVE_EXTRACT = NWAVE_MIN;
   }
 
@@ -476,7 +482,6 @@ init_observers ()
     ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
 
     if (ichoice)
-
     {
       Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
       for (n = 0; n < geo.nangles; n++)
@@ -745,7 +750,7 @@ init_ionization ()
   /* Prevent bf calculation of macro_estimators when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
-    geo.macro_simple = 1;       // Make everything simple if no macro atoms -- 57h
+    geo.macro_simple = TRUE;    // Make everything simple if no macro atoms -- 57h
 
   /* initialise the choice of handling for macro pops. */
   if (geo.run_type == RUN_TYPE_PREVIOUS)

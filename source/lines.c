@@ -15,7 +15,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "recipes.h"
+//OLD #include "recipes.h"
 
 
 /**********************************************************/
@@ -635,7 +635,11 @@ line_heat (xplasma, pp, nres)
   double x, sf;
 
 
-  check_plasma (xplasma, "line_heat");
+  if (check_plasma (xplasma, "line_heat"))
+  {
+    Error ("line_heat: Attempting heat dummy plasma cell\n");
+    return (0);
+  }
 
   sf = scattering_fraction (lin_ptr[nres], xplasma);
 

@@ -94,10 +94,23 @@ create_maps ()
       plasmamain[j].nplasma = j;
       plasmamain[j].nwind = i;
       j++;
+      if (wmain[i].inwind < 0)
+      {
+        Error
+          ("create_maps: wind cell %d (nplasma %d) has volume but not flagged as in wind! Critical error, could cause undefined behaviour. Exiting.\n",
+           i, j);
+        Exit (0);
+      }
     }
     else
     {
       wmain[i].nplasma = NPLASMA;
+      if (wmain[i].inwind >= 0)
+      {
+        Error
+          ("create_maps: wind cell %d has zero volume but flagged inwind! Critical error, could cause undefined behaviour. Exiting.\n", i);
+        Exit (0);
+      }
     }
   }
   if (j != NPLASMA)
@@ -269,7 +282,7 @@ calloc_plasma (nelem)
  * @param [in] char  message[]   A message which is printed out if 
  * one has tried to access the dummy Plsma element
  * @return     0 (FALSE) if one is not in the empty plasma cell, 1 
- * (TRUE) if you have gooten there.
+ * (TRUE) if you have gotten there.
  *
  * @details
  * Wind cells that have no associated volume are assigned to
@@ -290,7 +303,7 @@ check_plasma (xplasma, message)
 {
   if (xplasma->nplasma == NPLASMA)
   {
-    Error ("check_plasma -- %s \n", message);
+    Error ("check_plasma: In Dummy Plasma Cell when probably don't want to be:  %s \n", message);
     return (TRUE);
   }
   else
@@ -530,6 +543,7 @@ calloc_estimators (nelem)
     Log
       ("Allocated %10.1f Mb for MA estimators \n",
        1.e-6 * (nelem + 1) * (2. * nlevels_macro + 2. * size_alpha_est + 8. * size_gamma_est + 2. * size_Jbar_est) * sizeof (double));
+
   }
   else
   {
@@ -671,5 +685,65 @@ calloc_dyn_plasma (nelem)
     ("Allocated %10d bytes for each of %5d elements variable length plasma arrays totaling %10.1f Mb \n",
      sizeof (double) * nions * 14, (nelem + 1), 1.e-6 * (nelem + 1) * sizeof (double) * (nions * 14 + nlte_levels + nphot_total * 2));
 
+  return (0);
+}
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Dynamically allocate the macro-atom matrixes
+ *
+ * @param [in] int  nelem   The number of elements in macromain
+ * @return     Returns 0, unless the desired memory cannot be 
+ * allocated in which the routine exits after an error message
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+int
+calloc_matom_matrix (nelem)
+     int nelem;
+{
+  int nrows = nlevels_macro + 1;
+  int j, n;
+  n = j = 0;
+  int nmatrices_allocated = 0;
+  if (nlevels_macro == 0 && geo.nmacro == 0)
+  {
+    geo.nmacro = 0;
+    Log_silent ("Allocated no space for MA matrix since nlevels_macro==0 and geo.nmacro==0\n");
+    return (0);
+  }
+
+  for (n = 0; n < nelem; n++)
+  {
+    if (macromain[n].store_matom_matrix == TRUE)
+    {
+      /* allocate space for the macro-atom matrix */
+      if ((macromain[n].matom_matrix = calloc (sizeof (double *), nrows)) == NULL)
+      {
+        Error ("calloc_estimators: Error in allocating memory for MA matrix\n");
+        Exit (0);
+      }
+      for (j = 0; j < nrows; j++)
+      {
+        if ((macromain[n].matom_matrix[j] = calloc (sizeof (double), nrows)) == NULL)
+        {
+          Error ("calloc_estimators: Error in allocating memory for MA matrix entry %d\n", j);
+          Exit (0);
+        }
+      }
+      nmatrices_allocated += 1;
+    }
+  }
+
+  if (nlevels_macro > 0 && nmatrices_allocated > 0)
+  {
+    Log ("Allocated %10.1f Mb for MA matrix \n", 1.e-6 * (nmatrices_allocated + 1) * (nrows * nrows) * sizeof (double));
+  }
   return (0);
 }

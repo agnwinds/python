@@ -26,6 +26,7 @@ double a21(struct lines *line_ptr);
 double upsilon(int n_coll, double u0);
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+void skiplines(FILE *fptr, int nskip);
 /* python.c */
 int main(int argc, char *argv[]);
 /* photon2d.c */
@@ -104,8 +105,8 @@ int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], 
 double *vector(int i, int j);
 void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
-double zero_find(double (*func)(double, void *), double x_lo, double x_hi, double tol);
-double func_minimiser(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
+double zero_find(double (*func)(double, void *), double x1, double x2, double tol, int *ierr);
+double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
@@ -302,8 +303,6 @@ double dvwind_ds_cmf(PhotPtr p);
 int dvds_ave(void);
 int dvds_max(void);
 double get_dvds_max(PhotPtr p);
-/* reposition.c */
-int reposition(PhotPtr p);
 /* anisowind.c */
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* wind_util.c */
@@ -400,6 +399,7 @@ int check_plasma(PlasmaPtr xplasma, char message[]);
 int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
 int calloc_dyn_plasma(int nelem);
+int calloc_matom_matrix(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
 int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp, double weight);
@@ -472,6 +472,8 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplas
 int communicate_estimators_para(void);
 int gather_spectra_para(void);
 int communicate_matom_estimators_para(void);
+int get_parallel_nrange(int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax);
+int communicate_matom_matrices(void);
 /* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);
@@ -498,7 +500,7 @@ int macro_pops_check_for_population_inversion(int index_element, double *populat
 int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200], int n_iterations);
 void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200]);
 /* windsave2table_sub.c */
-int do_windsave2table(char *root, int ion_switch);
+int do_windsave2table(char *root, int ion_switch, int edge_switch);
 int create_master_table(int ndom, char rootname[]);
 int create_heat_table(int ndom, char rootname[]);
 int create_convergence_table(int ndom, char rootname[]);
@@ -619,6 +621,11 @@ void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
 double f_matom_emit_accelerate(PlasmaPtr xplasma, int upper, double freq_min, double freq_max);
 double f_kpkt_emit_accelerate(PlasmaPtr xplasma, double freq_min, double freq_max);
+int matom_deactivation_from_matrix(PlasmaPtr xplasma, int uplvl);
+int calc_all_matom_matrices(void);
+/* atomic_extern_init.c */
+/* python_extern_init.o */
+/* models_extern_init.c */
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -694,10 +701,10 @@ int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 void py_wind_help(void);
 /* windsave2table.c */
-void parse_arguments(int argc, char *argv[], char root[], int *ion_switch, int *spec_switch);
+void parse_arguments(int argc, char *argv[], char root[], int *ion_switch, int *spec_switch, int *edge_switch);
 int main(int argc, char *argv[]);
 /* windsave2table_sub.c */
-int do_windsave2table(char *root, int ion_switch);
+int do_windsave2table(char *root, int ion_switch, int edge_switch);
 int create_master_table(int ndom, char rootname[]);
 int create_heat_table(int ndom, char rootname[]);
 int create_convergence_table(int ndom, char rootname[]);

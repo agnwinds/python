@@ -126,7 +126,7 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
-  strict = 0;
+//OLD  strict = 0;
 
   restart_stat = parse_command_line (argc, argv);
 
@@ -253,6 +253,7 @@ main (argc, argv)
       w = wmain;
       geo.wcycle = 0;
       geo.pcycle = 0;
+      geo.model_count = 0;
     }
 
 
@@ -522,11 +523,13 @@ main (argc, argv)
   }
 
 
-  if (strict)
+  if (rdpar_check ())
+//OLD  if (strict)
   {
     Log ("Some of the input have not been updated for the current version of Python.  Please correct and rerun\n");
     exit (0);
   }
+
 
   /* INPUTS ARE FINALLY COMPLETE */
 

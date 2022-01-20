@@ -16,7 +16,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "py_optical_depth.h"
+#include "py_optd.h"
 
 /* ************************************************************************* */
 /**
@@ -37,13 +37,28 @@
  * ************************************************************************** */
 
 SightLines_t *
-outward_initialize_2d_model_angles (int *n_angles)
+outward_initialize_2d_model_angles (int *n_angles, double *input_inclinations)
 {
   int i;
   int len;
   const double default_phase = 0.5;
   const double default_angles[] = { 0.0, 10.0, 30.0, 45.0, 60.0, 75.0, 85.0, 90.0 };
   const int n_default_angles = sizeof default_angles / sizeof default_angles[0];
+
+  /*
+   * Count the number of inclination angles provided by the -i command. Since
+   * the array is initialized as -1, this assumes any values > -1 is a valid
+   * inclination angle.
+   */
+
+  int n_input = 0;
+  for (i = 0; i < MAX_CUSTOM_ANGLES; ++i)
+  {
+    if (input_inclinations[i] > -1)
+    {
+      n_input++;
+    }
+  }
 
   /*
    * Use the angles specified for by the user for spectrum generation, this
@@ -53,7 +68,32 @@ outward_initialize_2d_model_angles (int *n_angles)
 
   SightLines_t *inclinations = NULL;
 
-  if (xxspec != NULL && geo.nangles > 0)
+  if (n_input > 0)
+  {
+    *n_angles = n_input;
+    inclinations = calloc (n_input, sizeof *inclinations);
+    if (inclinations == NULL)
+    {
+      errormsg ("cannot allocate %lu bytes for observers array\n", n_input * sizeof *inclinations);
+      exit (EXIT_FAILURE);
+    }
+
+    for (i = 0; i < n_input; i++)
+    {
+      len = snprintf (inclinations[i].name, NAMELEN, "A%02.0fP%04.2f", input_inclinations[i], default_phase);
+      if (len < 0)
+      {
+        errormsg ("there was an error writing the name to the sight lines array\n");
+        exit (EXIT_FAILURE);
+      }
+
+      inclinations[i].lmn[0] = sin (input_inclinations[i] / RADIAN) * cos (-default_phase * 360.0 / RADIAN);
+      inclinations[i].lmn[1] = sin (input_inclinations[i] / RADIAN) * sin (-default_phase * 360.0 / RADIAN);
+      inclinations[i].lmn[2] = cos (input_inclinations[i] / RADIAN);
+      inclinations[i].angle = input_inclinations[i];
+    }
+  }
+  else if (xxspec != NULL && geo.nangles > 0)
   {
     *n_angles = geo.nangles;
     inclinations = calloc (geo.nangles, sizeof *inclinations);
@@ -259,22 +299,11 @@ photosphere_1d_initialize_angles (int *n_angles)
  * ************************************************************************** */
 
 SightLines_t *
-initialize_inclination_angles (int *n_angles)
+initialize_inclination_angles (int *n_angles, double *input_inclinations)
 {
   SightLines_t *inclinations;
 
-  if (MODE == RUN_MODE_TAU_INTEGRATE)
-  {
-    if (zdom[N_DOMAIN].coord_type == SPHERICAL)
-    {
-      inclinations = outward_initialize_1d_model_angles (n_angles);
-    }
-    else
-    {
-      inclinations = outward_initialize_2d_model_angles (n_angles);
-    }
-  }
-  else
+  if (RUN_MODE == RUN_MODE_ES_PHOTOSPHERE)
   {
     if (zdom[N_DOMAIN].coord_type == SPHERICAL)
     {
@@ -283,6 +312,17 @@ initialize_inclination_angles (int *n_angles)
     else
     {
       inclinations = photosphere_2d_initialize_angles (n_angles);
+    }
+  }
+  else
+  {
+    if (zdom[N_DOMAIN].coord_type == SPHERICAL)
+    {
+      inclinations = outward_initialize_1d_model_angles (n_angles);
+    }
+    else
+    {
+      inclinations = outward_initialize_2d_model_angles (n_angles, input_inclinations);
     }
   }
 
@@ -334,17 +374,18 @@ create_photon (PhotPtr p_out, double freq, double *lmn)
   p_out->x[0] = p_out->x[1] = p_out->x[2] = 0.0;
   stuff_v (lmn, p_out->lmn);
 
-  if (MODE == RUN_MODE_TAU_INTEGRATE)
-  {
-    move_phot (p_out, geo.rstar + DFUDGE);
-  }
-  else
+  if (RUN_MODE == RUN_MODE_ES_PHOTOSPHERE)
   {
     move_phot (p_out, zdom[N_DOMAIN].rmax - DFUDGE);
     for (i = 0; i < 3; ++i)
     {
       p_out->lmn[i] *= -1.0;    // Make the photon point inwards
     }
+
+  }
+  else
+  {
+    move_phot (p_out, geo.rstar + DFUDGE);
   }
 
   return EXIT_SUCCESS;

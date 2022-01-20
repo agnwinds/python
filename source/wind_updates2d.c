@@ -81,7 +81,8 @@ WindPtr (w);
   int first, last, m;
   double tot, agn_ip;
   double lum_h_line, lum_he_line, lum_c_line, lum_n_line, lum_o_line, lum_fe_line;
-  double h_dr, he_dr, c_dr, n_dr, o_dr, fe_dr;
+//OLD  double h_dr, he_dr, c_dr, n_dr, o_dr, fe_dr;
+  double c_dr, n_dr, o_dr, fe_dr;
   int my_nmin, my_nmax;         //Note that these variables are still used even without MPI on
   int ndom;
   FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fopen ();        /*This is the file to communicate with zeus */
@@ -92,7 +93,7 @@ WindPtr (w);
   fptr = fptr2 = fptr3 = fptr4 = fptr5 = NULL;
 
 #ifdef MPI_ON
-  int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
+  int position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer, size_of_specbuffer;
   char *commbuffer;
 
@@ -134,22 +135,7 @@ WindPtr (w);
   my_nmin = 0;
   my_nmax = NPLASMA;
 #ifdef MPI_ON
-  num_mpi_cells = floor (NPLASMA / np_mpi_global);
-  num_mpi_extra = NPLASMA - (np_mpi_global * num_mpi_cells);
-
-  /* this section distributes the remainder over the threads if the cells
-     do not divide evenly by thread */
-  if (rank_global < num_mpi_extra)
-  {
-    my_nmin = rank_global * (num_mpi_cells + 1);
-    my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
-  }
-  else
-  {
-    my_nmin = num_mpi_extra * (num_mpi_cells + 1) + (rank_global - num_mpi_extra) * (num_mpi_cells);
-    my_nmax = num_mpi_extra * (num_mpi_cells + 1) + (rank_global - num_mpi_extra + 1) * (num_mpi_cells);
-  }
-  ndo = my_nmax - my_nmin;
+  ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #endif
 
   /* Before we do anything let's record the average tr and te from the last cycle */
@@ -158,6 +144,18 @@ WindPtr (w);
   {
     t_r_ave_old += plasmamain[n].t_r;
     t_e_ave_old += plasmamain[n].t_e;
+
+    /* macro-atom estimators need to be normalised for all cells. 
+       Note they should have already been averaged over threads here */
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
+    {
+      nwind = plasmamain[n].nwind;
+      normalise_macro_estimators (nwind);
+
+      /* force recalculation of kpacket rates and matrices, if applicable */
+      macromain[n].kpkt_rates_known = FALSE;
+      macromain[n].matrix_rates_known = FALSE;
+    }
   }
 
   /* we now know how many cells this thread has to process - note this will be
@@ -177,12 +175,6 @@ WindPtr (w);
        some of the estimators include temperature terms (stimulated correction
        terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
-
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)      //test for macro atoms
-    {
-      normalise_macro_estimators(nwind);
-      macromain[n].kpkt_rates_known = -1;
-    }
 
     /* Store some information so one can determine how much the temps are changing */
     t_r_old = plasmamain[n].t_r;
@@ -777,7 +769,7 @@ WindPtr (w);
         ptest.grid = nwind;     //We need our test photon to know where it is 
         kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
 
-        //First for the optcial band (up to 4000AA)     
+        //First for the optical band (up to 4000AA)     
         if (length (plasmamain[nplasma].F_vis) > 0.0)   //Only makes sense if flux in this band is non-zero
         {
           stuff_v (plasmamain[nplasma].F_vis, fhat);
@@ -854,12 +846,13 @@ WindPtr (w);
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
      cool_sum, geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-  /* JM 1807 -- if we have "indivisible packet" mode on but are using the 
-     BF_SIMPLE_EMISSIVITY_APPROACH then we report the flows into and out of the ion pool */
-  if (geo.rt_mode == RT_MODE_MACRO)
-    report_bf_simple_ionpool ();
-#endif
+  if (!modes.turn_off_upweighting_of_simple_macro_atoms)
+  {
+    /* If we have "indivisible packet" mode on but are using the 
+       new BF_SIMPLE_EMISSIVITY_APPROACH then we report the flows into and out of the ion pool */
+    if (geo.rt_mode == RT_MODE_MACRO)
+      report_bf_simple_ionpool ();
+  }
 
 
 
@@ -980,7 +973,8 @@ WindPtr (w);
 
       c_rec = n_rec = o_rec = fe_rec = 0.0;
       c_lum = n_lum = o_lum = fe_lum = 0.0;
-      h_dr = he_dr = c_dr = n_dr = o_dr = fe_dr = 0.0;
+//OLD      h_dr = he_dr = c_dr = n_dr = o_dr = fe_dr = 0.0;
+      c_dr = n_dr = o_dr = fe_dr = 0.0;
       cool_dr_metals = 0.0;
 
       for (nn = 0; nn < nions; nn++)
@@ -1133,7 +1127,9 @@ wind_rad_init ()
 
 
     if (geo.rt_mode == RT_MODE_MACRO)
-      macromain[n].kpkt_rates_known = -1;
+    {
+      macromain[n].kpkt_rates_known = FALSE;
+    }
 
 /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell*/
 

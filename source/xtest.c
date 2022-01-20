@@ -47,6 +47,12 @@
  * to save their version of xtest.c outside of the
  * git repository for later use.
  *
+ * Ideally, developers would indicate what issue one trying
+ * to solve and recored the commit assoicated with this 
+ * along with the issue, in case one wants to locate
+ * what was done
+ *
+ * This version is assocated with issue 900
  *
  *
  **********************************************************/
@@ -54,48 +60,60 @@
 int
 xtest ()
 {
-//OLD  struct photon p;
-//OLD  double s;
-//OLD  int allow_negative;
-//OLD  int hit;
-//OLD  // -333708682.51580548, -3464297957.5598879, 916107434.79302168}, lmn = {-0.3821131382229368, -0.85766764329168899, 0.28692653993169387
-//OLD// -3.337e+08 -3.464e+09  9.161e+08
-//OLD// -3.821e-01 -8.577e-01  2.869e-01
-//OLD  p.x[0] = -333708682.51580548;
-//OLD  p.x[1] = -3464297957.5598879;
-//OLD  p.x[2] = 916107434.79302168;
-//OLD  p.lmn[0] = -0.3821131382229368;
-//OLD  p.lmn[1] = -0.85766764329168899;
-//OLD  p.lmn[2] = 0.28692653993169387;
+  double pos[3];
+  double x, xmin, xmax;
+  double y, z, delta;
+  double rzero, theta, vel[3];
+  FILE *fopen (), *fptr;
+  modes.run_xtest_diagnostics = TRUE;
+  double v_escape;
 
-//  ([-3236723814.5135012, -5445429831.4690027, -946014556.8735044],
-//  [-0.83113545374973818, -0.44527507240102326, -0.9559565373701183])
+  z = 1.e15;
+// z = 1e+14;
+  y = 0;
+  xmin = 0;
+  xmax = 5.67e17;
+  xmax = 2e16;
+  xmax = 10. * z;
 
-//OLD  p.x[0] = -3236723814.5135012;
-//OLD  p.x[1] = -5445429831.4690027;
-//OLD  p.x[2] = -946014556.8735044;
-//OLD  p.lmn[0] = -0.83113545374973818;
-//OLD  p.lmn[1] = -0.44527507240102326;
-//OLD  p.lmn[2] = -0.9559565373701183;
+  pos[1] = y;
+  pos[2] = z;
 
-//OLD  allow_negative = 1;
+  fptr = fopen ("xtest.diag", "w");
 
-//OLD  s = ds_to_disk (&p, allow_negative, &hit);
+  delta = (xmax - xmin) / 1000.;
 
-//OLD  Log ("s %e\n", s);
+  for (x = xmin; x <= xmax; x += delta)
+  {
+    pos[0] = x;
+    rzero = sv_find_wind_rzero (0, pos);
+    theta = sv_theta_wind (0, rzero);
+
+    v_escape = zdom[0].sv_v_infinity * sqrt (2. * GRAV * geo.mstar / rzero);
+    sv_velocity (pos, vel, 0);
+    fprintf (fptr, "%.3e %.3e %.3e   %.3e %.3e  %.3e %.3e %.3e %.3e\n", pos[0], pos[1], pos[2], rzero, theta, vel[0], vel[1], vel[2],
+             v_escape);
+
+  }
 
 
-  double x[3];
-  x[0] = 4.02e+10;
-  x[1] = 0;
-  x[2] = 1.24e+09;
-  double v[3];
+  wind_save (files.windsave);
+  do_windsave2table (files.root, 0, FALSE);
 
 
-  Log ("Start  %.5e %.5e %.5e\n", x[0], x[1], x[2]);
-  kn_velocity (0, x, v);
 
-  Log ("Result %.5e %.5e %.5e\n", v[0], v[1], v[2]);
+
+//OLD  double x[3];
+//OLD  x[0] = 4.02e+10;
+//OLD  x[1] = 0;
+//OLD  x[2] = 1.24e+09;
+//OLD  double v[3];
+
+
+//OLD  Log ("Start  %.5e %.5e %.5e\n", x[0], x[1], x[2]);
+//OLD  kn_velocity (0, x, v);
+
+//OLD  Log ("Result %.5e %.5e %.5e\n", v[0], v[1], v[2]);
 
 
 

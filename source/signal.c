@@ -55,11 +55,10 @@
  * 
  * ### Notes ###
  * In principle almost anything can be written to the .sig file, as this 
- * uses vfprintf to write to the file.  In pracitce all of the messages
+ * uses, vfprintf to write to the file.  In practice all of the messages
  * have the format 
- *
  * 
- * Mon Nov 10 09:05:34 2008     10.0  message 
+ *  Mon Nov 10 09:05:34 2008     10.0  message 
  * 
  * where the message is determined by the format and the extra variables 
  * that are passed to the program.  
@@ -182,7 +181,9 @@ xsignal_rm (char *root)
 
     strcpy (command, "rm ");
     strcat (command, filename);
-    system (command);
+
+    if (system (command) == -1)
+      Error ("xsignal_rm: '%s' returned error status\n", command);
 
 #ifdef MPI_ON
   }
