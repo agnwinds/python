@@ -424,8 +424,8 @@ double klein_nishina(double nu);
 int compton_dir(PhotPtr p);
 double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
-double alpha(double nu);
-double beta(double nu);
+double compton_alpha(double nu);
+double compton_beta(double nu);
 double comp_cool_integrand(double nu, void *params);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int mode);

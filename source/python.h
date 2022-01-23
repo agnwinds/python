@@ -649,7 +649,7 @@ struct geometry
   int *reverb_dump_cell;
   int reverb_lines, *reverb_line;       //Number of lines to track, and array of line 'nres' values
 
-  int spec_mod;                 //A flag to say that we do hav spectral models  ??? What does this mean???
+  int spec_mod;                 //A flag saying we do have spectral models. Used in Compton scattering and matrix_ion 
 };
 
 
