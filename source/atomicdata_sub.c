@@ -17,8 +17,10 @@
 #include "log.h"
 // If routines are added cproto > atomic_proto.h should be run
 #include "atomic_proto.h"
+#include "math_struc.h"
+#include "math_proto.h"
 
-#define LINELENGTH 400
+#define LINELEN 400
 #define MAXWORDS    20
 
 /**********************************************************/
