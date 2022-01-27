@@ -7,6 +7,8 @@
  *
  * @brief      A series of subroutines designed to carry out common 3 vector operations
  * 		
+ * These routines should be kept SEPARATE from routines that require the Python specific
+ * structures in python.h
  *
  * Many of the simpler routines are intened to simplify the code, and are not complicated.
  * Others especially those that transform between cylindrical and cartesian coordiantes

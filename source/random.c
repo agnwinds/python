@@ -7,6 +7,9 @@
  * numbers including varous routines for generating 
  * randomly oriented vectors
  *
+ * These routines should be kept SEPARATE from routines that require the Python specific
+ * structures in python.h
+ *
 ***********************************************************/
 
 #include <stdio.h>

@@ -36,6 +36,9 @@
  * @bug For reasons, which are currently unclear there are differences in the number of points
  * maintained in the cdfs for different generation methods.
  *
+ * These routines should be kept SEPARATE from routines that require the Python specific
+ * structures in python.h 
+ *
  ***********************************************************/
 
 #include <stdio.h>
