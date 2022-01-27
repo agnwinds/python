@@ -299,7 +299,7 @@ parse_command_line (argc, argv)
 
     if (modes.save_rng)
     {
-      init_rng_directory (files.root);
+      init_rng_directory (files.root, rank_global);
     }
   }
 

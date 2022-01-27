@@ -18,8 +18,13 @@
 #include <string.h>
 #include <errno.h>
 
-#include "atomic.h"
-#include "python.h"
+//OLD #include "atomic.h"
+//OLD #include "python.h"
+
+#include "constants.h"
+#include "math_struc.h"
+#include "math_proto.h"
+#include "log.h"
 
 /* A basis is defined such that if x is a 3 vector as expressed an unprimed cartesian coordinate
    frame, and if y is the same vector in some rotated frame, then
@@ -278,8 +283,9 @@ init_rand (seed)
  **********************************************************/
 
 void
-init_rng_directory (root)
+init_rng_directory (root, rank)
      char *root;
+     int rank;
 {
   int err;
   char dir_name[LINELENGTH];
@@ -297,7 +303,7 @@ init_rng_directory (root)
     }
   }
 
-  sprintf (file_name, "%.50s%.50s_%d.rng_save", dir_name, files.root, rank_global);
+  sprintf (file_name, "%.50s%.50s_%d.rng_save", dir_name, root, rank);
   strcpy (rngsave_file, file_name);
 }
 

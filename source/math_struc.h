@@ -34,3 +34,7 @@ typedef struct Cdf
 
 };
 
+extern struct Cdf cdf_vcos;
+
+
+#define LINELENGTH     256
