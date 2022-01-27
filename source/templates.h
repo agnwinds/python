@@ -24,8 +24,6 @@ double q21(struct lines *line_ptr, double t);
 double q12(struct lines *line_ptr, double t);
 double a21(struct lines *line_ptr);
 double upsilon(int n_coll, double u0);
-int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
-int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 void skiplines(FILE *fptr, int nskip);
 /* python.c */
 int main(int argc, char *argv[]);
@@ -107,6 +105,8 @@ void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
 double zero_find(double (*func)(double, void *), double x1, double x2, double tol, int *ierr);
 double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
+int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
