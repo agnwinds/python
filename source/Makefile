@@ -219,6 +219,7 @@ prototypes:
 	cproto  -I$(INCLUDE) atomicdata.c > atomic_proto.h
 	cproto  -I$(INCLUDE) atomicdata_sub.c >> atomic_proto.h
 	cproto  -I$(INCLUDE) atomicdata_init.c >> atomic_proto.h
+	cproto  -I$(INCLUDE) recipes.c random.c cdf.c vvector.c > math_proto.h
 
 python: startup python.o $(python_objects)
 	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
@@ -401,7 +402,7 @@ all: clean python windsave2table py_wind indent rad_hydro_files modify_wind insp
 FILE = atomicdata.o atomicdata_init.o atomicdata_sub.o atomic.o
 
 libatomic.a:  atomicdata.o atomicdata_init.o atomic.o
-	ar ru libatomic.a atomicdata.o atomic.o
+	aor ru libatomic.a atomicdata.o atomic.o
 	ranlib libatomic.a
 	mv libatomic.a $(LIB)
 	cp atomic.h  $(INCLUDE)

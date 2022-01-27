@@ -43,9 +43,10 @@
 #include <math.h>
 
 #include "log.h"
-#include "atomic.h"
-#include "python.h"
-
+// #include "atomic.h"
+//#include "python.h"
+#include "math_struc.h"
+#include "math_proto.h"
 #define EPS 1.e-10
 
 /* A basis is defined such that if x is a 3 vector as expressed an unprimed cartesian coordinate
@@ -143,7 +144,7 @@ length (a)
 
 int
 renorm (a, scalar)
-  double a[], scalar;
+     double a[], scalar;
 {
   double x;
 

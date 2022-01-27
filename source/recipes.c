@@ -22,9 +22,12 @@
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_min.h>
 
-#include "atomic.h"
-#include "python.h"
-//OLD #include "recipes.h"
+//OLD #include "atomic.h"
+
+//OLD#include "python.h"
+#include "constants.h"
+#include "math_struc.h"
+#include "math_proto.h"
 #include "log.h"
 
 

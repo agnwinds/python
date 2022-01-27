@@ -45,9 +45,13 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-#include "atomic.h"
-#include "python.h"
-#include "models.h"
+//OLD #include "atomic.h"
+#include "constants.h"
+#include "math_struc.h"
+#include "math_proto.h"
+#include "log.h"
+//#include "python.h"
+//#include "models.h"
 
 /// This is the initial value of PDFSTEPS
 #define PDFSTEPS 10000
