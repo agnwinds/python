@@ -1,6 +1,4 @@
 /* recipes.c */
-double *vector(int i, int j);
-void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
 double zero_find(double (*func)(double, void *), double x1, double x2, double tol, int *ierr);
 double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);

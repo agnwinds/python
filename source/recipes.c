@@ -4,11 +4,13 @@
  * @author ksl
  * @date   May, 2018
  *
- * @brief  These are collection of Numberical Recipes routines
+ * @brief  These are collection of math utility routines
  * used in Python
  *
  *
  * The routines have been modified to make them ansi compatable
+ * Some of these routines were originally Numerical Recipes 
+ * Routines, but these have been replaced with gsl
  *
  ***********************************************************/
 
@@ -22,37 +24,12 @@
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_min.h>
 
-//OLD #include "atomic.h"
-
-//OLD#include "python.h"
 #include "constants.h"
 #include "math_struc.h"
 #include "math_proto.h"
 #include "log.h"
 
 
-/******************************
- * The next two routines were written by ksl.  They were not part of
-   the recipes programs which I had but I think they are what was intended
-   TODO EP: I think these to functions are redundant now - we don't seem to use them
-********************************/
-
-double *
-vector (i, j)
-     int i, j;
-{
-  double dummy, *d;
-  d = calloc (sizeof (dummy), (j - i + 1) + 1);
-  return (d);
-}
-
-void
-free_vector (a, i, j)
-     double *a;
-     int i, j;
-{
-  free (a);
-}
 
 
 
@@ -93,13 +70,11 @@ num_int (func, a, b, eps)
   int status = 0;
   int status2 = 0;
 
-//OLD  int npoints;
   size_t neval;
   gsl_function F;
   F.function = func;
   F.params = &alpha;
   zflag = 1;
-//OLD  npoints = 1000;
   if (func (a, test) == 0.0 && func (b, test) == 0.0)
   {
     zflag = 0;

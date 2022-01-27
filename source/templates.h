@@ -100,8 +100,6 @@ int project_from(struct basis *basis_from, double v_in[], double v_out[]);
 int project_to(struct basis *basis_from, double v_in[], double v_out[]);
 int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], double v_to[]);
 /* recipes.c */
-double *vector(int i, int j);
-void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
 double zero_find(double (*func)(double, void *), double x1, double x2, double tol, int *ierr);
 double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
