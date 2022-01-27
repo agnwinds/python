@@ -192,12 +192,6 @@ cone_dummy, *ConePtr;
 
 
 
-struct basis
-{
-  double a[3][3];
-
-};
-//OLD basis_cartesian;
 
 /* Provide generally for having arrays which descibe the 3 xyz axes. 
 these are initialized in main, and used in anisowind  */
