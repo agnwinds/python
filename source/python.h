@@ -1500,7 +1500,9 @@ struct filenames
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
-  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
+/* The next file was eliminated to make it easier to split of some of the
+   routines from python.h for testing of individual routines */
+//OLD  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
 };
 
 extern struct filenames files;
