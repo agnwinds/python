@@ -380,6 +380,45 @@ compton_dir (p)
   return (0);
 }
 
+struct Cdf cdf_thermal;
+int init_cdf_thermal = TRUE;
+
+/* The void is need for compatability for routines
+   which are using gsl */
+
+double
+pdf_thermal (double x, void *params)
+{
+  return (x * x * exp (-x * x));
+}
+
+int
+compton_get_thermal_velocity (t, v)
+     double t, *v;
+{
+  double vel;
+
+
+  if (init_cdf_thermal)
+  {
+    double dummy[2] = { 0, 1 };
+    cdf_gen_from_func (&cdf_thermal, &pdf_thermal, 0, 5, 0, dummy);
+    init_cdf_thermal = FALSE;
+  }
+
+  vel = cdf_get_rand (&cdf_thermal);
+  vel *= (2. * BOLTZMANN / MELEC) * t;
+
+
+  randvec (v, vel);
+
+
+  return (0);
+
+
+
+}
+
 
 /**********************************************************/
 /** 
