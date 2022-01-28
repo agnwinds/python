@@ -24,8 +24,6 @@ double q21(struct lines *line_ptr, double t);
 double q12(struct lines *line_ptr, double t);
 double a21(struct lines *line_ptr);
 double upsilon(int n_coll, double u0);
-int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
-int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 void skiplines(FILE *fptr, int nskip);
 /* python.c */
 int main(int argc, char *argv[]);
@@ -102,11 +100,11 @@ int project_from(struct basis *basis_from, double v_in[], double v_out[]);
 int project_to(struct basis *basis_from, double v_in[], double v_out[]);
 int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], double v_to[]);
 /* recipes.c */
-double *vector(int i, int j);
-void free_vector(double *a, int i, int j);
 double num_int(double (*func)(double, void *), double a, double b, double eps);
 double zero_find(double (*func)(double, void *), double x1, double x2, double tol, int *ierr);
 double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
+int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
@@ -183,7 +181,7 @@ int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x, void *params);
 int init_rand(int seed);
-void init_rng_directory(void);
+void init_rng_directory(char *root, int rank);
 void save_gsl_rng_state(void);
 void reload_gsl_rng_state(void);
 double random_number(double min, double max);
