@@ -420,6 +420,8 @@ double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 int compton_dir(PhotPtr p);
+double pdf_thermal(double x, void *params);
+int compton_get_thermal_velocity(double t, double *v);
 double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double compton_alpha(double nu);
