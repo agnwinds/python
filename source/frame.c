@@ -101,10 +101,6 @@ observer_to_local_frame (p_in, p_out)
   int i, ierr;
 
 
-
-
-
-
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame");
 
   /* Initialize the output photon */
@@ -118,31 +114,6 @@ observer_to_local_frame (p_in, p_out)
 
   ierr = lorentz_transform (p_in, p_out, v);
 
-//OLD  vel = dot (p_in->lmn, v);
-
-
-//OLD  f_in = p_in->freq;
-
-//OLD  if (rel_mode == REL_MODE_LINEAR)
-//OLD  {
-//OLD    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
-//OLD    return (ierr);
-//OLD  }
-
-
-
-//OLD  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-
-//OLD  f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
-
-//OLD  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
-
-//OLD  for (i = 0; i < 3; i++)
-//OLD  {
-//OLD    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
-//OLD  }
-
-//OLD  p_out->w *= (f_out / f_in);
 
 
   return (ierr);
@@ -207,28 +178,6 @@ local_to_observer_frame (p_in, p_out)
   rescale (v, -1, v);
 
   ierr = lorentz_transform (p_in, p_out, v);
-
-//OLD  f_in = p_in->freq;
-
-//OLD  vel = dot (p_in->lmn, v);
-//OLD  if (rel_mode == REL_MODE_LINEAR)
-//OLD  {
-//OLD    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
-//OLD    return (ierr);
-//OLD  }
-//OLD  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-//OLD  f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
-
-
-/* Need to worry about sign changes, etc. here */
-//OLD  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
-
-//OLD  for (i = 0; i < 3; i++)
-//OLD  {
-//OLD    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] + x * v[i]);
-//OLD  }
-
-//OLD  p_out->w *= (f_out / f_in);
 
 
   return (ierr);
@@ -769,11 +718,33 @@ observer_to_local_frame_ruler_transform (v, dx_obs, dx_cmf)
 }
 
 
-/* 
-   This does a transfrom from the current frame into a frame moving with velocity v 
-   with respect to the current frame
+/**********************************************************/
+/**
+ * @brief      carries out the transformation of all the quantities
+ *      in a photon structure from one frame to another
+ *
+ * @param [in] PhotPtr  p_in   The photon in the observer frame
+ * @param [out] PhotPtr  p_out   The photon in the local frame
+ *
+ * @return    The routine returns 0, unless there was an error
+ *
+ *
+ * @details
+ *
+ *  This does a transfrom from the current frame into a frame moving with velocity v
+ *  with respect to the current frame.
+ *
+ * ### Notes ###
+ *
+ * One needs to be careful about the direction of the transformation
+ * As stated this tranforms into a frame that has a velocity v with
+ * respect to the current frame.
+ *
+ * It p_in and p_out are the same then the transformation will
+ * be performed in place.
+ *
+ **********************************************************/
 
-*/
 
 int
 lorentz_transform (p_in, p_out, v)

@@ -1150,7 +1150,7 @@ scatter (p, nres, nnscat)
   {
 
 
-    compton_get_thermal_velocity (xplasma->t_e, velocity_electron);
+    //compton_get_thermal_velocity (xplasma->t_e, velocity_electron);
     compton_dir (p);
   }
   else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
