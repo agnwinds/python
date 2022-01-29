@@ -866,6 +866,7 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
+  double velocity_electron[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -1147,6 +1148,9 @@ scatter (p, nres, nnscat)
 
   if (*nres == NRES_ES)
   {
+
+
+    compton_get_thermal_velocity (xplasma->t_e, velocity_electron);
     compton_dir (p);
   }
   else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
