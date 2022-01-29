@@ -94,11 +94,8 @@ observer_to_local_frame (p_in, p_out)
 {
   WindPtr one;
   int ndom;
-  double f_out, f_in;
-  double x;
-  double v[3], vel;
-  double gamma;
-  int i, ierr;
+  double v[3];
+  int ierr;
 
 
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame");
@@ -156,11 +153,7 @@ local_to_observer_frame (p_in, p_out)
 {
   WindPtr one;
   int ndom;
-  double f_out, f_in;
-  double x;
-  double v[3], vel;
-  double gamma;
-  int i;
+  double v[3];
   int ierr;
 
 
