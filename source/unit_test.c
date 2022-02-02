@@ -29,11 +29,14 @@ main (argc, argv)
      int argc;
      char *argv[];
 {
-    int n;
-    double velocity[3];
-    double t;
+  int n;
+  double velocity[3];
+  double t;
+  double v;
+  double speed = 0;
+  double speed2 = 0;
 
-  FILE *fptr, *fopen ();
+//  FILE *fptr, *fopen ();
 
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
@@ -57,17 +60,24 @@ main (argc, argv)
 
 
 
-  t=1.0e4;
+  t = 1.0e4;
 
-  for(n=0;n<100000;n++){
-      compton_get_thermal_velocity (t, velocity);
-      printf("%10.3e %10.3e %10.3e\n",velocity[0],velocity[1],velocity[2]);
+  for (n = 0; n < 1000000; n++)
+  {
+    compton_get_thermal_velocity (t, velocity);
+    printf ("%10.3e %10.3e %10.3e\n", velocity[0], velocity[1], velocity[2]);
+    v = sqrt (velocity[0] * velocity[0] + velocity[1] * velocity[1] + velocity[2] * velocity[2]);
+    speed += v;
+    speed2 += v * v;
 
-      }
+  }
 
+
+  printf (" Average speed %e  average v**2  %e\n", speed / n, speed2 / n);
+
+  printf (" The expected average is %e\n", 2. / sqrt (3.141592) * sqrt (2. * BOLTZMANN * t / MELEC));
 
 
   exit (0);
 
 }
-
