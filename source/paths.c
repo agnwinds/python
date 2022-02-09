@@ -88,6 +88,7 @@ int
 reverb_init (WindPtr wind)
 {
   char linelist[LINELENGTH];
+  char xlinelist[LINELENGTH];
   int i, n;
   double x[3];
   double r_rad_min = 99e99, r_rad_max = 0.0, r_rad_min_log, r_rad_max_log, r_delta;
@@ -139,7 +140,8 @@ reverb_init (WindPtr wind)
       sprintf (linelist, "reverb_init: Macro-atom line path tracking is enabled for lines %d", geo.reverb_line[0]);
       for (i = 1; i < geo.reverb_lines; i++)
       {
-        sprintf (linelist, "%.100s, %d", linelist, geo.reverb_line[i]);
+        sprintf (xlinelist, "%.100s, %d", linelist, geo.reverb_line[i]);
+        sprintf (linelist, "%.200s", xlinelist);
       }
       Log ("%s\n", linelist);
 

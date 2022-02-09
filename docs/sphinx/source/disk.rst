@@ -22,7 +22,7 @@ The parameters involved in describing a flat disk are::
 
 
 Vertically Extended disk (Details)
-##################################
+================================================
 
 .. figure:: images/vertical_disk.png
     :width: 300px
@@ -50,7 +50,7 @@ not take into account the fact that the disk area of a vertically extended disk 
 
 
 Non-Standard Temperature Profile
-================================
+================================================
 
 If desired the user can read the temperature profile for the disk from a file. Each
 line in the file should consist of a radius and a temperature (and optionally a value of log g)

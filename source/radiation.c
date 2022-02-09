@@ -821,7 +821,7 @@ mean_intensity_from_models (PlasmaPtr xplasma, double freq, int mode)
   int i;
   double j_bar = 0.0;
 
-  if (geo.spec_mod > 0)
+  if (geo.spec_mod)
   {
     /*
      * Thus we have some spectral models, since we have run some ionization

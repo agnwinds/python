@@ -53,6 +53,9 @@ to modify it's operation.  These include the following:
   In most cases, a fixed seed is preferred so that problems can be replicated, but if
   is repeating the same calculation multiple times, then one may want a random seed.
 
+--rng          
+  Save or load the RNG state to file, to allow persistent RNG states between restarts
+
 --version
   Causes Python to print out the version number and commit hash (and whether
   uncommitted files exist, and then stop.
@@ -85,7 +88,7 @@ which may be useful in certain special cases.  These include:
   But if an error occurs too often, something is seriously and so Python halts at that point.
   The default is :math:`10^{5}` (per thread).
 
--e write n
+-e_write n
   Changes the number of times an error message of a specific type is written
   to a diagnostic file.  When errors occur, a line describing the error is written
   to the diagnostic file the first ``n`` times the error occurs. After that statistics
@@ -96,3 +99,9 @@ which may be useful in certain special cases.  These include:
   Reverts to using v/c corrections for special relativity and eliminates work done to treat
   co-moving frames properly.  This is for testing, and is likely to be removed in the not
   too distant future.
+
+-srclassic    
+   Use Python with full special relativity for Doppler shits, etc., but do not include any co-moving frame effects.
+
+-no-matrix-storage 
+   Do not store macro-atom transition matrices if using the macro-atom line transfer and the matrix matom_transition_mode.\n\

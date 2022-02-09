@@ -651,7 +651,8 @@ cylind_extend_density (ndom, w)
     for (j = 0; j < mdim - 1; j++)
     {
       wind_ij_to_n (ndom, i, j, &n);
-      if (w[n].vol == 0)
+//DEBUG    if (w[n].vol == 0)
+      if (w[n].vol == 0 || (modes.partial_cells == PC_EXTEND && w[n].inwind == W_PART_INWIND))
 
       {                         /*Then this grid point is not in the wind  */
 

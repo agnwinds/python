@@ -50,10 +50,6 @@ int num_updates = 0;
  * function of the updates, various variables in geo are updated,  and for
  * a hydro model the results are written to a file
  *
- * This routine is nearly 1000 lines long and might beneifit from breaking
- * it into functionl blocks, e.g by separating out the mpi communicaiton
- * into their own routines.
- *
  *
  **********************************************************/
 int
@@ -81,7 +77,6 @@ WindPtr (w);
   int first, last, m;
   double tot, agn_ip;
   double lum_h_line, lum_he_line, lum_c_line, lum_n_line, lum_o_line, lum_fe_line;
-//OLD  double h_dr, he_dr, c_dr, n_dr, o_dr, fe_dr;
   double c_dr, n_dr, o_dr, fe_dr;
   int my_nmin, my_nmax;         //Note that these variables are still used even without MPI on
   int ndom;
@@ -164,8 +159,18 @@ WindPtr (w);
   {
 
 
+
+
     nwind = plasmamain[n].nwind;
     volume = w[nwind].vol;
+
+    /* Skip cells that are partially in the wind these are not to be included
+       in the calculation */
+
+    if (modes.partial_cells == PC_EXTEND && wmain[nwind].inwind == W_PART_INWIND)
+    {
+      continue;
+    }
 
 
 

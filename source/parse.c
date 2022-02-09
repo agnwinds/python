@@ -176,7 +176,7 @@ parse_command_line (argc, argv)
 
       else if (strcmp (argv[i], "--version") == 0)
       {
-        /* give information about the pyhon version, such as commit hash */
+        /* give information about the python version, such as commit hash */
         Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
         Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
         /* warn the user if there are uncommited changes */
@@ -192,9 +192,15 @@ parse_command_line (argc, argv)
         Log ("Run xstest, usually instead of normal Python.\n");
         j = i;
       }
+      else if (strcmp (argv[i], "-include_partial_cells") == 0)
+      {
+        modes.partial_cells = PC_INCLUDE;
+        Log ("Cells partially in the wind will be included.\n");
+        j = i;
+      }
       else if (strcmp (argv[i], "-ignore_partial_cells") == 0)
       {
-        modes.ignore_partial_cells = TRUE;
+        modes.partial_cells = PC_ZERO_DEN;
         Log ("Cells partially in the wind will be ingnored.\n");
         j = i;
       }
@@ -285,10 +291,7 @@ parse_command_line (argc, argv)
     sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
 
-//OLD    strcpy (files.diag, files.diagfolder);
     sprintf (dummy, "_%d.diag", rank_global);
-//OLD    strcat (files.diag, files.root);
-//OLD    strcat (files.diag, dummy);
 
     sprintf (files.diag, "%.50s/%.50s%.50s", files.diagfolder, files.root, dummy);
 
@@ -296,7 +299,7 @@ parse_command_line (argc, argv)
 
     if (modes.save_rng)
     {
-      init_rng_directory ();
+      init_rng_directory (files.root, rank_global);
     }
   }
 
@@ -343,42 +346,44 @@ where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
 \n\
 and the switches have the following meanings \n\
 \n\
- -h             Print this help message and stop \n\
- -r             Restart a run of the progarm reading the file xxx.windsave \n\
- -t time_max    Limit the total time to approximately time_max seconds.  Note that the program checks \n\
-                for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
-                is attempting to save the program outputs so that the program can be restarted with \n\
-                -r if that is desired. \n\
- -v n           Increase or decrease the amount of print out.  The default is 5.  Larger numbers increase  \n\
-                the amount printed; smaller numbers decrease it.   \n\
- --dry-run      Create a new .pf file and stop \n\
- -i             Same as --dry-run \n\
- --version      Print out python version, commit hash and if there were files with uncommitted \n\
-                changes and stop \n\
- --rseed        Set the random number seed to be time-based, rather than fixed. \n\
- --rng          Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
+ -h                     Print this help message and stop \n\
+ -r                     Restart a run of the progarm reading the file xxx.windsave \n\
+ -t time_max            Limit the total time to approximately time_max seconds.  Note that the program checks \n\
+                        for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
+                        is attempting to save the program outputs so that the program can be restarted with \n\
+                        -r if that is desired. \n\
+ -v n                   Increase or decrease the amount of print out.  The default is 5.  Larger numbers increase  \n\
+                        the amount printed; smaller numbers decrease it.   \n\
+ --dry-run              Create a new .pf file and stop \n\
+ -i                     Same as --dry-run \n\
+ --version              Print out python version, commit hash and if there were files with uncommitted \n\
+                        changes and stop \n\
+ --rseed                Set the random number seed to be time-based, rather than fixed. \n\
+ --rng                  Save or load the RNG state to file, to allow persistent RNG states between restarts\n\
 \n\
 Other switches exist but these are not intended for the general user.\n\
 These are largely diagnostic or for special cases. These include\n\
- -d             Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
-                Python will then query the user for information about what to do with a series of \n\
-                inputs beginning with @ \n\
- -e             Change the maximum number of errors of one type (by default 100,000) before the program will quit\n\
- -e_write 	Change the maximum number of errors of one type (by default 100) to print out before recording errors silently\n\
- -f             Invoke a fixed temperature mode, used for runs with Zeus or Plutu \n\
- -z             Invoke a special mode for that causes Python to start with a run from Zeus or Plutu\n\
- -p [range]     Vary the number of photons in ionization cycles logarthmically building up to the final value\n\
-                Range is in powers of 10, the difference beween the number of photons in the first cycle \n\
-                compared to the last. If range is missing, range is assumed to be 1, in which case the  \n\
-                number of photons will in the first cycle will be one order of magniude less than in the last cycle \n\
- -classic       Use Python in it's classic configuration, with linear Doppler shifts, etc., and where co-moving frame\n\
-                effects are not taken into account.\n\
- -srclassic     Use Python with full special relativity for Doppler shits, etc., but do not include any co-moving frame\n\
-                effects.\n\
- -ignore partial_cells   Ignore wind cells that are only partially filed by the wind (see Issue #900) \n\
+ -d                     Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
+                        Python will then query the user for information about what to do with a series of \n\
+                        inputs beginning with @ \n\
+ -e                     Change the maximum number of errors of one type (by default 100,000) before the program will quit\n\
+ -e_write               Change the maximum number of errors of one type (by default 100) to print out before recording errors silently\n\
+ -f                     Invoke a fixed temperature mode, used for runs with Zeus or Plutu \n\
+ -z                     Invoke a special mode for that causes Python to start with a run from Zeus or Plutu\n\
+ -p [range]             Vary the number of photons in ionization cycles logarthmically building up to the final value\n\
+                        Range is in powers of 10, the difference beween the number of photons in the first cycle \n\
+                        compared to the last. If range is missing, range is assumed to be 1, in which case the  \n\
+                        number of photons will in the first cycle will be one order of magniude less than in the last cycle \n\
+ -classic               Use Python in its classic configuration, with linear Doppler shifts, etc., and where co-moving frame\n\
+                        effects are not taken into account.\n\
+ -srclassic             Use Python with full special relativity for Doppler shifts, etc., but do not include any co-moving frame\n\
+                        effects.\n\
+ -ignore_partial_cells  Ignore wind cells that are only partially filled by the wind (This is now the default)  \n\
+ -include_partial_cells Include wind cells that are only partially filled by the wind   \n\
+ -no-matrix-storage     Do not store macro-atom transition matrices if using the macro-atom line transfer and the matrix matom_transition_mode.\n\
 \n\
- -xtest         Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\
-                setup.  This is only useful to devlopers \n\
+ -xtest                 Instead of running python, call the routine xtest so that one can diagnose issues associted with the \n\
+                        setup.  This is only useful to devlopers \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 of the parameter file and inputs will be requested from the command line. \n\
 \n\

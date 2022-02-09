@@ -208,8 +208,11 @@ define_wind ()
   }
 
 
-
-  /* Calculate gammas for wind cells, and make volumes co-moving volumes */
+  /* Calculate gammas for wind cells, and make volumes co-moving volumes.
+   */
+//DEBUG     Also set the volume of partial cells to 0 if we want to ignore them
+//DEBUG     in the calculation.   This allows the wind to be properly extended
+//DEBUG     in routines like cylind_extend_density */
 
   for (n = 0; n < NDIM2; n++)
   {
@@ -226,6 +229,7 @@ define_wind ()
       w[n].xgamma = w[n].xgamma_cen = 1.;
       geo.frame = OBS_FRAME;    //relevant quantities are defined in the observer faems
     }
+
   }
 
 

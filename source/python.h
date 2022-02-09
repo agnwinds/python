@@ -109,6 +109,7 @@ extern int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT dep
 #define MAXSCAT 			2000
 
 /* Define the structures */
+#include "math_struc.h"
 
 
 /* Geometry is an actual structure which exists at the beginning of th program
@@ -191,12 +192,6 @@ cone_dummy, *ConePtr;
 
 
 
-struct basis
-{
-  double a[3][3];
-
-};
-//OLD basis_cartesian;
 
 /* Provide generally for having arrays which descibe the 3 xyz axes. 
 these are initialized in main, and used in anisowind  */
@@ -649,7 +644,7 @@ struct geometry
   int *reverb_dump_cell;
   int reverb_lines, *reverb_line;       //Number of lines to track, and array of line 'nres' values
 
-  int spec_mod;                 //A flag to say that we do hav spectral models  ??? What does this mean???
+  int spec_mod;                 //A flag saying we do have spectral models. Used in Compton scattering and matrix_ion 
 };
 
 
@@ -1319,28 +1314,9 @@ have access to the proper normalization.
 */
 
 
-#define NCDF 30000              //The default size for these arrays.  This needs to be greater than
-                                //the size of any model that is read in, hence larger than NWAVE_EXTRACT in models.h
-#define FUNC_CDF  2000          //The size for CDFs made from functional form CDFs
-#define ARRAY_PDF 1000          //The size for PDFs to be turned into CDFs from arrays
-
-
-typedef struct Cdf
-{
-  double x[NCDF];               /* Positions for which the CDF is calculated */
-  double y[NCDF];               /* The value of the CDF at x */
-  double d[NCDF];               /* 57i -- the rate of change of the CDF at x */
-  double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
-                                   of the CDF to sample */
-  double x1, x2;                /* limits if they exist on what is returned */
-  double norm;                  /* The scaling factor which would renormalize the CDF */
-  int ncdf;                     /* Size of this CDF */
-}
- *CdfPtr, cdf_dummy;
-
 extern struct Cdf cdf_ff;
 extern struct Cdf cdf_fb;
-extern struct Cdf cdf_vcos;
+//OLD moved extern struct Cdf cdf_vcos;
 extern struct Cdf cdf_bb;
 extern struct Cdf cdf_brem;
 
@@ -1427,6 +1403,13 @@ extern int nerr_Jmodel_wrong_freq;
 
 
 
+enum partial_cells_enum
+{ PC_INCLUDE = 0,   // Include partial cells, as has been done historically
+  PC_ZERO_DEN = 1,  // Exclude partial cells, by setting their density to 0
+  PC_EXTEND = 2     // Exclude partial cells, by extending the density of a full cell, into a partial cell
+};
+
+
 /***********************ADVANCED_MODES STRUCTURE **********************/
 struct advanced_modes
 {
@@ -1459,7 +1442,7 @@ struct advanced_modes
   int turn_off_upweighting_of_simple_macro_atoms; // use deprecated method for simple atoms 
                                 // in macro scheme
   int run_xtest_diagnostics;     // Switch so that xtest can enable print outs just while xtest is being run
-  int ignore_partial_cells;      // Switch to ignore cells which are not completely in the wind.
+  int partial_cells;             // Switch to decribe treatment of partial cells.                 
 };
 
 extern struct advanced_modes modes;
@@ -1493,7 +1476,9 @@ struct filenames
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
-  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
+/* The next file was eliminated to make it easier to split of some of the
+   routines from python.h for testing of individual routines */
+//OLD  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
 };
 
 extern struct filenames files;

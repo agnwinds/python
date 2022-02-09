@@ -3,7 +3,7 @@ Demo: Quasar, M20
 
 The collaboration has published a series of papers using parameterised, biconical disc wind models. The initial model focus mostly on broad absorption quasars (`Higginbottom et al 2013 <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.1390H/abstract>`_), since the emission line were too weak in that case too match observed BLR properties. In `Matthews et al 2016 <https://ui.adsabs.harvard.edu/abs/2016MNRAS.458..293M/abstract>`_, we included a treatment of clumping and found some. Finally, in `Matthews et al 2020 <https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.5540M/abstract>`_ (hereafter M20) we used a similar model to the previous clumpy wind model, but explored some of the behaviour in the ionizing flux density plane, and also used an isotropic illuminating SED.
 
-This particular document focuses on Model A from M20. As with most of the demo models discussed here, the model makes use of the :doc:`Shlosman \& Vitello (1993) wind prescription<../../wind_models/sv>`.
+This particular document focuses on Model A from M20. As with most of the demo models discussed here, the model makes use of the :doc:`Shlosman \& Vitello (1993) wind prescription<../../../wind_models/sv>`.
 
 The wind is equatorial, and illuminated by an isotropic SED. 
 
