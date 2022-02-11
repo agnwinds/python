@@ -263,7 +263,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 //OLD  int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
   dt_cmf = 0.0;
-  xsignal (files.root, "%-20s arrived in photo_gen_wind \n", "NOK");
 
   for (n = 0; n < NPLASMA; n++)
   {
@@ -272,7 +271,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   }
 
   limit_lines (freqmin, freqmax);
-  xsignal (files.root, "%-20s limited lines \n", "NOK");
 
   photstop = photstart + nphot;
   Log_silent ("photo_gen_wind creates nphot %5d photons from %5d to %5d \n", nphot, photstart, photstop);
@@ -332,7 +330,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       ptype[nplasma][BOUND_BOUND]++;
     }
   }
-  xsignal (files.root, "%-20s worked out where photons will be made \n", "NOK");
 
 
 /* Now generate the photons looping over the Plasma cells */
@@ -439,7 +436,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     }
 
   }
-  xsignal (files.root, "%-20s actually made photons \n", "NOK");
 
 
   return (nphot);
