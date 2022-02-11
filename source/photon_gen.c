@@ -199,7 +199,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
   for (n = 0; n < NPHOT; n++)
   {
-    printf ("BOOM %i %e %e\n", n, p[n].freq, p[n].w);
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;
@@ -414,7 +413,6 @@ iwind = -1 	Don't generate any wind photons at all
     {
       geo.lum_wind = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
     }
-    printf ("BOOM total lum=%e\n", geo.lum_wind);
 
     xxxpdfwind = 1;             // Turn on the portion of the line luminosity routine which creates pdfs
     geo.f_wind = wind_luminosity (f1, f2, MODE_OBSERVER_FRAME_TIME);
