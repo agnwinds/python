@@ -87,7 +87,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   int iphot_start, nphot_rad, nphot_k;
   long nphot_tot_rad, nphot_tot_k;
 
-  xsignal (files.root, "%-20s Arrived in photon gen\n", "NOK");
   nphot_k = nphot_tot_k = natural_weight = iphot_start = 0;     // Initialize to avoid compiler warnings
 
   /* if we are generating nonradiative kpackets, then we need to subtract 
@@ -128,10 +127,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   {                             /* Use banding, create photons with different weights in different wavelength
                                    bands.  This is used for the for ionization calculation where one wants to assure
                                    that you have "enough" photons at high energy */
-    xsignal (files.root, "%-20s Populating bands\n", "NOK");
 
     ftot = populate_bands (ioniz_or_final, iwind, &xband);
-    xsignal (files.root, "%-20s Bands Populated\n", "NOK");
 
     for (n = 0; n < NPHOT; n++)
       p[n].path = -1.0;         /* SWM - Zero photon paths */
@@ -139,7 +136,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     /* Now generate the photons */
 
     iphot_start = 0;
-    xsignal (files.root, "%-20s Generating photons\n", "NOK");
 
     for (n = 0; n < xband.nbands; n++)
     {
@@ -165,7 +161,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
         iphot_start += xband.nphot[n];
       }
     }
-    xsignal (files.root, "%-20s Photons Generated\n", "NOK");
 
   }
 
@@ -207,7 +202,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     if (geo.reverb != REV_NONE && p[n].path < 0.0)      // SWM - Set path lengths for disk, star etc.
       simple_paths_gen_phot (&p[n]);
   }
-  xsignal (files.root, "%-20s Finished making photons\n", "NOK");
 
   return (0);
 
