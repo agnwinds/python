@@ -184,8 +184,9 @@ bf_estimators_increment (one, p, ds)
 
         if ((yy / weight_of_packet) > 50)
         {
-          Log ("bf_estimator_increment: A packet survived an optical depth of %g\n", yy / weight_of_packet);
-          Log ("bf_estimator_increment: freq_av %g, ft %g\n", freq_av, ft);
+          Log ("bf_estimator_increment: A packet (%d) in cell %d (%d) survived an optical depth of %g\n", p->np, p->grid, wmain[p->grid],
+               yy / weight_of_packet);
+          Log ("bf_estimator_increment: freq_av %g, ft %g   yy %g  weight %g\n", freq_av, ft, yy, weight_of_packet);
         }
       }
 

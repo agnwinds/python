@@ -1,9 +1,9 @@
 # This file allows one to specify switches to be used in the regression tests.
 # py 1d_sn.pf
-# py -classic agn_macro.pf
-py -classic agn_classic.pf
-py -gamma agn_gamma.pf
-# py -gamma agn_macro_gamma.pf
+py -ignore_partial_cells agn_macro_matrix.pf
+py -include_partial_cells agn_macro_partial.pf 
+py -ignore_partial_cells agn_macro.pf 
+py -ignore_partial_cells agn_simple.pf
 # py cv.pf
 # py -classic cv_kur.pf
 # py cv_vert.pf

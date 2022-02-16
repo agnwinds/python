@@ -150,6 +150,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     smax *= 0.5;
   }
 
+
+
+
   freq_inner = p_start_cmf.freq;
   freq_outer = p_stop_cmf.freq;
 
@@ -380,6 +383,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   }
 
   *tau = running_tau;
+
+
 
   return (ds_current);
 }

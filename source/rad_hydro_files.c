@@ -201,7 +201,6 @@ main (argc, argv)
   wind_cooling ();              /*We call wind_cooling here to obtain an up to date set of cooling rates */
 //OLD  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /*and we also call wind_luminosity to get the luminosities */
   wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);       /*and we also call wind_luminosity to get the luminosities */
-
   fptr = fopen ("py_heatcool.dat", "w");
   fptr2 = fopen ("py_driving.dat", "w");
   fptr3 = fopen ("py_ion_data.dat", "w");
