@@ -347,6 +347,12 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     icell = plasmamain[n].nwind;
 //OLD    ndom = wmain[icell].ndom;
 
+    if (ptype[n][FREE_BOUND] > 0)
+    {
+//      printf ("BOOM allocating %i\n", ptype[n][FREE_BOUND]);
+      photstoremain[n].freq = calloc (sizeof (double), ptype[n][FREE_BOUND]);
+//      printf ("BOOM testing %e\n", photstoremain[n].freq[0]);
+    }
     for (np = photstart; np < photstop; np++)
     {
 
@@ -362,7 +368,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       }
       else if (np < photstart + ptype[n][FREE_FREE] + ptype[n][FREE_BOUND])
       {
-        p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
+        p[np].freq = one_fb (&wmain[icell], freqmin, freqmax, ptype[n][FREE_BOUND]);
       }
       else
       {
@@ -435,7 +441,10 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       }
 
     }
-
+    if (ptype[n][FREE_BOUND] > 0)
+    {
+      free (photstoremain[n].freq);
+    }
   }
 
 

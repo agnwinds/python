@@ -86,7 +86,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   int n;
   int iphot_start, nphot_rad, nphot_k;
   long nphot_tot_rad, nphot_tot_k;
-
+  printf ("BOOM\n");
   nphot_k = nphot_tot_k = natural_weight = iphot_start = 0;     // Initialize to avoid compiler warnings
 
   /* if we are generating nonradiative kpackets, then we need to subtract 
@@ -198,8 +198,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
   for (n = 0; n < NPHOT; n++)
   {
-    printf ("PHOTON %i %e\n", n, p[n].freq);
-
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;

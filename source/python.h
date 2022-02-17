@@ -996,11 +996,11 @@ cumulative distribution function for a process, but trivial to create more than 
 of a particular type once one has the cdf,  This appears to be case for f fb photons.  But 
 the same procedure could be used for line photons */
 
-#define NSTORE 10
+#define NSTORE 20
 typedef struct photon_store
 {
-  int n;                        /* This is the photon number that was last used */
-  double t, f1, f2, freq[NSTORE];
+  int n,ntot;                        /* This is the photon number that was last used */
+  double t, f1, f2, *freq;
 
 } photon_store_dummy, *PhotStorePtr;
 
