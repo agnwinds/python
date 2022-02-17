@@ -198,6 +198,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
   for (n = 0; n < NPHOT; n++)
   {
+    printf ("PHOTON %i %e\n", n, p[n].freq);
+
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;

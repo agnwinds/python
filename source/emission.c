@@ -262,10 +262,8 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int nnscat;
 //OLD  int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
-  int n_free_free, n_free_bound, n_bound_bound;
   dt_cmf = 0.0;
 
-  n_free_free = n_free_bound = n_bound_bound = 0;
   for (n = 0; n < NPLASMA; n++)
   {
     for (nn = 0; nn < 3; nn++)
@@ -322,21 +320,17 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     if ((xlumsum += plasmamain[nplasma].lum_ff) > xlum)
     {
       ptype[nplasma][FREE_FREE]++;
-      n_free_free++;
     }
     else if ((xlumsum += plasmamain[nplasma].lum_rr) > xlum)
     {
       ptype[nplasma][FREE_BOUND]++;
-      n_free_bound++;
     }
     else
     {
       ptype[nplasma][BOUND_BOUND]++;
-      n_bound_bound++;
     }
   }
 
-//  xsignal (files.root, "%-20s Making %i ff %i fb %i bb photons\n", "NOK", n_free_free, n_free_bound, n_bound_bound);
 
 
 /* Now generate the photons looping over the Plasma cells */
