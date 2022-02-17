@@ -161,12 +161,11 @@ where_in_wind (x, ndomain)
 
     }
 
-    /* At this point global constraints (however poorly defined) have 
+    /* At this point global constraints (however poorly defned) have 
      * been applied to an arbitrary imported model, but we must still check 
      * whether this particular point is in the grid and whether that point is
      * in the wind or not.  We follow the usual practice of allowing the grid to
-     * define whether it is in the grid or not.  We also do this for the
-     * case where we want to exclude cells that are partially in the wind.
+     * define whether it is in the grid or not..  
      */
 
     if (one_dom->wind_type == IMPORT)
@@ -463,8 +462,11 @@ model_rho (ndom, x)
   double rho = 0;
   int n = 0;
 
+  /*211115-ksl-Check if we want to ignore cells and if so return
+     0 for the density
+   */
 
-  if (modes.partial_cells == PC_ZERO_DEN)
+  if (modes.ignore_partial_cells == TRUE)
   {
     n = where_in_grid (ndom, x);
 

@@ -262,8 +262,8 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int nnscat;
 //OLD  int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
-  dt_cmf = 0.0;
 
+  dt_cmf = 0.0;
   for (n = 0; n < NPLASMA; n++)
   {
     for (nn = 0; nn < 3; nn++)
@@ -436,7 +436,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     }
 
   }
-
 
   return (nphot);
 }

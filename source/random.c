@@ -7,9 +7,6 @@
  * numbers including varous routines for generating 
  * randomly oriented vectors
  *
- * These routines should be kept SEPARATE from routines that require the Python specific
- * structures in python.h
- *
 ***********************************************************/
 
 #include <stdio.h>
@@ -21,13 +18,8 @@
 #include <string.h>
 #include <errno.h>
 
-//OLD #include "atomic.h"
-//OLD #include "python.h"
-
-#include "constants.h"
-#include "math_struc.h"
-#include "math_proto.h"
-#include "log.h"
+#include "atomic.h"
+#include "python.h"
 
 /* A basis is defined such that if x is a 3 vector as expressed an unprimed cartesian coordinate
    frame, and if y is the same vector in some rotated frame, then
@@ -36,7 +28,6 @@
  */
 
 gsl_rng *rng = NULL;            // pointer to a global random number generator
-char rngsave_file[LINELENGTH];
 
 
 /**********************************************************/
@@ -286,15 +277,13 @@ init_rand (seed)
  **********************************************************/
 
 void
-init_rng_directory (root, rank)
-     char *root;
-     int rank;
+init_rng_directory (void)
 {
   int err;
   char dir_name[LINELENGTH];
   char file_name[LINELENGTH];
 
-  sprintf (dir_name, ".rng_%.100s/", root);
+  sprintf (dir_name, ".rng_%.100s/", files.root);
 
   err = mkdir (dir_name, 0777);
   if (err)
@@ -306,8 +295,8 @@ init_rng_directory (root, rank)
     }
   }
 
-  sprintf (file_name, "%.50s%.50s_%d.rng_save", dir_name, root, rank);
-  strcpy (rngsave_file, file_name);
+  sprintf (file_name, "%.50s%.50s_%d.rng_save", dir_name, files.root, rank_global);
+  strcpy (files.rngsave, file_name);
 }
 
 /**********************************************************/
@@ -327,9 +316,9 @@ save_gsl_rng_state ()
 {
   FILE *file;
 
-  if ((file = fopen (rngsave_file, "w")) == NULL)
+  if ((file = fopen (files.rngsave, "w")) == NULL)
   {
-    Error ("save_gsl_rng_state: unable to open %s to write RNG to file\n", rngsave_file);
+    Error ("save_gsl_rng_state: unable to open %s to write RNG to file\n", files.rngsave);
     return;
   }
 
@@ -338,12 +327,12 @@ save_gsl_rng_state ()
     Error ("save_gsl_rng_state: gsl_rng_fwrite failed to write RNG state to file\n");
   }
   {
-    Log ("GSL RNG state saved to %s\n", rngsave_file);
+    Log ("GSL RNG state saved to %s\n", files.rngsave);
   }
 
   if (fclose (file))
   {
-    Error ("save_gsl_rng_state: there was a problem when closing %s\n", rngsave_file);
+    Error ("save_gsl_rng_state: there was a problem when closing %s\n", files.rngsave);
   }
 }
 
@@ -374,24 +363,24 @@ reload_gsl_rng_state ()
 
   rng = gsl_rng_alloc (gsl_rng_mt19937);
 
-  if ((file = fopen (rngsave_file, "r")) == NULL)
+  if ((file = fopen (files.rngsave, "r")) == NULL)
   {
-    Error ("reload_gsl_rng_state: unable to open %s so using a new seed\n", rngsave_file);
+    Error ("reload_gsl_rng_state: unable to open %s so using a new seed\n", files.rngsave);
     return;
   }
 
   if (gsl_rng_fread (file, rng))
   {
-    Error ("reload_gsl_rng_state: gsl_rng_fread failed to read the RNG state from %s so using a new seed\n", rngsave_file);
+    Error ("reload_gsl_rng_state: gsl_rng_fread failed to read the RNG state from %s so using a new seed\n", files.rngsave);
   }
   else
   {
-    Log ("GSL RNG state loaded from %s\n", rngsave_file);
+    Log ("GSL RNG state loaded from %s\n", files.rngsave);
   }
 
   if (fclose (file))
   {
-    Error ("reload_gsl_rng_state: there was a problem when closing %s\n", rngsave_file);
+    Error ("reload_gsl_rng_state: there was a problem when closing %s\n", files.rngsave);
   }
 }
 

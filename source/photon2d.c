@@ -86,20 +86,16 @@ translate (w, pp, tau_scat, tau, nres)
 {
   int istat;
   int ndomain;
-  int ichoose;
 
 
-  ichoose = where_in_wind (pp->x, &ndomain);
 
-
-  if (ichoose < 0)
+  if (where_in_wind (pp->x, &ndomain) < 0)      //If the return is negative, this means we are outside the wind
   {
-    istat = translate_in_space (pp);
+    istat = translate_in_space (pp);    //And so we should translate in space
 
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
   {
-
     istat = translate_in_wind (w, pp, tau_scat, tau, nres);
   }
   else
@@ -152,7 +148,7 @@ translate_in_space (pp)
    * not really in the wind, so we have to address this situtation here.  The first problem
    * we have though is that we do not know what domain we are in.*/
 
-  if (ndom >= 0 && (zdom[ndom].wind_type == IMPORT))
+  if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
   {
     stuff_phot (pp, &ptest);
     move_phot (&ptest, ds + DFUDGE);    /* So now ptest is at the edge of the wind as defined by the boundary
@@ -161,8 +157,8 @@ translate_in_space (pp)
 
 
 
-    /* Note there is a possibility that we reach the other side 
-     * of the grid without actually encountering a
+    /* Note there is a possiblity that we reach the other side 
+     * of the grid without actually encoutering a
      * wind cell
      */
 
@@ -245,8 +241,6 @@ translate_in_space (pp)
  * cylindrical models.  Additionally for imported models we skip all of the
  * of the wind_cones.  This is inefficient, and needs to be corrected for
  * rtheta and spherical models which can easily be handled using wind cones.
- *
- * ksl 2201 - It is unclear what the comment I made in 1802 actually means anymore.
  *
  **********************************************************/
 
@@ -444,73 +438,56 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      shell.  It needs a "trial photon at the maximum distance however...
      Note that ds_current does not alter p in any way */
 
+  ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
 
-  if (modes.partial_cells == PC_EXTEND && one->inwind == W_PART_INWIND)
+  if (p->nres < 0)
+    xplasma->nscat_es++;
+  if (p->nres > 0)
+    xplasma->nscat_res++;
+
+  /* We now increment the radiation field in the cell, translate the photon and wrap
+   * things up.  For simple atoms, the routine radiation also reduces
+   * the weight of the photon due to continuum absorption, e.g. free free.
+   */
+
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
-    ds_current = smax;
-    istat = 0;
-    if (smax < 0)
+    /* In the macro-method, b-f and other continuum processes do not reduce the photon
+       weight, but are treated as as scattering processes.  Therefore most of what was in
+       subroutine radiation for the simple atom case can be avoided.  
+     */
+    if (geo.ioniz_or_extract == CYCLE_IONIZ)
     {
-      Error ("Houston, there is a problem %e\n", smax);
+      /* Provide inputs to bf_estimators in the local frame  */
+      stuff_phot (p, &phot_mid);
+      move_phot (&phot_mid, 0.5 * ds_current);
+      observer_to_local_frame (&phot_mid, &phot_mid_cmf);
+      ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
+      bf_estimators_increment (&w[p->grid], &phot_mid_cmf, ds_cmf);
     }
   }
   else
   {
-    ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-//  }
-
-    if (p->nres < 0)
-      xplasma->nscat_es++;
-    if (p->nres > 0)
-      xplasma->nscat_res++;
-
-    /* We now increment the radiation field in the cell, translate the photon and wrap
-     * things up.  For simple atoms, the routine radiation also reduces
-     * the weight of the photon due to continuum absorption, e.g. free free.
-     */
-
-    if (geo.rt_mode == RT_MODE_MACRO)
-    {
-      /* In the macro-method, b-f and other continuum processes do not reduce the photon
-         weight, but are treated as as scattering processes.  Therefore most of what was in
-         subroutine radiation for the simple atom case can be avoided.  
-       */
-      if (geo.ioniz_or_extract == CYCLE_IONIZ)
-      {
-        /* Provide inputs to bf_estimators in the local frame  */
-        stuff_phot (p, &phot_mid);
-        move_phot (&phot_mid, 0.5 * ds_current);
-        observer_to_local_frame (&phot_mid, &phot_mid_cmf);
-        ds_cmf = observer_to_local_frame_ds (&phot_mid, ds_current);
-        bf_estimators_increment (&w[p->grid], &phot_mid_cmf, ds_cmf);
-      }
-    }
-    else
-    {
-      radiation (p, ds_current);
-    }
-
-    if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
-    {
-      if (ds_current < wmain[p->grid].dfudge)
-      {
-        Error
-          ("translate_in_wind: found repeated resonance scattering nres %5d after motion of %10.3e for photon %d in plasma cell %d)\n",
-           *nres, ds_current, p->np, wmain[p->grid].nplasma);
-      }
-    }
-
-    p->nres = *nres;
-    if (p->nres > -1 && p->nres < nlines)
-      p->line_res = p->nres;
+    radiation (p, ds_current);
   }
 
-  p->istat = istat;
-
-
-
   move_phot (p, ds_current);
-  return (p->istat);
+
+  if (*nres > -1 && *nres <= NLINES && *nres == p->nres && istat == P_SCAT)
+  {
+    if (ds_current < wmain[p->grid].dfudge)
+    {
+      Error
+        ("translate_in_wind: uncaught repeated resonance scattering nres %5d after motion of %10.3e for photon %d in plasma cell %d)\n",
+         *nres, ds_current, p->np, wmain[p->grid].nplasma);
+    }
+  }
+
+  p->nres = *nres;
+  if (p->nres > -1 && p->nres < nlines)
+    p->line_res = p->nres;
+
+  return (p->istat = istat);
 }
 
 

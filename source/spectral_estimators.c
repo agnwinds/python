@@ -113,8 +113,7 @@ spectral_estimators (xplasma)
 
       else
       {
-        Error ("spectral_estimators: too few photons (1 or 0) in cell %d (%d) band %d to produce a model\n", xplasma->nplasma,
-               wmain[xplasma->nwind].inwind, n);
+        Error ("spectral_estimators: too few photons (1 or 0) in cell %d band %d to produce a model\n", xplasma->nplasma, n);
       }
 
       /* We also want to make sure that the weight will be zero, this way we make
@@ -345,7 +344,7 @@ spectral_estimators (xplasma)
 
   }                             //End of loop over bands
 
-  geo.spec_mod = TRUE;          //Tell the code we have a model
+  geo.spec_mod = 1;             //Tell the code we have a model
 
   return (0);
 

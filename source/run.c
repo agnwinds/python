@@ -70,7 +70,7 @@ calculate_ionization (restart_stat)
   if (rank_global == 0)
   {
 #endif
-    wind_save (files.windsave);
+    wind_save (files.windsave); // This is only needed to update pcycle
 #ifdef MPI_ON
   }
 #endif

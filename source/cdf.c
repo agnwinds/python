@@ -36,9 +36,6 @@
  * @bug For reasons, which are currently unclear there are differences in the number of points
  * maintained in the cdfs for different generation methods.
  *
- * These routines should be kept SEPARATE from routines that require the Python specific
- * structures in python.h 
- *
  ***********************************************************/
 
 #include <stdio.h>
@@ -48,13 +45,9 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-//OLD #include "atomic.h"
-#include "constants.h"
-#include "math_struc.h"
-#include "math_proto.h"
-#include "log.h"
-//#include "python.h"
-//#include "models.h"
+#include "atomic.h"
+#include "python.h"
+#include "models.h"
 
 /// This is the initial value of PDFSTEPS
 #define PDFSTEPS 10000

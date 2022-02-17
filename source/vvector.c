@@ -7,8 +7,6 @@
  *
  * @brief      A series of subroutines designed to carry out common 3 vector operations
  * 		
- * These routines should be kept SEPARATE from routines that require the Python specific
- * structures in python.h
  *
  * Many of the simpler routines are intened to simplify the code, and are not complicated.
  * Others especially those that transform between cylindrical and cartesian coordiantes
@@ -45,10 +43,9 @@
 #include <math.h>
 
 #include "log.h"
-// #include "atomic.h"
-//#include "python.h"
-#include "math_struc.h"
-#include "math_proto.h"
+#include "atomic.h"
+#include "python.h"
+
 #define EPS 1.e-10
 
 /* A basis is defined such that if x is a 3 vector as expressed an unprimed cartesian coordinate
@@ -146,7 +143,7 @@ length (a)
 
 int
 renorm (a, scalar)
-     double a[], scalar;
+  double a[], scalar;
 {
   double x;
 

@@ -199,10 +199,6 @@ get_extra_diagnostics ()
   n += modes.turn_off_upweighting_of_simple_macro_atoms =
     rdchoice ("@Diag.turn_off_upweighting_of_simple_macro_atoms(yes,no)", "1,0", answer);
 
-  strcpy (answer, "zero_densities");
-  n += modes.turn_off_upweighting_of_simple_macro_atoms =
-    rdchoice ("@Diag.partial_cells(include,zero_densities,extend_full_cells)", "0,1,2", answer);
-
   if (n > 0)
   {
     modes.extra_diagnostics = TRUE;
