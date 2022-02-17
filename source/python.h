@@ -999,7 +999,7 @@ the same procedure could be used for line photons */
 #define NSTORE 10
 typedef struct photon_store
 {
-  int n,ntot;                        /* This is the photon number that was last used */
+  int n;                        /* This is the photon number that was last used */
   double t, f1, f2, freq[NSTORE];
 
 } photon_store_dummy, *PhotStorePtr;

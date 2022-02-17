@@ -127,21 +127,17 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   {                             /* Use banding, create photons with different weights in different wavelength
                                    bands.  This is used for the for ionization calculation where one wants to assure
                                    that you have "enough" photons at high energy */
-    xsignal (files.root, "%-20s Populating bands \n", "NOK");
     ftot = populate_bands (ioniz_or_final, iwind, &xband);
-    xsignal (files.root, "%-20s Populated bands \n", "NOK");
 
     for (n = 0; n < NPHOT; n++)
       p[n].path = -1.0;         /* SWM - Zero photon paths */
 
     /* Now generate the photons */
-    xsignal (files.root, "%-20s generating photons \n", "NOK");
 
     iphot_start = 0;
 
     for (n = 0; n < xband.nbands; n++)
     {
-//      xsignal (files.root, "%-20s Generating photons for band %i\n", "NOK", n);
 
       if (xband.nphot[n] > 0)
       {
@@ -163,10 +159,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
         iphot_start += xband.nphot[n];
       }
-//      xsignal (files.root, "%-20s Generated photons for band %i\n", "NOK", n);
 
     }
-    xsignal (files.root, "%-20s generated photons \n", "NOK");
 
   }
 
@@ -402,7 +396,6 @@ iwind = -1 	Don't generate any wind photons at all
 
   if (iwind == -1)
     geo.f_wind = geo.lum_wind = 0.0;
-//  xsignal (files.root, "%-20s Computing wind luminosity\n", "NOK");
 
   if (iwind == 1 || (iwind == 0))
   {
@@ -417,7 +410,6 @@ iwind = -1 	Don't generate any wind photons at all
     xxxpdfwind = 0;             // Turn off the portion of the line luminosity routine which creates pdfs
 
   }
-//  xsignal (files.root, "%-20s Computed wind luminosity\n", "NOK");
 
   /* Handle the initialization of emission via k-packets and macro atoms. SS */
 
@@ -660,7 +652,6 @@ stellar photons */
   }
 
 /* Generate the wind photons */
-//  xsignal (files.root, "%-20s Making %i wind photons\n", "NOK", nwind);
 
   if (iwind >= 0)
   {
@@ -669,7 +660,6 @@ stellar photons */
       photo_gen_wind (p, weight, f1, f2, iphot_start, nphot);
     iphot_start += nphot;
   }
-//  xsignal (files.root, "%-20s Made %i wind photons\n", "NOK", nwind);
 
 /* Generate the disk photons */
 
