@@ -139,7 +139,6 @@ WindPtr (w);
   {
     t_r_ave_old += plasmamain[n].t_r;
     t_e_ave_old += plasmamain[n].t_e;
-
     /* macro-atom estimators need to be normalised for all cells. 
        Note they should have already been averaged over threads here */
     if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)

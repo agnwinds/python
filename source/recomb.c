@@ -512,11 +512,9 @@ one_fb (one, f1, f2)
   int nplasma;
   PlasmaPtr xplasma;
   PhotStorePtr xphot;
-
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   xphot = &photstoremain[nplasma];
-
 
   if (f2 < f1)
   {
@@ -536,12 +534,12 @@ one_fb (one, f1, f2)
     return (freq);
   }
 
+
   delta = tt / 100;             // Fudge factor to prevent generation of a CDF if t has changed only slightly
 
   /* Check to see if we have already generated a cdf */
   if (tt > (one_fb_te + delta) || tt < (one_fb_te - delta) || f1 != one_fb_f1 || f2 != one_fb_f2)
   {
-
 /* Then need to generate a new cdf */
 
     ww_fb = one;
