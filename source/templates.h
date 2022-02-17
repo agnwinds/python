@@ -255,7 +255,7 @@ double fb_topbase_partial(double freq);
 double fb_topbase_partial2(double freq, void *params);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
 double total_fb(WindPtr one, double t, double f1, double f2, int fb_choice, int mode);
-double one_fb(WindPtr one, double f1, double f2,int ntot);
+double one_fb(WindPtr one, double f1, double f2);
 int num_recomb(PlasmaPtr xplasma, double t_e, int mode);
 double fb(PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice);
 int init_freebound(double t1, double t2, double f1, double f2);

@@ -502,10 +502,9 @@ double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
  **********************************************************/
 
 double
-one_fb (one, f1, f2, ntot)
+one_fb (one, f1, f2)
      WindPtr one;               /* a single cell */
      double f1, f2;             /* freqmin and freqmax */
-     int ntot;                  /*the total number we will want */
 {
   double freq, tt, delta;
   int n, nn, nnn;
@@ -516,8 +515,6 @@ one_fb (one, f1, f2, ntot)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   xphot = &photstoremain[nplasma];
-//  printf ("BOOM in one_fb %i %i\n", nplasma, ntot);
-//  printf ("triyong to access xphot %e\n", xphot->freq[0]);
 
   if (f2 < f1)
   {
@@ -530,16 +527,12 @@ one_fb (one, f1, f2, ntot)
  */
 
   tt = xplasma->t_e;
-  if (xphot->n < ntot && xphot->f1 == f1 && xphot->f2 == f2 && xphot->t == tt)
+  if (xphot->n < NSTORE && xphot->f1 == f1 && xphot->f2 == f2 && xphot->t == tt)
   {
     freq = xphot->freq[xphot->n];
     (xphot->n)++;
     return (freq);
   }
-//  if (xphot->n >= ntot)
-//  {
-//    printf ("BOOM more photons than stored %i %i %i\n", xphot->n, NSTORE, xplasma->nplasma);
-//  }
 
 
   delta = tt / 100;             // Fudge factor to prevent generation of a CDF if t has changed only slightly
@@ -664,7 +657,7 @@ one_fb (one, f1, f2, ntot)
 
 /* Now create and store for future use a set of additonal photons */
 
-  for (n = 0; n < ntot; n++)
+  for (n = 0; n < NSTORE; n++)
   {
     xphot->freq[n] = cdf_get_rand (&cdf_fb);
     if (xphot->freq[n] < f1 || xphot->freq[n] > f2)
