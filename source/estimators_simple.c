@@ -274,6 +274,8 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 {
   double flux[3];
   double p_dir_cos[3];
+  int iangle;
+  double binw, angle;
 
 /* The lines below compute the flux element of this photon */
 
@@ -286,6 +288,23 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
     flux[2] *= (-1);
 
 
+  if (flux[2] > 0 && flux[0] > 0)
+    angle = (atan (flux[0] / flux[2]) * RADIAN);
+  else if (flux[2] < 0 && flux[0] > 0)
+    angle = (atan (flux[0] / flux[2]) * RADIAN) + 180;
+  else if (flux[2] < 0 && flux[0] < 0)
+    angle = (atan (flux[0] / flux[2]) * RADIAN) + 180;
+  else if (flux[2] > 0 && flux[0] < 0)
+    angle = 360. + (atan (flux[0] / flux[2]) * RADIAN);
+
+  binw = 360. / NFLUX_ANGLES;
+
+
+  iangle = (angle) / binw;      //Turn the angle into an integer to pass into the flux array
+
+  xplasma->F_UV_ang_x[iangle] += flux[0];
+  xplasma->F_UV_ang_y[iangle] += flux[1];
+  xplasma->F_UV_ang_z[iangle] += flux[2];
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {

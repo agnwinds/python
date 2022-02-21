@@ -914,6 +914,22 @@ typedef struct plasma
   double F_vis[4];
   double F_UV[4];
   double F_Xray[4];
+  
+  double F_vis_persistent[4];
+  double F_UV_persistent[4];
+  double F_Xray_persistent[4];
+  
+#define NFLUX_ANGLES 36 /* The number of bins into which the directional flux is calculated */
+  
+  /*Binned fluxes*/
+  double F_UV_ang_x[NFLUX_ANGLES];
+  double F_UV_ang_y[NFLUX_ANGLES];
+  double F_UV_ang_z[NFLUX_ANGLES];
+  
+  /*A version of the binned flux that is averaged over cycles */
+  double F_UV_ang_x_persist[NFLUX_ANGLES];
+  double F_UV_ang_y_persist[NFLUX_ANGLES];
+  double F_UV_ang_z_persist[NFLUX_ANGLES];
 
   /* The term direct here means from photons which have not been scattered. These are photons which have been
      created by the central object, or the disk, or in the simple case the wind, but which have not undergone

@@ -46,6 +46,8 @@ communicate_estimators_para ()
   double *redhelper, *redhelper2, *qdisk_helper, *qdisk_helper2;
   double *ion_helper, *ion_helper2;
   double *inner_ion_helper, *inner_ion_helper2;
+  double *flux_helper, *flux_helper2;
+
 //OLD  int nspec, size_of_commbuffer;
   int size_of_commbuffer;
 
@@ -82,6 +84,9 @@ communicate_estimators_para ()
      two integers (nhit and nphot) */
   qdisk_helper = calloc (sizeof (double), NRINGS * 2);
   qdisk_helper2 = calloc (sizeof (double), NRINGS * 2);
+
+  flux_helper = calloc (sizeof (double), NPLASMA * NFLUX_ANGLES * 3);
+  flux_helper2 = calloc (sizeof (double), NPLASMA * NFLUX_ANGLES * 3);
 
   MPI_Barrier (MPI_COMM_WORLD);
   // the following blocks gather all the estimators to the zeroth (Master) thread
@@ -146,6 +151,12 @@ communicate_estimators_para ()
     for (mpi_j = 0; mpi_j < n_inner_tot; mpi_j++)
     {
       inner_ion_helper[mpi_i * n_inner_tot + mpi_j] = plasmamain[mpi_i].inner_ioniz[mpi_j] / np_mpi_global;
+    }
+    for (mpi_j = 0; mpi_j < NFLUX_ANGLES; mpi_j++)
+    {
+      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + mpi_j] = plasmamain[mpi_i].F_UV_ang_x[mpi_j] / np_mpi_global;
+      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + NFLUX_ANGLES + mpi_j] = plasmamain[mpi_i].F_UV_ang_y[mpi_j] / np_mpi_global;
+      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + 2 * NFLUX_ANGLES + mpi_j] = plasmamain[mpi_i].F_UV_ang_z[mpi_j] / np_mpi_global;
     }
   }
 
@@ -250,6 +261,12 @@ communicate_estimators_para ()
     for (mpi_j = 0; mpi_j < n_inner_tot; mpi_j++)
     {
       plasmamain[mpi_i].inner_ioniz[mpi_j] = inner_ion_helper2[mpi_i * n_inner_tot + mpi_j];
+    }
+    for (mpi_j = 0; mpi_j < NFLUX_ANGLES; mpi_j++)
+    {
+      plasmamain[mpi_i].F_UV_ang_x[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + mpi_j];
+      plasmamain[mpi_i].F_UV_ang_y[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + NFLUX_ANGLES + mpi_j];
+      plasmamain[mpi_i].F_UV_ang_z[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + 2 * NFLUX_ANGLES + mpi_j];
     }
   }
 
