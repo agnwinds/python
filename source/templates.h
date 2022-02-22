@@ -420,6 +420,8 @@ double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 int compton_dir(PhotPtr p);
+double pdf_thermal(double x, void *params);
+int compton_get_thermal_velocity(double t, double *v);
 double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double compton_alpha(double nu);
@@ -614,6 +616,7 @@ double observer_to_local_frame_velocity(double *v_obs, double *v, double *v_cmf)
 double local_to_observer_frame_velocity(double *v_cmf, double *v, double *v_obs);
 int local_to_observer_frame_ruler_transform(double v[], double dx_cmf[], double dx_obs[]);
 int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double dx_cmf[]);
+int lorentz_transform(PhotPtr p_in, PhotPtr p_out, double v[]);
 /* macro_accelerate.c */
 void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);

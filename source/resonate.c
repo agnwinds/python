@@ -866,6 +866,7 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
+  double velocity_electron[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -1143,11 +1144,20 @@ scatter (p, nres, nnscat)
      bound free emission (>NLINES), allowing depending on the scattering mode for thermal trapping. 
      Note that this portion of the code is identical for both simple and macro atoms, except for the fact
      that ff and bf are only treated as scattering processes in macro-atom mode.
+
+     For electron scattering, we allow for thermal broadening, we obtain a velocity for the election
+     and transform into that frame, and then after we find the direction of the photon in the rest
+     frame of the electron, we transform back to the fluid frame.
    */
 
   if (*nres == NRES_ES)
   {
+
+    compton_get_thermal_velocity (xplasma->t_e, velocity_electron);
+    lorentz_transform (p, p, velocity_electron);
     compton_dir (p);
+    rescale (velocity_electron, -1, velocity_electron);
+    lorentz_transform (p, p, velocity_electron);
   }
   else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {
