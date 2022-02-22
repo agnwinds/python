@@ -174,6 +174,7 @@ communicate_estimators_para ()
   MPI_Reduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
   MPI_Reduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   //XXXX Duplicate MPI_Reduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce (flux_helper, flux_helper2, NPLASMA * 3 * NFLUX_ANGLES, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
   MPI_Reduce (ion_helper, ion_helper2, NPLASMA * nions, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (inner_ion_helper, inner_ion_helper2, NPLASMA * n_inner_tot, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -193,7 +194,7 @@ communicate_estimators_para ()
   /* 131213 NSH Send out the global min and max band limited frequencies to all threads */
   MPI_Bcast (minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
+  MPI_Bcast (flux_helper2, NPLASMA * 3 * NFLUX_ANGLES, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (ion_helper2, NPLASMA * nions, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (inner_ion_helper2, NPLASMA * n_inner_tot, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
