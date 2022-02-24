@@ -180,7 +180,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   if (fabs (dfreq) < EPSILON)
   {
-    Error ("calculate_ds: the frequency along the photon %d path's in cell %d is the same\n", one->nwind, p_now.np);
+    Error ("calculate_ds: frequency along photon %d path's in cell %d (nplasma %d) is the same (dfreq=%8.2e)\n", p_now.np, one->nwind,
+           one->nplasma, dfreq);
     limit_lines (freq_inner, freq_outer);
     nstart = nline_min;
     ndelt = 1;
