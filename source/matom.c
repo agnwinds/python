@@ -213,15 +213,9 @@ matom (p, nres, escape)
       {
 
         cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];        //pointer to continuum
-        if (n < 25)
-        {
-          sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];
-          bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
-        }
-        else
-        {
-          bf_cont = 0.0;
-        }
+
+        sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];
+        bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
 
         jprbs_known[uplvl][m] = jprbs[m] = bf_cont * config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex;       //energy of lower state
         eprbs_known[uplvl][m] = eprbs[m] = bf_cont * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);  //energy difference
