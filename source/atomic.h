@@ -253,12 +253,12 @@ typedef struct coll_stren
   int upper;                    //The upper energy level - this is in Chianti notation and is currently unused
   double energy;                //The energy of the transition
   double gf;                    //The effective oscillator strength - NSH thinks this is oscillator strtength x lower level multiplicity
-  double hi_t_lim;              //The high temerature limit
-  double n_points;              //The number of points in the splie fit
+  double hi_t_lim;              //The high temperature limit
+  int n_points;                 //The number of points in the spline fit
   int type;                     //The type of fit, this defines how one computes the scaled temperature and scaled coll strength
   float scaling_param;          //The scaling parameter C used in the Burgess and Tully calculations
   double sct[N_COLL_STREN_PTS]; //The scaled temperature points in the fit
-  double scups[N_COLL_STREN_PTS];       //The sclaed coll sttengths in ythe fit.
+  double scups[N_COLL_STREN_PTS];       //The scaled coll strengths in ythe fit.
 } Coll_stren, *Coll_strenptr;
 
 extern Coll_stren coll_stren[NLINES];  
