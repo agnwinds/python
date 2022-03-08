@@ -346,7 +346,7 @@ main (argc, argv)
         fprintf (fptr2, "%e ", plasmamain[nplasma].F_UV[0]);    //directional flux by band
         fprintf (fptr2, "%e ", plasmamain[nplasma].F_Xray[0]);  //directional flux by band
         fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
-        fprintf (fptr2, "%e\n", plasmamain[nplasma].rad_force_bf[0]);   //bound free scattering radiation force in the w(x) direction    
+        fprintf (fptr2, "%e\n", plasmamain[nplasma].rad_force_bf_persist[0]);   //bound free scattering radiation force in the w(x) direction    
         fprintf (fptr7, "%e ", plasmamain[nplasma].F_vis[0]);   //directional flux by band
         fprintf (fptr7, "%e ", plasmamain[nplasma].F_UV[0]);    //directional flux by band
         fprintf (fptr7, "%e ", plasmamain[nplasma].F_Xray[0]);  //directional flux by band      
@@ -361,10 +361,10 @@ main (argc, argv)
           fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[1]);  //electron scattering radiation force in the phi(rotational) directionz direction
           fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[2]);  //electron scattering radiation force in the z direction
           fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[3]);  //sum of magnitude of electron scattering radiation force
-          fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[0]);  //bound free scattering radiation force in the w(x) direction
-          fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[1]);  //bound free scattering radiation force in the phi(rotational) direction
-          fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[2]);  //bound free scattering radiation force in the z direction
-          fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf[3]);        //sum of magnitude of bound free scattering radiation force 
+          fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf_persist[0]);  //bound free scattering radiation force in the w(x) direction
+          fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf_persist[1]);  //bound free scattering radiation force in the phi(rotational) direction
+          fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf_persist[2]);  //bound free scattering radiation force in the z direction
+          fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf_persist[3]);        //sum of magnitude of bound free scattering radiation force 
         }
         fprintf (fptr7, "%e %e %e %e ", plasmamain[nplasma].F_vis_persistent[0], plasmamain[nplasma].F_vis_persistent[1], plasmamain[nplasma].F_vis_persistent[2], plasmamain[nplasma].F_vis_persistent[3]);    //directional flux by band
         fprintf (fptr7, "%e %e %e %e ", plasmamain[nplasma].F_UV_persistent[0], plasmamain[nplasma].F_UV_persistent[1], plasmamain[nplasma].F_UV_persistent[2], plasmamain[nplasma].F_UV_persistent[3]);        //directional flux by band

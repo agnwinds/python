@@ -605,6 +605,9 @@ WindPtr (w);
       vadd (plasmamain[nplasma].F_vis_persistent, plasmamain[nplasma].F_vis, plasmamain[nplasma].F_vis_persistent);
       vadd (plasmamain[nplasma].F_UV_persistent, plasmamain[nplasma].F_UV, plasmamain[nplasma].F_UV_persistent);
       vadd (plasmamain[nplasma].F_Xray_persistent, plasmamain[nplasma].F_Xray, plasmamain[nplasma].F_Xray_persistent);
+      vadd (plasmamain[nplasma].rad_force_bf_persist, plasmamain[nplasma].rad_force_bf, plasmamain[nplasma].rad_force_bf_persist);
+
+
       for (n = 0; n < NFLUX_ANGLES; n++)
       {
         plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n];
@@ -615,16 +618,21 @@ WindPtr (w);
     else
     {
       rescale (plasmamain[nplasma].F_vis_persistent, (1 - flux_persist_scale), plasmamain[nplasma].F_vis_persistent);
-      rescale (flux_helper, flux_persist_scale, plasmamain[nplasma].F_vis);
-      vadd (plasmamain[nplasma].F_vis_persistent, plasmamain[nplasma].F_vis, plasmamain[nplasma].F_vis_persistent);
+      rescale (plasmamain[nplasma].F_vis, flux_persist_scale, flux_helper);
+      vadd (plasmamain[nplasma].F_vis_persistent, flux_helper, plasmamain[nplasma].F_vis_persistent);
 
       rescale (plasmamain[nplasma].F_UV_persistent, (1 - flux_persist_scale), plasmamain[nplasma].F_UV_persistent);
-      rescale (flux_helper, flux_persist_scale, plasmamain[nplasma].F_UV);
-      vadd (plasmamain[nplasma].F_UV_persistent, plasmamain[nplasma].F_UV, plasmamain[nplasma].F_UV_persistent);
+      rescale (plasmamain[nplasma].F_UV, flux_persist_scale, flux_helper);
+      vadd (plasmamain[nplasma].F_UV_persistent, flux_helper, plasmamain[nplasma].F_UV_persistent);
 
       rescale (plasmamain[nplasma].F_Xray_persistent, (1 - flux_persist_scale), plasmamain[nplasma].F_Xray_persistent);
-      rescale (flux_helper, flux_persist_scale, plasmamain[nplasma].F_Xray);
-      vadd (plasmamain[nplasma].F_Xray_persistent, plasmamain[nplasma].F_Xray, plasmamain[nplasma].F_Xray_persistent);
+      rescale (plasmamain[nplasma].F_Xray, flux_persist_scale, flux_helper);
+      vadd (plasmamain[nplasma].F_Xray_persistent, flux_helper, plasmamain[nplasma].F_Xray_persistent);
+
+      rescale (plasmamain[nplasma].rad_force_bf_persist, (1 - flux_persist_scale), plasmamain[nplasma].rad_force_bf_persist);
+      rescale (plasmamain[nplasma].rad_force_bf, flux_persist_scale, flux_helper);
+      vadd (plasmamain[nplasma].rad_force_bf_persist, flux_helper, plasmamain[nplasma].rad_force_bf_persist);
+
 
       for (n = 0; n < NFLUX_ANGLES; n++)
       {
@@ -647,6 +655,7 @@ WindPtr (w);
     plasmamain[nplasma].F_vis_persistent[3] = length (plasmamain[nplasma].F_vis_persistent);
     plasmamain[nplasma].F_UV_persistent[3] = length (plasmamain[nplasma].F_UV_persistent);
     plasmamain[nplasma].F_Xray_persistent[3] = length (plasmamain[nplasma].F_Xray_persistent);
+    plasmamain[nplasma].rad_force_bf_persist[3] = length (plasmamain[nplasma].rad_force_bf_persist);
 
   }
 
@@ -1271,7 +1280,8 @@ wind_rad_init ()
       plasmamain[n].F_vis[i] = plasmamain[n].F_UV[i] = plasmamain[n].F_Xray[i] = 0.0;
       if (geo.wcycle == 0)
       {
-        plasmamain[n].F_vis_persistent[i] = plasmamain[n].F_UV_persistent[i] = plasmamain[n].F_Xray_persistent[i] = 0.0;
+        plasmamain[n].F_vis_persistent[i] = plasmamain[n].F_UV_persistent[i] = plasmamain[n].F_Xray_persistent[i] =
+          plasmamain[n].rad_force_bf_persist[i] = 0.0;
       }
     }
 

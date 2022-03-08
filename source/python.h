@@ -974,7 +974,9 @@ typedef struct plasma
   double rad_force_ff[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
   double rad_force_bf[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
 
-
+  double rad_force_es_persist[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_ff_persist[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_bf_persist[4];       /*Radiative force of wind - 4th element is sum of magnitudes */
 
   double gain;                  /* The gain being used in iterations of the structure */
   double converge_t_r, converge_t_e, converge_hc;
