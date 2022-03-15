@@ -208,14 +208,14 @@ main (argc, argv)
 
   fprintf (fptr, "# Size  %d  %d %d \n", size_Jbar_est, size_gamma_est, size_alpha_est);
 
-  fprintf (fptr, "%15s %3s %3s %3s ", "Variable", "np", "i", "j");
+  fprintf (fptr, "%15s %4s %4s %4s ", "Variable", "np", "i", "j");
   for (i = 0; i < nlevels_macro; i++)
   {
     fprintf (fptr, "MacLev%02d ", i);
   }
   fprintf (fptr, "\n");
 
-  fprintf (fptr, "%15s %3s %3s %3s ", "---------------", "---", "---", "---");
+  fprintf (fptr, "%15s %4s %4s %4s ", "---------------", "----", "----", "----");
   for (i = 0; i < nlevels_macro; i++)
   {
     fprintf (fptr, "-------- ");
@@ -230,7 +230,7 @@ main (argc, argv)
     nnwind = plasmamain[n].nwind;
     ndom = wmain[nnwind].ndom;
     wind_n_to_ij (ndom, nnwind, &ii, &jj);
-    fprintf (fptr, " %3d %3d %3d ", n, ii, jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
 
     for (i = 0; i < nlevels_macro; i++)
     {
@@ -248,7 +248,7 @@ main (argc, argv)
     nnwind = plasmamain[n].nwind;
     ndom = wmain[nnwind].ndom;
     wind_n_to_ij (ndom, nnwind, &ii, &jj);
-    fprintf (fptr, " %3d  %3d %3d ", n, ii, jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
 
     for (i = 0; i < nlevels_macro; i++)
     {
@@ -266,7 +266,7 @@ main (argc, argv)
     nnwind = plasmamain[n].nwind;
     ndom = wmain[nnwind].ndom;
     wind_n_to_ij (ndom, nnwind, &ii, &jj);
-    fprintf (fptr, " %3d  %3d %3d ", n, ii, jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
 
     for (i = 0; i < nlevels_macro; i++)
     {
