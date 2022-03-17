@@ -526,7 +526,8 @@ normalise_simple_estimators (xplasma)
   else
   {
     xplasma->j = xplasma->j_direct = xplasma->j_scatt = 0;
-    xplasma->t_e *= 0.7;
+    if (modes.fixed_temp != 1)
+      xplasma->t_e *= 0.7;
     if (xplasma->t_e < MIN_TEMP)
       xplasma->t_e = MIN_TEMP;
     xplasma->w = 0;
