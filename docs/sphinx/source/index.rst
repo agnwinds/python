@@ -82,7 +82,7 @@ Mandy Hewitt
    output
    evaluation
    wind_models
-   radiation_sources
+   radiation
    examples
    disk
    ionization_cycles
