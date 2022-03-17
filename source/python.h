@@ -807,7 +807,7 @@ typedef struct plasma
   double *recomb_simple_upweight;       /* multiplicative factor to account for ratio of total to "cooling" energy for b-f processes in simple atoms. */
 
 /* Beginning of macro information */
-  double kpkt_emiss;            /*This is the specific emissivity due to the conversion k-packet -> r-packet in the cell
+  double kpkt_emiss;            /*This is the luminosity produced due to the conversion k-packet -> r-packet in the cell
                                    in the frequency range that is required for the final spectral synthesis. (SS) */
 
   double kpkt_abs;              /* k-packet equivalent of matom_abs. (SS) */
@@ -1062,7 +1062,7 @@ typedef struct macro
   /* "e" version of the spontaneous recombination coefficient. (SS) */
 
   double *matom_emiss;
-  /* This is the specific emissivity due to the de-activation of macro atoms in the cell
+  /* This is the luminosity due to the de-activation of macro atoms in the cell
      in the frequency range that is required for the final spectral synthesis. (SS) */
 
   double *matom_abs;
