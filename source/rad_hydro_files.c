@@ -329,6 +329,7 @@ main (argc, argv)
       if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
       {
         fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);       //output geometric things
+        fprintf (fptr5, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);       //output geometric things
         fprintf (fptr2, "%e ", plasmamain[nplasma].rho);        //density
         fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
         fprintf (fptr7, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);       //output geometric things
@@ -336,6 +337,7 @@ main (argc, argv)
       else if (zdom[domain].coord_type == CYLIND)
       {
         fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);      //output geometric things
+        fprintf (fptr5, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2]);      //output geometric things
         fprintf (fptr2, "%e ", plasmamain[nplasma].rho);        //density
         fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
         fprintf (fptr7, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2]);      //output geometric things
@@ -477,7 +479,7 @@ main (argc, argv)
       else
         t_Xray = 0.0;           //Essentually a flag that there is no way of computing t (and hence M) in this cell.                
 
-      fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
+      fprintf (fptr5, " %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
 
       fprintf (fptr6, "%d %d %e %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)), plasmamain[nplasma].j);   //output geometric things
