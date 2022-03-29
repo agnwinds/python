@@ -183,6 +183,7 @@ main (argc, argv)
   char infile[LINELENGTH], outfile[LINELENGTH];
   int n, i;
   FILE *fptr, *fopen ();
+  int ii, jj, ndom, nnwind;
 
 
   xparse_command_line (argc, argv);
@@ -191,21 +192,47 @@ main (argc, argv)
   sprintf (outfile, "%.150s.txt", inroot);
 
   printf ("Reading %s and writing to %s\n", infile, outfile);
-
   wind_read (infile);
+
+  if (nlevels_macro == 0)
+  {
+    printf ("Currently this routine only looks at macro atom values, and this is a simple atom file\n");
+    exit (0);
+  }
+
 
 
   fptr = fopen (outfile, "w");
 
-  fprintf (fptr, "Results for %s\n", infile);
+  fprintf (fptr, "# Results for %s\n", infile);
 
-  fprintf (fptr, "Size  %d  %d %d \n", size_Jbar_est, size_gamma_est, size_alpha_est);
+  fprintf (fptr, "# Size  %d  %d %d \n", size_Jbar_est, size_gamma_est, size_alpha_est);
+
+  fprintf (fptr, "%15s %4s %4s %4s ", "Variable", "np", "i", "j");
+  for (i = 0; i < nlevels_macro; i++)
+  {
+    fprintf (fptr, "MacLev%02d ", i);
+  }
+  fprintf (fptr, "\n");
+
+  fprintf (fptr, "%15s %4s %4s %4s ", "---------------", "----", "----", "----");
+  for (i = 0; i < nlevels_macro; i++)
+  {
+    fprintf (fptr, "-------- ");
+  }
+  fprintf (fptr, "\n");
 
   for (n = 0; n < NPLASMA; n++)
   {
-    fprintf (fptr, "jbar ");
-    fprintf (fptr, "%d ", n);
-    for (i = 0; i < 10; i++)
+
+    fprintf (fptr, "%15s", "jbar");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
     {
       fprintf (fptr, "%8.2e ", macromain[n].jbar[i]);
     }
@@ -216,11 +243,34 @@ main (argc, argv)
 
   for (n = 0; n < NPLASMA; n++)
   {
-    fprintf (fptr, "jbar_old ");
-    fprintf (fptr, "%d ", n);
-    for (i = 0; i < 10; i++)
+    fprintf (fptr, "%15s", "jbar_old");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
     {
       fprintf (fptr, "%8.2e ", macromain[n].jbar_old[i]);
+    }
+    fprintf (fptr, "\n");
+  }
+
+
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    fprintf (fptr, "%15s", "matom_emiss");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
+    {
+      fprintf (fptr, "%8.2e ", macromain[n].matom_emiss[i]);
     }
     fprintf (fptr, "\n");
   }
