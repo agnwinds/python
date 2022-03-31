@@ -29,8 +29,12 @@
 //OLD #include "import.h"
 
 
-char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH];
+char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH], folder[LINELENGTH];
 int model_flag, ksl_flag, cmf2obs_flag, obs2cmf_flag;
+
+double line_matom_lum_single (double lum[], PlasmaPtr xplasma, int uplvl);
+int line_matom_lum (int uplvl);
+int create_matom_level_map ();
 
 /**********************************************************/
 /**
@@ -184,6 +188,7 @@ main (argc, argv)
   int n, i;
   FILE *fptr, *fopen ();
   int ii, jj, ndom, nnwind;
+  int mkdir ();
 
 
   xparse_command_line (argc, argv);
@@ -274,12 +279,178 @@ main (argc, argv)
     }
     fprintf (fptr, "\n");
   }
-
-
-
   fclose (fptr);
 
 
+  /* calculate all the line luminosities in macro-atom mode */
+  sprintf (folder, "matom_linelum_%s", inroot);
+  mkdir (folder, 0777);
+  printf ("Calculating macro-atom line luminosities for all lines in wavelength range %.1f to %.1f Angstroms...\n",
+          VLIGHT / geo.sfmax / ANGSTROM, VLIGHT / geo.sfmin / ANGSTROM);
+
+  create_matom_level_map ();
+  for (i = 0; i < nlevels_macro; i++)
+  {
+    line_matom_lum (i);
+  }
+  printf ("Done for %d levels.\n", nlevels_macro);
+
   exit (0);
 
+}
+
+/**********************************************************/
+/**
+ * @brief print out which line wavelengths correspond to which upper and lower levels 
+ *
+ **********************************************************/
+
+int
+create_matom_level_map ()
+{
+  int uplvl, nbbd, n;
+  char outfile[LINELENGTH];
+  FILE *fptr, *fopen ();
+
+  /* open a file in the folder where we store the matom line luminosities */
+  sprintf (outfile, "%s/line_map.txt", folder);
+
+  /* print some header information to the file */
+  fptr = fopen (outfile, "w");
+  fprintf (fptr, "# model name %s\n", inroot);
+  fprintf (fptr, "# which line wavelengths (Angstroms) correspond to which upper and lower levels\n");
+  fprintf (fptr, "upper lower wavelength\n");
+
+  for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
+  {
+    nbbd = config[uplvl].n_bbd_jump;
+    for (n = 0; n < nbbd; n++)
+    {
+      fprintf (fptr, "%d %d %12.2f\n", uplvl, n, VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
+    }
+  }
+  fclose (fptr);
+  return (0);
+}
+
+
+/**********************************************************/
+/**
+ * @brief calculate line luminosities for all cells for a given upper level and save to file
+ *
+ **********************************************************/
+
+int
+line_matom_lum (uplvl)
+     int uplvl;
+{
+  int n, nbbd, i, ii, jj, nnwind, ndom;
+  double emiss;
+  // double lum;
+  double lum[NBBJUMPS];
+  char outfile[LINELENGTH];
+  FILE *fptr, *fopen ();
+
+  nbbd = config[uplvl].n_bbd_jump;
+
+  /* open a file in the folder where we store the matom line luminosities */
+  sprintf (outfile, "%s/linelums_%.150s_lev%d.txt", folder, inroot, uplvl);
+
+  /* print some header information to the file */
+  fptr = fopen (outfile, "w");
+  fprintf (fptr, "# model name %s\n", inroot);
+  fprintf (fptr, "# Line luminosities from upper level %d from %.2f to %.2f Angstroms\n", uplvl, VLIGHT / geo.sfmax / ANGSTROM,
+           VLIGHT / geo.sfmin / ANGSTROM);
+  fprintf (fptr, "# Lower Levels:     ");
+  for (n = 0; n < nbbd; n++)
+  {
+    fprintf (fptr, "%12d", line[config[uplvl].bbd_jump[n]].nconfigl);
+  }
+  fprintf (fptr, "\n# Line Wavelengths:");
+  for (n = 0; n < nbbd; n++)
+  {
+    fprintf (fptr, " %12.2f", VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
+  }
+  fprintf (fptr, "\n");
+  fprintf (fptr, "%4s %4s %4s ", "np", "i", "j");
+  for (n = 0; n < nbbd; n++)
+  {
+    fprintf (fptr, " LowerLev%03d ", line[config[uplvl].bbd_jump[n]].nconfigl);
+  }
+  fprintf (fptr, "\n");
+
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, "%4d %4d %4d ", n, ii, jj);
+
+    emiss = line_matom_lum_single (lum, &plasmamain[n], uplvl);
+
+    for (i = 0; i < nbbd; i++)
+      fprintf (fptr, "%13.4e", lum[i]);
+
+    fprintf (fptr, "\n");
+  }
+  fclose (fptr);
+
+  return (0);
+}
+
+/**********************************************************/
+/**
+ * @brief calculate line luminosities for a single cell for a given upper level 
+ *
+ **********************************************************/
+
+double
+line_matom_lum_single (lum, xplasma, uplvl)
+     double lum[];
+     PlasmaPtr xplasma;
+     int uplvl;
+{
+  int n, nbbd, m;
+  double penorm, bb_cont;
+  double freq_min, freq_max, lum_tot;
+  struct lines *line_ptr;
+  double eprbs[NBBJUMPS];
+  MacroPtr mplasma;
+
+  mplasma = &macromain[xplasma->nplasma];
+
+  freq_min = geo.sfmin;
+  freq_max = geo.sfmax;
+
+  /* identify number of bb downward jumps */
+  nbbd = config[uplvl].n_bbd_jump;
+
+  penorm = 0.0;
+  m = 0;
+  lum_tot = 0.0;
+
+  /* work out how often we come out in each of these locations */
+  for (n = 0; n < nbbd; n++)
+  {
+    line_ptr = &line[config[uplvl].bbd_jump[n]];
+    if ((line_ptr->freq > freq_min) && (line_ptr->freq < freq_max))     // correct range
+    {
+      bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
+
+      eprbs[m] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);    //energy difference
+      penorm += eprbs[m];
+    }
+    m++;
+  }
+
+  /* correctly normalise the probabilities */
+  for (n = 0; n < nbbd; n++)
+  {
+    eprbs[n] = eprbs[n] / penorm;
+    lum[n] = eprbs[n] * macromain[xplasma->nplasma].matom_emiss[uplvl];
+    lum_tot += lum[n];
+  }
+
+  return (lum_tot);
 }
