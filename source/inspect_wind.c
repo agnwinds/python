@@ -283,12 +283,17 @@ main (argc, argv)
 
 
   /* calculate all the line luminosities in macro-atom mode */
+  /* these are stored in a folder with a separate file for each upper level */
   sprintf (folder, "matom_linelum_%s", inroot);
   mkdir (folder, 0777);
   printf ("Calculating macro-atom line luminosities for all lines in wavelength range %.1f to %.1f Angstroms...\n",
           VLIGHT / geo.sfmax / ANGSTROM, VLIGHT / geo.sfmin / ANGSTROM);
 
+  /* create a file that tells the user the wavelengths of every macro-atom line and the 
+     corresponding upper and lower levels */
   create_matom_level_map ();
+
+  /* loop over all macro atom upper levels */
   for (i = 0; i < nlevels_macro; i++)
   {
     line_matom_lum (i);
@@ -344,7 +349,7 @@ int
 line_matom_lum (uplvl)
      int uplvl;
 {
-  int n, nbbd, i, ii, jj, nnwind, ndom;
+  int n, nbbd, i, ii, jj, nnwind, ndom, inwind;
   double emiss;
   // double lum;
   double lum[NBBJUMPS];
@@ -372,30 +377,53 @@ line_matom_lum (uplvl)
     fprintf (fptr, " %12.2f", VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
   }
   fprintf (fptr, "\n");
-  fprintf (fptr, "%4s %4s %4s ", "np", "i", "j");
+
+  /* columns of wind cells */
+  fprintf (fptr, "%12s %12s %12s %4s %4s %12s %12s %12s", "nwind", "x", "z", "i", "j", "inwind", "wind_vol", "plasma_vol");
+
+  /* header info for each lower level */
   for (n = 0; n < nbbd; n++)
   {
-    fprintf (fptr, " LowerLev%03d ", line[config[uplvl].bbd_jump[n]].nconfigl);
+    fprintf (fptr, "  LowerLev%03d  ", line[config[uplvl].bbd_jump[n]].nconfigl);
   }
   fprintf (fptr, "\n");
+  // fprintf (fptr, "%12s %12s %12s %4s %4s %12s %12s %12s", "------------", "------------", "------------", "----", "----", "------------",
+  //          "------------", "------------");
+  // for (n = 0; n < nbbd; n++)
+  // {
+  //   fprintf (fptr, "  -----------  ");
+  // }
+  // fprintf (fptr, "\n");
 
 
-  for (n = 0; n < NPLASMA; n++)
+  /* loop over each plasma cell and do the calculation */
+  for (nnwind = 0; nnwind < NDIM2; nnwind++)
   {
-    nnwind = plasmamain[n].nwind;
     ndom = wmain[nnwind].ndom;
+    inwind = wmain[nnwind].inwind;
     wind_n_to_ij (ndom, nnwind, &ii, &jj);
-    fprintf (fptr, "%4d %4d %4d ", n, ii, jj);
-
-    emiss = line_matom_lum_single (lum, &plasmamain[n], uplvl);
-
-    for (i = 0; i < nbbd; i++)
-      fprintf (fptr, "%13.4e", lum[i]);
+    fprintf (fptr, "%12d %12.4e %12.4e %4d %4d %12d %12.4e", nnwind, wmain[nnwind].xcen[0], wmain[nnwind].xcen[2], ii, jj, inwind,
+             wmain[nnwind].vol);
+    if (wmain[nnwind].inwind >= 0)
+    {
+      n = wmain[nnwind].nplasma;
+      emiss = line_matom_lum_single (lum, &plasmamain[n], uplvl);
+      /* print the filled volume */
+      fprintf (fptr, " %13.4e", plasmamain[n].vol);
+      for (i = 0; i < nbbd; i++)
+        fprintf (fptr, " %13.4e", lum[i]);
+    }
+    else
+    {
+      /* print a 0.0 instead of the filled volume and line lums outside the wind */
+      fprintf (fptr, " %13.4e", 0.0);
+      for (i = 0; i < nbbd; i++)
+        fprintf (fptr, " %13.4e", 0.0);
+    }
 
     fprintf (fptr, "\n");
   }
   fclose (fptr);
-
   return (0);
 }
 
@@ -417,19 +445,14 @@ line_matom_lum_single (lum, xplasma, uplvl)
   struct lines *line_ptr;
   double eprbs[NBBJUMPS];
   MacroPtr mplasma;
-
   mplasma = &macromain[xplasma->nplasma];
-
   freq_min = geo.sfmin;
   freq_max = geo.sfmax;
-
   /* identify number of bb downward jumps */
   nbbd = config[uplvl].n_bbd_jump;
-
   penorm = 0.0;
   m = 0;
   lum_tot = 0.0;
-
   /* work out how often we come out in each of these locations */
   for (n = 0; n < nbbd; n++)
   {
@@ -437,9 +460,12 @@ line_matom_lum_single (lum, xplasma, uplvl)
     if ((line_ptr->freq > freq_min) && (line_ptr->freq < freq_max))     // correct range
     {
       bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
-
       eprbs[m] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);    //energy difference
       penorm += eprbs[m];
+    }
+    else
+    {
+      eprbs[m] = 0.0;
     }
     m++;
   }
@@ -447,8 +473,15 @@ line_matom_lum_single (lum, xplasma, uplvl)
   /* correctly normalise the probabilities */
   for (n = 0; n < nbbd; n++)
   {
-    eprbs[n] = eprbs[n] / penorm;
-    lum[n] = eprbs[n] * macromain[xplasma->nplasma].matom_emiss[uplvl];
+    if (penorm == 0)
+    {
+      lum[n] = 0.0;
+    }
+    else
+    {
+      eprbs[n] = eprbs[n] / penorm;
+      lum[n] = eprbs[n] * macromain[xplasma->nplasma].matom_emiss[uplvl];
+    }
     lum_tot += lum[n];
   }
 
