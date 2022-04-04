@@ -101,12 +101,6 @@ calc_matom_matrix (xplasma, matom_matrix)
       rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
       coll_rate = q21 (line_ptr, t_e);  // this is multiplied by ne below
 
-//OLD Unneeded check.  There is already a check in q21
-//OLD      if (coll_rate < 0)
-//OLD      {
-//OLD        coll_rate = 0;
-//OLD      }
-
       bb_cont = rad_rate + (coll_rate * ne);
 
       target_level = line_ptr->nconfigl;
@@ -128,15 +122,9 @@ calc_matom_matrix (xplasma, matom_matrix)
     {
 
       cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];  //pointer to continuum
-      if (n < 25)               //?
-      {
-        sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];     //need this twice so store it
-        bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
-      }
-      else
-      {
-        bf_cont = sp_rec_rate = 0.0;
-      }
+
+      sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];     //need this twice so store it
+      bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
 
 
       target_level = phot_top[config[uplvl].bfd_jump[n]].nlev;
@@ -167,14 +155,8 @@ calc_matom_matrix (xplasma, matom_matrix)
 
       coll_rate = q12 (line_ptr, t_e);  // this is multiplied by ne below
 
-// Unneded check this has been checked previously
-//OLD      if (coll_rate < 0)
-//OLD      {
-//OLD        coll_rate = 0;
-//OLD      }
       target_level = line[config[uplvl].bbu_jump[n]].nconfigu;
       Q_matrix[uplvl][target_level] += Qcont = ((rad_rate) + (coll_rate * ne)) * config[uplvl].ex;      //energy of lower state
-
 
       Q_norm[uplvl] += Qcont;
     }

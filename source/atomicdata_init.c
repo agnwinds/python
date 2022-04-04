@@ -336,8 +336,8 @@ init_atomic_data ()
     coll_stren[n].upper = -1;   //The upper energy level - this is in Chianti notation and is currently unused
     coll_stren[n].energy = 0.0; //The energy of the transition
     coll_stren[n].gf = 0.0;
-    coll_stren[n].hi_t_lim = 0.0;       //The high temerature limit
-    coll_stren[n].n_points = 0.0;       //The number of points in the splie fit
+    coll_stren[n].hi_t_lim = 0.0;       //The high temperature limit
+    coll_stren[n].n_points = 0; //The number of points in the spline fit
     coll_stren[n].type = -1;    //The type of fit, this defines how one computes the scaled temperature and scaled coll strength
     coll_stren[n].scaling_param = 0.0;  //The scaling parameter C used in the Burgess and Tully calculations
     for (n1 = 0; n1 < N_COLL_STREN_PTS; n1++)
