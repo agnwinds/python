@@ -331,7 +331,8 @@ create_matom_level_map ()
     nbbd = config[uplvl].n_bbd_jump;
     for (n = 0; n < nbbd; n++)
     {
-      fprintf (fptr, "%d %d %12.2f\n", uplvl, n, VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
+      fprintf (fptr, "%d %d %12.2f\n", uplvl, line[config[uplvl].bbd_jump[n]].nconfigl,
+               VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
     }
   }
   fclose (fptr);
