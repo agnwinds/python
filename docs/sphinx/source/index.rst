@@ -80,11 +80,12 @@ Mandy Hewitt
    running_python
    input
    output
-   evaluation
-   wind_models
+   operation
    radiation
+   wind_models
+   coordinate
    examples
-   disk
-   ionization_cycles
-   spectral_cycles
+   physics
+   atomic
+   meta
    *
