@@ -1,10 +1,10 @@
-Radiation sources
+Radiation Sources
 #################
 
 .. todo::
   Fill in. Add description of how to use your own input spectrum. Finish links to keywords. 
 
-External radiation Sources
+External Radiation Sources
 ==========================
 
 In generic terms, there are two main external radiation sources for any Python calculation: a **Central Source** which can be a normal star, a WD, or a BH, and a **disk**.  Even though Python supports the existence of a secondary star for the purposes of calculating when light from a disk system is occulted, the secondary star does not radiate.
@@ -22,18 +22,14 @@ calculation are generated externally, and with minor exceptions photons preserve
 throughout their passage through the wind.  (The minor exceptions have to do with processes like
 adiabiatic cooling, which result in the loss of photons).
 
-
 In the simple-atom approach, various processes cause photons passing through the wind to lose energy
 as they pass through the wind. This energy heats the plasma.  To account for this, photons are
 generated from the wind at the beginning of each cycle.  Processes include, free-free emission, free-bound emission and line emission.  
 
 In non-macro-atom calculations wind radiation can be turned on and off using the :doc:`/input/parameters/wind/Wind/Wind.radiation` keyword. 
 
+(In various files that contain the spectra there is a column WCreated that in the simple atom mode gives the spectrum of photons that were created in the wind.  This column, also exists in the macro-atom case, where it records the spectrum of pbotons that have interacted with the wind and been re-emitted.)
 
-(In various files that contain the spectra.  There is a column WCreated that in the simple atom mode 
-gives the spectrum of photons that were created in the wind.  This column, also exists in the 
-macro-atom case, where it records the spectrum of pbotons that have interacted with the wind and
-been re-emitted.)
 
 Spectra of the external radiation sources
 =========================================
@@ -102,10 +98,13 @@ If the disk or central object temperature outside the
 temperatures in the grid, then Python will "adjust" the spectrum assuming that the overall spectrum changes as a BB would, but 
 the features in the spectrum are unchanged.  If the gravity goes outside the range of the grid, the closest value is chosen.
 
-
 One need not use Kurucz models, of course.  Any set of models can be used, as long as the files contain two
 columns, a wavelength in Angstroms and something that is proportional to :math:`F_{\lambda}`.  The normalization of the fluxes
 does not matter, because the models are only used to establish the shape of the spectrum.  The normalization is
 determined by the total luminosity of the component.
 
+.. toctree::
+   :glob:
+
+   radiation/*
 
