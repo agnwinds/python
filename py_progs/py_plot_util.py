@@ -117,7 +117,7 @@ def read_pywind_smart(filename, return_inwind=False):
 
 
 
-def wind_to_masked(d, value_string, return_inwind=False, mode="2d"):
+def wind_to_masked(d, value_string, return_inwind=False, mode="2d", ignore_partial = True):
 
 	'''
 	turn a table, one of whose colnames is value_string,
@@ -140,14 +140,20 @@ def wind_to_masked(d, value_string, return_inwind=False, mode="2d"):
 	x, z, value: Floats 
 	    value is the quantity you are concerned with, e.g. ne
 	'''
+	# this integer decides whether partial cells are in or out of the wind
+	if ignore_partial:
+		inwind_crit = (0,1)
+	else:
+		inwind_crit = (0,2)
+
 	if mode == "1d":
 		inwind = d["inwind"]
 		x = d["r"]
 		values = d[value_string]
 
 		# create an inwind boolean to use to create mask
-		inwind_bool = (inwind >= 0)
-		mask = (inwind < 0)
+		inwind_bool = (inwind >= inwind_crit[0]) * (inwind < inwind_crit[1])
+		mask = ~inwind_bool
 
 		# finally we have our mask, so create the masked array
 		masked_values = np.ma.masked_where ( mask, values )
@@ -177,8 +183,8 @@ def wind_to_masked(d, value_string, return_inwind=False, mode="2d"):
 		inwind = d["inwind"].reshape(xshape, zshape)
 
 		# create an inwind boolean to use to create mask
-		inwind_bool = (inwind >= 0)
-		mask = (inwind < 0)
+		inwind_bool = (inwind >= inwind_crit[0]) * (inwind < inwind_crit[1])
+		mask = ~inwind_bool
 
 		# finally we have our mask, so create the masked array
 		masked_values = np.ma.masked_where ( mask, values )
