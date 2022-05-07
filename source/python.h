@@ -134,7 +134,9 @@ extern int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT dep
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
-#define LINELENGTH 	256
+#ifndef LINELENGTH
+    #define LINELENGTH 	400
+#endif
 
 /* This structure contains the information needed for each separate region of space, e.g the
  * wind and the disk

@@ -21,7 +21,10 @@
 // If routines are added cproto > atomic_proto.h should be run
 #include "atomic_proto.h"
 
+#ifndef LINELENGTH
 #define LINELENGTH 400
+#endif
+
 #define MAXWORDS    20
 #define TRUE         1
 #define FALSE        0

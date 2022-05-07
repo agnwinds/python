@@ -284,7 +284,7 @@ main (argc, argv)
 
   /* calculate all the line luminosities in macro-atom mode */
   /* these are stored in a folder with a separate file for each upper level */
-  sprintf (folder, "matom_linelum_%s", inroot);
+  sprintf (folder, "matom_linelum_%.200s", inroot);
   mkdir (folder, 0777);
   printf ("Calculating macro-atom line luminosities for all lines in wavelength range %.1f to %.1f Angstroms...\n",
           VLIGHT / geo.sfmax / ANGSTROM, VLIGHT / geo.sfmin / ANGSTROM);
@@ -318,7 +318,7 @@ create_matom_level_map ()
   FILE *fptr, *fopen ();
 
   /* open a file in the folder where we store the matom line luminosities */
-  sprintf (outfile, "%s/line_map.txt", folder);
+  sprintf (outfile, "%.200s/line_map.txt", folder);
 
   /* print some header information to the file */
   fptr = fopen (outfile, "w");
@@ -351,8 +351,8 @@ line_matom_lum (uplvl)
      int uplvl;
 {
   int n, nbbd, i, ii, jj, nnwind, ndom, inwind;
-  double emiss;
-  // double lum;
+  // OLD double emiss;
+  // OLD double lum;
   double lum[NBBJUMPS];
   char outfile[LINELENGTH];
   FILE *fptr, *fopen ();
@@ -360,7 +360,7 @@ line_matom_lum (uplvl)
   nbbd = config[uplvl].n_bbd_jump;
 
   /* open a file in the folder where we store the matom line luminosities */
-  sprintf (outfile, "%s/linelums_%.150s_lev%d.txt", folder, inroot, uplvl);
+  sprintf (outfile, "%.100s/linelums_%.100s_lev%d.txt", folder, inroot, uplvl);
 
   /* print some header information to the file */
   fptr = fopen (outfile, "w");
@@ -408,7 +408,7 @@ line_matom_lum (uplvl)
     if (wmain[nnwind].inwind >= 0)
     {
       n = wmain[nnwind].nplasma;
-      emiss = line_matom_lum_single (lum, &plasmamain[n], uplvl);
+//OLD      emiss = line_matom_lum_single (lum, &plasmamain[n], uplvl);
       /* print the filled volume */
       fprintf (fptr, " %13.4e", plasmamain[n].vol);
       for (i = 0; i < nbbd; i++)
@@ -445,8 +445,8 @@ line_matom_lum_single (lum, xplasma, uplvl)
   double freq_min, freq_max, lum_tot;
   struct lines *line_ptr;
   double eprbs[NBBJUMPS];
-  MacroPtr mplasma;
-  mplasma = &macromain[xplasma->nplasma];
+  //OLD MacroPtr mplasma;
+  //OLD mplasma = &macromain[xplasma->nplasma];
   freq_min = geo.sfmin;
   freq_max = geo.sfmax;
   /* identify number of bb downward jumps */

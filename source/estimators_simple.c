@@ -486,7 +486,7 @@ normalise_simple_estimators (xplasma)
   double volume_obs, invariant_volume_time;
   double electron_density_obs;
   double freq_min, freq_max, dfreq;
-  double wedge_volume, rmin, rmax, thetamin, thetamax;  //things needed for directional fluxes
+//OLD  double wedge_volume, rmin, rmax, thetamin, thetamax;  //things needed for directional fluxes
 
   nwind = xplasma->nwind;
 
@@ -603,12 +603,13 @@ normalise_simple_estimators (xplasma)
 
   for (i = 0; i < NFLUX_ANGLES; i++)
   {
-    rmin = wmain[xplasma->nwind].r;
-    rmax = wmain[xplasma->nwind + 1].r;
-    thetamin = i * RADIAN;
-    thetamax = (i + 1) * RADIAN;
+//ksl - commented out set but not used variables
+//OLD    rmin = wmain[xplasma->nwind].r;
+//OLD    rmax = wmain[xplasma->nwind + 1].r;
+//OLD    thetamin = i * RADIAN;
+//OLD    thetamax = (i + 1) * RADIAN;
 
-    wedge_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
+//OLD    wedge_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
     xplasma->F_UV_ang_x[i] /= volume_obs;
     xplasma->F_UV_ang_y[i] /= volume_obs;
     xplasma->F_UV_ang_z[i] /= volume_obs;
