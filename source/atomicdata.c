@@ -21,7 +21,12 @@
 // If routines are added cproto > atomic_proto.h should be run
 #include "atomic_proto.h"
 
+#ifdef LINELENGTH
+#undef LINELENGTH
+#endif
 #define LINELENGTH 400
+
+
 #define MAXWORDS    20
 #define TRUE         1
 #define FALSE        0
@@ -2400,7 +2405,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
           break;
         case 'z':
         default:
-          Error ("get_atomicdata: Could not interpret line %d in file %s: %s\n", lineno, file, aline);
+          Error ("get_atomicdata: (Case default) Could not interpret line %d in file %s: %s %d \n", lineno, file, aline, LINELENGTH);
           break;
         }
 

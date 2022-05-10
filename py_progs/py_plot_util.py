@@ -148,13 +148,11 @@ def wind_to_masked(d, value_string, return_inwind=False, mode="2d", ignore_parti
         inwind_bool = (inwind >= inwind_crit[0]) * (inwind < inwind_crit[1])
         mask = ~inwind_bool
 
-        # finally we have our mask, so create the masked array
+    # finally we have our mask, so create the masked array
         masked_values = np.ma.masked_where ( mask, values )
 
-        #return the arrays later, z is None for 1d
+    #return the arrays later, z is None for 1d
         z = None
-
-
 
 
     elif mode == "2d":
@@ -181,7 +179,6 @@ def wind_to_masked(d, value_string, return_inwind=False, mode="2d", ignore_parti
 
         # finally we have our mask, so create the masked array
         masked_values = np.ma.masked_where ( mask, values )
-
 
 
     else:
