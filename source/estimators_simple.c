@@ -486,6 +486,7 @@ normalise_simple_estimators (xplasma)
   double volume_obs, invariant_volume_time;
   double electron_density_obs;
   double freq_min, freq_max, dfreq;
+
 //OLD  double wedge_volume, rmin, rmax, thetamin, thetamax;  //things needed for directional fluxes
 
   nwind = xplasma->nwind;
@@ -603,6 +604,7 @@ normalise_simple_estimators (xplasma)
 
   for (i = 0; i < NFLUX_ANGLES; i++)
   {
+
 //ksl - commented out set but not used variables
 //OLD    rmin = wmain[xplasma->nwind].r;
 //OLD    rmax = wmain[xplasma->nwind + 1].r;

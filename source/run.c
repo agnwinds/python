@@ -50,6 +50,7 @@ calculate_ionization (restart_stat)
 {
   int n, nn;
   double zz, z_abs_all, z_abs[N_ISTAT], z_else, ztot;
+  double radiated[20];
   int nphot_istat[N_ISTAT];
   WindPtr w;
   PhotPtr p;
@@ -241,6 +242,10 @@ calculate_ionization (restart_stat)
         z_abs[p[nn].istat] += p[nn].w;
         nphot_istat[p[nn].istat]++;
       }
+      if (p[nn].istat == P_ESCAPE)
+      {
+        radiated[p[nn].origin] += p[nn].w;
+      }
       else
         z_else += p[nn].w;
     }
@@ -255,6 +260,13 @@ calculate_ionization (restart_stat)
       Log ("!!python: luminosity lost to low-frequency free-free    %18.12e number of packets %d\n", z_abs[P_LOFREQ_FF],
            nphot_istat[P_LOFREQ_FF]);
     }
+    Log ("\n");
+    Log ("!!python: stellar photon luminosity escaping            %18.12e \n", radiated[PTYPE_STAR]);
+    Log ("!!python: boundary layer photon luminosity escaping     %18.12e \n", radiated[PTYPE_BL]);
+    Log ("!!python: disk photon luminosity escaping               %18.12e \n", radiated[PTYPE_DISK]);
+    Log ("!!python: wind photon luminosity escaping               %18.12e \n", radiated[PTYPE_WIND]);
+    Log ("!!python: agn photon luminosity escaping                %18.12e \n", radiated[PTYPE_AGN]);
+    Log ("\n");
     Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
     Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
     Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
