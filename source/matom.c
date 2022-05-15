@@ -714,9 +714,8 @@ kpkt (p, nres, escape, mode)
   double cooling_adiabatic;
   double cooling_normalisation;
   double destruction_choice;
-//OLD  double electron_temperature;
   double upweight_factor;
-  WindPtr one;
+  WindPtr xwind;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   double freqmin, freqmax;
@@ -735,8 +734,8 @@ kpkt (p, nres, escape, mode)
      and so we only have spontaneous recombination to worry about here for ALL cases. */
 
 
-  one = &wmain[p->grid];
-  xplasma = &plasmamain[one->nplasma];
+  xwind = &wmain[p->grid];
+  xplasma = &plasmamain[xwind->nplasma];
   if (check_plasma (xplasma, "kpkt"))
   {
     Error ("kpkt:Photon appears to be having interaction in wind cell associated with dummy plasma structure\n");
@@ -845,7 +844,7 @@ kpkt (p, nres, escape, mode)
         *nres = i + NLINES + 1;
         *escape = TRUE;
 
-        p->freq = matom_select_bf_freq (one, i);
+        p->freq = matom_select_bf_freq (xwind, i);
 
         /* if the cross-section corresponds to a simple ion (macro_info == FALSE)
            or if we are treating all ions as simple, then adopt the total emissivity
@@ -919,7 +918,7 @@ kpkt (p, nres, escape, mode)
     /* consult issues #187, #492 regarding free-free */
     *escape = TRUE;
     *nres = NRES_FF;
-    p->freq = one_ff (one, freqmin, freqmax);
+    p->freq = one_ff (xplasma, freqmin, freqmax);
     return (0);
   }
   else if (destruction_choice < (mplasma->cooling_bftot + cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_ff_lofreq))

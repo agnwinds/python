@@ -241,8 +241,8 @@ double total_emission(PlasmaPtr xplasma, double f1, double f2);
 int photo_gen_wind(PhotPtr p, double weight, double freqmin, double freqmax, int photstart, int nphot);
 double one_line(PlasmaPtr xplasma, int *nres);
 double total_free(PlasmaPtr xplasma, double t_e, double f1, double f2);
-double ff(WindPtr one, double t_e, double freq);
-double one_ff(WindPtr one, double f1, double f2);
+double ff(PlasmaPtr xplasma, double t_e, double freq);
+double one_ff(PlasmaPtr xplasma, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* cooling.c */
 double cooling(PlasmaPtr xplasma, double t);

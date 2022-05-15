@@ -339,7 +339,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
       if (np < photstart + ptype[n][FREE_FREE])
       {
-        p[np].freq = one_ff (&wmain[icell], freqmin, freqmax);
+        p[np].freq = one_ff (&plasmamain[n], freqmin, freqmax);
         if (p[np].freq <= 0.0)
         {
           Error_silent
@@ -372,7 +372,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       }
 
       p[np].w = weight;
-      get_random_location (icell, p[np].x);
+      get_random_location (plasmamain[n].nwind, p[np].x);
       p[np].grid = icell;
 
       nnscat = 1;
@@ -592,7 +592,7 @@ total_free (xplasma, t_e, f1, f2)
 /**
  * @brief      calculate f_nu for free free emisssion
  *
- * @param [in] WindPtr  one   A wind cell
+ * @param [in] PlasmaPtr  one   A plasma  cell
  * @param [in] double  t_e   The temperature of the plasma
  * @param [in] double  freq   The frequency at which f_nu is to be calculated
  * @return     f_nu for the specific freqency and temperature requested and densities
@@ -614,8 +614,8 @@ int ff_nplasma = -100;
 double ff_t_e = -100.;
 
 double
-ff (one, t_e, freq)
-     WindPtr one;
+ff (xplasma, t_e, freq)
+     PlasmaPtr xplasma;
      double t_e, freq;
 {
   double g_ff_h, g_ff_he;
@@ -623,9 +623,8 @@ ff (one, t_e, freq)
   double gsqrd, gaunt, sum;
   int nplasma;
   int nion;
-  PlasmaPtr xplasma;
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
+
+  nplasma = xplasma->nplasma;
 
 
   if (t_e < TMIN)
@@ -689,7 +688,7 @@ double one_ff_f1, one_ff_f2, one_ff_te;
  * @brief      randomly generate the frequency of a
  * 	ff photon within the frequency interval f1 and f2
  *
- * @param [in] WindPtr  one   A specific wind cell
+ * @param [in] PlasmaPtr  xplasma   A specific plasma cell
  * @param [in] double  f1   The minimum frequency
  * @param [in] double  f2   The maximum frequency
  * @return     A randomly geneted frequncy for a ff photon given
@@ -710,17 +709,14 @@ double one_ff_f1, one_ff_f2, one_ff_te;
  **********************************************************/
 
 double
-one_ff (one, f1, f2)
-     WindPtr one;               /* a single cell */
+one_ff (xplasma, f1, f2)
+     PlasmaPtr xplasma;         /* a single cell */
      double f1, f2;             /* freqmin and freqmax */
 {
   double freq, dfreq;
   int n;
-  int nplasma;
-  PlasmaPtr xplasma;
   int echeck;
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
+
   if (f2 < f1)
   {
     Error ("one_ff: Bad inputs f2 %g < f1 %g returning 0.0  t_e %g\n", f2, f1, xplasma->t_e);
@@ -735,16 +731,16 @@ one_ff (one, f1, f2)
     for (n = 0; n < ARRAY_PDF - 1; n++)
     {
       ff_x[n] = f1 + dfreq * n;
-      ff_y[n] = ff (one, xplasma->t_e, ff_x[n]);
+      ff_y[n] = ff (xplasma, xplasma->t_e, ff_x[n]);
     }
 
     ff_x[ARRAY_PDF - 1] = f2;
-    ff_y[ARRAY_PDF - 1] = ff (one, xplasma->t_e, ff_x[ARRAY_PDF - 1]);
+    ff_y[ARRAY_PDF - 1] = ff (xplasma, xplasma->t_e, ff_x[ARRAY_PDF - 1]);
     if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, ARRAY_PDF, f1, f2)) != 0)
     {
       Error
-        ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
-         echeck, f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
+        ("one_ff: cdf_gen_from_array error %d : nplasma %d f1 %g f2 %g te %g ne %g nh %g vol %g\n",
+         echeck, xplasma->nplasma, f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], xplasma->vol);
       Exit (0);
     }
     one_ff_te = xplasma->t_e;
