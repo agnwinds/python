@@ -77,29 +77,24 @@ wind_luminosity (f1, f2, mode)
      int mode;
 {
   double lum, lum_lines, lum_rr, lum_ff, factor;
-  int n;
   double x;
   int nplasma;
 
 
   lum = lum_lines = lum_rr = lum_ff = factor = 0.0;
-  for (n = 0; n < NDIM2; n++)
+  for (nplasma = 0; nplasma < NPLASMA; nplasma++)
   {
 
-    if (wmain[n].inwind >= 0)
-    {
-      nplasma = wmain[n].nplasma;
 
-      if (mode == MODE_OBSERVER_FRAME_TIME)
-        factor = 1.0 / plasmamain[nplasma].xgamma;      /* this is dt_cmf */
-      else if (mode == MODE_CMF_TIME)
-        factor = 1.0;
+    if (mode == MODE_OBSERVER_FRAME_TIME)
+      factor = 1.0 / plasmamain[nplasma].xgamma;        /* this is dt_cmf */
+    else if (mode == MODE_CMF_TIME)
+      factor = 1.0;
 
-      lum += x = total_emission (&wmain[n], f1, f2) * factor;
-      lum_lines += plasmamain[nplasma].lum_lines * factor;
-      lum_rr += plasmamain[nplasma].lum_rr * factor;
-      lum_ff += plasmamain[nplasma].lum_ff * factor;
-    }
+    lum += x = total_emission (&plasmamain[nplasma], f1, f2) * factor;
+    lum_lines += plasmamain[nplasma].lum_lines * factor;
+    lum_rr += plasmamain[nplasma].lum_rr * factor;
+    lum_ff += plasmamain[nplasma].lum_ff * factor;
   }
 
   if (mode == MODE_CMF_TIME)
@@ -120,7 +115,7 @@ wind_luminosity (f1, f2, mode)
 /**
  * @brief      Calculate the band-limited emission of a single cell
  *
- * @param [in] WindPtr  one   The wind cell of interest
+ * @param [in] PlasmaPtr  xplasma   The plasma cell of interest
  * @param [in] double  f1   The minimum frequency for the calculation
  * @param [in] double  f2   The maximum frequency for the calculation
  * @return
@@ -148,16 +143,11 @@ wind_luminosity (f1, f2, mode)
  **********************************************************/
 
 double
-total_emission (one, f1, f2)
-     WindPtr one;
+total_emission (xplasma, f1, f2)
+     PlasmaPtr xplasma;
      double f1, f2;
 {
   double t_e;
-  int nplasma;
-  PlasmaPtr xplasma;
-
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
 
   t_e = xplasma->t_e;
 
@@ -170,7 +160,7 @@ total_emission (one, f1, f2)
   {
     if (geo.rt_mode == RT_MODE_MACRO)
     {
-      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL));   //outer shellrecombinations
+      xplasma->lum_rr = (total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (xplasma, t_e, f1, f2, FB_FULL, OUTER_SHELL));       //outer shellrecombinations
 
       /*
        *The first term here is the fb cooling due to macro ions and the second gives
@@ -187,18 +177,18 @@ total_emission (one, f1, f2)
       xplasma->lum_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
-      xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      xplasma->lum_ff = total_free (xplasma, t_e, f1, f2);
       xplasma->lum_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
-      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (xplasma, f1, f2);
+      xplasma->lum_tot += xplasma->lum_ff = total_free (xplasma, t_e, f1, f2);
       /* We compute the radiative recombination luminosity - this is not the same as the rr cooling rate and
          so is stored in a separate variable */
-      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);  //outer shell recombinations
+      xplasma->lum_tot += xplasma->lum_rr = total_fb (xplasma, t_e, f1, f2, FB_FULL, OUTER_SHELL);      //outer shell recombinations
     }
   }
 
@@ -260,7 +250,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell, icell_old;
   int nplasma = 0;
   int nnscat;
-//OLD  int ndom;
   int ptype[NPLASMA][3];        //Store for the types of photons we want, ff first, fb next, line third
   dt_cmf = 0.0;
 
@@ -303,7 +292,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     /* At this point we know the cell in which the photon will be generated */
 
     nplasma = wmain[icell].nplasma;
-//OLD    ndom = wmain[icell].ndom;
     plasmamain[nplasma].nrad += 1;
 
 
@@ -344,9 +332,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     photstart = photstop;
     photstop = photstart + ptype[n][FREE_FREE] + ptype[n][FREE_BOUND] + ptype[n][BOUND_BOUND];
 
-    icell = plasmamain[n].nwind;
-//OLD    ndom = wmain[icell].ndom;
-
+    icell = plasmamain[n].nplasma;
 
     for (np = photstart; np < photstop; np++)
     {
@@ -363,7 +349,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       }
       else if (np < photstart + ptype[n][FREE_FREE] + ptype[n][FREE_BOUND])
       {
-        p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
+        p[np].freq = one_fb (&plasmamain[n], freqmin, freqmax);
       }
       else
       {
@@ -374,11 +360,11 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          */
         if (icell != icell_old)
         {
-          lum_lines (&wmain[icell], nline_min, nline_max);
+          lum_lines (&plasmamain[n], nline_min, nline_max);
           icell_old = icell;
         }
 
-        p[np].freq = one_line (&wmain[icell], &p[np].nres);
+        p[np].freq = one_line (&plasmamain[n], &p[np].nres);
         if (p[np].freq == 0)
         {
           Error ("photo_gen_wind: one_line returned 0 for freq %g %g\n", freqmin, freqmax);
@@ -465,16 +451,12 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
  **********************************************************/
 
 double
-one_line (one, nres)
-     WindPtr one;
+one_line (xplasma, nres)
+     PlasmaPtr xplasma;
      int *nres;
 {
   double xlum, xlumsum;
   int m;
-  int nplasma;
-  PlasmaPtr xplasma;
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
   /* Put in a bunch of checks */
   if (xplasma->lum_lines <= 0)
   {
@@ -515,7 +497,7 @@ one_line (one, nres)
 /**
  * @brief      calculates the band-limited ff luminosity of a cell.
  *
- * @param [in] WindPtr  one   A wind cell
+ * @param [in] PlasmaPtr  xplasma   A plasma cell
  * @param [in] double  t_e   The electron temperature to use
  * @param [in] double  f1   The minimum frequency
  * @param [in] double  f2   The maximum frequency
@@ -537,8 +519,8 @@ one_line (one, nres)
  **********************************************************/
 
 double
-total_free (one, t_e, f1, f2)
-     WindPtr one;
+total_free (xplasma, t_e, f1, f2)
+     PlasmaPtr xplasma;
      double t_e;
      double f1, f2;
 {
@@ -546,10 +528,7 @@ total_free (one, t_e, f1, f2)
   double gaunt;
   double x, sum;
   double gsqrd;                 /*The scaled inverse temperature  - used to compute the gaunt factor */
-  int nplasma, nion;
-  PlasmaPtr xplasma;
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
+  int nion;
   if (f2 < f1)
   {
     Error ("total_free: band limited ff  emissivity requested by f1 %g > f2 %g\n", f1, f2);

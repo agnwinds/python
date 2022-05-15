@@ -366,7 +366,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  * 	associated with each recombination.  Python tracks effectively the kinetic energy
  * 	of the plasma (not the potential energy available if everything recombined).
  *
- * @param [in] WindPtr  one   The wind cell of interest
+ * @param [in] PlasmaPtr  xplasma   The plasma cell of interest
  * @param [in] double  t   The temperature of the cell
  * @param [in] double  f1   The minimum frequency
  * @param [in] double  f2   The maximum frequency
@@ -400,19 +400,14 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  **********************************************************/
 
 double
-total_fb (one, t, f1, f2, fb_choice, mode)
-     WindPtr one;
+total_fb (xplasma, t, f1, f2, fb_choice, mode)
+     PlasmaPtr xplasma;
      double t, f1, f2;
      int fb_choice;
      int mode;
 {
   double total;
   int nion;
-  int nplasma;
-  PlasmaPtr xplasma;
-
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
 
   if (t < 100. || f2 < f1)
     t = 100.;                   /* Set the temperature to 100 K so that if there are free electrons emission by this process continues */
@@ -471,7 +466,7 @@ double fb_jumps[NLEVELS];
 double xfb_jumps[NLEVELS];
 int fb_njumps = (-1);
 
-WindPtr ww_fb;
+// WindPtr ww_fb;
 double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
 
 
@@ -479,7 +474,7 @@ double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
 /**
  * @brief      generates one free bound photon with specific frequency limits
  *
- * @param [in] WindPtr  one   The wind cell in which the photon is being
+ * @param [in] PlasmaPtr  xplasma   The wind cell in which the photon is being
  * @param [in] double  f1   The minimum frequency
  * @param [in] double  f2   The frequency limits
  * @return     The frequency of the fb photon that was generated.
@@ -502,18 +497,16 @@ double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
  **********************************************************/
 
 double
-one_fb (one, f1, f2)
-     WindPtr one;               /* a single cell */
+one_fb (xplasma, f1, f2)
+     PlasmaPtr xplasma;         /* a single cell */
      double f1, f2;             /* freqmin and freqmax */
 {
   double freq, tt, delta;
   int n, nn, nnn;
   double fthresh, dfreq;
   int nplasma;
-  PlasmaPtr xplasma;
   PhotStorePtr xphot;
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
+  nplasma = xplasma->nplasma;
   xphot = &photstoremain[nplasma];
 
   if (f2 < f1)
@@ -542,7 +535,7 @@ one_fb (one, f1, f2)
   {
 /* Then need to generate a new cdf */
 
-    ww_fb = one;
+//OLD    ww_fb = one;
 
     /* Create the fb_array */
 
@@ -637,7 +630,7 @@ one_fb (one, f1, f2)
     if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2) != 0)
     {
       Error ("one_fb after cdf_gen_from_array error: f1 %g f2 %g te %g ne %g nh %g vol %g\n",
-             f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
+             f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], xplasma->vol);
       Error ("Giving up\n");
       Exit (0);
     }
