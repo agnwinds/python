@@ -479,7 +479,7 @@ main (argc, argv)
       else
         t_Xray = 0.0;           //Essentually a flag that there is no way of computing t (and hence M) in this cell.                
 
-      fprintf (fptr5, " %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
+      fprintf (fptr5, " %e %e %e %e %e %e %e\n", plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
 
       fprintf (fptr6, "%d %d %e %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)), plasmamain[nplasma].j);   //output geometric things
