@@ -86,6 +86,12 @@ extract (w, p, itype)
   double dvds_max;
   int ierr;
 
+  if (sane_check (p->w))
+  {
+    Error ("Extract: XXX sane_check photon weight is %e for photon %d on entering extract\n", p->w, p->np);
+    return (-1);
+  }
+
 
   ierr = check_frame (p, F_OBSERVER, "extract_start");
   if (ierr)
@@ -112,6 +118,11 @@ extract (w, p, itype)
 
       /* then turn into a probability */
       p_norm = p_escape_from_tau (tau_norm);
+      if (sane_check (p_norm))
+      {
+        Error ("Extract: XXX p_norm %e tau_norm %e dvds_max %e for photon %d in grid %d nres %d\n", p_norm, tau_norm, dvds_max, p_in.np,
+               p_in.grid, p_in.nres);
+      }
 
     }
     else
@@ -218,6 +229,15 @@ extract (w, p, itype)
          are in the global frame
        */
 
+
+
+      if (sane_check (pp.w))
+      {
+        Error ("Extract: XXX sane_check photon weight is %e for photon %d before calling extract_one  %e  %d\n", pp.w, pp.np, p_norm,
+               p_in.nnscat);
+        return (-1);
+      }
+
       extract_one (w, &pp, itype, n);
     }
   }
@@ -283,6 +303,13 @@ extract_one (w, pp, itype, nspec)
   int ishell;
   double normal[3];
   int ierr;
+
+  if (sane_check (pp->w))
+  {
+    Error ("Extract_one: XXX sane_check photon weight is %e for photon %d on entering extract_one\n", pp->w, pp->np);
+    return (-1);
+  }
+
 
 
   weight_min = EPSILON * pp->w;
@@ -423,6 +450,13 @@ extract_one (w, pp, itype, nspec)
   {
     istat = translate (w, pp, 20., &tau, &nres);
     icell++;
+
+    if (sane_check (pp->w))
+    {
+      Error ("Extract_one: XXXX sane_check photon weight is %e for photon %d after translate \n", pp->w, pp->np);
+      istat = -1;
+    }
+
 
     stuff_phot (pp, &pdummy);
     istat = walls (pp, &pstart, normal);

@@ -403,7 +403,9 @@ radiation (PhotPtr p, double ds)
 
   if (sane_check (p->w))
   {
-    Error ("Radiation:sane_check photon weight is %e for tau %e\n", p->w, tau);
+    Error ("Radiation:sane_check photon weight is %e for photon %d tau %e\n", p->w, p->np, tau);
+    p->w = 0.0;
+    Error ("Radiation: after same check, set weight of photont %d to zerro\n", p->np);
   }
 
   if (geo.ioniz_or_extract == CYCLE_EXTRACT)
