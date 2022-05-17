@@ -85,6 +85,12 @@ wind_luminosity (f1, f2, mode)
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
   {
 
+    if (wmain[plasmamain[nplasma].nwind].inwind < 0)
+    {
+      Error ("wind_luminosty: Trying to calculate luminosity for a wind cell %d that has plasma cell %d but is not in the wind\n",
+             plasmamain[nplasma].nwind, nplasma);
+    }
+
 
     if (mode == MODE_OBSERVER_FRAME_TIME)
       factor = 1.0 / plasmamain[nplasma].xgamma;        /* this is dt_cmf */
@@ -275,23 +281,39 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     xlum = random_number (0.0, 1.0) * geo.f_wind;
 
     xlumsum = 0;
-    icell = 0;
+
+    nplasma = 0;
     while (xlumsum < xlum)
     {
-
-      if (wmain[icell].inwind >= 0)
-      {
-        nplasma = wmain[icell].nplasma;
-        dt_cmf = 1.0 / plasmamain[nplasma].xgamma;
-        xlumsum += plasmamain[nplasma].lum_tot * dt_cmf;
-      }
-      icell++;
+      dt_cmf = 1.0 / plasmamain[nplasma].xgamma;
+      xlumsum += plasmamain[nplasma].lum_tot * dt_cmf;
+      nplasma++;
     }
-    icell--;
+    nplasma--;
+
+    if (nplasma == NPLASMA)
+    {
+      Error ("photo_gen_wind: Generating photon in a cell that should not be in wind\n");
+    }
+
+
+//OLD    icell = 0;
+//OLD    while (xlumsum < xlum)
+//OLD    {
+
+//OLD      if (wmain[icell].inwind >= 0)
+//OLD      {
+//OLD        nplasma = wmain[icell].nplasma;
+//OLD        dt_cmf = 1.0 / plasmamain[nplasma].xgamma;
+//OLD        xlumsum += plasmamain[nplasma].lum_tot * dt_cmf;
+//OLD      }
+//OLD      icell++;
+//OLD    }
+//OLD    icell--;
 
     /* At this point we know the cell in which the photon will be generated */
 
-    nplasma = wmain[icell].nplasma;
+//OLD    nplasma = wmain[icell].nplasma;
     plasmamain[nplasma].nrad += 1;
 
 
@@ -373,7 +395,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
       p[np].w = weight;
       get_random_location (plasmamain[n].nwind, p[np].x);
-      p[np].grid = icell;
+      p[np].grid = plasmamain[n].nwind;
 
       nnscat = 1;
 
