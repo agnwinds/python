@@ -57,6 +57,8 @@ main (argc, argv)
   printf ("Beginning unit test\n");
 
 
+  xsignal ("unit_test", "%-20s Initializing variables for %s\n", "NOK", "unit_test");
+
 #if COMPTON_TEST == 1
   int n;
   double velocity[3];
@@ -98,11 +100,18 @@ main (argc, argv)
   wind_read (infile);
 
 
+  int number;
 
 
 
 
-  lum_one = wind_luminosity (f1, f2, MODE_CMF_TIME);
+
+  xsignal ("unit_test", "%-20s before old wind_lum for %s\n", "NOK", "unit_test");
+
+  for (number = 0; number < 100; number++)
+  {
+    lum_one = wind_luminosity (f1, f2, MODE_CMF_TIME);
+  }
 
   if (my_rank == 0)
   {
@@ -113,7 +122,12 @@ main (argc, argv)
 
   double par_wind_luminosity ();
 
-  lum_one = par_wind_luminosity (f1, f2, MODE_CMF_TIME);
+  xsignal ("unit_test", "%-20s before new wind luminosity %s\n", "NOK", "unit_test");
+  for (number = 0; number < 100; number++)
+  {
+    lum_one = par_wind_luminosity (f1, f2, MODE_CMF_TIME);
+  }
+  xsignal ("unit_test", "%-20s after new wind luminosity %s\n", "NOK", "unit_test");
 
   Log_parallel ("new version: %d %e %e %e %e\n", my_rank, lum_one, geo.lum_lines, geo.lum_rr, geo.lum_ff);
 
@@ -156,7 +170,6 @@ par_wind_luminosity (f1, f2, mode)
      int mode;
 {
   double lum, lum_lines, lum_rr, lum_ff, factor;
-  double x;
   int nplasma;
   int ndo, my_nmin, my_nmax, n;
 
@@ -190,15 +203,7 @@ par_wind_luminosity (f1, f2, mode)
     }
 
 
-    if (mode == MODE_OBSERVER_FRAME_TIME)
-      factor = 1.0 / plasmamain[nplasma].xgamma;        /* this is dt_cmf */
-    else if (mode == MODE_CMF_TIME)
-      factor = 1.0;
-
-    lum += x = total_emission (&plasmamain[nplasma], f1, f2) * factor;
-    lum_lines += plasmamain[nplasma].lum_lines * factor;
-    lum_rr += plasmamain[nplasma].lum_rr * factor;
-    lum_ff += plasmamain[nplasma].lum_ff * factor;
+    total_emission (&plasmamain[nplasma], f1, f2);
   }
 
   /* So at this point I have calculated the lumiosities in one of the threads for all of the plasma cells,
@@ -208,14 +213,31 @@ par_wind_luminosity (f1, f2, mode)
 
 #ifdef MPI_ON
   int size_of_commbuffer, n_mpi, n_mpi2, num_comm;
-  int position, i;
+  int position;
   char *commbuffer;
 
-  size_of_commbuffer = 8 * (floor (NPLASMA / np_mpi_global) + 1);
-  size_of_commbuffer = 24 * (floor (NPLASMA / np_mpi_global) + 10);
+  // We are currently transmtting 1 integer (4) and 1 double, but we need to add 4 bits for the process number
+
+  /* We need to transmit 
+     process #  only 4 bits  once
+
+     The remainder need to be transimitted for each cell
+
+     cell number     4
+     lum_lines       8
+     lum_rr          8
+     lum_ff          8
+
+     Total          28
+   */
+
+
+
+  size_of_commbuffer = 28 * (floor (NPLASMA / np_mpi_global) + 1) + 4;
+
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
-  Log ("commbuffer size %d\n", size_of_commbuffer);
+  Log ("commbuffer size %d  %d\n", size_of_commbuffer, (floor (NPLASMA / np_mpi_global) + 1));
 
 
   MPI_Barrier (MPI_COMM_WORLD);
@@ -228,21 +250,29 @@ par_wind_luminosity (f1, f2, mode)
 
     if (rank_global == n_mpi)
     {
+      // First tansmit ndo, whikch is the number of tasks (elements) this thread is working on (4)
+
       MPI_Pack (&ndo, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+      // Log ("Position1 %d %d\n", n, position);
       for (n = my_nmin; n < my_nmax; n++)
       {
+        // Next  transimit number of the the plasma cell (4) 
         MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        //   Log ("Position2 %d %d\n", n, position);
+        // Now transimit the values we want (8)
         MPI_Pack (&plasmamain[n].lum_lines, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].lum_rr, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].lum_ff, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 
-//        Log ("Position %d %d\n", n, position);
+        //    Log ("Position3 %d %d\n", n, position);
       }
     }
-    Log ("MPI task %d broadcasting plasma update information.\n", rank_global);
+    Log ("Luminoisity,MPI task %d broadcasting plasma update information.\n", rank_global);
 
     MPI_Barrier (MPI_COMM_WORLD);
     MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
     MPI_Barrier (MPI_COMM_WORLD);
-    Log ("Luminosity: MPI task %d survived broadcasting matom_matrix update information.\n", rank_global);
+    Log ("Luminosity: MPI task %d survived plasma update information.\n", rank_global);
 
     position = 0;
 
@@ -253,6 +283,8 @@ par_wind_luminosity (f1, f2, mode)
       {
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
       }
     }
@@ -260,6 +292,24 @@ par_wind_luminosity (f1, f2, mode)
   free (commbuffer);
 
 #endif
+
+
+  lum = lum_lines = lum_rr = lum_ff = factor = 0.0;
+
+  for (nplasma = 0; nplasma < NPLASMA; nplasma++)
+  {
+
+    if (mode == MODE_OBSERVER_FRAME_TIME)
+      factor = 1.0 / plasmamain[nplasma].xgamma;        /* this is dt_cmf */
+    else if (mode == MODE_CMF_TIME)
+      factor = 1.0;
+
+    lum_lines += plasmamain[nplasma].lum_lines * factor;
+    lum_rr += plasmamain[nplasma].lum_rr * factor;
+    lum_ff += plasmamain[nplasma].lum_ff * factor;
+  }
+
+  lum = lum_lines + lum_rr + lum_ff;
 
   if (mode == MODE_CMF_TIME)
   {

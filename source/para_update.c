@@ -732,7 +732,7 @@ communicate_matom_estimators_para ()
  * @param   [in,out]  int   *my_nmax   pointer to integer value of final task
  * @return            int   ndo        number of tasks this thread is working on 
 
- * @detailsFor a process with ntotal tasks, 
+ * @details  For a process with ntotal tasks, 
  * this routine calculates which thread will be given each task.
  * typically ntotal is NPLASMA and the thread is splitting up wind cells.
  * The routine deals with remainders by distributing the remainder over the 
