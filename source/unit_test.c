@@ -234,27 +234,27 @@ par_wind_luminosity (f1, f2, mode)
         MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_lines, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 
-        Log ("Position %d %d\n", n, position);
+//        Log ("Position %d %d\n", n, position);
       }
     }
     Log ("MPI task %d broadcasting plasma update information.\n", rank_global);
-  }
 
-  MPI_Barrier (MPI_COMM_WORLD);
-  MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
-  MPI_Barrier (MPI_COMM_WORLD);
-  Log ("Luminosity: MPI task %d survived broadcasting matom_matrix update information.\n", rank_global);
+    MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
+    Log ("Luminosity: MPI task %d survived broadcasting matom_matrix update information.\n", rank_global);
 
-  position = 0;
+    position = 0;
 
-  if (rank_global != n_mpi)
-  {
-    MPI_Unpack (commbuffer, size_of_commbuffer, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
-    for (n_mpi2 = 0; n_mpi2 < num_comm; n_mpi2++)
+    if (rank_global != n_mpi)
     {
-      MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
-      MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+      MPI_Unpack (commbuffer, size_of_commbuffer, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
+      for (n_mpi2 = 0; n_mpi2 < num_comm; n_mpi2++)
+      {
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
+      }
     }
   }
   free (commbuffer);
