@@ -157,6 +157,7 @@ int spec_read(char filename[]);
 /* extract.c */
 int extract(WindPtr w, PhotPtr p, int itype);
 int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
+int just_extract(WindPtr w, PhotPtr pp, int itype, int nspec);
 /* cdf.c */
 int cdf_gen_from_func(CdfPtr cdf, double (*func)(double, void *), double xmin, double xmax, int njumps, double jump[]);
 double gen_array_from_func(double (*func)(double, void *), double xmin, double xmax, int pdfsteps);

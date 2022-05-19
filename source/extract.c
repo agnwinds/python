@@ -269,19 +269,15 @@ extract_one (w, pp, itype, nspec)
      int itype, nspec;
 
 {
-  int istat, nres;
+  int istat;
   struct photon pstart;
-  struct photon pdummy, pdummy_orig;
+  struct photon pdummy;
   double weight_min;
-  int icell;
-  int k, k1;
   double x[3];
   double tau;
   double zz;
   double dvds;
-  double lfreqmin, lfreqmax, ldfreq;
   int ishell;
-  double normal[3];
   int ierr;
 
 
@@ -395,22 +391,54 @@ extract_one (w, pp, itype, nspec)
   {
     istat = P_ABSORB;           /* Check to see if tau already too large */
     Error ("extract: tau should not be large\n");
+    return (istat);
   }
-  else if (geo.binary == TRUE)
+  else if (geo.binary == TRUE && hit_secondary (pp))
   {
-    istat = hit_secondary (pp); /* Check to see if it hit secondary */
+    return (istat);
   }
+
+  istat = just_extract (w, pp, itype, nspec);
+
+  return (istat);
+}
+
+
+
+
+
+int
+just_extract (w, pp, itype, nspec)
+     WindPtr w;
+     PhotPtr pp;
+     int itype, nspec;
+
+{
+
+  int istat, nres;
+  struct photon pstart;
+  struct photon pdummy, pdummy_orig;
+  double weight_min;
+  int icell;
+  int k, k1;
+  double tau;
+  double lfreqmin, lfreqmax, ldfreq;
+  double normal[3];
+  int ierr;
 
 /* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
+  weight_min = EPSILON * pp->w;
   tau = 0;
   pp->ds = 0;
   icell = 0;
 /* Now we can actually extract the reweighted photon */
 
+  stuff_phot (pp, &pstart);
   stuff_phot (pp, &pdummy_orig);
+  stuff_phot (pp, &pdummy);
 
   ierr = check_frame (pp, F_OBSERVER, "extract_one: photon not in observer frame at start");
   ierr = walls (&pdummy_orig, &pstart, normal);
@@ -418,6 +446,8 @@ extract_one (w, pp, itype, nspec)
   {
     Error ("extract_one: Surprising state change made by walls %d _> %d\n", pp->istat, pdummy.istat);
   }
+
+  istat = P_INWIND;
 
   while (istat == P_INWIND)
   {
