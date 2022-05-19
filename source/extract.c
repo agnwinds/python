@@ -370,8 +370,6 @@ extract_one (w, pp, itype, nspec)
        to reweight.  This is the isotropic assumption.  Otherwise, one
        needs to reweight
 
-       //OLD       Once the photon is reweighted, reposition it so it does not interact ith
-       //OLD       the same resonance a second time.
      */
 
     if (geo.scatter_mode == SCATTER_MODE_THERMAL)
@@ -398,7 +396,7 @@ extract_one (w, pp, itype, nspec)
     return (istat);
   }
 
-  istat = just_extract (w, pp, itype, nspec);
+  istat = just_extract (w, pp, nspec);
 
   return (istat);
 }
@@ -407,11 +405,40 @@ extract_one (w, pp, itype, nspec)
 
 
 
+/**********************************************************/
+/** 
+ * @brief      Reduce the weight of a single photon along a single line of sight.
+ *
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in] PhotPtr  pp  The photon to be extracted (in the observer frame)
+ * @param [in] int  nspec   the spectrum which will be incremented
+ * @return     The photon status after translation
+ *
+ * @details
+ * This routine just extracts the photon, which is assumed to be in the
+ * observer frame
+ * 
+ * extract_one is analogous to the detailed portion of transphot except here the
+ * basic point is to calculate the optical depth through the plasma in a certain
+ * direction, and to increment the appropriate spectrum.  
+ *
+ * ### Notes ###
+ * 
+ * In Python, and in extract and transphot in particular, tau generally refers to the tau associated
+ * with scattering processes, and the weight contains the effect of dimunition of the energy of
+ * the photon bundle due to pure absorption processes.  So, in extract, we add pp->w * exp(-tau)
+ * to the spectrum.
+ *
+ * Note that both linearly and logarithmically spaced spectra are produced.
+ *
+ **********************************************************/
+
+
 int
-just_extract (w, pp, itype, nspec)
+just_extract (w, pp, nspec)
      WindPtr w;
      PhotPtr pp;
-     int itype, nspec;
+     int nspec;
 
 {
 
