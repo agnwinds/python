@@ -180,9 +180,13 @@ calculate_ionization (restart_stat)
      */
 
     nphot_to_define = (long) NPHOT;
+    Log ("Starting photon definition:  The elapsed TIME was %f\n", timer ());
 
     define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+    Log ("Finished photon definition:  The elapsed TIME was %f\n", timer ());
+
     photon_checks (p, freqmin, freqmax, "Check before transport");
+    Log ("Finished photon checks:  The elapsed TIME was %f\n", timer ());
 
     /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
 
@@ -218,9 +222,11 @@ calculate_ionization (restart_stat)
     /* NSH 4/12/12  Changed so it is only called if we have read in gsqrd data */
     if (gaunt_n_gsqrd > 0)
       pop_kappa_ff_array ();
+    Log ("starting photon transport:  The elapsed TIME was %f\n", timer ());
 
     /* Transport the photons through the wind */
     trans_phot (w, p, 0);
+    Log ("finished photon transport:  The elapsed TIME was %f\n", timer ());
 
     /* Determine how much energy was absorbed in the wind. first zero counters. 
        There are counters for total energy absorbed and for each entry in the istat enum */
@@ -316,7 +322,11 @@ calculate_ionization (restart_stat)
 /* Note that this step is parallelized */
 
     xsignal (files.root, "%-20s Start wind update\n", "NOK");
+    Log ("Starting wind update:  The elapsed TIME was %f\n", timer ());
+
     wind_update (w);
+    Log ("Finished wind update:  The elapsed TIME was %f\n", timer ());
+
     xsignal (files.root, "%-20s Finished wind update\n", "NOK");
 
 
