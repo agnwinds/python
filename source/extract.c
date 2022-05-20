@@ -19,8 +19,8 @@
 
 /**********************************************************/
 /**
- * @brief      A supervisory routine called to
- * 	builds detailed spectra in the normal (extract) mode.
+ * @brief      The main routine for building
+ * 	detailed spectra in the normal (extract) mode.
  *
  * @param [in] WindPtr  w   The entire wind
  * @param [in] PhotPtr  p   The photon to extract
@@ -33,9 +33,9 @@
  * scatters, unless the user has exercised the "live or die" option, in
  * which case it is not called.
  *
- * extract carries out several preperatory steps for the extraction
- * and for each spectrum one wants to build, it calls extract_one,
- * where the actual incrementing of the spectrum is done.
+ * extract carries out all of the preparatory steps to create the
+ * photon to be extracted, and then calls a routine extract_one
+ * to reduce the weight of the photon as it passes out of the system
  *
  * itype takes on the following values:
  * * PTYPE_STAR->the photon came for the star
@@ -45,6 +45,13 @@
  *
  * extract uses the types to prepare the photon for extraction, including
  * doppler shifting the photon if is of PTYPE_WIND or PTYPE_DISK.
+ *
+ * ### Notes ###
+ *
+ * The logic behind the weighting of the (disk/star) photons is described in Christian Knigge's thesis in
+ * section 2.3.4.  According to equation 2.19
+ * 	Pc/Pw=12 cos(theta)*(1+b cos(theta)/(3+2b) where b=1.5 corresponds to the
+ * Eddington approximation.
  *
  * Usually, Python constructs a spectrum of all photons, but there are
  * advanced options which allone to restrict the spectrum created to
@@ -66,46 +73,11 @@
  * * 	s[n].top_bot    <0  -> accept photons below the disk
  * *    One can also select photons that are to be extracted from a particular
  * spherical region.
- * ### Notes ###
  *
  *
  **********************************************************/
 
 
-/**********************************************************/
-/**
- * @brief      Extract a single photon along a single line of sight.
- *
- * @param [in] WindPtr  w   The entire wind
- * @param [in] PhotPtr  pp  The photon to be extracted
- * @param [in] int  itype   The type of photon (star, disk, wind, etc)
- * @param [in] int  nspec   the spectrum which will be incremented
- * @return     The photon status after translation
- *
- * @details
- * extract_one is analogous to the detailed portion of transphot except here the
- * basic point is to calculate the optical depth through the plasma in a certain
- * direction, and to increment the appropriate spectrum.
- *
- * Unlike trans_phot, this routine also checks to see if
- * whether the photon hits the secondary star, if one exists.
- *
- * ### Notes ###
- * The logic behind the weighting of the photons is described in Christian Knigge's thesis in
- * section 2.3.4.  According to equation 2.19
- * 	Pc/Pw=12 cos(theta)*(1+b cos(theta)/(3+2b) where b=1.5 corresponds to the
- * Eddington approximation.
- *
- * In Python, and in extract and transphot in particular, tau generally refers to the tau associated
- * with scattering processes, and the weight contains the effect of dimunition of the energy of
- * the photon bundle due to pure absorption processes.  So, in extract, we add pp->w * exp(-tau)
- * to the spectrum.
- *
- * Note that both linearly and logarithmically spaced spectra are produced.
- *
- **********************************************************/
-double xlmn[3];
-//XTEST
 
 int
 extract (w, p, itype)
@@ -121,15 +93,11 @@ extract (w, p, itype)
   double dvds_max;
   int ierr;
   int istat;
-  struct photon pstart;
-  double weight_min;
   double x[3];
   double tau;
   double zz;
   double dvds;
   int ishell;
-
-
 
 
   ierr = check_frame (p, F_OBSERVER, "extract_start");
@@ -248,8 +216,6 @@ extract (w, p, itype)
        * A disk photon is in the observer frame
        */
 
-      stuff_v (xxspec[n].lmn, xlmn);
-      //XTEST
 
       if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_WIND)
       {
@@ -275,49 +241,9 @@ extract (w, p, itype)
         stuff_v (xxspec[n].lmn, pp.lmn);
       }
 
-      /*
-       * At this point photons of type DISK or WIND are in
-       * the local frame, but others are in the global
-       * frame
-       */
-
-      //extract_one(w, &pp, itype, n);
-
-
-      //int
-      //extract_one(w, pp, itype, nspec)
-      //              WindPtr w;
-      //PhotPtr pp;
-      //int           itype   , nspec;
-
-//      {
-      weight_min = EPSILON * pp.w;
       istat = P_INWIND;
       tau = 0;
 
-      //We want pstart to be in the observer frame
-
-      if (itype == PTYPE_WIND)
-      {
-        ierr = local_to_observer_frame (&pp, &pstart);
-        if (ierr)
-          Error ("extract_one: pp of type WIND not in local frame %d\n", ierr);
-      }
-      else if (itype == PTYPE_DISK)
-      {
-        ierr = local_to_observer_frame_disk (&pp, &pstart);
-        if (ierr)
-          Error ("extract_one: pp of type DISK not in local frame %d\n", ierr);
-      }
-      else
-      {
-        ierr = check_frame (&pp, F_OBSERVER, "extract_one: start");
-        if (ierr)
-        {
-          Error ("extract_one: check_frame_failure for itype %d\n", itype);
-        }
-        stuff_phot (&pp, &pstart);
-      }
 
       /*
        * At this stage, we need to transform the
@@ -336,19 +262,6 @@ extract (w, p, itype)
         if ((ierr = local_to_observer_frame (&pp, &pp)))
           Error ("extract_one: wind photon not in local frame\n");
 
-        if (pp.x[2] * pstart.x[2] < 0)
-        {
-          Error ("Extract_one: Went through xz plane on local2observer frame\n");
-          Error ("Extract_one: start %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-                 pstart.x[0], pstart.x[1], pstart.x[2], pstart.lmn[0], pstart.lmn[1], pstart.lmn[2]);
-          Error ("Extract_one:   was %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-                 pdummy.x[0], pdummy.x[1], pdummy.x[2], pdummy.lmn[0], pdummy.lmn[1], pdummy.lmn[2]);
-          Error ("Extract_one:    is %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n",
-                 pp.x[0], pp.x[1], pp.x[2], pp.lmn[0], pp.lmn[1], pp.lmn[2]);
-        }
-        pstart.lmn[0] = pp.lmn[0];
-        pstart.lmn[1] = pp.lmn[1];
-        pstart.lmn[2] = pp.lmn[2];
       }
       /*
        * Re-weight the photons. Note that photons
@@ -399,9 +312,6 @@ extract (w, p, itype)
           tau = 0.0;
         }
       }
-      stuff_phot (&pp, &pdummy);
-      /*Actually not clear to me why we do
-         need this dummy photon at this stage  */
       if (tau > TAU_MAX)
       {
         istat = P_ABSORB;       /* Check to see if tau
@@ -413,7 +323,7 @@ extract (w, p, itype)
       {
         return (istat);
       }
-      istat = just_extract (w, &pp, n);
+      istat = extract_one (w, &pp, n);
 
     }
   }
@@ -453,7 +363,7 @@ extract (w, p, itype)
 
 
 int
-just_extract (w, pp, nspec)
+extract_one (w, pp, nspec)
      WindPtr w;
      PhotPtr pp;
      int nspec;
