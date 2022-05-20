@@ -379,7 +379,6 @@ extract_one (w, pp, nspec)
   double tau;
   double lfreqmin, lfreqmax, ldfreq;
   double normal[3];
-  int ierr;
 
   /*
    * Preserve the starting position of the photon so one can use this
@@ -397,12 +396,8 @@ extract_one (w, pp, nspec)
   stuff_phot (pp, &pdummy_orig);
   stuff_phot (pp, &pdummy);
 
-  ierr = check_frame (pp, F_OBSERVER, "extract_one: photon not in observer frame at start");
-  ierr = walls (&pdummy_orig, &pstart, normal);
-  if (pdummy.istat != pp->istat)
-  {
-    Error ("extract_one: Surprising state change made by walls %d _> %d\n", pp->istat, pdummy.istat);
-  }
+  check_frame (pp, F_OBSERVER, "extract_one: photon not in observer frame at start");
+
   istat = P_INWIND;
 
   while (istat == P_INWIND)
