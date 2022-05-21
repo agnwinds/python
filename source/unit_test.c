@@ -223,7 +223,7 @@ main (argc, argv)
 
   xsignal ("unit_test", "%-20s before old wind_lum for %s\n", "NOK", "unit_test");
 
-  for (number = 0; number < 100; number++)
+  for (number = 0; number < 10; number++)
   {
     lum_one = wind_luminosity (f1, f2, MODE_CMF_TIME);
   }
@@ -238,10 +238,12 @@ main (argc, argv)
   double par_wind_luminosity ();
 
   xsignal ("unit_test", "%-20s before new wind luminosity %s\n", "NOK", "unit_test");
-  for (number = 0; number < 100; number++)
+
+  for (number = 0; number < 10; number++)
   {
     lum_one = par_wind_luminosity (f1, f2, MODE_CMF_TIME);
   }
+
   xsignal ("unit_test", "%-20s after new wind luminosity %s\n", "NOK", "unit_test");
 
   Log_parallel ("new version: %d %e %e %e %e\n", my_rank, lum_one, geo.lum_lines, geo.lum_rr, geo.lum_ff);
