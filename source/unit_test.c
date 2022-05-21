@@ -25,6 +25,8 @@
 char inroot[LINELENGTH];
 
 #define COMPTON_TEST 0
+#define NUMBER_TEST  1
+#define LUM_TEST 0
 
 int
 main (argc, argv)
@@ -59,6 +61,118 @@ main (argc, argv)
 
   xsignal ("unit_test", "%-20s Initializing variables for %s\n", "NOK", "unit_test");
 
+#if NUMBER_TEST == 1
+  int n;
+  int nmax = 1000000;
+  double x[nmax + 1];
+  double q;
+
+  double m, mrepeat;
+  double j, jrepeat;
+
+  mrepeat = 1e2;
+  jrepeat = 1e2;;
+
+  for (n = 0; n <= nmax; n++)
+  {
+    x[n] = .1 + random_number (0, 100);
+  }
+
+  xsignal ("unit_test", "%-20s at start %s\n", "NOK", "unit_test");
+
+
+  for (j = 0; j < jrepeat; j++)
+  {
+    for (m = 0; m < mrepeat; m++)
+    {
+      for (n = 0; n < nmax; n++)
+      {
+        q = x[n] + x[n + 1];
+      }
+    }
+  }
+
+  xsignal ("unit_test", "%-20s after addition %s\n", "NOK", "unit_test");
+
+
+  for (j = 0; j < jrepeat; j++)
+  {
+    for (m = 0; m < mrepeat; m++)
+    {
+      for (n = 0; n < nmax; n++)
+      {
+        q = x[n] * x[n + 1];
+      }
+    }
+  }
+
+  xsignal ("unit_test", "%-20s after multiplication %s\n", "NOK", "unit_test");
+
+
+  for (j = 0; j < jrepeat; j++)
+  {
+    for (m = 0; m < mrepeat; m++)
+    {
+      for (n = 0; n < nmax; n++)
+      {
+        q = x[n] / x[n + 1];
+      }
+    }
+  }
+  xsignal ("unit_test", "%-20s after division %s\n", "NOK", "unit_test");
+
+
+  for (j = 0; j < jrepeat; j++)
+  {
+    for (m = 0; m < mrepeat; m++)
+    {
+      for (n = 0; n < nmax; n++)
+      {
+        q = exp (-x[n]);
+      }
+    }
+  }
+  xsignal ("unit_test", "%-20s after expon %s\n", "NOK", "unit_test");
+
+
+
+  for (j = 0; j < jrepeat; j++)
+  {
+    for (m = 0; m < mrepeat; m++)
+    {
+      for (n = 0; n < nmax; n++)
+      {
+        q = log10 (x[n]);
+      }
+    }
+  }
+  xsignal ("unit_test", "%-20s after log10 %s\n", "NOK", "unit_test");
+
+
+  double fibo = 1;
+  for (j = 0; j < jrepeat; j++)
+  {
+    for (m = 0; m < mrepeat; m++)
+    {
+      for (n = 0; n < nmax; n++)
+      {
+        fibo += fibo;
+      }
+    }
+  }
+  xsignal ("unit_test", "%-20s after fibo %s\n", "NOK", "unit_test");
+
+
+
+
+  printf ("q %e fibo %e\n", q, fibo);
+
+
+
+#endif
+
+
+
 #if COMPTON_TEST == 1
   int n;
   double velocity[3];
@@ -84,6 +198,7 @@ main (argc, argv)
 #endif
 
 
+#if LUM_TEST == 1
 /* Create a way to do luminosities in parallel */
 
   char infile[LINELENGTH];
@@ -130,6 +245,7 @@ main (argc, argv)
   xsignal ("unit_test", "%-20s after new wind luminosity %s\n", "NOK", "unit_test");
 
   Log_parallel ("new version: %d %e %e %e %e\n", my_rank, lum_one, geo.lum_lines, geo.lum_rr, geo.lum_ff);
+#endif
 
   printf ("Finished unit test\n");
 
