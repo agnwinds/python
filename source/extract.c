@@ -87,12 +87,11 @@ extract (w, p, itype)
 {
   int n, mscat, mtopbot;
   struct photon pp, p_in, p_dummy, pdummy;
-  int extract_photon;
+//  int extract_photon;
   double xdiff[3];
   double p_norm, tau_norm;
   double dvds_max;
   int ierr;
-  int istat;
   double x[3];
   double tau;
   double zz;
@@ -172,160 +171,168 @@ extract (w, p, itype)
      * and a radius.
      */
 
-    extract_photon = TRUE;
+    //   extract_photon = TRUE;
 
     if ((mscat = xxspec[n].nscat) >= MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
-      extract_photon = TRUE;
+    {
+    }
+//      extract_photon = TRUE;
     else
-      extract_photon = FALSE;
+      continue;
+//      extract_photon = FALSE;
 
-    if (extract_photon)
+//    if (extract_photon)
+//    {
+    if ((mtopbot = xxspec[n].top_bot) == 0)
     {
-      if ((mtopbot = xxspec[n].top_bot) == 0)
-        extract_photon = TRUE;
-      //Then there are no positional parameters and we are done
-      else if (mtopbot == -1 && p_in.x[2] < 0)
-        extract_photon = TRUE;
-      else if (mtopbot == 1 && p_in.x[2] > 0)
-        extract_photon = TRUE;
-      else if (mtopbot == 2)
-        //Then to count, the photom must originate within sn.r of sn.x
-      {
-        vsub (p_in.x, xxspec[n].x, xdiff);
-        if (length (xdiff) > xxspec[n].r)
-          extract_photon = FALSE;
-      }
-      else
-        extract_photon = FALSE;
+//        extract_photon = TRUE;
     }
-    if (extract_photon)
+    //Then there are no positional parameters and we are done
+    else if (mtopbot == -1 && p_in.x[2] < 0)
     {
-      /*
-       * Create a photon pp to use here and in extract_one,
-       * and send it in the correct direction.  This
-       * assures we have not modified p_in as part of
-       * extract.  Also, allow for aberration of photons to
-       * assure that we are extracting at the correct angle
-       * in the observer frame
-       * 
-       * Note that a wind photon is in the local frame, and
-       * the only thing we need to do is to figure out the
-       * extraction direction in the local frame that will
-       * produce the directon we want
-       * 
-       * A disk photon is in the observer frame
-       */
+//        extract_photon = TRUE;
+    }
+    else if (mtopbot == 1 && p_in.x[2] > 0)
+    {
+//        extract_photon = TRUE;
+    }
+    else if (mtopbot == 2)
+      //Then to count, the photom must originate within sn.r of sn.x
+    {
+      vsub (p_in.x, xxspec[n].x, xdiff);
+      if (length (xdiff) > xxspec[n].r)
+        continue;
+//          extract_photon = FALSE;
+    }
+    else
+      continue;
+//        extract_photon = FALSE;
+//    }
+//    if (extract_photon)
+//    {
+    /*
+     * Create a photon pp to use here and in extract_one,
+     * and send it in the correct direction.  This
+     * assures we have not modified p_in as part of
+     * extract.  Also, allow for aberration of photons to
+     * assure that we are extracting at the correct angle
+     * in the observer frame
+     * 
+     * Note that a wind photon is in the local frame, and
+     * the only thing we need to do is to figure out the
+     * extraction direction in the local frame that will
+     * produce the directon we want
+     * 
+     * A disk photon is in the observer frame
+     */
 
 
-      if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_WIND)
-      {
-        stuff_phot (&p_in, &p_dummy);
-        p_dummy.frame = F_OBSERVER;
-        stuff_v (xxspec[n].lmn, p_dummy.lmn);
-        observer_to_local_frame (&p_dummy, &p_dummy);
-        stuff_phot (&p_in, &pp);
-        stuff_v (p_dummy.lmn, pp.lmn);
-      }
-      else if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_DISK)
-      {
-        stuff_phot (&p_in, &p_dummy);
-        p_dummy.frame = F_OBSERVER;
-        stuff_v (xxspec[n].lmn, p_dummy.lmn);
-        observer_to_local_frame_disk (&p_dummy, &p_dummy);
-        stuff_phot (&p_in, &pp);
-        stuff_v (p_dummy.lmn, pp.lmn);
-      }
-      else
-      {
-        stuff_phot (&p_in, &pp);
-        stuff_v (xxspec[n].lmn, pp.lmn);
-      }
+    if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_WIND)
+    {
+      stuff_phot (&p_in, &p_dummy);
+      p_dummy.frame = F_OBSERVER;
+      stuff_v (xxspec[n].lmn, p_dummy.lmn);
+      observer_to_local_frame (&p_dummy, &p_dummy);
+      stuff_phot (&p_in, &pp);
+      stuff_v (p_dummy.lmn, pp.lmn);
+    }
+    else if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_DISK)
+    {
+      stuff_phot (&p_in, &p_dummy);
+      p_dummy.frame = F_OBSERVER;
+      stuff_v (xxspec[n].lmn, p_dummy.lmn);
+      observer_to_local_frame_disk (&p_dummy, &p_dummy);
+      stuff_phot (&p_in, &pp);
+      stuff_v (p_dummy.lmn, pp.lmn);
+    }
+    else
+    {
+      stuff_phot (&p_in, &pp);
+      stuff_v (xxspec[n].lmn, pp.lmn);
+    }
 
-      istat = P_INWIND;
-      tau = 0;
+    tau = 0;
 
 
-      /*
-       * At this stage, we need to transform the
-       * photon back into the observer frame
-       */
+    /*
+     * At this stage, we need to transform the
+     * photon back into the observer frame
+     */
 
-      if (itype == PTYPE_DISK)
-      {
-        if ((ierr = local_to_observer_frame_disk (&pp, &pp)))
-          Error ("extract_one: disk photon not in local frame");
-      }
-      if (itype == PTYPE_WIND)
-      {
-        stuff_phot (&pp, &pdummy);
+    if (itype == PTYPE_DISK)
+    {
+      if ((ierr = local_to_observer_frame_disk (&pp, &pp)))
+        Error ("extract_one: disk photon not in local frame");
+    }
+    if (itype == PTYPE_WIND)
+    {
+      stuff_phot (&pp, &pdummy);
 
-        if ((ierr = local_to_observer_frame (&pp, &pp)))
-          Error ("extract_one: wind photon not in local frame\n");
-
-      }
-      /*
-       * Re-weight the photons. Note that photons
-       * have already been frequency shifted prior
-       * to entering extract. For disk and central
-       * object photons, see Eqn 2.19 Knigge's
-       * thesis
-       */
-
-      if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
-      {
-        stuff_v (pp.x, x);
-        renorm (x, 1.);
-        zz = fabs (dot (x, xxspec[n].lmn));
-        pp.w *= zz * (2.0 + 3.0 * zz);
-      }
-      else if (itype == PTYPE_DISK)
-      {
-        zz = fabs (xxspec[n].lmn[2]);
-        pp.w *= zz * (2.0 + 3.0 * zz);
-      }
-      else if (pp.nres > -1 && pp.nres < NLINES)
-      {
-
-        /*
-         * It was a wind photon.  In this
-         * case, what we do depends on
-         * whether it is a photon which arose
-         * via line radiation or some other
-         * process.
-         * 
-         * If
-         * geo.scatter_mode==SCATTER_MODE_ISOTR
-         * OPIC then there is no need to
-         * reweight.  This is the isotropic
-         * assumption.  Otherwise, one needs
-         * to reweight
-         * 
-         */
-
-        if (geo.scatter_mode == SCATTER_MODE_THERMAL)
-        {
-          dvds = dvwind_ds_cmf (&pp);
-          ishell = pp.grid;
-          tau = sobolev (&w[ishell], pp.x, -1.0, lin_ptr[pp.nres], dvds);
-          if (tau > 0.0)
-            pp.w *= p_escape_from_tau (tau);
-          tau = 0.0;
-        }
-      }
-      if (tau > TAU_MAX)
-      {
-        istat = P_ABSORB;       /* Check to see if tau
-                                 * already too large */
-        Error ("extract: tau should not be large\n");
-        return (istat);
-      }
-      else if (geo.binary == TRUE && hit_secondary (&pp))
-      {
-        return (istat);
-      }
-      istat = extract_one (w, &pp, n);
+      if ((ierr = local_to_observer_frame (&pp, &pp)))
+        Error ("extract_one: wind photon not in local frame\n");
 
     }
+    /*
+     * Re-weight the photons. Note that photons
+     * have already been frequency shifted prior
+     * to entering extract. For disk and central
+     * object photons, see Eqn 2.19 Knigge's
+     * thesis
+     */
+
+    if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
+    {
+      stuff_v (pp.x, x);
+      renorm (x, 1.);
+      zz = fabs (dot (x, xxspec[n].lmn));
+      pp.w *= zz * (2.0 + 3.0 * zz);
+    }
+    else if (itype == PTYPE_DISK)
+    {
+      zz = fabs (xxspec[n].lmn[2]);
+      pp.w *= zz * (2.0 + 3.0 * zz);
+    }
+    else if (pp.nres > -1 && pp.nres < NLINES)
+    {
+
+      /*
+       * It was a wind photon.  In this
+       * case, what we do depends on
+       * whether it is a photon which arose
+       * via line radiation or some other
+       * process.
+       * 
+       * If
+       * geo.scatter_mode==SCATTER_MODE_ISOTR
+       * OPIC then there is no need to
+       * reweight.  This is the isotropic
+       * assumption.  Otherwise, one needs
+       * to reweight
+       * 
+       */
+
+      if (geo.scatter_mode == SCATTER_MODE_THERMAL)
+      {
+        dvds = dvwind_ds_cmf (&pp);
+        ishell = pp.grid;
+        tau = sobolev (&w[ishell], pp.x, -1.0, lin_ptr[pp.nres], dvds);
+        if (tau > 0.0)
+          pp.w *= p_escape_from_tau (tau);
+        tau = 0.0;
+      }
+    }
+    if (tau > TAU_MAX)
+    {
+      Error ("extract: tau should not be large\n");
+      continue;
+    }
+    else if (geo.binary == TRUE && hit_secondary (&pp))
+    {
+      continue;
+    }
+    extract_one (w, &pp, n);
+
+//    }
   }
 
 
