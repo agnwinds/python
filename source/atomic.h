@@ -84,7 +84,7 @@ typedef struct ions
   int istate;                   /* 1=neutral, 2 = once ionized, etc. */
   int nelem;                    /* index to elements structure */
   double ip;                    /* ionization potential of this ion (converted from eV to ergs by get_atomic) */
-  double g;                     /* multiplicity of ground state, note that this is not totally consistent
+  double g,log_g;                     /* multiplicity of ground state, note that this is not totally consistent
                                    with energy levels and this needs to be reconciled */
   int nmax;                     /* The maximum number of allowed lte configurations for this ion. 
                                    Used only by get_atomic */
@@ -175,7 +175,7 @@ typedef struct configurations
                                  */
   int n_bbu_jump, n_bbd_jump;   /* No. of bound-bound upward/downward jumps available to this configuration (SS) */
   int n_bfu_jump, n_bfd_jump;   /* No. of bound-free upward/downward jumps available to this configuration (SS) */
-  double g;                     /* multiplicity for level */
+  double g,log_g;                     /* multiplicity for level */
   double q_num;                 /* principal quantum number.  In Topbase this has non-integer values */
   double ex;                    /*excitation energy of level */
   double rad_rate;              /* Total spontaneous radiative de-excitation rate for level */
@@ -301,8 +301,8 @@ typedef struct topbase_phot
                                    configuration (nlev) and then up_index. (SS) */
   int up_index;
   int use;                      /* It we are to use this cross section. This allows unused VFKY cross sections to sit in the array. */
-  double freq[NCROSS], x[NCROSS];
-  double f, sigma;              /*last freq, last x-section */
+  double freq[NCROSS],log_freq[NCROSS], x[NCROSS],log_x[NCROSS];
+  double f,log_f, sigma,log_sigma;              /*last freq, last x-section */
 } Topbase_phot, *TopPhotPtr;
 
 extern Topbase_phot phot_top[NLEVELS];

@@ -383,6 +383,8 @@ structure does not have this property! */
           ion[nions].z = z;
           ion[nions].istate = istate;
           ion[nions].g = gg;
+          ion[nions].log_g = log (gg);
+
           ion[nions].ip = p * EV2ERGS;
           ion[nions].nmax = nmax;
 /* Use the keyword IonM to classify the ion as a macro-ion (IonM) or not (simply Ion) */
@@ -658,6 +660,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
           config[nlevels].nion = n;
           config[nlevels].q_num = qqnum;
           config[nlevels].g = gg;
+          config[nlevels].log_g = log (gg);
           config[nlevels].ex = exx;
           config[nlevels].rad_rate = rl;
 
@@ -1105,8 +1108,11 @@ described as macro-levels. */
               for (n = 0; n < np; n++)
               {
                 phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / PLANCK; // convert from eV to freqency
+                phot_top[ntop_phot].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK);       // convert from eV to freqency
 
                 phot_top[ntop_phot].x[n] = xx[n];       // leave cross sections in  CGS
+                phot_top[ntop_phot].log_x[n] = log (xx[n]);     // leave cross sections in  CGS
+
               }
               if (phot_freq_min > phot_top[ntop_phot].freq[0])
                 phot_freq_min = phot_top[ntop_phot].freq[0];
@@ -1181,7 +1187,11 @@ described as macro-levels. */
                   for (n = 0; n < np; n++)
                   {
                     phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / PLANCK;   // convert from eV to freqency
+                    phot_top[nphot_total].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK); // convert from eV to freqency
+
                     phot_top[nphot_total].x[n] = xx[n]; // leave cross sections in  CGS
+                    phot_top[nphot_total].log_x[n] = log (xx[n]);       // leave cross sections in  CGS
+
                   }
                   if (phot_freq_min > phot_top[ntop_phot].freq[0])
                     phot_freq_min = phot_top[ntop_phot].freq[0];
@@ -1205,7 +1215,11 @@ described as macro-levels. */
                   for (n = 0; n < np; n++)
                   {
                     phot_top[ion[nion].ntop_ground].freq[n] = xe[n] * EV2ERGS / PLANCK; // convert from eV to freqency
+                    phot_top[ion[nion].ntop_ground].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK);       // convert from eV to freqency
+
                     phot_top[ion[nion].ntop_ground].x[n] = xx[n];       // leave cross sections in  CGS
+                    phot_top[ion[nion].ntop_ground].log_x[n] = log (xx[n]);     // leave cross sections in  CGS
+
                   }
                   if (phot_freq_min > phot_top[ion[nion].ntop_ground].freq[0])
                     phot_freq_min = phot_top[ion[nion].ntop_ground].freq[0];
@@ -1278,7 +1292,11 @@ described as macro-levels. */
               for (n = 0; n < np; n++)
               {
                 inner_cross[n_inner_tot].freq[n] = xe[n] * EV2ERGS / PLANCK;    // convert from eV to freqency
+                inner_cross[n_inner_tot].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK);  // convert from eV to freqency
+
                 inner_cross[n_inner_tot].x[n] = xx[n];  // leave cross sections in  CGS
+                inner_cross[n_inner_tot].log_x[n] = log (xx[n]);        // leave cross sections in  CGS
+
               }
               if (inner_freq_min > inner_cross[n_inner_tot].freq[0])
                 inner_freq_min = inner_cross[n_inner_tot].freq[0];
