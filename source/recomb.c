@@ -69,7 +69,7 @@ int nfb = 0;
  * x*= H;
  */
 #define FBEMISS   7.67413e-62   // Calculated with constants.c
-
+#define LOG_FBEMISS -140.7224208336316
 
 
 /* These are external structures used primarily because we need to call
@@ -79,7 +79,7 @@ Numerical Recipes routines from fb_verner and fb_topbase */
 struct topbase_phot *fb_xtop;
 
 /// Temperature at which thee emissivity is calculated
-double fbt;
+double fbt, log_fbt;
 
 /// fb_choice (see above)
 int fbfr;
@@ -121,10 +121,14 @@ fb_topbase_partial (freq)
      double freq;
 {
   int nion;
-  double partial;
-  double x;
+  double partial, log_freq;
+  double x, logx;
   double gn, gion;
+  double log_gn, log_gion;
   double fthresh;
+  double test;
+
+  log_freq = log (freq);
 
   fthresh = fb_xtop->freq[0];
   if (freq < fthresh)
@@ -134,23 +138,48 @@ fb_topbase_partial (freq)
 
   /* JM -- below lines to address bug #195 */
   gn = 1;
+  log_gn = 0;
   if (ion[nion].phot_info > 0)  // it's a topbase record
+  {
     gn = config[fb_xtop->nlev].g;
+    log_gn = config[fb_xtop->nlev].log_g;
+  }
+
   else if (ion[nion].phot_info == 0)    // it's a VFKY record, so shouldn't really use levels
+  {
     gn = ion[nion].g;
+    log_gn = ion[nion].log_g;
+  }
   else
   {
     Error
       ("fb_topbase_partial: Did not understand cross-section type %i for ion %i (z=%i, istate %i). Setting multiplicity to zero!\n",
        ion[nion].phot_info, nion, ion[nion].z, ion[nion].istate);
     gn = 0.0;
+    log_gn = -999.;             //Not really sure what to do here - probably return a zero
   }
 
   gion = ion[nion + 1].g;       // Want the g factor of the next ion up
-  x = sigma_phot (fb_xtop, freq);
+  log_gion = ion[nion + 1].log_g;       // Want the g factor of the next ion up
+
+//  x = sigma_phot (fb_xtop, freq);
+  logx = log_sigma_phot (fb_xtop, log_freq);
+
+
+
   // Now calculate emission using Ferland's expression
 
-  partial = FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt, 1.5) * exp (H_OVER_K * (fthresh - freq) / fbt) * x;
+//  partial = FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt, 1.5) * exp (H_OVER_K * (fthresh - freq) / fbt) * x;
+
+  test =
+    LOG_FBEMISS + log_gn - 0.6931471805599453 - log_gion + 1.5 * (2.0 * log_freq - log_fbt) + (H_OVER_K * (fthresh - freq) / fbt) + logx;
+
+//  if (fabs (partial / exp (test) - 1.) > 1e-10)
+//  {
+//    printf ("BOOM %e %e\n", partial / exp (test), fabs (partial / exp (test) - 1.));
+//  }
+  partial = exp (test);
+
 
   // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
 
@@ -163,6 +192,9 @@ fb_topbase_partial (freq)
 
   return (partial);
 }
+
+
+
 
 
 /**********************************************************/
@@ -796,6 +828,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 
 
   fbt = t;                      /* Externally transmitted variable */
+  log_fbt = log (t);
   fbfr = fb_choice;             /* Externally transmitted variable */
 
   fnu = 0.0;                    /* Initially set the emissivity to zero */
@@ -1189,6 +1222,8 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   // Put information where it can be used by the integrating function
   fbt = t;
+  log_fbt = log (t);
+
   fbfr = fb_choice;
 
   /* Limit the frequency range to one that is reasonable before integrating */
@@ -1307,6 +1342,8 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
     {
       nn = n;
       fbt = t;
+      log_fbt = log (t);
+
       fbfr = fb_choice;
 
       /* Limit the frequency range to one that is reasonable before integrating */
@@ -1540,6 +1577,7 @@ gs_rrate (nion, T)
     rate = 0.0;                 /* NSH 130605 to remove o3 compile error */
 
     fbt = T;
+    log_fbt = log (T);
     fbfr = FB_RATE;
 
     if (ion[nion - 1].phot_info > 0)    //topbase or hybrid
@@ -1701,6 +1739,7 @@ matom_select_bf_freq (WindPtr one, int nconf)
   xplasma = &plasmamain[one->nplasma];
   te = xplasma->t_e;            //electron temperature in cell
   fbt = te;                     //set external temperature to the right value
+  log_fbt = log (te);           //set external temperature to the right value
 
   //If hydrogenic ion use analytic expression
   if (ion[phot_top[nconf].nion].istate == ion[phot_top[nconf].nion].z)
