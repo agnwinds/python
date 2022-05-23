@@ -188,7 +188,6 @@ calculate_ionization (restart_stat)
     define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
     xsignal (files.root, "%-20s Finished photon definition\n", "NOK");
 
-    exit (0);
     photon_checks (p, freqmin, freqmax, "Check before transport");
     xsignal (files.root, "%-20s Finished photon checks\n", "NOK");
 
