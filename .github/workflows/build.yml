@@ -58,11 +58,13 @@ jobs:
       
     - name: balmer test
       run: |
+        cd $PYTHON/examples/gh-workflow/
         $PYTHON/bin/py -f -v 1 balmer_test
         python $PYTHON/py_progs/balmer_decrement.py balmer_test
       
     - name: read in parameter files
       run: |
+        cd $PYTHON/examples/gh-workflow/
         $PYTHON/bin/py -i cv_macro_benchmark
         $PYTHON/bin/py -i cv_standard
         $PYTHON/bin/py -i fiducial_agn
