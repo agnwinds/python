@@ -54,7 +54,8 @@ def BalmerTest(root, plotit=True):
 
 	# run py wind. pass the command to run for situations in CI where we can't get the path working
 	py_wind_cmd = "{}/bin/py_wind".format(PYTHON)
-	util.run_py_wind(root, cmds=cmds, py_wind_cmd = py_wind_cmd)
+	isys, logfile_contents = util.run_py_wind(root, cmds=cmds, py_wind_cmd = py_wind_cmd, return_output = True)
+	print (isys)
 
 	# these could be in principle be used to check absolute emissivity values 
 	# ne = rd.read_pywind("{}.ne.dat".format(root), mode="1d")[2][1]
@@ -64,9 +65,13 @@ def BalmerTest(root, plotit=True):
 	# nprot = nh1 + nh2
 
 	# read the emissivities
-	ratios = np.zeros(nlevels)
-	for i in range(nlevels):
-		ratios[i] = rd.read_pywind("{}.lev{}_emiss.dat".format(root,i+3), mode="1d")[2][1]
+	try:
+		ratios = np.zeros(nlevels)
+		for i in range(nlevels):
+			ratios[i] = rd.read_pywind("{}.lev{}_emiss.dat".format(root,i+3), mode="1d")[2][1]
+	except FileNotFoundError:
+		print("Error reading py_wind output. Logfile follows...")
+		print (logfile_contents)
 
 
 
