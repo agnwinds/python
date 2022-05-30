@@ -42,7 +42,7 @@ def get_pywind_summary (fname, vers="", den_or_frac=0):
 
 
 
-def run_py_wind (fname, vers="", cmds=None, ilv=None):
+def run_py_wind (fname, vers="", cmds=None, ilv=None, py_wind_cmd = "py_wind", return_output = False):
     '''
     run version vers of py_wind on file fname.wind_save
     '''
@@ -52,15 +52,26 @@ def run_py_wind (fname, vers="", cmds=None, ilv=None):
 
     x = cmds
     np.savetxt("_tempcmd.txt", x, fmt = "%s")
+    logfilename = "tempfile"
 
     print ("Running py_wind...")
     print ("commands = {}".format(cmds))
-    isys = os.system('py_wind'+vers+' '+fname+' < _tempcmd.txt > tempfile')
+    cmd_to_run = "{}{} {} < _tempcmd.txt > {}".format(py_wind_cmd, vers, fname, logfilename)
+    isys = os.system(cmd_to_run)
     time.sleep(3)
 
+    # return log file to use if required
+    if return_output:
+        logfile = open(logfilename)
+        logfile_contents = logfile.read()
+        
+
     # remove temporary file
-    os.system("rm -f _tempcmd.txt")
-    return isys
+    os.system("rm -f _tempcmd.txt {}".format(logfilename))
+    if return_output:
+        return (isys, logfile_contents)
+    else:
+        return isys
 
 
 
