@@ -52,8 +52,9 @@ def BalmerTest(root, plotit=True):
 	cmds.append("-1")
 	cmds.append("q")
 
-	# run py wind 
-	util.run_py_wind(root, cmds=cmds)
+	# run py wind. pass the command to run for situations in CI where we can't get the path working
+	py_wind_cmd = "{}/bin/py_wind".format(PYTHON)
+	util.run_py_wind(root, cmds=cmds, py_wind_cmd = py_wind_cmd)
 
 	# these could be in principle be used to check absolute emissivity values 
 	# ne = rd.read_pywind("{}.ne.dat".format(root), mode="1d")[2][1]

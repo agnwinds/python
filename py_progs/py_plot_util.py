@@ -42,7 +42,7 @@ def get_pywind_summary (fname, vers="", den_or_frac=0):
 
 
 
-def run_py_wind (fname, vers="", cmds=None, ilv=None):
+def run_py_wind (fname, vers="", cmds=None, ilv=None, py_wind_cmd = "py_wind"):
     '''
     run version vers of py_wind on file fname.wind_save
     '''
@@ -55,7 +55,8 @@ def run_py_wind (fname, vers="", cmds=None, ilv=None):
 
     print ("Running py_wind...")
     print ("commands = {}".format(cmds))
-    isys = os.system('py_wind'+vers+' '+fname+' < _tempcmd.txt > tempfile')
+    cmd_to_run = "{}{} {} < _tempcmd.txt > tempfile".format(py_wind_cmd, vers, fname)
+    isys = os.system(cmd_to_run)
     time.sleep(3)
 
     # remove temporary file
