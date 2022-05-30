@@ -171,30 +171,22 @@ extract (w, p, itype)
      * and a radius.
      */
 
-    //   extract_photon = TRUE;
 
     if ((mscat = xxspec[n].nscat) >= MAXSCAT || p_in.nscat == mscat || (mscat < 0 && p_in.nscat >= (-mscat)))
     {
     }
-//      extract_photon = TRUE;
     else
       continue;
-//      extract_photon = FALSE;
 
-//    if (extract_photon)
-//    {
     if ((mtopbot = xxspec[n].top_bot) == 0)
     {
-//        extract_photon = TRUE;
     }
     //Then there are no positional parameters and we are done
     else if (mtopbot == -1 && p_in.x[2] < 0)
     {
-//        extract_photon = TRUE;
     }
     else if (mtopbot == 1 && p_in.x[2] > 0)
     {
-//        extract_photon = TRUE;
     }
     else if (mtopbot == 2)
       //Then to count, the photom must originate within sn.r of sn.x
@@ -202,14 +194,10 @@ extract (w, p, itype)
       vsub (p_in.x, xxspec[n].x, xdiff);
       if (length (xdiff) > xxspec[n].r)
         continue;
-//          extract_photon = FALSE;
     }
     else
       continue;
-//        extract_photon = FALSE;
-//    }
-//    if (extract_photon)
-//    {
+
     /*
      * Create a photon pp to use here and in extract_one,
      * and send it in the correct direction.  This
@@ -227,7 +215,13 @@ extract (w, p, itype)
      */
 
 
-    if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_WIND)
+    /* At this point we need to calculate the desired direction of the photon in
+       the local frame of the disk or wind.  PTYPE_STAR, PTYPE_BL do not 
+       need this test
+     */
+
+
+    if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
     {
       stuff_phot (&p_in, &p_dummy);
       p_dummy.frame = F_OBSERVER;
@@ -236,7 +230,7 @@ extract (w, p, itype)
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
     }
-    else if ((rel_mode == REL_MODE_FULL || rel_mode == REL_MODE_SR_FREQ) && itype == PTYPE_DISK)
+    else if (itype == PTYPE_DISK && rel_mode != REL_MODE_LINEAR)
     {
       stuff_phot (&p_in, &p_dummy);
       p_dummy.frame = F_OBSERVER;
@@ -251,7 +245,6 @@ extract (w, p, itype)
       stuff_v (xxspec[n].lmn, pp.lmn);
     }
 
-    tau = 0;
 
 
     /*
@@ -289,7 +282,7 @@ extract (w, p, itype)
     }
     else if (itype == PTYPE_DISK)
     {
-      zz = fabs (xxspec[n].lmn[2]);
+      zz = fabs (p_dummy.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
     }
     else if (pp.nres > -1 && pp.nres < NLINES)
@@ -321,6 +314,8 @@ extract (w, p, itype)
         tau = 0.0;
       }
     }
+
+    /* Make some final chacks before extracting the photon */
     if (tau > TAU_MAX)
     {
       Error ("extract: tau should not be large\n");
@@ -330,9 +325,11 @@ extract (w, p, itype)
     {
       continue;
     }
+
+    /* If one has reached this point, we extract the photon and increment the spectrum */
+
     extract_one (w, &pp, n);
 
-//    }
   }
 
 
