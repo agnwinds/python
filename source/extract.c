@@ -238,6 +238,8 @@ extract (w, p, itype)
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
+      zz = fabs (pp.lmn[2]);
+      pp.w *= zz * (2.0 + 3.0 * zz);
     }
     else
     {
@@ -280,9 +282,10 @@ extract (w, p, itype)
       zz = fabs (dot (x, xxspec[n].lmn));
       pp.w *= zz * (2.0 + 3.0 * zz);
     }
-    else if (itype == PTYPE_DISK)
+    else if (itype == PTYPE_DISK && rel_mode == REL_MODE_LINEAR)
     {
-      zz = fabs (p_dummy.lmn[2]);
+      //  zz = fabs (p_dummy.lmn[2]);
+      zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
     }
     else if (pp.nres > -1 && pp.nres < NLINES)

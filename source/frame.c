@@ -319,6 +319,9 @@ local_to_observer_frame_disk (p_in, p_out)
 
 
 
+  /* Note the use of division here; it is intended, so that this produces the exact
+     opposite of the transformation in the other direction */
+
   if (rel_mode == REL_MODE_LINEAR)
   {
     f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
