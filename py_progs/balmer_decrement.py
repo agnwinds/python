@@ -22,8 +22,10 @@ Notes:
 	model but merely checks it
 '''
 import numpy as np 
-import py_plot_util as util 
 import sys, os
+PYTHON = os.environ["PYTHON"]
+sys.path.append("$PYTHON/py_progs/")
+import py_plot_util as util 
 import py_read_output as rd 
 
 

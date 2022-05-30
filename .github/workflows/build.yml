@@ -28,8 +28,8 @@ jobs:
     - uses: actions/checkout@v3
     - name: configure
       run: ./configure
-    - name: make travis_install
-      run: make travis_install
+    - name: make gh_workflow_install
+      run: make gh_workflow_install
 
   run:
     runs-on: ubuntu-latest
@@ -39,6 +39,13 @@ jobs:
     - uses: actions/setup-python@v3
       with:
         python-version: '3.x' # Version range 
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel
+        cd $PYTHON/examples/gh-workflow/
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
     - name: compile helper programs and setup 
       run: | 
@@ -46,15 +53,15 @@ jobs:
         make clean
         make CC=gcc INDENT=no all 
         make clean
-        cd $PYTHON/examples/travis/
+        cd $PYTHON/examples/gh-workflow/
         $PYTHON/bin/Setup_Py_Dir
       
-#     - name: balmer test
-#       run: |
-#         $PYTHON/bin/py -f -v 1 balmer_test
-#         python $PYTHON/py_progs/balmer_decrement.py balmer_test
+    - name: balmer test
+      run: |
+        $PYTHON/bin/py -f -v 1 balmer_test
+        python $PYTHON/py_progs/balmer_decrement.py balmer_test
       
-    - name: read in files
+    - name: read in parameter files
       run: |
         $PYTHON/bin/py -i cv_macro_benchmark
         $PYTHON/bin/py -i cv_standard

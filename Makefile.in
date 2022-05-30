@@ -27,7 +27,7 @@ else
 endif
 
 # install for travis
-travis_install:
+gh_workflow_install:
 	@echo 'Installing Python. the radiative transfer code'
 	@echo 'Installing in directory '$(PYTHON)
 
