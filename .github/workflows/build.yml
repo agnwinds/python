@@ -1,0 +1,29 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: 
+      - "dev"
+      - "main" 
+  pull_request:
+    branches: 
+      - "dev"
+      - "main" 
+env:
+  PYTHON: ${{ github.workspace }} 
+
+jobs:
+  greeting_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Print out environment variables"
+        run: echo "$GITHUB_WORKSPACE $PYTHON"
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: configure
+      run: ./configure
+    - name: make travis_install
+      run: make travis_install
