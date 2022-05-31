@@ -534,5 +534,9 @@ extract_one (w, pp, nspec)
       ("Extract: Abnormal photon %5d  %d %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e\n",
        pp->np, istat, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
 
+  if (modes.save_photons)
+  {
+    save_photons (pp, "final");
+  }
   return (istat);
 }
