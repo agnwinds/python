@@ -424,7 +424,7 @@ class TransferFunction:
         Apply a SQLalchemy filter directly to the content.
 
         Args:
-            *args: The list of filter arguments
+            args: The list of filter arguments
 
         Returns:
             TransferFunction: Self, so filters can be stacked
@@ -519,11 +519,15 @@ class TransferFunction:
         Calculates the centroid delay for the current data
 
         Args:
-            response (bool): Whether or not to calculate the delay from the response
-            threshold (float): Exclude all bins with value < threshold
-            bounds (float): Return the fractional bounds (i.e. bounds=0.25,
-                            the function will return [0.5, 0.25, 0.75]). Not implemented.
-            days (bool): Whether to return the delay in days or seconds
+            response (bool): 
+                Whether or not to calculate the delay from the response
+            threshold (float): 
+                Exclude all bins with value < threshold
+            bounds (float): 
+                Return the fractional bounds (i.e. bounds=0.25,
+                the function will return [0.5, 0.25, 0.75]). Not implemented.
+            days (bool): 
+                Whether to return the delay in days or seconds
 
         Returns:
             Union[float, Tuple[float, float, float]]:
@@ -586,10 +590,13 @@ class TransferFunction:
         on the order of 1 minute per GB of input file.
 
         Args:
-            scaling_factor (float): 1/Number of cycles in the spectra file
-            limit (int): Number of photons to limit the TF to, for testing.
-                         Recommend testing filters on a small number of photons to begin with.
-            verbose (bool): Whether to output exactly what the query is.
+            scaling_factor (float): 
+                1/Number of cycles in the spectra file
+            limit (int): 
+                Number of photons to limit the TF to, for testing.
+                Recommend testing filters on a small number of photons to begin with.
+            verbose (bool): 
+                Whether to output exactly what the query is.
 
         Returns:
             TransferFunction:   Self, for chaining commands
@@ -895,11 +902,11 @@ class TransferFunction:
             keplerian (Optional[dict]):
                 A dictionary describing the profile of a keplerian disk, the bounds of which will
                 be overlaid on the plot. Arguments include
-                    angle (float) - Angle of disk to the observer,
-                    mass (float) - Mass of the central object in M_sol,
-                    radius (Tuple(float, float)) - Inner and outer disk radii,
-                    include_minimum_velocity - Whether or not to include the outer disk velocity profile
-                        (default no).
+                angle (float) - Angle of disk to the observer,
+                mass (float) - Mass of the central object in M_sol,
+                radius (Tuple(float, float)) - Inner and outer disk radii,
+                include_minimum_velocity - Whether or not to include the outer disk velocity profile
+                (default no).
             dynamic_range (Optional[int]):
                 If the plot is logarithmic,
                 the dynamic range the colour bar should show. If not provided,
@@ -1222,12 +1229,16 @@ def open_database(file_root: str, user: str = None, password: str = None, batch_
     intelligently resume- you must delete the half-written DB!
 
     Args:
-        file_root (string): Root of the filename (no '.db' or '.delay_dump')
-        user (string):      Username. Here in case I change to PostgreSQL
-        password (string):  Password. Here in case I change to PostgreSQL
-        batch_size (int):   Number of photons to stage before committing. If
-                            too low, file creation is slow. If too high, get
-                            out-of-memory errors.
+        file_root (string): 
+            Root of the filename (no '.db' or '.delay_dump')
+        user (string):      
+            Username. Here in case I change to PostgreSQL
+        password (string):  
+            Password. Here in case I change to PostgreSQL
+        batch_size (int):   
+            Number of photons to stage before committing. If
+            too low, file creation is slow. If too high, get
+            out-of-memory errors.
 
     Returns:
         sqlalchemy.engine.Connection:  Connection to the database opened
