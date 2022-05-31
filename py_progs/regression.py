@@ -297,8 +297,9 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
             if one[-1]==pf or one[-1]==root_name:
                 for one_word in one[1:-1]:
                         xswitch='%s %s ' % (xswitch,one_word)
+            print('xs',xswitch)
         if np<=1:
-            command='%s %s%s %s' % (version,xswitch,switch,pf)
+            command='%s %s %s' % (version,xswitch,pf)
         else:
             command='mpirun -np %d %s %s%s %s >%s.stdout.txt' % (np,version,xswitch,switches,pf,root_name)
         commands.append(command)
