@@ -1,18 +1,13 @@
 #!/usr/bin/env python 
-
 '''
-                    Space Telescope Science Institute
-
 Synopsis:  
-
-These are routines for plotting various parameters in of the wind
-after these parameters have been saved to an astropy-compatible
-ascii table
+    These are routines for plotting various parameters in of the wind
+    after these parameters have been saved to an astropy-compatible
+    ascii table
 
 
 Command line usage 
-
-    usage: plot_wind filename var   
+    plot_wind filename var   
 
     to make a plot of a single variable from the command line
 
@@ -20,7 +15,6 @@ Description:
 
 
 Primary routines:
-
     doit : Create a plot of a single variable in a file made with 
             windsave2table.  This is the routine called from
             the command line. Additional options are available
@@ -30,19 +24,6 @@ Primary routines:
             one for each run and one containing the difference
     compare:     Similar to compare_separate but produces a 
             single file
-
-
-
-
-Notes:
-
-
-                                       
-History:
-
-160223  ksl Coding begun
-170505  ksl Adapat to Python3
-
 '''
 
 import sys

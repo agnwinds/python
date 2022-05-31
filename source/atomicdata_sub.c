@@ -581,7 +581,7 @@ q21 (line_ptr, t)
     q21_a = 0.0;
   }
 
-  return (0.0);
+  return (q21_a);
 }
 
 

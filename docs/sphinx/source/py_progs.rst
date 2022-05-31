@@ -9,27 +9,9 @@ for all the scripts by navigating to :code:`docs/pydocs` and running :code:`writ
 
 .. todo:: Finish adding modules below.
 
-py_read_output
-=================================
-.. automodule:: py_read_output
-    :members:
+.. toctree::
 
-py_plot_output
-=================================
-.. automodule:: py_plot_output
-    :members:
-
-py_plot_util
-=================================
-.. automodule:: py_plot_util
-    :members:
-
-run_check
-=================================
-.. automodule:: run_check
-    :members:
-
-import_cyl
-=================================
-.. automodule:: import_cyl
-    :members:
+   py_progs/plotting
+   py_progs/testing
+   py_progs/utilities
+   py_progs/py4py
