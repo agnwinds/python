@@ -46,7 +46,7 @@ extensions = [
 import os
 import sys
 
-sys.path.insert(0, '../../py_progs/')
+sys.path.insert(0, '../../../../py_progs/')
 
 # == Options for the varous plugins =======================================
 # -- Whether or not to include ToDo notes ---------------------------------
