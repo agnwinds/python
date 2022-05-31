@@ -239,6 +239,7 @@ extract (w, p, itype)
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
       zz = fabs (pp.lmn[2]);
+      zz = fabs (xxspec[n].lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
     }
     else
