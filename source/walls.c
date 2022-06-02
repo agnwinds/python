@@ -35,7 +35,7 @@ double xsouth[] = {
 /**********************************************************/
 /**
  * @brief      determines whether the photon has reached a boundary, the central object, the disk or
- * reached the edges of the wind and, if so, modify the position of the photon, and return the appropriate
+ * the edges of the wind.  If so, modify the position of the photon, and return the appropriate
  * status.
  *
  * @param [in, out] PhotPtr  p   A photon at its new proposed location.  On exiting the routine
@@ -44,6 +44,7 @@ double xsouth[] = {
  * @param [in] PhotPtr  pold   the previous position and direction of the photon. .
  * @param [out] double *  normal   A vector when the star or disk has been hit, which contains
  * the normal for the reflecting surface at the point the photon encountered the the boundary
+ *
  * @return   A status
  *
  * * The photon has hit the star				P_HIT_STAR
@@ -67,7 +68,7 @@ double xsouth[] = {
  * be a valid position for the photon, but p may need to be adjusted.
  *
  * If one of the walls has been hit, the routine moves the photon back to that wall, but does not
- * othewise changed it.
+ * otherwise changed it.
  *
  * The routine also calculates the normal to the surface that was hit, which is intended to
  * be used by trans_phot to redirect the photon (if it has hit the disk or the star and is to
@@ -75,8 +76,8 @@ double xsouth[] = {
  *
  * ### Notes ###
  *
- * Note that p and pold must be travelling in the same directon to work properly.  There is an
- * error check at the beginning of the routine to make sure this is the case.  
+ * Note that p and pold must be travelling in the same directon to work properly.  
+ * This is checked.
  *
  *
  **********************************************************/
@@ -100,8 +101,9 @@ walls (p, pold, normal)
    * 
    * Note that we check both whether the new position is inside
    * the star and whether the path the photon has travelled 
-   * passed thourht the star. 
+   * passed throught the star. 
    */
+
 
   r = dot (p->x, p->x);
   s_star = ds_to_sphere (geo.rstar, pold);
@@ -112,7 +114,8 @@ walls (p, pold, normal)
   {
 
 
-    stuff_phot (pold, p);
+    stuff_v (pold->x, p->x);
+//    stuff_phot (pold, p);
     if (move_phot (p, s_star))
     {
       Error ("walls: move_phot frame error on push to star of np %d \n", p->np);
@@ -151,7 +154,8 @@ walls (p, pold, normal)
 
     if (dot (xxx, xxx) < geo.diskrad_sq)
     {                           /* The photon has hit the disk */
-      stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
+      stuff_v (pold->x, p->x);
+//OLD      stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
       if (move_phot (p, s_disk - DFUDGE))
       {
         Error ("walls: frame error in move_phot of np %D on move to disk \n", p->np);
@@ -226,7 +230,8 @@ walls (p, pold, normal)
     {
 
 
-      stuff_phot (pold, p);
+      stuff_v (pold->x, p->x);
+//OLD      stuff_phot (pold, p);
       if (move_phot (p, s_disk - DFUDGE))
       {
         Error ("walls: frame error in move_phot for photon %d which hit disk\n", p->np);
