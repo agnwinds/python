@@ -268,8 +268,15 @@ extract (w, p, itype)
     }
     else if (itype == PTYPE_DISK)
     {
+
+
+
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
+//XTEST      double zz_orig;
+//XTEST      zz_orig = fabs (p_in.lmn[2]);
+//XTEST      zz_orig = zz_orig * (2.0 + 3.0 * zz_orig);
+//XTEST      pp.w *= zz * (2.0 + 3.0 * zz) / zz_orig;
     }
     else if (pp.nres > -1 && pp.nres < NLINES)
     {
