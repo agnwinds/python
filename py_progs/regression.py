@@ -222,7 +222,7 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
     if os.path.exists(out_dir)==False:
         os.mkdir(out_dir)
     if os.path.exists('%s/commands.txt' % out_dir):
-        os.rm('%s/commands.txt' % out_dir)
+        os.remove('%s/commands.txt' % out_dir)
 
 
     print(date)
