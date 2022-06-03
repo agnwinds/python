@@ -87,7 +87,7 @@ extract (w, p, itype)
      int itype;
 {
   int n, mscat, mtopbot;
-  struct photon pp, p_in, p_dummy, pdummy;
+  struct photon pp, p_in, p_dummy;
   double xdiff[3];
   double p_norm, tau_norm;
   double dvds_max;
@@ -238,9 +238,6 @@ extract (w, p, itype)
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
-      zz = fabs (pp.lmn[2]);
-      zz = fabs (xxspec[n].lmn[2]);
-      pp.w *= zz * (2.0 + 3.0 * zz);
     }
     else
     {
@@ -251,45 +248,26 @@ extract (w, p, itype)
 
     /* At this stage, we are in the local frame for
        photons which are from the wind or the star.
-     */
+
+       pp is the phton we are going to extract
 
 
-    /*
-     * NOw , we need to transform the
-     * photon back into the observer frame
-     */
-
-    if (itype == PTYPE_DISK)
-    {
-      if ((ierr = local_to_observer_frame_disk (&pp, &pp)))
-        Error ("extract_one: disk photon not in local frame");
-    }
-    if (itype == PTYPE_WIND)
-    {
-      stuff_phot (&pp, &pdummy);
-
-      if ((ierr = local_to_observer_frame (&pp, &pp)))
-        Error ("extract_one: wind photon not in local frame\n");
-
-    }
-    /*
-     * Re-weight the photons. Note that photons
-     * have already been frequency shifted prior
-     * to entering extract. For disk and central
-     * object photons, see Eqn 2.19 Knigge's
-     * thesis
+       * Re-weight the photons. Note that photons
+       * have already been frequency shifted prior
+       * to entering extract. For disk and central
+       * object photons, see Eqn 2.19 Knigge's
+       * thesis
      */
 
     if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
     {
       stuff_v (pp.x, x);
       renorm (x, 1.);
-      zz = fabs (dot (x, xxspec[n].lmn));
+      zz = fabs (dot (x, pp.lmn));
       pp.w *= zz * (2.0 + 3.0 * zz);
     }
-    else if (itype == PTYPE_DISK && rel_mode == REL_MODE_LINEAR)
+    else if (itype == PTYPE_DISK)
     {
-      //  zz = fabs (p_dummy.lmn[2]);
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
     }
@@ -321,6 +299,24 @@ extract (w, p, itype)
           pp.w *= p_escape_from_tau (tau);
         tau = 0.0;
       }
+    }
+
+
+
+    /*
+     * Now , we need to transform the
+     * photon back into the observer frame
+     */
+
+    if (itype == PTYPE_DISK)
+    {
+      if ((ierr = local_to_observer_frame_disk (&pp, &pp)))
+        Error ("extract_one: disk photon not in local frame");
+    }
+    if (itype == PTYPE_WIND)
+    {
+      if ((ierr = local_to_observer_frame (&pp, &pp)))
+        Error ("extract_one: wind photon not in local frame\n");
     }
 
     /* Make some final chacks before extracting the photon */
