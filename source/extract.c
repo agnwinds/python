@@ -48,7 +48,8 @@
  *
  * ### Notes ###
  *
- * The logic behind the weighting of the (disk/star) photons is described in Christian Knigge's thesis in
+ * The logic behind the weighting of the (disk/star) photons is described 
+ * in Christian Knigge's thesis in
  * section 2.3.4.  According to equation 2.19
  * 	Pc/Pw=12 cos(theta)*(1+b cos(theta)/(3+2b) where b=1.5 corresponds to the
  * Eddington approximation.
@@ -87,7 +88,6 @@ extract (w, p, itype)
 {
   int n, mscat, mtopbot;
   struct photon pp, p_in, p_dummy, pdummy;
-//  int extract_photon;
   double xdiff[3];
   double p_norm, tau_norm;
   double dvds_max;
@@ -249,9 +249,13 @@ extract (w, p, itype)
     }
 
 
+    /* At this stage, we are in the local frame for
+       photons which are from the wind or the star.
+     */
+
 
     /*
-     * At this stage, we need to transform the
+     * NOw , we need to transform the
      * photon back into the observer frame
      */
 
