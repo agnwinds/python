@@ -328,7 +328,7 @@ struct geometry
 #define CMF_FRAME 1
 
   int frame;                    /* Records frame parmeters like density and volumes are stroed */
-  int system_type;              /* See allowed types above. system_type should only be used for setp */
+  int system_type;              /* See allowed types above. system_type should only be used for setup */
   int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
   int ndomain;                  /* The number of domains in a model */

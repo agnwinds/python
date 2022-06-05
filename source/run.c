@@ -220,7 +220,7 @@ calculate_ionization (restart_stat)
       pop_kappa_ff_array ();
 
     /* Transport the photons through the wind */
-    trans_phot (w, p, 0);
+    trans_phot (w, p, FALSE);
 
     /* Determine how much energy was absorbed in the wind. first zero counters. 
        There are counters for total energy absorbed and for each entry in the istat enum */
