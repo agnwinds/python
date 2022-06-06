@@ -113,23 +113,64 @@ def read_diag(root):
         return converged,converging,t_r,t_e,hc
 
 
+def xwindsave2table(root):
+    '''
+    Run windsave2table with the same version number (not commit)
+    as the .spec files indicate was written)
+
+    This is a backup method, and is not guaranteed to work.  Two
+    obvious reasons it could fail would be if one does not have
+    the specified compiled version of windsave2bable in one's
+    path, or if the the structure of the windsavefile changed
+    mid-version.  
+    '''
+
+    # Locate the version for this run file
+    sfiles=glob('%s*spec' % root)
+    if len(sfiles):
+        foo=open(sfiles[0])
+        line=foo.readline()
+        words=line.split()
+        if words[1]=='Python':
+            xver=words[3]
+            command='windsave2table%s %s' % (xver,root)
+        else:
+            return FALSE
+
+
+    print('We will try this command instead :', command)
+
+
+    proc=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    stdout,stderr=proc.communicate()
+    if proc.returncode:
+        print('Error: also failed trying to run %s ' % xver,proc.returncode)
+        return True
+    elif len(stderr):
+        print('Error: also failed with ' %s)
+        print(stderr.decode())
+        return True 
+    else:
+        return False
+
+
 def windsave2table(root):
     '''
     Run windsave2table
-    '''
 
+
+    Normally this will just run windsave2table, but if it turns out that that fails
+    the routine will try to run the same version (not commit) of windsave2table that
+    python was run with.  This will only work, if the correct version exists in one's
+    bin file
+    '''
     command='windsave2table %s' % root
 
     proc=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     stdout,stderr=proc.communicate()
-    # print(stdout.decode())
-    # print('Error')
-    # print(stderr.decode())
-    # print('return code')
-    # print (proc.returncode)
     if proc.returncode:
         print('Error: running windsave2table',proc.returncode)
-        return True
+        return xwindsave2table(root)
     elif len(stderr):
         print('Error: running windsave2table')
         print(stderr.decode())
