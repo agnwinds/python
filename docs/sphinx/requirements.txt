@@ -4,3 +4,8 @@ ipython
 nbsphinx
 sphinx-rtd-theme
 docutils<0.18
+astropy
+numpy
+matplotlib
+scipy
+sqlalchemy
