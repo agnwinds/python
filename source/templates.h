@@ -273,7 +273,6 @@ int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
-int save_extract_photons(int n, PhotPtr p, PhotPtr pp);
 int save_photons(PhotPtr p, char comment[]);
 int track_scatters(PhotPtr p, int nplasma, char *comment);
 int Diag(char *format, ...);
