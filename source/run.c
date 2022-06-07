@@ -183,6 +183,7 @@ calculate_ionization (restart_stat)
 
     define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
+
     photon_checks (p, freqmin, freqmax, "Check before transport");
 
     /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
