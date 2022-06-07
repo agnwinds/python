@@ -560,6 +560,7 @@ extract_one (w, pp, nspec)
 
   if (modes.save_photons || modes.save_extract_photons)
   {
+    pp->tau = tau;
     save_photons (pp, "Extracted");
   }
   return (istat);
