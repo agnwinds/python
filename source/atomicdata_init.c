@@ -153,7 +153,7 @@ init_atomic_data ()
     ion[n].nelem = (-1);
     ion[n].ip = (-1);
     ion[n].g = (-1);
-    ion[n].log_g = (-1);
+    ion[n].log_g = (-1);        //Log version of multiplicity
     ion[n].nmax = (-1);
     ion[n].firstlevel = (-1);
     ion[n].nlevels = (-1);
@@ -207,9 +207,9 @@ init_atomic_data ()
 
     }
     phot_top[n].f = (-1);       //last frequency
-    phot_top[n].log_f = (-1);   //last frequency    
+    phot_top[n].log_f = (-1);   //log of last frequency    
     phot_top[n].sigma = 0.0;    //last cross section
-    phot_top[n].log_sigma = -1.0;       //last cross section
+    phot_top[n].log_sigma = -1.0;       //log of last cross section
 
   }
 

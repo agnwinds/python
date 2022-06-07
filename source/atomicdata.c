@@ -383,7 +383,7 @@ structure does not have this property! */
           ion[nions].z = z;
           ion[nions].istate = istate;
           ion[nions].g = gg;
-          ion[nions].log_g = log (gg);
+          ion[nions].log_g = log (gg);  //populate the log version - used for freebound integrations
 
           ion[nions].ip = p * EV2ERGS;
           ion[nions].nmax = nmax;
@@ -660,7 +660,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
           config[nlevels].nion = n;
           config[nlevels].q_num = qqnum;
           config[nlevels].g = gg;
-          config[nlevels].log_g = log (gg);
+          config[nlevels].log_g = log (gg);     //The log version used for integrals in freebound
           config[nlevels].ex = exx;
           config[nlevels].rad_rate = rl;
 
@@ -1108,10 +1108,10 @@ described as macro-levels. */
               for (n = 0; n < np; n++)
               {
                 phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / PLANCK; // convert from eV to freqency
-                phot_top[ntop_phot].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK);       // convert from eV to freqency
+                phot_top[ntop_phot].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK);       // log version
 
                 phot_top[ntop_phot].x[n] = xx[n];       // leave cross sections in  CGS
-                phot_top[ntop_phot].log_x[n] = log (xx[n]);     // leave cross sections in  CGS
+                phot_top[ntop_phot].log_x[n] = log (xx[n]);     // log version
 
               }
               if (phot_freq_min > phot_top[ntop_phot].freq[0])
@@ -1187,10 +1187,10 @@ described as macro-levels. */
                   for (n = 0; n < np; n++)
                   {
                     phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / PLANCK;   // convert from eV to freqency
-                    phot_top[nphot_total].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK); // convert from eV to freqency
+                    phot_top[nphot_total].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK); // log version
 
                     phot_top[nphot_total].x[n] = xx[n]; // leave cross sections in  CGS
-                    phot_top[nphot_total].log_x[n] = log (xx[n]);       // leave cross sections in  CGS
+                    phot_top[nphot_total].log_x[n] = log (xx[n]);       // log version
 
                   }
                   if (phot_freq_min > phot_top[ntop_phot].freq[0])

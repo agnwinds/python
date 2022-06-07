@@ -78,7 +78,7 @@ Numerical Recipes routines from fb_verner and fb_topbase */
 ///Topbase description of a photoionization x-section
 struct topbase_phot *fb_xtop;
 
-/// Temperature at which thee emissivity is calculated
+/// Temperature (and log) at which the emissivity is calculated 
 double fbt, log_fbt;
 
 /// fb_choice (see above)
@@ -111,7 +111,7 @@ int fbfr;
  *
  * This routine used to be used for integrations, the wrapper routine fb_topbase_partial2 is
  * now used for that purpose - this is only used directly now.
- *
+ * Recast in log space for speedup purposes
  *
  *
  **********************************************************/
@@ -122,13 +122,13 @@ fb_topbase_partial (freq)
 {
   int nion;
   double partial, log_freq;
-  double x, logx;
+  double logx;
   double gn, gion;
   double log_gn, log_gion;
   double fthresh;
   double test;
 
-  log_freq = log (freq);
+  log_freq = log (freq);        //Go into log space
 
   fthresh = fb_xtop->freq[0];
   if (freq < fthresh)
@@ -160,25 +160,22 @@ fb_topbase_partial (freq)
   }
 
   gion = ion[nion + 1].g;       // Want the g factor of the next ion up
-  log_gion = ion[nion + 1].log_g;       // Want the g factor of the next ion up
+  log_gion = ion[nion + 1].log_g;       // Want the g factor of the next ion up in log space
 
 //  x = sigma_phot (fb_xtop, freq);
   logx = log_sigma_phot (fb_xtop, log_freq);
 
 
 
-  // Now calculate emission using Ferland's expression
+  // Now calculate emission using Ferland's expression - recast in log space 2022 for speed.
 
 //  partial = FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt, 1.5) * exp (H_OVER_K * (fthresh - freq) / fbt) * x;
 
   test =
     LOG_FBEMISS + log_gn - 0.6931471805599453 - log_gion + 1.5 * (2.0 * log_freq - log_fbt) + (H_OVER_K * (fthresh - freq) / fbt) + logx;
 
-//  if (fabs (partial / exp (test) - 1.) > 1e-10)
-//  {
-//    printf ("BOOM %e %e\n", partial / exp (test), fabs (partial / exp (test) - 1.));
-//  }
-  partial = exp (test);
+
+  partial = exp (test);         //Go back to linear space
 
 
   // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity

@@ -321,7 +321,9 @@ radiation (PhotPtr p, double ds)
                 }
                 if (density > DENSITY_PHOT_MIN)
                 {
-                  kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
+//                  kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
+                  kappa_tot += x = exp (log_sigma_phot (x_top_ptr, log (freq_xs))) * density * frac_path * zdom[ndom].fill;
+
                   if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield != -1)    // Calculate during ionization cycles only
                   {
                     frac_auger += z = x * (inner_elec_yield[x_top_ptr->n_elec_yield].Ea / EV2ERGS) / (freq_xs * HEV);
@@ -630,6 +632,32 @@ sigma_phot (x_ptr, freq)
 
 }
 
+
+/**********************************************************/
+/**
+ * @brief      calculates the log of 
+ *  photionization crossection due to a Topbase level associated with
+ *  x_ptr at log frequency log_freq
+ *
+ * @param [in,out] struct topbase_phot *  x_ptr   The structure that contains
+ * TopBase information about the photoionization x-section
+ * @param [in] double  freq   The frequency where the x-section is to be calculated
+ *
+ * @return     The x-section
+ *
+ * @details
+ * log_sigma_phot uses the Topbase x-sections to calculate the bound free
+ * (or photoionization) xsection.   The data must have been into the
+ * photoionization structures xphot with get_atomic_data and the
+ * densities of individual ions must have been calculated previously.
+ *
+ * ### Notes ###
+ * The logs of the x-section and frequency are stored in the topbase_phot struture
+ * so that if one requests the same xsection with the same log frequency  
+ * again, then the calculation of the x-section is avoided.
+ * this was recast in   log space as part of an effort to speed up the code.
+ *
+ **********************************************************/
 
 double
 log_sigma_phot (x_ptr, log_freq)

@@ -667,6 +667,7 @@ alpha_sp_integrand (double freq, void *params)
     return (0.0);               // No recombination at frequencies lower than the threshold freq occur
 
   x = sigma_phot (cont_ext_ptr, freq);  //this is the cross-section
+
   integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt);
 
 
