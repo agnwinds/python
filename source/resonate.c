@@ -705,6 +705,10 @@ sobolev (one, x, den_ion, lptr, dvds)
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
+  if (nplasma == NPLASMA)
+  {
+    Error ("sobelev: Asking for tau for a cell that is not in wind. windcell %d inwind %d\n", one->nwind, one->inwind);
+  }
   xplasma = &plasmamain[nplasma];
   ndom = wmain[plasmamain->nwind].ndom;
   nion = lptr->nion;

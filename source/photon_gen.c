@@ -126,6 +126,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   {                             /* Use banding, create photons with different weights in different wavelength
                                    bands.  This is used for the for ionization calculation where one wants to assure
                                    that you have "enough" photons at high energy */
+
     ftot = populate_bands (ioniz_or_final, iwind, &xband);
 
     for (n = 0; n < NPHOT; n++)
@@ -142,7 +143,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
       {
         /* Reinitialization is required here always because we are changing
          * the frequencies around all the time */
-
         Log ("Defining photons for band %d...\n", n);
         if (n == 0)
           xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind, PRINT_ON, 1);
@@ -151,7 +151,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
         /* The weight of each photon is designed so that all of the photons add up to the
            luminosity of the photosphere.  This implies that photons must be generated in such
            a way that it mimics the energy distribution of the star. */
-
         geo.weight = (natural_weight) = (ftot) / (nphot_tot_rad);
         xband.weight[n] = weight = natural_weight * xband.nat_fraction[n] / xband.used_fraction[n];
         xmake_phot (p, xband.f1[n], xband.f2[n], ioniz_or_final, iwind, weight, iphot_start, xband.nphot[n]);
@@ -659,6 +658,7 @@ stellar photons */
       photo_gen_wind (p, weight, f1, f2, iphot_start, nphot);
     iphot_start += nphot;
   }
+
 
 /* Generate the disk photons */
 
