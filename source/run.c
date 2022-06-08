@@ -574,7 +574,7 @@ make_spectra (restart_stat)
     else
       iwind = 0;                /* Create wind photons but do not force reinitialization */
 
-    /* Create the initial photon bundles which need to be trannsported through the wind 
+    /* Create the initial photon bundles which need to be transported through the wind 
 
        For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 
        1 implies that detailed spectra, as opposed to the ionization of the wind is being calculated
@@ -587,6 +587,12 @@ make_spectra (restart_stat)
 
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
+
+    if (modes.save_photons || modes.save_extract_photons)
+    {
+      for (n = 0; n < NPHOT; n++)
+        save_photons (&p[n], "B4Extract");
+    }
 
 
     for (icheck = 0; icheck < NPHOT; icheck++)
