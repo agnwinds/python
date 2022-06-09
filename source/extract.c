@@ -99,6 +99,11 @@ extract (w, p, itype)
   int ishell;
 
 
+  if (modes.save_extract_photons)
+  {
+    save_photons (p, "Extract1");
+  }
+
   ierr = check_frame (p, F_OBSERVER, "extract_start");
   if (ierr)
   {
