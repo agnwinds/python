@@ -245,10 +245,8 @@ FILE *epltptr;
  * ### Notes ###
  * see #111 and #120
  *
- * The diagnostic filenames are  hardwired
+ * Some of the diagnostic filenames are  hardwired
  *
- * @bug Ultimately we would like to write the extra diagnositcs to
- * a single file
  *
  **********************************************************/
 
@@ -260,7 +258,8 @@ init_extra_diagnostics ()
 
   if (eplinit == 0 && modes.extra_diagnostics)
   {
-    epltptr = fopen ("python.ext.txt", "w");
+    sprintf (files.extra, "%.50s.ext.txt", files.root);
+    epltptr = fopen (files.extra, "w");
     eplinit = 1;
   }
 

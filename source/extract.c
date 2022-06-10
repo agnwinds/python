@@ -476,7 +476,7 @@ extract_one (w, pp, nspec)
     }
     if (istat == P_SCAT)
     {                           /* Cause the photon to scatter and
-                                 * reinitilize */
+                                 * reinitialize */
       break;
     }
   }
