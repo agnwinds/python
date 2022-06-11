@@ -71,6 +71,7 @@ xtest ()
   z = 1.e15;
 // z = 1e+14;
   y = 0;
+  y = -1e14;
   xmin = 0;
   xmax = 5.67e17;
   xmax = 2e16;

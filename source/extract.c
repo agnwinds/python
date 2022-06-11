@@ -99,10 +99,10 @@ extract (w, p, itype)
   int ishell;
 
 
-  if (modes.save_extract_photons)
-  {
-    save_photons (p, "Extract1");
-  }
+//  if (modes.save_extract_photons)
+//  {
+//    save_photons (p, "Extract1");
+//  }
 
   ierr = check_frame (p, F_OBSERVER, "extract_start");
   if (ierr)
@@ -358,8 +358,10 @@ extract (w, p, itype)
 
     /* If one has reached this point, we extract the photon and increment the spectrum */
 
-    if (modes.save_photons)
-      save_photons (&pp, "extract_b4_extract");
+//    if (modes.save_photons || modes.save_extract_photons)
+//      save_photons (&pp, "b4_extract_one");
+
+
 
     extract_one (w, &pp, n);
 
@@ -436,6 +438,8 @@ extract_one (w, pp, nspec)
   check_frame (pp, F_OBSERVER, "extract_one: photon not in observer frame at start");
 
   istat = P_INWIND;
+  if (modes.save_photons || modes.save_extract_photons)
+    save_photons (pp, "B4Translate");
 
   while (istat == P_INWIND)
   {
@@ -479,6 +483,11 @@ extract_one (w, pp, nspec)
                                  * reinitialize */
       break;
     }
+  }
+
+  if (modes.save_photons || modes.save_extract_photons)
+  {
+    save_photons (pp, "AfterTranslate");
   }
 
   if (istat == P_ESCAPE)
