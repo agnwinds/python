@@ -588,11 +588,11 @@ make_spectra (restart_stat)
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
-    if (modes.save_photons || modes.save_extract_photons)
-    {
-      for (n = 0; n < NPHOT; n++)
-        save_photons (&p[n], "B4Extract");
-    }
+//    if (modes.save_photons || modes.save_extract_photons)
+//    {
+//      for (n = 0; n < NPHOT; n++)
+//        save_photons (&p[n], "B4Extract");
+//    }
 
 
     for (icheck = 0; icheck < NPHOT; icheck++)

@@ -229,6 +229,8 @@ extract (w, p, itype)
        need this test
      */
 
+    if (modes.save_photons)
+      save_photons (&p_dummy, "extract_b");
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
     {
@@ -258,6 +260,9 @@ extract (w, p, itype)
       stuff_v (xxspec[n].lmn, pp.lmn);
     }
 
+
+    if (modes.save_photons)
+      save_photons (&p_dummy, "extract_c");
 
     /* At this stage, we are in the local frame for
        photons which are from the wind or the star.
