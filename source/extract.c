@@ -230,7 +230,7 @@ extract (w, p, itype)
      */
 
     if (modes.save_photons)
-      save_photons (&p_dummy, "extract_b");
+      save_photons (&p_in, "extract_b");
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
     {
