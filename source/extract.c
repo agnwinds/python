@@ -99,6 +99,11 @@ extract (w, p, itype)
   int ishell;
 
 
+  if (modes.save_extract_photons)
+  {
+    save_photons (p, "Extract1");
+  }
+
   ierr = check_frame (p, F_OBSERVER, "extract_start");
   if (ierr)
   {
@@ -471,7 +476,7 @@ extract_one (w, pp, nspec)
     }
     if (istat == P_SCAT)
     {                           /* Cause the photon to scatter and
-                                 * reinitilize */
+                                 * reinitialize */
       break;
     }
   }

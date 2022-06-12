@@ -245,10 +245,8 @@ FILE *epltptr;
  * ### Notes ###
  * see #111 and #120
  *
- * The diagnostic filenames are  hardwired
+ * Some of the diagnostic filenames are  hardwired
  *
- * @bug Ultimately we would like to write the extra diagnositcs to
- * a single file
  *
  **********************************************************/
 
@@ -260,7 +258,8 @@ init_extra_diagnostics ()
 
   if (eplinit == 0 && modes.extra_diagnostics)
   {
-    epltptr = fopen ("python.ext.txt", "w");
+    sprintf (files.extra, "%.50s.ext.txt", files.root);
+    epltptr = fopen (files.extra, "w");
     eplinit = 1;
   }
 
@@ -376,8 +375,10 @@ save_photons (p, comment)
   save_photon_number += 1;
 
   fprintf (epltptr,
-           "PHOTON %3d %3d %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
+//OLD           "PHOTON %3d %3d %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %3d %3d %s \n",
+           "PHOTON %3d %3d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
            geo.wcycle, p->np, p->freq_orig, p->freq, p->w_orig, p->w, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+//OLD           p->lmn[2], p->ds, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
            p->lmn[2], p->ds, p->tau, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
 
   fflush (epltptr);
