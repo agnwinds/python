@@ -266,7 +266,7 @@ extract (w, p, itype)
 
 
     if (modes.save_photons)
-      save_photons (&p_dummy, "extract_c");
+      save_photons (&pp, "extract_c");
 
     /* At this stage, we are in the local frame for
        photons which are from the wind or the star.
