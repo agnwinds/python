@@ -246,11 +246,15 @@ extract (w, p, itype)
       stuff_phot (&p_in, &p_dummy);
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
+
       if (modes.save_photons)
         save_photons (&p_dummy, "extract_b1");
+
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
+
       if (modes.save_photons)
         save_photons (&p_dummy, "extract_b2");
+
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
     }
