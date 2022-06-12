@@ -153,12 +153,12 @@ extract (w, p, itype)
   }
   if (itype == PTYPE_DISK)
   {
-    if (modes.save_photons)
-      save_photons (&p_in, "extract_begin");
+//    if (modes.save_photons)
+//      save_photons (&p_in, "extract_begin");
     if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
       Error ("extract: disk photon not in observer frame %d\n", ierr);
-    if (modes.save_photons)
-      save_photons (&p_in, "extract_begin_local");
+//    if (modes.save_photons)
+//      save_photons (&p_in, "extract_begin_local");
   }
   /*
    * At this point were are in a local frame for WIND and DISK photons,
@@ -239,11 +239,11 @@ extract (w, p, itype)
       stuff_phot (&p_in, &p_dummy);
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
-      if (modes.save_photons)
-        save_photons (&p_dummy, "extract_b4_setup_dir");
+//      if (modes.save_photons)
+//        save_photons (&p_dummy, "extract_b4_setup_dir");
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
-      if (modes.save_photons)
-        save_photons (&p_dummy, "extract_aft_setup_dir");
+//      if (modes.save_photons)
+//        save_photons (&p_dummy, "extract_aft_setup_dir");
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
     }
@@ -277,15 +277,15 @@ extract (w, p, itype)
     else if (itype == PTYPE_DISK)
     {
 
-      if (modes.save_photons)
-        save_photons (&pp, "extract_b4_reweight");
+//      if (modes.save_photons)
+//        save_photons (&pp, "extract_b4_reweight");
 
 
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
 
-      if (modes.save_photons)
-        save_photons (&pp, "extract_aft_reweight");
+//      if (modes.save_photons)
+//        save_photons (&pp, "extract_aft_reweight");
 
 //XTEST      double zz_orig;
 //XTEST      zz_orig = fabs (p_in.lmn[2]);
@@ -354,7 +354,7 @@ extract (w, p, itype)
     /* If one has reached this point, we extract the photon and increment the spectrum */
 
     if (modes.save_photons)
-      save_photons (&pp, "extract_b4_extract");
+      save_photons (&pp, "extract_f");
 
     extract_one (w, &pp, n);
 
