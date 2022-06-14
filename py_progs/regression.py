@@ -304,7 +304,7 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
             if one[-1]==pf or one[-1]==root_name:
                 for one_word in one[1:-1]:
                         xswitch='%s %s ' % (xswitch,one_word)
-            print('xs',xswitch)
+            # print('xs',xswitch)
         if np<=1:
             command='%s %s %s' % (version,xswitch,pf)
         else:
