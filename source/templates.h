@@ -157,7 +157,7 @@ int spec_save(char filename[]);
 int spec_read(char filename[]);
 /* extract.c */
 int extract(WindPtr w, PhotPtr p, int itype);
-int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
+int extract_one(WindPtr w, PhotPtr pp, int nspec);
 /* cdf.c */
 int cdf_gen_from_func(CdfPtr cdf, double (*func)(double, void *), double xmin, double xmax, int njumps, double jump[]);
 double gen_array_from_func(double (*func)(double, void *), double xmin, double xmax, int pdfsteps);
@@ -275,7 +275,6 @@ int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
-int save_extract_photons(int n, PhotPtr p, PhotPtr pp);
 int save_photons(PhotPtr p, char comment[]);
 int track_scatters(PhotPtr p, int nplasma, char *comment);
 int Diag(char *format, ...);

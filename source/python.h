@@ -328,7 +328,7 @@ struct geometry
 #define CMF_FRAME 1
 
   int frame;                    /* Records frame parmeters like density and volumes are stroed */
-  int system_type;              /* See allowed types above. system_type should only be used for setp */
+  int system_type;              /* See allowed types above. system_type should only be used for setup */
   int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
   int ndomain;                  /* The number of domains in a model */
@@ -1497,9 +1497,7 @@ struct filenames
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
-/* The next file was eliminated to make it easier to split of some of the
-   routines from python.h for testing of individual routines */
-//OLD  char rngsave[LINELENGTH];     // .gsl_save file for restarting RNG
+  char extra[LINELENGTH];       // extra diagnositcs file opened by init_extra_diagnositcs
 };
 
 extern struct filenames files;
