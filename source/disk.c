@@ -393,7 +393,7 @@ ds_to_disk (p, allow_negative, hit)
   r_diskplane = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
 
-  if (geo.disk_type == DISK_FLAT)
+  if (geo.disk_type == DISK_FLAT || geo.disk_type == DISK_WITH_HOLE)
   {
     if (r_diskplane > geo.disk_rad_max)
     {

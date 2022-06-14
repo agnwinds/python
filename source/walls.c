@@ -131,7 +131,7 @@ walls (p, pold, normal)
    * Deal with the simpler case of a flat disk first
    */
 
-  if (geo.disk_type == DISK_FLAT && p->x[2] * pold->x[2] < 0.0)
+  if ((geo.disk_type == DISK_FLAT || geo.disk_type == DISK_WITH_HOLE) && p->x[2] * pold->x[2] < 0.0)
   {                             /* Then the photon crossed the xy plane and probably hit the disk */
     s_disk = (-(pold->x[2])) / (pold->lmn[2]);
 
