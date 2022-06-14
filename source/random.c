@@ -102,10 +102,10 @@ double zzz[] = { 0.0, 0.0, 1.0 };
 int init_vcos = 0;
 
 /**********************************************************/
-/** @name      randvec
+/** @name      randvcos
  *
  * @brief Create a photon direction "lmn" in the hemisphere with the 
- * vector "north pointin go the north pole according to the Eddingon
+ * vector "north pointing to the north pole based on  the Eddingon
  * approximation
  *
  * @param [out] double lmn[] The resulting 3 vector containg the correct 
@@ -116,7 +116,7 @@ int init_vcos = 0;
  * @details
  *
  * Create a photon direction "lmn" in the hemisphere with the vector "north" pointing to the "north
- * pole" pole of the hemispere in the case where the photon is originating in a photosphere.
+ * pole" pole of the hemisphere in the case where the photon is originating in a photosphere.
  * Another way of saying this is that north is the normal to surface at the point
  * at which the photon originates.  
  * 
@@ -125,7 +125,8 @@ int init_vcos = 0;
  *
  *
  * ### Notes ###
- * The routine calls vcos which actually containes the Eddinggton 
+ * The routine calls vcos for generating the cdf that is used
+ * vcos contains the Eddington 
  * approximation (aka linear limb darkening)
  *
  * Jumps were added to include more points near 90 degrees.
@@ -169,7 +170,6 @@ randvcos (lmn, north)
   n = cdf_get_rand (&cdf_vcos);
   q = sqrt (1. - n * n);
 
-// The is the correct approach to generating a uniform azimuthal distribution
 
   phi = 2. * PI * random_number (0.0, 1.0);
   l = q * cos (phi);
@@ -181,7 +181,7 @@ direction in the cartesian frame.  If north is in the +-z direction
 this is simple. Otherwise one must do a coordinate rotation. */
 
   if (north[0] == 0 && north[1] == 0)
-  {                             /* Deal with it as a special case */
+  {                            
     lmn[0] = l;
     lmn[1] = m;
     if (north[2] > 0)
@@ -210,23 +210,23 @@ this is simple. Otherwise one must do a coordinate rotation. */
 /**********************************************************/
 /** @name      vcos
  *
- * @brief the appropriate distribution for Eddington limb darkininge 
+ * @brief get the probablity density associated with  Eddington limb darkening 
+ * for cos theta
  *
  * @param [in] double x       cos theta
  * @param [in] void * params  Unused parameters for passing to the GSL integrator
- * @return     The probability density for emiingin
+ * @return     The probability density of the Eddingtog approximation at cos theta
  *
  * @details
  *
- * approximation
- *
  *
  * ### Notes ###
- * The routine calls vcos which actually contains the Eddington
- * approximation (aka linear limb darkening)
  *
  * See Hubeny & Mihalas Equation 17.17  
  *
+ * The extra factor of x arises from the fact that we want to
+ * account for  the proablility density for
+ * all azimutal angles
  *
  *
  **********************************************************/

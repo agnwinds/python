@@ -245,10 +245,8 @@ FILE *epltptr;
  * ### Notes ###
  * see #111 and #120
  *
- * The diagnostic filenames are  hardwired
+ * Some of the diagnostic filenames are  hardwired
  *
- * @bug Ultimately we would like to write the extra diagnositcs to
- * a single file
  *
  **********************************************************/
 
@@ -260,7 +258,8 @@ init_extra_diagnostics ()
 
   if (eplinit == 0 && modes.extra_diagnostics)
   {
-    epltptr = fopen ("python.ext.txt", "w");
+    sprintf (files.extra, "%.50s.ext.txt", files.root);
+    epltptr = fopen (files.extra, "w");
     eplinit = 1;
   }
 
@@ -346,51 +345,6 @@ save_photon_stats (one, p, ds, w_ave)
 }
 
 
-
-/**********************************************************/
-/**
- * @brief      saves informations about photons in
- *     a particulare wavelength range
- *
- * @param [in] int  n   The number of the spectrum
- * @param [in] PhotPtr  p   The photon before being doppler shifted
- * @param [in] PhotPtr  pp   The phtoon after being doppler shiftd
- * @param [in] double *  v   The velocity vector at the possibon of p/pp
- * @return     Always returns 0
-phase(0=inferior_conjunction)                   0.5
- *
- * @details
- * This diagnostic routine was proably written to address a concern
- * about whether the photons were being properly doppler shifted on extract
- *
- * ### Notes ###
- * Called from extract.c, where currently one restricts the wavelenght
- * range of the photons to around CIV
- *
- **********************************************************/
-
-int
-save_extract_photons (n, p, pp)
-     int n;
-     PhotPtr p, pp;
-{
-  double v[3];
-  WindPtr one;
-  int ndom;
-
-  /* Calculate the local velocity of the wind at this position */
-  one = &wmain[p->grid];
-  ndom = one->ndom;
-  vwind_xyz (ndom, p, v);
-
-  fprintf (epltptr,
-           "EXTRACT %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-           n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-           p->lmn[0], p->lmn[1], p->lmn[2], pp->lmn[0], pp->lmn[1], pp->lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp->freq);
-
-  return (0);
-}
-
 int save_photon_number = 0;
 
 
@@ -421,9 +375,11 @@ save_photons (p, comment)
   save_photon_number += 1;
 
   fprintf (epltptr,
-           "PHOTON %3d %3d %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %3d %3d %s \n",
+//OLD           "PHOTON %3d %3d %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %3d %3d %s \n",
+           "PHOTON %3d %3d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
            geo.wcycle, p->np, p->freq_orig, p->freq, p->w_orig, p->w, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
-           p->lmn[2], p->ds, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
+//OLD           p->lmn[2], p->ds, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
+           p->lmn[2], p->ds, p->tau, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
 
   fflush (epltptr);
 

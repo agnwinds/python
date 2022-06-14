@@ -221,6 +221,9 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
 
     if os.path.exists(out_dir)==False:
         os.mkdir(out_dir)
+    if os.path.exists('%s/commands.txt' % out_dir):
+        os.remove('%s/commands.txt' % out_dir)
+
 
     print(date)
 
@@ -235,9 +238,11 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
     if os.path.isdir(pf_dir):
         pf_files=glob(pf_dir+'/*pf')
         txt_files=glob(pf_dir+'/*.txt')
+        wind_save=glob(pf_dir+'/*.wind_save')
     elif os.path.isdir('%s/examples/%s' % (PYTHON,pf_dir)):
         pf_files=glob('%s/examples/%s/*pf' % (PYTHON,pf_dir))
         txt_files=glob('%s/examples/%s/*.txt' % (PYTHON,pf_dir))
+        wind_save=glob(pf_dir+'/*.wind_save')
     else:
         print('Error: The pf directory %s does not appear to exist' % pf_dir)
         return
@@ -263,6 +268,8 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
     # get any text files if any
 
     for one in txt_files:
+        shutil.copy(one,out_dir)
+    for one in wind_save:
         shutil.copy(one,out_dir)
 
     # Lookd for a file with extra switches for some models

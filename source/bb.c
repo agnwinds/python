@@ -98,7 +98,7 @@ int error_bb_lo = 0;
  * or frequency limits are changed, we use standard routines to limit
  * what portion of the dimensionless cdf to use.
  *
- * If the freuency range and temperature for a photon falls outside of ALPHAMIN
+ * If the frequency range and temperature for a photon falls outside of ALPHAMIN
  * and ALPHAMAX special routines are used to sample the distribution there.
  * so that the spectrum falls off as a power law at low frequencies and an
  * exponential at high frequencies.
