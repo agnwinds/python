@@ -373,7 +373,7 @@ xdefine_phot (f1, f2, ioniz_or_final, iwind, print_mode, tot_flag)
 /* Note  -- disk_init not only calculates fluxes and luminosity for the disk.  It
 calculates the boundaries of the various disk annulae depending on f1 and f2 */
 
-    disk_init (geo.rstar, geo.disk_rad_max, geo.mstar, geo.disk_mdot, f1, f2, ioniz_or_final, &geo.f_disk);
+    disk_init (geo.disk_rad_min, geo.disk_rad_max, geo.mstar, geo.disk_mdot, f1, f2, ioniz_or_final, &geo.f_disk);
   }
   if (geo.bl_radiation)
   {

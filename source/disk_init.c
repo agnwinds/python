@@ -78,6 +78,9 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double factor;
 
 
+  Log ("disk_init: Initialising disk to rmin %.1e rmax %.1e while central object has size %.1e\n", rmin, rmax, geo.rstar);
+
+
   /*
    * Compute the apparent luminosity of the disk.  This is not
    * actually used to determine how annulae are set up.  It is just

@@ -102,7 +102,7 @@ get_disk_params ()
     }
     else
     {
-      geo.disk_rad_min = 0.0;
+      geo.disk_rad_min = geo.rstar;
     }
 
     rddoub ("Disk.radmax(cm)", &geo.disk_rad_max);

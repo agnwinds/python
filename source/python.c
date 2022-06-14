@@ -613,8 +613,8 @@ main (argc, argv)
  */
 
 
-  disk_init (geo.rstar, geo.disk_rad_max, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
-  qdisk_init (geo.rstar, geo.disk_rad_max, geo.mstar, geo.disk_mdot);
+  disk_init (geo.disk_rad_min, geo.disk_rad_max, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
+  qdisk_init (geo.disk_rad_min, geo.disk_rad_max, geo.mstar, geo.disk_mdot);
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
 

@@ -91,6 +91,7 @@ get_stellar_params ()
   }
 
   rddoub ("Central_object.radius(cm)", &geo.rstar);
+  geo.disk_rad_min = geo.rstar; //Normally this is what we want
 
 
   geo.rstar_sq = geo.rstar * geo.rstar;
