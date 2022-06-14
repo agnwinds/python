@@ -424,13 +424,14 @@ qdisk_save (diskfile, ztot)
  * @brief      Read the temperature profile from a file
  *
  * @param [in] char *  tprofile   Name of the input file
- * @return     Returns the maximum radius
+ * @return     0
  *
  * @details
  *
  * Each line of the input file
  * a radius and a temperature in the first two columns.
- * Any extra columns are ignored.
+ * An optinional 3rd column can contain a gravity
+ * for use with stellar atmospheres models
  *
  * Comment lines (and other lines) that can not
  * be parsed are ignored, but will be printed out
@@ -439,8 +440,8 @@ qdisk_save (diskfile, ztot)
  * The radius values shoule be in cm
  * The temperature in degrees Kelvin
  *
- * The maxium radius of the disk is set to the maximum
- * radius contained in the input file.
+ * The minimum and maximum radius of the disk is set to the minimum
+ * and maximum radius of the disk.  If the 
  *
  * ###Notes###
  *
@@ -455,7 +456,7 @@ qdisk_save (diskfile, ztot)
  *
  **********************************************************/
 
-double
+int
 read_non_standard_disk_profile (tprofile)
      char *tprofile;
 {
@@ -540,5 +541,15 @@ read_non_standard_disk_profile (tprofile)
 
   fclose (fptr);
 
-  return (blmod.r[blmod.n_blpts - 1]);
+  geo.disk_rad_min = 0;
+  if (blmod.r[0] > geo.rstar)
+  {
+    geo.disk_rad_min = blmod.r[0];
+    geo.disk_type = DISK_WITH_HOLE;
+    Log ("The temperature profile begins at %e, which is larger than central object %e\n", geo.disk_rad_min, geo.rstar);
+    Log ("Treating the disk as having a hole through which photon can pass\n");
+  }
+  geo.disk_rad_max = blmod.r[blmod.n_blpts - 1];
+
+  return (0);
 }

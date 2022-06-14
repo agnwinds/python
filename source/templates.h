@@ -131,7 +131,7 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 double radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
-double log_sigma_phot(struct topbase_phot *x_ptr, double freq);
+double log_sigma_phot(struct topbase_phot *x_ptr, double log_freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
@@ -451,7 +451,7 @@ int matom_emiss_report(void);
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
 int qdisk_save(char *diskfile, double ztot);
-double read_non_standard_disk_profile(char *tprofile);
+int read_non_standard_disk_profile(char *tprofile);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double q_ioniz_dere(int nion, double t_e);
@@ -718,5 +718,3 @@ int get_one_array_element(int ndom, char variable_name[], int array_dim, double 
 int create_spec_table(int ndom, char rootname[]);
 int create_detailed_cell_spec_table(int ncell, char rootname[]);
 int create_big_detailed_spec_table(int ndom, char *rootname);
-
-double logtest(double input);

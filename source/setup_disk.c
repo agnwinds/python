@@ -111,7 +111,7 @@ get_disk_params ()
   else if (geo.disk_tprofile == DISK_TPROFILE_READIN)
   {
     rdstr ("Disk.T_profile_file", files.tprofile);
-    geo.disk_rad_max = read_non_standard_disk_profile (files.tprofile);
+    read_non_standard_disk_profile (files.tprofile);
     geo.disk_mdot = 0;
   }
   else
