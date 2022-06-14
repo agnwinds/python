@@ -51,14 +51,14 @@ get_disk_params ()
   {
     strcpy (answer, "none");
   }
-  sprintf (values, "%d,%d,%d", DISK_NONE, DISK_FLAT, DISK_VERTICALLY_EXTENDED);
-  geo.disk_type = rdchoice ("Disk.type(none,flat,vertically.extended)", values, answer);
+  sprintf (values, "%d,%d,%d,%d", DISK_NONE, DISK_FLAT, DISK_VERTICALLY_EXTENDED, DISK_WITH_HOLE);
+  geo.disk_type = rdchoice ("Disk.type(none,flat,vertically.extended,rmin>central.obj.rad)", values, answer);
 
 
   if (geo.disk_type == DISK_NONE)
   {
     geo.disk_radiation = 0;
-    geo.disk_rad_max = 0;
+    geo.disk_rad_min = geo.disk_rad_max = 0;
     return (0);
   }
 
@@ -93,6 +93,16 @@ get_disk_params ()
     else if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
     {
       geo.disk_rad_max = 100. * geo.rstar;
+    }
+
+    if (geo.disk_type == DISK_WITH_HOLE)
+    {
+      geo.disk_rad_min = geo.rstar;
+      rddoub ("Disk.radmin(cm)", &geo.disk_rad_min);
+    }
+    else
+    {
+      geo.disk_rad_min = 0.0;
     }
 
     rddoub ("Disk.radmax(cm)", &geo.disk_rad_max);

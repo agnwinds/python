@@ -383,7 +383,7 @@ struct geometry
   double tstar_init;            /* The temperature of the star, before backscattering is taken into account */
   double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
 
-  double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
+  double tmax;                  /* the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
 #define DISK_MISSED 0
@@ -394,6 +394,7 @@ struct geometry
 #define DISK_NONE   0
 #define DISK_FLAT   1
 #define DISK_VERTICALLY_EXTENDED   2
+#define DISK_WITH_HOLE      3
 
   int disk_type;
 
