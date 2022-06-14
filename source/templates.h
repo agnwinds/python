@@ -42,8 +42,6 @@ int phot_status(void);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
 int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
-int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
-int phot_gen_sum(char filename[], char mode[]);
 double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
 /* parse.c */
@@ -105,6 +103,9 @@ double zero_find(double (*func)(double, void *), double x1, double x2, double to
 double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+/* disk_photon_gen.c */
+int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
+int disk_photon_summary(char filename[], char mode[]);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
@@ -485,7 +486,7 @@ int setup_windcone(void);
 int init_windcone(double r, double z, double dzdr, int allow_negative_dzdr, ConePtr one_windcone);
 /* setup_disk.c */
 double get_disk_params(void);
-/* photo_gen_matom.c */
+/* photon_gen_matom.c */
 double get_kpkt_f(void);
 double get_kpkt_heating_f(void);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);

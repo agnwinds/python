@@ -204,7 +204,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
 /**********************************************************/
 /**
- * @brief      write information about the disk to a file
+ * @brief      write information about the way photons are
+ * created and absropted by the disk to a file
  *
  * @param [in out] char  filename[]   The name of the file
  * @param [in out] char  mode[]   A switch to determine whther to
@@ -213,17 +214,16 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
  *
  * @details
  * The routine normal writes the disk.diag file.  It provides
- * infomration not only about the rings used, but also about
+ * information not only about the rings used, but also about
  * the number of photons that hit each ring,
  *
  * ### Notes ###
  *
- * This routine is now well-named
  *
  **********************************************************/
 
 int
-phot_gen_sum (filename, mode)
+disk_photon_summary (filename, mode)
      char filename[], mode[];
 {
   FILE *fopen (), *ptr;
@@ -248,5 +248,3 @@ phot_gen_sum (filename, mode)
 }
 
 /* THESE ROUTINES ARE FOR THE BOUNDARY LAYER */
-
-
