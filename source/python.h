@@ -413,7 +413,7 @@ struct geometry
   int disk_tprofile;            /* Variable used to specify a standard accretion disk (0) or
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
-  double diskrad, diskrad_sq;
+  double disk_rad_min,disk_rad_max;   
   double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 *diskrad */
   double lum_disk_init, lum_disk_back;  /* The intrinsic luminosity of the disk, the back scattered luminosity */
   int run_type;                 /* Variable that describes whether this is a continuation of a previous run 

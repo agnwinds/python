@@ -198,7 +198,7 @@ main (argc, argv)
     if (geo.disk_tprofile == DISK_TPROFILE_READIN)      //We also need to re-read in any previously used disk temperature profile
     {
       rdstr ("Disk.T_profile_file", files.tprofile);
-      geo.diskrad = read_non_standard_disk_profile (files.tprofile);
+      geo.disk_rad_max = read_non_standard_disk_profile (files.tprofile);
       geo.disk_mdot = 0;
     }
     if (geo.pcycle > 0)
@@ -371,7 +371,7 @@ main (argc, argv)
 
   /* If the disk radius is <0, assume no disk was intended. */
 
-  if (geo.diskrad <= 0.0)
+  if (geo.disk_rad_max <= 0.0)
   {
     geo.disk_type = DISK_NONE;
     geo.disk_radiation = 0;
@@ -613,8 +613,8 @@ main (argc, argv)
  */
 
 
-  disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
-  qdisk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot);
+  disk_init (geo.rstar, geo.disk_rad_max, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
+  qdisk_init (geo.rstar, geo.disk_rad_max, geo.mstar, geo.disk_mdot);
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
 

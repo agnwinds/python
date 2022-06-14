@@ -149,10 +149,10 @@ walls (p, pold, normal)
       return (-1);
     }
 
-    /* Check whether it hit the disk plane beyond the geo.diskrad**2 */
+    /* Check whether it hit the disk plane beyond the geo.disk_rad_max**2 */
     vmove (pold->x, pold->lmn, s_disk, xxx);
 
-    if (dot (xxx, xxx) < geo.diskrad_sq)
+    if (dot (xxx, xxx) < geo.disk_rad_max * geo.disk_rad_max)
     {                           /* The photon has hit the disk */
       stuff_v (pold->x, p->x);
 //OLD      stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
@@ -188,7 +188,7 @@ walls (p, pold, normal)
 
     rho = sqrt (pold->x[0] * pold->x[0] + pold->x[1] * pold->x[1]);
     z = zdisk (rho);
-    if (z - fabs (pold->x[2]) > 1 && rho < geo.diskrad)
+    if (z - fabs (pold->x[2]) > 1 && rho < geo.disk_rad_max)
     {
       Error ("walls: %d The previous position %11.4e %11.4e %11.4e is inside the disk by %e\n", pold->np, pold->x[0], pold->x[1],
              pold->x[2], z - fabs (pold->x[2]));
@@ -208,7 +208,7 @@ walls (p, pold, normal)
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     z = zdisk (rho);
 
-    if (rho < geo.diskrad && fabs (p->x[2]) <= z)
+    if (rho < geo.disk_rad_max && fabs (p->x[2]) <= z)
     {
       /* This is the case where the proposed photon is within the disk */
 

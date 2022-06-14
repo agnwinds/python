@@ -113,7 +113,7 @@ init_geo ()
   geo.wind_radiation = TRUE;    /* 1 implies wind will radiate */
 
   geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
-  geo.diskrad = 2.4e10;
+  geo.disk_rad_max = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
 
   geo.t_bl = 100000.;

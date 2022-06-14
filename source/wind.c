@@ -105,7 +105,7 @@ where_in_wind (x, ndomain)
   /* Check if position is inside the disk for a vertically extended disk */
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
-    if (rho < geo.diskrad && z < zdisk (rho))
+    if (rho < geo.disk_rad_max && z < zdisk (rho))
     {
       *ndomain = -1;
       return (W_IN_DISK);

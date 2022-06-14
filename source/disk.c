@@ -266,7 +266,7 @@ zdisk (r)
      double r;
 {
   double z;
-  z = geo.disk_z0 * pow (r / geo.diskrad, geo.disk_z1) * geo.diskrad;
+  z = geo.disk_z0 * pow (r / geo.disk_rad_max, geo.disk_z1) * geo.disk_rad_max;
   return (z);
 }
 
@@ -317,7 +317,7 @@ struct plane diskplane, disktop, diskbottom;
  *
  * The z-height of a vertically extended disk is defined by
  * zdisk.  The outside edge of the disk is assumed to be
- * a cylinder at geo.diskrad.  
+ * a cylinder at geo.disk_rad_max.  
  *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
@@ -395,7 +395,7 @@ ds_to_disk (p, allow_negative, hit)
 
   if (geo.disk_type == DISK_FLAT)
   {
-    if (r_diskplane > geo.diskrad)
+    if (r_diskplane > geo.disk_rad_max)
     {
       *hit = DISK_MISSED;
       return (VERY_BIG);
@@ -435,12 +435,12 @@ ds_to_disk (p, allow_negative, hit)
 
 
     disktop.x[0] = disktop.x[1] = 0.0;
-    disktop.x[2] = geo.diskrad * geo.disk_z0;
+    disktop.x[2] = geo.disk_rad_max * geo.disk_z0;
     disktop.lmn[0] = disktop.lmn[1] = 0.0;
     disktop.lmn[2] = 1.0;
 
     diskbottom.x[0] = diskbottom.x[1] = 0.0;
-    diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
+    diskbottom.x[2] = (-geo.disk_rad_max * geo.disk_z0);
     diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
     diskbottom.lmn[2] = 1.0;
 
@@ -475,7 +475,7 @@ ds_to_disk (p, allow_negative, hit)
      hits the disk
    */
 
-  s_cyl = ds_to_cylinder (geo.diskrad, p);
+  s_cyl = ds_to_cylinder (geo.disk_rad_max, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_cyl);
   z_cyl = phit.x[2];
@@ -483,10 +483,10 @@ ds_to_disk (p, allow_negative, hit)
   z_cyl2 = VERY_BIG;
   s_cyl2 = VERY_BIG;
 
-  if (r_phot > geo.diskrad)
+  if (r_phot > geo.disk_rad_max)
   {
     move_phot (&phit, DFUDGE);
-    s_cyl2 = ds_to_cylinder (geo.diskrad, &phit);
+    s_cyl2 = ds_to_cylinder (geo.disk_rad_max, &phit);
     move_phot (&phit, s_cyl2);
     z_cyl2 = phit.x[2];
     s_cyl2 += s_cyl;
@@ -511,7 +511,7 @@ ds_to_disk (p, allow_negative, hit)
   /* Return if if we are within a cm of the disk surface 
    */
 
-  if ((r_phot < geo.diskrad) && (fabs (delta_z) < 1.0))
+  if ((r_phot < geo.disk_rad_max) && (fabs (delta_z) < 1.0))
   {
     return (0);
   }
@@ -530,7 +530,7 @@ ds_to_disk (p, allow_negative, hit)
    */
 
 
-  if ((r_phot < geo.diskrad) && delta_z > 0)
+  if ((r_phot < geo.disk_rad_max) && delta_z > 0)
   {
 
     if (p->x[2] * p->lmn[2] > 0)
@@ -598,7 +598,7 @@ ds_to_disk (p, allow_negative, hit)
       phit.lmn[0] *= (-1);
       phit.lmn[1] *= (-1);
       phit.lmn[2] *= (-1);
-      s_cyl = ds_to_cylinder (geo.diskrad, &phit);
+      s_cyl = ds_to_cylinder (geo.disk_rad_max, &phit);
       s_cyl *= (-1);
 
       /* s_cyl should be negative and but it may be closer to 0 than 
@@ -650,7 +650,7 @@ ds_to_disk (p, allow_negative, hit)
 
    */
 
-  else if (r_phot < geo.diskrad && fabs (p->x[2]) < disktop.x[2])
+  else if (r_phot < geo.disk_rad_max && fabs (p->x[2]) < disktop.x[2])
   {
 /* Begin the case where the photon is OUTSIDE THE DISK, BUT INSIDE THE PILLBOX */
 
@@ -672,7 +672,7 @@ ds_to_disk (p, allow_negative, hit)
 
   }
 
-  else if (r_phot > geo.diskrad || fabs (p->x[2]) > disktop.x[2])
+  else if (r_phot > geo.disk_rad_max || fabs (p->x[2]) > disktop.x[2])
   {
     /* Begin the case where we are OUTSIDE THE PILLBOX */
 
@@ -698,8 +698,8 @@ ds_to_disk (p, allow_negative, hit)
 
     /* Identify photons that are outside the disk radius and the photon hits 
        the outer cylindrical edge of the disk */
-    // else if (r_diskplane > geo.diskrad && fabs (z_cyl) < disktop.x[2])
-    else if (r_phot > geo.diskrad && fabs (z_cyl) < disktop.x[2])
+    // else if (r_diskplane > geo.disk_rad_max && fabs (z_cyl) < disktop.x[2])
+    else if (r_phot > geo.disk_rad_max && fabs (z_cyl) < disktop.x[2])
     {
       *hit = DISK_HIT_EDGE;
       return (s_cyl);
@@ -708,7 +708,7 @@ ds_to_disk (p, allow_negative, hit)
     /* Identify photons outside the pill box, and do not  hit either
        the disk or the edges of the disk
      */
-    else if (r_diskplane > geo.diskrad && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
+    else if (r_diskplane > geo.disk_rad_max && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
     {
       *hit = DISK_MISSED;
       return (VERY_BIG);
@@ -730,13 +730,13 @@ ds_to_disk (p, allow_negative, hit)
       {
         smax = s_diskplane;
       }
-      else if (r_phot < geo.diskrad && s_cyl < smax)
+      else if (r_phot < geo.disk_rad_max && s_cyl < smax)
       {
         smax = s_cyl;
       }
       else
       {
-        smax = 2 * geo.diskrad; /* this is a cheat */
+        smax = 2 * geo.disk_rad_max;    /* this is a cheat */
       }
 
       /* For the minimum, we need to either to be inside the
@@ -744,7 +744,7 @@ ds_to_disk (p, allow_negative, hit)
          pill box
        */
 
-      if (fabs (p->x[2]) < disktop.x[2] && r_phot < geo.diskrad)
+      if (fabs (p->x[2]) < disktop.x[2] && r_phot < geo.disk_rad_max)
       {
         smin = 0;
       }
@@ -844,7 +844,7 @@ ds_to_disk (p, allow_negative, hit)
 
     xdisk = xcyl = xcyl2 = FALSE;
 
-    if (r_diskplane < geo.diskrad)
+    if (r_diskplane < geo.disk_rad_max)
     {
       xdisk = TRUE;
     }
