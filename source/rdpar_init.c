@@ -75,11 +75,12 @@ int xinit_choices = 0;
 int
 init_choices ()
 {
-  /* Initialize the structure that contains all of the types of possilbe radiations */
+  /* Initialize the structure that contains all of the types of possible radiation types */
 
-  char *xchoices[] = { "bb", "uniform", "power", "cloudy", "brems", "none", "models" };
-  int xvals[] = { SPECTYPE_BB, SPECTYPE_UNIFORM, SPECTYPE_POW, SPECTYPE_CL_TAB, SPECTYPE_BREM, SPECTYPE_NONE, SPECTYPE_MODEL };
-  int num_choices = 7;
+  char *xchoices[] = { "bb", "uniform", "power", "cloudy", "brems", "none", "models", "mono" };
+  int xvals[] =
+    { SPECTYPE_BB, SPECTYPE_UNIFORM, SPECTYPE_POW, SPECTYPE_CL_TAB, SPECTYPE_BREM, SPECTYPE_NONE, SPECTYPE_MODEL, SPECTYPE_MONO };
+  int num_choices = 8;
 
   if (xinit_choices)
     return (0);
@@ -92,7 +93,7 @@ init_choices ()
   }
   zz_spec.n = num_choices;
 
-  /* To initialize more than one sets of choices one needs essentially to repeat the lines aboe
+  /* To initialize more than one sets of choices one needs essentially to repeat the lines above
    * making sure that the names of the input arrays changed.  Alternatively, one could create
    * a routine for each structure one wanted to initialize
    *
@@ -156,7 +157,7 @@ get_choices (question, choices, qstruct)
      char *choices;
      struct rdpar_choices *qstruct;
 {
-  int num_choices = 7;
+  int num_choices = 8;
 
 
   char cur_choices[10][LINELENGTH];

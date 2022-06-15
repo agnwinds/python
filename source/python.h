@@ -129,8 +129,11 @@ extern int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT dep
 #define SPECTYPE_POW     -4
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_BREM    -6
+#define SPECTYPE_MONO    -7
 #define SPECTYPE_NONE	 -3
 #define SPECTYPE_MODEL	 -99    // This is just used briefly, before a model number is assigned
+
+#define  MONO_FREQ     2.997925e18/1500.   //Hardwired single freqency for diagnostic purposes
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10

@@ -71,7 +71,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
   double q1;
-//OLD  int nrings, i, icheck;
   int nrings, i;
   int spectype;
   double emit;

@@ -166,6 +166,11 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
       p[i].freq = random_number (freqmin, freqmax);
     }
 
+    else if (spectype == SPECTYPE_MONO)
+    {
+      p[i].freq = MONO_FREQ;
+    }
+
     else
     {                           /* Then we will use a model which was read in */
       p[i].freq = one_continuum (spectype, disk.t[nring], log10 (disk.g[nring]), freqmin, freqmax);

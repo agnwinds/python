@@ -299,13 +299,6 @@ extract (w, p, itype)
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
 
-//      if (modes.save_photons)
-//        save_photons (&pp, "extract_aft_reweight");
-
-//XTEST      double zz_orig;
-//XTEST      zz_orig = fabs (p_in.lmn[2]);
-//XTEST      zz_orig = zz_orig * (2.0 + 3.0 * zz_orig);
-//XTEST      pp.w *= zz * (2.0 + 3.0 * zz) / zz_orig;
     }
     else if (pp.nres > -1 && pp.nres < NLINES)
     {
@@ -358,7 +351,7 @@ extract (w, p, itype)
     /* Make some final chacks before extracting the photon */
     if (tau > TAU_MAX)
     {
-      Error ("extract: tau should not be large\n");
+      Error ("extract: tau (%e) for photon %d should not be large \n", tau, pp.np);
       continue;
     }
     else if (geo.binary == TRUE && hit_secondary (&pp))

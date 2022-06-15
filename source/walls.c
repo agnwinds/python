@@ -87,6 +87,7 @@ walls (p, pold, normal)
      double *normal;
 {
   double r, rho, rho_sq;
+  double r_hit_disk;
   double xxx[3];
   double s_disk, s_star, z;
   double theta, phi;
@@ -115,7 +116,6 @@ walls (p, pold, normal)
 
 
     stuff_v (pold->x, p->x);
-//    stuff_phot (pold, p);
     if (move_phot (p, s_star))
     {
       Error ("walls: move_phot frame error on push to star of np %d \n", p->np);
@@ -151,11 +151,11 @@ walls (p, pold, normal)
 
     /* Check whether it hit the disk plane beyond the geo.disk_rad_max**2 */
     vmove (pold->x, pold->lmn, s_disk, xxx);
+    r_hit_disk = dot (xxx, xxx);
 
-    if (dot (xxx, xxx) < geo.disk_rad_max * geo.disk_rad_max)
+    if (r_hit_disk > geo.disk_rad_min * geo.disk_rad_min && r_hit_disk < geo.disk_rad_max * geo.disk_rad_max)
     {                           /* The photon has hit the disk */
       stuff_v (pold->x, p->x);
-//OLD      stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
       if (move_phot (p, s_disk - DFUDGE))
       {
         Error ("walls: frame error in move_phot of np %D on move to disk \n", p->np);
