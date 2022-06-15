@@ -98,6 +98,8 @@ extract (w, p, itype)
   double dvds;
   int ishell;
 
+  tau = 0.0;
+
 
   if (modes.save_extract_photons)
   {
