@@ -91,18 +91,18 @@ get_knigge_wind_params (ndom)
   zdom[ndom].kn_alpha = 1.5;    /* Accleration scale exponent for wind */
   zdom[ndom].kn_v_infinity = 3; /* Final speed of wind in units of escape velocity */
   zdom[ndom].kn_lambda = 0.0;   /* Mass loss rate exponent */
-  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the stellar
-                                                                           radius. The value set here is for the minimum collimation, see KWD95.  
-                                                                         */
+  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.disk_rad_max / geo.rstar);      /* Center of collimation in units of the stellar
+                                                                                   radius. The value set here is for the minimum collimation, see KWD95.  
+                                                                                 */
   zdom[ndom].kn_v_zero = 1.0;   /* The velocity at the base of the wind will be kn_v_zero times the sound speed. */
   zdom[ndom].wind_rhomin_at_disk = 1;   /* Innner and outer edges of the wind in stellar radii. These
                                            parameters were added to allow one to create models similar to those 
                                            used in the YSO paper (Sim+05)  */
-  zdom[ndom].wind_rhomax_at_disk = geo.diskrad / geo.rstar;
+  zdom[ndom].wind_rhomax_at_disk = geo.disk_rad_max / geo.rstar;
 
   rddoub ("KWD.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
 
-  Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n", dmin, zdom[ndom].kn_dratio / dmin, geo.diskrad, geo.rstar);
+  Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n", dmin, zdom[ndom].kn_dratio / dmin, geo.disk_rad_max, geo.rstar);
 
 
   rddoub ("KWD.mdot_r_exponent", &zdom[ndom].kn_lambda);        /* Mass loss rate exponent */

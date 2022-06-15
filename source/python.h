@@ -129,8 +129,11 @@ extern int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT dep
 #define SPECTYPE_POW     -4
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_BREM    -6
+#define SPECTYPE_MONO    -7
 #define SPECTYPE_NONE	 -3
 #define SPECTYPE_MODEL	 -99    // This is just used briefly, before a model number is assigned
+
+#define  MONO_FREQ     2.997925e18/1500.   //Hardwired single freqency for diagnostic purposes
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -383,7 +386,7 @@ struct geometry
   double tstar_init;            /* The temperature of the star, before backscattering is taken into account */
   double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
 
-  double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
+  double tmax;                  /* the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
 #define DISK_MISSED 0
@@ -394,6 +397,7 @@ struct geometry
 #define DISK_NONE   0
 #define DISK_FLAT   1
 #define DISK_VERTICALLY_EXTENDED   2
+#define DISK_WITH_HOLE      3
 
   int disk_type;
 
@@ -413,7 +417,7 @@ struct geometry
   int disk_tprofile;            /* Variable used to specify a standard accretion disk (0) or
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
-  double diskrad, diskrad_sq;
+  double disk_rad_min,disk_rad_max;   
   double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 *diskrad */
   double lum_disk_init, lum_disk_back;  /* The intrinsic luminosity of the disk, the back scattered luminosity */
   int run_type;                 /* Variable that describes whether this is a continuation of a previous run 

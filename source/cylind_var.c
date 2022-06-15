@@ -140,7 +140,7 @@ cylvar_ds_in_cell (ndom, p)
  *
  * @details
  * The cylvar coordinate system basically adds an offset determined
- * by zdisk(r) to each z position in the grid.  Beyond geo.diskrad
+ * by zdisk(r) to each z position in the grid.  Beyond geo.disk_rad_max
  * the coordinate system stays fixed in the z direction (on the
  * assumption that the forumula for the disk is not valid there.)
  *
@@ -191,12 +191,12 @@ cylvar_make_grid (w, ndom)
         dr = zdom[ndom].rmax / (ndim - 3);
         w[n].x[0] = r = i * dr; /* The first zone is at the inner radius of
                                    the wind */
-        if (r < geo.diskrad)
+        if (r < geo.disk_rad_max)
         {
           z_offset = zdisk (r);
         }
         else
-          z_offset = zdisk (geo.diskrad);
+          z_offset = zdisk (geo.disk_rad_max);
 
         dz = (zdom[ndom].rmax - z_offset) / (mdim - 4);
         if (j == 0)
@@ -226,12 +226,12 @@ cylvar_make_grid (w, ndom)
           w[n].xcen[0] = 0.5 * zdom[ndom].xlog_scale * (pow (10., dlogr * (i - 1)) + pow (10., dlogr * (i))) + zdisk (r);
         }
 
-        if (r < geo.diskrad)
+        if (r < geo.disk_rad_max)
         {
           z_offset = zdisk (r);
         }
         else
-          z_offset = zdisk (geo.diskrad);
+          z_offset = zdisk (geo.disk_rad_max);
 
         dlogz = (log10 ((zdom[ndom].rmax - z_offset) / zdom[ndom].zlog_scale)) / (mdim - 4);
         if (j == 0)

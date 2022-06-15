@@ -51,14 +51,14 @@ get_disk_params ()
   {
     strcpy (answer, "none");
   }
-  sprintf (values, "%d,%d,%d", DISK_NONE, DISK_FLAT, DISK_VERTICALLY_EXTENDED);
-  geo.disk_type = rdchoice ("Disk.type(none,flat,vertically.extended)", values, answer);
+  sprintf (values, "%d,%d,%d,%d", DISK_NONE, DISK_FLAT, DISK_VERTICALLY_EXTENDED, DISK_WITH_HOLE);
+  geo.disk_type = rdchoice ("Disk.type(none,flat,vertically.extended,rmin>central.obj.rad)", values, answer);
 
 
   if (geo.disk_type == DISK_NONE)
   {
     geo.disk_radiation = 0;
-    geo.diskrad = 0;
+    geo.disk_rad_min = geo.disk_rad_max = 0;
     return (0);
   }
 
@@ -88,20 +88,30 @@ get_disk_params ()
     /* Set a default for diskrad for an AGN */
     if (geo.system_type == SYSTEM_TYPE_CV)
     {
-      geo.diskrad = diskrad (geo.mstar, geo.m_sec, geo.period);
+      geo.disk_rad_max = diskrad (geo.mstar, geo.m_sec, geo.period);
     }
     else if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
     {
-      geo.diskrad = 100. * geo.rstar;
+      geo.disk_rad_max = 100. * geo.rstar;
     }
 
-    rddoub ("Disk.radmax(cm)", &geo.diskrad);
+    if (geo.disk_type == DISK_WITH_HOLE)
+    {
+      geo.disk_rad_min = geo.rstar;
+      rddoub ("Disk.radmin(cm)", &geo.disk_rad_min);
+    }
+    else
+    {
+      geo.disk_rad_min = geo.rstar;
+    }
+
+    rddoub ("Disk.radmax(cm)", &geo.disk_rad_max);
 
   }
   else if (geo.disk_tprofile == DISK_TPROFILE_READIN)
   {
     rdstr ("Disk.T_profile_file", files.tprofile);
-    geo.diskrad = read_non_standard_disk_profile (files.tprofile);
+    read_non_standard_disk_profile (files.tprofile);
     geo.disk_mdot = 0;
   }
   else
@@ -110,12 +120,11 @@ get_disk_params ()
     Exit (1);
   }
 
-  Log ("geo.diskrad  %e\n", geo.diskrad);
-  geo.diskrad_sq = geo.diskrad * geo.diskrad;
+  Log ("geo.disk_rad_max  %e\n", geo.disk_rad_max);
 
 /* If diskrad <= geo.rstar set geo.disk_type = DISK_NONE to make any disk transparent anyway. */
 
-  if (geo.diskrad < geo.rstar)
+  if (geo.disk_rad_max < geo.rstar)
   {
     Log ("Disk radius is less than star radius, so assuming no disk)\n");
     geo.disk_type = DISK_NONE;
