@@ -311,7 +311,7 @@ get_bl_and_agn_params (lstar)
       rddoub ("@Central_object.power_law_cutoff", &geo.pl_low_cutoff);
 
     strcpy (answer, "sphere");
-    geo.pl_geometry = rdchoice ("Central_object.geometry_for_source(sphere,lamp_post)", "0,1", answer);
+    geo.pl_geometry = rdchoice ("Central_object.geometry_for_source(sphere,lamp_post,bubble)", "0,1,2", answer);
 
 
     if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
@@ -320,7 +320,13 @@ get_bl_and_agn_params (lstar)
       geo.lamp_post_height *= GRAV * geo.mstar / VLIGHT / VLIGHT;       //get it in CGS units
       Log ("lamp_post_height in cm is %g\n", geo.lamp_post_height);
     }
-    else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only two options at the moment
+    else if (geo.pl_geometry == PL_GEOMETRY_BUBBLE)
+    {
+      rddoub ("Central_object.bubble_size(r_g)", &geo.bubble_size);
+      geo.bubble_size *= GRAV * geo.mstar / VLIGHT / VLIGHT;    //get it in CGS units
+      Log ("bubble size  in cm is %g\n", geo.bubble_size);
+    }
+    else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only three options at the moment
     {
       Error ("Did not understand power law geometry %i. Fatal.\n", geo.pl_geometry);
       Exit (0);

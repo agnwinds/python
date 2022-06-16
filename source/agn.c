@@ -491,7 +491,30 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
+
+    /* if we have a bubble geometry then we should generate isotropic photons at a random position
+       within a sphere. */
+    else if (geo.pl_geometry == PL_GEOMETRY_BUBBLE)
+    {
+      /* This is esssentially copied from spherical_get_random_location */
+      double rrr;
+
+      rrr =
+        (geo.rstar * geo.rstar * geo.rstar) + (geo.bubble_size * geo.bubble_size * geo.bubble_size -
+                                               geo.rstar * geo.rstar * geo.rstar) * random_number (0.0, 1.0);
+
+
+      rrr = pow (rrr, (1. / 3.));
+
+      /* The direction can be anywhere on a sphere, so completely random directins for origin */
+      randvec (p[i].x, rrr);
+      randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
+    }
+    if (modes.save_photons)
+      save_photons (&p[i], "AGN");
   }
+
+
 
   return (0);
 }

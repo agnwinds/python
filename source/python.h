@@ -619,7 +619,9 @@ struct geometry
   int pl_geometry;              /* geometry of X-ray point source */
 #define PL_GEOMETRY_SPHERE 0
 #define PL_GEOMETRY_LAMP_POST 1
+#define PL_GEOMETRY_BUBBLE 2
   double lamp_post_height;      /* height of X-ray point source if lamp post */
+  double bubble_size;           /* size of a bubble if any */
 
 /* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
   double agn_cltab_low;         //break at which the low frequency power law ends

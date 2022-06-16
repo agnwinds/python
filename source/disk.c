@@ -877,13 +877,13 @@ ds_to_disk (p, allow_negative, hit)
     Error
       ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
        p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
-    if (modes.save_photons)
-    {
-      save_photons (p, "ds_to_disk");
-      Diag
-        ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
-         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
-    }
+//    if (modes.save_photons)
+//    {
+    //     save_photons (p, "ds_to_disk");
+//      Diag
+//        ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
+//         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
+//    }
   }
 
   if (p->x[2] > 0)
