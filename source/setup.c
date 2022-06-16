@@ -120,6 +120,7 @@ init_geo ()
 
   geo.pl_geometry = PL_GEOMETRY_SPHERE; // default to spherical geometry
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
+  geo.bubble_size = 0.0;        // should only be used if geo.pl_geometry is PL_GEOMETRY_BUBBLE_
 
 
   strcpy (geo.atomic_filename, "data/standard80.dat");

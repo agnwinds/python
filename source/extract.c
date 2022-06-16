@@ -232,7 +232,7 @@ extract (w, p, itype)
        need this test
      */
 
-    if (modes.save_photons)
+    if (modes.save_extract_photons)
       save_photons (&p_in, "extract_b");
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
@@ -250,12 +250,12 @@ extract (w, p, itype)
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
 
-      if (modes.save_photons)
+      if (modes.save_extract_photons)
         save_photons (&p_dummy, "extract_b1");
 
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
 
-      if (modes.save_photons)
+      if (modes.save_extract_photons)
         save_photons (&p_dummy, "extract_b2");
 
       stuff_phot (&p_in, &pp);
@@ -268,7 +268,7 @@ extract (w, p, itype)
     }
 
 
-    if (modes.save_photons)
+    if (modes.save_extract_photons)
       save_photons (&pp, "extract_c");
 
     /* At this stage, we are in the local frame for
@@ -363,7 +363,7 @@ extract (w, p, itype)
 
     /* If one has reached this point, we extract the photon and increment the spectrum */
 
-    if (modes.save_photons)
+    if (modes.save_extract_photons)
       save_photons (&pp, "extract_f");
 
     extract_one (w, &pp, n);
