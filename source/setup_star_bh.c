@@ -320,7 +320,7 @@ get_bl_and_agn_params (lstar)
       geo.lamp_post_height *= GRAV * geo.mstar / VLIGHT / VLIGHT;       //get it in CGS units
       Log ("lamp_post_height in cm is %g\n", geo.lamp_post_height);
     }
-    if (geo.pl_geometry == PL_GEOMETRY_BUBBLE)
+    else if (geo.pl_geometry == PL_GEOMETRY_BUBBLE)
     {
       rddoub ("Central_object.bubble_size(r_g)", &geo.bubble_size);
       geo.bubble_size *= GRAV * geo.mstar / VLIGHT / VLIGHT;    //get it in CGS units
