@@ -153,13 +153,10 @@ extract (w, p, itype)
     }
 
     p_in.w *= p_in.nnscat / p_norm;
-  }
-  if (itype == PTYPE_WIND)
-  {
     if ((ierr = observer_to_local_frame (&p_in, &p_in)))
       Error ("extract: wind photon not in observer frame %d\n", ierr);
   }
-  if (itype == PTYPE_DISK)
+  else if (itype == PTYPE_DISK)
   {
 //    if (modes.save_photons)
 //      save_photons (&p_in, "extract_begin");

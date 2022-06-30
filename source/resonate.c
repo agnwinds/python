@@ -871,7 +871,7 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
-  double velocity_electron[3];
+//  double velocity_electron[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
