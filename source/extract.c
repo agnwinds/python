@@ -97,6 +97,7 @@ extract (w, p, itype)
   double zz;
   double dvds;
   int ishell;
+  double vel[3];
 
   tau = 0.0;
 
@@ -154,7 +155,15 @@ extract (w, p, itype)
 
     p_in.w *= p_in.nnscat / p_norm;
     if ((ierr = observer_to_local_frame (&p_in, &p_in)))
+    {
       Error ("extract: wind photon not in observer frame %d\n", ierr);
+    }
+    if (p_in.nres == NRES_ES)
+    {
+      lorentz_transform (&p_in, &p_in, velocity_electron);
+      rescale (velocity_electron, -1, vel);     // Only need to do this once
+    }
+
   }
   else if (itype == PTYPE_DISK)
   {
@@ -238,6 +247,10 @@ extract (w, p, itype)
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
       observer_to_local_frame (&p_dummy, &p_dummy);
+//      if (p_dummy.nres == NRES_ES)
+//      {
+//        lorentz_transform (&p_dummy, &p_dummy, velocity_electron);
+//      }
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
     }
@@ -343,6 +356,10 @@ extract (w, p, itype)
     }
     if (itype == PTYPE_WIND)
     {
+      if (pp.nres == NRES_ES)
+      {
+        lorentz_transform (&pp, &pp, vel);
+      }
       if ((ierr = local_to_observer_frame (&pp, &pp)))
         Error ("extract_one: wind photon not in local frame\n");
     }
