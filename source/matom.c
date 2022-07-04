@@ -76,6 +76,7 @@ matom (p, nres, escape)
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
+  struct auger *auger_ptr;
   int uplvl, uplvl_old;
 //OLD  int icheck;
   double jprbs[2 * (NBBJUMPS + NBFJUMPS)];
@@ -93,6 +94,8 @@ matom (p, nres, escape)
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   int z;
+  int nauger, iauger, target_level;
+  double auger_rate;
 
 
   one = &wmain[p->grid];
@@ -162,6 +165,8 @@ matom (p, nres, escape)
     nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
     nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
     nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
+    nauger = config[uplvl].nauger;      // number of auger jumps 
+    iauger = config[uplvl].iauger;
 
     if (prbs_known[uplvl] == FALSE)
     {
@@ -222,6 +227,25 @@ matom (p, nres, escape)
         pjnorm += jprbs[m];
         penorm += eprbs[m];
         m++;
+      }
+
+      /* Auger ionization */
+      if (iauger >= 0)
+      {
+        auger_ptr = &auger_macro[iauger];
+
+        for (n = 0; n < nauger; n++)
+        {
+          target_level = auger_ptr->nconfig_target[n];
+          auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
+
+          jprbs_known[uplvl][m] = jprbs[m] = auger_rate * config[target_level].ex;      //energy of lower state
+          eprbs_known[uplvl][m] = eprbs[m] = auger_rate * (config[uplvl].ex - config[target_level].ex); //energy difference
+
+          pjnorm += jprbs[m];
+          penorm += eprbs[m];
+          m++;
+        }
       }
 
       /* Now upwards jumps. */
@@ -353,6 +377,11 @@ matom (p, nres, escape)
       uplvl = phot_top[config[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
 //OLD      icheck = 4;
     }
+    else if (n < (nbbd + nbfd + nbbu + nbfu + nauger))
+    {                           /* auger ionization jump */
+      uplvl = auger_macro[iauger].nconfig_target[n - nbbd - nbfd - nbbu - nauger];
+//OLD      icheck = 4;
+    }
     else
     {
       Error ("Trying to jump but nowhere to go! Matom. Abort");
@@ -447,6 +476,11 @@ matom (p, nres, escape)
       *escape = FALSE;
     }
 
+  }
+  else if (n < (nbbd + nbfd + nauger))
+  {                             /* auger ionization */
+    /* Auger processes only undergo k-packet (collisional) deactivation */
+    *escape = FALSE;
   }
   else
   {

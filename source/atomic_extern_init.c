@@ -21,6 +21,8 @@ IonPtr ion;
 
 ConfigPtr config;
 
+AugerPtr auger_macro;
+
 LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that contains all the data, *lin_ptr
                                    is an array which contains a frequency ordered set of ptrs to line */
 struct lines fast_line;

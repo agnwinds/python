@@ -45,11 +45,12 @@ calc_matom_matrix (xplasma, matom_matrix)
   int uplvl, target_level, escape_dummy;
   double Qcont;
   struct lines *line_ptr;
+  struct auger *auger_ptr;
   struct topbase_phot *cont_ptr;
   double rad_rate, coll_rate;
-  int n, i, nn, mm;
+  int n, i, nn, mm, iauger, nauger;
   double Qcont_kpkt, bb_cont, sp_rec_rate, bf_cont, lower_density, density_ratio;
-  double kpacket_to_rpacket_rate, norm, Rcont;
+  double kpacket_to_rpacket_rate, norm, Rcont, auger_rate;
   double *a_data;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
   struct photon pdummy;
@@ -90,7 +91,8 @@ calc_matom_matrix (xplasma, matom_matrix)
     nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
     nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
     nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
-
+    nauger = config[uplvl].nauger;      /* number of Auger jumps */
+    iauger = config[uplvl].iauger;
 
     /* bound-bound */
     for (n = 0; n < nbbd; n++)
@@ -117,6 +119,27 @@ calc_matom_matrix (xplasma, matom_matrix)
       Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
     }
 
+    /* Auger ionization */
+    if (config[uplvl].iauger >= 0)
+    {
+      auger_ptr = &auger_macro[iauger];
+
+      for (n = 0; n < nauger; n++)
+      {
+        target_level = auger_ptr->nconfig_target[n];
+        auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
+
+        //internal jump to another macro atom level
+        Q_matrix[uplvl][target_level] += Qcont = auger_rate * config[target_level].ex;  //energy of lower state
+
+        //jump to the k-packet pool (we used to call this "deactivation")
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = auger_rate * (config[uplvl].ex - config[target_level].ex);       //energy of lower state
+
+        //deactivation back to r-packet isn't possible for the Auger process
+        Q_norm[uplvl] += Qcont + Qcont_kpkt;
+      }
+    }
+
     /* bound-free */
     for (n = 0; n < nbfd; n++)
     {
@@ -125,7 +148,6 @@ calc_matom_matrix (xplasma, matom_matrix)
 
       sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];       //need this twice so store it
       bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
-
 
       target_level = phot_top[config[uplvl].bfd_jump[n]].nlev;
 

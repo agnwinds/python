@@ -128,6 +128,24 @@ init_atomic_data ()
        sizeof (line_dummy), NLINES, 1.e-6 * NLINES * sizeof (line_dummy));
   }
 
+  if (auger_macro != NULL)
+  {
+    free (auger_macro);
+  }
+  auger_macro = (AugerPtr) calloc (sizeof (auger_dummy), NAUGER_MACRO);
+
+  if (auger_macro == NULL)
+  {
+    Error ("There is a problem in allocating memory for the line structure\n");
+    exit (0);
+  }
+  else
+  {
+    Log_silent
+      ("Allocated %10d bytes for each of %6d elements of auger_macro totaling %10.1f Mb \n",
+       sizeof (auger_dummy), NAUGER_MACRO, 1.e-6 * NAUGER_MACRO * sizeof (auger_dummy));
+  }
+
 
   /* Initialize variables */
 
@@ -260,6 +278,23 @@ init_atomic_data ()
     line[n].el = line[n].eu = 0.0;
     line[n].macro_info = -1;
     line[n].coll_index = -999;
+  }
+
+  for (n = 0; n < NAUGER_MACRO; n++)
+  {
+    auger_macro[n].z = -1;
+    auger_macro[n].nion = -1;
+    auger_macro[n].istate = -1;
+    auger_macro[n].nconfig = -1;
+    auger_macro[n].iauger = -1;
+    auger_macro[n].nauger = -1;
+    auger_macro[n].Avalue_auger = 0.0;
+
+    for (i = 0; i < NAUGER_ELECTRONS; i++)
+    {
+      auger_macro[n].nconfig_target[i] = -1;
+      auger_macro[n].branching_ratio[i] = 0.0;
+    }
   }
 
 /* The following lines initialise the dielectronic recombination structure */

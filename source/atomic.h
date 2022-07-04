@@ -187,11 +187,35 @@ typedef struct configurations
   int bbu_indx_first;           /* index to first MC estimator for bb jumps from this configuration */
   int bfu_indx_first;           /* index to first MC estimator for bf jumps from this configuration */
   int bfd_indx_first;           /* index to first rate for downward bf jumps from this configuration */
-
+  int iauger;                   /* if this configuration is a vacancy state in a macro-atom, then this 
+                                   indexes where the entry is in the Auger structure. Otherwise, -1. */
+  int nauger;                   /* number of possible Auger channels (nominal maximum of 4) */
 }
 config_dummy, *ConfigPtr;
 
 extern ConfigPtr config;
+
+
+int nauger_macro;               /* the number of auger processes read in associated with macro atoms */
+#define NAUGER_MACRO 200        /* number of Auger processes */
+#define NAUGER_ELECTRONS 4
+
+typedef struct auger 
+{
+  int nion;                                    /* The ion no (in python) of the transition */
+  int z, istate;                               /* element and ion associated with the line */
+  int nconfig;                                 /* the entry in the config structure where the vacancy state lies */
+  int iauger;                                  /* the index to this auger entry */
+  int nauger;                                  /* number of Auger jumps */
+  double Avalue_auger;                         /* the total A value associated with creating Auger electrons */
+  int nconfig_target[NAUGER_ELECTRONS];        /* the configuration of the upper ion we are jumping to */
+  double branching_ratio[NAUGER_ELECTRONS];     /* probability of creating 0-3 Auger electrons */
+} auger_dummy, *AugerPtr;
+
+extern AugerPtr auger_macro;
+int nauger_macro;               /* the number of auger processes read in associated with macro atoms */
+
+
 
 
 /* Structure to describe the lines */
@@ -210,10 +234,10 @@ typedef struct lines
                                    Note: program will exit if -1 before leaving get_atomicdata
                                  */
   double freq;                  /* The frequency of the resonance line */
-  double f;                     /*oscillator strength.  Note: it might be better to keep PI_E2_OVER_MEC flambda times this.
+  double f;                     /* oscillator strength.  Note: it might be better to keep PI_E2_OVER_MEC flambda times this.
                                    Could do that by initializing */
   double el, eu;                /* The energy of the lower and upper levels for the transition */
-  double pow;                   /*The power in the lines as last calculated in total_line_emission */
+  double pow;                   /* The power in the lines as last calculated in total_line_emission */
   int where_in_list;            /* Position of line in the line list: i.e. lin_ptr[line[n].where_in_list] points
                                    to the line. Added by SS for use in macro atom method. */
   int down_index;               /* This is to map from the line to knowing which macro atom jump it is (and therefore find
