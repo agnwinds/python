@@ -122,6 +122,10 @@ get_atomic_data (masterfile)
   double q;
   double freq, f, exx, et, p;
   double the_ground_frac[20];
+  double auger_branches[NAUGER_ELECTRONS];      /* array to hold branching ratios for number of Auger electrons */
+  double Avalue_auger;          /* Auger A value for macro-atom data */
+  int ne_records;               /* number of Auger electron entries to read in for each Auger record (normally 4) */
+  int target_istate;
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
   int simple_line_ignore[NIONS], cstren_no_line;
@@ -180,6 +184,7 @@ get_atomic_data (masterfile)
   ntop_phot_simple = ntop_phot_macro = 0;
   nlte_levels = 0;
   nlines = nlines_simple = nlines_macro = 0;
+  nauger_macro = 0;
   lineno = 0;
   nxphot = 0;
 
@@ -256,6 +261,8 @@ structure does not have this property! */
           choice = 'r';         /* A simple atom line */
         else if (strncmp (word, "LinMacro", 8) == 0)
           choice = 'r';         /* A line for a Macro Atom */
+        else if (strncmp (word, "AugerMacro", 7) == 0)
+          choice = 'a';         /* An Auger record for a Macro Atom */
         else if (strncmp (word, "Frac", 4) == 0)
           choice = 'f';         /*ground state fractions */
         else if (strncmp (word, "InnerVYS", 8) == 0)
@@ -1310,6 +1317,125 @@ described as macro-levels. */
             exit (0);
           }
           break;
+
+/**
+ * @section Auger macro-atom data
+ */
+        case 'a':
+          if (sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &levl, &levu, &Avalue_auger, &ne_records) != 7)
+          {
+            Error ("Auger macro-atom input incorrectly formatted\n");
+            Error ("Get_atomic_data: %s\n", aline);
+            exit (0);
+          }
+
+          /* check we haven't asked for too many Auger electron pathways */
+          if (ne_records > NAUGER_ELECTRONS)
+          {
+            Error ("Too many Auger electron records specified (%d), should be < NAUGER_ELECTRONS (%d)\n", ne_records, NAUGER_ELECTRONS);
+            exit (0);
+          }
+
+          if (nauger_macro < NAUGER_MACRO)
+          {
+            //need to identify the configurations associated with the current and target levels 
+            n = 0;
+            while ((config[n].z != z || config[n].istate != istate || config[n].ilv != levu) && n < nlevels)
+              n++;
+
+            /* check we've found a valid macro-atom level */
+            if (n == nlevels)
+            {
+              Error_silent ("Get_atomic_data: No configuration found to match Auger record %d\n", lineno);
+              exit (0);
+            }
+            if (config[n].macro_info == -1)
+            {
+              Error ("Getatomic_data: Macro Atom Auger data supplied for config %d\n but there is no suitable level data\n", n);
+              exit (0);
+            }
+
+            /* copy information into the auger macro structure */
+            auger_macro[nauger_macro].z = z;
+            auger_macro[nauger_macro].istate = istate;
+            auger_macro[nauger_macro].nconfig = n;
+            auger_macro[nauger_macro].iauger = nauger_macro;
+            auger_macro[nauger_macro].nauger = 0;
+            auger_macro[nauger_macro].Avalue_auger = Avalue_auger;
+            config[n].iauger = nauger_macro;
+
+            /* we now need to read the next line of Auger data which should be of form 
+               AugNels 26 24 -1 -1 -1 -1
+               the length depends on the variable ne_records
+             */
+            if (fgets (aline, LINELENGTH, fptr) == NULL)
+            {
+              Error ("Get_atomic_data: Problem reading Auger macro-atom record\n");
+              Error ("Get_atomic_data: %s\n", aline);
+              exit (0);
+            }
+
+            /* at the moment we a maximum of 4 auger electrons ejected but this could 
+               be expanded by reading in more entries here */
+            nwords = sscanf (aline, "%*s %d %d %le %le %le %le",
+                             &z, &istate, &auger_branches[0], &auger_branches[1], &auger_branches[2], &auger_branches[3]);
+
+            if (nwords != ne_records + 3)
+            {
+              Error ("Auger macro-atom input incorrectly formatted\n");
+              Error ("Get_atomic_data: %s\n", aline);
+              exit (0);
+            }
+
+            /* cycle through each of the possible ion stages we can go to and populate the 
+               branching ratio arrays */
+            for (m = 0; m < ne_records; m++)
+            {
+              if (auger_branches[m] == -1)
+              {
+                auger_macro[nauger_macro].branching_ratio[m] = -1;
+              }
+
+              else
+              {
+                auger_macro[nauger_macro].nauger++;
+
+                /* the data is supplied in number of events per 10,000, so we create a branching ratio here */
+                auger_macro[nauger_macro].branching_ratio[m] = auger_branches[m] / 10000.0;
+
+                /* for the moment, we are assuming Auger ionization occurs to the ground state of the 
+                   target ion */
+                target_istate = istate + 1 + m;
+
+                n = 0;
+                while ((config[n].z != z || config[n].istate != target_istate || config[n].ilv != 1) && n < nlevels)
+                  n++;
+                if (n == nlevels)
+                {
+                  Error ("Get_atomic_data: No target ion configuration found to match Auger macro record %d\n", lineno);
+                  exit (0);
+                }
+
+                auger_macro[nauger_macro].nconfig_target[m] = n;
+              }
+            }
+
+            /* if we got here it means all the entries were -1, so there's 1 Auger pathway only */
+            if (auger_macro[nauger_macro].nauger == 0)
+            {
+              auger_macro[nauger_macro].nauger = 1;
+            }
+            /* also record the number of possible auger jumps in the config structure */
+            config[n].nauger = auger_macro[nauger_macro].nauger;
+            nauger_macro++;
+          }
+          else
+          {
+            Error ("getatomic_data: file %s line %d: More Auger macro-atom records than allowed. Increase NAUGER_MACRO in atomic.h\n", file,
+                   lineno);
+            exit (0);
+          }
+
 
 
           /*Input data for innershell ionization followed by
