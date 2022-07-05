@@ -710,7 +710,14 @@ lorentz_transform (p_in, p_out, v)
 
   if (rel_mode == REL_MODE_LINEAR)
   {
-    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
+    if (p_in->frame == F_LOCAL)
+    {
+      f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
+    }
+    else
+    {
+      f_out = p_out->freq = f_in / (1. + vel / VLIGHT);
+    }
     return (ierr);
   }
 
