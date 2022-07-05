@@ -17,7 +17,7 @@
 #include "python.h"
 
 
-#define STEPS 100000
+#define STEPS 1000000
 
 
 
