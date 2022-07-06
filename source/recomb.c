@@ -963,7 +963,6 @@ init_freebound (t1, t2, f1, f2)
 
       for (j = 0; j < NTEMPS; j++)
       {
-        Log ("HERE j %d\n", j);
         t = fb_t[j];
         xnrecomb[nion][j] = xinteg_fb (t, 0.0, VERY_BIG, nion, FB_RATE);
         xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, VERY_BIG, nion, FB_RATE);
@@ -1198,8 +1197,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   nmin = nmax = 0;
   if (-1 < nion && nion < nions)        //Get emissivity for this specific ion_number
   {
-    Log ("HERE nion %d phot info %d\n", nion, ion[nion].phot_info);
-
     if (ion[nion].phot_info > 0)        // topbase or hybrid
     {
       nmin = ion[nion].ntop_first;

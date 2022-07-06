@@ -1431,6 +1431,8 @@ described as macro-levels. */
             exit (0);
           }
 
+          break;
+
 
 
           /*Input data for innershell ionization followed by

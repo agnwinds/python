@@ -267,6 +267,8 @@ init_atomic_data ()
     config[i].n_bbd_jump = 0;
     config[i].n_bfu_jump = 0;
     config[i].n_bfd_jump = 0;
+    config[i].iauger = -1;
+    config[i].nauger = 0;
   }
 
   for (n = 0; n < NLINES; n++)
