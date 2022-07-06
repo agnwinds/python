@@ -743,16 +743,23 @@ upsilon (n_coll, u0)
  * @brief Printout some information about auger macro-atom data for diagnostics
  **********************************************************/
 
-void check_auger_macro()
-{
-  int n, m;
-  int nconfigu, nconfigl;
+// void check_auger_macro()
+// {
+//   int n, iauger;
+//   int nconfigu, nconfigl;
 
-  for (n = 0; n < nlines; n++)
-  {
-    nconfigu = 
-  }
-}
+//   for (n = 0; n < nlines; n++)
+//   {
+//     nconfigu = line[n].nconfigu;
+
+//     if (config[nconfigu].iauger >= 0)
+//     {
+//       iauger = config[nconfigu].iauger;
+
+
+//     }
+//   }
+// }
 
 
 

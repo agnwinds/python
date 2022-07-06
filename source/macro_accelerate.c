@@ -320,7 +320,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* throw an error if this normalisation is not zero */
     /* note that the ground state is a special case here (improve error check) */
-    if ((fabs (norm) > 1e-15 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
+    if ((fabs (norm) > 1e-14 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
       Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", norm, uplvl);
   }
 
