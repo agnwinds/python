@@ -161,12 +161,12 @@ extract (w, p, itype)
   }
   if (itype == PTYPE_DISK)
   {
-//    if (modes.save_photons)
-//      save_photons (&p_in, "extract_begin");
+    if (modes.save_photons)
+      save_photons (&p_in, "extract_begin");
     if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
       Error ("extract: disk photon not in observer frame %d\n", ierr);
-//    if (modes.save_photons)
-//      save_photons (&p_in, "extract_begin_local");
+    if (modes.save_photons)
+      save_photons (&p_in, "extract_begin_local");
   }
   /*
    * At this point were are in a local frame for WIND and DISK photons,
