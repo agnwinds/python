@@ -738,6 +738,22 @@ upsilon (n_coll, u0)
   return (upsilon);
 }
 
+/**********************************************************/
+/**
+ * @brief Printout some information about auger macro-atom data for diagnostics
+ **********************************************************/
+
+void check_auger_macro()
+{
+  int n, m;
+  int nconfigu, nconfigl;
+
+  for (n = 0; n < nlines; n++)
+  {
+    nconfigu = 
+  }
+}
+
 
 
 

@@ -261,7 +261,7 @@ structure does not have this property! */
           choice = 'r';         /* A simple atom line */
         else if (strncmp (word, "LinMacro", 8) == 0)
           choice = 'r';         /* A line for a Macro Atom */
-        else if (strncmp (word, "AugerMacro", 7) == 0)
+        else if (strncmp (word, "AugMacro", 7) == 0)
           choice = 'a';         /* An Auger record for a Macro Atom */
         else if (strncmp (word, "Frac", 4) == 0)
           choice = 'f';         /*ground state fractions */
@@ -1322,7 +1322,7 @@ described as macro-levels. */
  * @section Auger macro-atom data
  */
         case 'a':
-          if (sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &levl, &levu, &Avalue_auger, &ne_records) != 7)
+          if (sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &levl, &levu, &Avalue_auger, &ne_records) != 6)
           {
             Error ("Auger macro-atom input incorrectly formatted\n");
             Error ("Get_atomic_data: %s\n", aline);
@@ -1380,7 +1380,7 @@ described as macro-levels. */
             nwords = sscanf (aline, "%*s %d %d %le %le %le %le",
                              &z, &istate, &auger_branches[0], &auger_branches[1], &auger_branches[2], &auger_branches[3]);
 
-            if (nwords != ne_records + 3)
+            if (nwords != ne_records + 2)
             {
               Error ("Auger macro-atom input incorrectly formatted\n");
               Error ("Get_atomic_data: %s\n", aline);
@@ -1391,17 +1391,17 @@ described as macro-levels. */
                branching ratio arrays */
             for (m = 0; m < ne_records; m++)
             {
-              if (auger_branches[m] == -1)
+              if (auger_branches[m] <= 0)
               {
-                auger_macro[nauger_macro].branching_ratio[m] = -1;
+                auger_macro[nauger_macro].branching_ratio[m] = 0.0;
               }
 
               else
               {
                 auger_macro[nauger_macro].nauger++;
 
-                /* the data is supplied in number of events per 10,000, so we create a branching ratio here */
-                auger_macro[nauger_macro].branching_ratio[m] = auger_branches[m] / 10000.0;
+                /* the data is supplied as a branching ratio so copy over */
+                auger_macro[nauger_macro].branching_ratio[m] = auger_branches[m];
 
                 /* for the moment, we are assuming Auger ionization occurs to the ground state of the 
                    target ion */
@@ -1420,11 +1420,6 @@ described as macro-levels. */
               }
             }
 
-            /* if we got here it means all the entries were -1, so there's 1 Auger pathway only */
-            if (auger_macro[nauger_macro].nauger == 0)
-            {
-              auger_macro[nauger_macro].nauger = 1;
-            }
             /* also record the number of possible auger jumps in the config structure */
             config[n].nauger = auger_macro[nauger_macro].nauger;
             nauger_macro++;
@@ -2600,6 +2595,8 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   Log ("We have read in %3d Inner shell photoionization cross sections\n", n_inner_tot);        //110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("                %3d have matching electron yield data\n", n_elec_yield_tot);
 //  Log ("                %3d have matching fluorescent yield data\n", n_fluor_yield_tot);
+  Log ("We have read in %3d Auger ionization records for macro-atoms\n", nauger_macro);
+
 
   Log ("We have read in %3d Dielectronic recombination coefficients\n", ndrecomb);      //110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("We have read in %3d Badnell totl Radiative rate coefficients\n", n_total_rr);
@@ -2717,7 +2714,7 @@ a total emission oscillator strength for the level....really ought to be radiati
     }
     else
     {                           // a macro atom so check for collision data
-      if (line[n].f <= 0 && line[n].coll_index == -999)
+      if (line[n].f < 0 && line[n].coll_index == -999)
       {
         Error ("get_atomic_data: Macro line with neither collision data or oscillator strength\n");
         Error ("get_atomic_data: n %3d ion_no %3d z %2d ion %2d freq %8.1e f %6.3f macro %2d coll %4d up_down %2d %2d\n",

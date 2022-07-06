@@ -272,7 +272,7 @@ init_atomic_data ()
   for (n = 0; n < NLINES; n++)
   {
     line[n].freq = -1;
-    line[n].f = 0;
+    line[n].f = -1;
     line[n].nion = -1;
     line[n].gl = line[n].gu = 0;
     line[n].el = line[n].eu = 0.0;
