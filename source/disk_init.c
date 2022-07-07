@@ -148,14 +148,14 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     log_g = (geff ((r + 0.5 * dr) / rmin));
     v = sqrt (GRAV * geo.mstar / r);
     v /= VLIGHT;
-    if (rel_mode == REL_MODE_FULL)
-    {
-      factor = sqrt (1. - v * v);
-    }
-    else
-    {
-      factor = 1.0;
-    }
+//    if (rel_mode == REL_MODE_FULL)
+//    {
+//      factor = sqrt (1. - v * v);
+//    }
+//    else
+//    {
+    factor = 1.0;
+//    }
 
     if (spectype > -1)
     {
@@ -204,14 +204,14 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     v = sqrt (GRAV * geo.mstar / r);
     v /= VLIGHT;
 
-    if (rel_mode == REL_MODE_FULL)
-    {
-      factor = sqrt (1. - v * v);
-    }
-    else
-    {
-      factor = 1.0;
-    }
+//    if (rel_mode == REL_MODE_FULL)
+//    {
+//      factor = sqrt (1. - v * v);
+//    }
+//    else
+//    {
+    factor = 1.0;
+//    }
 
     if (spectype > -1)
     {
