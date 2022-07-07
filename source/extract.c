@@ -97,6 +97,8 @@ extract (w, p, itype)
   double zz;
   double dvds;
   int ishell;
+  double weight_scale;
+  double w_orig;
 
   tau = 0.0;
 
@@ -172,7 +174,7 @@ extract (w, p, itype)
    * At this point were are in a local frame for WIND and DISK photons,
    * but the global frame for the central source and boundary layer
    */
-
+  w_orig = p_in.w;
   for (n = MSPEC; n < nspectra; n++)
   {
     /*
@@ -233,14 +235,22 @@ extract (w, p, itype)
      */
 
     if (modes.save_extract_photons)
-      save_photons (&p_in, "extract_b");
+      save_photons (&p_in, "extract_p_in_b4_dummy");
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
     {
       stuff_phot (&p_in, &p_dummy);
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
+
+
+
       observer_to_local_frame (&p_dummy, &p_dummy);
+
+
+
+      //     p_in.w = p_in.w / weight_scale / weight_scale;
+
       stuff_phot (&p_in, &pp);
       stuff_v (p_dummy.lmn, pp.lmn);
     }
@@ -251,15 +261,27 @@ extract (w, p, itype)
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
 
       if (modes.save_extract_photons)
-        save_photons (&p_dummy, "extract_b1");
+        save_photons (&p_dummy, "extract_dummy_b4");
 
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
 
+      weight_scale = p_dummy.w / w_orig;
+
       if (modes.save_extract_photons)
-        save_photons (&p_dummy, "extract_b2");
+        save_photons (&p_dummy, "extract_dummy_after");
 
       stuff_phot (&p_in, &pp);
+
+      pp.w = w_orig / weight_scale / weight_scale;
+
+
+      Diag ("Xtest %5d %12.5e  %12.5e %12.5e\n", n, weight_scale, pp.x[0], pp.x[1]);
+
+
       stuff_v (p_dummy.lmn, pp.lmn);
+      if (modes.save_extract_photons)
+        save_photons (&pp, "extract_local_final");
+
     }
     else
     {
@@ -268,8 +290,8 @@ extract (w, p, itype)
     }
 
 
-    if (modes.save_extract_photons)
-      save_photons (&pp, "extract_c");
+    //  if (modes.save_extract_photons)
+    //    save_photons (&pp, "extract_c");
 
     /* At this stage, we are in the local frame for
        photons which are from the wind or the star.
@@ -294,12 +316,16 @@ extract (w, p, itype)
     else if (itype == PTYPE_DISK)
     {
 
-//      if (modes.save_photons)
-//        save_photons (&pp, "extract_b4_reweight");
+      if (modes.save_photons)
+        save_photons (&pp, "extract_b4_reweight");
 
 
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
+
+      if (modes.save_photons)
+        save_photons (&pp, "extract_aft_reweight");
+
 
     }
     else if (pp.nres > -1 && pp.nres < NLINES)
@@ -364,7 +390,7 @@ extract (w, p, itype)
     /* If one has reached this point, we extract the photon and increment the spectrum */
 
     if (modes.save_extract_photons)
-      save_photons (&pp, "extract_f");
+      save_photons (&pp, "extract_b4_extr_one");
 
     extract_one (w, &pp, n);
 
