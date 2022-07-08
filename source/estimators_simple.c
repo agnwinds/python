@@ -302,14 +302,10 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 
 
   iangle = (angle) / binw;      //Turn the angle into an integer to pass into the flux array
-//  if (xplasma->nplasma == 0)
-//    printf ("BOOM in cell 0 photon has angle %e (%i) ", angle, iangle);
   xplasma->F_UV_ang_x[iangle] += flux[0];
   xplasma->F_UV_ang_y[iangle] += flux[1];
   xplasma->F_UV_ang_z[iangle] += flux[2];
 
-//  if (xplasma->nplasma == 0)
-//    printf ("relvant estimator now %e\n", xplasma->F_UV_ang_x[iangle]);
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
