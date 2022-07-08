@@ -83,6 +83,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].tau = 0;
     p[i].nres = p[i].line_res = -1;     // It's a continuum photon
     p[i].nnscat = 1;
+    p[i].np = istart + i;
     if (geo.reverb_disk == REV_DISK_UNCORRELATED)
       p[i].path = 0;            //If we're assuming disk photons are uncorrelated, leave them at 0
 

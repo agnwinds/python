@@ -143,7 +143,6 @@ wind_luminosity (f1, f2, mode)
 #endif
 
 
-  Log_parallel ("Hello world %d\n", rank_global);
 
 
   for (nplasma = my_nmin; nplasma < my_nmax; nplasma++)

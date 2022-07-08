@@ -127,6 +127,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
     }
 
     trans_phot_single (w, &p[nphot], iextract);
+
   }
 
   Log ("\n");
@@ -508,6 +509,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     p->nrscat = pp.nrscat;
     p->w = pp.w;
   }
+
+  if (modes.save_photons)
+    save_photons (&pp, "End");
 
   return (0);
 }
