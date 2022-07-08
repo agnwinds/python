@@ -103,11 +103,6 @@ extract (w, p, itype)
   tau = 0.0;
 
 
-  if (modes.save_extract_photons)
-  {
-    save_photons (p, "Extract1");
-  }
-
 
   ierr = check_frame (p, F_OBSERVER, "extract_start");
   if (ierr)
@@ -140,7 +135,6 @@ extract (w, p, itype)
       dvds_max = get_dvds_max (&p_in);
       tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
 
-      /* then turn into a probability */
       p_norm = p_escape_from_tau (tau_norm);
 
     }
@@ -163,17 +157,15 @@ extract (w, p, itype)
   }
   if (itype == PTYPE_DISK)
   {
-    if (modes.save_photons)
-      save_photons (&p_in, "extract_begin");
     if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
       Error ("extract: disk photon not in observer frame %d\n", ierr);
-    if (modes.save_photons)
-      save_photons (&p_in, "extract_begin_local");
   }
+
   /*
    * At this point were are in a local frame for WIND and DISK photons,
    * but the global frame for the central source and boundary layer
    */
+
   w_orig = p_in.w;
   for (n = MSPEC; n < nspectra; n++)
   {
@@ -230,12 +222,13 @@ extract (w, p, itype)
 
 
     /* At this point we need to calculate the desired direction of the photon in
-       the local frame of the disk or wind.  PTYPE_STAR, PTYPE_BL do not 
-       need this test
-     */
+       the local frame of the disk or wind.  Additionally, we have to 
+       mske a correction to the weights of these photons, due to
+       an an effect of special relativty which accounts for solid angle
+       corrections.
 
-    if (modes.save_extract_photons)
-      save_photons (&p_in, "extract_p_in_b4_dummy");
+       PTYPE_STAR, PTYPE_BL do not need this test
+     */
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
     {
@@ -243,15 +236,13 @@ extract (w, p, itype)
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
 
-
-
       observer_to_local_frame (&p_dummy, &p_dummy);
 
-
-
-      //     p_in.w = p_in.w / weight_scale / weight_scale;
+      weight_scale = p_dummy.w / w_orig;
 
       stuff_phot (&p_in, &pp);
+
+      pp.w = w_orig / weight_scale / weight_scale;
       stuff_v (p_dummy.lmn, pp.lmn);
     }
     else if (itype == PTYPE_DISK && rel_mode != REL_MODE_LINEAR)
@@ -260,28 +251,14 @@ extract (w, p, itype)
       p_dummy.frame = F_OBSERVER;
       stuff_v (xxspec[n].lmn, p_dummy.lmn);
 
-      if (modes.save_extract_photons)
-        save_photons (&p_dummy, "extract_dummy_b4");
-
       observer_to_local_frame_disk (&p_dummy, &p_dummy);
 
       weight_scale = p_dummy.w / w_orig;
 
-      if (modes.save_extract_photons)
-        save_photons (&p_dummy, "extract_dummy_after");
-
       stuff_phot (&p_in, &pp);
 
       pp.w = w_orig / weight_scale / weight_scale;
-
-
-//      Diag ("Xtest %5d %12.5e  %12.5e %12.5e\n", n, weight_scale, pp.x[0], pp.x[1]);
-
-
       stuff_v (p_dummy.lmn, pp.lmn);
-      if (modes.save_extract_photons)
-        save_photons (&pp, "extract_local_final");
-
     }
     else
     {
@@ -290,13 +267,11 @@ extract (w, p, itype)
     }
 
 
-    //  if (modes.save_extract_photons)
-    //    save_photons (&pp, "extract_c");
 
     /* At this stage, we are in the local frame for
        photons which are from the wind or the star.
 
-       pp is the phton we are going to extract
+       pp is the photon we are going to extract
 
 
        * Re-weight the photons. Note that photons
@@ -316,16 +291,8 @@ extract (w, p, itype)
     else if (itype == PTYPE_DISK)
     {
 
-      if (modes.save_photons)
-        save_photons (&pp, "extract_b4_reweight");
-
-
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
-
-      if (modes.save_photons)
-        save_photons (&pp, "extract_aft_reweight");
-
 
     }
     else if (pp.nres > -1 && pp.nres < NLINES)
@@ -389,8 +356,6 @@ extract (w, p, itype)
 
     /* If one has reached this point, we extract the photon and increment the spectrum */
 
-    if (modes.save_extract_photons)
-      save_photons (&pp, "extract_b4_extr_one");
 
     extract_one (w, &pp, n);
 
@@ -458,7 +423,6 @@ extract_one (w, pp, nspec)
   tau = 0;
   pp->ds = 0;
   icell = 0;
-  /* Now we can actually extract the reweighted photon */
 
   stuff_phot (pp, &pstart);
   stuff_phot (pp, &pdummy_orig);
@@ -473,10 +437,9 @@ extract_one (w, pp, nspec)
     istat = translate (w, pp, 20., &tau, &nres);
     icell++;
 
-
-
     stuff_phot (pp, &pdummy);
     istat = walls (pp, &pstart, normal);
+
     if (istat == -1)
     {
 
@@ -538,7 +501,6 @@ extract_one (w, pp, nspec)
       lfreqmax = log10 (xxspec[nspec].freqmax);
       ldfreq = (lfreqmax - lfreqmin) / NWAVE_EXTRACT;
 
-      /* find out where we are in log space */
       k1 = (int) ((log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq);
       if (k1 < 0)
       {
@@ -580,7 +542,9 @@ extract_one (w, pp, nspec)
       {
         if (geo.reverb_filter_lines == -2 || pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
         {
-          //If this photon has scattered, been reprocessed, or originated in the wind it 's important
+          /*If this photon has scattered, been reprocessed, 
+            or originated in the wind it 's important
+            */
           pstart.w = pp->w * exp (-(tau));
           stuff_v (xxspec[nspec].lmn, pstart.lmn);
           delay_dump_single (&pstart, nspec);
@@ -596,10 +560,5 @@ extract_one (w, pp, nspec)
       ("Extract: Abnormal photon %5d  %d %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e\n",
        pp->np, istat, pp->x[0], pp->x[1], pp->x[2], pp->lmn[0], pp->lmn[1], pp->lmn[2]);
 
-  if (modes.save_photons || modes.save_extract_photons)
-  {
-    pp->tau = tau;
-    save_photons (pp, "Extracted");
-  }
   return (istat);
 }
