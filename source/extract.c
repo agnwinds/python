@@ -275,7 +275,7 @@ extract (w, p, itype)
       pp.w = w_orig / weight_scale / weight_scale;
 
 
-      Diag ("Xtest %5d %12.5e  %12.5e %12.5e\n", n, weight_scale, pp.x[0], pp.x[1]);
+//      Diag ("Xtest %5d %12.5e  %12.5e %12.5e\n", n, weight_scale, pp.x[0], pp.x[1]);
 
 
       stuff_v (p_dummy.lmn, pp.lmn);
