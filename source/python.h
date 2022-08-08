@@ -112,9 +112,9 @@ extern int NWAVE_NOW;                  //Either NWAVE_IONIZ or NWAVE_EXTRACT dep
 #include "math_struc.h"
 
 
-/* Geometry is an actual structure which exists at the beginning of th program
+/* Geometry is an actual structure which exists at the beginning of the program
    It carries the variables which define the geometry.  Reasonable values of each of
-   these should be defined before it is altered with inputs fromt eh terminal. 
+   these should be defined before it is altered with inputs from the terminal. 
    The geometry structure is used to transfer all of the information about a wind
 
 
