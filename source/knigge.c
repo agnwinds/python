@@ -432,9 +432,9 @@ double
 kn_vzero (r)
      double r;
 {
-  double t, teff ();
+  double t;
   double ratio, v;
-  ratio = r / geo.rstar;
+  ratio = r / geo.disk_rad_min;
   if (ratio < kfudge)
     ratio = kfudge;
   t = teff (ratio);
@@ -476,7 +476,7 @@ kn_wind_mdot_integral (double r, void *params)
   double x, ratio;
 
 
-  ratio = r / geo.rstar;
+  ratio = r / geo.disk_rad_min;
   if (ratio < kfudge)
     ratio = kfudge;
   t = teff (ratio);
@@ -515,7 +515,7 @@ kn_rho_zero (ndom, r)
   one_dom = &zdom[ndom];
 
 
-  ratio = r / geo.rstar;
+  ratio = r / geo.disk_rad_min;
 
   if (ratio < kfudge)
     ratio = kfudge;

@@ -26,7 +26,7 @@
 /** 
  * @brief      returns the specific band-limited luminosity in macro-atoms
  *
- * @param [in] int  mode   vvariable which controls whether or not we need to compute the
+ * @param [in] int  mode   variable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
  *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
  *            see #define statements in python.h and code in xdefine_phot().
