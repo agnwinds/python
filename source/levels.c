@@ -116,12 +116,12 @@ levels (xplasma, mode)
         m = ion[nion].first_nlte_level;
         m_ground = m;           //store the ground state index - allow for gs energy neq 0 (SS) 
         nlevden = ion[nion].first_levden;
-        xplasma->levden[nlevden] = config[m].g / z;     //Assumes first level is ground state
+        xplasma->levden[nlevden] = xconfig[m].g / z;    //Assumes first level is ground state
         for (n = 1; n < ion[nion].nlte; n++)
         {
           m++;
           nlevden++;
-          xplasma->levden[nlevden] = weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt) / z;
+          xplasma->levden[nlevden] = weight * xconfig[m].g * exp ((-xconfig[m].ex + xconfig[m_ground].ex) / kt) / z;
         }
       }
     }

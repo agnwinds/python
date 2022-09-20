@@ -1327,30 +1327,30 @@ wind_rad_init ()
 
     for (i = 0; i < nlevels_macro; i++)
     {
-      for (njump = 0; njump < config[i].n_bbu_jump; njump++)
+      for (njump = 0; njump < xconfig[i].n_bbu_jump; njump++)
       {
-        macromain[n].jbar[config[i].bbu_indx_first + njump] = 0.0;
+        macromain[n].jbar[xconfig[i].bbu_indx_first + njump] = 0.0;
       }
-      for (njump = 0; njump < config[i].n_bfu_jump; njump++)
+      for (njump = 0; njump < xconfig[i].n_bfu_jump; njump++)
       {
-        macromain[n].gamma[config[i].bfu_indx_first + njump] = 0.0;
-        macromain[n].gamma_e[config[i].bfu_indx_first + njump] = 0.0;
-        macromain[n].alpha_st[config[i].bfd_indx_first + njump] = 0.0;
-        macromain[n].alpha_st_e[config[i].bfd_indx_first + njump] = 0.0;
+        macromain[n].gamma[xconfig[i].bfu_indx_first + njump] = 0.0;
+        macromain[n].gamma_e[xconfig[i].bfu_indx_first + njump] = 0.0;
+        macromain[n].alpha_st[xconfig[i].bfd_indx_first + njump] = 0.0;
+        macromain[n].alpha_st_e[xconfig[i].bfd_indx_first + njump] = 0.0;
       }
 
 
-      for (njump = 0; njump < config[i].n_bfd_jump; njump++)
+      for (njump = 0; njump < xconfig[i].n_bfd_jump; njump++)
       {
         if (plasmamain[n].t_e > 1.0)
         {
-          macromain[n].recomb_sp[config[i].bfd_indx_first + njump] = alpha_sp (&phot_top[config[i].bfd_jump[njump]], &plasmamain[n], 0);
-          macromain[n].recomb_sp_e[config[i].bfd_indx_first + njump] = alpha_sp (&phot_top[config[i].bfd_jump[njump]], &plasmamain[n], 2);
+          macromain[n].recomb_sp[xconfig[i].bfd_indx_first + njump] = alpha_sp (&phot_top[xconfig[i].bfd_jump[njump]], &plasmamain[n], 0);
+          macromain[n].recomb_sp_e[xconfig[i].bfd_indx_first + njump] = alpha_sp (&phot_top[xconfig[i].bfd_jump[njump]], &plasmamain[n], 2);
         }
         else
         {
-          macromain[n].recomb_sp[config[i].bfd_indx_first + njump] = 0.0;
-          macromain[n].recomb_sp_e[config[i].bfd_indx_first + njump] = 0.0;
+          macromain[n].recomb_sp[xconfig[i].bfd_indx_first + njump] = 0.0;
+          macromain[n].recomb_sp_e[xconfig[i].bfd_indx_first + njump] = 0.0;
         }
 
       }

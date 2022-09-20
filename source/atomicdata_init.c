@@ -92,13 +92,13 @@ init_atomic_data ()
   }
 
 
-  if (config != NULL)
+  if (xconfig != NULL)
   {
-    free (config);
+    free (xconfig);
   }
-  config = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
+  xconfig = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
 
-  if (config == NULL)
+  if (xconfig == NULL)
   {
     Error ("There is a problem in allocating memory for the config structure\n");
     exit (0);
@@ -245,10 +245,10 @@ init_atomic_data ()
 
   for (i = 0; i < NLEVELS; i++)
   {
-    config[i].n_bbu_jump = 0;   // initialising the number of jumps from each level to 0. (SS)
-    config[i].n_bbd_jump = 0;
-    config[i].n_bfu_jump = 0;
-    config[i].n_bfd_jump = 0;
+    xconfig[i].n_bbu_jump = 0;  // initialising the number of jumps from each level to 0. (SS)
+    xconfig[i].n_bbd_jump = 0;
+    xconfig[i].n_bfu_jump = 0;
+    xconfig[i].n_bfd_jump = 0;
   }
 
   for (n = 0; n < NLINES; n++)

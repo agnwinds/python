@@ -19,7 +19,7 @@ double rho2nh;                  /* Conversion constant from rho to nh the number
 
 IonPtr ion;
 
-ConfigPtr config;
+ConfigPtr xconfig;
 
 LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that contains all the data, *lin_ptr
                                    is an array which contains a frequency ordered set of ptrs to line */

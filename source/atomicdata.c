@@ -627,7 +627,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 
           if (mflag == 1)
           {
-            config[nlevels].macro_info = 1;
+            xconfig[nlevels].macro_info = 1;
 
             /* Extra check added here to be sure that the level emissivities used in the
                detailed spectrum calculation won't get messed up. The next loop should
@@ -649,20 +649,20 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
           }
           else
           {
-            config[nlevels].macro_info = 0;
+            xconfig[nlevels].macro_info = 0;
             nlevels_simple++;
           }
 
-          config[nlevels].z = z;
-          config[nlevels].istate = istate;
-          config[nlevels].isp = islp;
-          config[nlevels].ilv = ilv;
-          config[nlevels].nion = n;
-          config[nlevels].q_num = qqnum;
-          config[nlevels].g = gg;
-          config[nlevels].log_g = log (gg);     //The log version used for integrals in freebound
-          config[nlevels].ex = exx;
-          config[nlevels].rad_rate = rl;
+          xconfig[nlevels].z = z;
+          xconfig[nlevels].istate = istate;
+          xconfig[nlevels].isp = islp;
+          xconfig[nlevels].ilv = ilv;
+          xconfig[nlevels].nion = n;
+          xconfig[nlevels].q_num = qqnum;
+          xconfig[nlevels].g = gg;
+          xconfig[nlevels].log_g = log (gg);    //The log version used for integrals in freebound
+          xconfig[nlevels].ex = exx;
+          xconfig[nlevels].rad_rate = rl;
 
 
           if (ion[n].n_lte_max > 0)
@@ -671,21 +671,21 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             {
               ion[n].first_nlte_level = nlevels;
               ion[n].nlte = 1;
-              config[nlevels].nden = ion[n].first_levden;
+              xconfig[nlevels].nden = ion[n].first_levden;
             }
             else if (ion[n].n_lte_max > ion[n].nlte)
             {
-              config[nlevels].nden = ion[n].first_levden + ion[n].nlte;
+              xconfig[nlevels].nden = ion[n].first_levden + ion[n].nlte;
               ion[n].nlte++;
             }
             else
             {
-              config[nlevels].nden = -1;
+              xconfig[nlevels].nden = -1;
             }
           }
           else
           {
-            config[nlevels].nden = -1;
+            xconfig[nlevels].nden = -1;
           }
 
 
@@ -791,14 +791,14 @@ described as macro-levels. */
           }
 //  So now we know that this level can be associated with an ion
 
-          config[nlevels].z = z;
-          config[nlevels].istate = istate;
-          config[nlevels].isp = islp;
-          config[nlevels].ilv = ilv;
-          config[nlevels].nion = n;     //Internal index to ion structure
-          config[nlevels].q_num = qqnum;
-          config[nlevels].g = gg;
-          config[nlevels].ex = exx;
+          xconfig[nlevels].z = z;
+          xconfig[nlevels].istate = istate;
+          xconfig[nlevels].isp = islp;
+          xconfig[nlevels].ilv = ilv;
+          xconfig[nlevels].nion = n;    //Internal index to ion structure
+          xconfig[nlevels].q_num = qqnum;
+          xconfig[nlevels].g = gg;
+          xconfig[nlevels].ex = exx;
           if (ion[n].firstlevel < 0)
           {
             ion[n].firstlevel = nlevels;
@@ -812,9 +812,9 @@ described as macro-levels. */
    of the plasma stucture.  To do this set config[].ndent to -1
 */
 
-          config[nlevels].nden = -1;
+          xconfig[nlevels].nden = -1;
 
-          config[nlevels].rad_rate = 0.0;       // ?? Set emission oscillator strength for the level to zero
+          xconfig[nlevels].rad_rate = 0.0;      // ?? Set emission oscillator strength for the level to zero
 
           nlevels_simple++;
           nlevels++;
@@ -936,8 +936,8 @@ described as macro-levels. */
 
             // Locate upper state
             n = 0;
-            while ((config[n].z != z || config[n].istate != (istate + 1)        //note that the upper config will (SS)
-                    || config[n].ilv != levu) && n < nlevels)   //be the next ion up (istate +1) (SS)
+            while ((xconfig[n].z != z || xconfig[n].istate != (istate + 1)      //note that the upper config will (SS)
+                    || xconfig[n].ilv != levu) && n < nlevels)  //be the next ion up (istate +1) (SS)
               n++;
             if (n == nlevels)
             {
@@ -948,8 +948,8 @@ described as macro-levels. */
 
             // Locate lower state
             m = 0;
-            while ((config[m].z != z || config[m].istate != istate      //Now searching for the lower
-                    || config[m].ilv != levl) && m < nlevels)   //configuration (SS)
+            while ((xconfig[m].z != z || xconfig[m].istate != istate    //Now searching for the lower
+                    || xconfig[m].ilv != levl) && m < nlevels)  //configuration (SS)
               m++;
             if (m == nlevels)
             {
@@ -959,50 +959,50 @@ described as macro-levels. */
 
             // Populate upper state info
             phot_top[ntop_phot].uplev = n;      //store the level in the upper ion (SS)
-            config[n].bfd_jump[config[n].n_bfd_jump] = ntop_phot;       //record the line index as a downward bf Macro Atom jump (SS)
-            phot_top[ntop_phot].down_index = config[n].n_bfd_jump;      //record jump index in the photoionization structure
-            config[n].n_bfd_jump += 1;  //note that there is one more downwards bf jump available (SS)
-            if (config[n].n_bfd_jump > NBFJUMPS)
+            xconfig[n].bfd_jump[xconfig[n].n_bfd_jump] = ntop_phot;     //record the line index as a downward bf Macro Atom jump (SS)
+            phot_top[ntop_phot].down_index = xconfig[n].n_bfd_jump;     //record jump index in the photoionization structure
+            xconfig[n].n_bfd_jump += 1; //note that there is one more downwards bf jump available (SS)
+            if (xconfig[n].n_bfd_jump > NBFJUMPS)
             {
-              Error ("get_atomic_data: Too many downward b-f jump for ion %d\n", config[n].istate);
+              Error ("get_atomic_data: Too many downward b-f jump for ion %d\n", xconfig[n].istate);
               exit (0);
             }
 
 
             // Populate lower state info
             phot_top[ntop_phot].nlev = m;       //store lower configuration then find upper configuration(SS)
-            config[m].bfu_jump[config[m].n_bfu_jump] = ntop_phot;       //record the line index as an upward bf Macro Atom jump (SS)
-            phot_top[ntop_phot].up_index = config[m].n_bfu_jump;        //record the jump index in the photoionization structure
-            config[m].n_bfu_jump += 1;  //note that there is one more upwards bf jump available (SS)
-            if (config[m].n_bfu_jump > NBFJUMPS)
+            xconfig[m].bfu_jump[xconfig[m].n_bfu_jump] = ntop_phot;     //record the line index as an upward bf Macro Atom jump (SS)
+            phot_top[ntop_phot].up_index = xconfig[m].n_bfu_jump;       //record the jump index in the photoionization structure
+            xconfig[m].n_bfu_jump += 1; //note that there is one more upwards bf jump available (SS)
+            if (xconfig[m].n_bfu_jump > NBFJUMPS)
             {
-              Error ("get_atomic_data: Too many upward b-f jump for ion %d\n", config[m].istate);
+              Error ("get_atomic_data: Too many upward b-f jump for ion %d\n", xconfig[m].istate);
               exit (0);
             }
 
 
-            phot_top[ntop_phot].nion = config[m].nion;
+            phot_top[ntop_phot].nion = xconfig[m].nion;
             phot_top[ntop_phot].z = z;
             phot_top[ntop_phot].istate = istate;
             phot_top[ntop_phot].np = np;
             phot_top[ntop_phot].nlast = -1;
             phot_top[ntop_phot].macro_info = 1;
 
-            if (ion[config[m].nion].phot_info == -1)
+            if (ion[xconfig[m].nion].phot_info == -1)
             {
-              ion[config[m].nion].phot_info = 1;        /* Mark this ion as using TOPBASE photo */
-              ion[config[m].nion].ntop_first = ntop_phot;
+              ion[xconfig[m].nion].phot_info = 1;       /* Mark this ion as using TOPBASE photo */
+              ion[xconfig[m].nion].ntop_first = ntop_phot;
             }
 
             /* next line sees if the topbase level just read in is the ground state -
                if it is, the ion structure element ntop_ground is set to that topbase level number
                note that m is the lower level here */
-            if (m == config[ion[config[n].nion].first_nlte_level].ilv)
+            if (m == xconfig[ion[xconfig[n].nion].first_nlte_level].ilv)
             {
-              ion[config[n].nion].ntop_ground = ntop_phot;
+              ion[xconfig[n].nion].ntop_ground = ntop_phot;
             }
 
-            ion[config[m].nion].ntop++;
+            ion[xconfig[m].nion].ntop++;
 
             // Finish up this section by storing the photionization data properly
 
@@ -1063,8 +1063,8 @@ described as macro-levels. */
              * partition functions
              */
 
-            while ((config[n].nden == -1
-                    || config[n].z != z || config[n].istate != istate || config[n].isp != islp || config[n].ilv != ilv) && n < nlevels)
+            while ((xconfig[n].nden == -1
+                    || xconfig[n].z != z || xconfig[n].istate != istate || xconfig[n].isp != islp || xconfig[n].ilv != ilv) && n < nlevels)
               n++;
             if (n == nlevels)
             {
@@ -1072,10 +1072,10 @@ described as macro-levels. */
               Debug ("No level found to match PhotTop data in file %s on line %d. Data ignored.\n", file, lineno);
               break;            // There was no pre-existing ion
             }
-            if (ion[config[n].nion].macro_info == 0)    //this is not a macro atom level (SS)
+            if (ion[xconfig[n].nion].macro_info == 0)   //this is not a macro atom level (SS)
             {
               phot_top[ntop_phot].nlev = n;     // level associated with this crossection.
-              phot_top[ntop_phot].nion = config[n].nion;
+              phot_top[ntop_phot].nion = xconfig[n].nion;
               phot_top[ntop_phot].z = z;
               phot_top[ntop_phot].istate = istate;
               phot_top[ntop_phot].np = np;
@@ -1084,27 +1084,27 @@ described as macro-levels. */
 
               /* next line sees if the topbase level just read in is the ground state -
                  if it is, the ion structure element ntop_ground is set to that topbase level number */
-              if (islp == config[ion[config[n].nion].first_nlte_level].isp && ilv == config[ion[config[n].nion].first_nlte_level].ilv)
+              if (islp == xconfig[ion[xconfig[n].nion].first_nlte_level].isp && ilv == xconfig[ion[xconfig[n].nion].first_nlte_level].ilv)
               {
-                ion[config[n].nion].ntop_ground = ntop_phot;
+                ion[xconfig[n].nion].ntop_ground = ntop_phot;
               }
 
 
-              if (ion[config[n].nion].phot_info == -1)
+              if (ion[xconfig[n].nion].phot_info == -1)
               {
-                ion[config[n].nion].phot_info = 1;      /* Mark this ion as using TOPBASE photo */
-                ion[config[n].nion].ntop_first = ntop_phot;
+                ion[xconfig[n].nion].phot_info = 1;     /* Mark this ion as using TOPBASE photo */
+                ion[xconfig[n].nion].ntop_first = ntop_phot;
 
               }
-              else if (ion[config[n].nion].phot_info == (0))
+              else if (ion[xconfig[n].nion].phot_info == (0))
               {
                 Error
                   ("Get_atomic_data: file %s VFKY and Topbase photoionization x-sections in wrong order for nion %d\n",
-                   file, config[n].nion);
+                   file, xconfig[n].nion);
                 Error ("             Read topbase x-sections before VFKY if using both types!!\n");
                 exit (0);
               }
-              ion[config[n].nion].ntop++;
+              ion[xconfig[n].nion].ntop++;
               for (n = 0; n < np; n++)
               {
                 phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / PLANCK; // convert from eV to freqency
@@ -1518,7 +1518,7 @@ described as macro-levels. */
             eu = EV2ERGS * eu;
             //need to identify the configurations associated with the upper and lower levels (SS)
             n = 0;
-            while ((config[n].z != z || config[n].istate != istate || config[n].ilv != levl) && n < nlevels)
+            while ((xconfig[n].z != z || xconfig[n].istate != istate || xconfig[n].ilv != levl) && n < nlevels)
               n++;
             if (n == nlevels)
             {
@@ -1528,7 +1528,7 @@ described as macro-levels. */
 
 
             m = 0;
-            while ((config[m].z != z || config[m].istate != istate || config[m].ilv != levu) && m < nlevels)
+            while ((xconfig[m].z != z || xconfig[m].istate != istate || xconfig[m].ilv != levu) && m < nlevels)
               m++;
             if (m == nlevels)
             {
@@ -1539,22 +1539,22 @@ described as macro-levels. */
             /* Now that we know this is a valid transition for the macro atom record the data */
 
             nconfigl = n;       //record lower configuration (SS)
-            config[n].bbu_jump[config[n].n_bbu_jump] = nlines;  //record the line index as an upward bb Macro Atom jump(SS)
-            line[nlines].down_index = config[n].n_bbu_jump;     //record the index for the jump in the line structure
-            config[n].n_bbu_jump += 1;  //note that there is one more upwards jump available (SS)
-            if (config[n].n_bbu_jump > NBBJUMPS)
+            xconfig[n].bbu_jump[xconfig[n].n_bbu_jump] = nlines;        //record the line index as an upward bb Macro Atom jump(SS)
+            line[nlines].down_index = xconfig[n].n_bbu_jump;    //record the index for the jump in the line structure
+            xconfig[n].n_bbu_jump += 1; //note that there is one more upwards jump available (SS)
+            if (xconfig[n].n_bbu_jump > NBBJUMPS)
             {
-              Error ("get_atomic_data: Too many upward b-b jumps for ion %d\n", config[n].istate);
+              Error ("get_atomic_data: Too many upward b-b jumps for ion %d\n", xconfig[n].istate);
               exit (0);
             }
 
             nconfigu = m;       //record upper configuration (SS)
-            config[m].bbd_jump[config[m].n_bbd_jump] = nlines;  //record the line index as a downward bb Macro Atom jump (SS)
-            line[nlines].up_index = config[m].n_bbd_jump;       //record jump index in line structure
-            config[m].n_bbd_jump += 1;  //note that there is one more downwards jump available (SS)
-            if (config[m].n_bbd_jump > NBBJUMPS)
+            xconfig[m].bbd_jump[xconfig[m].n_bbd_jump] = nlines;        //record the line index as a downward bb Macro Atom jump (SS)
+            line[nlines].up_index = xconfig[m].n_bbd_jump;      //record jump index in line structure
+            xconfig[m].n_bbd_jump += 1; //note that there is one more downwards jump available (SS)
+            if (xconfig[m].n_bbd_jump > NBBJUMPS)
             {
-              Error ("get_atomic_data: Too many downward b-b jumps for ion %d\n", config[m].istate);
+              Error ("get_atomic_data: Too many downward b-b jumps for ion %d\n", xconfig[m].istate);
               exit (0);
             }
 
@@ -2570,7 +2570,7 @@ a total emission oscillator strength for the level....really ought to be radiati
       mstop = mstart + ion[line[n].nion].nlevels;
 
       m = mstart;
-      while (config[m].ilv != line[n].levl && m < mstop)
+      while (xconfig[m].ilv != line[n].levl && m < mstop)
         m++;
       if (m < mstop)
         line[n].nconfigl = m;
@@ -2578,12 +2578,12 @@ a total emission oscillator strength for the level....really ought to be radiati
         line[n].nconfigl = -9999;
 
       m = mstart;
-      while (config[m].ilv != line[n].levu && m < mstop)
+      while (xconfig[m].ilv != line[n].levu && m < mstop)
         m++;
       if (m < mstop)
       {
         line[n].nconfigu = m;
-        config[m].rad_rate += a21 (&line[n]);
+        xconfig[m].rad_rate += a21 (&line[n]);
       }
       else
         line[n].nconfigu = -9999;
@@ -2631,9 +2631,9 @@ or zero so that simple checks of true and false can be used for them */
 
   for (n = 0; n < nlevels; n++)
   {
-    if (config[n].macro_info == -1)
+    if (xconfig[n].macro_info == -1)
     {
-      Error ("Level %d for element %d and ion %d is of unknown type\n", n, config[n].z, config[n].istate);
+      Error ("Level %d for element %d and ion %d is of unknown type\n", n, xconfig[n].z, xconfig[n].istate);
       ierr = 1;
     }
   }
@@ -2675,14 +2675,14 @@ or zero so that simple checks of true and false can be used for them */
 
   for (i = 0; i < nlevels; i++)
   {
-    if (bb_max < config[i].n_bbu_jump)
-      bb_max = config[i].n_bbu_jump;
-    if (bb_max < config[i].n_bbd_jump)
-      bb_max = config[i].n_bbd_jump;
-    if (bf_max < config[i].n_bfu_jump)
-      bf_max = config[i].n_bfu_jump;
-    if (bf_max < config[i].n_bfd_jump)
-      bf_max = config[i].n_bfd_jump;
+    if (bb_max < xconfig[i].n_bbu_jump)
+      bb_max = xconfig[i].n_bbu_jump;
+    if (bb_max < xconfig[i].n_bbd_jump)
+      bb_max = xconfig[i].n_bbd_jump;
+    if (bf_max < xconfig[i].n_bfu_jump)
+      bf_max = xconfig[i].n_bfu_jump;
+    if (bf_max < xconfig[i].n_bfd_jump)
+      bf_max = xconfig[i].n_bfd_jump;
   }
 
 
