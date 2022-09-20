@@ -328,11 +328,11 @@ create_matom_level_map ()
 
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
-    nbbd = config[uplvl].n_bbd_jump;
+    nbbd = xconfig[uplvl].n_bbd_jump;
     for (n = 0; n < nbbd; n++)
     {
-      fprintf (fptr, "%d %d %12.2f\n", uplvl, line[config[uplvl].bbd_jump[n]].nconfigl,
-               VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
+      fprintf (fptr, "%d %d %12.2f\n", uplvl, line[xconfig[uplvl].bbd_jump[n]].nconfigl,
+               VLIGHT / line[xconfig[uplvl].bbd_jump[n]].freq / ANGSTROM);
     }
   }
   fclose (fptr);
@@ -357,7 +357,7 @@ line_matom_lum (uplvl)
   char outfile[LINELENGTH];
   FILE *fptr, *fopen ();
 
-  nbbd = config[uplvl].n_bbd_jump;
+  nbbd = xconfig[uplvl].n_bbd_jump;
 
   /* open a file in the folder where we store the matom line luminosities */
   sprintf (outfile, "%.100s/linelums_%.100s_lev%d.txt", folder, inroot, uplvl);
@@ -370,12 +370,12 @@ line_matom_lum (uplvl)
   fprintf (fptr, "# Lower Levels:     ");
   for (n = 0; n < nbbd; n++)
   {
-    fprintf (fptr, "%12d", line[config[uplvl].bbd_jump[n]].nconfigl);
+    fprintf (fptr, "%12d", line[xconfig[uplvl].bbd_jump[n]].nconfigl);
   }
   fprintf (fptr, "\n# Line Wavelengths:");
   for (n = 0; n < nbbd; n++)
   {
-    fprintf (fptr, " %12.2f", VLIGHT / line[config[uplvl].bbd_jump[n]].freq / ANGSTROM);
+    fprintf (fptr, " %12.2f", VLIGHT / line[xconfig[uplvl].bbd_jump[n]].freq / ANGSTROM);
   }
   fprintf (fptr, "\n");
 
@@ -385,7 +385,7 @@ line_matom_lum (uplvl)
   /* header info for each lower level */
   for (n = 0; n < nbbd; n++)
   {
-    fprintf (fptr, "  LowerLev%03d  ", line[config[uplvl].bbd_jump[n]].nconfigl);
+    fprintf (fptr, "  LowerLev%03d  ", line[xconfig[uplvl].bbd_jump[n]].nconfigl);
   }
   fprintf (fptr, "\n");
   // fprintf (fptr, "%12s %12s %12s %4s %4s %12s %12s %12s", "------------", "------------", "------------", "----", "----", "------------",
@@ -450,19 +450,19 @@ line_matom_lum_single (lum, xplasma, uplvl)
   freq_min = geo.sfmin;
   freq_max = geo.sfmax;
   /* identify number of bb downward jumps */
-  nbbd = config[uplvl].n_bbd_jump;
+  nbbd = xconfig[uplvl].n_bbd_jump;
   penorm = 0.0;
   m = 0;
   lum_tot = 0.0;
   /* work out how often we come out in each of these locations */
   for (n = 0; n < nbbd; n++)
   {
-    line_ptr = &line[config[uplvl].bbd_jump[n]];
+    line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
     if ((line_ptr->freq > freq_min) && (line_ptr->freq < freq_max))     // correct range
     {
       // bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
       bb_cont = (a21 (line_ptr) * 1.0);
-      eprbs[m] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);    //energy difference
+      eprbs[m] = bb_cont * (xconfig[uplvl].ex - xconfig[line[xconfig[uplvl].bbd_jump[n]].nconfigl].ex); //energy difference
       penorm += eprbs[m];
     }
     else
