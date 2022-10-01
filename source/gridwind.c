@@ -416,13 +416,13 @@ calloc_estimators (nelem)
   {
     Log_silent
       ("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
-       n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump, config[n].n_bfd_jump);
-    config[n].bbu_indx_first = size_Jbar_est;
-    size_Jbar_est += config[n].n_bbu_jump;
-    config[n].bfu_indx_first = size_gamma_est;
-    size_gamma_est += config[n].n_bfu_jump;
-    config[n].bfd_indx_first = size_alpha_est;
-    size_alpha_est += config[n].n_bfd_jump;
+       n, xconfig[n].n_bbu_jump, xconfig[n].n_bbd_jump, xconfig[n].n_bfu_jump, xconfig[n].n_bfd_jump);
+    xconfig[n].bbu_indx_first = size_Jbar_est;
+    size_Jbar_est += xconfig[n].n_bbu_jump;
+    xconfig[n].bfu_indx_first = size_gamma_est;
+    size_gamma_est += xconfig[n].n_bfu_jump;
+    xconfig[n].bfd_indx_first = size_alpha_est;
+    size_alpha_est += xconfig[n].n_bfd_jump;
   }
 
 

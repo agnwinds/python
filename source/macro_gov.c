@@ -572,11 +572,11 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
     for (index_fast_col = index_lvl; index_fast_col < ion[index_ion].first_nlte_level + ion[index_ion].nlte - 1; index_fast_col++)
     {
       {
-        if (config[index_fast_col + 1].rad_rate > 1.e15)
+        if (xconfig[index_fast_col + 1].rad_rate > 1.e15)
         {
-          fast_line.gl = config[index_lvl].g;
-          fast_line.gu = config[index_fast_col + 1].g;
-          fast_line.freq = (config[index_fast_col + 1].ex - config[index_lvl].ex) / PLANCK;
+          fast_line.gl = xconfig[index_lvl].g;
+          fast_line.gu = xconfig[index_fast_col + 1].g;
+          fast_line.freq = (xconfig[index_fast_col + 1].ex - xconfig[index_lvl].ex) / PLANCK;
           fast_line.f = 1e4;
           rate = q12 (&fast_line, xplasma->t_e) * xne;
           lower = conf_to_matrix[index_lvl];
@@ -596,14 +596,14 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
          done by looping over the numbers "bbu, bbd, bfu, bfd" which tell us how many
          processes there are. */
 
-      for (index_bbu = 0; index_bbu < config[index_lvl].n_bbu_jump; index_bbu++)
+      for (index_bbu = 0; index_bbu < xconfig[index_lvl].n_bbu_jump; index_bbu++)
       {
         /* These are bb upwards jumps. The rate in such a jump is given by
            Jbar which has been computed as a Monte Carlo estimator. I'm also
            including a collisional term (which depends on ne). */
 
-        line_ptr = &line[config[index_lvl].bbu_jump[index_bbu]];
-        rate = b12 (line_ptr) * mplasma->jbar_old[config[index_lvl].bbu_indx_first + index_bbu];
+        line_ptr = &line[xconfig[index_lvl].bbu_jump[index_bbu]];
+        rate = b12 (line_ptr) * mplasma->jbar_old[xconfig[index_lvl].bbu_indx_first + index_bbu];
         rate += q12 (line_ptr, xplasma->t_e) * xne;
 
         /* This is the rate out of the level in question. We need to add it
@@ -629,13 +629,13 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
         radiative_flag[index_lvl][line_ptr->nconfigu] = 1;
       }
 
-      for (index_bbd = 0; index_bbd < config[index_lvl].n_bbd_jump; index_bbd++)
+      for (index_bbd = 0; index_bbd < xconfig[index_lvl].n_bbd_jump; index_bbd++)
       {
         /* These are bb downwards jumps. The rate in such a jump is given by
            the A-value. I'm also
            including a collisional term (which depends on ne). */
 
-        line_ptr = &line[config[index_lvl].bbd_jump[index_bbd]];
+        line_ptr = &line[xconfig[index_lvl].bbd_jump[index_bbd]];
         rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
         rate += q21 (line_ptr, xplasma->t_e) * xne;
 
@@ -662,13 +662,13 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
         }
       }
 
-      for (index_bfu = 0; index_bfu < config[index_lvl].n_bfu_jump; index_bfu++)
+      for (index_bfu = 0; index_bfu < xconfig[index_lvl].n_bfu_jump; index_bfu++)
       {
         /* These are bf upwards jumps. The rate in such a jump is given by
            gamma which has been computed as a Monte Carlo estimator. */
 
-        cont_ptr = &phot_top[config[index_lvl].bfu_jump[index_bfu]];
-        rate = mplasma->gamma_old[config[index_lvl].bfu_indx_first + index_bfu];
+        cont_ptr = &phot_top[xconfig[index_lvl].bfu_jump[index_bfu]];
+        rate = mplasma->gamma_old[xconfig[index_lvl].bfu_indx_first + index_bfu];
         rate += q_ioniz (cont_ptr, xplasma->t_e) * xne;
 
         /* This is the rate out of the level in question. We need to add it
@@ -693,7 +693,7 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
         /* Lower and upper are the same, but now it contributes in the
            other direction. */
 
-        rate = mplasma->alpha_st_old[config[index_lvl].bfu_indx_first + index_bfu] * xne;
+        rate = mplasma->alpha_st_old[xconfig[index_lvl].bfu_indx_first + index_bfu] * xne;
 
         rate_matrix[upper][upper] += -1. * rate;
         rate_matrix[lower][upper] += rate;
@@ -704,15 +704,15 @@ macro_pops_fill_rate_matrix (MacroPtr mplasma, PlasmaPtr xplasma, double xne, in
         }
       }
 
-      for (index_bfd = 0; index_bfd < config[index_lvl].n_bfd_jump; index_bfd++)
+      for (index_bfd = 0; index_bfd < xconfig[index_lvl].n_bfd_jump; index_bfd++)
       {
         /* These are bf downwards jumps. The rate in such a jump is given by
            the alpha value. */
-        cont_ptr = &phot_top[config[index_lvl].bfd_jump[index_bfd]];
+        cont_ptr = &phot_top[xconfig[index_lvl].bfd_jump[index_bfd]];
         /* Get new values of the recombination rates and store them. */
-        mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 0);
-        mplasma->recomb_sp_e[config[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 2);
-        rate = mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] * xne;
+        mplasma->recomb_sp[xconfig[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 0);
+        mplasma->recomb_sp_e[xconfig[index_lvl].bfd_indx_first + index_bfd] = alpha_sp (cont_ptr, xplasma, 2);
+        rate = mplasma->recomb_sp[xconfig[index_lvl].bfd_indx_first + index_bfd] * xne;
         rate += q_recomb (cont_ptr, xplasma->t_e) * xne * xne;
 
         /* This is the rate out of the level in question. We need to add it
@@ -779,7 +779,7 @@ macro_pops_check_for_population_inversion (int index_element, double *population
         if (radiative_flag[index_lvl][i])
         {
           // todo: learn why we have a correction factor at the end
-          inversion_test = populations[conf_to_matrix[index_lvl]] * config[i].g / config[index_lvl].g * 0.999999;
+          inversion_test = populations[conf_to_matrix[index_lvl]] * xconfig[i].g / xconfig[index_lvl].g * 0.999999;
 
           if (populations[conf_to_matrix[i]] > inversion_test)
           {
@@ -903,11 +903,11 @@ macro_pops_copy_to_xplasma (PlasmaPtr xplasma, int index_element, double *popula
       fractional_population = populations[conf_to_matrix[index_lvl]] / this_ion_density;
       if (this_ion_density < DENSITY_MIN || fractional_population < DENSITY_MIN)
       {
-        xplasma->levden[config[index_lvl].nden] = DENSITY_MIN;
+        xplasma->levden[xconfig[index_lvl].nden] = DENSITY_MIN;
       }
       else
       {
-        xplasma->levden[config[index_lvl].nden] = fractional_population;
+        xplasma->levden[xconfig[index_lvl].nden] = fractional_population;
       }
     }
   }

@@ -141,13 +141,11 @@ fb_topbase_partial (freq)
   log_gn = 0;
   if (ion[nion].phot_info > 0)  // it's a topbase record
   {
-    //   gn = config[fb_xtop->nlev].g;
-    log_gn = config[fb_xtop->nlev].log_g;
+    log_gn = xconfig[fb_xtop->nlev].log_g;
   }
 
   else if (ion[nion].phot_info == 0)    // it's a VFKY record, so shouldn't really use levels
   {
-    //  gn = ion[nion].g;
     log_gn = ion[nion].log_g;
   }
   else
@@ -155,14 +153,11 @@ fb_topbase_partial (freq)
     Error
       ("fb_topbase_partial: Did not understand cross-section type %i for ion %i (z=%i, istate %i). Setting multiplicity to zero!\n",
        ion[nion].phot_info, nion, ion[nion].z, ion[nion].istate);
-//    gn = 0.0;
     log_gn = -999.;             //Not really sure what to do here - probably return a zero
   }
 
-//  gion = ion[nion + 1].g;       // Want the g factor of the next ion up
   log_gion = ion[nion + 1].log_g;       // Want the g factor of the next ion up in log space
 
-//  x = sigma_phot (fb_xtop, freq);
   logx = log_sigma_phot (fb_xtop, log_freq);
 
 

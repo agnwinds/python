@@ -239,7 +239,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
   ;
   if (ion[nion].nlevels > 0)
   {
-    dd *= config[ion[nion].firstlevel].g / xplasma->partition[nion];
+    dd *= xconfig[ion[nion].firstlevel].g / xplasma->partition[nion];
   }
 
   if (old_line_ptr == line_ptr && old_ne == ne && old_te == te && old_w == w && old_tr == tr && old_dd == dd)

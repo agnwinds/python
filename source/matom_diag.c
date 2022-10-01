@@ -51,7 +51,7 @@ matom_emiss_report ()
     }
 
     Log ("Macro Atom level emissivities (summed): z %2d i %2d macro %2d n %2d matom_abs %8.4e matom_emiss %8.4e\n",
-         config[m].z, config[m].istate, config[m].macro_info, m, abs_sum, emiss_sum);
+         xconfig[m].z, xconfig[m].istate, xconfig[m].macro_info, m, abs_sum, emiss_sum);
   }
 
 

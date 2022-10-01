@@ -191,7 +191,7 @@ typedef struct configurations
 }
 config_dummy, *ConfigPtr;
 
-extern ConfigPtr config;
+extern ConfigPtr xconfig;
 
 
 /* Structure to describe the lines */
