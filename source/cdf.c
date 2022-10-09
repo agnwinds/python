@@ -668,7 +668,7 @@ cdf_get_rand (cdf)
   int i, j;
   double q;
   double a, b, c, s[2];
-  int xquadratic ();
+  int quadratic ();
 /* Find the interval within which x lies */
   r = random_number (0.0, 1.0); //This *exludes* 0.0 and 1.0.
   i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);     //find the interval in the CDF where this number lies
@@ -678,7 +678,7 @@ cdf_get_rand (cdf)
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
   b = cdf->d[i];
   c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
-  if ((j = xquadratic (a, b, c, s)) < 0)
+  if ((j = quadratic (a, b, c, s)) < 0)
   {
     Error ("cdf_get_rand: %d\n", j);
   }
@@ -833,7 +833,7 @@ cdf_get_rand_limit (cdf)
   int i, j;
   double q;
   double a, b, c, s[2];
-  int xquadratic ();
+  int quadratic ();
   r = random_number (0.0, 1.0); //
 
   r = r * cdf->limit2 + (1. - r) * cdf->limit1;
@@ -848,7 +848,7 @@ cdf_get_rand_limit (cdf)
     a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
     b = cdf->d[i];
     c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
-    if ((j = xquadratic (a, b, c, s)) < 0)
+    if ((j = quadratic (a, b, c, s)) < 0)
     {
       Error ("pdf_get_rand: %d\n", j);
     }

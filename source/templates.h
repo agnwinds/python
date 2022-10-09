@@ -390,7 +390,6 @@ int cylvar_extend_density(int ndom, WindPtr w);
 int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 /* bilinear.c */
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
-int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
 int create_maps(void);
 int calloc_wind(int nelem);
