@@ -77,7 +77,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double factor;
 
 
-  Log ("disk_init: Initialising disk to rmin %.1e rmax %.1e while central object has size %.1e\n", rmin, rmax, geo.rstar);
+  Error ("disk_init: Initialising disk to rmin %.1e rmax %.1e while central object has a larger size %.1e\n", rmin, rmax, geo.rstar);
 
 
   /*
@@ -137,7 +137,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   q1 = 2. * PI;
 
   (*ftot) = 0;
-//OLD  icheck = 0;
 
 
   for (logr = logrmin; logr < logrmax; logr += logdr)
@@ -550,6 +549,23 @@ read_non_standard_disk_profile (tprofile)
     geo.disk_type = DISK_WITH_HOLE;
     Log ("The temperature profile begins at %e, which is larger than central object %e\n", geo.disk_rad_min, geo.rstar);
     Log ("Treating the disk as having a hole through which photon can pass\n");
+  }
+  if (blmod.r[0] < geo.rstar)
+  {
+    Error ("The temperature profile which was read in begins at %e, which is less than central object %e\n", blmod.r[0], geo.rstar);
+    double frac;
+    frac = (geo.rstar - blmod.r[0]) / geo.rstar;
+    if (frac > 0.01 || blmod.r[1] < geo.rstar)
+    {
+      Error ("This does not appear to be a rounding error so exiting\n");
+      Exit (0);
+    }
+    else
+    {
+      Error ("This appears to be a rounding error, so continuining\n");
+      blmod.r[0] = geo.rstar;
+      geo.disk_rad_min = geo.rstar;;
+    }
   }
   geo.disk_rad_max = blmod.r[blmod.n_blpts - 1];
 
