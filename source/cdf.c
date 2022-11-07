@@ -524,6 +524,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
   if (nmax == nmin)
   {
+    cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
+    cdf_to_file (cdf, "diag_cdf.txt");
     Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
     Exit (1);
   }
@@ -898,6 +900,41 @@ cdf_to_file (cdf, filename)
   fprintf (fptr, "#n x y  1-y d\n");
   for (n = 0; n <= cdf->ncdf; n++)
     fprintf (fptr, "%3d %14.8e	%14.8e %14.8e  %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
+  fclose (fptr);
+  return (0);
+}
+
+/**********************************************************/
+/**
+ * @brief      Write the array inputs used for generating a cdf to a file
+ *
+ * @param [in] double   x[]     An array containing the x variable
+ * @param [in] double   y[]     An array containing the y variable 
+ * @param [in] double   xmin    The min value in x to be used to generate the cdf
+ * @param [in] double   xmax    The max value in x to be used to generate the cdf
+ * @param [in] char  filename[]   The name of the file to which the cdf should be written
+ * @return     Always returns 0
+ *
+ * @details
+ * This is a diagnostic routine
+ *
+ * ### Notes ###
+ **********************************************************/
+
+int
+cdf_inputs_to_file (x, y, n_xy, xmin, xmax, filename)
+     double x[], y[];
+     int n_xy;
+     double xmin, xmax;
+     char filename[];
+{
+  FILE *fopen (), *fptr;
+  int n;
+  fptr = fopen (filename, "w");
+  fprintf (fptr, "# Number of samples in array %d\n", n_xy);
+  fprintf (fptr, "# xmin xmax  Range(to.be.returned) %10.4g %10.4g\n", xmin, xmax);
+  for (n = 0; n <= n_xy; n++)
+    fprintf (fptr, "%5d %14.8e %14.8e\n", n, x[n], y[n]);
   fclose (fptr);
   return (0);
 }
