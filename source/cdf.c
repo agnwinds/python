@@ -400,7 +400,7 @@ int pdf_n;
  *
  * cdf_gen_from_array does not have the concept of jumps. All of
  * this needs to be taken care of by the routine that generates
- * the array.  This means the x's should be monotonic, withoug
+ * the array.  This means the x's should be monotonic, without
  * duplicates, and all the values of y should be 0 or positive.
  * The program exits if these conditions are not fulfilled.
  *

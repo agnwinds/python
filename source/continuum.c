@@ -18,7 +18,7 @@
 #include "models.h"
 
 double old_t, old_g, old_freqmin, old_freqmax;
-double jump[] = { 913.8 };
+//OLD double jump[] = { 913.8 };
 
 
 /**********************************************************/
@@ -26,7 +26,7 @@ double jump[] = { 913.8 };
  * @brief      get a photon frequency from a grid of stored spectra
  * from a continuum grid
  *
- * @param [in] int  spectype   An index to the continum grid which one want got obtaining a photon
+ * @param [in] int  spectype   An index to the continuum grid from which one wants to obtaing a photon
  * @param [in] double  t   The associated temperature (or first variable) defining the grid
  * @param [in] double  g   The associted gravity (or second variable)
  * @param [in] double  freqmin   The minimum frequency desiered for a photon
@@ -39,12 +39,11 @@ double jump[] = { 913.8 };
  * model grid is assumed to be based on two variables t (temperature) and
  * gravity (g).  This reflects the fact that most of the grids used in Python
  * to date (e.g Kurucz models) are these kinds of grids.  The routine linearly
- * interpolates  on these to variables to produce a spectrum at the desired
- * t and g.  It then creates a coumulative distribution of the portion of
+ * interpolates  on these two variables to produce a spectrum at the desired
+ * t and g.  It then creates a comulative distribution of the portion of
  * the spectrum bewtween fmin and fmax and then uses a random number to
- * obtain a frequncy for a single program.
+ * obtain a frequncy for a single photon. 
  *
- * The routine should already work for any grid.
  *
  * ### Notes ###
  *
@@ -55,8 +54,9 @@ double jump[] = { 913.8 };
  * found in trying to use this in other situations.  A more general routine is needed.
  * The first step in doing this is to replace much of the code here with
  * a call to the routine model (spectype, par) in models.c
- * This issue #539
- *
+ * This is issue #539, which as of 221109 remains open. The
+ * note there states correctly that we should not attack this problem
+ * until we have a specific example.
  *
  **********************************************************/
 
@@ -100,11 +100,18 @@ one_continuum (spectype, t, g, freqmin, freqmax)
        interpolate on the model flux to get the flux at lambdamin. copy relevant wavelengths and
        fluxes to w_local and f_local  */
     if (comp[spectype].xmod.w[0] < lambdamin && lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves - 1])
+//BAD    if (lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves - 1])
     {
       w_local[nwave] = lambdamin;
       linterp (lambdamin, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
       f_local[nwave] = y;
       nwave++;
+    }
+    else
+    {
+      Error ("one_continuum: lambda min %.2e is bigger than the max wavelength %.2e of the model\n",
+             lambdamin, comp[spectype].xmod.w[comp[spectype].nwaves - 1]);
+      Exit (1);
     }
 
     /* loop over rest of model wavelengths and fluxes and copy to w_local and f_local.
@@ -121,7 +128,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
       }
     }
 
-    /* No add a point at lambdamax.  Specicxally  check if upper bound is beyond lambdamax, and if so, 
+    /* No add a point at lambdamax.  Specificly,  check if upper bound is beyond lambdamax, and if so, 
        interpolate to get appropriate flux
        at lambda max. copy to w_local and f_local */
 
