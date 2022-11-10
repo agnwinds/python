@@ -525,7 +525,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (nmax == nmin)
   {
     cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
-    cdf_to_file (cdf, "diag_cdf.txt");
+    cdf_to_file (cdf, "cdf_gen_from_array");
     Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
     Exit (1);
   }
@@ -871,29 +871,43 @@ cdf_get_rand_limit (cdf)
   return (x);
 }
 
-
+int cdf_write_init = 0;
 /**********************************************************/
 /**
- * @brief      Write the full structure of the cumulattive distribution function to a file
+ * @brief      Write the full structure of the cumulative distribution function to a file
  *
  * @param [in] CdfPtr  cdf   A ptr to a cdf structure
- * @param [in] char  filename[]   The name of the file to which the cdf should be written
+ * @param [in] char  comment[]   A string with a comment
  * @return     Always returns 0
  *
  * @details
- * This is a diagnostic routine
+ * This is a diagnostic routine that wirtes a cdf to a file for analysis
+ *
+ * This routine should really be parallelized so that it only
+ * writes to a file from thread 0, but cdf.c has
+ * been written so it can be removed from python as a whole, and
+ * tested separately
  *
  * ### Notes ###
  **********************************************************/
 
 int
-cdf_to_file (cdf, filename)
+cdf_to_file (cdf, comment)
      CdfPtr cdf;
-     char filename[];
+     char comment[];
 {
   FILE *fopen (), *fptr;
   int n;
-  fptr = fopen (filename, "w");
+  if (cdf_write_init == 0)
+  {
+    fptr = fopen ("cdf_diag", "w");
+    cdf_write_init++;
+  }
+  else
+  {
+    fptr = fopen ("cdf_diag", "a");
+  }
+  fprintf (fptr, "# %s\n", comment);
   fprintf (fptr, "# limits (portion.to.sample)   %10.4g %10.4g\n", cdf->limit1, cdf->limit2);
   fprintf (fptr, "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n", cdf->x1, cdf->x2);
   fprintf (fptr, "# norm   Scale.factor          %10.4g \n", cdf->norm);

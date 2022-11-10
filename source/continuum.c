@@ -100,18 +100,11 @@ one_continuum (spectype, t, g, freqmin, freqmax)
        interpolate on the model flux to get the flux at lambdamin. copy relevant wavelengths and
        fluxes to w_local and f_local  */
     if (comp[spectype].xmod.w[0] < lambdamin && lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves - 1])
-//BAD    if (lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves - 1])
     {
       w_local[nwave] = lambdamin;
       linterp (lambdamin, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
       f_local[nwave] = y;
       nwave++;
-    }
-    else
-    {
-      Error ("one_continuum: lambda min %.2e is bigger than the max wavelength %.2e of the model\n",
-             lambdamin, comp[spectype].xmod.w[comp[spectype].nwaves - 1]);
-      Exit (1);
     }
 
     /* loop over rest of model wavelengths and fluxes and copy to w_local and f_local.
@@ -158,10 +151,15 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 
     /*  Get_model returns wavelengths in Ang and flux in ergs/cm**2/Ang */
 
+
     if (cdf_gen_from_array (&comp[spectype].xcdf, w_local, f_local, nwave, lambdamin, lambdamax) != 0)
     {
       Error ("One_continuum: after return from cdf_gen_from_array\n");
     }
+
+    // XXXX diagnostic only
+    cdf_to_file (&comp[spectype].xcdf, "one_continuum");
+
     old_freqmin = freqmin;
     old_freqmax = freqmax;
   }

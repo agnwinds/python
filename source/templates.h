@@ -166,7 +166,7 @@ int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin
 double cdf_get_rand(CdfPtr cdf);
 int cdf_limit(CdfPtr cdf, double xmin, double xmax);
 double cdf_get_rand_limit(CdfPtr cdf);
-int cdf_to_file(CdfPtr cdf, char filename[]);
+int cdf_to_file(CdfPtr cdf, char comment[]);
 int cdf_inputs_to_file(double x[], double y[], int n_xy, double xmin, double xmax, char filename[]);
 int cdf_check(CdfPtr cdf);
 int calc_cdf_gradient(CdfPtr cdf);
