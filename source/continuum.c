@@ -152,16 +152,20 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     /*  Get_model returns wavelengths in Ang and flux in ergs/cm**2/Ang */
 
 
+
     if (cdf_gen_from_array (&comp[spectype].xcdf, w_local, f_local, nwave, lambdamin, lambdamax) != 0)
     {
       Error ("One_continuum: after return from cdf_gen_from_array\n");
     }
 
-    // XXXX diagnostic only
-    cdf_to_file (&comp[spectype].xcdf, "one_continuum");
-
     old_freqmin = freqmin;
     old_freqmax = freqmax;
+
+    // XXXX diagnostic only
+    char my_comments[132];
+    sprintf (my_comments, "one_continum %f %f", lambdamin, lambdamax);
+    cdf_to_file (&comp[spectype].xcdf, my_comments);
+
   }
 
   /* generate the frequency from the CDF that has been built up from the model fluxes */
