@@ -161,11 +161,6 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     old_freqmin = freqmin;
     old_freqmax = freqmax;
 
-    // XXXX diagnostic only
-    char my_comments[132];
-    sprintf (my_comments, "one_continum %f %f", lambdamin, lambdamax);
-    cdf_to_file (&comp[spectype].xcdf, my_comments);
-
   }
 
   /* generate the frequency from the CDF that has been built up from the model fluxes */
