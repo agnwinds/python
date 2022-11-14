@@ -228,14 +228,17 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
                                    normalization is 1.  110629 ksl */
   cdf->ncdf = FUNC_CDF;         //The number of points is
 
-
-
+/* Set the limits for cdf_get_rand_limit to the full array */
+  cdf->limit1 = 0;
+  cdf->limit2 = 1.0;
+  cdf->x1 = cdf->x[0];
+  cdf->x2 = xmax;
 
 /* Calculate the gradients */
   if (calc_cdf_gradient (cdf))
   {
-    Error ("cdf_gen_from_func: Errro returned from calc_cdf_gradient\n");
-  }                             // 57ib
+    Error ("cdf_gen_from_func: Error returned from calc_cdf_gradient\n");
+  }
 
 
   /* Check the cdf */
@@ -525,9 +528,9 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (nmax == nmin)
   {
     cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
-    cdf_to_file (cdf, "cdf_gen_from_array");
+//OLD    cdf_to_file (cdf, "cdf_gen_from_array");
     Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
-    Exit (1);
+//OLD    Exit (1);
   }
 
   if (nmin == 0 && xmin < x[0]) /*We are requesting a CDF that starts below where we have data
@@ -639,6 +642,22 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     Exit (1);
   }
 //  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
+
+  if (nmax == nmin)
+  {
+//OLD    cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
+    cdf_to_file (cdf, "cdf_gen_from_array with only two elements");
+//OL    Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
+//OLD    Exit (1);
+  }
+
+/* Set the limits for cdf_get_rand_limit to the full array */
+  cdf->limit1 = 0;
+  cdf->limit2 = 1.0;
+  cdf->x1 = cdf->x[0];
+  cdf->x2 = x[nmax];
+
+
 
   if (zcheck)
   {
@@ -818,8 +837,8 @@ cdf_limit (cdf, xmin, xmax)
  *
  * @details
  *
- * The basic idea here is that we have created a cdf that covers a broad range of, for example, frequncy
- * space.  At this point we want photons that only cover some portion of the broad range.
+ * The basic idea here is that we have created a cdf that covers a broad range of, for example, frequency
+ * space.  However, at this point we want photons that only cover some portion of the broad range.
  * Instead of creating a new cdf that just covers a desired frequency space, we only sample a portion of
  * the broad range as defined by cdf_limit (for this particular cdf)
  *
@@ -836,7 +855,7 @@ cdf_get_rand_limit (cdf)
   double q;
   double a, b, c, s[2];
   int quadratic ();
-  r = random_number (0.0, 1.0); //
+  r = random_number (0.0, 1.0);
 
   r = r * cdf->limit2 + (1. - r) * cdf->limit1;
   i = r * cdf->ncdf;
@@ -852,7 +871,7 @@ cdf_get_rand_limit (cdf)
     c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
     if ((j = quadratic (a, b, c, s)) < 0)
     {
-      Error ("pdf_get_rand: %d\n", j);
+      Error ("pdf_get_rand_limit: No positive roots %d\n", j);
     }
     else
     {

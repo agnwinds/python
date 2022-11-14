@@ -1344,7 +1344,6 @@ have access to the proper normalization.
 
 extern struct Cdf cdf_ff;
 extern struct Cdf cdf_fb;
-//OLD moved extern struct Cdf cdf_vcos;
 extern struct Cdf cdf_bb;
 extern struct Cdf cdf_brem;
 

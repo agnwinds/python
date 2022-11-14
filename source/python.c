@@ -445,7 +445,7 @@ main (argc, argv)
     {
       // This block will run for both AGN, *and* some versions of a boundary layer.
       // Even though we're setting the same params, we need to change the wording based on the system, unfortunately.
-      geo.agn_spectype = geo.agn_ion_spectype;;
+      geo.agn_spectype = geo.agn_ion_spectype;
 
       // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
       if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
