@@ -25,38 +25,57 @@ extern int ncomps;                     // The number of components that have bee
 extern int nmods_tot;                  // The total number of models that have been read in 
 
 
-/* This is the structure that describes an individual continuum model. 
- * mods is the set of all models that are read
- */
+/** The Model structure that contais the  individual continuum model. 
+  * 
+  * mods is the set of all models that are read in; the various
+  * sets of models are distinguished by the ModSum structure 
+  */
 typedef struct Model
 {
-  char name[LINELEN];
-  double par[NPARS];
-  double w[NWAVES];
-  double f[NWAVES];
-  int nwaves;
+  char name[LINELEN]; /**< file name for the model */
+  double par[NPARS];  /**< Parameters, usually temperatur and gravity for the model */
+  double w[NWAVES];  /**< Wavelengths (in A) */
+  double f[NWAVES];  /**< Fluxes in ergs/cm**2/s/A */
+  int nwaves;        /**< The number of wavelength flux pairs for this model */
 } model_dummy, *ModelPtr;
 extern ModelPtr  mods;
 
-/* There is one element of comp for each set of models of the same type, i.e. if
-one reads in a list of WD atmosphers this will occupy one componenet here */
+/**
+  * Modsum is the structure that is used to describe a set of models
+  * used for various components of the system.
+  *
+  * When models are read in there is usual one set of models for each
+  * component of the system.
+  * There is one element of comp for each set of models of the same type, 
+  * i.e. if
+  *one reads in a list of WD atmosphers this will occupy one componenet here 
+ */
 
 struct ModSum
 {
-  char name[LINELEN];
-  int npars;                    // Number of parameters that describe the model
-  int nmods, modstart, modstop; //number of models of this type and the index into the model struct
-  double min[NPARS];            // The minimum and maximum for each "free" parameter of the model
-  double max[NPARS];
-  int nwaves;                   //All models in each comp should have same wavelengths;
-  struct Model xmod;            //The current intepolated model of this type 
-  struct Cdf xcdf;              //The current cumulative distribution function for this component
+  char name[LINELEN];  /**< The name of the file that is read in to 
+                         * describe each set of models
+                         */
+  int npars;            /**< Number of parameters that describe the model */
+  int nmods, modstart, modstop; /**< number of models of this type and 
+                                  * the index into the model struct
+                                  */
+  double min[NPARS];            /**< The minimum value for each 
+                                  * "free" parameter of the model
+                                  */
+  double max[NPARS];            /**< The maxium for each "free" parameter
+                                  * for this set of models
+                                  */
+  int nwaves;                   /**<  The number of wavelength flux pairs
+                                  * for this set of moels
+                                  * All models in each comp should have same wavelengths;
+                                  */
+  struct Model xmod;            /**< The current intepolated model of this type 
+                                  */
+  struct Cdf xcdf;              /**< The current cumulative distribution 
+                                  * function for this component
+                                  */
 };
 
 extern struct ModSum comp[NCOMPS];
 
-
-
-
-/* In modsum, current[0] often refers to a normalization.  Therefore for parallism, a set of
-models which really only have one parameter, e.g. T, will store that parmeter in .par[1] */
