@@ -124,7 +124,8 @@ wind_luminosity (f1, f2, mode)
 {
   double lum, lum_lines, lum_rr, lum_ff, factor;
   int nplasma;
-  int ndo, my_nmin, my_nmax, n;
+//OLD  int ndo, my_nmin, my_nmax, n;
+  int my_nmin, my_nmax;
 
 
   lum = lum_lines = lum_rr = lum_ff = factor = 0.0;
@@ -132,6 +133,7 @@ wind_luminosity (f1, f2, mode)
 
 
 #ifdef MPI_ON
+  int n, ndo;
   ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
   // Log parallel gets each thread as does printf
   Log_parallel ("xxxwind_luminosity: thread %d lum %d to %d %d \n", rank_global, my_nmin, my_nmax, ndo);
@@ -139,7 +141,7 @@ wind_luminosity (f1, f2, mode)
 #else
   my_nmin = 0;
   my_nmax = NPLASMA;
-  ndo = NPLASMA;
+//OLD  ndo = NPLASMA;
 #endif
 
 

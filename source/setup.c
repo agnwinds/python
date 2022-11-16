@@ -203,7 +203,7 @@ get_spectype (yesno, question, spectype)
        have negative values
      */
 
-    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS))
+    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS || geo.ioniz_or_extract == CYCLE_EXTRACT))
     {
       *spectype = SPECTYPE_MODEL;
     }

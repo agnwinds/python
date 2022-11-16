@@ -77,7 +77,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double factor;
 
 
-  Error ("disk_init: Initialising disk to rmin %.1e rmax %.1e while central object has a larger size %.1e\n", rmin, rmax, geo.rstar);
 
 
   /*

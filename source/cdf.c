@@ -228,14 +228,17 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
                                    normalization is 1.  110629 ksl */
   cdf->ncdf = FUNC_CDF;         //The number of points is
 
-
-
+/* Set the limits for cdf_get_rand_limit to the full array */
+  cdf->limit1 = 0;
+  cdf->limit2 = 1.0;
+  cdf->x1 = cdf->x[0];
+  cdf->x2 = xmax;
 
 /* Calculate the gradients */
   if (calc_cdf_gradient (cdf))
   {
-    Error ("cdf_gen_from_func: Errro returned from calc_cdf_gradient\n");
-  }                             // 57ib
+    Error ("cdf_gen_from_func: Error returned from calc_cdf_gradient\n");
+  }
 
 
   /* Check the cdf */
@@ -400,7 +403,7 @@ int pdf_n;
  *
  * cdf_gen_from_array does not have the concept of jumps. All of
  * this needs to be taken care of by the routine that generates
- * the array.  This means the x's should be monotonic, withoug
+ * the array.  This means the x's should be monotonic, without
  * duplicates, and all the values of y should be 0 or positive.
  * The program exits if these conditions are not fulfilled.
  *
@@ -524,8 +527,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
   if (nmax == nmin)
   {
+    cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
+//OLD    cdf_to_file (cdf, "cdf_gen_from_array");
     Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
-    Exit (1);
+//OLD    Exit (1);
   }
 
   if (nmin == 0 && xmin < x[0]) /*We are requesting a CDF that starts below where we have data
@@ -637,6 +642,22 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     Exit (1);
   }
 //  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
+
+  if (nmax == nmin)
+  {
+//OLD    cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
+    cdf_to_file (cdf, "cdf_gen_from_array with only two elements");
+//OL    Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
+//OLD    Exit (1);
+  }
+
+/* Set the limits for cdf_get_rand_limit to the full array */
+  cdf->limit1 = 0;
+  cdf->limit2 = 1.0;
+  cdf->x1 = cdf->x[0];
+  cdf->x2 = x[nmax];
+
+
 
   if (zcheck)
   {
@@ -816,8 +837,8 @@ cdf_limit (cdf, xmin, xmax)
  *
  * @details
  *
- * The basic idea here is that we have created a cdf that covers a broad range of, for example, frequncy
- * space.  At this point we want photons that only cover some portion of the broad range.
+ * The basic idea here is that we have created a cdf that covers a broad range of, for example, frequency
+ * space.  However, at this point we want photons that only cover some portion of the broad range.
  * Instead of creating a new cdf that just covers a desired frequency space, we only sample a portion of
  * the broad range as defined by cdf_limit (for this particular cdf)
  *
@@ -834,7 +855,7 @@ cdf_get_rand_limit (cdf)
   double q;
   double a, b, c, s[2];
   int quadratic ();
-  r = random_number (0.0, 1.0); //
+  r = random_number (0.0, 1.0);
 
   r = r * cdf->limit2 + (1. - r) * cdf->limit1;
   i = r * cdf->ncdf;
@@ -850,7 +871,7 @@ cdf_get_rand_limit (cdf)
     c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
     if ((j = quadratic (a, b, c, s)) < 0)
     {
-      Error ("pdf_get_rand: %d\n", j);
+      Error ("pdf_get_rand_limit: No positive roots %d\n", j);
     }
     else
     {
@@ -869,12 +890,61 @@ cdf_get_rand_limit (cdf)
   return (x);
 }
 
+int cdf_write_init = 0;
+/**********************************************************/
+/**
+ * @brief      Write the full structure of the cumulative distribution function to a file
+ *
+ * @param [in] CdfPtr  cdf   A ptr to a cdf structure
+ * @param [in] char  comment[]   A string with a comment
+ * @return     Always returns 0
+ *
+ * @details
+ * This is a diagnostic routine that wirtes a cdf to a file for analysis
+ *
+ * This routine should really be parallelized so that it only
+ * writes to a file from thread 0, but cdf.c has
+ * been written so it can be removed from python as a whole, and
+ * tested separately
+ *
+ * ### Notes ###
+ **********************************************************/
+
+int
+cdf_to_file (cdf, comment)
+     CdfPtr cdf;
+     char comment[];
+{
+  FILE *fopen (), *fptr;
+  int n;
+  if (cdf_write_init == 0)
+  {
+    fptr = fopen ("cdf_diag", "w");
+    cdf_write_init++;
+  }
+  else
+  {
+    fptr = fopen ("cdf_diag", "a");
+  }
+  fprintf (fptr, "# %s\n", comment);
+  fprintf (fptr, "# limits (portion.to.sample)   %10.4g %10.4g\n", cdf->limit1, cdf->limit2);
+  fprintf (fptr, "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n", cdf->x1, cdf->x2);
+  fprintf (fptr, "# norm   Scale.factor          %10.4g \n", cdf->norm);
+  fprintf (fptr, "#n x y  1-y d\n");
+  for (n = 0; n <= cdf->ncdf; n++)
+    fprintf (fptr, "%3d %14.8e	%14.8e %14.8e  %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
+  fclose (fptr);
+  return (0);
+}
 
 /**********************************************************/
 /**
- * @brief      Write the full structure of the cumulattive distribution function to a file
+ * @brief      Write the array inputs used for generating a cdf to a file
  *
- * @param [in] CdfPtr  cdf   A ptr to a cdf structure
+ * @param [in] double   x[]     An array containing the x variable
+ * @param [in] double   y[]     An array containing the y variable 
+ * @param [in] double   xmin    The min value in x to be used to generate the cdf
+ * @param [in] double   xmax    The max value in x to be used to generate the cdf
  * @param [in] char  filename[]   The name of the file to which the cdf should be written
  * @return     Always returns 0
  *
@@ -885,19 +955,19 @@ cdf_get_rand_limit (cdf)
  **********************************************************/
 
 int
-cdf_to_file (cdf, filename)
-     CdfPtr cdf;
+cdf_inputs_to_file (x, y, n_xy, xmin, xmax, filename)
+     double x[], y[];
+     int n_xy;
+     double xmin, xmax;
      char filename[];
 {
   FILE *fopen (), *fptr;
   int n;
   fptr = fopen (filename, "w");
-  fprintf (fptr, "# limits (portion.to.sample)   %10.4g %10.4g\n", cdf->limit1, cdf->limit2);
-  fprintf (fptr, "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n", cdf->x1, cdf->x2);
-  fprintf (fptr, "# norm   Scale.factor          %10.4g \n", cdf->norm);
-  fprintf (fptr, "#n x y  1-y d\n");
-  for (n = 0; n <= cdf->ncdf; n++)
-    fprintf (fptr, "%3d %14.8e	%14.8e %14.8e  %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
+  fprintf (fptr, "# Number of samples in array %d\n", n_xy);
+  fprintf (fptr, "# xmin xmax  Range(to.be.returned) %10.4g %10.4g\n", xmin, xmax);
+  for (n = 0; n <= n_xy; n++)
+    fprintf (fptr, "%5d %14.8e %14.8e\n", n, x[n], y[n]);
   fclose (fptr);
   return (0);
 }

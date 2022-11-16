@@ -425,16 +425,19 @@ main (argc, argv)
 
     if (geo.star_radiation)
     {
+      geo.star_spectype = geo.star_ion_spectype;
       get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
     }
 
     if (geo.disk_radiation)
     {
+      geo.disk_spectype = geo.disk_ion_spectype;
       get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.disk_spectype);
     }
 
     if (geo.bl_radiation)
     {
+      geo.bl_spectype = geo.bl_ion_spectype;
       get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
     }
 
@@ -442,7 +445,7 @@ main (argc, argv)
     {
       // This block will run for both AGN, *and* some versions of a boundary layer.
       // Even though we're setting the same params, we need to change the wording based on the system, unfortunately.
-      geo.agn_spectype = SPECTYPE_POW;
+      geo.agn_spectype = geo.agn_ion_spectype;
 
       // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
       if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)

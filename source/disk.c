@@ -141,13 +141,22 @@ teff (x)
  * @param [in] double  x   distance from center in units of r/rmin
  * @return     log of gravity at x in cm s**-2
  *
- * The gravity is needed when one constructs a disk spectrum
- * from spectra from a grid of stellar atmospheres
- *
  *
  * ###Notes###
  *
- * See Long & Knigge for details
+ * The gravity is needed when one constructs a disk spectrum
+ * from spectra from a grid of stellar atmospheres
+ *
+ * Normally the gravity is calculated
+ * using the prescription defined by Herter et al (1979) for a steady
+ * state Sakura-Sunyaev disk.  See Long & Knigge for details.  
+ *
+ * For the case where a temperature and gravity are read from a 
+ * file then the gravity is based on the values that are read in.
+ *
+ * If only a temperature profile is read in, and the mdot of the disk
+ * is not, then the gravity is set to 1.0 so that log g will be 00
+ * 
  *
  **********************************************************/
 
@@ -172,7 +181,7 @@ geff (x)
       return (q);
     }
   }
-  else
+  else if (geo.disk_mdot > 0)
   {
     double g0;
     g0 = 0.625 * log10 (geo.mstar / MSOL) - 1.875 * log10 (geo.rstar / 1.e9) + 0.125 * log10 (geo.disk_mdot / 1.e16);
@@ -184,6 +193,10 @@ geff (x)
 
     q = log10 (q);
     return (q);
+  }
+  else
+  {
+    return (1.0);               // return a positive value if g could not be otherwise defined.
   }
 }
 

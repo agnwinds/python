@@ -489,7 +489,12 @@ linterp (x, xarray, yarray, xdim, y, mode)
 
   fraction (x, xarray, xdim, &nelem, &frac, mode);
 
-  if (mode == 0)
+  if (yarray[nelem] == yarray[nelem + 1])
+  {
+    // Prevent round-off errors when the numbers are identical`
+    *y = yarray[nelem];
+  }
+  else if (mode == 0)
     *y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
   else if (mode == 1)
     *y = exp ((1. - frac) * log (yarray[nelem]) + frac * log (yarray[nelem + 1]));

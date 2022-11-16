@@ -201,25 +201,23 @@ get_choices (question, choices, qstruct)
 
   strcpy (dummy, " ");
   strcpy (dummy, question);
-  int ncommas = 0;
-  int nparen = 0;
   int i = 0;
   int j = 0;
   for (i = 0; i < strlen (dummy); i++)
   {
     if (dummy[i] == '(')
     {
-      nparen += 1;
+//OLD      nparen += 1;
       dummy[i] = ' ';
     }
     if (dummy[i] == ')')
     {
-      nparen += 1;
+      //OLD     nparen += 1;
       dummy[i] = ' ';
     }
     if (dummy[i] == ',')
     {
-      ncommas += 1;
+//OLD      ncommas += 1;
       dummy[i] = ' ';
     }
   }

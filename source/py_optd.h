@@ -24,7 +24,8 @@
   fprintf(stderr, fmt, ##__VA_ARGS__);               \
 }
 
-// Structure to hold the angles to extract the optical depth/column density from
+/** Structure to hold the angles to extract the optical depth/column density from
+  */
 
 typedef struct SightLines_s
 {
@@ -33,8 +34,9 @@ typedef struct SightLines_s
   double lmn[3];
 } SightLines_t;
 
-// Structure to hold the name and frequency of a photoionization edge to
-// evaluate the optical depth at
+/** Structure to hold the name and frequency of a photoionization edge to
+  *evaluate the optical depth at
+  */
 
 typedef struct Edges_s
 {
@@ -42,8 +44,9 @@ typedef struct Edges_s
   double freq;
 } Edges_t;
 
-// Structure to save the angle and position of the electron scattering
-// photosphere surface
+/** Structure to save the angle and position of the electron scattering
+  * photosphere surface
+  */ 
 
 typedef struct Positions_s
 {
@@ -51,9 +54,10 @@ typedef struct Positions_s
   double x, y, z;
 } Positions_t;
 
-// Enumerator used to control the column density which is extracted, i.e. by
-// default mass density/N_H is extracted by the density of an ion can also
-// be extracted
+/** Enumerator used to control the column density which is extracted, i.e. by
+  * default mass density/N_H is extracted by the density of an ion can also
+  * be extracted
+  */ 
 
 enum COLUMN_DENSITY
 {

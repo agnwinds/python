@@ -197,5 +197,6 @@ setup_created_files ()
   strcat (files.disk, ".disk.diag");
 
 
+
   return (opar_stat);
 }
