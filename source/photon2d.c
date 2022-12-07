@@ -445,7 +445,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
      Note that ds_current does not alter p in any way */
 
 
-  if (modes.partial_cells == PC_EXTEND && one->inwind == W_PART_INWIND)
+  if ( (modes.partial_cells == PC_EXTEND && one->inwind == W_PART_INWIND) || one->inwind == W_IGNORE)
   {
     ds_current = smax;
     istat = 0;
@@ -457,7 +457,6 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   else
   {
     ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-//  }
 
     if (p->nres < 0)
       xplasma->nscat_es++;
@@ -567,8 +566,8 @@ smax_in_cell (PhotPtr p)
   else if (one->inwind == W_IGNORE)
   {
     smax += one->dfudge;
-    move_phot (p, smax);
-    return (p->istat);
+    //move_phot (p, smax);
+    return (smax);
   }
   else if (one->inwind == W_NOT_INWIND)
   {                             /* The cell is not in the wind at all */
@@ -576,7 +575,7 @@ smax_in_cell (PhotPtr p)
     Error ("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n", n, smax);
     Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np, p->x[0], p->x[1], p->x[2]);
     move_phot (p, smax);
-    return (p->istat);
+    return (smax);
 
   }
 
