@@ -35,13 +35,14 @@ endif
 
 
 # This is mostly to address GitHub issues #100
+# 221210 - Expression to find MPI Compiler modified so works with mpich as well as open mpi See issue #977
 ifeq (mpicc, $(CC))
 	# you're using mpicc, so we'll compile with the DMPI_ON flag
 	MPI_FLAG = -DMPI_ON
 
 	# check what underlying compiler mpi is using, and the version
 	# we'll use this to print to the user and also to do some checks
-	MPI_COMPILER := $(shell mpicc --showme:command)
+	MPI_COMPILER := $(shell mpicc -show)
 	COMPILER_VERSION := $(shell expr `'$(CC)' -dumpversion`)
 	COMPILER_PRINT_STRING = Compiling with mpicc wrapper, for compiler $(MPI_COMPILER) $(COMPILER_VERSION)
 
@@ -133,13 +134,13 @@ startup:
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
 
-# indent:
-# 	@echo $(INDENT_STRING)
-# 	$(INDENT_CMD)
 
-
-
-
+# To ensure a uniform style within .c programs, we enforce a indent style on .c code whe
+# modifications are made. For this portion of the installation to work properly, one must have 
+# the python scripting installed, as well as gnuindent.  On linux systems, this is generally
+# not an inssue, but this is not the case for MAC OSX.  The run_indent.py routine below tries
+# to sort out whether one has gindent installed; if not it issues a woraning but does not
+# reformat any of the changed files.
 
 indent:
 	# Fix indenting, if necessary.
