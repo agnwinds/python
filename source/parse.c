@@ -291,7 +291,7 @@ parse_command_line (argc, argv)
     sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
 
-    sprintf (dummy, "_%d.diag", rank_global);
+    sprintf (dummy, "_%02d.diag", rank_global);
 
     sprintf (files.diag, "%.50s/%.50s%.50s", files.diagfolder, files.root, dummy);
 

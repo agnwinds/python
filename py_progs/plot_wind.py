@@ -281,7 +281,6 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1,vmin=0,vmax=0):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     pylab.colorbar(im, cax=cax)
-    pylab.tight_layout()
 
     pylab.draw()
     title=title.replace(' ','_')
@@ -289,6 +288,7 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1,vmin=0,vmax=0):
         filename=title+'.png'
     else:
         filename='%s_%s.png' %(root,title)
+    pylab.tight_layout()
     pylab.savefig(filename)
     return filename
 
