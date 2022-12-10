@@ -134,13 +134,13 @@ startup:
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
 
-# indent:
-# 	@echo $(INDENT_STRING)
-# 	$(INDENT_CMD)
 
-
-
-
+# To ensure a uniform style within .c programs, we enforce a indent style on .c code whe
+# modifications are made. For this portion of the installation to work properly, one must have 
+# the python scripting installed, as well as gnuindent.  On linux systems, this is generally
+# not an inssue, but this is not the case for MAC OSX.  The run_indent.py routine below tries
+# to sort out whether one has gindent installed; if not it issues a woraning but does not
+# reformat any of the changed files.
 
 indent:
 	# Fix indenting, if necessary.
