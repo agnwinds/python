@@ -85,7 +85,6 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-r") == 0)
       {
-        Log ("Restarting %s\n", files.root);
         restart_stat = 1;
         j = i;
       }
@@ -301,6 +300,13 @@ parse_command_line (argc, argv)
     {
       init_rng_directory (files.root, rank_global);
     }
+  }
+
+  if (restart_stat)
+  {
+    Log ("\n*****Restarting %s *****\n", files.root);
+    Log
+      ("WARNING: With  the execption of the number of ionization and spectral cycles\n any changes in the parameter files will be ignored\n\n");
   }
 
   return (restart_stat);
