@@ -723,6 +723,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      solution via gsl_linalg_LU_refine */
   double test_val;
   double lndet;
+  int n_error = 0;
 
   gsl_permutation *p;
   gsl_matrix_view m;
@@ -822,19 +823,27 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
     if (b_data[mm] > 0.0)
     {
-      if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
+      if (n_error == 0 && fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
       {
         Error ("Solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
         ierr = 2;
+        n_error += 1;
       }
     }
-    else if (fabs (test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
+    else if (fabs (n_error == 0 && test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
 
     {
       Error ("Solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
       ierr = 3;
+      n_error += 1;
     }
   }
+
+  if (n_error)
+  {
+    Error ("Solve_matrix: There were %d row errors in all\n", n_error);
+  }
+
 
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)
