@@ -58,7 +58,7 @@ def read_diag(root):
     Get convergence and possibly other information from the diag file
     '''
 
-    filename='diag_%s/%s_0.diag' % (root,root)
+    filename='diag_%s/%s_00.diag' % (root,root)
 
     command="grep 'Check_convergence' %s" % filename
 
