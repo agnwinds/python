@@ -695,8 +695,8 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
  * @param [in] double a_data - the square rate matric
  * @param [in] double b_data - the vector of total elemental abundances
  * @param [in] int  nrows - the number of rows (and columns) in the a matrix
- * @param [out] double x   - the ionic abundances calculated here
- * @param [in] int  nplasma - the index of the plasma cell we are working on - only used for reporting errors
+ * @param [out] double x   - the calculated ionic abundances
+ * @param [in] int  nplasma - the index of the plasma cell we are working on
  * @return  int ierr - a number defining any error state
  *
  * @details
@@ -718,7 +718,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      int nplasma;
 {
   int mm, ierr, s;
-  /* s is the 'sign' of the permutation - is had the value -1^n where n is the number of
+  /* s is the 'sign' of the permutation - is has the value -1^n where n is the number of
      permutations. We dont use it anywhere, but in principle it can be used to refine the
      solution via gsl_linalg_LU_refine */
   double test_val;
@@ -732,7 +732,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_matrix *test_matrix;
   gsl_error_handler_t *handler;
 
-  /* Turn off gsl error hanling so that the code does not abort on error */
+  /* Turn off gsl error handling so that the code does not abort on error */
 
   handler = gsl_set_error_handler_off ();
 
@@ -766,9 +766,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   p = gsl_permutation_alloc (nrows);
 
-
-
-  /* This routine decomposes m into its LU Components.  It stores the L part in m and the
+  /* Decomposes m into its LU Components.  Store the L part in m and the
    * U part in s and p is modified.
    */
 
@@ -790,13 +788,11 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
     return (4);
 
-
-
   }
 
   gsl_permutation_free (p);
 
-  /* JM 140414 -- before we clean, we should check that the populations vector we have just created really is a solution to
+  /* Check that the populations vector we have just created really is a solution to
      the matrix equation */
 
   /* The following line does the matrix multiplication test_vector = 1.0 * test_matrix * populations The CblasNoTrans
@@ -807,7 +803,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr != 0)
   {
-    Error ("Solve_matrix: bad return when testing matrix solution to rate equations.\n");
+    Error ("Solve_matrix: bad return (%d) when testing matrix solution to rate equations in plamsa cell.\n", ierr, nplasma);
   }
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
@@ -825,7 +821,8 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
     {
       if (n_error == 0 && fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
       {
-        Error ("Solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+        Error ("Solve_matrix: test solution fails relative error for row %i %e != %e frac_error %3 in plasma cell %d\n", mm, test_val,
+               b_data[mm], fabs ((test_val - b_data[mm]) / test_val), nplasma);
         ierr = 2;
         n_error += 1;
       }
@@ -833,7 +830,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
     else if (fabs (n_error == 0 && test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
 
     {
-      Error ("Solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+      Error ("Solve_matrix: test solution fails absolute error for row %i %e != %e in plasma cell %d\n", mm, test_val, b_data[mm], nplasma);
       ierr = 3;
       n_error += 1;
     }
@@ -841,7 +838,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (n_error)
   {
-    Error ("Solve_matrix: There were %d row errors in all\n", n_error);
+    Error ("Solve_matrix: There were %d row errors in all for plasma cell %d\n", n_error, nplasma);
   }
 
 
