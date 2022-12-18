@@ -817,6 +817,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
     /* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
        1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
 
+
     if (b_data[mm] > 0.0)
     {
       if (n_error == 0 && fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
@@ -827,7 +828,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
         n_error += 1;
       }
     }
-    else if (fabs (n_error == 0 && test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
+    else if ((n_error) == 0 && fabs (test_val - b_data[mm]) > EPSILON)  // if b_data is 0, check absolute error
 
     {
       Error ("Solve_matrix: test solution fails absolute error for row %i %e != %e in plasma cell %d\n", mm, test_val, b_data[mm], nplasma);
