@@ -58,7 +58,11 @@ def read_diag(root):
     Get convergence and possibly other information from the diag file
     '''
 
-    filename='diag_%s/%s_0.diag' % (root,root)
+    # 2212 - ksl - the check here is for backward compatibility
+
+    filename='diag_%s/%s_00.diag' % (root,root)
+    if os.path.exists==False:
+        filename='diag_%s/%s_0.diag' % (root,root)
 
     command="grep 'Check_convergence' %s" % filename
 
