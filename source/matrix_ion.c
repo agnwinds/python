@@ -837,7 +837,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
     }
   }
 
-  if (n_error)
+  if (n_error > 1)
   {
     Error ("Solve_matrix: There were %d row errors in all for plasma cell %d\n", n_error, nplasma);
   }
