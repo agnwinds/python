@@ -425,5 +425,7 @@ wind_cooling ()
   geo.heat_shock = nonthermal;
 
 
+
+
   return (cool);
 }

@@ -1012,7 +1012,7 @@ on the assumption that the fb information will be reused.
 */
 
 
-  Log ("init_freebound: Creating recombination emissivites between %e and %e in stucture element %d\n", f1, f2, nput);
+  Log ("init_freebound: Creating recombination emissivities between %e and %e in structure element %d\n", f1, f2, nput);
 
 
   freebound[nput].f1 = f1;
