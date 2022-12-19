@@ -79,11 +79,10 @@ main (argc, argv)
   double time_max;
   double lstar;
 
+/* Initicialize MPI */
+
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
-
-
-
 
 
 #ifdef MPI_ON
@@ -98,6 +97,8 @@ main (argc, argv)
   np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
+
+/* This completes the intialization of mpi */
 
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
