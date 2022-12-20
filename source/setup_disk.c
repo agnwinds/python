@@ -132,7 +132,6 @@ get_disk_params ()
   {
     rdstr ("Disk.T_profile_file", files.tprofile);
     read_non_standard_disk_profile (files.tprofile);
-    geo.disk_mdot = 0;
   }
   else
   {

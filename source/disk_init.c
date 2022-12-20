@@ -430,7 +430,7 @@ qdisk_save (diskfile, ztot)
  *
  * Each line of the input file
  * a radius and a temperature in the first two columns.
- * An optinional 3rd column can contain a gravity
+ * An optional 3rd column can contain a gravity
  * for use with stellar atmospheres models
  *
  * Comment lines (and other lines) that can not
@@ -441,7 +441,7 @@ qdisk_save (diskfile, ztot)
  * The temperature in degrees Kelvin
  *
  * The minimum and maximum radius of the disk is set to the minimum
- * and maximum radius of the disk.  If the 
+ * and maximum radius of the disk.  e 
  *
  * ###Notes###
  *
@@ -452,7 +452,6 @@ qdisk_save (diskfile, ztot)
  * mdot and a standard model to describe the disk.  This has been
  * changed so that if one reads in a non standard temperature
  * profile, it must include the entire disk..
- *
  *
  **********************************************************/
 
@@ -501,7 +500,7 @@ read_non_standard_disk_profile (tprofile)
     }
     else
     {
-      Error ("read_non_standard_disk_file: could not convert a line in %s, OK if comment\n", tprofile);
+      Error ("read_non_standard_disk_file: Could not convert a line in %s, OK if comment\n", tprofile);
     }
 
     if (blmod.n_blpts == NBLMODEL)
@@ -538,7 +537,6 @@ read_non_standard_disk_profile (tprofile)
   }
 
 
-
   fclose (fptr);
 
   geo.disk_rad_min = 0;
@@ -566,7 +564,10 @@ read_non_standard_disk_profile (tprofile)
       geo.disk_rad_min = geo.rstar;;
     }
   }
+
   geo.disk_rad_max = blmod.r[blmod.n_blpts - 1];
+      geo.disk_mdot = 0;
+
 
   return (0);
 }

@@ -199,8 +199,7 @@ main (argc, argv)
     if (geo.disk_tprofile == DISK_TPROFILE_READIN)      //We also need to re-read in any previously used disk temperature profile
     {
       rdstr ("Disk.T_profile_file", files.tprofile);
-      geo.disk_rad_max = read_non_standard_disk_profile (files.tprofile);
-      geo.disk_mdot = 0;
+      read_non_standard_disk_profile (files.tprofile);
     }
     if (geo.pcycle > 0)
     {
