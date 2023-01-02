@@ -484,7 +484,7 @@ init_observers ()
 
     if (ichoice)
     {
-      Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+      Log ("OK n>=%d->all; 0<=n<%d -> n scatters; n<0 -> >= |n| scatters\n", MAXSCAT, MAXSCAT);
       for (n = 0; n < geo.nangles; n++)
       {
         rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
