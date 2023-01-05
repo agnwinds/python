@@ -240,6 +240,10 @@ extern double y_axis[3];
 extern double z_axis[3];
 
 
+extern double velocity_electron[3];     // velocity of the electron when thermal effects are included
+
+
+
 
 /* End of structures which are used to define boundaries to the emission regions */
 /*******************DOMAIN structure***********************************************/

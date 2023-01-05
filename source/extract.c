@@ -97,6 +97,7 @@ extract (w, p, itype)
   double zz;
   double dvds;
   int ishell;
+  double vel[3];
   double weight_scale;
   double w_orig;
 
@@ -149,13 +150,18 @@ extract (w, p, itype)
     }
 
     p_in.w *= p_in.nnscat / p_norm;
-  }
-  if (itype == PTYPE_WIND)
-  {
+
     if ((ierr = observer_to_local_frame (&p_in, &p_in)))
       Error ("extract: wind photon not in observer frame %d\n", ierr);
+
+    if (p_in.nres == NRES_ES)
+    {
+      lorentz_transform (&p_in, &p_in, velocity_electron);
+      rescale (velocity_electron, -1, vel);     // Only need to do this once
+    }
+
   }
-  if (itype == PTYPE_DISK)
+  else if (itype == PTYPE_DISK)
   {
     if ((ierr = observer_to_local_frame_disk (&p_in, &p_in)))
       Error ("extract: disk photon not in observer frame %d\n", ierr);
@@ -339,6 +345,11 @@ extract (w, p, itype)
     }
     if (itype == PTYPE_WIND)
     {
+      if (pp.nres == NRES_ES)
+      {
+        lorentz_transform (&pp, &pp, vel);
+      }
+
       if ((ierr = local_to_observer_frame (&pp, &pp)))
         Error ("extract_one: wind photon not in local frame\n");
     }
@@ -543,8 +554,8 @@ extract_one (w, pp, nspec)
         if (geo.reverb_filter_lines == -2 || pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
         {
           /*If this photon has scattered, been reprocessed, 
-            or originated in the wind it 's important
-            */
+             or originated in the wind it 's important
+           */
           pstart.w = pp->w * exp (-(tau));
           stuff_v (xxspec[nspec].lmn, pstart.lmn);
           delay_dump_single (&pstart, nspec);
