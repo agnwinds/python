@@ -135,3 +135,6 @@ int xxxbound;
 struct rdpar_choices zz_spec;
 
 struct Import *imported_model;  ///<  MaxDom is defined in python.h and as such import.h has to be included after
+
+
+double velocity_electron[3];    // velocity of the electron when thermal effects are included
