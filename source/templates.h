@@ -166,7 +166,8 @@ int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin
 double cdf_get_rand(CdfPtr cdf);
 int cdf_limit(CdfPtr cdf, double xmin, double xmax);
 double cdf_get_rand_limit(CdfPtr cdf);
-int cdf_to_file(CdfPtr cdf, char filename[]);
+int cdf_to_file(CdfPtr cdf, char comment[]);
+int cdf_inputs_to_file(double x[], double y[], int n_xy, double xmin, double xmax, char filename[]);
 int cdf_check(CdfPtr cdf);
 int calc_cdf_gradient(CdfPtr cdf);
 int cdf_array_fixup(double *x, double *y, int n_xy);
@@ -390,7 +391,6 @@ int cylvar_extend_density(int ndom, WindPtr w);
 int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 /* bilinear.c */
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
-int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
 int create_maps(void);
 int calloc_wind(int nelem);

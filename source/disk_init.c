@@ -77,7 +77,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double factor;
 
 
-  Log ("disk_init: Initialising disk to rmin %.1e rmax %.1e while central object has size %.1e\n", rmin, rmax, geo.rstar);
 
 
   /*
@@ -137,7 +136,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   q1 = 2. * PI;
 
   (*ftot) = 0;
-//OLD  icheck = 0;
 
 
   for (logr = logrmin; logr < logrmax; logr += logdr)
@@ -432,7 +430,7 @@ qdisk_save (diskfile, ztot)
  *
  * Each line of the input file
  * a radius and a temperature in the first two columns.
- * An optinional 3rd column can contain a gravity
+ * An optional 3rd column can contain a gravity
  * for use with stellar atmospheres models
  *
  * Comment lines (and other lines) that can not
@@ -443,7 +441,7 @@ qdisk_save (diskfile, ztot)
  * The temperature in degrees Kelvin
  *
  * The minimum and maximum radius of the disk is set to the minimum
- * and maximum radius of the disk.  If the 
+ * and maximum radius of the disk.  e 
  *
  * ###Notes###
  *
@@ -454,7 +452,6 @@ qdisk_save (diskfile, ztot)
  * mdot and a standard model to describe the disk.  This has been
  * changed so that if one reads in a non standard temperature
  * profile, it must include the entire disk..
- *
  *
  **********************************************************/
 
@@ -503,7 +500,7 @@ read_non_standard_disk_profile (tprofile)
     }
     else
     {
-      Error ("read_non_standard_disk_file: could not convert a line in %s, OK if comment\n", tprofile);
+      Error ("read_non_standard_disk_file: Could not convert a line in %s, OK if comment\n", tprofile);
     }
 
     if (blmod.n_blpts == NBLMODEL)
@@ -540,7 +537,6 @@ read_non_standard_disk_profile (tprofile)
   }
 
 
-
   fclose (fptr);
 
   geo.disk_rad_min = 0;
@@ -551,7 +547,27 @@ read_non_standard_disk_profile (tprofile)
     Log ("The temperature profile begins at %e, which is larger than central object %e\n", geo.disk_rad_min, geo.rstar);
     Log ("Treating the disk as having a hole through which photon can pass\n");
   }
+  if (blmod.r[0] < geo.rstar)
+  {
+    Error ("The temperature profile which was read in begins at %e, which is less than central object %e\n", blmod.r[0], geo.rstar);
+    double frac;
+    frac = (geo.rstar - blmod.r[0]) / geo.rstar;
+    if (frac > 0.01 || blmod.r[1] < geo.rstar)
+    {
+      Error ("This does not appear to be a rounding error so exiting\n");
+      Exit (0);
+    }
+    else
+    {
+      Error ("This appears to be a rounding error, so continuining\n");
+      blmod.r[0] = geo.rstar;
+      geo.disk_rad_min = geo.rstar;;
+    }
+  }
+
   geo.disk_rad_max = blmod.r[blmod.n_blpts - 1];
+      geo.disk_mdot = 0;
+
 
   return (0);
 }

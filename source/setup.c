@@ -203,7 +203,7 @@ get_spectype (yesno, question, spectype)
        have negative values
      */
 
-    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS))
+    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS || geo.ioniz_or_extract == CYCLE_EXTRACT))
     {
       *spectype = SPECTYPE_MODEL;
     }
@@ -484,7 +484,7 @@ init_observers ()
 
     if (ichoice)
     {
-      Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+      Log ("OK n>=%d->all; 0<=n<%d -> n scatters; n<0 -> >= |n| scatters\n", MAXSCAT, MAXSCAT);
       for (n = 0; n < geo.nangles; n++)
       {
         rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);

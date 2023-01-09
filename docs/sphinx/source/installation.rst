@@ -46,6 +46,9 @@ note that export syntax is for bash- for csh use
 
 The atomic data needed to run Python is included in the distribution.  
 
+
+(Python is updated fairly ofen.  Normally, one does not need to redo the entire installation proces.   Insstead follow the instuctions in :doc:`updating` )
+
 Running python
 ==============
 

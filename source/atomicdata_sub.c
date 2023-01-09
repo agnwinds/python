@@ -76,8 +76,8 @@ atomicdata2file ()
   fprintf (fptr, "# Excitation levels: There are %d levels\n", nlevels);
   for (n = 0; n < nlevels; n++)
     fprintf (fptr, "Level n %5d z %2d istate %2d q %.1f g %4.0f ex %8.3g  bb %2d %2d bf %2d %2d\n", n,
-             config[n].z, config[n].istate, config[n].q_num, config[n].g, config[n].ex,
-             config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump, config[n].n_bfd_jump);
+             xconfig[n].z, xconfig[n].istate, xconfig[n].q_num, xconfig[n].g, xconfig[n].ex,
+             xconfig[n].n_bbu_jump, xconfig[n].n_bbd_jump, xconfig[n].n_bfu_jump, xconfig[n].n_bfd_jump);
 
   /* Write the resonance line data to the file */
 

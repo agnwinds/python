@@ -77,6 +77,7 @@ Mandy Hewitt
 
    quick
    installation
+   updating
    running_python
    input
    output

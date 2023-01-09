@@ -104,14 +104,15 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   }
 
   if (freq_sampling == 0)
-  {                             /* Original approach, uniform sampling of entire wavelength interval,
-                                   still used for detailed spectrum calculation */
+  {
+    /* Original approach, uniform sampling of entire wavelength interval,
+       still used for detailed spectrum calculation */
 
     if (f1 != f1_old || f2 != f2_old || iwind != iwind_old)
     {                           // The reinitialization is required
       xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON, 1);
     }
-    /* The weight of each photon is designed §so that all of the photons add up to the
+    /* The weight of each photon is designed so that all of the photons add up to the
        luminosity of the photosphere.  This implies that photons must be generated in such
        a way that it mimics the energy distribution of the star. */
 
@@ -123,9 +124,10 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, 0, nphot_rad);
   }
   else
-  {                             /* Use banding, create photons with different weights in different wavelength
-                                   bands.  This is used for the for ionization calculation where one wants to assure
-                                   that you have "enough" photons at high energy */
+  {
+    /* Use banding, create photons with different weights in different wavelength
+       bands.  This is used for the for ionization calculation where one wants to assure
+       that you have "enough" photons at high energy */
 
     ftot = populate_bands (ioniz_or_final, iwind, &xband);
 

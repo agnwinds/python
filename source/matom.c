@@ -196,16 +196,16 @@ matom (p, nres, escape)
 
       for (n = 0; n < nbbd; n++)
       {
-        line_ptr = &line[config[uplvl].bbd_jump[n]];
+        line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
 
         rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
         coll_rate = ne * q21 (line_ptr, t_e);
 
 
         bb_cont = rad_rate + coll_rate;
-        jprbs_known[uplvl][m] = jprbs[m] = bb_cont * config[line_ptr->nconfigl].ex;     //energy of lower state
+        jprbs_known[uplvl][m] = jprbs[m] = bb_cont * xconfig[line_ptr->nconfigl].ex;    //energy of lower state
 
-        eprbs_known[uplvl][m] = eprbs[m] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);  //energy difference
+        eprbs_known[uplvl][m] = eprbs[m] = bb_cont * (xconfig[uplvl].ex - xconfig[line[xconfig[uplvl].bbd_jump[n]].nconfigl].ex);       //energy difference
 
 
         pjnorm += jprbs[m];
@@ -217,13 +217,13 @@ matom (p, nres, escape)
       for (n = 0; n < nbfd; n++)
       {
 
-        cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];        //pointer to continuum
+        cont_ptr = &phot_top[xconfig[uplvl].bfd_jump[n]];       //pointer to continuum
 
-        sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];
+        sp_rec_rate = mplasma->recomb_sp[xconfig[uplvl].bfd_indx_first + n];
         bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
 
-        jprbs_known[uplvl][m] = jprbs[m] = bf_cont * config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex;       //energy of lower state
-        eprbs_known[uplvl][m] = eprbs[m] = bf_cont * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);  //energy difference
+        jprbs_known[uplvl][m] = jprbs[m] = bf_cont * xconfig[phot_top[xconfig[uplvl].bfd_jump[n]].nlev].ex;     //energy of lower state
+        eprbs_known[uplvl][m] = eprbs[m] = bf_cont * (xconfig[uplvl].ex - xconfig[phot_top[xconfig[uplvl].bfd_jump[n]].nlev].ex);       //energy difference
         pjnorm += jprbs[m];
         penorm += eprbs[m];
         m++;
@@ -260,13 +260,13 @@ matom (p, nres, escape)
 
       for (n = 0; n < nbbu; n++)
       {
-        line_ptr = &line[config[uplvl].bbu_jump[n]];
-        rad_rate = (b12 (line_ptr) * mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
+        line_ptr = &line[xconfig[uplvl].bbu_jump[n]];
+        rad_rate = (b12 (line_ptr) * mplasma->jbar_old[xconfig[uplvl].bbu_indx_first + n]);
 
         coll_rate = ne * q12 (line_ptr, t_e);   // this is multiplied by ne below
 
 
-        jprbs_known[uplvl][m] = jprbs[m] = (rad_rate + coll_rate) * config[uplvl].ex;   //energy of lower state
+        jprbs_known[uplvl][m] = jprbs[m] = (rad_rate + coll_rate) * xconfig[uplvl].ex;  //energy of lower state
 
 
         pjnorm += jprbs[m];
@@ -278,7 +278,7 @@ matom (p, nres, escape)
       {
         /* For bf ionization the jump probability is just gamma * energy
            gamma is the photoionisation rate. Stimulated recombination also included. */
-        cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];        //pointer to continuum
+        cont_ptr = &phot_top[xconfig[uplvl].bfu_jump[n]];       //pointer to continuum
 
         /* first let us take care of the situation where the lower level is zero or close to zero */
         lower_density = den_config (xplasma, cont_ptr->nlev);
@@ -289,7 +289,7 @@ matom (p, nres, escape)
         else
           density_ratio = 0.0;
 
-        jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;        //energy of lower state
+        jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[xconfig[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[xconfig[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * xconfig[uplvl].ex;     //energy of lower state
 
         /* this error condition can happen in unconverged hot cells where T_R >> T_E.
            for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
@@ -315,8 +315,8 @@ matom (p, nres, escape)
     {
       Error ("matom: macro atom level has no way out: uplvl %d pj %g pe %g t_e %.3g  ne %.3g\n", uplvl, pjnorm_known[uplvl],
              penorm_known[uplvl], t_e, ne);
-      Error ("matom: macro atom level has no way out: z %d istate %d nion %d ilv %d nbfu %d nbfd %d nbbu %d nbbd %d\n", config[uplvl].z,
-             config[uplvl].istate, config[uplvl].nion, config[uplvl].ilv, nbfu, nbfd, nbbu, nbbd);
+      Error ("matom: macro atom level has no way out: z %d istate %d nion %d ilv %d nbfu %d nbfd %d nbbu %d nbbd %d\n", xconfig[uplvl].z,
+             xconfig[uplvl].istate, xconfig[uplvl].nion, xconfig[uplvl].ilv, nbfu, nbfd, nbbu, nbbd);
       *escape = TRUE;
       p->istat = P_ERROR_MATOM;
       return (-1);
@@ -356,26 +356,21 @@ matom (p, nres, escape)
     }
 
     /* n now identifies the jump that occurs - now set the new level. */
-//OLD    icheck = 0;
     if (n < nbbd)
     {                           /* bb downwards jump */
-      uplvl = line[config[uplvl].bbd_jump[n]].nconfigl;
-//OLD      icheck = 1;
+      uplvl = line[xconfig[uplvl].bbd_jump[n]].nconfigl;
     }
     else if (n < (nbbd + nbfd))
     {                           /* bf downwards jump */
-      uplvl = phot_top[config[uplvl].bfd_jump[n - nbbd]].nlev;
-//OLD      icheck = 2;
+      uplvl = phot_top[xconfig[uplvl].bfd_jump[n - nbbd]].nlev;
     }
     else if (n < (nbbd + nbfd + nbbu))
     {                           /* bb upwards jump */
-      uplvl = line[config[uplvl].bbu_jump[n - nbbd - nbfd]].nconfigu;
-//OLD      icheck = 3;
+      uplvl = line[xconfig[uplvl].bbu_jump[n - nbbd - nbfd]].nconfigu;
     }
     else if (n < (nbbd + nbfd + nbbu + nbfu))
     {                           /* bf upwards jump */
-      uplvl = phot_top[config[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
-//OLD      icheck = 4;
+      uplvl = phot_top[xconfig[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
     }
     else if (n < (nbbd + nbfd + nbbu + nbfu + nauger))
     {                           /* auger ionization jump */
@@ -431,7 +426,7 @@ matom (p, nres, escape)
     choice = random_number (0.0, 1.0);
 
 
-    line_ptr = &line[config[uplvl].bbd_jump[n]];        //pointer for the bb transition
+    line_ptr = &line[xconfig[uplvl].bbd_jump[n]];       //pointer for the bb transition
 
     rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
 
@@ -441,8 +436,8 @@ matom (p, nres, escape)
     {
       /* It's a r-packet (radiative) deactivation */
       *escape = TRUE;
-      *nres = line[config[uplvl].bbd_jump[n]].where_in_list;
-      p->freq = line[config[uplvl].bbd_jump[n]].freq;
+      *nres = line[xconfig[uplvl].bbd_jump[n]].where_in_list;
+      p->freq = line[xconfig[uplvl].bbd_jump[n]].freq;
     }
     else
     {
@@ -455,9 +450,9 @@ matom (p, nres, escape)
     /* With collisional recombination included we need to decide whether to deactivate
        radiatively or make a k-packet. */
 
-    cont_ptr = &phot_top[config[uplvl].bfd_jump[n - nbbd]];
+    cont_ptr = &phot_top[xconfig[uplvl].bfd_jump[n - nbbd]];
 
-    rad_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n - nbbd];     //again using recomb_sp rather than alpha_sp (SS July 04)
+    rad_rate = mplasma->recomb_sp[xconfig[uplvl].bfd_indx_first + n - nbbd];    //again using recomb_sp rather than alpha_sp (SS July 04)
     coll_rate = ne * q_recomb (cont_ptr, t_e);
 
     choice = random_number (0.0, 1.0);
@@ -466,8 +461,8 @@ matom (p, nres, escape)
     {
       /*It's a r-packet (radiative) deactivation */
       *escape = TRUE;
-      *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
-      p->freq = matom_select_bf_freq (one, config[uplvl].bfd_jump[n - nbbd]);
+      *nres = xconfig[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
+      p->freq = matom_select_bf_freq (one, xconfig[uplvl].bfd_jump[n - nbbd]);
 
     }
     else
@@ -598,11 +593,11 @@ alpha_sp (cont_ptr, xplasma, ichoice)
      through by the appropriate constant. */
   if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
   {
-    alpha_sp_value = alpha_sp_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
+    alpha_sp_value = alpha_sp_value * xconfig[cont_ptr->nlev].g / xconfig[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }
   else                          //case for simple element
   {
-    alpha_sp_value = alpha_sp_value * config[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5);  //g for next ion up used
+    alpha_sp_value = alpha_sp_value * xconfig[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5); //g for next ion up used
   }
 
   alpha_sp_value = alpha_sp_value * ALPHA_SP_CONSTANT;
@@ -1245,8 +1240,8 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
      /jumping from this configuration. Then choose one. */
 
 
-  nbbd = config[uplvl].n_bbd_jump;      //number of bb downward jumps
-  nbfd = config[uplvl].n_bfd_jump;      //number of bf downared jumps
+  nbbd = xconfig[uplvl].n_bbd_jump;     //number of bb downward jumps
+  nbfd = xconfig[uplvl].n_bfd_jump;     //number of bf downared jumps
 
 
   // Set the emission probabilities and normalization factor to 0
@@ -1269,12 +1264,12 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
   for (n = 0; n < nbbd; n++)
   {
-    line_ptr = &line[config[uplvl].bbd_jump[n]];
+    line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
     if ((line_ptr->freq > freq_min) && (line_ptr->freq < freq_max))     // correct range
     {
       bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 
-      eprbs[m] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);    //energy difference
+      eprbs[m] = bb_cont * (xconfig[uplvl].ex - xconfig[line[xconfig[uplvl].bbd_jump[n]].nconfigl].ex); //energy difference
       penorm += eprbs[m];
     }
     m++;
@@ -1287,14 +1282,13 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
   for (n = 0; n < nbfd; n++)
   {
-    cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];
+    cont_ptr = &phot_top[xconfig[uplvl].bfd_jump[n]];
 
     if (cont_ptr->freq[0] < freq_max)
     {
-//OLD      sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
-      sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];
+      sp_rec_rate = mplasma->recomb_sp[xconfig[uplvl].bfd_indx_first + n];
 
-      eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
+      eprbs[m] = sp_rec_rate * ne * (xconfig[uplvl].ex - xconfig[phot_top[xconfig[uplvl].bfd_jump[n]].nlev].ex);        //energy difference
       penorm += eprbs[m];
     }
     m++;
@@ -1326,14 +1320,14 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
     if (n < nbbd)
     {
-      line_ptr = &line[config[uplvl].bbd_jump[n]];
-      *nres = line[config[uplvl].bbd_jump[n]].where_in_list;
-      p->freq = xfreq = line[config[uplvl].bbd_jump[n]].freq;
+      line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
+      *nres = line[xconfig[uplvl].bbd_jump[n]].where_in_list;
+      p->freq = xfreq = line[xconfig[uplvl].bbd_jump[n]].freq;
     }
     else if (n < (nbbd + nbfd))
     {
-      *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
-      xfreq = matom_select_bf_freq (one, config[uplvl].bfd_jump[n - nbbd]);
+      *nres = xconfig[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
+      xfreq = matom_select_bf_freq (one, xconfig[uplvl].bfd_jump[n - nbbd]);
       p->freq = xfreq;
     }
 

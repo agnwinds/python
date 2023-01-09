@@ -270,7 +270,7 @@ config_overview (n, icell)
   double xden;
   int i, ii;
 
-  p = &config[n];
+  p = &xconfig[n];
   /* initialize the density */
   xden = -1;
 
@@ -324,7 +324,7 @@ config_overview (n, icell)
     {
       //ii=p->bbu_jump[i];
       ii = i;
-      printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[config[n].bbu_indx_first + ii]), (m->jbar_old[config[n].bbu_indx_first + ii]));
+      printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[xconfig[n].bbu_indx_first + ii]), (m->jbar_old[xconfig[n].bbu_indx_first + ii]));
     }
 
     printf ("bbd_jump:\n");
@@ -332,7 +332,7 @@ config_overview (n, icell)
     {
       //                          ii=p->bbd_jump[i];
       ii = i;
-      printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[config[n].bbu_indx_first + ii]), (m->jbar_old[config[n].bbu_indx_first + ii]));
+      printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[xconfig[n].bbu_indx_first + ii]), (m->jbar_old[xconfig[n].bbu_indx_first + ii]));
     }
 
     /* Detailed information on the fb transitions */
@@ -343,13 +343,13 @@ config_overview (n, icell)
       //      ii=p->bfu_jump[i];
       ii = i;
       printf (" %3d %g %g %g %g %g %g %g %g\n", ii,
-              (m->gamma[config[n].bfu_indx_first + ii]),
-              (m->gamma_old[config[n].bfu_indx_first + ii]),
-              (m->alpha_st[config[n].bfu_indx_first + ii]),
-              (m->alpha_st_old[config[n].bfu_indx_first + ii]),
-              (m->alpha_st_e[config[n].bfu_indx_first + ii]),
-              (m->alpha_st_e_old[config[n].bfu_indx_first + ii]),
-              (m->recomb_sp[config[n].bfd_indx_first + ii]), (m->recomb_sp_e[config[n].bfd_indx_first + ii]));
+              (m->gamma[xconfig[n].bfu_indx_first + ii]),
+              (m->gamma_old[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st_old[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st_e[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st_e_old[xconfig[n].bfu_indx_first + ii]),
+              (m->recomb_sp[xconfig[n].bfd_indx_first + ii]), (m->recomb_sp_e[xconfig[n].bfd_indx_first + ii]));
     }
 
 
@@ -360,13 +360,13 @@ config_overview (n, icell)
       //      ii=p->bfd_jump[i];
       ii = i;
       printf (" %3d %g %g %g %g %g %g %g %g\n", ii,
-              (m->gamma[config[n].bfu_indx_first + ii]),
-              (m->gamma_old[config[n].bfu_indx_first + ii]),
-              (m->alpha_st[config[n].bfu_indx_first + ii]),
-              (m->alpha_st_old[config[n].bfu_indx_first + ii]),
-              (m->alpha_st_e[config[n].bfu_indx_first + ii]),
-              (m->alpha_st_e_old[config[n].bfu_indx_first + ii]),
-              (m->recomb_sp[config[n].bfd_indx_first + ii]), (m->recomb_sp_e[config[n].bfd_indx_first + ii]));
+              (m->gamma[xconfig[n].bfu_indx_first + ii]),
+              (m->gamma_old[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st_old[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st_e[xconfig[n].bfu_indx_first + ii]),
+              (m->alpha_st_e_old[xconfig[n].bfu_indx_first + ii]),
+              (m->recomb_sp[xconfig[n].bfd_indx_first + ii]), (m->recomb_sp_e[xconfig[n].bfd_indx_first + ii]));
     }
 
 
@@ -432,7 +432,7 @@ depcoef_overview (icell)
 
   for (n = 0; n < NLEVELS; n++)
   {
-    p = &config[n];
+    p = &xconfig[n];
     if (icell >= 0 && icell < NDIM2 && p->macro_info == 1)
     {
       xden = den_config (x, n);
@@ -581,7 +581,7 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
 
       geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
 
-      p = &config[nconfig];
+      p = &xconfig[nconfig];
       xden = den_config (xplasma, nconfig);
       lteden = den_config (xdummy, nconfig);
 

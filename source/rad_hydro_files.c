@@ -30,6 +30,10 @@
  * real work is carried out in rad_hydro_files_sub.c  Indeed so 
  * little of the real work is done here that it might be sensible
  * to move some portion of that code here.
+ * 
+ * ksl - 2212 - Nick did not really try to make the doucmentation
+ * accurate for this
+ *
  *
  *
  ***********************************************************/
@@ -45,7 +49,7 @@
 
 /**********************************************************/
 /**
- * @brief Parse the command line arguments given to windsave2table
+ * @brief Parse the command line  
  *
  * @param[in] int argc        The number of arguments in the command line
  * @param[in] char *argv[]    The command line arguments
@@ -57,20 +61,7 @@
  *
  * Parse arguments provided in the command line whilst invoking windsave2table.
  *
- * The allowed switches include 
- *
- *  --version    Print out information about the version number
- *
- *  -d   Write out ion densisties, rather than ion fractions in the cell
- *  -s   Write out the number of scatters per unit volume  by an ion in a cell, instead of the 
- *       ion fraction
- *
- * The switches only affect the ion tables not the master table
- * This was originally implemented to enable somebody to query which version of
- * Python windsave2table was compiled with. Works in a similar fashion to how
- * the version information is stored and viewed in Python.
- * 
- * 
+ * 2212 - ksl - This needs updating
  *
  **********************************************************/
 
@@ -107,14 +98,13 @@ xparse_arguments (int argc, char *argv[], char root[], int *ion_switch)
   }
 
 
-
 }
 
 
 /**********************************************************/
 /** 
- * @brief      windsave2table writes key variables in a windsave file 
- * to an astropy table calculated Python.  This is the  main routine.
+ * @brief      writes key variables in a windsave file 
+ * to data files appropriate for use with PlUTO.
  *
  * @param [in] int  argc   The number of argments in the command line
  * @param [in] char *  argv[]   The command line
@@ -128,9 +118,6 @@ xparse_arguments (int argc, char *argv[], char root[], int *ion_switch)
  * parsed and this should be rootname of the windsave file
  *
  * ### Notes ###
- *
- * This routine is a supervisory routine. The real work 
- * is in do_windsave2table
  *
  * The routine does not read the .pf file.  It does read  
  * the windsave file and the associated atomic data file
@@ -150,6 +137,7 @@ main (argc, argv)
   int ion_switch, nwind, nplasma;
   int i, j, ii, domain;
   //OLD double vol, kappa_es, lum_sum, cool_sum;
+
   double vol, kappa_es;
   double t_opt, t_UV, t_Xray, v_th, fhat[3];    /*This is the dimensionless optical depth parameter computed for communication to rad-hydro. */
 
@@ -158,21 +146,34 @@ main (argc, argv)
   FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fptr6, *fptr7, *fptr8, *fptr9, *fptr10, *fopen ();       /*This is the file to communicate with zeus */
   domain = geo.hydro_domain_number;
 
+  /* Initialize  MPI, which is needed because some of the routines are MPI enabled */
+
+  int my_rank;                  // these two variables are used regardless of parallel mode
+  int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
+
+#ifdef MPI_ON
+  MPI_Init (&argc, &argv);
+  MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
+  MPI_Comm_size (MPI_COMM_WORLD, &np_mpi);
+#else
+  my_rank = 0;
+  np_mpi = 1;
+#endif
+
+  np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
+  rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
+  Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
+
+  /* MPI intialiazation is complete */
+
+
 
   strcpy (parameter_file, "NONE");
 
-  /* Next command stops Debug statements printing out in py_wind */
   Log_set_verbosity (3);
-
-  /*
-   * EP: added some extra argument parsing for windsave2table - specifically
-   * because I was having some trouble with knowing when windsave2table was
-   * last compiled and on what commit this was
-   */
 
   xparse_arguments (argc, argv, root, &ion_switch);
 
-  printf ("Reading data from file %s\n", root);
   /* Now create the names of all the files which will be written */
   strcpy (windsavefile, root);
   strcpy (outputfile, root);
@@ -190,17 +191,11 @@ main (argc, argv)
   }
 
 
-  printf ("Read wind_file %s\n", windsavefile);
 
   get_atomic_data (geo.atomic_filename);
-
-  printf ("Read Atomic data from %s\n", geo.atomic_filename);
-
-
-//  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
-//  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /*and we also call wind_luminosity to get the luminosities */
   wind_cooling ();              /*We call wind_cooling here to obtain an up to date set of cooling rates */
   wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);       /*and we also call wind_luminosity to get the luminosities */
+
 
   fptr = fopen ("py_heatcool.dat", "w");
   fptr2 = fopen ("py_driving.dat", "w");
@@ -263,6 +258,8 @@ main (argc, argv)
     domain = 0;
   }
 
+  printf ("Checkpoint 1\n");
+
   if (zdom[domain].coord_type == SPHERICAL)
   {
     fprintf (fptr2, "i j rcen thetacen F_vis_r F_UV_r F_Xray_r es_f_r bf_f_r\n");       //directional flux by band
@@ -283,6 +280,7 @@ main (argc, argv)
   fprintf (fptr9, "NANGLES %i\n", NFLUX_ANGLES);
   fprintf (fptr10, "NANGLES %i\n", NFLUX_ANGLES);
 
+  printf ("Checkpoint 2\n");
 
   for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
   {

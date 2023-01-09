@@ -742,8 +742,8 @@ den_config (xplasma, nconf)
   double density;
   int nnlev, nion;
 
-  nnlev = config[nconf].nden;
-  nion = config[nconf].nion;
+  nnlev = xconfig[nconf].nden;
+  nion = xconfig[nconf].nion;
 
   if (nnlev >= 0)
   {                             // Then a "non-lte" level with a density

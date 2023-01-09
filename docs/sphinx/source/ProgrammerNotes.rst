@@ -94,6 +94,10 @@ The portions of the routine that are parallelize are:
   the radiative transfer step in the detailed spectrum phase.
 
 
+MPI requires intialization. For python this is carried out in python.c.  Various subroutines make 
+use of MPI, and as a result, programmers need to be aware of this fact when they write auxiliary 
+routines that use the various subroutines called by Python.
+
 Input naming conventions
 ========================
 

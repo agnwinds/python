@@ -19,7 +19,7 @@ double rho2nh;                  /* Conversion constant from rho to nh the number
 
 IonPtr ion;
 
-ConfigPtr config;
+ConfigPtr xconfig;
 
 AugerPtr auger_macro;
 

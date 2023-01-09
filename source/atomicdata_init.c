@@ -92,13 +92,13 @@ init_atomic_data ()
   }
 
 
-  if (config != NULL)
+  if (xconfig != NULL)
   {
-    free (config);
+    free (xconfig);
   }
-  config = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
+  xconfig = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
 
-  if (config == NULL)
+  if (xconfig == NULL)
   {
     Error ("There is a problem in allocating memory for the config structure\n");
     exit (0);

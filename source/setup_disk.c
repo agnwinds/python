@@ -78,6 +78,18 @@ get_disk_params ()
   sprintf (values, "%d,%d", DISK_TPROFILE_STANDARD, DISK_TPROFILE_READIN);
   geo.disk_tprofile = rdchoice ("Disk.temperature.profile(standard,readin)", values, answer);
 
+  /*Initialize disk rmin to something plausible */
+
+  geo.disk_rad_min = geo.rstar;
+  if (geo.disk_rad_min < GRAV * geo.mstar / (VLIGHT * VLIGHT))
+  {
+    Error ("disk_init: Central object size %.1e is less than R_g %.1e, so initialising to R_g \n", geo.rstar,
+           GRAV * geo.mstar / (VLIGHT * VLIGHT));
+    geo.disk_rad_min = GRAV * geo.mstar / (VLIGHT * VLIGHT);
+  }
+
+
+
 
   if (geo.disk_tprofile == DISK_TPROFILE_STANDARD)
   {
@@ -97,14 +109,22 @@ get_disk_params ()
 
     if (geo.disk_type == DISK_WITH_HOLE)
     {
-      geo.disk_rad_min = geo.rstar;
+// geo.disk_rad_min has already been intialized
+//      geo.disk_rad_min = geo.rstar;
       rddoub ("Disk.radmin(cm)", &geo.disk_rad_min);
-    }
-    else
-    {
-      geo.disk_rad_min = geo.rstar;
-    }
 
+      if (geo.disk_rad_min < GRAV * geo.mstar / (VLIGHT * VLIGHT))
+      {
+        Error ("disk_init: disk rad min %.1e is less than R_g %.1e, so exiting \n", geo.disk_rad_min, GRAV * geo.mstar / (VLIGHT * VLIGHT));
+        Exit (1);
+      }
+    }
+//    else
+//    {
+//      geo.disk_rad_min = geo.rstar;
+//    }
+
+    geo.disk_rad_max = 30 * geo.disk_rad_min;
     rddoub ("Disk.radmax(cm)", &geo.disk_rad_max);
 
   }
@@ -112,7 +132,6 @@ get_disk_params ()
   {
     rdstr ("Disk.T_profile_file", files.tprofile);
     read_non_standard_disk_profile (files.tprofile);
-    geo.disk_mdot = 0;
   }
   else
   {

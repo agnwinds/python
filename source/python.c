@@ -79,11 +79,10 @@ main (argc, argv)
   double time_max;
   double lstar;
 
+/* Initicialize MPI */
+
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
-
-
-
 
 
 #ifdef MPI_ON
@@ -98,6 +97,8 @@ main (argc, argv)
   np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
+
+/* This completes the intialization of mpi */
 
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
@@ -198,8 +199,7 @@ main (argc, argv)
     if (geo.disk_tprofile == DISK_TPROFILE_READIN)      //We also need to re-read in any previously used disk temperature profile
     {
       rdstr ("Disk.T_profile_file", files.tprofile);
-      geo.disk_rad_max = read_non_standard_disk_profile (files.tprofile);
-      geo.disk_mdot = 0;
+      read_non_standard_disk_profile (files.tprofile);
     }
     if (geo.pcycle > 0)
     {
@@ -425,16 +425,19 @@ main (argc, argv)
 
     if (geo.star_radiation)
     {
+      geo.star_spectype = geo.star_ion_spectype;
       get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
     }
 
     if (geo.disk_radiation)
     {
+      geo.disk_spectype = geo.disk_ion_spectype;
       get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.disk_spectype);
     }
 
     if (geo.bl_radiation)
     {
+      geo.bl_spectype = geo.bl_ion_spectype;
       get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
     }
 
@@ -442,7 +445,7 @@ main (argc, argv)
     {
       // This block will run for both AGN, *and* some versions of a boundary layer.
       // Even though we're setting the same params, we need to change the wording based on the system, unfortunately.
-      geo.agn_spectype = SPECTYPE_POW;
+      geo.agn_spectype = geo.agn_ion_spectype;
 
       // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
       if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)

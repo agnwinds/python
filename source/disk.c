@@ -25,7 +25,9 @@
 /** 
  * @brief      Calculate the temperature of the disk at a normalised distance x
  *
- * @param [in] double  x   distance from center of disk in units of r/rstar
+ * @param [in] double  x   distance from center of disk in units of the minimum
+ * radius of the disk
+
  * @return     The temperature
  *
  * The routine returns the effective temperature for the disk as a distance
@@ -43,6 +45,9 @@
  *
  *
  * ###Notes###
+ *
+ * For disks that start at a radius that is larger than r_star, the temperature
+ * is based on the minimum radius.
  *
  * A reference for the standard steady state disk is Wade, 1984 MNRAS 208, 381
  *
@@ -70,12 +75,12 @@ teff (x)
   }
 
 
-  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
+  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && ((x * geo.disk_rad_min) < blmod.r[blmod.n_blpts - 1]))
   {
     /* This is the case where the temperature profile is read in as an array, and so we
        simply find the array elements that bracket the requested radius and do a linear
        interpolation to calcualte the temperature at the requested radius. */
-    if ((r = (x * geo.rstar)) < blmod.r[0])
+    if ((r = (x * geo.disk_rad_min)) < blmod.r[0])
     {
       return (blmod.t[0]);
     }
@@ -87,11 +92,11 @@ teff (x)
   }
   else
   {
-    double t, r;
-    r = geo.rstar;
-    t = 3. * GRAV / (8. * PI * STEFAN_BOLTZMANN) * geo.mstar * geo.disk_mdot / (r * r * r);
-    t = pow (t, 0.25);
     /* This is a standard accretion disk */
+    double t, r;
+    r = geo.disk_rad_min;
+    t = 3. * GRAV / (8. * PI * STEFAN_BOLTZMANN) * geo.mstar * geo.disk_mdot / (r * r * r);
+    t = pow (t, 0.25);          /*This is the chaacteristic temperature */
 
     q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
     q = t * pow (q, 0.25e0);
@@ -110,7 +115,7 @@ teff (x)
        * the requested r
        * 
        */
-      r = x * geo.rstar;        // 04aug -- Requires fix if disk does not extend to rstar
+      r = x * geo.disk_rad_min;
       kkk = 1;                  // photon cannot hit the disk at r<qdisk.r[0]
       while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
         kkk++;
@@ -136,13 +141,22 @@ teff (x)
  * @param [in] double  x   distance from center in units of r/rmin
  * @return     log of gravity at x in cm s**-2
  *
- * The gravity is needed when one constructs a disk spectrum
- * from spectra from a grid of stellar atmospheres
- *
  *
  * ###Notes###
  *
- * See Long & Knigge for details
+ * The gravity is needed when one constructs a disk spectrum
+ * from spectra from a grid of stellar atmospheres
+ *
+ * Normally the gravity is calculated
+ * using the prescription defined by Herter et al (1979) for a steady
+ * state Sakura-Sunyaev disk.  See Long & Knigge for details.  
+ *
+ * For the case where a temperature and gravity are read from a 
+ * file then the gravity is based on the values that are read in.
+ *
+ * If only a temperature profile is read in, and the mdot of the disk
+ * is not, then the gravity is set to 1.0 so that log g will be 00
+ * 
  *
  **********************************************************/
 
@@ -167,7 +181,7 @@ geff (x)
       return (q);
     }
   }
-  else
+  else if (geo.disk_mdot > 0)
   {
     double g0;
     g0 = 0.625 * log10 (geo.mstar / MSOL) - 1.875 * log10 (geo.rstar / 1.e9) + 0.125 * log10 (geo.disk_mdot / 1.e16);
@@ -179,6 +193,10 @@ geff (x)
 
     q = log10 (q);
     return (q);
+  }
+  else
+  {
+    return (1.0);               // return a positive value if g could not be otherwise defined.
   }
 }
 

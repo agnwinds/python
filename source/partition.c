@@ -116,13 +116,13 @@ partition_functions (xplasma, mode)
       m = ion[nion].firstlevel;
       m_ground = m;
       //store ground state - in case energy neq 0(SS)
-      z = config[m].g;
+      z = xconfig[m].g;
       //Makes explicit assumption that first level is ground
 
       for (n = 1; n < ion[nion].nlevels; n++)
       {
         m++;
-        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+        z += weight * xconfig[m].g * exp ((-xconfig[m].ex + xconfig[m_ground].ex) / kt);
       }
     }
     else if (ion[nion].nlte > 0)
@@ -131,13 +131,13 @@ partition_functions (xplasma, mode)
       m = ion[nion].first_nlte_level;
       m_ground = m;
       //store ground state - in case energy neq 0(SS)
-      z = config[m].g;
+      z = xconfig[m].g;
       //This statement makes an explicit assumption that first level is ground
 
       for (n = 1; n < ion[nion].nlte; n++)
       {
         m++;
-        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+        z += weight * xconfig[m].g * exp ((-xconfig[m].ex + xconfig[m_ground].ex) / kt);
       }
     }
     else
@@ -228,13 +228,13 @@ partition_functions_2 (xplasma, xnion, temp, weight)
       m = ion[nion].firstlevel;
       m_ground = m;
       //store ground state - in case energy neq 0(SS)
-      z = config[m].g;
+      z = xconfig[m].g;
       //Makes explicit assumption that first level is ground
 
       for (n = 1; n < ion[nion].nlevels; n++)
       {
         m++;
-        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+        z += weight * xconfig[m].g * exp ((-xconfig[m].ex + xconfig[m_ground].ex) / kt);
       }
     }
     else if (ion[nion].nlte > 0)
@@ -243,13 +243,13 @@ partition_functions_2 (xplasma, xnion, temp, weight)
       m = ion[nion].first_nlte_level;
       m_ground = m;
       //store ground state - in case energy neq 0(SS)
-      z = config[m].g;
+      z = xconfig[m].g;
       //This statement makes an explicit assumption that first level is ground
 
       for (n = 1; n < ion[nion].nlte; n++)
       {
         m++;
-        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+        z += weight * xconfig[m].g * exp ((-xconfig[m].ex + xconfig[m_ground].ex) / kt);
       }
     }
     else

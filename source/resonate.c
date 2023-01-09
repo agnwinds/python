@@ -727,7 +727,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     // macro atom case SS
     d1 = den_config (xplasma, lptr->nconfigl);
     d2 = den_config (xplasma, lptr->nconfigu);
-    levden_upper = xplasma->levden[config[lptr->nconfigu].nden];
+    levden_upper = xplasma->levden[xconfig[lptr->nconfigu].nden];
   }
 
   else
@@ -871,7 +871,8 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
-  double velocity_electron[3];
+//  double velocity_electron[3];
+  double vel[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -975,9 +976,9 @@ scatter (p, nres, nnscat)
         llvl = phot_top[*nres - NLINES - 1].nlev;       //lower level
         ulvl = phot_top[*nres - NLINES - 1].uplev;      //upper level
 
-        for (m = 0; m < config[llvl].n_bfu_jump; m++)
+        for (m = 0; m < xconfig[llvl].n_bfu_jump; m++)
         {
-          if (config[llvl].bfu_jump[m] == *nres - NLINES - 1)
+          if (xconfig[llvl].bfu_jump[m] == *nres - NLINES - 1)
           {
             break;
           }
@@ -986,7 +987,7 @@ scatter (p, nres, nnscat)
         // m should now be the label to identify which of the bf processes from llvl
         // this is. Check that it is reasonable
 
-        if (m > config[llvl].n_bfu_jump - 1)
+        if (m > xconfig[llvl].n_bfu_jump - 1)
         {
           Error ("scatter (resonate.c): could not identify bf transition. Abort. \n");
           Exit (0);
@@ -997,9 +998,9 @@ scatter (p, nres, nnscat)
         stim_fact = den_config (xplasma, ulvl) / den_config (xplasma, llvl) / xplasma->ne;
 
         gamma_twiddle =
-          mplasma->gamma_old[config[llvl].bfu_indx_first + m] - (mplasma->alpha_st_old[config[llvl].bfu_indx_first + m] * stim_fact);
+          mplasma->gamma_old[xconfig[llvl].bfu_indx_first + m] - (mplasma->alpha_st_old[xconfig[llvl].bfu_indx_first + m] * stim_fact);
         gamma_twiddle_e =
-          mplasma->gamma_e_old[config[llvl].bfu_indx_first + m] - (mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] * stim_fact);
+          mplasma->gamma_e_old[xconfig[llvl].bfu_indx_first + m] - (mplasma->alpha_st_e_old[xconfig[llvl].bfu_indx_first + m] * stim_fact);
 
         /* Both gamma_twiddles must be greater that zero if this is going to work. If they
            are zero then it's probably because this is the first iteration and so the've not
@@ -1161,8 +1162,8 @@ scatter (p, nres, nnscat)
     compton_get_thermal_velocity (xplasma->t_e, velocity_electron);
     lorentz_transform (p, p, velocity_electron);
     compton_dir (p);
-    rescale (velocity_electron, -1, velocity_electron);
-    lorentz_transform (p, p, velocity_electron);
+    rescale (velocity_electron, -1, vel);
+    lorentz_transform (p, p, vel);
   }
   else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {

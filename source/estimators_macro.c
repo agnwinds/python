@@ -142,13 +142,13 @@ bf_estimators_increment (one, p, ds)
         /* Now identify which of the BF processes from this level this is. */
 
         m = 0;
-        while (m < config[llvl].n_bfu_jump && config[llvl].bfu_jump[m] != n)
+        while (m < xconfig[llvl].n_bfu_jump && xconfig[llvl].bfu_jump[m] != n)
           m++;
 
         // m should now be the label to identify which of the bf processes from llvl
         // this is. Check that it is reasonable
 
-        if (m > config[llvl].n_bfu_jump - 1)
+        if (m > xconfig[llvl].n_bfu_jump - 1)
         {
           Error ("bf_estimators_increment: could not identify bf transition. Abort. \n");
           Exit (0);
@@ -162,13 +162,13 @@ bf_estimators_increment (one, p, ds)
 
         /* Increment the photoionization rate estimator */
 
-        mplasma->gamma[config[llvl].bfu_indx_first + m] += y / freq_av;
+        mplasma->gamma[xconfig[llvl].bfu_indx_first + m] += y / freq_av;
 
-        mplasma->alpha_st[config[llvl].bfu_indx_first + m] += exponential / freq_av;
+        mplasma->alpha_st[xconfig[llvl].bfu_indx_first + m] += exponential / freq_av;
 
-        mplasma->gamma_e[config[llvl].bfu_indx_first + m] += y / ft;
+        mplasma->gamma_e[xconfig[llvl].bfu_indx_first + m] += y / ft;
 
-        mplasma->alpha_st_e[config[llvl].bfu_indx_first + m] += exponential / ft;
+        mplasma->alpha_st_e[xconfig[llvl].bfu_indx_first + m] += exponential / ft;
 
         /* Now record the contribution to the energy absorbed by macro atoms allowing
            for the filling factor. */
@@ -335,10 +335,10 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   /* Now find which of the bb transition from level llvl this is. */
 
 
-  nmax = config[llvl].n_bbu_jump;
+  nmax = xconfig[llvl].n_bbu_jump;
 
   n = 0;
-  while (n < nmax && line[config[llvl].bbu_jump[n]].where_in_list != nn)
+  while (n < nmax && line[xconfig[llvl].bbu_jump[n]].where_in_list != nn)
     n++;
 
   if (n == nmax)
@@ -362,7 +362,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
   if (y >= 0)
   {
-    mplasma->jbar[config[llvl].bbu_indx_first + n] += y;
+    mplasma->jbar[xconfig[llvl].bbu_indx_first + n] += y;
   }
   else
   {
@@ -454,26 +454,29 @@ normalise_macro_estimators (n)
 
   for (i = 0; i < nlte_levels; i++)
   {
-    for (j = 0; j < config[i].n_bfu_jump; j++)
+    for (j = 0; j < xconfig[i].n_bfu_jump; j++)
     {
-      mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / PLANCK / invariant_volume_time; // normalize by invariant_volume_time
-      mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / PLANCK / invariant_volume_time;
-      mplasma->gamma[config[i].bfu_indx_first + j] = 0.0;       //re-initialise for next iteration
-      mplasma->gamma_e[config[i].bfu_indx_first + j] = 0.0;
+      mplasma->gamma_old[xconfig[i].bfu_indx_first + j] = mplasma->gamma[xconfig[i].bfu_indx_first + j] / PLANCK / invariant_volume_time;       // normalize by invariant_volume_time
+
+      mplasma->gamma_e_old[xconfig[i].bfu_indx_first + j] =
+        mplasma->gamma_e[xconfig[i].bfu_indx_first + j] / PLANCK / invariant_volume_time;
+
+      mplasma->gamma[xconfig[i].bfu_indx_first + j] = 0.0;      //re-initialise for next iteration
+      mplasma->gamma_e[xconfig[i].bfu_indx_first + j] = 0.0;
 
       /* For the stimulated recombination parts we need the the
          ratio of statistical weights too. For free electron statistical
          weight = 2 is included in stimfac above. */
 
-      stat_weight_ratio = config[phot_top[config[i].bfu_jump[j]].uplev].g / config[i].g;
+      stat_weight_ratio = xconfig[phot_top[xconfig[i].bfu_jump[j]].uplev].g / xconfig[i].g;
 
-      mplasma->alpha_st_old[config[i].bfu_indx_first + j] =
-        mplasma->alpha_st[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / invariant_volume_time;
-      mplasma->alpha_st[config[i].bfu_indx_first + j] = 0.0;
+      mplasma->alpha_st_old[xconfig[i].bfu_indx_first + j] =
+        mplasma->alpha_st[xconfig[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / invariant_volume_time;
+      mplasma->alpha_st[xconfig[i].bfu_indx_first + j] = 0.0;
 
-      mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] =
-        mplasma->alpha_st_e[config[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / invariant_volume_time;
-      mplasma->alpha_st_e[config[i].bfu_indx_first + j] = 0.0;
+      mplasma->alpha_st_e_old[xconfig[i].bfu_indx_first + j] =
+        mplasma->alpha_st_e[xconfig[i].bfu_indx_first + j] * stimfac * stat_weight_ratio / PLANCK / invariant_volume_time;
+      mplasma->alpha_st_e[xconfig[i].bfu_indx_first + j] = 0.0;
 
       /* For continuua whose edges lie beyond freqmin assume that gamma
          is given by a black body. */
@@ -482,12 +485,12 @@ normalise_macro_estimators (n)
       /* Try also doing it for very high energy ones - greater than 50eV: 1.2e16 since up there the statistics of the estimators are very poor at the moment.
          Ideally we don't want to have this so should probably switch this back sometime (SS August 05) !!!BUG */
 
-      if (phot_top[config[i].bfu_jump[j]].freq[0] < 7.5e12 || phot_top[config[i].bfu_jump[j]].freq[0] > 5e18)
+      if (phot_top[xconfig[i].bfu_jump[j]].freq[0] < 7.5e12 || phot_top[xconfig[i].bfu_jump[j]].freq[0] > 5e18)
       {
-        mplasma->gamma_old[config[i].bfu_indx_first + j] = get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
-        mplasma->gamma_e_old[config[i].bfu_indx_first + j] = get_gamma_e (&phot_top[config[i].bfu_jump[j]], xplasma);
-        mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] = get_alpha_st_e (&phot_top[config[i].bfu_jump[j]], xplasma);
-        mplasma->alpha_st_old[config[i].bfu_indx_first + j] = get_alpha_st (&phot_top[config[i].bfu_jump[j]], xplasma);
+        mplasma->gamma_old[xconfig[i].bfu_indx_first + j] = get_gamma (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
+        mplasma->gamma_e_old[xconfig[i].bfu_indx_first + j] = get_gamma_e (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
+        mplasma->alpha_st_e_old[xconfig[i].bfu_indx_first + j] = get_alpha_st_e (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
+        mplasma->alpha_st_old[xconfig[i].bfu_indx_first + j] = get_alpha_st (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
       }
     }
 
@@ -503,30 +506,30 @@ normalise_macro_estimators (n)
        computed in the macro atom jumping probabilities.
      */
 
-    for (j = 0; j < config[i].n_bbu_jump; j++)
+    for (j = 0; j < xconfig[i].n_bbu_jump; j++)
     {
-      nlev_upper = line[config[i].bbu_jump[j]].nconfigu;
+      nlev_upper = line[xconfig[i].bbu_jump[j]].nconfigu;
       lower_density = den_config (xplasma, i);
       upper_density = den_config (xplasma, nlev_upper);
 
       /* The correction for stimulated emission is (1 - n_lower * g_upper / n_upper / g_lower) */
 
       stimfac = upper_density / lower_density;
-      stimfac = stimfac * config[i].g / config[line[config[i].bbu_jump[j]].nconfigu].g;
+      stimfac = stimfac * xconfig[i].g / xconfig[line[xconfig[i].bbu_jump[j]].nconfigu].g;
 
       if (stimfac < 1.0 && stimfac >= 0.0)
       {
         stimfac = 1. - stimfac;
       }
       else if (upper_density > DENSITY_PHOT_MIN && lower_density > DENSITY_PHOT_MIN
-               && xplasma->levden[config[nlev_upper].nden] > DENSITY_MIN)
+               && xplasma->levden[xconfig[nlev_upper].nden] > DENSITY_MIN)
       {
         /* check for population inversions. We don't worry about this if the densities are extremely low or if the
            upper level has hit the density floor - the lower level is still allowed to hit this floor because it
            should never cause an inversion */
         Error ("normalise_macro_estimators: bb stimulated correction factor is out of bounds, 0 <= stimfac < 1 but got %g\n", stimfac);
         Error ("normalise_macro_estimators: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
-               upper_density, lower_density, xplasma->levden[config[nlev_upper].nden]);
+               upper_density, lower_density, xplasma->levden[xconfig[nlev_upper].nden]);
         Exit (EXIT_FAILURE);
         stimfac = 0.0;
       }
@@ -537,10 +540,10 @@ normalise_macro_estimators (n)
 
       /* normalise jbar. Note that this uses the cell volume rather than the filled volume */
 
-      line_freq = line[config[i].bbu_jump[j]].freq;
-      mplasma->jbar_old[config[i].bbu_indx_first + j] =
-        mplasma->jbar[config[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / invariant_volume_time / line_freq;
-      mplasma->jbar[config[i].bbu_indx_first + j] = 0.0;
+      line_freq = line[xconfig[i].bbu_jump[j]].freq;
+      mplasma->jbar_old[xconfig[i].bbu_indx_first + j] =
+        mplasma->jbar[xconfig[i].bbu_indx_first + j] * VLIGHT * stimfac / 4. / PI / invariant_volume_time / line_freq;
+      mplasma->jbar[xconfig[i].bbu_indx_first + j] = 0.0;
     }
   }
 
@@ -621,11 +624,11 @@ total_fb_matoms (xplasma, t_e, f1, f2)
   {
     for (i = 0; i < nlte_levels; i++)
     {
-      for (j = 0; j < config[i].n_bfu_jump; j++)
+      for (j = 0; j < xconfig[i].n_bfu_jump; j++)
       {
         /* Need the density for the upper level in the recombination
            process. */
-        cont_ptr = &phot_top[config[i].bfu_jump[j]];
+        cont_ptr = &phot_top[xconfig[i].bfu_jump[j]];
         density = den_config (xplasma, cont_ptr->uplev);
 
         /* the cooling contribution for each transition is given by 
@@ -635,15 +638,15 @@ total_fb_matoms (xplasma, t_e, f1, f2)
            This is essentially equation (33) of Lucy (2003) */
 
         cool_contribution =
-          (mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
+          (mplasma->alpha_st_e_old[xconfig[i].bfu_indx_first + j] +
            alpha_sp (cont_ptr, xplasma, 1)
-           - mplasma->alpha_st_old[config[i].bfu_indx_first + j]
-           - alpha_sp (cont_ptr, xplasma, 0)) * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * density * xplasma->ne * xplasma->vol;
+           - mplasma->alpha_st_old[xconfig[i].bfu_indx_first + j]
+           - alpha_sp (cont_ptr, xplasma, 0)) * PLANCK * phot_top[xconfig[i].bfu_jump[j]].freq[0] * density * xplasma->ne * xplasma->vol;
 
         /* Now add the collisional ionization term. */
         density = den_config (xplasma, cont_ptr->nlev);
         cool_contribution +=
-          q_ioniz (cont_ptr, t_e) * density * xplasma->ne * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * xplasma->vol;
+          q_ioniz (cont_ptr, t_e) * density * xplasma->ne * PLANCK * phot_top[xconfig[i].bfu_jump[j]].freq[0] * xplasma->vol;
 
         /* That's the bf cooling contribution. */
         total += cool_contribution;
@@ -802,21 +805,21 @@ macro_bf_heating (xplasma, t_e)
 
   for (i = 0; i < nlte_levels; i++)
   {
-    for (j = 0; j < config[i].n_bfu_jump; j++)
+    for (j = 0; j < xconfig[i].n_bfu_jump; j++)
     {
       heat_contribution = 0.0;
       /* Photoionization part. */
-      lower_density = den_config (xplasma, phot_top[config[i].bfu_jump[j]].nlev);
+      lower_density = den_config (xplasma, phot_top[xconfig[i].bfu_jump[j]].nlev);
       heat_contribution =
-        (mplasma->gamma_e_old[config[i].bfu_indx_first + j] -
-         mplasma->gamma_old[config[i].bfu_indx_first +
-                            j]) * PLANCK * phot_top[config[i].bfu_jump[j]].freq[0] * lower_density * xplasma->vol;
+        (mplasma->gamma_e_old[xconfig[i].bfu_indx_first + j] -
+         mplasma->gamma_old[xconfig[i].bfu_indx_first +
+                            j]) * PLANCK * phot_top[xconfig[i].bfu_jump[j]].freq[0] * lower_density * xplasma->vol;
 
       /* Three body recombination part. */
-      upper_density = den_config (xplasma, phot_top[config[i].bfu_jump[j]].uplev);
+      upper_density = den_config (xplasma, phot_top[xconfig[i].bfu_jump[j]].uplev);
       heat_contribution +=
-        q_recomb (&phot_top[config[i].bfu_jump[j]],
-                  t_e) * xplasma->ne * xplasma->ne * PLANCK * upper_density * xplasma->vol * phot_top[config[i].bfu_jump[j]].freq[0];
+        q_recomb (&phot_top[xconfig[i].bfu_jump[j]],
+                  t_e) * xplasma->ne * xplasma->ne * PLANCK * upper_density * xplasma->vol * phot_top[xconfig[i].bfu_jump[j]].freq[0];
 
       total += heat_contribution;
 
@@ -919,11 +922,11 @@ check_stimulated_recomb (xplasma)
 
   for (i = 0; i < nlte_levels; i++)
   {
-    for (j = 0; j < config[i].n_bfu_jump; j++)
+    for (j = 0; j < xconfig[i].n_bfu_jump; j++)
     {
-      cont_ptr = &phot_top[config[i].bfu_jump[j]];
-      gamma = mplasma->gamma_old[config[i].bfu_indx_first + j];
-      st_recomb = mplasma->alpha_st_old[config[i].bfu_indx_first + j];
+      cont_ptr = &phot_top[xconfig[i].bfu_jump[j]];
+      gamma = mplasma->gamma_old[xconfig[i].bfu_indx_first + j];
+      st_recomb = mplasma->alpha_st_old[xconfig[i].bfu_indx_first + j];
       st_recomb *= xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev);
       coll_ioniz = q_ioniz (cont_ptr, xplasma->t_e) * xplasma->ne;
 
@@ -965,17 +968,17 @@ get_dilute_estimators (xplasma)
 
   for (i = 0; i < nlte_levels; i++)
   {
-    for (j = 0; j < config[i].n_bfu_jump; j++)
+    for (j = 0; j < xconfig[i].n_bfu_jump; j++)
     {
-      mplasma->gamma_old[config[i].bfu_indx_first + j] = get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
-      mplasma->gamma_e_old[config[i].bfu_indx_first + j] = get_gamma_e (&phot_top[config[i].bfu_jump[j]], xplasma);
-      mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] = get_alpha_st_e (&phot_top[config[i].bfu_jump[j]], xplasma);
-      mplasma->alpha_st_old[config[i].bfu_indx_first + j] = get_alpha_st (&phot_top[config[i].bfu_jump[j]], xplasma);
+      mplasma->gamma_old[xconfig[i].bfu_indx_first + j] = get_gamma (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
+      mplasma->gamma_e_old[xconfig[i].bfu_indx_first + j] = get_gamma_e (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
+      mplasma->alpha_st_e_old[xconfig[i].bfu_indx_first + j] = get_alpha_st_e (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
+      mplasma->alpha_st_old[xconfig[i].bfu_indx_first + j] = get_alpha_st (&phot_top[xconfig[i].bfu_jump[j]], xplasma);
     }
-    for (j = 0; j < config[i].n_bbu_jump; j++)
+    for (j = 0; j < xconfig[i].n_bbu_jump; j++)
     {
-      line_ptr = &line[config[i].bbu_jump[j]];
-      mplasma->jbar_old[config[i].bbu_indx_first + j] = mean_intensity (xplasma, line_ptr->freq, MEAN_INTENSITY_BB_MODEL);
+      line_ptr = &line[xconfig[i].bbu_jump[j]];
+      mplasma->jbar_old[xconfig[i].bbu_indx_first + j] = mean_intensity (xplasma, line_ptr->freq, MEAN_INTENSITY_BB_MODEL);
     }
   }
 
@@ -1188,11 +1191,11 @@ get_alpha_st (cont_ptr, xplasma)
      through by the appropriate constant. */
   if (cont_ptr->macro_info == 1 && geo.macro_simple == FALSE)
   {
-    alpha_st_value = alpha_st_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
+    alpha_st_value = alpha_st_value * xconfig[cont_ptr->nlev].g / xconfig[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }
   else                          //case for simple element
   {
-    alpha_st_value = alpha_st_value * config[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5);  //g for next ion up used
+    alpha_st_value = alpha_st_value * xconfig[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5); //g for next ion up used
   }
 
   alpha_st_value = alpha_st_value * ALPHA_SP_CONSTANT * xplasma->w;
@@ -1285,11 +1288,11 @@ get_alpha_st_e (cont_ptr, xplasma)
      through by the appropriate constant. */
   if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
   {
-    alpha_st_e_value = alpha_st_e_value * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
+    alpha_st_e_value = alpha_st_e_value * xconfig[cont_ptr->nlev].g / xconfig[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
   }
   else                          //case for simple element
   {
-    alpha_st_e_value = alpha_st_e_value * config[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5);      //g for next ion up used
+    alpha_st_e_value = alpha_st_e_value * xconfig[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5);     //g for next ion up used
   }
 
   alpha_st_e_value = alpha_st_e_value * ALPHA_SP_CONSTANT * xplasma->w;

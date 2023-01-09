@@ -8,7 +8,6 @@
  * the fractional position of a 2d vector in a 2d cell with
  * 4 corners.
  *
- * There is also a quadratic equation solver
  ***********************************************************/
 
 #include <stdio.h>
@@ -79,7 +78,7 @@
  * 
  * (Q[0]+f R[0]) (S[2]+f T[2]) = (Q[2]+f R[2]) (S[0]+f T[0])
  * 
- * which can now be put in the form of a xquadratic
+ * which can now be put in the form of a quadratic
  * 
  * a f**2 + b f +c = 0
  * 
@@ -114,7 +113,7 @@ bilin (x, x00, x01, x10, x11, f, g)
   double a, b, c, d;
   double q[3], r[3], s[3], t[3];
   double zz[3];
-  int i, xquadratic ();
+  int i, quadratic ();
   void Exit (int error_code);
 
 
@@ -159,7 +158,7 @@ bilin (x, x00, x01, x10, x11, f, g)
     }
     else
     {
-      i = xquadratic (a, b, c, root);   /* root[i] is the smallest positive root unless i is
+      i = quadratic (a, b, c, root);    /* root[i] is the smallest positive root unless i is
                                            negative in which case either both roots were negative or both roots 
                                            were imaginary */
       if (i != (-1))
@@ -175,7 +174,7 @@ bilin (x, x00, x01, x10, x11, f, g)
       }
       else
       {
-        Error ("Bilinear -- imaginary roots from xquadratic\n");
+        Error ("Bilinear -- imaginary roots from quadratic\n");
       }
 
     }
@@ -203,92 +202,4 @@ bilin (x, x00, x01, x10, x11, f, g)
 
   return (0);
 
-}
-
-
-
-
-/**********************************************************/
-/** 
- * @brief      solves a quadratic of the form 0=ax**2+bx+c
- *
- * @param [in, out] double  a   
- * @param [in, out] double  b   
- * @param [in, out] double  c   
- * @param [in, out] double  r[] roots of the quadratic equation   
- * @return    
- * * -1 -> both roots are imaginary
- * * -2 -> both roots are negative or 0
- * *  0 -> the first root is the smallest positive  root 
- * *  1 -> the second root is the smallest positive root
- *
- * @details
- * This solves a simple xquadratic (or if a is zero linear equation).  The return is set up
- * to make it easy to identify the smallest positive root if one exists.  The routine returns
- * a negative number if both roots are negative or imaginary. 
- *
- * ### Notes ###
- *
- * @bug xquadratic looks line for line identical to another routine quadratic which can be
- * found in phot_util.c.  Both versions of the code seem to be called.  One of them
- * should be removed.
- *
- **********************************************************/
-
-int
-xquadratic (a, b, c, r)
-     double a, b, c, r[];
-{
-  double q, z;
-  double qq;
-
-  if (a == 0.0)
-  {                             /* Then it's not really a xquadratic but we can solve it
-                                   anyway */
-    if (b == 0.0)
-    {
-      r[0] = r[1] = -99.;
-      return (-1);              /* The roots are extremely imaginary, since both a a b were 0 */
-    }
-
-    r[0] = r[1] = (-c / b);
-
-    if (r[0] < 0.0)
-      return (-2);              /* Generally speaking we are not interested in
-                                   negative distances */
-    else
-      return (0);
-  }
-
-  qq = 4. * a * c / (b * b);
-
-  if ((q = 1.0 - qq) < 0.0)
-  {
-    r[0] = r[1] = -99.;
-    return (-1);                /* both roots are imaginary */
-  }
-  else if (fabs (qq) < 1.e-8)
-  {
-    r[0] = (-c / b);
-    r[1] = (-b / a);
-  }
-  else
-  {
-
-    q = sqrt (q);
-    z = 0.5 * b / a;
-
-    r[0] = (-1.0 - q) * z;
-    r[1] = (-1.0 + q) * z;
-  }
-
-
-
-  if (r[0] > 0.0 && (r[0] < r[1] || r[1] <= 0.0))
-    return (0);                 /* r[0] is smallest positive root */
-  if (r[1] > 0.0 && (r[1] < r[0] || r[0] <= 0.0))
-    return (1);                 /* r[1] is smallest positive root */
-  return (-2);                  /* both roots are negative */
-
-  /* x1 should be the smallest positive root for most applications */
 }

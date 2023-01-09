@@ -91,7 +91,16 @@ get_stellar_params ()
   }
 
   rddoub ("Central_object.radius(cm)", &geo.rstar);
-  geo.disk_rad_min = geo.rstar; //Normally this is what we want
+  if (geo.rstar < 6. * GRAV * geo.mstar / (VLIGHT * VLIGHT))
+  {
+    Log ("Warning: Central object size %.1e is less than ISCO %.1e\n", geo.rstar, 6. * GRAV * geo.mstar / (VLIGHT * VLIGHT));
+    geo.disk_rad_min = 6. * GRAV * geo.mstar / (VLIGHT * VLIGHT);
+
+  }
+  else
+  {
+    geo.disk_rad_min = geo.rstar;       //Normally this is what we want
+  }
 
 
   geo.rstar_sq = geo.rstar * geo.rstar;
