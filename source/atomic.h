@@ -226,7 +226,6 @@ typedef struct auger
 } auger_dummy, *AugerPtr;
 
 extern AugerPtr auger_macro;
-int nauger_macro;               /* the number of auger processes read in associated with macro atoms */
 
 
 
