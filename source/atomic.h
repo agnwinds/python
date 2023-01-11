@@ -209,7 +209,7 @@ config_dummy, *ConfigPtr;
 extern ConfigPtr xconfig;
 
 
-int nauger_macro;               /* the number of auger processes read in associated with macro atoms */
+extern int nauger_macro;               /* the number of auger processes read in associated with macro atoms */
 #define NAUGER_MACRO 200        /* number of Auger processes */
 #define NAUGER_ELECTRONS 4
 
