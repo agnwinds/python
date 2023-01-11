@@ -87,12 +87,12 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
-    nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
-    nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
-    nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
-    nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
-    nauger = config[uplvl].nauger;      /* number of Auger jumps */
-    iauger = config[uplvl].iauger;
+    nbbd = xconfig[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
+    nbbu = xconfig[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
+    nbfd = xconfig[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
+    nbfu = xconfig[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
+    nauger = xconfig[uplvl].nauger;      /* number of Auger jumps */
+    iauger = xconfig[uplvl].iauger;
 
     /* bound-bound */
     for (n = 0; n < nbbd; n++)
@@ -120,7 +120,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
 
     /* Auger ionization */
-    if (config[uplvl].iauger >= 0)
+    if (xconfig[uplvl].iauger >= 0)
     {
       auger_ptr = &auger_macro[iauger];
 
@@ -130,10 +130,10 @@ calc_matom_matrix (xplasma, matom_matrix)
         auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
 
         //internal jump to another macro atom level
-        Q_matrix[uplvl][target_level] += Qcont = auger_rate * config[target_level].ex;  //energy of lower state
+        Q_matrix[uplvl][target_level] += Qcont = auger_rate * xconfig[target_level].ex;  //energy of lower state
 
         //jump to the k-packet pool (we used to call this "deactivation")
-        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = auger_rate * (config[uplvl].ex - config[target_level].ex);       //energy of lower state
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);       //energy of lower state
 
         //deactivation back to r-packet isn't possible for the Auger process
         Q_norm[uplvl] += Qcont + Qcont_kpkt;
@@ -149,7 +149,7 @@ calc_matom_matrix (xplasma, matom_matrix)
       sp_rec_rate = mplasma->recomb_sp[xconfig[uplvl].bfd_indx_first + n];      //need this twice so store it
       bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
 
-      target_level = phot_top[config[uplvl].bfd_jump[n]].nlev;
+      target_level = phot_top[xconfig[uplvl].bfd_jump[n]].nlev;
 
       if (bf_cont > 0.0)
       {
@@ -320,7 +320,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* throw an error if this normalisation is not zero */
     /* note that the ground state is a special case here (improve error check) */
-    if ((fabs (norm) > 1e-14 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
+    if ((fabs (norm) > 1e-14 && uplvl != ion[xconfig[uplvl].nion].first_nlte_level) || sane_check (norm))
       Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", norm, uplvl);
   }
 
