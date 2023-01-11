@@ -1340,7 +1340,7 @@ described as macro-levels. */
           {
             //need to identify the configurations associated with the current and target levels 
             n = 0;
-            while ((config[n].z != z || config[n].istate != istate || config[n].ilv != levu) && n < nlevels)
+            while ((xconfig[n].z != z || xconfig[n].istate != istate || xconfig[n].ilv != levu) && n < nlevels)
               n++;
 
             /* check we've found a valid macro-atom level */
@@ -1349,7 +1349,7 @@ described as macro-levels. */
               Error_silent ("Get_atomic_data: No configuration found to match Auger record %d\n", lineno);
               exit (0);
             }
-            if (config[n].macro_info == -1)
+            if (xconfig[n].macro_info == -1)
             {
               Error ("Getatomic_data: Macro Atom Auger data supplied for config %d\n but there is no suitable level data\n", n);
               exit (0);
@@ -1362,7 +1362,7 @@ described as macro-levels. */
             auger_macro[nauger_macro].iauger = nauger_macro;
             auger_macro[nauger_macro].nauger = 0;
             auger_macro[nauger_macro].Avalue_auger = Avalue_auger;
-            config[n].iauger = nauger_macro;
+            xconfig[n].iauger = nauger_macro;
 
             /* we now need to read the next line of Auger data which should be of form 
                AugNels 26 24 -1 -1 -1 -1
@@ -1408,7 +1408,7 @@ described as macro-levels. */
                 target_istate = istate + 1 + m;
 
                 n = 0;
-                while ((config[n].z != z || config[n].istate != target_istate || config[n].ilv != 1) && n < nlevels)
+                while ((xconfig[n].z != z || xconfig[n].istate != target_istate || xconfig[n].ilv != 1) && n < nlevels)
                   n++;
                 if (n == nlevels)
                 {
@@ -1421,7 +1421,7 @@ described as macro-levels. */
             }
 
             /* also record the number of possible auger jumps in the config structure */
-            config[n].nauger = auger_macro[nauger_macro].nauger;
+            xconfig[n].nauger = auger_macro[nauger_macro].nauger;
             nauger_macro++;
           }
           else

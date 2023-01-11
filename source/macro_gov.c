@@ -171,10 +171,10 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
     new_uplvl = matom_deactivation_from_matrix (xplasma, uplvl);
 
-    if (config[new_uplvl].nauger > 0)
+    if (xconfig[new_uplvl].nauger > 0)
     {
       Log ("AUGER: %d %d Jumped to Auger level %d from %d %d old level %d\n",
-           config[new_uplvl].z, config[new_uplvl].istate, new_uplvl, config[uplvl].z, config[uplvl].istate, uplvl);
+           xconfig[new_uplvl].z, xconfig[new_uplvl].istate, new_uplvl, xconfig[uplvl].z, xconfig[uplvl].istate, uplvl);
     }
 
     if (new_uplvl == nlevels_macro)

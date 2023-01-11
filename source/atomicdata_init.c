@@ -263,12 +263,12 @@ init_atomic_data ()
 
   for (i = 0; i < NLEVELS; i++)
   {
-    config[i].n_bbu_jump = 0;   // initialising the number of jumps from each level to 0. (SS)
-    config[i].n_bbd_jump = 0;
-    config[i].n_bfu_jump = 0;
-    config[i].n_bfd_jump = 0;
-    config[i].iauger = -1;
-    config[i].nauger = 0;
+    xconfig[i].n_bbu_jump = 0;   // initialising the number of jumps from each level to 0. (SS)
+    xconfig[i].n_bbd_jump = 0;
+    xconfig[i].n_bfu_jump = 0;
+    xconfig[i].n_bfd_jump = 0;
+    xconfig[i].iauger = -1;
+    xconfig[i].nauger = 0;
   }
 
   for (n = 0; n < NLINES; n++)

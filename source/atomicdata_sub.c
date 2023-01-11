@@ -752,9 +752,9 @@ upsilon (n_coll, u0)
 //   {
 //     nconfigu = line[n].nconfigu;
 
-//     if (config[nconfigu].iauger >= 0)
+//     if (xconfig[nconfigu].iauger >= 0)
 //     {
-//       iauger = config[nconfigu].iauger;
+//       iauger = xconfig[nconfigu].iauger;
 
 
 //     }

@@ -161,12 +161,12 @@ matom (p, nres, escape)
     /*  The excited configuration is now known. Now compute all the probabilities of deactivation
        /jumping from this configuration. Then choose one. */
 
-    nbbd = config[uplvl].n_bbd_jump;    // number of bb downward jumps
-    nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
-    nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
-    nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
-    nauger = config[uplvl].nauger;      // number of auger jumps 
-    iauger = config[uplvl].iauger;
+    nbbd = xconfig[uplvl].n_bbd_jump;    // number of bb downward jumps
+    nbbu = xconfig[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
+    nbfd = xconfig[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
+    nbfu = xconfig[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
+    nauger = xconfig[uplvl].nauger;      // number of auger jumps 
+    iauger = xconfig[uplvl].iauger;
 
     if (prbs_known[uplvl] == FALSE)
     {
@@ -239,8 +239,8 @@ matom (p, nres, escape)
           target_level = auger_ptr->nconfig_target[n];
           auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
 
-          jprbs_known[uplvl][m] = jprbs[m] = auger_rate * config[target_level].ex;      //energy of lower state
-          eprbs_known[uplvl][m] = eprbs[m] = auger_rate * (config[uplvl].ex - config[target_level].ex); //energy difference
+          jprbs_known[uplvl][m] = jprbs[m] = auger_rate * xconfig[target_level].ex;      //energy of lower state
+          eprbs_known[uplvl][m] = eprbs[m] = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex); //energy difference
 
           pjnorm += jprbs[m];
           penorm += eprbs[m];
