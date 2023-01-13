@@ -6,9 +6,9 @@ The code is under active development, but we are looking for beta users to test 
 
 Documentation of input parameters is hosted on [ReadTheDocs](http://agnwinds.readthedocs.io/en/dev/).
 
-## Travis-CI \& Docs Build Status
+## CI \& Docs Build Status
 
-[![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
+[![C/C++ CI](https://github.com/agnwinds/python/actions/workflows/build.yml/badge.svg)](https://github.com/agnwinds/python/actions/workflows/build.yml)
 
 [![Documentation Status](https://readthedocs.org/projects/agnwinds/badge/?version=latest)](https://agnwinds.readthedocs.io/en/latest/?badge=latest)
 

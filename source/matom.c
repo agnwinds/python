@@ -76,6 +76,7 @@ matom (p, nres, escape)
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
+  struct auger *auger_ptr;
   int uplvl, uplvl_old;
 //OLD  int icheck;
   double jprbs[2 * (NBBJUMPS + NBFJUMPS)];
@@ -93,6 +94,8 @@ matom (p, nres, escape)
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   int z;
+  int nauger, iauger, target_level;
+  double auger_rate;
 
 
   one = &wmain[p->grid];
@@ -158,10 +161,12 @@ matom (p, nres, escape)
     /*  The excited configuration is now known. Now compute all the probabilities of deactivation
        /jumping from this configuration. Then choose one. */
 
-    nbbd = xconfig[uplvl].n_bbd_jump;   // number of bb downward jumps
-    nbbu = xconfig[uplvl].n_bbu_jump;   // number of bb upward jump from this configuration
-    nbfd = xconfig[uplvl].n_bfd_jump;   // number of bf downward jumps from this transition
-    nbfu = xconfig[uplvl].n_bfu_jump;   // number of bf upward jumps from this transiion
+    nbbd = xconfig[uplvl].n_bbd_jump;    // number of bb downward jumps
+    nbbu = xconfig[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
+    nbfd = xconfig[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
+    nbfu = xconfig[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
+    nauger = xconfig[uplvl].nauger;      // number of auger jumps 
+    iauger = xconfig[uplvl].iauger;
 
     if (prbs_known[uplvl] == FALSE)
     {
@@ -222,6 +227,25 @@ matom (p, nres, escape)
         pjnorm += jprbs[m];
         penorm += eprbs[m];
         m++;
+      }
+
+      /* Auger ionization */
+      if (iauger >= 0)
+      {
+        auger_ptr = &auger_macro[iauger];
+
+        for (n = 0; n < nauger; n++)
+        {
+          target_level = auger_ptr->nconfig_target[n];
+          auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
+
+          jprbs_known[uplvl][m] = jprbs[m] = auger_rate * xconfig[target_level].ex;      //energy of lower state
+          eprbs_known[uplvl][m] = eprbs[m] = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex); //energy difference
+
+          pjnorm += jprbs[m];
+          penorm += eprbs[m];
+          m++;
+        }
       }
 
       /* Now upwards jumps. */
@@ -348,6 +372,11 @@ matom (p, nres, escape)
     {                           /* bf upwards jump */
       uplvl = phot_top[xconfig[uplvl].bfu_jump[n - nbbd - nbfd - nbbu]].uplev;
     }
+    else if (n < (nbbd + nbfd + nbbu + nbfu + nauger))
+    {                           /* auger ionization jump */
+      uplvl = auger_macro[iauger].nconfig_target[n - nbbd - nbfd - nbbu - nauger];
+//OLD      icheck = 4;
+    }
     else
     {
       Error ("Trying to jump but nowhere to go! Matom. Abort");
@@ -442,6 +471,11 @@ matom (p, nres, escape)
       *escape = FALSE;
     }
 
+  }
+  else if (n < (nbbd + nbfd + nauger))
+  {                             /* auger ionization */
+    /* Auger processes only undergo k-packet (collisional) deactivation */
+    *escape = FALSE;
   }
   else
   {

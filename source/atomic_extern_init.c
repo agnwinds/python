@@ -12,6 +12,7 @@ int nlines_macro;               /* Actual number of Macro Atom lines that were r
 int n_inner_tot;                /*The actual number of inner shell ionization cross sections in total */
 
 int nauger;                     /*Actual number of innershell edges for which autoionization is to be computed */
+int nauger_macro;                     
 
 ElemPtr ele;
 
@@ -20,6 +21,8 @@ double rho2nh;                  /* Conversion constant from rho to nh the number
 IonPtr ion;
 
 ConfigPtr xconfig;
+
+AugerPtr auger_macro;
 
 LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that contains all the data, *lin_ptr
                                    is an array which contains a frequency ordered set of ptrs to line */

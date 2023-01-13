@@ -29,6 +29,8 @@ extern int nions;                      /**< The actual number of ions read from 
 extern int nlevels;                    /**< These are the actual number of levels which were read in */
 #define NLTE_LEVELS	12000   /**<  Maximum number of levels to treat explicitly */
 extern int nlte_levels;                /**<  Actual number of levels to treat explicityly */
+
+/* AUGER NOTE: recommended to increase NLEVELS_MACRO to at least 500 for Auger macro-atoms */
 #define NLEVELS_MACRO   200     /**<  Maximum number of macro atom levels. (SS, June 04) */
 extern int nlevels_macro;              /**<  Actual number of macro atom levels. (SS, June 04) */
 #define NLINES 		200000  /**<  Maximum number of lines to be read */
@@ -39,8 +41,8 @@ extern int nlines_macro;               /**<  Actual number of Macro Atom lines t
 extern int n_inner_tot;                /**< The actual number of inner shell ionization cross sections in total */
 
 
+/* AUGER NOTE: recommended to increase these values to at least 200 for Auger macro-atoms */
 #define NBBJUMPS         100    /**<  Maximum number of Macro Atom bound-bound jumps from any one configuration (SS) */
-
 #define NBFJUMPS         100    /**<  Maximum number of Macro Atom Bound-free jumps from any one configuration (SS) */
 
 #define MAXJUMPS          1000000       /**<  The maximum number of Macro Atom jumps before emission (if this is exceeded
@@ -188,21 +190,43 @@ typedef struct configurations
   int n_bbu_jump, n_bbd_jump;   /**<  No. of bound-bound upward/downward jumps available to this configuration (SS) */
   int n_bfu_jump, n_bfd_jump;   /**<  No. of bound-free upward/downward jumps available to this configuration (SS) */
   double g,log_g;                     /* multiplicity for level and log version for use in freebound integrations */
-  double q_num;                 /**<  principal quantum number.  In Topbase this has non-integer values */
-  double ex;                    /**< excitation energy of level */
-  double rad_rate;              /**<  Total spontaneous radiative de-excitation rate for level */
-  int bbu_jump[NBBJUMPS];       /**<  list of upwards bb jumps from this configuration */
-  int bbd_jump[NBBJUMPS];       /**<  list of downwards bb jumps from this configuration */
-  int bfu_jump[NBFJUMPS];       /**<  list of upwards bf jumps from this configuration */
-  int bfd_jump[NBFJUMPS];       /**<  list of downwards bf jumps from this configuration (SS) */
-  int bbu_indx_first;           /**<  index to first MC estimator for bb jumps from this configuration */
-  int bfu_indx_first;           /**<  index to first MC estimator for bf jumps from this configuration */
-  int bfd_indx_first;           /**<  index to first rate for downward bf jumps from this configuration */
-
+  double q_num;                 /* principal quantum number.  In Topbase this has non-integer values */
+  double ex;                    /*excitation energy of level */
+  double rad_rate;              /* Total spontaneous radiative de-excitation rate for level */
+  int bbu_jump[NBBJUMPS];       /* list of upwards bb jumps from this configuration */
+  int bbd_jump[NBBJUMPS];       /* list of downwards bb jumps from this configuration */
+  int bfu_jump[NBFJUMPS];       /* list of upwards bf jumps from this configuration */
+  int bfd_jump[NBFJUMPS];       /* list of downwards bf jumps from this configuration (SS) */
+  int bbu_indx_first;           /* index to first MC estimator for bb jumps from this configuration */
+  int bfu_indx_first;           /* index to first MC estimator for bf jumps from this configuration */
+  int bfd_indx_first;           /* index to first rate for downward bf jumps from this configuration */
+  int iauger;                   /* if this configuration is a vacancy state in a macro-atom, then this 
+                                   indexes where the entry is in the Auger structure. Otherwise, -1. */
+  int nauger;                   /* number of possible Auger channels (nominal maximum of 4) */
 }
 config_dummy, *ConfigPtr;
 
 extern ConfigPtr xconfig;
+
+
+extern int nauger_macro;               /* the number of auger processes read in associated with macro atoms */
+#define NAUGER_MACRO 200        /* number of Auger processes */
+#define NAUGER_ELECTRONS 4
+
+typedef struct auger 
+{
+  int nion;                                    /* The ion no (in python) of the transition */
+  int z, istate;                               /* element and ion associated with the line */
+  int nconfig;                                 /* the entry in the config structure where the vacancy state lies */
+  int iauger;                                  /* the index to this auger entry */
+  int nauger;                                  /* number of Auger jumps */
+  double Avalue_auger;                         /* the total A value associated with creating Auger electrons */
+  int nconfig_target[NAUGER_ELECTRONS];        /* the configuration of the upper ion we are jumping to */
+  double branching_ratio[NAUGER_ELECTRONS];     /* probability of creating 0-3 Auger electrons */
+} auger_dummy, *AugerPtr;
+
+extern AugerPtr auger_macro;
+
 
 
 /** Structure to describe the lines */
@@ -295,6 +319,7 @@ extern double inner_freq_min;          /**< The lowest frequency for which inner
 
 #define NCROSS 2000             /**<  Maximum number of x-sections for a single photionization process */
 #define NTOP_PHOT 400           /**<  Maximum number of photoionisation processes.  */
+/* AUGER NOTE: recommended to increase NTOP_PHOT to 1000 for Auger macro-atoms */
 extern int ntop_phot;                  /**<  The actual number of TopBase photoionzation x-sections */
 extern int nphot_total;                /**<  total number of photoionzation x-sections = nxphot + ntop_phot */
 
