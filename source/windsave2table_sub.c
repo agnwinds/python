@@ -477,24 +477,27 @@ create_heat_table (ndom, rootname)
   c[19] = get_one (ndom, "lum_ff");
   strcpy (column_name[19], "lum_ff");
 
+  c[20] = get_one (ndom, "lum_rr");
+  strcpy (column_name[20], "lum_rr");
 
-  c[20] = get_one (ndom, "cool_rr");
-  strcpy (column_name[20], "cool_rr");
 
-  c[21] = get_one (ndom, "cool_adiab");
-  strcpy (column_name[21], "cool_adiab");
+  c[21] = get_one (ndom, "cool_rr");
+  strcpy (column_name[21], "cool_rr");
 
-  c[22] = get_one (ndom, "heat_shock");
-  strcpy (column_name[22], "heat_shock");
+  c[22] = get_one (ndom, "cool_adiab");
+  strcpy (column_name[22], "cool_adiab");
 
-  c[23] = get_one (ndom, "heat_lines_macro");
-  strcpy (column_name[23], "heat_lines_macro");
+  c[23] = get_one (ndom, "heat_shock");
+  strcpy (column_name[23], "heat_shock");
 
-  c[24] = get_one (ndom, "heat_photo_macro");
-  strcpy (column_name[24], "heat_photo_macro");
+  c[24] = get_one (ndom, "heat_lines_macro");
+  strcpy (column_name[24], "heat_lines_macro");
 
-  /* This should be the maxium number above +1 */
-  ncols = 25;
+  c[25] = get_one (ndom, "heat_photo_macro");
+  strcpy (column_name[25], "heat_photo_macro");
+
+  /* This should be the maximum number above +1 */
+  ncols = 26;
 
 
   converge = get_one (ndom, "converge");
@@ -1432,6 +1435,10 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "lum_ff") == 0)
       {
         x[n] = plasmamain[nplasma].lum_ff;
+      }
+      else if (strcmp (variable_name, "lum_rr") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_rr;
       }
       else if (strcmp (variable_name, "cool_rr") == 0)
       {
