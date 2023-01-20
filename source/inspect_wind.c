@@ -408,7 +408,7 @@ line_matom_lum (uplvl)
     if (wmain[nnwind].inwind >= 0)
     {
       n = wmain[nnwind].nplasma;
-//OLD      emiss = line_matom_lum_single (lum, &plasmamain[n], uplvl);
+      line_matom_lum_single (lum, &plasmamain[n], uplvl);
       /* print the filled volume */
       fprintf (fptr, " %13.4e", plasmamain[n].vol);
       for (i = 0; i < nbbd; i++)
