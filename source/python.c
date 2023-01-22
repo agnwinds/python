@@ -112,7 +112,6 @@ main (argc, argv)
 
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
-  //OLD run_ztest = FALSE;
   NWAVE_MAX = (int) NWAVE_IONIZ;
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -127,7 +126,6 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
-//OLD  strict = 0;
 
   restart_stat = parse_command_line (argc, argv);
 
@@ -527,7 +525,6 @@ main (argc, argv)
 
 
   if (rdpar_check ())
-//OLD  if (strict)
   {
     Log ("Some of the input have not been updated for the current version of Python.  Please correct and rerun\n");
     exit (0);
@@ -627,6 +624,14 @@ main (argc, argv)
   if (run_xtest)
   {
     xtest ();
+  }
+
+
+  if (geo.wcycles == 0 && geo.pcycles == 0)
+  {
+    wind_save (files.windsave);
+    Log ("Both ionization and spectral cycles are set to 0; Saving windfile but then exiting\n");
+    exit (1);                   //There is really nothing to do!
   }
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */

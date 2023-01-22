@@ -21,9 +21,6 @@
 #include <string.h>
 #include <errno.h>
 
-//OLD #include "atomic.h"
-//OLD #include "python.h"
-
 #include "constants.h"
 #include "math_struc.h"
 #include "math_proto.h"
@@ -181,7 +178,7 @@ direction in the cartesian frame.  If north is in the +-z direction
 this is simple. Otherwise one must do a coordinate rotation. */
 
   if (north[0] == 0 && north[1] == 0)
-  {                            
+  {
     lmn[0] = l;
     lmn[1] = m;
     if (north[2] > 0)

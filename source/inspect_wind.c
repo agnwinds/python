@@ -26,7 +26,6 @@
 
 #include "atomic.h"
 #include "python.h"
-//OLD #include "import.h"
 
 
 char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH], folder[LINELENGTH];
@@ -351,8 +350,6 @@ line_matom_lum (uplvl)
      int uplvl;
 {
   int n, nbbd, i, ii, jj, nnwind, ndom, inwind;
-  // OLD double emiss;
-  // OLD double lum;
   double lum[NBBJUMPS];
   char outfile[LINELENGTH];
   FILE *fptr, *fopen ();
@@ -445,8 +442,6 @@ line_matom_lum_single (lum, xplasma, uplvl)
   double freq_min, freq_max, lum_tot;
   struct lines *line_ptr;
   double eprbs[NBBJUMPS];
-  //OLD MacroPtr mplasma;
-  //OLD mplasma = &macromain[xplasma->nplasma];
   freq_min = geo.sfmin;
   freq_max = geo.sfmax;
   /* identify number of bb downward jumps */

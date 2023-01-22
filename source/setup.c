@@ -596,10 +596,16 @@ init_photons ()
   rdint ("Spectrum_cycles", &geo.pcycles);
 
 
+  /* If both geo.wcycles and geo.pcycles are 0, there is nothing to do, but for
+   * except that for diagnostic reasons one migh want to inspect the initial
+   * setup in the windsave file.  So now we wait to exit until this actually
+   * written out.
+   */
+
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
-    Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    exit (1);                   //There is really nothing to do!
+    Log ("Both ionization and spectral cycles are set to 0; the rest of the inputs will be gathered\n ");
+    Log ("After that, the windsave file will be written to disk but then the program will exit\n");
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
