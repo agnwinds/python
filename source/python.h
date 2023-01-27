@@ -1583,6 +1583,7 @@ struct advanced_modes
                                    * tests.  
                                    */
   int partial_cells;             /**< Switch to decribe treatment of partial cells. */              
+  int searchlight;               /**< Switch to invoke search light option. */
 };
 
 extern struct advanced_modes modes;

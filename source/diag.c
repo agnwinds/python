@@ -203,6 +203,10 @@ get_extra_diagnostics ()
   n += modes.turn_off_upweighting_of_simple_macro_atoms =
     rdchoice ("@Diag.partial_cells(include,zero_densities,extend_full_cells)", "0,1,2", answer);
 
+  strcpy (answer, "no");
+  n += modes.searchlight = rdchoice ("@Diag.invoke_searchlight_option(yes,no)", "1,0", answer);
+
+
   if (n > 0)
   {
     modes.extra_diagnostics = TRUE;
@@ -212,10 +216,84 @@ get_extra_diagnostics ()
     modes.extra_diagnostics = FALSE;
   }
 
+  if (modes.searchlight)
+  {
+    init_searchlight ();
+  }
+
   return 0;
 }
 
 
+
+/**********************************************************/
+/**
+ * @brief      define the characteristics of
+ *  for the searchlight options which causes all the 
+ *  photons to arise from a certain location and
+ *  to point in a fixed direction
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+int
+init_searchlight ()
+{
+  char answer[LINELENGTH];
+  int ichoice;
+  double angle, rho;
+
+  strcpy (answer, "central_object");
+
+  ichoice = rdchoice ("@Diag.location(central_object,disk)", "1,2", answer);
+  geo.searchlight_x[0] = geo.searchlight_x[1] = geo.searchlight_x[2] = 0;
+  geo.searchlight_lmn[0] = geo.searchlight_x[1] = geo.searchlight_x[2] = 0;
+
+  if (ichoice == 1)
+  {
+    angle = 45.;
+    rddoub ("@Diag.angle(0=pole)", &angle);
+    angle /= RADIAN;
+    geo.searchlight_lmn[0] = sin (angle);
+    geo.searchlight_lmn[2] = cos (angle);
+    geo.searchlight_x[0] = geo.rstar * sin (angle);
+    geo.searchlight_x[2] = geo.rstar * cos (angle);
+  }
+  else if (ichoice == 2)
+  {
+    angle = 0.;
+    rho = 4.;
+    rddoub ("@Diag.r(units_of_rstar", &rho);
+    rddoub ("@Diag.angle(0=pole", &angle);
+
+    geo.searchlight_x[0] = geo.rstar * rho;
+
+    angle /= RADIAN;
+    geo.searchlight_lmn[0] = sin (angle);
+    geo.searchlight_lmn[2] = cos (angle);
+
+  }
+  else
+  {
+    Error ("init_searchlight:Houston, we have a problem");
+
+  }
+
+
+  Log ("Searchlight mode has been activated:\n");
+  Log (" From  location %10.1e %10.1e %10.1e\n", geo.searchlight_x[0], geo.searchlight_x[1], geo.searchlight_x[2]);
+  Log (" In   direction %10.3f %10.3f %10.3f\n", geo.searchlight_lmn[0], geo.searchlight_lmn[1], geo.searchlight_lmn[2]);
+
+
+  return (0);
+
+}
 
 
 
@@ -225,6 +303,7 @@ int eplinit = 0;
 int pstatinit = 0;
 
 /// Extra diagnostics file
+
 FILE *epltptr;
 
 
@@ -235,11 +314,11 @@ FILE *epltptr;
  *  extra diagnostics.  In some cases reads a file
  *  that specifies in which cells ones wants diagnostics
  *
- * @return     Always retuns 0
+ * @return     Always returns 0
  *
  * @details
  * This routine gets some residual inforamtion needed
- * to specify exactlay what one wants to track, and opens
+ * to specify exactly what one wants to track, and opens
  * files that will be used to write the diagnostics.
  *
  * ### Notes ###
