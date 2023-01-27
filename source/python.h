@@ -141,8 +141,6 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
    It carries the variables which define the geometry.  Reasonable values of each of
    these should be defined before it is altered with inputs from the terminal. 
    The geometry structure is used to transfer all of the information about a wind
-
-
  */
 
 /* Definitions of spectral types, which are all negative because when
@@ -158,9 +156,6 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
 #define SPECTYPE_NONE	 -3
 #define SPECTYPE_MODEL	 -99    // This is just used briefly, before a model number is assigned
 
-//OLD#define  MONO_FREQ     2.997925e18/1500.   //Hardwired single freqency for diagnostic purposes
-#define  MONO_FREQ     2.997925e18/1000.   /**< Hardwired single freqency for diagnostic purposes
-                                             */
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -576,7 +571,8 @@ struct geometry
   int disk_ion_spectype, disk_spectype; /**<  Same as above but for the disk */
   int bl_ion_spectype, bl_spectype;     /**<  Same as above but for the boundary layer */
   int agn_ion_spectype, agn_spectype;   /**<  Same as above but for the AGN */
-  int search_light_ion_spectype, search_light_spectype; /**<  Same as above but for the search_light. Created for 1d test */
+  double searchlight_x[3],searchlight_lmn[3];
+  double mono_freq;
 
   char model_list[NCOMPS][LINELENGTH];  /**<  The file which contains the model names and the associated values for the model */
   int model_count;              /**< The number of distinct models that have been read in */

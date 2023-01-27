@@ -892,6 +892,11 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
       p[i].freq = random_number (freqmin, freqmax);     //Generate a random frequency - this will exclude freqmin,freqmax.
 
     }
+    else if (spectype == SPECTYPE_MONO)
+    {
+      p[i].freq = geo.mono_freq;
+    }
+
     else
     {
       p[i].freq = one_continuum (spectype, t, geo.gstar, freqmin, freqmax);

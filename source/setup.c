@@ -193,6 +193,7 @@ get_spectype (yesno, question, spectype)
   int i;
   int init_choices (), get_choices ();
 
+
   if (yesno)
   {
     init_choices ();            // Populate the spect array
@@ -228,6 +229,15 @@ get_spectype (yesno, question, spectype)
     get_choices (question, choices, &zz_spec);
     *spectype = rdchoice (question, choices, one_choice);
 
+    if (*spectype == SPECTYPE_MONO)
+    {
+      double x;
+      x = 1000.;
+      rddoub ("monochromatic.wavelength", &x);
+      geo.mono_freq = VLIGHT * 1e8 / x;
+    }
+
+
     if (*spectype == SPECTYPE_MODEL)
     {
       if (geo.run_type == RUN_TYPE_PREVIOUS)
@@ -249,7 +259,6 @@ get_spectype (yesno, question, spectype)
           return (*spectype);
         }
       }
-
       get_models (model_list, 2, spectype);
       strcpy (geo.model_list[geo.model_count], model_list);     // Copy it to geo
       strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
@@ -257,6 +266,8 @@ get_spectype (yesno, question, spectype)
       geo.model_count++;
     }
   }
+
+
   else
   {
     *spectype = SPECTYPE_NONE;  // No radiation
@@ -414,8 +425,17 @@ init_observers ()
    * Now read in the read of the variables for the spectra
    */
 
+  if (geo.mono_freq > 0)
+  {
+    geo.swavemax = 1.5 * VLIGHT * 1e8 / geo.mono_freq;
+    geo.swavemin = 0.667 * VLIGHT * 1e8 / geo.mono_freq;
+  }
+
   rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
   rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
+
+
+
   if (geo.swavemin > geo.swavemax)
   {
     geo.swavemax = geo.swavemin;
@@ -427,6 +447,16 @@ init_observers ()
 
   geo.sfmin = VLIGHT / (geo.swavemax * 1.e-8);
   geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
+
+  if (geo.mono_freq > 0)
+  {
+    if (geo.mono_freq < geo.sfmin || geo.mono_freq > geo.sfmax)
+    {
+      Error ("Monochromatic frequency %e out of range of frequency limits %e %e\n", geo.mono_freq, geo.sfmin, geo.sfmax);
+      Exit (1);
+    }
+  }
+
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 

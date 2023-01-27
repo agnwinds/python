@@ -169,7 +169,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     else if (spectype == SPECTYPE_MONO)
     {
-      p[i].freq = MONO_FREQ;
+      p[i].freq = geo.mono_freq;
     }
 
     else
