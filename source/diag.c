@@ -252,18 +252,22 @@ init_searchlight ()
   strcpy (answer, "central_object");
 
   ichoice = rdchoice ("@Diag.location(central_object,disk)", "1,2", answer);
-  geo.searchlight_x[0] = geo.searchlight_x[1] = geo.searchlight_x[2] = 0;
-  geo.searchlight_lmn[0] = geo.searchlight_x[1] = geo.searchlight_x[2] = 0;
 
   if (ichoice == 1)
   {
     angle = 45.;
     rddoub ("@Diag.angle(0=pole)", &angle);
     angle /= RADIAN;
+
     geo.searchlight_lmn[0] = sin (angle);
+    geo.searchlight_lmn[1] = 0;
     geo.searchlight_lmn[2] = cos (angle);
-    geo.searchlight_x[0] = geo.rstar * sin (angle);
-    geo.searchlight_x[2] = geo.rstar * cos (angle);
+
+    geo.searchlight_x[0] = 1.001 * geo.rstar * sin (angle);
+    geo.searchlight_x[1] = 0;
+    geo.searchlight_x[2] = 1.001 * geo.rstar * cos (angle);
+
+    modes.searchlight = 1;
   }
   else if (ichoice == 2)
   {
@@ -273,11 +277,15 @@ init_searchlight ()
     rddoub ("@Diag.angle(0=pole", &angle);
 
     geo.searchlight_x[0] = geo.rstar * rho;
+    geo.searchlight_x[1] = 0;
+    geo.searchlight_x[2] = 0;
 
     angle /= RADIAN;
     geo.searchlight_lmn[0] = sin (angle);
+    geo.searchlight_lmn[1] = 0;
     geo.searchlight_lmn[2] = cos (angle);
 
+    modes.searchlight = 2;
   }
   else
   {

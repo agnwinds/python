@@ -560,6 +560,34 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
   int nstar, nbl, nwind, ndisk, nmatom, nagn, nkpkt;
   double agn_f1;
 
+  /* For the diagnostic searchlight mode
+     we intercept the normal procedure for generating
+     photons and substitute searchlight mode.  
+   */
+
+  if (ioniz_or_final && modes.searchlight)
+  {
+
+    weight = 1;
+
+    if (modes.searchlight == 1)
+    {
+      photo_gen_star (p, geo.rstar, geo.tstar, weight, f1, f2, geo.star_spectype, iphot_start, nphotons);
+    }
+    else if (modes.searchlight == 2)
+    {
+      photo_gen_disk (p, weight, f1, f2, geo.disk_spectype, iphot_start, nphotons);
+    }
+    else
+    {
+      Error ("xmake_phot: Unknown searchlight mode %d\n", modes.searchlight);
+      Exit (1);
+    }
+  }
+
+
+/* End of generation of photons via the seaach light mode */
+
   nstar = nbl = nwind = ndisk = 0;
   nagn = nkpkt = nmatom = 0;
 
@@ -759,7 +787,7 @@ stellar photons */
  * @param [in] double  freqmax   The maximum freqency for the band
  * @param [in out] int  ioniz_or_final  A flag indicating whether this is for
  * an ionization cycle or a detailed spectrum cycle
- * @param [out] double *  f   The baand limited luminosity of the star
+ * @param [out] double *  f   The band limited luminosity of the star
  * @return     Always returns 0
  *
  * @details
@@ -907,24 +935,32 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
       Error_silent ("photo_gen_star: phot no. %d freq %g out of range %g %g\n", i, p[i].freq, freqmin, freqmax);
     }
 
-    randvec (p[i].x, r);
-
-    if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+    if (modes.searchlight && geo.ioniz_or_extract == CYCLE_EXTRACT)
     {
-      while (fabs (p[i].x[2]) < zdisk (r))
-      {
-        randvec (p[i].x, r);
-      }
-
-
-      if (fabs (p[i].x[2]) < zdisk (r))
-      {
-        Error ("Photon_gen: stellar photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
-        Exit (0);
-      }
+      stuff_v (geo.searchlight_x, p[i].x);
+      stuff_v (geo.searchlight_lmn, p[i].lmn);
     }
+    else
+    {
+      randvec (p[i].x, r);
+      randvcos (p[i].lmn, p[i].x);
 
-    randvcos (p[i].lmn, p[i].x);
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+      {
+        while (fabs (p[i].x[2]) < zdisk (r))
+        {
+          randvec (p[i].x, r);
+        }
+
+
+        if (fabs (p[i].x[2]) < zdisk (r))
+        {
+          Error ("Photon_gen: stellar photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
+          Exit (0);
+        }
+      }
+
+    }
 
 
   }

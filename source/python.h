@@ -400,6 +400,11 @@ struct geometry
   int wcycles, pcycles, pcycles_renorm; /**< The number of ionization and spectrum cycles desired, pcycles_renorm 
                                          * is only used on restarts.  See spectrum_restart_renormalize
                                          */
+#define CYCLE_IONIZ    1
+#define CYCLE_EXTRACT  0
+  int ioniz_or_extract;         /**<  Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
+                                   detailed spectrum.  
+                                 */
 
 
   /* This section stores information which specifies the spectra to be extracted.  Some of the parameters
@@ -481,11 +486,6 @@ struct geometry
                                    populations are computed as for simple ions. By default it is set to
                                    MACRO_IONIZ_MODE_NO_ESTIMATORS initially and then set to  MACRO_IONIZ_MODE_ESTIMATORS the first time that
                                    Monte Carlo estimators are normalised. */
-#define CYCLE_IONIZ    1
-#define CYCLE_EXTRACT  0
-  int ioniz_or_extract;         /**<  Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
-                                   detailed spectrum.  
-                                 */
   int macro_simple;             /**<  As default this is set to FALSE, in which case a full
                                    Macro Atom calculation is performed. If it is set to TRUE it means
                                    that although Macro Atom data has been read in, all lines/continua are treated
