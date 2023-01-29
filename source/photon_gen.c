@@ -572,7 +572,19 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
 
     if (modes.searchlight == 1)
     {
-      photo_gen_star (p, geo.rstar, geo.tstar, weight, f1, f2, geo.star_spectype, iphot_start, nphotons);
+      if (geo.system_type == SYSTEM_TYPE_STAR || geo.system_type == SYSTEM_TYPE_CV)
+      {
+        photo_gen_star (p, geo.rstar, geo.tstar, weight, f1, f2, geo.star_spectype, iphot_start, nphotons);
+      }
+      else if (geo.system_type == SYSTEM_TYPE_BH || geo.system_type == SYSTEM_TYPE_AGN)
+      {
+        photo_gen_agn (p, geo.rstar, geo.alpha_agn, weight, f1, f2, geo.agn_spectype, iphot_start, nphotons);
+      }
+      else
+      {
+        Error ("xmake_phot: Uknown system type (%d) for central object searchlight option\n", geo.system_type);
+        Exit (1);
+      }
     }
     else if (modes.searchlight == 2)
     {

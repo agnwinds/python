@@ -344,7 +344,7 @@ extern int current_domain;             // This integer is used by py_wind only
 /* RUN_TYPE differs from SYSTEM_TYPE in that
   it has implications on how the program is run
   wherease SYSTEM_TYPE refers (mainly) to the type
-  of sytem, with the exception 
+  of system, with the exception 
 */
 
 #define RUN_TYPE_NEW       0
@@ -412,12 +412,20 @@ struct geometry
    */
 
 #define NSPEC   20
-  int nangles;
-  double angle[NSPEC], phase[NSPEC];
-  int scat_select[NSPEC], top_bot_select[NSPEC];
-  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
+  int nangles;   /**< The number of anbles to create spectra for */
+  double angle[NSPEC], phase[NSPEC];  /**< The angle and associated binary phase (if relevant) for the extracted spectra */
+  int scat_select[NSPEC], top_bot_select[NSPEC];  /**< Variables to constrain the spectra by number of scatters
+                                                    * and whether the photons "originate" from above or relow the disk
+                                                    * plane
+                                                    */
+  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];  /**< Variables which can be used to
+                                                                                   * constrain the spectra by position
+                                                                                   */
   double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
-  int select_extract, select_spectype;  //select_extract is TRUE if extract mode, FALSE if Live or Die
+  int select_extract, select_spectype;  /**< select_extract is TRUE if extract mode, FALSE if Live or Die
+                                          * select_spectype indicates what type of spectrum, e.g FLAMBA, will
+                                          * be created.
+                                          */
 
 /* Begin description of the actual geometry */
 
@@ -571,8 +579,13 @@ struct geometry
   int disk_ion_spectype, disk_spectype; /**<  Same as above but for the disk */
   int bl_ion_spectype, bl_spectype;     /**<  Same as above but for the boundary layer */
   int agn_ion_spectype, agn_spectype;   /**<  Same as above but for the AGN */
-  double searchlight_x[3],searchlight_lmn[3];
-  double mono_freq;
+  double searchlight_x[3],searchlight_lmn[3]; /**< location and direction of all photons in the spectral
+                                                * cycles when searchlight mode (an advanced option) is
+                                                * invoked
+                                                */
+  double mono_freq;                     /**< The frequency of all photons in the so-called monochromatic mode, which
+                                          *  can be use for certain diagnositc experiments
+                                          */
 
   char model_list[NCOMPS][LINELENGTH];  /**<  The file which contains the model names and the associated values for the model */
   int model_count;              /**< The number of distinct models that have been read in */
@@ -1687,11 +1700,11 @@ extern int xxxbound;
 
 
 /** Structure associated with rdchoice.  This 
- * shtructure is required only in cases where one 
+ * structure is required only in cases where one 
  * wants to use rdchoice multiple times with different
  * options.  But it can, or course be used for 
- * any such call.  It allows one to assoicated
- * a input word with an output value, using the routine
+ * any such call.  It allows one to associate
+ * an input word with an output value, using the routine
  * get_choices.  There needs to be one structure
  * for each input variable.  At present, this is only
  * used for the selection of spec_types

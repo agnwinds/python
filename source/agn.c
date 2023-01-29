@@ -431,6 +431,10 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     {
       p[i].freq = get_rand_brem (freqmin, freqmax);
     }
+    else if (spectype == SPECTYPE_MONO)
+    {
+      p[i].freq = geo.mono_freq;
+    }
     else
     {
       p[i].freq = one_continuum (spectype, -1., -1., freqmin, freqmax); //A continuum (model) photon - we use t=g=-1 to flag that this is not a normal model
