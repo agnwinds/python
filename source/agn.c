@@ -447,13 +447,21 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     }
 
 
-/* Now we work out where the photon starts out from*/
+/* Now we work out where the photon starts.
+   * The first case is the specail searchlight case
+   * which is purely diagnostic
+ */
 
-    /* first option is for the original spherical X-ray source as used in e.g. Higginbottom+ 2013 */
-
-    if (geo.pl_geometry == PL_GEOMETRY_SPHERE)
+    if (geo.ioniz_or_extract == CYCLE_EXTRACT && modes.searchlight)
     {
-      randvec (p[i].x, r);      //Simple random coordinate on the surface of a shpere
+      stuff_v (geo.searchlight_x, p[i].x);
+      stuff_v (geo.searchlight_lmn, p[i].lmn);
+    }
+    /*  original spherical X-ray source as used in e.g. Higginbottom+ 2013 */
+
+    else if (geo.pl_geometry == PL_GEOMETRY_SPHERE)
+    {
+      randvec (p[i].x, r);      //Simple random coordinate on the surface of a sphere
 
       /* Added by SS August 2004 for finite disk. */
       if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
@@ -472,8 +480,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       }
       randvcos (p[i].lmn, p[i].x);      //Random direction centred on the previously randmised vector
     }
-
-
 
     /* if we have a lamp post geometry then we should generate isotropic photons at a height
        above the disk plane */
@@ -514,7 +520,10 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       randvec (p[i].x, rrr);
       randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
-    if (modes.save_photons)
+
+    /* This is set up for looking at photons in spectral cycles at present */
+    // if (modes.save_photons)
+    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
       save_photons (&p[i], "AGN");
   }
 

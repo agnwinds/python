@@ -325,7 +325,7 @@ FILE *epltptr;
  * @return     Always returns 0
  *
  * @details
- * This routine gets some residual inforamtion needed
+ * This routine gets some residual information needed
  * to specify exactly what one wants to track, and opens
  * files that will be used to write the diagnostics.
  *
@@ -449,8 +449,6 @@ int save_photon_number = 0;
  * a photon at any time.
  *
  * ### Notes ###
- * It was written as part of the effort to
- *    debug imports for the fu_ori project.
  *
  **********************************************************/
 

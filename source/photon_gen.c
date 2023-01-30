@@ -565,7 +565,7 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
      photons and substitute searchlight mode.  
    */
 
-  if (ioniz_or_final && modes.searchlight)
+  if (ioniz_or_final == CYCLE_EXTRACT && modes.searchlight)
   {
 
     weight = 1;
@@ -974,6 +974,10 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 
     }
 
+    /* This is set up for looking at photons in spectral cycles at present */
+    // if (modes.save_photons)
+    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+      save_photons (&p[i], "STAR");
 
   }
   return (0);
