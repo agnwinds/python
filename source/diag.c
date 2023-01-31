@@ -239,6 +239,25 @@ get_extra_diagnostics ()
  *
  * ### Notes ###
  *
+ * Searchlight mode is only useful in limited situation
+ * and is probably most useful when used in conjunction
+ * with saving photons.
+ *
+ * The main issue, especially for understanding scattering,
+ * is the way spectra are accumulated at specific angles
+ *
+ * For live or die mode, one accepts an annulus above or
+ * below the plane
+ *
+ * For extract, a photons are extracted in a specific 
+ * direction.  
+ *
+ * For these reasons, searchlight mode should most
+ * likely be used in situations where one analyses
+ * each photon path.
+ *
+ * ksl-230131
+ *
  *
  **********************************************************/
 
@@ -248,6 +267,11 @@ init_searchlight ()
   char answer[LINELENGTH];
   int ichoice;
   double angle, rho;
+
+  Log ("WARNING: Searchlight mode is experimental and should be used with extreme care\n");
+  Log ("The primary problem is that spectra are not accumulated at specific places on the sphere\n");
+  Log ("Instead they are acumulated in annulae with with postive and negative angles with respect to the xy plane\n");
+  Log ("Extract mode has similar issues; as a result if one uses this mode one should proably use it in conjunction with saving photons\n");
 
   strcpy (answer, "central_object");
 

@@ -579,6 +579,8 @@ struct geometry
   int disk_ion_spectype, disk_spectype; /**<  Same as above but for the disk */
   int bl_ion_spectype, bl_spectype;     /**<  Same as above but for the boundary layer */
   int agn_ion_spectype, agn_spectype;   /**<  Same as above but for the AGN */
+
+  /* Searchlight mode is very experimental.  See notes in diag.c */
   double searchlight_x[3],searchlight_lmn[3]; /**< location and direction of all photons in the spectral
                                                 * cycles when searchlight mode (an advanced option) is
                                                 * invoked
@@ -1300,7 +1302,7 @@ typedef struct photon
      Comment - ksl - 180712 - The logic for all of this is obscure to me, since we keep track of the
      photons origin separately.  At some point one might want to revisit the necessity for this
    */
-  int np;                       /* The photon number, which used ease tracking a photon for diagnostic
+  int np;                       /* The photon number, which eases tracking a photon for diagnostic
                                    purposes */
   double path;                  /* The total path length of a photon (used for reverberation calcuations) */
   double ds;                    /* the distance a photon has moved since its creation or last interaction */
@@ -1596,7 +1598,14 @@ struct advanced_modes
                                    * tests.  
                                    */
   int partial_cells;             /**< Switch to decribe treatment of partial cells. */              
-  int searchlight;               /**< Switch to invoke search light option. */
+  int searchlight;               /**< Switch to invoke search light option. This is 
+                                  a very experimental diagnostic mode in which photons
+                                  originate at a specific place in the grid in the 
+                                  detailed spectrum stage.  It probably should be 
+                                  used in conjunction with analysing individual photons
+                                  as they pass through the grid.  There are lots of
+                                  issues with how the detailed spectra are constucted
+                                  that make it less useful than it might seem. */
 };
 
 extern struct advanced_modes modes;
