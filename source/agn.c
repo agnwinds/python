@@ -31,7 +31,7 @@
  * @param [in] double  alpha   the spectral index of the PL source - also sometimes used for a temperature if a BB source is required
  * @param [in] double  freqmin   minimum frequency to integrate over
  * @param [in] double  freqmax   maximum frequency
- * @param [in] int  ioniz_or_final   flag to say if we are in the ionization cycles or spectral cycle
+ * @param [in] int  ioniz_or_extract   flag to say if we are in the ionization cycles or spectral cycle
  * @param [out] double   f    the returned luminosity  
  * @return     f - the luminosity - seems to be returned as well as set implicitly.
  *
@@ -51,9 +51,9 @@
  **********************************************************/
 
 double
-agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
+agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_extract, f)
      double r, lum, alpha, freqmin, freqmax;
-     int ioniz_or_final;
+     int ioniz_or_extract;
      double *f;
 {
 
@@ -62,7 +62,7 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   double emit, emit_2_10;
   int spectype;
 
-  if (ioniz_or_final == 1)
+  if (ioniz_or_extract == CYCLE_EXTRACT)
     spectype = geo.agn_spectype;        /* type for final spectrum */
   else
     spectype = geo.agn_ion_spectype;    /*type for ionization calculation */

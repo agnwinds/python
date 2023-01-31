@@ -400,8 +400,8 @@ struct geometry
   int wcycles, pcycles, pcycles_renorm; /**< The number of ionization and spectrum cycles desired, pcycles_renorm 
                                          * is only used on restarts.  See spectrum_restart_renormalize
                                          */
-#define CYCLE_IONIZ    1
-#define CYCLE_EXTRACT  0
+#define CYCLE_IONIZ    0
+#define CYCLE_EXTRACT  1
   int ioniz_or_extract;         /**<  Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
                                    detailed spectrum.  
                                  */
