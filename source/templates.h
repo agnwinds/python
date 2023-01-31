@@ -275,6 +275,7 @@ double matom_select_bf_freq(WindPtr one, int nconf);
 /* diag.c */
 int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
+int init_searchlight(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 int save_photons(PhotPtr p, char comment[]);

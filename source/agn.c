@@ -31,7 +31,7 @@
  * @param [in] double  alpha   the spectral index of the PL source - also sometimes used for a temperature if a BB source is required
  * @param [in] double  freqmin   minimum frequency to integrate over
  * @param [in] double  freqmax   maximum frequency
- * @param [in] int  ioniz_or_final   flag to say if we are in the ionization cycles or spectral cycle
+ * @param [in] int  ioniz_or_extract   flag to say if we are in the ionization cycles or spectral cycle
  * @param [out] double   f    the returned luminosity  
  * @return     f - the luminosity - seems to be returned as well as set implicitly.
  *
@@ -51,9 +51,9 @@
  **********************************************************/
 
 double
-agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
+agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_extract, f)
      double r, lum, alpha, freqmin, freqmax;
-     int ioniz_or_final;
+     int ioniz_or_extract;
      double *f;
 {
 
@@ -62,7 +62,7 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   double emit, emit_2_10;
   int spectype;
 
-  if (ioniz_or_final == 1)
+  if (ioniz_or_extract == CYCLE_EXTRACT)
     spectype = geo.agn_spectype;        /* type for final spectrum */
   else
     spectype = geo.agn_ion_spectype;    /*type for ionization calculation */
@@ -431,6 +431,11 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     {
       p[i].freq = get_rand_brem (freqmin, freqmax);
     }
+    else if (spectype == SPECTYPE_MONO)
+    {
+      p[i].w = 1.;
+      p[i].freq = geo.mono_freq;
+    }
     else
     {
       p[i].freq = one_continuum (spectype, -1., -1., freqmin, freqmax); //A continuum (model) photon - we use t=g=-1 to flag that this is not a normal model
@@ -443,13 +448,21 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     }
 
 
-/* Now we work out where the photon starts out from*/
+/* Now we work out where the photon starts.
+   * The first case is the specail searchlight case
+   * which is purely diagnostic
+ */
 
-    /* first option is for the original spherical X-ray source as used in e.g. Higginbottom+ 2013 */
-
-    if (geo.pl_geometry == PL_GEOMETRY_SPHERE)
+    if (geo.ioniz_or_extract == CYCLE_EXTRACT && modes.searchlight)
     {
-      randvec (p[i].x, r);      //Simple random coordinate on the surface of a shpere
+      stuff_v (geo.searchlight_x, p[i].x);
+      stuff_v (geo.searchlight_lmn, p[i].lmn);
+    }
+    /*  original spherical X-ray source as used in e.g. Higginbottom+ 2013 */
+
+    else if (geo.pl_geometry == PL_GEOMETRY_SPHERE)
+    {
+      randvec (p[i].x, r);      //Simple random coordinate on the surface of a sphere
 
       /* Added by SS August 2004 for finite disk. */
       if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
@@ -468,8 +481,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       }
       randvcos (p[i].lmn, p[i].x);      //Random direction centred on the previously randmised vector
     }
-
-
 
     /* if we have a lamp post geometry then we should generate isotropic photons at a height
        above the disk plane */
@@ -510,7 +521,10 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       randvec (p[i].x, rrr);
       randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
-    if (modes.save_photons)
+
+    /* This is set up for looking at photons in spectral cycles at present */
+    // if (modes.save_photons)
+    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
       save_photons (&p[i], "AGN");
   }
 

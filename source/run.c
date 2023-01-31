@@ -181,7 +181,7 @@ calculate_ionization (restart_stat)
 
     nphot_to_define = (long) NPHOT;
 
-    define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+    define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_IONIZ, iwind, 1);
 
 
     photon_checks (p, freqmin, freqmax, "Check before transport");
@@ -590,7 +590,7 @@ make_spectra (restart_stat)
     NPHOT = NPHOT_MAX;          // Assure that we really are creating as many photons as we expect.
 
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
-    define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
+    define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_EXTRACT, iwind, 0);
 
 //    if (modes.save_photons || modes.save_extract_photons)
 //    {

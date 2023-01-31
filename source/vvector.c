@@ -45,8 +45,6 @@
 #include <math.h>
 
 #include "log.h"
-// #include "atomic.h"
-//#include "python.h"
 #include "math_struc.h"
 #include "math_proto.h"
 #define EPS 1.e-10
@@ -60,12 +58,6 @@ History:
 			include a sane_check
  */
 
-// This exists in python.h and so is commented out here.
-//struct basis
-//{
-//  double a[3][3];
-//
-//};
 
 
 /**********************************************************/
@@ -170,7 +162,7 @@ renorm (a, scalar)
 
 /**********************************************************/
 /** 
- * @brief      muliply  a vector by a scalar
+ * @brief      multiply  a vector by a scalar
  *
  * @param [in] double  a[]  the input vector
  * @param [in] double  scalar   the number to scale the vector by
