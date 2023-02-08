@@ -18,6 +18,49 @@
 PlasmaPtr xplasma;              /// Pointer to current plasma cell
 
 
+
+/**********************************************************/
+/** 
+ * @brief      carry out the process of Compton scattering a photon    
+ *
+ * @param [in] Photpr p  A photon                        
+ * @return     0
+ *
+ * @details
+ * 
+ * ### Notes ###
+ *
+ * This routine oversees the compton scatterin of a single photon
+ *
+ **********************************************************/
+
+
+int
+compton_scatter (p)
+     PhotPtr p;                 // Pointer to the current photon
+{
+  double t_e;
+  double vel[3];
+
+  WindPtr one;
+  PlasmaPtr xplasma;
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+
+  t_e = xplasma->t_e;
+
+  compton_get_thermal_velocity (t_e, velocity_electron);
+  lorentz_transform (p, p, velocity_electron);
+  compton_dir (p);
+  rescale (velocity_electron, -1, vel);
+  lorentz_transform (p, p, vel);
+
+  return (0);
+}
+
+
+
+
 /**********************************************************/
 /** 
  * @brief      computes the effective Compton opacity in the cell.
