@@ -41,6 +41,7 @@ compton_scatter (p)
 {
   double t_e;
   double vel[3];
+  double v;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -50,6 +51,63 @@ compton_scatter (p)
   t_e = xplasma->t_e;
 
   compton_get_thermal_velocity (t_e, velocity_electron);
+
+  /* Now account for the fact that the photons sees fewer 
+     electrons traveling in the direction of the initial
+     photon than those which are moving towards it
+
+     What we want to assure is that the fraction of photons
+     that go in the direction of the photon is given
+     by 
+
+     0.5 (1-v/c)
+
+     and the fraction that goes in the opposite direction
+     of the photon is
+
+     0.5 (1+v/c)
+
+     where v is the component of the velocity vector of
+     the electron going the same direction as the photon.
+
+     If the electron were going near the speed of light
+     in this direction, then an observer in the rest
+     frame would see that the photon was always encontuering
+     photons moving towards the photons, and none moveing
+     with it.
+
+     Note that because the velocities in the 3 directions
+     are uncorrellated, we do not have to go into the frame
+     aligned with the photon, and revese only that component
+     and transform back
+
+     This calculation is carried out non-relativistically,
+     as is the thermal velocity calculation.
+   */
+
+  v = dot (p->lmn, velocity_electron);
+
+  if (random_number (0.0, 1.0) < 0.5 * (1. + fabs (v / VLIGHT)))
+  {
+    /* Then we want the photon to be headed  towards the photon */
+    if (v > 0)
+    {
+      velocity_electron[0] = (-velocity_electron[0]);
+      velocity_electron[2] = (-velocity_electron[1]);
+      velocity_electron[2] = (-velocity_electron[2]);
+    }
+  }
+  else if (v < 0)
+  {
+    velocity_electron[0] = (-velocity_electron[0]);
+    velocity_electron[2] = (-velocity_electron[1]);
+    velocity_electron[2] = (-velocity_electron[2]);
+  }
+
+
+
+
+
   lorentz_transform (p, p, velocity_electron);
   compton_dir (p);
   rescale (velocity_electron, -1, vel);
