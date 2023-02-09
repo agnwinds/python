@@ -924,7 +924,6 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 
     if (spectype == SPECTYPE_BB)
     {
-      p[i].w = 1;
       p[i].freq = planck (t, freqmin, freqmax);
     }
     else if (spectype == SPECTYPE_UNIFORM)
@@ -935,6 +934,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     }
     else if (spectype == SPECTYPE_MONO)
     {
+      p[i].w = 1;
       p[i].freq = geo.mono_freq;
     }
 
