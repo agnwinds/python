@@ -8,6 +8,8 @@ int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x, void *params);
+int randvdipole(double lmn[], double north[]);
+double vdipole(double cos_theta, void *params);
 int init_rand(int seed);
 void init_rng_directory(char *root, int rank);
 void save_gsl_rng_state(void);

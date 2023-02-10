@@ -81,17 +81,6 @@ randvec (a, r)
 
 }
 
-/* Create a photon direction "lmn" in the hemisphere with the vector "north" pointing to the "north
-   pole" pole of the hemispere in the case where the photon is originating in a photosphere.
-Another way of saying this is that north is the normal to surface at the point
-at which the photon originates.  
-
-   The photon directions will be distributed according to the Eddinton approximation
-
-History:
-	02jan	ksl	Add jumps array and modified call to pdf_gen_from_func so to taylor the
-			pdf_array to include more points near 90 degrees.
-*/
 
 double zzz[] = { 0.0, 0.0, 1.0 };
 
@@ -105,7 +94,7 @@ int init_vcos = 0;
  * vector "north pointing to the north pole based on  the Eddingon
  * approximation
  *
- * @param [out] double lmn[] The resulting 3 vector containg the correct 
+ * @param [out] double lmn[] The resulting 3 vector containing the correct 
  * direction cosines      
  * @param [in] double  north [] The direction  of local north
  * @return     Always retursn 0                       
@@ -244,6 +233,111 @@ vcos (double x, void *params)
 }
 
 
+int init_vdipole = 0;
+
+/**********************************************************/
+/** @name      randvdipole
+ *
+ * @brief Create a photon direction "lmn" in with the 
+ * vector "north" pointing in the direction of the the photon
+ * before scttering
+ *
+ * @param [out] double lmn[] The resulting 3 vector containg the correct 
+ * direction cosines      
+ * @param [in] double  north [] The direction of the photon before scatterin
+ * @return     Always returns 0                       
+ *
+ * @details
+ *
+ * 
+ * The photon directions will be distributed according to the dipole    
+ * approximation
+ *
+ *
+ * ### Notes ###
+ * The routine calls vdipole for generating the cdf that is used
+ *
+ * Jumps were added to include more points near 90 degrees.
+ *
+ * This routine was adapted from randvcos and retains some of 
+ * that routines terminology for clarity.
+ *
+ *
+ **********************************************************/
+
+int
+randvdipole (lmn, north)
+     double lmn[], north[];
+{
+  double x[3];                  /* the photon direction in the rotated frame */
+  double l, m, n;               /* the individual direction cosines in the rotated frame */
+  double q, jumps[5];
+  struct basis nbasis;
+  int echeck;
+  double phi;
+
+  /*** 
+   * ### Programming Comment ###
+   * pdf_gen_from_func still uses jumps, so this is OK, but it may not be
+   * necessary as PDFSTEPS has been increased to 10000 in cdf.c  180715 ksl.
+   */
+
+  if (init_vdipole == 0)
+  {
+    jumps[0] = 0.01745;
+    jumps[1] = 0.03490;
+    jumps[2] = 0.05230;
+    jumps[3] = 0.06976;
+    jumps[4] = 0.08716;
+
+    if ((echeck = cdf_gen_from_func (&cdf_vdipole, &vdipole, -1., 1., 5, jumps)) != 0)
+    {
+      Error ("Randvcos: return from cdf_gen_from_func %d\n", echeck);;
+    }
+    init_vdipole = 1;
+  }
+
+
+  n = cdf_get_rand (&cdf_vcos);
+  q = sqrt (1. - n * n);
+
+
+  phi = 2. * PI * random_number (0.0, 1.0);
+  l = q * cos (phi);
+  m = q * sin (phi);
+
+/* So at this point we have the direction cosines in a frame in which
+the z axis is along the normal to the surface.  We must now put the
+direction in the cartesian frame.  If north is in the +-z direction
+this is simple. Otherwise one must do a coordinate rotation. */
+
+  if (north[0] == 0 && north[1] == 0)
+  {
+    lmn[0] = l;
+    lmn[1] = m;
+    if (north[2] > 0)
+      lmn[2] = n;
+    else
+      lmn[2] = -n;
+  }
+  else
+  {
+    create_basis (north, zzz, &nbasis); /* Create a basis with the first axis in 
+                                           direction of "north" and the second axis in the 
+                                           yz plane */
+    x[0] = n;
+    x[1] = l;
+    x[2] = m;
+
+    project_from (&nbasis, x, lmn);     /* Project the vector back to the standard
+                                           frame */
+  }
+  return (0);
+
+}
+
+
+
 
 /**********************************************************/
 /** @name      vdipole
@@ -259,6 +353,8 @@ vcos (double x, void *params)
  *
  *
  * ### Notes ###
+ *
+ * The probability densits is not  normalized, necessarily.
  *
  *
  **********************************************************/
