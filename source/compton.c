@@ -43,10 +43,16 @@ compton_scatter (p)
   double vel[3];
   double v;
 
+
   WindPtr one;
   PlasmaPtr xplasma;
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
+
+
+  if (modes.save_extract_photons)
+    save_photons (p, "BeforeC");
+
 
   t_e = xplasma->t_e;
 
@@ -112,6 +118,9 @@ compton_scatter (p)
   compton_dir (p);
   rescale (velocity_electron, -1, vel);
   lorentz_transform (p, p, vel);
+
+  if (modes.save_extract_photons)
+    save_photons (p, "AfterC");
 
   return (0);
 }

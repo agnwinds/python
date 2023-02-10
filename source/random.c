@@ -244,6 +244,41 @@ vcos (double x, void *params)
 }
 
 
+
+/**********************************************************/
+/** @name      vdipole
+ *
+ * @brief get the probablity density associated with dipole radiation
+ * for cos theta
+ *
+ * @param [in] double x       cos theta
+ * @param [in] void * params  Unused parameters for passing to the GSL integrator
+ * @return     The probability density of the Eddingtog approximation at cos theta
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+
+double
+vdipole (double cos_theta, void *params)
+{
+
+
+  double pdf;
+
+  pdf = 0.5 * (1 + cos_theta * cos_theta);
+
+
+  return (pdf);
+}
+
+
+
 /**********************************************************/
 /** 
  * @brief	Sets up a random number generator 

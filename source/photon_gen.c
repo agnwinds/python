@@ -976,9 +976,8 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     }
 
     /* This is set up for looking at photons in spectral cycles at present */
-    // if (modes.save_photons)
-    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
-      save_photons (&p[i], "STAR");
+    //if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+    //  save_photons (&p[i], "STAR");
 
   }
   return (0);

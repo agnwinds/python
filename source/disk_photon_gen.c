@@ -210,16 +210,16 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
 
-    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
-      save_photons (&p[i], "gen_local");
+    // if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+    //   save_photons (&p[i], "gen_local");
 
     /* When given the same input photons the transformation is made in place */
     if (local_to_observer_frame_disk (&p[i], &p[i]))
     {
       Error ("photon_gen: Frame Error\n");
     }
-    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
-      save_photons (&p[i], "gen_obs");
+    // if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+    //   save_photons (&p[i], "gen_obs");
 
 
 
