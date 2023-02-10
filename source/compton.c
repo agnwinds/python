@@ -437,17 +437,17 @@ compton_dir (p)
 
   n = l = m = 0.0;
 
-  if (x1 < 0.0001)              //If the photon energy is low, we just have Thompson scattering - scattering is isotropic
+  if (x1 < 0.0001)              //If the photon energy is low, we use the diple approximation for scttering            
   {
-    randvec (lmn, 1.0);
+    randvdipole (lmn, p->lmn);
     stuff_v (lmn, p->lmn);
   }
   else
   {
     /* The process is as follows:
        Generate a random number between 0 and 1 - this represents a randomised cross section (normalised to the maximum which out photon packet sees
-       Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 detgress
-       Calculate sigma_max, a varialbe that is communicted externnaly to the zero_find routine.  This is used to xcale the K_N function to lie between 
+       Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 degrees
+       Calculate sigma_max, a variable that is communicated externally to the zero_find routine.  This is used to scale the K_N function to lie between 
        0 and 1. This is essentually the chance of a photon scattering through 180 degrees - or the angle giving the maximum energy loss
        Find the zero that represents our randomised fractional energy loss z_rand.
      */

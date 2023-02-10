@@ -672,7 +672,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 /**
  * @brief      Generate a single sample from a cdf
  *
- * @param [in] CdfPtr  cdf   a structure which contains the cumulative distribution function.
+ * @param [in] CdfPtr  cdf   a structure which contains a cumulative distribution function.
+ *
  * @return   x  a random value fronm the cdf between xmin and xmax
  *
  * @details
@@ -690,18 +691,20 @@ cdf_get_rand (cdf)
   double q;
   double a, b, c, s[2];
   int quadratic ();
-/* Find the interval within which x lies */
-  r = random_number (0.0, 1.0); //This *exludes* 0.0 and 1.0.
-  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);     //find the interval in the CDF where this number lies
+
+/* Gnerate a random number and then find the interval n the cdf in which x lies */
+  r = random_number (0.0, 1.0); //This *excludes* 0.0 and 1.0.
+  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);
 
 /* Now calculate a place within that interval - we use the gradient of the CDF to get a more accurate value between the CDF points */
   q = random_number (0.0, 1.0);
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
   b = cdf->d[i];
   c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
+
   if ((j = quadratic (a, b, c, s)) < 0)
   {
-    Error ("cdf_get_rand: %d\n", j);
+    Error ("cdf_get_rand: No positive roots found %d\n", j);
   }
   else
   {
@@ -713,10 +716,12 @@ cdf_get_rand (cdf)
   }
 
   x = cdf->x[i] * (1. - q) + cdf->x[i + 1] * q;
+
   if (!(cdf->x[0] <= x && x <= cdf->x[cdf->ncdf]))
   {
     Error ("cdf_get_rand: %g %d %g %g\n", r, i, q, x);
   }
+
   return (x);
 }
 
