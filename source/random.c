@@ -271,7 +271,7 @@ randvdipole (lmn, north)
 {
   double x[3];                  /* the photon direction in the rotated frame */
   double l, m, n;               /* the individual direction cosines in the rotated frame */
-  double q, jumps[5];
+  double q, jumps[10];
   struct basis nbasis;
   int echeck;
   double phi;
@@ -284,21 +284,33 @@ randvdipole (lmn, north)
 
   if (init_vdipole == 0)
   {
-    jumps[0] = 0.01745;
-    jumps[1] = 0.03490;
-    jumps[2] = 0.05230;
-    jumps[3] = 0.06976;
-    jumps[4] = 0.08716;
 
-    if ((echeck = cdf_gen_from_func (&cdf_vdipole, &vdipole, -1., 1., 5, jumps)) != 0)
+    jumps[0] = 0.00010;
+    jumps[1] = 0.00030;
+    jumps[2] = 0.00100;
+    jumps[3] = 0.00300;
+    jumps[4] = 0.00500;
+
+    jumps[5] = 1. - 0.00500;
+    jumps[6] = 1. - 0.00300;
+    jumps[7] = 1. - 0.00100;
+    jumps[8] = 1. - 0.00300;
+    jumps[9] = 1. - 0.00010;
+
+
+    if ((echeck = cdf_gen_from_func (&cdf_vdipole, &vdipole, -1., 1., 10, jumps)) != 0)
+//    if ((echeck = cdf_gen_from_func (&cdf_vdipole, &vdipole, -1., 1., 10, jumps)) != 0)
     {
       Error ("Randvcos: return from cdf_gen_from_func %d\n", echeck);;
     }
     init_vdipole = 1;
+    cdf_to_file (&cdf_vdipole, "Dipole");
   }
 
 
-  n = cdf_get_rand (&cdf_vcos);
+  n = cdf_get_rand (&cdf_vdipole);
+
+
   q = sqrt (1. - n * n);
 
 
@@ -307,7 +319,7 @@ randvdipole (lmn, north)
   m = q * sin (phi);
 
 /* So at this point we have the direction cosines in a frame in which
-the z axis is along the normal to the surface.  We must now put the
+the z axis we want to be in the direction of the initial travel    
 direction in the cartesian frame.  If north is in the +-z direction
 this is simple. Otherwise one must do a coordinate rotation. */
 
@@ -319,19 +331,26 @@ this is simple. Otherwise one must do a coordinate rotation. */
       lmn[2] = n;
     else
       lmn[2] = -n;
+
+    Log ("ZZZZ  %e \n", n);
   }
   else
   {
     create_basis (north, zzz, &nbasis); /* Create a basis with the first axis in 
                                            direction of "north" and the second axis in the 
                                            yz plane */
-    x[0] = n;
+    x[0] = n;                   /* Because the photon is travelling in this direction */
     x[1] = l;
     x[2] = m;
 
     project_from (&nbasis, x, lmn);     /* Project the vector back to the standard
                                            frame */
+
+    renorm (lmn, 1.0);          /* Eliminate roundoff errors */
+
   }
+
+
   return (0);
 
 }

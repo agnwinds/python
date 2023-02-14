@@ -57,7 +57,7 @@
 //#include "models.h"
 
 /// This is the initial value of PDFSTEPS
-#define PDFSTEPS 10000
+#define PDFSTEPS 100000
 
 /// This is the value of pdfsteps at this point in time         
 int pdf_steps_current;
@@ -905,7 +905,7 @@ int cdf_write_init = 0;
  * @return     Always returns 0
  *
  * @details
- * This is a diagnostic routine that wirtes a cdf to a file for analysis
+ * This is a diagnostic routine that writes a cdf to a file for analysis
  *
  * This routine should really be parallelized so that it only
  * writes to a file from thread 0, but cdf.c has
@@ -924,20 +924,20 @@ cdf_to_file (cdf, comment)
   int n;
   if (cdf_write_init == 0)
   {
-    fptr = fopen ("cdf_diag", "w");
+    fptr = fopen ("cdf_diag.txt", "w");
     cdf_write_init++;
   }
   else
   {
-    fptr = fopen ("cdf_diag", "a");
+    fptr = fopen ("cdf_diag.txt", "a");
   }
   fprintf (fptr, "# %s\n", comment);
   fprintf (fptr, "# limits (portion.to.sample)   %10.4g %10.4g\n", cdf->limit1, cdf->limit2);
   fprintf (fptr, "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n", cdf->x1, cdf->x2);
   fprintf (fptr, "# norm   Scale.factor          %10.4g \n", cdf->norm);
-  fprintf (fptr, "#n x y  1-y d\n");
+  fprintf (fptr, "# n x y  1-y d\n");
   for (n = 0; n <= cdf->ncdf; n++)
-    fprintf (fptr, "%3d %14.8e	%14.8e %14.8e  %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
+    fprintf (fptr, "%6d %14.8e %14.8e %14.8e %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
   fclose (fptr);
   return (0);
 }

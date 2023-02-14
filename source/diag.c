@@ -485,7 +485,8 @@ save_photons (p, comment)
 
   fprintf (epltptr,
 //OLD           "PHOTON %3d %3d %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %3d %3d %s \n",
-           "PHOTON %3d %7d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
+//OLD           "PHOTON %3d %7d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %12.5e %12.5e %12.5e %12.5e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
+           "PHOTON %3d %7d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %15e %15e %15e %15e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
            geo.pcycle, p->np, p->freq_orig, p->freq, p->w_orig, p->w, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
 //OLD           p->lmn[2], p->ds, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
            p->lmn[2], p->ds, p->tau, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);

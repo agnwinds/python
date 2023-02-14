@@ -50,8 +50,6 @@ compton_scatter (p)
   xplasma = &plasmamain[one->nplasma];
 
 
-  if (modes.save_extract_photons)
-    save_photons (p, "BeforeC");
 
 
   t_e = xplasma->t_e;
@@ -115,12 +113,14 @@ compton_scatter (p)
 
 
   lorentz_transform (p, p, velocity_electron);
+  if (modes.save_extract_photons)
+    save_photons (p, "BeforeC");
   compton_dir (p);
+  if (modes.save_extract_photons)
+    save_photons (p, "AfterC");
   rescale (velocity_electron, -1, vel);
   lorentz_transform (p, p, vel);
 
-  if (modes.save_extract_photons)
-    save_photons (p, "AfterC");
 
   return (0);
 }
@@ -437,13 +437,14 @@ compton_dir (p)
 
   n = l = m = 0.0;
 
-  if (x1 < 0.0001)              //If the photon energy is low, we use the diple approximation for scttering            
+  if (x1 < 0.0001)              //If the photon energy is low, we use the diple approximation            
   {
     randvdipole (lmn, p->lmn);
     stuff_v (lmn, p->lmn);
   }
   else
   {
+
     /* The process is as follows:
        Generate a random number between 0 and 1 - this represents a randomised cross section (normalised to the maximum which out photon packet sees
        Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 degrees
