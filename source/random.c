@@ -294,7 +294,7 @@ randvdipole (lmn, north)
     jumps[5] = 1. - 0.00500;
     jumps[6] = 1. - 0.00300;
     jumps[7] = 1. - 0.00100;
-    jumps[8] = 1. - 0.00300;
+    jumps[8] = 1. - 0.00030;
     jumps[9] = 1. - 0.00010;
 
 
