@@ -956,7 +956,6 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     else
     {
       randvec (p[i].x, r);
-      randvcos (p[i].lmn, p[i].x);
 
       if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
       {
@@ -965,18 +964,13 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
           randvec (p[i].x, r);
         }
 
-
-        if (fabs (p[i].x[2]) < zdisk (r))
-        {
-          Error ("Photon_gen: stellar photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
-          Exit (0);
-        }
       }
+
+      randvcos (p[i].lmn, p[i].x);
 
     }
 
     /* This is set up for looking at photons in spectral cycles at present */
-    // if (modes.save_photons)
     if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
       save_photons (&p[i], "STAR");
 

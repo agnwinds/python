@@ -3,12 +3,14 @@
  *  @author ksl
  * @date   May, 2018
  *
- * @brief  Various general purpose rouines for generating random
+ * @brief  Various general purpose routines for generating random
  * numbers including varous routines for generating 
  * randomly oriented vectors
  *
- * These routines should be kept SEPARATE from routines that require the Python specific
- * structures in python.h
+ * These routines should be kept SEPARATE from routines that 
+ * require the Python specific
+ * structures in python.h so that it is possible to test 
+ * them more easily.
  *
 ***********************************************************/
 
@@ -207,12 +209,12 @@ this is simple. Otherwise one must do a coordinate rotation. */
 /**********************************************************/
 /** @name      vcos
  *
- * @brief get the probablity density associated with  Eddington limb darkening 
+ * @brief get the probability density associated with Eddington limb darkening 
  * for cos theta
  *
  * @param [in] double x       cos theta
  * @param [in] void * params  Unused parameters for passing to the GSL integrator
- * @return     The probability density of the Eddingtog approximation at cos theta
+ * @return     The probability density of the Eddington approximation at cos theta
  *
  * @details
  *
@@ -222,8 +224,8 @@ this is simple. Otherwise one must do a coordinate rotation. */
  * See Hubeny & Mihalas Equation 17.17  
  *
  * The extra factor of x arises from the fact that we want to
- * account for  the proablility density for
- * all azimutal angles
+ * account for  the probability density for
+ * all azimuthal angles
  *
  *
  **********************************************************/
@@ -248,8 +250,8 @@ vcos (double x, void *params)
 /** 
  * @brief	Sets up a random number generator 
  *
- * @param [in] seed			The seed to set up the generator
- * @return 					0
+ * @param [in] seed  The seed to set up the generator
+ * @return 	     0
  *
  * Sets up a random number generator. The resulting generator
  * is addressed by the pointer rng, which is set up as a local
@@ -259,6 +261,7 @@ vcos (double x, void *params)
  *
  * ###Notes###
  * 2/18	-	Written by NSH
+ * The number generator uses  GSL Meursenne twirster
 ***********************************************************/
 
 
@@ -266,7 +269,7 @@ int
 init_rand (seed)
      int seed;
 {
-  rng = gsl_rng_alloc (gsl_rng_mt19937);        //Set the random number generator to the GSL Meursenne twirster
+  rng = gsl_rng_alloc (gsl_rng_mt19937);
   gsl_rng_set (rng, seed);
   return (0);
 }
@@ -350,7 +353,7 @@ save_gsl_rng_state ()
  *
  * @details
  *
- * Read's in a dumped RNG state from the file root.gsl_save. The point of this
+ * Retreive a dumped RNG state from the file root.gsl_save. The point of this
  * is mostly for debugging purposes, being able to keep the same RNG if
  * restarting the model.
  *
