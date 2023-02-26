@@ -210,10 +210,11 @@ this is simple. Otherwise one must do a coordinate rotation. */
  *
  * See Hubeny & Mihalas Equation 17.17  
  *
- * The extra factor of x arises from the fact that we want to
- * account for  the proablility density for
- * all azimutal angles
- *
+ * The extra factor of x arises from the fact that we also need to
+ * account for the geometric factor at differnt angles.  If
+ * there were no limb darkening, the second term, the whole
+ * term in parenthesis could simply be dropped.
+ * 
  *
  **********************************************************/
 
