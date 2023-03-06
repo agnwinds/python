@@ -48,7 +48,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-//OLD #include "atomic.h"
+#include <math.h>
 #include "constants.h"
 #include "math_struc.h"
 #include "math_proto.h"
@@ -680,6 +680,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
  *
  * ### Notes ###
  *
+ * The quadratic equation that is solved is intended to assure
+ * that the recreated pdf is continuous at the boundaries
+ * between the points that ae contained in the cdf structure
+ *
  **********************************************************/
 
 double
@@ -696,22 +700,31 @@ cdf_get_rand (cdf)
   r = random_number (0.0, 1.0); //This *excludes* 0.0 and 1.0.
   i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);
 
-/* Now calculate a place within that interval - we use the gradient of the CDF to get a more accurate value between the CDF points */
+/* Now calculate a place within that interval - we use the gradient of the 
+ * CDF to get a more accurate value between the CDF points
+ * 
+ * To avoid round-off errors and wasted CPU cycles we check that there
+ * is that the gradient change is significant
+ */
   q = random_number (0.0, 1.0);
-  a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
-  b = cdf->d[i];
-  c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
 
-  if ((j = quadratic (a, b, c, s)) < 0)
+  if (fabs (a = (cdf->d[i + 1] - cdf->d[i])) > 1.e-6)
   {
-    Error ("cdf_get_rand: No positive roots found %d\n", j);
-  }
-  else
-  {
-    q = s[j];
-    if (q < 0 || q > 1)
+    a *= 0.5;
+    b = cdf->d[i];
+    c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
+
+    if ((j = quadratic (a, b, c, s)) < 0)
     {
-      Error ("cdf_get_rand: q out of range %d  %f\n", j, q);
+      Error ("cdf_get_rand: No positive roots found %d\n", j);
+    }
+    else
+    {
+      q = s[j];
+      if (q < 0 || q > 1)
+      {
+        Error ("cdf_get_rand: q out of range %d  %f\n", j, q);
+      }
     }
   }
 
