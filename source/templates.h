@@ -35,14 +35,14 @@ int translate_in_wind(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *n
 double smax_in_cell(PhotPtr p);
 double ds_in_cell(int ndom, PhotPtr p);
 /* photon_gen.c */
-int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
-double populate_bands(int ioniz_or_final, int iwind, struct xbands *band);
-int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind, int print_mode, int tot_flag);
+int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_extract, int iwind, int freq_sampling);
+double populate_bands(int ioniz_or_extract, int iwind, struct xbands *band);
+int xdefine_phot(double f1, double f2, int ioniz_or_extract, int iwind, int print_mode, int tot_flag);
 int phot_status(void);
-int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
-int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
+int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_extract, int iwind, double weight, int iphot_start, int nphotons);
+int star_init(double freqmin, double freqmax, int ioniz_or_extract, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
-double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_final, double *f);
+double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_extract, double *f);
 int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
 /* parse.c */
 int parse_command_line(int argc, char *argv[]);
@@ -183,6 +183,8 @@ double roche2_half_width(void);
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x, void *params);
+int randvdipole(double lmn[], double north[]);
+double vdipole(double cos_theta, void *params);
 int init_rand(int seed);
 void init_rng_directory(char *root, int rank);
 void save_gsl_rng_state(void);
@@ -410,7 +412,7 @@ int xsignal_rm(char *root);
 int set_max_time(char *root, double t);
 int check_time(char *root);
 /* agn.c */
-double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
+double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_extract, double *f);
 double emittance_pow(double freqmin, double freqmax, double alpha);
 double emittance_bpow(double freqmin, double freqmax, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -418,6 +420,7 @@ int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, d
 int get_shell_wind_params(int ndom);
 int shell_make_grid(WindPtr w, int ndom);
 /* compton.c */
+int compton_scatter(PhotPtr p);
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
@@ -450,7 +453,7 @@ double exp_stddev(double exp_temp, double numin, double numax);
 /* matom_diag.c */
 int matom_emiss_report(void);
 /* disk_init.c */
-double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
+double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_extract, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
 int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
