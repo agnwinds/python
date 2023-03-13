@@ -273,18 +273,18 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
      int ndom;
 {
   double flux[3];
-  double p_dir_cos[3];
+  double flux_orig[3];
   int iangle;
   double binw, angle;
 
-/* The lines below compute the flux element of this photon */
+/* Compute the weighted flux for this photon */
 
-  stuff_v (phot_mid->lmn, p_dir_cos);   //Get the direction of the photon packet
+  stuff_v (phot_mid->lmn, flux_orig);   //Get the direction of the photon packet
+  renorm (flux_orig, w_ave * ds_obs);   //Renormalise the direction into a flux vector 
 
-  renorm (p_dir_cos, w_ave * ds_obs);   //Renormalise the direction into a flux element
-  project_from_xyz_cyl (phot_mid->x, p_dir_cos, flux);  //Go from a direction cosine into a cartesian vector
+  project_from_xyz_cyl (phot_mid->x, flux_orig, flux);  //Transform to the frame ine which fluxes are summed 
 
-  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere, reverse the sense of the z flux
     flux[2] *= (-1);
   angle = 0.0;
 
@@ -307,10 +307,17 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
   xplasma->F_UV_ang_z[iangle] += flux[2];
 
 
+
+  /* This ends the calculation of the overall intensity as a funciton of solid angle 
+   * The quantities calculated below are simply the weighted fluxes at the posiiton
+   * of the photons
+   */
+
+
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     renorm (phot_mid->x, 1);    //Create a unit vector in the direction of the photon from the origin
-    flux[0] = dot (p_dir_cos, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
+    flux[0] = dot (flux_orig, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
     flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
   }
 
