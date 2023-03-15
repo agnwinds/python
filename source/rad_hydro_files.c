@@ -204,9 +204,6 @@ main (argc, argv)
   fptr_pcon = fopen ("py_pcon_data.dat", "w");
   fptr_debug = fopen ("py_debug_data.dat", "w");
   fptr_flux = fopen ("py_fluxes.dat", "w");
-  fptr_flux_x = fopen ("directional_flux_x.dat", "w");
-  fptr_flux_y = fopen ("directional_flux_y.dat", "w");
-  fptr_flux_z = fopen ("directional_flux_z.dat", "w");
 
 //  fptr11 = fopen ("idomega.dat", "w");
 
@@ -276,9 +273,56 @@ main (argc, argv)
     fprintf (fptr_flux, "i j rcen thetacen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");   //directional flux by band
   }
 
-  fprintf (fptr_flux_x, "NANGLES %i\n", NFLUX_ANGLES);
-  fprintf (fptr_flux_y, "NANGLES %i\n", NFLUX_ANGLES);
-  fprintf (fptr_flux_z, "NANGLES %i\n", NFLUX_ANGLES);
+  /* Write out the directional flux table */
+
+  fptr_flux_x = fopen ("directional_flux_x.dat", "w");
+  fptr_flux_y = fopen ("directional_flux_y.dat", "w");
+  fptr_flux_z = fopen ("directional_flux_z.dat", "w");
+
+  fprintf (fptr_flux_x, "#  i   j  inwind       x           z");
+  fprintf (fptr_flux_y, "#  i   j  inwind       x           z");
+  fprintf (fptr_flux_z, "#  i   j  inwind       x           z");
+
+  for (ii = 0; ii < NFLUX_ANGLES; ii++)
+  {
+    fprintf (fptr_flux_x, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
+    fprintf (fptr_flux_y, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
+    fprintf (fptr_flux_z, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
+  }
+  fprintf (fptr_flux_x, "\n");
+
+  fprintf (fptr_flux_x, "# NANGLES %i\n", NFLUX_ANGLES);
+  fprintf (fptr_flux_y, "# NANGLES %i\n", NFLUX_ANGLES);
+  fprintf (fptr_flux_z, "# NANGLES %i\n", NFLUX_ANGLES);
+
+
+  for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
+  {
+    if (wmain[nwind].vol > 0.0)
+    {
+      nplasma = wmain[nwind].nplasma;
+      wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
+
+      fprintf (fptr_flux_x, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      fprintf (fptr_flux_y, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      fprintf (fptr_flux_z, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      for (ii = 0; ii < NFLUX_ANGLES; ii++)
+      {
+        fprintf (fptr_flux_x, "%10.3e ", plasmamain[nplasma].F_UV_ang_x_persist[ii]);
+        fprintf (fptr_flux_y, "%10.3e ", plasmamain[nplasma].F_UV_ang_y_persist[ii]);
+        fprintf (fptr_flux_z, "%10.3e ", plasmamain[nplasma].F_UV_ang_z_persist[ii]);
+
+      }
+      fprintf (fptr_flux_x, "\n");
+      fprintf (fptr_flux_y, "\n");
+      fprintf (fptr_flux_z, "\n");
+
+
+    }
+  }
+
+  /* Completed writing out the directional flux table */
+
 
   printf ("Checkpoint 2\n");
 
@@ -293,9 +337,9 @@ main (argc, argv)
         i = i - 1;              //There is an extra radial 'ghost zone' in spherical coords in python, we need to make our i,j agree with zeus
       vol = wmain[plasmamain[nplasma].nwind].vol;
       if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
-        fprintf (fptr_hc, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);     //output geometric things
+        fprintf (fptr_hc, "%d %d %e %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN, vol);     //output geometric things
       else if (zdom[domain].coord_type == CYLIND)
-        fprintf (fptr_hc, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);    //output geometric things
+        fprintf (fptr_hc, "%d %d %e %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2], vol);    //output geometric things
 
       fprintf (fptr_hc, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);  //output temp, xi and ne to ease plotting of heating rates
       fprintf (fptr_hc, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);        //Xray heating - or photoionization
@@ -308,40 +352,21 @@ main (argc, argv)
       fprintf (fptr_hc, "%e ", plasmamain[nplasma].rho);        //density
       fprintf (fptr_hc, "%e \n", plasmamain[nplasma].rho * rho2nh);     //hydrogen number density
 
-      fprintf (fptr_flux_x, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);   //output geometric things
-      fprintf (fptr_flux_y, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);   //output geometric things
-      fprintf (fptr_flux_z, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);   //output geometric things
-//      fprintf (fptr11, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, wmain[plasmamain[nplasma].nwind].theta / RADIAN);    //output geometric things
-      for (ii = 0; ii < NFLUX_ANGLES; ii++)
-      {
-        fprintf (fptr_flux_x, "%e ", plasmamain[nplasma].F_UV_ang_x_persist[ii]);
-        fprintf (fptr_flux_y, "%e ", plasmamain[nplasma].F_UV_ang_y_persist[ii]);
-        fprintf (fptr_flux_z, "%e ", plasmamain[nplasma].F_UV_ang_z_persist[ii]);
-
-//        fprintf (fptr11, "%e ", plasmamain[nplasma].idomega[ii]);
-      }
-      fprintf (fptr_flux_x, "\n");
-      fprintf (fptr_flux_y, "\n");
-      fprintf (fptr_flux_z, "\n");
-//      fprintf (fptr11, "\n");
-
-
-
       if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
       {
-        fprintf (fptr_drive, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);  //output geometric things
-        fprintf (fptr_pcon, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);   //output geometric things
+        fprintf (fptr_drive, "%d %d %e %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN, vol);  //output geometric things
+        fprintf (fptr_pcon, "%d %d %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN);   //output geometric things
         fprintf (fptr_drive, "%e ", plasmamain[nplasma].rho);   //density
         fprintf (fptr_drive, "%e ", plasmamain[nplasma].ne);
-        fprintf (fptr_flux, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN);   //output geometric things
+        fprintf (fptr_flux, "%d %d %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN);   //output geometric things
       }
       else if (zdom[domain].coord_type == CYLIND)
       {
-        fprintf (fptr_drive, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol); //output geometric things
-        fprintf (fptr_pcon, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2]);  //output geometric things
+        fprintf (fptr_drive, "%d %d %e %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2], vol); //output geometric things
+        fprintf (fptr_pcon, "%d %d %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
         fprintf (fptr_drive, "%e ", plasmamain[nplasma].rho);   //density
         fprintf (fptr_drive, "%e ", plasmamain[nplasma].ne);
-        fprintf (fptr_flux, "%d %d %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2]);  //output geometric things
+        fprintf (fptr_flux, "%d %d %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
       }
       if (zdom[domain].coord_type == SPHERICAL)
       {
@@ -396,7 +421,7 @@ main (argc, argv)
 
       v_th = pow ((2. * BOLTZMANN * plasmamain[nplasma].t_e / MPROT), 0.5);     //We need the thermal velocity for hydrogen
 //      v_th = 4.2e5;
-      stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x); //place our test photon at the centre of the cell
+      stuff_v (wmain[nwind].xcen, ptest.x);     //place our test photon at the centre of the cell
       ptest.grid = nwind;       //We need our test photon to know where it is 
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
       kappa_es = THOMPSON / MPROT;
@@ -483,7 +508,7 @@ main (argc, argv)
       fprintf (fptr_pcon, " %e %e %e %e %e %e %e\n", plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
 
-      fprintf (fptr_debug, "%d %d %e %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)), plasmamain[nplasma].j);      //output geometric things
+      fprintf (fptr_debug, "%d %d %e %e %e %e %e\n", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)), plasmamain[nplasma].j);      //output geometric things
     }
   }
   fclose (fptr_hc);
