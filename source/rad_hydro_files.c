@@ -290,6 +290,8 @@ main (argc, argv)
     fprintf (fptr_flux_z, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
   }
   fprintf (fptr_flux_x, "\n");
+  fprintf (fptr_flux_y, "\n");
+  fprintf (fptr_flux_z, "\n");
 
   fprintf (fptr_flux_x, "# NANGLES %i\n", NFLUX_ANGLES);
   fprintf (fptr_flux_y, "# NANGLES %i\n", NFLUX_ANGLES);
