@@ -1010,8 +1010,9 @@ typedef struct plasma
      created by the central object, or the disk, or in the simple case the wind, but which have not undergone
      any kind of interaction which would change their direction
    */
-  double j_direct, j_scatt;     /**<  Mean intensity due to direct photons and scattered photons */
-  double ip_direct, ip_scatt;   /**<  Mean intensity due to direct photons and scattered photons */
+  double j_direct, j_scatt;     /**<  Mean intensity due to direct photons and scattered photons.
+                                 Direct photons include photons created in the wind in simple mode. */
+  double ip_direct, ip_scatt;   /**<  Ionization parameter due  to direct photons and scattered photons. See ip */
   double max_freq;              /**<   The maximum frequency photon seen in this cell */
   double cool_tot;              /**< The total cooling in a cell */
   /* The total luminosity of all processes in the cell, basically the emissivity of the cell times it volume. Not the same 
