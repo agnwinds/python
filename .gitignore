@@ -3,6 +3,8 @@
 bin/py*
 bin/windsave2table*
 bin/rad_hydro*
+bin/inspect_wind*
+bin/modify_wind*
 
 # Run files
 *.spec*

@@ -50,6 +50,7 @@ calculate_ionization (restart_stat)
 {
   int n, nn;
   double zz, z_abs_all, z_abs[N_ISTAT], z_else, ztot;
+  double radiated[20];
   int nphot_istat[N_ISTAT];
   WindPtr w;
   PhotPtr p;
@@ -180,7 +181,9 @@ calculate_ionization (restart_stat)
 
     nphot_to_define = (long) NPHOT;
 
-    define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+    define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_IONIZ, iwind, 1);
+
+
     photon_checks (p, freqmin, freqmax, "Check before transport");
 
     /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
@@ -219,7 +222,7 @@ calculate_ionization (restart_stat)
       pop_kappa_ff_array ();
 
     /* Transport the photons through the wind */
-    trans_phot (w, p, 0);
+    trans_phot (w, p, FALSE);
 
     /* Determine how much energy was absorbed in the wind. first zero counters. 
        There are counters for total energy absorbed and for each entry in the istat enum */
@@ -241,6 +244,10 @@ calculate_ionization (restart_stat)
         z_abs[p[nn].istat] += p[nn].w;
         nphot_istat[p[nn].istat]++;
       }
+      if (p[nn].istat == P_ESCAPE)
+      {
+        radiated[p[nn].origin] += p[nn].w;
+      }
       else
         z_else += p[nn].w;
     }
@@ -255,6 +262,13 @@ calculate_ionization (restart_stat)
       Log ("!!python: luminosity lost to low-frequency free-free    %18.12e number of packets %d\n", z_abs[P_LOFREQ_FF],
            nphot_istat[P_LOFREQ_FF]);
     }
+    Log ("\n");
+    Log ("!!python: stellar photon luminosity escaping            %18.12e \n", radiated[PTYPE_STAR]);
+    Log ("!!python: boundary layer photon luminosity escaping     %18.12e \n", radiated[PTYPE_BL]);
+    Log ("!!python: disk photon luminosity escaping               %18.12e \n", radiated[PTYPE_DISK]);
+    Log ("!!python: wind photon luminosity escaping               %18.12e \n", radiated[PTYPE_WIND]);
+    Log ("!!python: agn photon luminosity escaping                %18.12e \n", radiated[PTYPE_AGN]);
+    Log ("\n");
     Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
     Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
     Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
@@ -304,7 +318,9 @@ calculate_ionization (restart_stat)
 /* Note that this step is parallelized */
 
     xsignal (files.root, "%-20s Start wind update\n", "NOK");
+
     wind_update (w);
+
     xsignal (files.root, "%-20s Finished wind update\n", "NOK");
 
 
@@ -334,8 +350,8 @@ calculate_ionization (restart_stat)
       spectrum_summary (files.lwspec, 0, 6, SPECTYPE_RAW, 1., 1, 0);    /* .log_spec_tot */
       spectrum_summary (files.wspec_wind, 0, 6, SPECTYPE_RAW, 1., 0, 1);        /* .spec_tot_wind  */
       spectrum_summary (files.lwspec_wind, 0, 6, SPECTYPE_RAW, 1., 1, 1);       /* .log_spec_tot_wind */
-      phot_gen_sum (files.phot, "w");   /* Save info about the way photons are created and absorbed
-                                           by the disk */
+      disk_photon_summary (files.phot, "w");    /* Save info about the way photons are created and absorbed
+                                                   by the disk */
 #ifdef MPI_ON
     }
     MPI_Barrier (MPI_COMM_WORLD);
@@ -562,7 +578,7 @@ make_spectra (restart_stat)
     else
       iwind = 0;                /* Create wind photons but do not force reinitialization */
 
-    /* Create the initial photon bundles which need to be trannsported through the wind 
+    /* Create the initial photon bundles which need to be transported through the wind 
 
        For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 
        1 implies that detailed spectra, as opposed to the ionization of the wind is being calculated
@@ -574,7 +590,13 @@ make_spectra (restart_stat)
     NPHOT = NPHOT_MAX;          // Assure that we really are creating as many photons as we expect.
 
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
-    define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
+    define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_EXTRACT, iwind, 0);
+
+//    if (modes.save_photons || modes.save_extract_photons)
+//    {
+//      for (n = 0; n < NPHOT; n++)
+//        save_photons (&p[n], "B4Extract");
+//    }
 
 
     for (icheck = 0; icheck < NPHOT; icheck++)
@@ -648,7 +670,7 @@ make_spectra (restart_stat)
   if (rank_global == 0)
   {
 #endif
-    phot_gen_sum (files.phot, "a");
+    disk_photon_summary (files.phot, "a");
 #ifdef MPI_ON
   }
 #endif

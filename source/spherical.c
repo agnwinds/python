@@ -68,8 +68,8 @@ spherical_ds_in_cell (ndom, p)
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
-    Error ("spherical_ds_in_cell: Photon not in grid when routine entered\n");
-    return (n);                 /* Photon was not in wind */
+    Error ("spherical_ds_in_cell: Photon %d not in grid when routine entered\n", p->np);
+    return (n);
   }
 
   ix = n;
@@ -81,8 +81,8 @@ spherical_ds_in_cell (ndom, p)
 
   if (smax == VERY_BIG && s == VERY_BIG)
   {
-    Error ("spherical: ds_in_cell s and smax returning VERY_BIG in cell %i nudging photon by DFUDGE\n", p->grid);
-    return (DFUDGE);            //Set an error condtion and leave
+    Error ("spherical: ds_in_cell: s and smax returning VERY_BIG in cell %i nudging photon %d by DFUDGE\n", p->grid, p->np);
+    return (DFUDGE);
   }
 
 
@@ -91,7 +91,7 @@ spherical_ds_in_cell (ndom, p)
 
   if (smax <= 0)
   {
-    Error ("spherical: ds_in_cell %f\n", smax);
+    Error ("spherical: ds_in_cell: smax %f negative for photon %d\n", smax, p->np);
   }
   return (smax);
 }

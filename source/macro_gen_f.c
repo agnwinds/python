@@ -26,7 +26,7 @@
 /** 
  * @brief      returns the specific band-limited luminosity in macro-atoms
  *
- * @param [in] int  mode   vvariable which controls whether or not we need to compute the
+ * @param [in] int  mode   variable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
  *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
  *            see #define statements in python.h and code in xdefine_phot().
@@ -463,7 +463,7 @@ get_matom_f_accelerate (mode)
   double lum;
   double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
 //OLD  int n_tries, n_tries_local;
-  double norm;
+//OLD  double norm;
 //OLD  int which_out;
   int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
@@ -511,17 +511,17 @@ get_matom_f_accelerate (mode)
 
 
     /* zero all the emissivity counters and check absorbed quantities */
-    norm = 0;
+//OLD    norm = 0;
     for (n = 0; n < NPLASMA; n++)
     {
       for (m = 0; m < nlevels_macro; m++)
       {
-        norm += macromain[n].matom_abs[m];
+//OLD        norm += macromain[n].matom_abs[m];
         macromain[n].matom_emiss[m] = 0.0;
         if (sane_check (macromain[n].matom_abs[m]))
           Error ("matom_abs is %8.4e in matom %i level %i\n", macromain[n].matom_abs[m], n, m);
       }
-      norm += plasmamain[n].kpkt_abs;
+//OLD      norm += plasmamain[n].kpkt_abs;
       plasmamain[n].kpkt_emiss = 0.0;
       if (sane_check (plasmamain[n].kpkt_abs))
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);

@@ -1,18 +1,13 @@
 #!/usr/bin/env python 
-
 '''
-                    Space Telescope Science Institute
-
 Synopsis:  
-
-These are routines for plotting various parameters in of the wind
-after these parameters have been saved to an astropy-compatible
-ascii table
+    These are routines for plotting various parameters in of the wind
+    after these parameters have been saved to an astropy-compatible
+    ascii table
 
 
 Command line usage 
-
-    usage: plot_wind filename var   
+    plot_wind filename var   
 
     to make a plot of a single variable from the command line
 
@@ -20,7 +15,6 @@ Description:
 
 
 Primary routines:
-
     doit : Create a plot of a single variable in a file made with 
             windsave2table.  This is the routine called from
             the command line. Additional options are available
@@ -30,19 +24,6 @@ Primary routines:
             one for each run and one containing the difference
     compare:     Similar to compare_separate but produces a 
             single file
-
-
-
-
-Notes:
-
-
-                                       
-History:
-
-160223  ksl Coding begun
-170505  ksl Adapat to Python3
-
 '''
 
 import sys
@@ -300,7 +281,6 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1,vmin=0,vmax=0):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     pylab.colorbar(im, cax=cax)
-    pylab.tight_layout()
 
     pylab.draw()
     title=title.replace(' ','_')
@@ -308,6 +288,7 @@ def just_plot(x,y,xvar,root,title,xlabel,ylabel,fig_no=1,vmin=0,vmax=0):
         filename=title+'.png'
     else:
         filename='%s_%s.png' %(root,title)
+    pylab.tight_layout()
     pylab.savefig(filename)
     return filename
 
@@ -319,15 +300,12 @@ def doit(filename='fiducial_agn.master.txt', var='t_r',grid='ij',inwind='',scale
     Plot a single variable from an astropy table (normally created with windsave2table, with various
     options
 
-    where var is the variable to plot
-    where grid can be ij, log, or anything else.  If ij then the plot will be in grid coordinates, if log
-        the plot will be in on a log scale in physical coordiantes.  If anything else, the plot will be
-        on a linear scale in physical coordiantes
-    where scale indicates how the variable should be plotted.  guess tells the routine to make a sensible choice
-        linear implies the scale should be linear and log implies a log scale should be used
-    where zmin and zmax overide the max and mimimum in the array (assuming these limits are with the range of
-        the variable)
-
+    where var is the variable to plot where grid can be ij, log, or anything else.  If ij then the plot will 
+    be in grid coordinates, if log the plot will be in on a log scale in physical coordiantes.  If anything else, 
+    the plot will be on a linear scale in physical coordiantes where scale indicates how the variable should be 
+    plotted.  guess tells the routine to make a sensible choice linear implies the scale should be linear and log 
+    implies a log scale should be used where zmin and zmax overide the max and mimimum in the array (assuming these 
+    limits are with the range of the variable)
     '''
 
     if root=='':

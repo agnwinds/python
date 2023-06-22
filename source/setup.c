@@ -113,13 +113,14 @@ init_geo ()
   geo.wind_radiation = TRUE;    /* 1 implies wind will radiate */
 
   geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
-  geo.diskrad = 2.4e10;
+  geo.disk_rad_max = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
 
   geo.t_bl = 100000.;
 
   geo.pl_geometry = PL_GEOMETRY_SPHERE; // default to spherical geometry
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
+  geo.bubble_size = 0.0;        // should only be used if geo.pl_geometry is PL_GEOMETRY_BUBBLE_
 
 
   strcpy (geo.atomic_filename, "data/standard80.dat");
@@ -192,6 +193,7 @@ get_spectype (yesno, question, spectype)
   int i;
   int init_choices (), get_choices ();
 
+
   if (yesno)
   {
     init_choices ();            // Populate the spect array
@@ -202,7 +204,7 @@ get_spectype (yesno, question, spectype)
        have negative values
      */
 
-    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS))
+    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS || geo.ioniz_or_extract == CYCLE_IONIZ))
     {
       *spectype = SPECTYPE_MODEL;
     }
@@ -227,6 +229,15 @@ get_spectype (yesno, question, spectype)
     get_choices (question, choices, &zz_spec);
     *spectype = rdchoice (question, choices, one_choice);
 
+    if (*spectype == SPECTYPE_MONO)
+    {
+      double x;
+      x = 1000.;
+      rddoub ("monochromatic.wavelength", &x);
+      geo.mono_freq = VLIGHT * 1e8 / x;
+    }
+
+
     if (*spectype == SPECTYPE_MODEL)
     {
       if (geo.run_type == RUN_TYPE_PREVIOUS)
@@ -248,7 +259,6 @@ get_spectype (yesno, question, spectype)
           return (*spectype);
         }
       }
-
       get_models (model_list, 2, spectype);
       strcpy (geo.model_list[geo.model_count], model_list);     // Copy it to geo
       strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
@@ -256,6 +266,8 @@ get_spectype (yesno, question, spectype)
       geo.model_count++;
     }
   }
+
+
   else
   {
     *spectype = SPECTYPE_NONE;  // No radiation
@@ -413,8 +425,17 @@ init_observers ()
    * Now read in the read of the variables for the spectra
    */
 
+  if (geo.mono_freq > 0)
+  {
+    geo.swavemax = 1.5 * VLIGHT * 1e8 / geo.mono_freq;
+    geo.swavemin = 0.667 * VLIGHT * 1e8 / geo.mono_freq;
+  }
+
   rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
   rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
+
+
+
   if (geo.swavemin > geo.swavemax)
   {
     geo.swavemax = geo.swavemin;
@@ -426,6 +447,16 @@ init_observers ()
 
   geo.sfmin = VLIGHT / (geo.swavemax * 1.e-8);
   geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
+
+  if (geo.mono_freq > 0)
+  {
+    if (geo.mono_freq < geo.sfmin || geo.mono_freq > geo.sfmax)
+    {
+      Error ("Monochromatic frequency %e out of range of frequency limits %e %e\n", geo.mono_freq, geo.sfmin, geo.sfmax);
+      Exit (1);
+    }
+  }
+
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 
@@ -483,7 +514,7 @@ init_observers ()
 
     if (ichoice)
     {
-      Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+      Log ("OK n>=%d->all; 0<=n<%d -> n scatters; n<0 -> >= |n| scatters\n", MAXSCAT, MAXSCAT);
       for (n = 0; n < geo.nangles; n++)
       {
         rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
@@ -595,10 +626,16 @@ init_photons ()
   rdint ("Spectrum_cycles", &geo.pcycles);
 
 
+  /* If both geo.wcycles and geo.pcycles are 0, there is nothing to do, but for
+   * except that for diagnostic reasons one migh want to inspect the initial
+   * setup in the windsave file.  So now we wait to exit until this actually
+   * written out.
+   */
+
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
-    Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    exit (1);                   //There is really nothing to do!
+    Log ("Both ionization and spectral cycles are set to 0; the rest of the inputs will be gathered\n ");
+    Log ("After that, the windsave file will be written to disk but then the program will exit\n");
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */

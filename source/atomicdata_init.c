@@ -92,13 +92,13 @@ init_atomic_data ()
   }
 
 
-  if (config != NULL)
+  if (xconfig != NULL)
   {
-    free (config);
+    free (xconfig);
   }
-  config = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
+  xconfig = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
 
-  if (config == NULL)
+  if (xconfig == NULL)
   {
     Error ("There is a problem in allocating memory for the config structure\n");
     exit (0);
@@ -128,6 +128,24 @@ init_atomic_data ()
        sizeof (line_dummy), NLINES, 1.e-6 * NLINES * sizeof (line_dummy));
   }
 
+  if (auger_macro != NULL)
+  {
+    free (auger_macro);
+  }
+  auger_macro = (AugerPtr) calloc (sizeof (auger_dummy), NAUGER_MACRO);
+
+  if (auger_macro == NULL)
+  {
+    Error ("There is a problem in allocating memory for the line structure\n");
+    exit (0);
+  }
+  else
+  {
+    Log_silent
+      ("Allocated %10d bytes for each of %6d elements of auger_macro totaling %10.1f Mb \n",
+       sizeof (auger_dummy), NAUGER_MACRO, 1.e-6 * NAUGER_MACRO * sizeof (auger_dummy));
+  }
+
 
   /* Initialize variables */
 
@@ -153,6 +171,7 @@ init_atomic_data ()
     ion[n].nelem = (-1);
     ion[n].ip = (-1);
     ion[n].g = (-1);
+    ion[n].log_g = (-1);        //Log version of multiplicity
     ion[n].nmax = (-1);
     ion[n].firstlevel = (-1);
     ion[n].nlevels = (-1);
@@ -200,10 +219,16 @@ init_atomic_data ()
     for (j = 0; j < NCROSS; j++)        //initialise the crooss sectiond
     {
       phot_top[n].freq[j] = (-1);
+      phot_top[n].log_freq[j] = (-1);
       phot_top[n].x[j] = (-1);
+      phot_top[n].log_x[j] = (-1);
+
     }
     phot_top[n].f = (-1);       //last frequency
+    phot_top[n].log_f = (-1);   //log of last frequency    
     phot_top[n].sigma = 0.0;    //last cross section
+    phot_top[n].log_sigma = -1.0;       //log of last cross section
+
   }
 
 
@@ -226,29 +251,52 @@ init_atomic_data ()
     {
       inner_cross[n].freq[j] = (-1);
       inner_cross[n].x[j] = (-1);
+      inner_cross[n].log_freq[j] = (-1);
+      inner_cross[n].log_x[j] = (-1);
     }
     inner_cross[n].f = (-1);
     inner_cross[n].sigma = 0.0;
+    inner_cross[n].log_f = (-1);
+    inner_cross[n].log_sigma = 0.0;
   }
 
 
   for (i = 0; i < NLEVELS; i++)
   {
-    config[i].n_bbu_jump = 0;   // initialising the number of jumps from each level to 0. (SS)
-    config[i].n_bbd_jump = 0;
-    config[i].n_bfu_jump = 0;
-    config[i].n_bfd_jump = 0;
+    xconfig[i].n_bbu_jump = 0;   // initialising the number of jumps from each level to 0. (SS)
+    xconfig[i].n_bbd_jump = 0;
+    xconfig[i].n_bfu_jump = 0;
+    xconfig[i].n_bfd_jump = 0;
+    xconfig[i].iauger = -1;
+    xconfig[i].nauger = 0;
   }
 
   for (n = 0; n < NLINES; n++)
   {
     line[n].freq = -1;
-    line[n].f = 0;
+    line[n].f = -1;
     line[n].nion = -1;
     line[n].gl = line[n].gu = 0;
     line[n].el = line[n].eu = 0.0;
     line[n].macro_info = -1;
     line[n].coll_index = -999;
+  }
+
+  for (n = 0; n < NAUGER_MACRO; n++)
+  {
+    auger_macro[n].z = -1;
+    auger_macro[n].nion = -1;
+    auger_macro[n].istate = -1;
+    auger_macro[n].nconfig = -1;
+    auger_macro[n].iauger = -1;
+    auger_macro[n].nauger = -1;
+    auger_macro[n].Avalue_auger = 0.0;
+
+    for (i = 0; i < NAUGER_ELECTRONS; i++)
+    {
+      auger_macro[n].nconfig_target[i] = -1;
+      auger_macro[n].branching_ratio[i] = 0.0;
+    }
   }
 
 /* The following lines initialise the dielectronic recombination structure */
@@ -336,8 +384,8 @@ init_atomic_data ()
     coll_stren[n].upper = -1;   //The upper energy level - this is in Chianti notation and is currently unused
     coll_stren[n].energy = 0.0; //The energy of the transition
     coll_stren[n].gf = 0.0;
-    coll_stren[n].hi_t_lim = 0.0;       //The high temerature limit
-    coll_stren[n].n_points = 0.0;       //The number of points in the splie fit
+    coll_stren[n].hi_t_lim = 0.0;       //The high temperature limit
+    coll_stren[n].n_points = 0; //The number of points in the spline fit
     coll_stren[n].type = -1;    //The type of fit, this defines how one computes the scaled temperature and scaled coll strength
     coll_stren[n].scaling_param = 0.0;  //The scaling parameter C used in the Burgess and Tully calculations
     for (n1 = 0; n1 < N_COLL_STREN_PTS; n1++)

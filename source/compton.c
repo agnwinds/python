@@ -18,6 +18,116 @@
 PlasmaPtr xplasma;              /// Pointer to current plasma cell
 
 
+
+/**********************************************************/
+/** 
+ * @brief      carry out the process of Compton scattering a photon    
+ *
+ * @param [in] Photpr p  A photon                        
+ * @return     0
+ *
+ * @details
+ * 
+ * ### Notes ###
+ *
+ * This routine oversees the compton scatterin of a single photon
+ *
+ **********************************************************/
+
+
+int
+compton_scatter (p)
+     PhotPtr p;                 // Pointer to the current photon
+{
+  double t_e;
+  double vel[3];
+  double v;
+
+
+  WindPtr one;
+  PlasmaPtr xplasma;
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+
+
+
+
+  t_e = xplasma->t_e;
+
+  compton_get_thermal_velocity (t_e, velocity_electron);
+
+  /* Now account for the fact that the photons sees fewer 
+     electrons traveling in the direction of the initial
+     photon than those which are moving towards it
+
+     What we want to assure is that the fraction of photons
+     that go in the direction of the photon is given
+     by 
+
+     0.5 (1-v/c)
+
+     and the fraction that goes in the opposite direction
+     of the photon is
+
+     0.5 (1+v/c)
+
+     where v is the component of the velocity vector of
+     the electron going the same direction as the photon.
+
+     If the electron were going near the speed of light
+     in this direction, then an observer in the rest
+     frame would see that the photon was always encontuering
+     photons moving towards the photons, and none moveing
+     with it.
+
+     Note that because the velocities in the 3 directions
+     are uncorrellated, we do not have to go into the frame
+     aligned with the photon, and revese only that component
+     and transform back
+
+     This calculation is carried out non-relativistically,
+     as is the thermal velocity calculation.
+   */
+
+  v = dot (p->lmn, velocity_electron);
+
+  if (random_number (0.0, 1.0) < 0.5 * (1. + fabs (v / VLIGHT)))
+  {
+    /* Then we want the photon to be headed  towards the photon */
+    if (v > 0)
+    {
+      velocity_electron[0] = (-velocity_electron[0]);
+      velocity_electron[2] = (-velocity_electron[1]);
+      velocity_electron[2] = (-velocity_electron[2]);
+    }
+  }
+  else if (v < 0)
+  {
+    velocity_electron[0] = (-velocity_electron[0]);
+    velocity_electron[2] = (-velocity_electron[1]);
+    velocity_electron[2] = (-velocity_electron[2]);
+  }
+
+
+
+
+
+  lorentz_transform (p, p, velocity_electron);
+  if (modes.save_extract_photons)
+    save_photons (p, "BeforeC");
+  compton_dir (p);
+  if (modes.save_extract_photons)
+    save_photons (p, "AfterC");
+  rescale (velocity_electron, -1, vel);
+  lorentz_transform (p, p, vel);
+
+
+  return (0);
+}
+
+
+
+
 /**********************************************************/
 /** 
  * @brief      computes the effective Compton opacity in the cell.
@@ -327,17 +437,18 @@ compton_dir (p)
 
   n = l = m = 0.0;
 
-  if (x1 < 0.0001)              //If the photon energy is low, we just have Thompson scattering - scattering is isotropic
+  if (x1 < 0.0001)              //If the photon energy is low, we use the diple approximation            
   {
-    randvec (lmn, 1.0);
+    randvdipole (lmn, p->lmn);
     stuff_v (lmn, p->lmn);
   }
   else
   {
+
     /* The process is as follows:
        Generate a random number between 0 and 1 - this represents a randomised cross section (normalised to the maximum which out photon packet sees
-       Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 detgress
-       Calculate sigma_max, a varialbe that is communicted externnaly to the zero_find routine.  This is used to xcale the K_N function to lie between 
+       Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 degrees
+       Calculate sigma_max, a variable that is communicated externally to the zero_find routine.  This is used to scale the K_N function to lie between 
        0 and 1. This is essentually the chance of a photon scattering through 180 degrees - or the angle giving the maximum energy loss
        Find the zero that represents our randomised fractional energy loss z_rand.
      */
@@ -378,6 +489,85 @@ compton_dir (p)
     p->w = p->w / f;            //reduce the photon weight by the same ammount to conserve photon numbers
   }
   return (0);
+}
+
+/**********************************************************/
+/** 
+ * @brief      return the (unormalized) proability density Maxwell-Boltzman distribution
+ *
+ * @param [in] double x  
+ * @param [in] void *params  dummy variable needed for gsl compatability
+ * @return     the unormalized proablitly density for a Maxwell-Boltzmann distribution         
+ *
+ * @details
+ * 
+ * ### Notes ###
+ *
+ **********************************************************/
+
+struct Cdf cdf_thermal;
+int init_cdf_thermal = TRUE;
+
+
+double
+pdf_thermal (double x, void *params)
+{
+  return (x * x * exp (-x * x));
+}
+
+/**********************************************************/
+/** 
+ * @brief      get a random thermal velocity of an electron in a plasma
+ *
+ * @param [in] double t   temperature of the plasma
+ * @param [out] double *v the velocity of a random electron
+ * @return     0
+ *
+ * @details
+ * 
+ * ### Notes ###
+ *
+ * The PDF for the speed of thermalized particles is given by the Maxwell-Boltzmann
+ * distribution.  Given a temperature, this routine gets a random
+ * speed and then converts this to a velocity assuming that the 
+ * directions are isotropic.
+ *
+ **********************************************************/
+
+
+int
+compton_get_thermal_velocity (t, v)
+     double t, *v;
+{
+  double vel;
+
+
+  if (init_cdf_thermal)
+  {
+    double dummy[2] = { 0, 1 };
+    cdf_gen_from_func (&cdf_thermal, &pdf_thermal, 0, 5, 0, dummy);
+    init_cdf_thermal = FALSE;
+  }
+
+  vel = cdf_get_rand (&cdf_thermal);
+
+  vel *= sqrt ((2. * BOLTZMANN / MELEC) * t);
+
+  if (vel > 0.5 * VLIGHT)
+  {
+    Error ("compton_get_thermal_velocity: v (%e) > 0.5 C\n", vel);
+    vel = 0.5 * VLIGHT;
+  }
+
+
+  randvec (v, vel);
+
+
+
+  return (0);
+
+
+
 }
 
 

@@ -891,11 +891,11 @@ wind_div_v ()
 /**
  * @brief      find the density of the wind at x
  *
- * @param [in, out] WindPtr  w   The entire wind
- * @param [in, out] double  x[]   A position
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in] double  x[]   A position
  * @return
- * The density at x, if the postion is in the active region of the wind.
- * If the postion is not in the active region of one of the domains, then
+ * The density at x, if the position is in the active region of the wind.
+ * If the position is not in the active region of one of the domains, then
  * 0 is returned.  No error is reported for this
  *
  * @details
@@ -918,7 +918,6 @@ rho (w, x)
   int nn, nnn[4], nelem;
   int nplasma;
   int ndom, ndomain;
-
 
   if (where_in_wind (x, &ndomain) < 0)  //note that where_in_wind is independent of grid.
     return (0.0);
@@ -947,11 +946,11 @@ rho (w, x)
 
   }
 
-
   return (dd);
 }
 
 
+#define NSTEPS 100
 
 /**********************************************************/
 /**
@@ -977,7 +976,6 @@ rho (w, x)
  * This should be fixed.  This is now #395
  *
  **********************************************************/
-#define NSTEPS 100
 
 int
 mdot_wind (w, z, rmax)
@@ -1052,7 +1050,7 @@ mdot_wind (w, z, rmax)
  * 	a cell n
  *
  * @param [in] int  n   An element number in the wind structure
- * @param [out] double  x[]   The random location that is calculaed
+ * @param [out] double  x[]   The random location that is calculated
  * @return     Always returns 0
  *
  * @details
@@ -1131,8 +1129,6 @@ zero_scatters ()
 
   return (0);
 }
-
-
 
 
 /**********************************************************/
@@ -1227,7 +1223,6 @@ int
 check_grid ()
 {
   int ndom, n;
-//OLD  double l_sob, vth, lambda_t, nh;
   double lambda_t, nh;
   double delta_r, delta_x, delta_z, delta_vz, delta_vx;
   double v1[3], v2[3];

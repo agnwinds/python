@@ -30,6 +30,10 @@
  * real work is carried out in rad_hydro_files_sub.c  Indeed so 
  * little of the real work is done here that it might be sensible
  * to move some portion of that code here.
+ * 
+ * ksl - 2212 - Nick did not really try to make the doucmentation
+ * accurate for this
+ *
  *
  *
  ***********************************************************/
@@ -45,7 +49,7 @@
 
 /**********************************************************/
 /**
- * @brief Parse the command line arguments given to windsave2table
+ * @brief Parse the command line  
  *
  * @param[in] int argc        The number of arguments in the command line
  * @param[in] char *argv[]    The command line arguments
@@ -57,20 +61,7 @@
  *
  * Parse arguments provided in the command line whilst invoking windsave2table.
  *
- * The allowed switches include 
- *
- *  --version    Print out information about the version number
- *
- *  -d   Write out ion densisties, rather than ion fractions in the cell
- *  -s   Write out the number of scatters per unit volume  by an ion in a cell, instead of the 
- *       ion fraction
- *
- * The switches only affect the ion tables not the master table
- * This was originally implemented to enable somebody to query which version of
- * Python windsave2table was compiled with. Works in a similar fashion to how
- * the version information is stored and viewed in Python.
- * 
- * 
+ * 2212 - ksl - This needs updating
  *
  **********************************************************/
 
@@ -107,14 +98,13 @@ xparse_arguments (int argc, char *argv[], char root[], int *ion_switch)
   }
 
 
-
 }
 
 
 /**********************************************************/
 /** 
- * @brief      windsave2table writes key variables in a windsave file 
- * to an astropy table calculated Python.  This is the  main routine.
+ * @brief      writes key variables in a windsave file 
+ * to data files appropriate for use with PlUTO.
  *
  * @param [in] int  argc   The number of argments in the command line
  * @param [in] char *  argv[]   The command line
@@ -128,9 +118,6 @@ xparse_arguments (int argc, char *argv[], char root[], int *ion_switch)
  * parsed and this should be rootname of the windsave file
  *
  * ### Notes ###
- *
- * This routine is a supervisory routine. The real work 
- * is in do_windsave2table
  *
  * The routine does not read the .pf file.  It does read  
  * the windsave file and the associated atomic data file
@@ -149,30 +136,44 @@ main (argc, argv)
   char parameter_file[LINELENGTH];
   int ion_switch, nwind, nplasma;
   int i, j, ii, domain;
-//OLD  double vol, kappa_es, lum_sum, cool_sum;
+  //OLD double vol, kappa_es, lum_sum, cool_sum;
+
   double vol, kappa_es;
   double t_opt, t_UV, t_Xray, v_th, fhat[3];    /*This is the dimensionless optical depth parameter computed for communication to rad-hydro. */
 
   struct photon ptest;          //We need a test photon structure in order to compute t
 
-  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fptr6, *fopen ();        /*This is the file to communicate with zeus */
+  FILE *fptr_hc, *fptr_drive, *fptr_ion, *fptr_spec, *fptr_pcon, *fptr_debug, *fptr_flux, *fptr_flux_x, *fptr_flux_y, *fptr_flux_z, *fopen ();  /*This is the file to communicate with zeus */
   domain = geo.hydro_domain_number;
+
+  /* Initialize  MPI, which is needed because some of the routines are MPI enabled */
+
+  int my_rank;                  // these two variables are used regardless of parallel mode
+  int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
+
+#ifdef MPI_ON
+  MPI_Init (&argc, &argv);
+  MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
+  MPI_Comm_size (MPI_COMM_WORLD, &np_mpi);
+#else
+  my_rank = 0;
+  np_mpi = 1;
+#endif
+
+  np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
+  rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
+  Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
+
+  /* MPI intialiazation is complete */
+
 
 
   strcpy (parameter_file, "NONE");
 
-  /* Next command stops Debug statements printing out in py_wind */
   Log_set_verbosity (3);
-
-  /*
-   * EP: added some extra argument parsing for windsave2table - specifically
-   * because I was having some trouble with knowing when windsave2table was
-   * last compiled and on what commit this was
-   */
 
   xparse_arguments (argc, argv, root, &ion_switch);
 
-  printf ("Reading data from file %s\n", root);
   /* Now create the names of all the files which will be written */
   strcpy (windsavefile, root);
   strcpy (outputfile, root);
@@ -190,61 +191,58 @@ main (argc, argv)
   }
 
 
-  printf ("Read wind_file %s\n", windsavefile);
 
   get_atomic_data (geo.atomic_filename);
-
-  printf ("Read Atomic data from %s\n", geo.atomic_filename);
-
-
-//OLD  cool_sum = wind_cooling ();   /*We call wind_cooling here to obtain an up to date set of cooling rates */
   wind_cooling ();              /*We call wind_cooling here to obtain an up to date set of cooling rates */
-//OLD  lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /*and we also call wind_luminosity to get the luminosities */
   wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);       /*and we also call wind_luminosity to get the luminosities */
 
-  fptr = fopen ("py_heatcool.dat", "w");
-  fptr2 = fopen ("py_driving.dat", "w");
-  fptr3 = fopen ("py_ion_data.dat", "w");
-  fptr4 = fopen ("py_spec_data.dat", "w");
-  fptr5 = fopen ("py_pcon_data.dat", "w");
-  fptr6 = fopen ("py_debug_data.dat", "w");
+
+  fptr_hc = fopen ("py_heatcool.dat", "w");
+  fptr_drive = fopen ("py_driving.dat", "w");
+  fptr_ion = fopen ("py_ion_data.dat", "w");
+  fptr_spec = fopen ("py_spec_data.dat", "w");
+  fptr_pcon = fopen ("py_pcon_data.dat", "w");
+  fptr_debug = fopen ("py_debug_data.dat", "w");
+  fptr_flux = fopen ("py_fluxes.dat", "w");
+
+//  fptr11 = fopen ("idomega.dat", "w");
 
 
   if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
-    fprintf (fptr, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+    fprintf (fptr_hc, "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
   else if (zdom[domain].coord_type == CYLIND)
-    fprintf (fptr, "i j rcen zcen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
+    fprintf (fptr_hc, "i j rcen zcen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
 
 
 
-  fprintf (fptr3, "nions %i\n", nions);
+  fprintf (fptr_ion, "nions %i\n", nions);
   for (i = 0; i < nions; i++)
   {
-    fprintf (fptr3, "ion %i %s %i %i\n", i, ele[ion[i].nelem].name, ion[i].z, ion[i].istate);
+    fprintf (fptr_ion, "ion %i %s %i %i\n", i, ele[ion[i].nelem].name, ion[i].z, ion[i].istate);
   }
-  fprintf (fptr3, "nplasma %i\n", NPLASMA);
+  fprintf (fptr_ion, "nplasma %i\n", NPLASMA);
 
 
-  fprintf (fptr4, "model %i\n", geo.ioniz_mode);
+  fprintf (fptr_spec, "model %i\n", geo.ioniz_mode);
   if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)
   {
-    fprintf (fptr4, "nbands %i\n", geo.nxfreq);
-    fprintf (fptr4, "nplasma %i\n", NPLASMA);
+    fprintf (fptr_spec, "nbands %i\n", geo.nxfreq);
+    fprintf (fptr_spec, "nplasma %i\n", NPLASMA);
     for (i = 0; i < geo.nxfreq + 1; i++)
-      fprintf (fptr4, "%e ", geo.xfreq[i]);     //hard wired band edges
-    fprintf (fptr4, "\n ");
+      fprintf (fptr_spec, "%e ", geo.xfreq[i]); //hard wired band edges
+    fprintf (fptr_spec, "\n ");
   }
   else if (geo.ioniz_mode == IONMODE_MATRIX_BB)
-    fprintf (fptr4, "nplasma %i\n", NPLASMA);
+    fprintf (fptr_spec, "nplasma %i\n", NPLASMA);
 
-  fprintf (fptr5, "nplasma %i\n", NPLASMA);
+  fprintf (fptr_pcon, "nplasma %i\n", NPLASMA);
 
   if (zdom[domain].coord_type == SPHERICAL)
-    fprintf (fptr6, "i j rcen thetacen v_th dvdr \n");
+    fprintf (fptr_debug, "i j rcen thetacen v_th dvdr J\n");
   else if (zdom[domain].coord_type == CYLIND)
-    fprintf (fptr6, "i j rcen zcen v_th dvz_dz \n");
+    fprintf (fptr_debug, "i j rcen zcen v_th dvz_dz J\n");
   else if (zdom[domain].coord_type == RTHETA)
-    fprintf (fptr6, "i j rcen thetacen v_th dvr_dr \n");
+    fprintf (fptr_debug, "i j rcen thetacen v_th dvr_dr J\n");
 
   printf ("Set up files\n");
 
@@ -257,21 +255,78 @@ main (argc, argv)
     domain = 0;
   }
 
+  printf ("Checkpoint 1\n");
+
   if (zdom[domain].coord_type == SPHERICAL)
   {
-    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_r F_UV_r F_Xray_r es_f_r bf_f_r\n");    //directional flux by band
+    fprintf (fptr_drive, "i j rcen thetacen F_vis_r F_UV_r F_Xray_r es_f_r bf_f_r\n");  //directional flux by band
+    fprintf (fptr_flux, "i j rcen thetacen F_vis_r F_UV_r F_Xray_r \n");        //directional flux by band
   }
   else if (zdom[domain].coord_type == CYLIND)
   {
-    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");    //directional flux by band
+    fprintf (fptr_drive, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod F_vis_x2 F_vis_y2 F_vis_z2 F_vis_mod2 F_UV_x2 F_UV_y2 F_UV_z2 F_UV_mod2 F_Xray_x2 F_Xray_y2 F_Xray_z2 F_Xray_mod2 es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");     //directional flux by band
+    fprintf (fptr_flux, "i j rcen zcen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");       //directional flux by band
   }
   else if (zdom[domain].coord_type == RTHETA)
   {
-    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");        //directional flux by band
+    fprintf (fptr_drive, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");   //directional flux by band
+    fprintf (fptr_flux, "i j rcen thetacen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");   //directional flux by band
   }
 
+  /* Write out the directional flux table */
+
+  fptr_flux_x = fopen ("directional_flux_x.dat", "w");
+  fptr_flux_y = fopen ("directional_flux_y.dat", "w");
+  fptr_flux_z = fopen ("directional_flux_z.dat", "w");
+
+  fprintf (fptr_flux_x, "#  i   j  inwind       x           z");
+  fprintf (fptr_flux_y, "#  i   j  inwind       x           z");
+  fprintf (fptr_flux_z, "#  i   j  inwind       x           z");
+
+  for (ii = 0; ii < NFLUX_ANGLES; ii++)
+  {
+    fprintf (fptr_flux_x, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
+    fprintf (fptr_flux_y, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
+    fprintf (fptr_flux_z, "       A%03d", ii * 360 / NFLUX_ANGLES + 5);
+  }
+  fprintf (fptr_flux_x, "\n");
+  fprintf (fptr_flux_y, "\n");
+  fprintf (fptr_flux_z, "\n");
+
+  fprintf (fptr_flux_x, "# NANGLES %i\n", NFLUX_ANGLES);
+  fprintf (fptr_flux_y, "# NANGLES %i\n", NFLUX_ANGLES);
+  fprintf (fptr_flux_z, "# NANGLES %i\n", NFLUX_ANGLES);
 
 
+  for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
+  {
+    if (wmain[nwind].vol > 0.0)
+    {
+      nplasma = wmain[nwind].nplasma;
+      wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
+
+      fprintf (fptr_flux_x, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      fprintf (fptr_flux_y, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      fprintf (fptr_flux_z, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      for (ii = 0; ii < NFLUX_ANGLES; ii++)
+      {
+        fprintf (fptr_flux_x, "%10.3e ", plasmamain[nplasma].F_UV_ang_x_persist[ii]);
+        fprintf (fptr_flux_y, "%10.3e ", plasmamain[nplasma].F_UV_ang_y_persist[ii]);
+        fprintf (fptr_flux_z, "%10.3e ", plasmamain[nplasma].F_UV_ang_z_persist[ii]);
+
+      }
+      fprintf (fptr_flux_x, "\n");
+      fprintf (fptr_flux_y, "\n");
+      fprintf (fptr_flux_z, "\n");
+
+
+    }
+  }
+
+  /* Completed writing out the directional flux table */
+
+
+  printf ("Checkpoint 2\n");
 
   for (nwind = zdom[domain].nstart; nwind < zdom[domain].nstop; nwind++)
   {
@@ -284,72 +339,91 @@ main (argc, argv)
         i = i - 1;              //There is an extra radial 'ghost zone' in spherical coords in python, we need to make our i,j agree with zeus
       vol = wmain[plasmamain[nplasma].nwind].vol;
       if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
-        fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);        //output geometric things
+        fprintf (fptr_hc, "%d %d %e %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN, vol);     //output geometric things
       else if (zdom[domain].coord_type == CYLIND)
-        fprintf (fptr, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);       //output geometric things
+        fprintf (fptr_hc, "%d %d %e %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2], vol);    //output geometric things
 
-      fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);     //output temp, xi and ne to ease plotting of heating rates
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);   //Xray heating - or photoionization
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);     //Compton heating
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_lines) / vol);    //Line heating 28/10/15 - not currently used in zeus
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_ff) / vol);       //FF heating 28/10/15 - not currently used in zeus
-      fprintf (fptr, "%e ", (plasmamain[nplasma].cool_comp) / vol);     //Compton cooling
-      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol); //Line cooling must include all recombination cooling
-      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);        //ff cooling
-      fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
-      fprintf (fptr, "%e \n", plasmamain[nplasma].rho * rho2nh);        //hydrogen number density
+      fprintf (fptr_hc, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);  //output temp, xi and ne to ease plotting of heating rates
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);        //Xray heating - or photoionization
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].heat_comp) / vol);  //Compton heating
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].heat_lines) / vol); //Line heating 28/10/15 - not currently used in zeus
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].heat_ff) / vol);    //FF heating 28/10/15 - not currently used in zeus
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].cool_comp) / vol);  //Compton cooling
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);      //Line cooling must include all recombination cooling
+      fprintf (fptr_hc, "%e ", (plasmamain[nplasma].lum_ff) / vol);     //ff cooling
+      fprintf (fptr_hc, "%e ", plasmamain[nplasma].rho);        //density
+      fprintf (fptr_hc, "%e \n", plasmamain[nplasma].rho * rho2nh);     //hydrogen number density
 
       if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
-        fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);       //output geometric things
+      {
+        fprintf (fptr_drive, "%d %d %e %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN, vol);  //output geometric things
+        fprintf (fptr_pcon, "%d %d %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN);   //output geometric things
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].rho);   //density
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].ne);
+        fprintf (fptr_flux, "%d %d %e %e ", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN);   //output geometric things
+      }
       else if (zdom[domain].coord_type == CYLIND)
-        fprintf (fptr2, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].xcen[0], wmain[plasmamain[nplasma].nwind].xcen[2], vol);      //output geometric things
-      fprintf (fptr2, "%e ", plasmamain[nplasma].rho);  //density
-      fprintf (fptr2, "%e ", plasmamain[nplasma].ne);
+      {
+        fprintf (fptr_drive, "%d %d %e %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2], vol); //output geometric things
+        fprintf (fptr_pcon, "%d %d %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].rho);   //density
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].ne);
+        fprintf (fptr_flux, "%d %d %e %e ", i, j, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      }
       if (zdom[domain].coord_type == SPHERICAL)
       {
-        fprintf (fptr2, "%e ", plasmamain[nplasma].F_vis[0]);   //directional flux by band
-        fprintf (fptr2, "%e ", plasmamain[nplasma].F_UV[0]);    //directional flux by band
-        fprintf (fptr2, "%e ", plasmamain[nplasma].F_Xray[0]);  //directional flux by band
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
-        fprintf (fptr2, "%e\n", plasmamain[nplasma].rad_force_bf[0]);   //bound free scattering radiation force in the w(x) direction          
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].F_vis[0]);      //directional flux by band
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].F_UV[0]);       //directional flux by band
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].F_Xray[0]);     //directional flux by band
+        fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_es[0]);       //electron scattering radiation force in the w(x) direction
+        fprintf (fptr_drive, "%e\n", plasmamain[nplasma].rad_force_bf_persist[0]);      //bound free scattering radiation force in the w(x) direction    
+        fprintf (fptr_flux, "%e ", plasmamain[nplasma].F_vis[0]);       //directional flux by band
+        fprintf (fptr_flux, "%e ", plasmamain[nplasma].F_UV[0]);        //directional flux by band
+        fprintf (fptr_flux, "%e ", plasmamain[nplasma].F_Xray[0]);      //directional flux by band      
       }
       else
       {
-        fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2], plasmamain[nplasma].F_vis[3]);        //directional flux by band
-        fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2], plasmamain[nplasma].F_UV[3]);    //directional flux by band
-        fprintf (fptr2, "%e %e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2], plasmamain[nplasma].F_Xray[3]);    //directional flux by band
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[0]);    //electron scattering radiation force in the w(x) direction
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[1]);    //electron scattering radiation force in the phi(rotational) directionz direction
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[2]);    //electron scattering radiation force in the z direction
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_es[3]);    //sum of magnitude of electron scattering radiation force
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[0]);    //bound free scattering radiation force in the w(x) direction
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[1]);    //bound free scattering radiation force in the phi(rotational) direction
-        fprintf (fptr2, "%e ", plasmamain[nplasma].rad_force_bf[2]);    //bound free scattering radiation force in the z direction
-        fprintf (fptr2, "%e \n", plasmamain[nplasma].rad_force_bf[3]);  //sum of magnitude of bound free scattering radiation force 
+        {
+          fprintf (fptr_drive, "%e %e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2], plasmamain[nplasma].F_vis[3]); //directional flux by band
+          fprintf (fptr_drive, "%e %e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2], plasmamain[nplasma].F_UV[3]);     //directional flux by band
+          fprintf (fptr_drive, "%e %e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2], plasmamain[nplasma].F_Xray[3]);     //directional flux by band
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_es[0]);     //electron scattering radiation force in the w(x) direction
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_es[1]);     //electron scattering radiation force in the phi(rotational) directionz direction
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_es[2]);     //electron scattering radiation force in the z direction
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_es[3]);     //sum of magnitude of electron scattering radiation force
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_bf_persist[0]);     //bound free scattering radiation force in the w(x) direction
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_bf_persist[1]);     //bound free scattering radiation force in the phi(rotational) direction
+          fprintf (fptr_drive, "%e ", plasmamain[nplasma].rad_force_bf_persist[2]);     //bound free scattering radiation force in the z direction
+          fprintf (fptr_drive, "%e \n", plasmamain[nplasma].rad_force_bf_persist[3]);   //sum of magnitude of bound free scattering radiation force 
+        }
+        fprintf (fptr_flux, "%e %e %e %e ", plasmamain[nplasma].F_vis_persistent[0], plasmamain[nplasma].F_vis_persistent[1], plasmamain[nplasma].F_vis_persistent[2], plasmamain[nplasma].F_vis_persistent[3]);        //directional flux by band
+        fprintf (fptr_flux, "%e %e %e %e ", plasmamain[nplasma].F_UV_persistent[0], plasmamain[nplasma].F_UV_persistent[1], plasmamain[nplasma].F_UV_persistent[2], plasmamain[nplasma].F_UV_persistent[3]);    //directional flux by band
+        fprintf (fptr_flux, "%e %e %e %e\n ", plasmamain[nplasma].F_Xray_persistent[0], plasmamain[nplasma].F_Xray_persistent[1], plasmamain[nplasma].F_Xray_persistent[2], plasmamain[nplasma].F_Xray_persistent[3]);  //directional flux by band
       }
-      fprintf (fptr3, "%d %d ", i, j);  //output geometric things               
+      fprintf (fptr_ion, "%d %d ", i, j);       //output geometric things               
       for (ii = 0; ii < nions; ii++)
-        fprintf (fptr3, "%e ", plasmamain[nplasma].density[ii]);
-      fprintf (fptr3, "\n");
-      fprintf (fptr4, "%d %d ", i, j);  //output geometric things 
+        fprintf (fptr_ion, "%e ", plasmamain[nplasma].density[ii]);
+      fprintf (fptr_ion, "\n");
+      fprintf (fptr_spec, "%d %d ", i, j);      //output geometric things 
       if (geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)
       {
         for (ii = 0; ii < geo.nxfreq; ii++)
-          fprintf (fptr4, "%e %e %i %e %e %e %e ",
+          fprintf (fptr_spec, "%e %e %i %e %e %e %e ",
                    plasmamain[nplasma].fmin_mod[ii], plasmamain[nplasma].fmax_mod[ii], plasmamain[nplasma].spec_mod_type[ii],
                    plasmamain[nplasma].pl_log_w[ii], plasmamain[nplasma].pl_alpha[ii], plasmamain[nplasma].exp_w[ii],
                    plasmamain[nplasma].exp_temp[ii]);
       }
       else if (geo.ioniz_mode == IONMODE_MATRIX_BB)
-        fprintf (fptr4, "%e %e ", plasmamain[nplasma].t_r, plasmamain[nplasma].w);
-      fprintf (fptr4, "\n ");
+        fprintf (fptr_spec, "%e %e ", plasmamain[nplasma].t_r, plasmamain[nplasma].w);
+      fprintf (fptr_spec, "\n ");
 
 
       //We need to compute the g factor for this cell and output it.
 
 
       v_th = pow ((2. * BOLTZMANN * plasmamain[nplasma].t_e / MPROT), 0.5);     //We need the thermal velocity for hydrogen
-      stuff_v (wmain[plasmamain[nplasma].nwind].xcen, ptest.x); //place our test photon at the centre of the cell
+//      v_th = 4.2e5;
+      stuff_v (wmain[nwind].xcen, ptest.x);     //place our test photon at the centre of the cell
       ptest.grid = nwind;       //We need our test photon to know where it is 
       kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
       kappa_es = THOMPSON / MPROT;
@@ -359,18 +433,23 @@ main (argc, argv)
       {
         if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
         {
-          fhat[0] = sqrt (length (plasmamain[nplasma].F_vis));
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_vis_persistent));
           fhat[1] = 0.0;
-          fhat[2] = sqrt (length (plasmamain[nplasma].F_vis));
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_vis_persistent));
         }
         else
         {
-          stuff_v (plasmamain[nplasma].F_vis, fhat);
+          stuff_v (plasmamain[nplasma].F_vis_persistent, fhat);
         }
-        renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-        stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
-        t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
-
+        if (renorm (fhat, 1.) == -1)    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
+        {
+          t_opt = 0.0;
+        }
+        else
+        {
+          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+          t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
+        }
       }
       else
         t_opt = 0.0;            //Essentually a flag that there is no way of computing t (and hence M) in this cell.
@@ -380,17 +459,23 @@ main (argc, argv)
       {
         if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
         {
-          fhat[0] = sqrt (length (plasmamain[nplasma].F_UV));
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_UV_persistent));
           fhat[1] = 0.0;
-          fhat[2] = sqrt (length (plasmamain[nplasma].F_UV));
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_UV_persistent));
         }
         else
         {
-          stuff_v (plasmamain[nplasma].F_UV, fhat);
+          stuff_v (plasmamain[nplasma].F_UV_persistent, fhat);
         }
-        renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-        stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
-        t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
+        if (renorm (fhat, 1.) == -1)    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
+        {
+          t_UV = 0.0;
+        }
+        else
+        {
+          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+          t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
+        }
       }
       else
         t_UV = 0.0;             //Essentually a flag that there is no way of computing t (and hence M) in this cell.
@@ -401,31 +486,43 @@ main (argc, argv)
       {
         if (zdom[domain].coord_type == SPHERICAL)       //We have to do something special here - because flux is r, theta, phi in sphericals
         {
-          fhat[0] = sqrt (length (plasmamain[nplasma].F_Xray));
+          fhat[0] = sqrt (length (plasmamain[nplasma].F_Xray_persistent));
           fhat[1] = 0.0;
-          fhat[2] = sqrt (length (plasmamain[nplasma].F_Xray));
+          fhat[2] = sqrt (length (plasmamain[nplasma].F_Xray_persistent));
         }
         else
         {
-          stuff_v (plasmamain[nplasma].F_Xray, fhat);
+          stuff_v (plasmamain[nplasma].F_Xray_persistent, fhat);
         }
-        renorm (fhat, 1.);      //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-        stuff_v (fhat, ptest.lmn);      //place our test photon at the centre of the cell            
-        t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
+        if (renorm (fhat, 1.) == -1)    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
+        {
+          t_Xray = 0.0;
+        }
+        else
+        {
+          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+          t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
+        }
       }
       else
         t_Xray = 0.0;           //Essentually a flag that there is no way of computing t (and hence M) in this cell.                
 
-      fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
+      fprintf (fptr_pcon, " %e %e %e %e %e %e %e\n", plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
 
-      fprintf (fptr6, "%d %d %e %e %e %e\n", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)));     //output geometric things
+      fprintf (fptr_debug, "%d %d %e %e %e %e %e\n", i, j, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN, v_th, fabs (dvwind_ds_cmf (&ptest)), plasmamain[nplasma].j);      //output geometric things
     }
   }
-  fclose (fptr);
-  fclose (fptr2);
-  fclose (fptr3);
-  fclose (fptr4);
-  fclose (fptr5);
+  fclose (fptr_hc);
+  fclose (fptr_drive);
+  fclose (fptr_ion);
+  fclose (fptr_spec);
+  fclose (fptr_pcon);
+  fclose (fptr_debug);
+  fclose (fptr_flux);
+  fclose (fptr_flux_x);
+  fclose (fptr_flux_y);
+  fclose (fptr_flux_z);
+
   exit (0);
 }

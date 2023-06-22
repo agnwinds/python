@@ -178,11 +178,13 @@ def do_all_angles_ev(rootname='sv',smooth=21,emin=1000,emax=9000,fmax=0,fig_no=1
     pylab.clf()
 
 
+    print (cols)
     for col in cols:
         flux=data[col]
         # print(flux)
         xlabel=col+'$^{\circ}$'
         q=convolve(flux,boxcar(smooth)/float(smooth),mode='same')
+        print (q*data['Freq.'])
         pylab.semilogx(data['Freq.']*HEV,q*data['Freq.'],'-',label=xlabel)
     pylab.xlabel(r'Energy (eV)',size=16)
     pylab.ylabel(r'$\nu F_{\nu}$',size=16)
@@ -191,6 +193,8 @@ def do_all_angles_ev(rootname='sv',smooth=21,emin=1000,emax=9000,fmax=0,fig_no=1
         pylab.axis((emin,emax,0,z[3]))
     else:
         pylab.axis((emin,emax,0,fmax))
+
+    pylab.semilogy()
 
     pylab.title(root)
     pylab.legend(loc='best')

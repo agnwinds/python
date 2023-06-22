@@ -400,7 +400,7 @@ create_heat_table (ndom, rootname)
 {
   char filename[132];
   double *c[50], *converge;
-  char column_name[50][20];
+  char column_name[50][22];
   char one_line[1024], start[1024], one_value[20];
 
 
@@ -438,63 +438,72 @@ create_heat_table (ndom, rootname)
   c[6] = get_one (ndom, "ave_freq");
   strcpy (column_name[6], "ave_freq");
 
-  c[7] = get_one (ndom, "j");
-  strcpy (column_name[7], "j");
+  c[7] = get_one (ndom, "J");
+  strcpy (column_name[7], "J");
 
-  c[8] = get_one (ndom, "lum_tot");
-  strcpy (column_name[8], "lum_tot");
+  c[8] = get_one (ndom, "J_direct");
+  strcpy (column_name[8], "J_direct");
 
-  c[9] = get_one (ndom, "heat_tot");
-  strcpy (column_name[9], "heat_tot");
+  c[9] = get_one (ndom, "J_scatt");
+  strcpy (column_name[9], "J_scatt");
 
-  c[10] = get_one (ndom, "heat_comp");
-  strcpy (column_name[10], "heat_comp");
+  c[10] = get_one (ndom, "lum_tot");
+  strcpy (column_name[10], "lum_tot");
 
-  c[11] = get_one (ndom, "heat_lines");
-  strcpy (column_name[11], "heat_lines");
+  c[11] = get_one (ndom, "heat_tot");
+  strcpy (column_name[11], "heat_tot");
 
-  c[12] = get_one (ndom, "heat_ff");
-  strcpy (column_name[12], "heat_ff");
+  c[12] = get_one (ndom, "heat_comp");
+  strcpy (column_name[12], "heat_comp");
 
-  c[13] = get_one (ndom, "heat_photo");
-  strcpy (column_name[13], "heat_photo");
+  c[13] = get_one (ndom, "heat_lines");
+  strcpy (column_name[13], "heat_lines");
 
-  c[14] = get_one (ndom, "heat_auger");
-  strcpy (column_name[14], "heat_auger");
+  c[14] = get_one (ndom, "heat_ff");
+  strcpy (column_name[14], "heat_ff");
 
-  c[15] = get_one (ndom, "cool_tot");
-  strcpy (column_name[15], "cool_tot");
+  c[15] = get_one (ndom, "heat_photo");
+  strcpy (column_name[15], "heat_photo");
 
-  c[16] = get_one (ndom, "cool_comp");
-  strcpy (column_name[16], "cool_comp");
+  c[16] = get_one (ndom, "heat_auger");
+  strcpy (column_name[16], "heat_auger");
 
-  c[17] = get_one (ndom, "lum_lines");
-  strcpy (column_name[17], "lum_lines");
+  c[17] = get_one (ndom, "cool_tot");
+  strcpy (column_name[17], "cool_tot");
 
-  c[18] = get_one (ndom, "cool_dr");
-  strcpy (column_name[18], "cool_dr");
+  c[18] = get_one (ndom, "cool_comp");
+  strcpy (column_name[18], "cool_comp");
 
-  c[19] = get_one (ndom, "lum_ff");
-  strcpy (column_name[19], "lum_ff");
+  c[19] = get_one (ndom, "lum_lines");
+  strcpy (column_name[19], "lum_lines");
+
+  c[20] = get_one (ndom, "cool_dr");
+  strcpy (column_name[20], "cool_dr");
+
+  c[21] = get_one (ndom, "lum_ff");
+  strcpy (column_name[21], "lum_ff");
+
+  c[22] = get_one (ndom, "lum_rr");
+  strcpy (column_name[22], "lum_rr");
 
 
-  c[20] = get_one (ndom, "cool_rr");
-  strcpy (column_name[20], "cool_rr");
+  c[23] = get_one (ndom, "cool_rr");
+  strcpy (column_name[23], "cool_rr");
 
-  c[21] = get_one (ndom, "cool_adiab");
-  strcpy (column_name[21], "cool_adiab");
+  c[24] = get_one (ndom, "cool_adiab");
+  strcpy (column_name[24], "cool_adiab");
 
-  c[22] = get_one (ndom, "heat_shock");
-  strcpy (column_name[22], "heat_shock");
+  c[25] = get_one (ndom, "heat_shock");
+  strcpy (column_name[25], "heat_shock");
 
-  c[23] = get_one (ndom, "heat_lines_macro");
-  strcpy (column_name[23], "heat_lines_macro");
+  c[26] = get_one (ndom, "heat_lines_macro");
+  strcpy (column_name[26], "heat_lines_macro");
 
-  c[24] = get_one (ndom, "heat_photo_macro");
-  strcpy (column_name[24], "heat_photo_macro");
+  c[27] = get_one (ndom, "heat_photo_macro");
+  strcpy (column_name[27], "heat_photo_macro");
 
-  /* This should be the maxium number above +1 */
-  ncols = 25;
+  /* This should be the maximum number above +1 */
+  ncols = 28;
 
 
   converge = get_one (ndom, "converge");
@@ -1353,9 +1362,17 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].dt_e_old;
       }
-      else if (strcmp (variable_name, "j") == 0)
+      else if (strcmp (variable_name, "J") == 0)
       {
         x[n] = plasmamain[nplasma].j;
+      }
+      else if (strcmp (variable_name, "J_direct") == 0)
+      {
+        x[n] = plasmamain[nplasma].j_direct;
+      }
+      else if (strcmp (variable_name, "J_scatt") == 0)
+      {
+        x[n] = plasmamain[nplasma].j_scatt;
       }
       else if (strcmp (variable_name, "ave_freq") == 0)
       {
@@ -1432,6 +1449,10 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "lum_ff") == 0)
       {
         x[n] = plasmamain[nplasma].lum_ff;
+      }
+      else if (strcmp (variable_name, "lum_rr") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_rr;
       }
       else if (strcmp (variable_name, "cool_rr") == 0)
       {

@@ -273,24 +273,51 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
      int ndom;
 {
   double flux[3];
-  double p_dir_cos[3];
+  double flux_orig[3];
+  int iangle;
+  double binw, angle;
 
-/* The lines below compute the flux element of this photon */
+/* Compute the weighted flux for this photon */
 
-  stuff_v (phot_mid->lmn, p_dir_cos);   //Get the direction of the photon packet
+  stuff_v (phot_mid->lmn, flux_orig);   //Get the direction of the photon packet
+  renorm (flux_orig, w_ave * ds_obs);   //Renormalise the direction into a flux vector 
 
-  renorm (p_dir_cos, w_ave * ds_obs);   //Renormalise the direction into a flux element
-  project_from_xyz_cyl (phot_mid->x, p_dir_cos, flux);  //Go from a direction cosine into a cartesian vector
+  project_from_xyz_cyl (phot_mid->x, flux_orig, flux);  //Transform to the frame ine which fluxes are summed 
 
-  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere, reverse the sense of the z flux
     flux[2] *= (-1);
+  angle = 0.0;
 
+
+  if (flux[2] > 0 && flux[0] > 0)
+    angle = (atan (flux[0] / flux[2]) * RADIAN);
+  else if (flux[2] < 0 && flux[0] > 0)
+    angle = (atan (flux[0] / flux[2]) * RADIAN) + 180;
+  else if (flux[2] < 0 && flux[0] < 0)
+    angle = (atan (flux[0] / flux[2]) * RADIAN) + 180;
+  else if (flux[2] > 0 && flux[0] < 0)
+    angle = 360. + (atan (flux[0] / flux[2]) * RADIAN);
+
+  binw = 360. / NFLUX_ANGLES;
+
+
+  iangle = (angle) / binw;      //Turn the angle into an integer to pass into the flux array
+  xplasma->F_UV_ang_x[iangle] += flux[0];
+  xplasma->F_UV_ang_y[iangle] += flux[1];
+  xplasma->F_UV_ang_z[iangle] += flux[2];
+
+
+
+  /* This ends the calculation of the overall intensity as a funciton of solid angle 
+   * The quantities calculated below are simply the weighted fluxes at the posiiton
+   * of the photons
+   */
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     renorm (phot_mid->x, 1);    //Create a unit vector in the direction of the photon from the origin
-    flux[0] = dot (p_dir_cos, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
+    flux[0] = dot (flux_orig, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
     flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
   }
 
@@ -463,6 +490,8 @@ normalise_simple_estimators (xplasma)
   double electron_density_obs;
   double freq_min, freq_max, dfreq;
 
+//OLD  double wedge_volume, rmin, rmax, thetamin, thetamax;  //things needed for directional fluxes
+
   nwind = xplasma->nwind;
 
   invariant_volume_time = wmain[nwind].vol / wmain[nwind].xgamma_cen;
@@ -501,7 +530,8 @@ normalise_simple_estimators (xplasma)
   else
   {
     xplasma->j = xplasma->j_direct = xplasma->j_scatt = 0;
-    xplasma->t_e *= 0.7;
+    if (modes.fixed_temp != 1)
+      xplasma->t_e *= 0.7;
     if (xplasma->t_e < MIN_TEMP)
       xplasma->t_e = MIN_TEMP;
     xplasma->w = 0;
@@ -573,6 +603,24 @@ normalise_simple_estimators (xplasma)
     xplasma->F_vis[i] /= volume_obs;
     xplasma->F_UV[i] /= volume_obs;
     xplasma->F_Xray[i] /= volume_obs;
+  }
+
+  for (i = 0; i < NFLUX_ANGLES; i++)
+  {
+
+//ksl - commented out set but not used variables
+//OLD    rmin = wmain[xplasma->nwind].r;
+//OLD    rmax = wmain[xplasma->nwind + 1].r;
+//OLD    thetamin = i * RADIAN;
+//OLD    thetamax = (i + 1) * RADIAN;
+
+//OLD    wedge_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
+    xplasma->F_UV_ang_x[i] /= volume_obs;
+    xplasma->F_UV_ang_y[i] /= volume_obs;
+    xplasma->F_UV_ang_z[i] /= volume_obs;
+
+    //   xplasma->idomega[i] /= (4. * PI * volume_obs);
+
   }
 
   return (0);

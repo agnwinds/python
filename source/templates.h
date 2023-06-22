@@ -35,16 +35,14 @@ int translate_in_wind(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *n
 double smax_in_cell(PhotPtr p);
 double ds_in_cell(int ndom, PhotPtr p);
 /* photon_gen.c */
-int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
-double populate_bands(int ioniz_or_final, int iwind, struct xbands *band);
-int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind, int print_mode);
+int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_extract, int iwind, int freq_sampling);
+double populate_bands(int ioniz_or_extract, int iwind, struct xbands *band);
+int xdefine_phot(double f1, double f2, int ioniz_or_extract, int iwind, int print_mode, int tot_flag);
 int phot_status(void);
-int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
-int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
+int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_extract, int iwind, double weight, int iphot_start, int nphotons);
+int star_init(double freqmin, double freqmax, int ioniz_or_extract, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
-int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
-int phot_gen_sum(char filename[], char mode[]);
-double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_final, double *f);
+double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_extract, double *f);
 int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
 /* parse.c */
 int parse_command_line(int argc, char *argv[]);
@@ -105,6 +103,9 @@ double zero_find(double (*func)(double, void *), double x1, double x2, double to
 double find_function_minimum(double a, double m, double b, double (*func)(double, void *), double tol, double *xmin);
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+/* disk_photon_gen.c */
+int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
+int disk_photon_summary(char filename[], char mode[]);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
 int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
@@ -131,6 +132,7 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 double radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
+double log_sigma_phot(struct topbase_phot *x_ptr, double log_freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
@@ -156,7 +158,7 @@ int spec_save(char filename[]);
 int spec_read(char filename[]);
 /* extract.c */
 int extract(WindPtr w, PhotPtr p, int itype);
-int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
+int extract_one(WindPtr w, PhotPtr pp, int nspec);
 /* cdf.c */
 int cdf_gen_from_func(CdfPtr cdf, double (*func)(double, void *), double xmin, double xmax, int njumps, double jump[]);
 double gen_array_from_func(double (*func)(double, void *), double xmin, double xmax, int pdfsteps);
@@ -164,7 +166,8 @@ int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin
 double cdf_get_rand(CdfPtr cdf);
 int cdf_limit(CdfPtr cdf, double xmin, double xmax);
 double cdf_get_rand_limit(CdfPtr cdf);
-int cdf_to_file(CdfPtr cdf, char filename[]);
+int cdf_to_file(CdfPtr cdf, char comment[]);
+int cdf_inputs_to_file(double x[], double y[], int n_xy, double xmin, double xmax, char filename[]);
 int cdf_check(CdfPtr cdf);
 int calc_cdf_gradient(CdfPtr cdf);
 int cdf_array_fixup(double *x, double *y, int n_xy);
@@ -180,6 +183,8 @@ double roche2_half_width(void);
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x, void *params);
+int randvdipole(double lmn[], double north[]);
+double vdipole(double cos_theta, void *params);
 int init_rand(int seed);
 void init_rng_directory(char *root, int rank);
 void save_gsl_rng_state(void);
@@ -223,8 +228,8 @@ double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative, int *hit);
 double disk_height(double s, void *params);
 /* lines.c */
-double total_line_emission(WindPtr one, double f1, double f2);
-double lum_lines(WindPtr one, int nmin, int nmax);
+double total_line_emission(PlasmaPtr xplasma, double f1, double f2);
+double lum_lines(PlasmaPtr xplasma, int nmin, int nmax);
 double two_level_atom(struct lines *line_ptr, PlasmaPtr xplasma, double *d1, double *d2);
 double line_nsigma(struct lines *line_ptr, PlasmaPtr xplasma);
 double scattering_fraction(struct lines *line_ptr, PlasmaPtr xplasma);
@@ -236,16 +241,17 @@ double one_continuum(int spectype, double t, double g, double freqmin, double fr
 double emittance_continuum(int spectype, double freqmin, double freqmax, double t, double g);
 double model_int(double lambda, void *params);
 /* emission.c */
+double xwind_luminosity(double f1, double f2, int mode);
 double wind_luminosity(double f1, double f2, int mode);
-double total_emission(WindPtr one, double f1, double f2);
+double total_emission(PlasmaPtr xplasma, double f1, double f2);
 int photo_gen_wind(PhotPtr p, double weight, double freqmin, double freqmax, int photstart, int nphot);
-double one_line(WindPtr one, int *nres);
-double total_free(WindPtr one, double t_e, double f1, double f2);
-double ff(WindPtr one, double t_e, double freq);
-double one_ff(WindPtr one, double f1, double f2);
+double one_line(PlasmaPtr xplasma, int *nres);
+double total_free(PlasmaPtr xplasma, double t_e, double f1, double f2);
+double ff(PlasmaPtr xplasma, double t_e, double freq);
+double one_ff(PlasmaPtr xplasma, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* cooling.c */
-double cooling(PlasmaPtr xxxplasma, double t);
+double cooling(PlasmaPtr xplasma, double t);
 double xtotal_emission(WindPtr one, double f1, double f2);
 double adiabatic_cooling(WindPtr one, double t);
 double shock_heating(WindPtr one);
@@ -254,8 +260,8 @@ double wind_cooling(void);
 double fb_topbase_partial(double freq);
 double fb_topbase_partial2(double freq, void *params);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
-double total_fb(WindPtr one, double t, double f1, double f2, int fb_choice, int mode);
-double one_fb(WindPtr one, double f1, double f2);
+double total_fb(PlasmaPtr xplasma, double t, double f1, double f2, int fb_choice, int mode);
+double one_fb(PlasmaPtr xplasma, double f1, double f2);
 int num_recomb(PlasmaPtr xplasma, double t_e, int mode);
 double fb(PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice);
 int init_freebound(double t1, double t2, double f1, double f2);
@@ -271,9 +277,9 @@ double matom_select_bf_freq(WindPtr one, int nconf);
 /* diag.c */
 int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
+int init_searchlight(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
-int save_extract_photons(int n, PhotPtr p, PhotPtr pp);
 int save_photons(PhotPtr p, char comment[]);
 int track_scatters(PhotPtr p, int nplasma, char *comment);
 int Diag(char *format, ...);
@@ -388,7 +394,6 @@ int cylvar_extend_density(int ndom, WindPtr w);
 int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 /* bilinear.c */
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
-int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
 int create_maps(void);
 int calloc_wind(int nelem);
@@ -407,7 +412,7 @@ int xsignal_rm(char *root);
 int set_max_time(char *root, double t);
 int check_time(char *root);
 /* agn.c */
-double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
+double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_extract, double *f);
 double emittance_pow(double freqmin, double freqmax, double alpha);
 double emittance_bpow(double freqmin, double freqmax, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -415,11 +420,14 @@ int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, d
 int get_shell_wind_params(int ndom);
 int shell_make_grid(WindPtr w, int ndom);
 /* compton.c */
+int compton_scatter(PhotPtr p);
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 int compton_dir(PhotPtr p);
+double pdf_thermal(double x, void *params);
+int compton_get_thermal_velocity(double t, double *v);
 double compton_func(double f, void *params);
 double sigma_compton_partial(double f, double x);
 double compton_alpha(double nu);
@@ -445,10 +453,10 @@ double exp_stddev(double exp_temp, double numin, double numax);
 /* matom_diag.c */
 int matom_emiss_report(void);
 /* disk_init.c */
-double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
+double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_extract, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
 int qdisk_save(char *diskfile, double ztot);
-double read_non_standard_disk_profile(char *tprofile);
+int read_non_standard_disk_profile(char *tprofile);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double q_ioniz_dere(int nion, double t_e);
@@ -482,7 +490,7 @@ int setup_windcone(void);
 int init_windcone(double r, double z, double dzdr, int allow_negative_dzdr, ConePtr one_windcone);
 /* setup_disk.c */
 double get_disk_params(void);
-/* photo_gen_matom.c */
+/* photon_gen_matom.c */
 double get_kpkt_f(void);
 double get_kpkt_heating_f(void);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
@@ -614,6 +622,7 @@ double observer_to_local_frame_velocity(double *v_obs, double *v, double *v_cmf)
 double local_to_observer_frame_velocity(double *v_cmf, double *v, double *v_obs);
 int local_to_observer_frame_ruler_transform(double v[], double dx_cmf[], double dx_obs[]);
 int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double dx_cmf[]);
+int lorentz_transform(PhotPtr p_in, PhotPtr p_out, double v[]);
 /* macro_accelerate.c */
 void calc_matom_matrix(PlasmaPtr xplasma, double **matom_matrix);
 int fill_kpkt_rates(PlasmaPtr xplasma, int *escape, PhotPtr p);
@@ -674,7 +683,7 @@ int flux_summary(WindPtr w, char rootname[], int ochoice);
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
 int line_summary(WindPtr w, char rootname[], int ochoice);
-int total_emission_summary(WindPtr w, char rootname[], int ochoice);
+int total_emission_summary(char rootname[], int ochoice);
 int modify_te(WindPtr w, char rootname[], int ochoice);
 int partial_measure_summary(WindPtr w, int element, int istate, char rootname[], int ochoice);
 int collision_summary(WindPtr w, char rootname[], int ochoice);

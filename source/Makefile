@@ -35,13 +35,14 @@ endif
 
 
 # This is mostly to address GitHub issues #100
+# 221210 - Expression to find MPI Compiler modified so works with mpich as well as open mpi See issue #977
 ifeq (mpicc, $(CC))
 	# you're using mpicc, so we'll compile with the DMPI_ON flag
 	MPI_FLAG = -DMPI_ON
 
 	# check what underlying compiler mpi is using, and the version
 	# we'll use this to print to the user and also to do some checks
-	MPI_COMPILER := $(shell mpicc --showme:command)
+	MPI_COMPILER := $(shell mpicc -show)
 	COMPILER_VERSION := $(shell expr `'$(CC)' -dumpversion`)
 	COMPILER_PRINT_STRING = Compiling with mpicc wrapper, for compiler $(MPI_COMPILER) $(COMPILER_VERSION)
 
@@ -119,7 +120,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces.
 
-VERSION = 86a
+VERSION = 87b
 
 INDENT = yes
 
@@ -133,13 +134,13 @@ startup:
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
 
-# indent:
-# 	@echo $(INDENT_STRING)
-# 	$(INDENT_CMD)
 
-
-
-
+# To ensure a uniform style within .c programs, we enforce a indent style on .c code whe
+# modifications are made. For this portion of the installation to work properly, one must have 
+# the python scripting installed, as well as gnuindent.  On linux systems, this is generally
+# not an inssue, but this is not the case for MAC OSX.  The run_indent.py routine below tries
+# to sort out whether one has gindent installed; if not it issues a woraning but does not
+# reformat any of the changed files.
 
 indent:
 	# Fix indenting, if necessary.
@@ -161,7 +162,7 @@ foo: foo.o signal.o time.o
 # these are the objects required for compiltion of python
 # note that the kpar_source is now separate from this
 python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
-		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o \
+		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o disk_photon_gen.o\
 		trans_phot.o phot_util.o resonate.o radiation.o estimators_simple.o\
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
@@ -173,7 +174,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		agn.o shell_wind.o compton.o zeta.o dielectronic.o \
 		spectral_estimators.o matom_diag.o disk_init.o \
 		xlog.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o  macro_gen_f.o macro_gov.o windsave2table_sub.o \
+		setup_star_bh.o setup_domains.o setup_disk.o photon_gen_matom.o  macro_gen_f.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
@@ -185,7 +186,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
 # Problems ocurr due to the prototypes that are generated.  ksl 160705
 python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c photon2d.c photon_gen.c parse.c \
-		saha.c spectra.c wind2d.c wind.c  vvector.c recipes.c \
+		saha.c spectra.c wind2d.c wind.c  vvector.c recipes.c disk_photon_gen.c\
 		trans_phot.c phot_util.c resonate.c radiation.c estimators_simple.c setup_files.c \
 		wind_updates2d.c windsave.c extract.c cdf.c roche.c random.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
@@ -197,7 +198,7 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		agn.c shell_wind.c compton.c zeta.c dielectronic.c \
 		spectral_estimators.c matom_diag.c disk_init.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup_star_bh.c setup_domains.c \
-		setup_disk.c photo_gen_matom.c  macro_gen_f.c macro_gov.c windsave2table_sub.c \
+		setup_disk.c photon_gen_matom.c  macro_gen_f.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c \
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c \
@@ -248,7 +249,7 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o \
+		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
 		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o \
 		macro_accelerate.o  atomic_extern_init.o python_extern_init.o  models_extern_init.o
@@ -274,7 +275,7 @@ table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_in
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o macro_accelerate.o \
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o
 
@@ -290,7 +291,7 @@ rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o 
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o frame.o walls.o charge_exchange.o macro_accelerate.o \
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o
 
@@ -326,7 +327,7 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o
@@ -350,7 +351,7 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o \
 		spectral_estimators.o shell_wind.o compton.o zeta.o dielectronic.o \
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
+		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o
@@ -364,9 +365,17 @@ inspect_wind:  $(inspect_wind_objects)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
+# unit_tests allows one to test low level routines, but one must be aware that one needs to define
+# everything in the main routine before one can probe a particular routine.  
+unit_test: startup unit_test.o $(python_objects)
+	$(CC) ${CFLAGS} unit_test.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o unit_test
+	cp $@ $(BIN)/unit_test
+	# Fix indenting, if necessary.
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
+
 py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o photon_gen.o parse.o setup_files.o \
-		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o \
+		saha.o spectra.o wind2d.o wind.o  vvector.o recipes.o disk_photon_gen.o\
 		trans_phot.o phot_util.o resonate.o radiation.o estimators_simple.o\
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
@@ -378,7 +387,7 @@ py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		agn.o shell_wind.o compton.o zeta.o dielectronic.o \
 		spectral_estimators.o matom_diag.o disk_init.o \
 		xlog.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o  macro_gen_f.o macro_gov.o windsave2table_sub.o \
+		setup_star_bh.o setup_domains.o setup_disk.o photon_gen_matom.o  macro_gen_f.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \

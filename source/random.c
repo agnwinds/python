@@ -3,12 +3,14 @@
  *  @author ksl
  * @date   May, 2018
  *
- * @brief  Various general purpose rouines for generating random
+ * @brief  Various general purpose routines for generating random
  * numbers including varous routines for generating 
  * randomly oriented vectors
  *
- * These routines should be kept SEPARATE from routines that require the Python specific
- * structures in python.h
+ * These routines should be kept SEPARATE from routines that 
+ * require the Python specific
+ * structures in python.h so that it is possible to test 
+ * them more easily.
  *
 ***********************************************************/
 
@@ -20,9 +22,6 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
-
-//OLD #include "atomic.h"
-//OLD #include "python.h"
 
 #include "constants.h"
 #include "math_struc.h"
@@ -42,11 +41,11 @@ char rngsave_file[LINELENGTH];
 /**********************************************************/
 /** @name      randvec
  *
- * @brief GEt a 3 vector "a" whose direction will be random and whose
+ * @brief Get a 3 vector "a" whose direction will be random and whose
  * lenght will be r
  *
  * @param [out] double a[] The resulting 3 vector      
- * @param [in] double  r   desired radius of the vector
+ * @param [in] double  r   desired length of the vector
  * @return     Always retursn 0                       
  *
  * @details
@@ -84,17 +83,6 @@ randvec (a, r)
 
 }
 
-/* Create a photon direction "lmn" in the hemisphere with the vector "north" pointing to the "north
-   pole" pole of the hemispere in the case where the photon is originating in a photosphere.
-Another way of saying this is that north is the normal to surface at the point
-at which the photon originates.  
-
-   The photon directions will be distributed according to the Eddinton approximation
-
-History:
-	02jan	ksl	Add jumps array and modified call to pdf_gen_from_func so to taylor the
-			pdf_array to include more points near 90 degrees.
-*/
 
 double zzz[] = { 0.0, 0.0, 1.0 };
 
@@ -102,13 +90,13 @@ double zzz[] = { 0.0, 0.0, 1.0 };
 int init_vcos = 0;
 
 /**********************************************************/
-/** @name      randvec
+/** @name      randvcos
  *
  * @brief Create a photon direction "lmn" in the hemisphere with the 
- * vector "north pointin go the north pole according to the Eddingon
+ * vector "north pointing to the north pole based on  the Eddingon
  * approximation
  *
- * @param [out] double lmn[] The resulting 3 vector containg the correct 
+ * @param [out] double lmn[] The resulting 3 vector containing the correct 
  * direction cosines      
  * @param [in] double  north [] The direction  of local north
  * @return     Always retursn 0                       
@@ -116,7 +104,7 @@ int init_vcos = 0;
  * @details
  *
  * Create a photon direction "lmn" in the hemisphere with the vector "north" pointing to the "north
- * pole" pole of the hemispere in the case where the photon is originating in a photosphere.
+ * pole" pole of the hemisphere in the case where the photon is originating in a photosphere.
  * Another way of saying this is that north is the normal to surface at the point
  * at which the photon originates.  
  * 
@@ -125,7 +113,8 @@ int init_vcos = 0;
  *
  *
  * ### Notes ###
- * The routine calls vcos which actually containes the Eddinggton 
+ * The routine calls vcos for generating the cdf that is used
+ * vcos contains the Eddington 
  * approximation (aka linear limb darkening)
  *
  * Jumps were added to include more points near 90 degrees.
@@ -169,7 +158,6 @@ randvcos (lmn, north)
   n = cdf_get_rand (&cdf_vcos);
   q = sqrt (1. - n * n);
 
-// The is the correct approach to generating a uniform azimuthal distribution
 
   phi = 2. * PI * random_number (0.0, 1.0);
   l = q * cos (phi);
@@ -181,7 +169,7 @@ direction in the cartesian frame.  If north is in the +-z direction
 this is simple. Otherwise one must do a coordinate rotation. */
 
   if (north[0] == 0 && north[1] == 0)
-  {                             /* Deal with it as a special case */
+  {
     lmn[0] = l;
     lmn[1] = m;
     if (north[2] > 0)
@@ -210,23 +198,28 @@ this is simple. Otherwise one must do a coordinate rotation. */
 /**********************************************************/
 /** @name      vcos
  *
- * @brief the appropriate distribution for Eddington limb darkininge 
+ * @brief get the probability density associated with Eddington limb darkening 
+ * for cos theta
  *
  * @param [in] double x       cos theta
  * @param [in] void * params  Unused parameters for passing to the GSL integrator
- * @return     The probability density for emiingin
+ * @return     The probability density of the Eddington approximation at cos theta
  *
  * @details
  *
- * approximation
- *
  *
  * ### Notes ###
- * The routine calls vcos which actually contains the Eddington
- * approximation (aka linear limb darkening)
  *
  * See Hubeny & Mihalas Equation 17.17  
  *
+ * The extra factor of x arises from the fact that we also need to
+ * account for the geometric factor at differnt angles.  If
+ * there were no limb darkening, the second term, the whole
+ * term in parenthesis could simply be dropped.
+ * 
+ * The extra factor of x arises from the fact that we want to
+ * account for  the probability density for
+ * all azimuthal angles
  *
  *
  **********************************************************/
@@ -247,12 +240,173 @@ vcos (double x, void *params)
 }
 
 
+int init_vdipole = 0;
+
+/**********************************************************/
+/** @name      randvdipole
+ *
+ * @brief Create a photon direction "lmn" in with the 
+ * vector "north" pointing in the direction of the the photon
+ * before scttering
+ *
+ * @param [out] double lmn[] The resulting 3 vector containg the correct 
+ * direction cosines      
+ * @param [in] double  north [] The direction of the photon before scatterin
+ * @return     Always returns 0                       
+ *
+ * @details
+ *
+ * 
+ * The photon directions will be distributed according to the dipole    
+ * approximation
+ *
+ *
+ * ### Notes ###
+ * The routine calls vdipole for generating the cdf that is used
+ *
+ * Jumps were added to include more points near 90 degrees.
+ *
+ * This routine was adapted from randvcos and retains some of 
+ * that routines terminology for clarity.
+ *
+ *
+ **********************************************************/
+
+int
+randvdipole (lmn, north)
+     double lmn[], north[];
+{
+  double x[3];                  /* the photon direction in the rotated frame */
+  double l, m, n;               /* the individual direction cosines in the rotated frame */
+  double q, jumps[10];
+  struct basis nbasis;
+  int echeck;
+  double phi;
+
+  /*** 
+   * ### Programming Comment ###
+   * pdf_gen_from_func still uses jumps, so this is OK, but it may not be
+   * necessary as PDFSTEPS has been increased to 10000 in cdf.c  180715 ksl.
+   */
+
+  if (init_vdipole == 0)
+  {
+
+    jumps[0] = 0.00010;
+    jumps[1] = 0.00030;
+    jumps[2] = 0.00100;
+    jumps[3] = 0.00300;
+    jumps[4] = 0.00500;
+
+    jumps[5] = 1. - 0.00500;
+    jumps[6] = 1. - 0.00300;
+    jumps[7] = 1. - 0.00100;
+    jumps[8] = 1. - 0.00030;
+    jumps[9] = 1. - 0.00010;
+
+
+    if ((echeck = cdf_gen_from_func (&cdf_vdipole, &vdipole, -1., 1., 10, jumps)) != 0)
+//    if ((echeck = cdf_gen_from_func (&cdf_vdipole, &vdipole, -1., 1., 10, jumps)) != 0)
+    {
+      Error ("Randvcos: return from cdf_gen_from_func %d\n", echeck);;
+    }
+    init_vdipole = 1;
+    cdf_to_file (&cdf_vdipole, "Dipole");
+  }
+
+
+  n = cdf_get_rand (&cdf_vdipole);
+
+
+  q = sqrt (1. - n * n);
+
+
+  phi = 2. * PI * random_number (0.0, 1.0);
+  l = q * cos (phi);
+  m = q * sin (phi);
+
+/* So at this point we have the direction cosines in a frame in which
+the z axis we want to be in the direction of the initial travel    
+direction in the cartesian frame.  If north is in the +-z direction
+this is simple. Otherwise one must do a coordinate rotation. */
+
+  if (north[0] == 0 && north[1] == 0)
+  {
+    lmn[0] = l;
+    lmn[1] = m;
+    if (north[2] > 0)
+      lmn[2] = n;
+    else
+      lmn[2] = -n;
+
+    Log ("ZZZZ  %e \n", n);
+  }
+  else
+  {
+    create_basis (north, zzz, &nbasis); /* Create a basis with the first axis in 
+                                           direction of "north" and the second axis in the 
+                                           yz plane */
+    x[0] = n;                   /* Because the photon is travelling in this direction */
+    x[1] = l;
+    x[2] = m;
+
+    project_from (&nbasis, x, lmn);     /* Project the vector back to the standard
+                                           frame */
+
+    renorm (lmn, 1.0);          /* Eliminate roundoff errors */
+
+  }
+
+
+  return (0);
+
+}
+
+
+
+
+/**********************************************************/
+/** @name      vdipole
+ *
+ * @brief get the probablity density associated with dipole radiation
+ * for cos theta
+ *
+ * @param [in] double x       cos theta
+ * @param [in] void * params  Unused parameters for passing to the GSL integrator
+ * @return     The probability density of the Eddingtog approximation at cos theta
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ * The probability densits is not  normalized, necessarily.
+ *
+ *
+ **********************************************************/
+
+
+double
+vdipole (double cos_theta, void *params)
+{
+
+
+  double pdf;
+
+  pdf = 0.5 * (1 + cos_theta * cos_theta);
+
+
+  return (pdf);
+}
+
+
+
 /**********************************************************/
 /** 
  * @brief	Sets up a random number generator 
  *
- * @param [in] seed			The seed to set up the generator
- * @return 					0
+ * @param [in] seed  The seed to set up the generator
+ * @return 	     0
  *
  * Sets up a random number generator. The resulting generator
  * is addressed by the pointer rng, which is set up as a local
@@ -262,6 +416,7 @@ vcos (double x, void *params)
  *
  * ###Notes###
  * 2/18	-	Written by NSH
+ * The number generator uses  GSL Meursenne twirster
 ***********************************************************/
 
 
@@ -269,7 +424,7 @@ int
 init_rand (seed)
      int seed;
 {
-  rng = gsl_rng_alloc (gsl_rng_mt19937);        //Set the random number generator to the GSL Meursenne twirster
+  rng = gsl_rng_alloc (gsl_rng_mt19937);
   gsl_rng_set (rng, seed);
   return (0);
 }
@@ -353,7 +508,7 @@ save_gsl_rng_state ()
  *
  * @details
  *
- * Read's in a dumped RNG state from the file root.gsl_save. The point of this
+ * Retreive a dumped RNG state from the file root.gsl_save. The point of this
  * is mostly for debugging purposes, being able to keep the same RNG if
  * restarting the model.
  *

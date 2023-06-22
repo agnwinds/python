@@ -330,7 +330,7 @@ q_recomb_dere (cont_ptr, electron_temperature)
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
-  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1)
+  if (ion[nion].dere_di_flag == 1 && xconfig[cont_ptr->nlev].ilv == 1)
   {
     root_etemp = sqrt (electron_temperature);
     coeff = 2.07e-16 / (root_etemp * root_etemp * root_etemp);
@@ -404,7 +404,7 @@ q_ioniz (cont_ptr, electron_temperature)
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
-  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1 && ion[nion].macro_info == 0)
+  if (ion[nion].dere_di_flag == 1 && xconfig[cont_ptr->nlev].ilv == 1 && ion[nion].macro_info == 0)
   {
     coeff = q_ioniz_dere (nion, electron_temperature);
   }
@@ -465,7 +465,7 @@ q_recomb (cont_ptr, electron_temperature)
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
   /* Still use the Mihalas approximation for macro-atoms */
-  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1 && ion[nion].macro_info == 0)
+  if (ion[nion].dere_di_flag == 1 && xconfig[cont_ptr->nlev].ilv == 1 && ion[nion].macro_info == 0)
   {
     coeff = q_recomb_dere (cont_ptr, electron_temperature);
   }
@@ -476,7 +476,7 @@ q_recomb (cont_ptr, electron_temperature)
     coeff = 3.2085e-3 / electron_temperature * gaunt * cont_ptr->x[0];  // normal constants * 1/T times gaunt * cross section
 
     coeff /= cont_ptr->freq[0] * H_OVER_K;      // divide by h nu / k
-    coeff *= config[cont_ptr->nlev].g / config[cont_ptr->uplev].g;
+    coeff *= xconfig[cont_ptr->nlev].g / xconfig[cont_ptr->uplev].g;
   }
 
   /* otherwise return 0 */

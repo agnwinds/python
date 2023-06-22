@@ -1,31 +1,28 @@
 #!/usr/bin/env python 
-
 '''
-                    Space Telescope Science Institute
-
 Synopsis:  
-
-Sumarize a model run with python, ultimately generating
-an html file with various plots, etc.
+    Sumarize a model run with python, ultimately generating
+    an html file with various plots, etc.
 
 
 Command line usage (if any):
+    run_check.py root1 [root2 ...]
 
-    usage:  run_check.py root1 [root2 ...]
-            run_check.py root1.pf [root2.pf ...]
-            run_check -all
-            run_check -h
+    run_check.py root1.pf [root2.pf ...]
+
+    run_check -all
+
+    run_check -h
             
 
 Description:  
-
     This routine performs basic checks on one or more python runs
     and creates an html file for each that is intended to provide
     a quick summary of a run.  
 
     The user can enter the runs to be tested from the command line,
     either in the form of a set of root names or .pf names. Wildcarding,
-    e.g *.pf can be used.  *.out.pf files will be ignored.  
+    e.g ``*.pf`` can be used.  ``*.out.pf`` files will be ignored.  
 
     Alternatively to process all of the files in a directory, one can use
     the switch -all (which supercedes anything else).  
@@ -33,20 +30,13 @@ Description:
     In all cases the routine checks to see if the appropriate wind_save file
     exists before attempting to run.
 
-    -h delievers this documentation
+    -h delivers this documentation
 
 Primary routines:
-
     doit - processes a single file
     steer  - processes the command line and calls doit for each file.
 
 Notes:
-                                       
-History:
-
-190312 ksl Coding begun
-190806 ksl Added a steering routine so that multiple files could be processed
-
 '''
 
 import sys
@@ -68,7 +58,11 @@ def read_diag(root):
     Get convergence and possibly other information from the diag file
     '''
 
-    filename='diag_%s/%s_0.diag' % (root,root)
+    # 2212 - ksl - the check here is for backward compatibility
+
+    filename='diag_%s/%s_00.diag' % (root,root)
+    if os.path.exists==False:
+        filename='diag_%s/%s_0.diag' % (root,root)
 
     command="grep 'Check_convergence' %s" % filename
 
@@ -123,23 +117,64 @@ def read_diag(root):
         return converged,converging,t_r,t_e,hc
 
 
+def xwindsave2table(root):
+    '''
+    Run windsave2table with the same version number (not commit)
+    as the .spec files indicate was written)
+
+    This is a backup method, and is not guaranteed to work.  Two
+    obvious reasons it could fail would be if one does not have
+    the specified compiled version of windsave2bable in one's
+    path, or if the the structure of the windsavefile changed
+    mid-version.  
+    '''
+
+    # Locate the version for this run file
+    sfiles=glob('%s*spec' % root)
+    if len(sfiles):
+        foo=open(sfiles[0])
+        line=foo.readline()
+        words=line.split()
+        if words[1]=='Python':
+            xver=words[3]
+            command='windsave2table%s %s' % (xver,root)
+        else:
+            return FALSE
+
+
+    print('We will try this command instead :', command)
+
+
+    proc=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    stdout,stderr=proc.communicate()
+    if proc.returncode:
+        print('Error: also failed trying to run %s ' % xver,proc.returncode)
+        return True
+    elif len(stderr):
+        print('Error: also failed with ' %s)
+        print(stderr.decode())
+        return True 
+    else:
+        return False
+
+
 def windsave2table(root):
     '''
     Run windsave2table
-    '''
 
+
+    Normally this will just run windsave2table, but if it turns out that that fails
+    the routine will try to run the same version (not commit) of windsave2table that
+    python was run with.  This will only work, if the correct version exists in one's
+    bin file
+    '''
     command='windsave2table %s' % root
 
     proc=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     stdout,stderr=proc.communicate()
-    # print(stdout.decode())
-    # print('Error')
-    # print(stderr.decode())
-    # print('return code')
-    # print (proc.returncode)
     if proc.returncode:
         print('Error: running windsave2table',proc.returncode)
-        return True
+        return xwindsave2table(root)
     elif len(stderr):
         print('Error: running windsave2table')
         print(stderr.decode())

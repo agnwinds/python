@@ -2382,11 +2382,11 @@ J_summary (w, rootname, ochoice)
       /* now we need to find the jbar estimator and line 
          pointer corresponding to this transition */
       njump = 0;
-      printf ("Level %i has %i upwards jumps %i downwards jumps\n", llvl + 1, config[llvl].n_bbu_jump, config[llvl].n_bbd_jump);
+      printf ("Level %i has %i upwards jumps %i downwards jumps\n", llvl + 1, xconfig[llvl].n_bbu_jump, xconfig[llvl].n_bbd_jump);
 
-      while (njump < config[llvl].n_bbu_jump)
+      while (njump < xconfig[llvl].n_bbu_jump)
       {
-        line_ptr = &line[config[llvl].bbu_jump[njump]];
+        line_ptr = &line[xconfig[llvl].bbu_jump[njump]];
         lu = line_ptr->nconfigu;
         ll = line_ptr->nconfigl;
 
@@ -2395,7 +2395,7 @@ J_summary (w, rootname, ochoice)
         njump++;
       }
 
-      if (njump >= config[llvl].n_bbu_jump)
+      if (njump >= xconfig[llvl].n_bbu_jump)
       {
         Error ("Couldn't find this transition, try something else!\n");
         return (0);
@@ -2409,7 +2409,7 @@ J_summary (w, rootname, ochoice)
       {
         nplasma = w[n].nplasma;
         if (i == 0)
-          aaa[n] = macromain[nplasma].jbar_old[config[llvl].bbu_indx_first + njump];
+          aaa[n] = macromain[nplasma].jbar_old[xconfig[llvl].bbu_indx_first + njump];
         else
           aaa[n] = (plasmamain[nplasma].xj[i]);
       }
@@ -2417,7 +2417,7 @@ J_summary (w, rootname, ochoice)
 
     printf ("Line wavelength is %.2f\n", (VLIGHT / line_ptr->freq) / ANGSTROM);
     printf ("Line freq is %8.4e\n", line_ptr->freq);
-    printf ("njump %i llvl %i uplvl %i nres %i", njump, llvl, uplvl, config[llvl].bbu_jump[njump]);
+    printf ("njump %i llvl %i uplvl %i nres %i", njump, llvl, uplvl, xconfig[llvl].bbu_jump[njump]);
     display ("J in cell");
     //printf ("i=%i", i);
     sprintf (number, "%i", i);

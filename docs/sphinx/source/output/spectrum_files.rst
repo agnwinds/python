@@ -42,16 +42,16 @@ File types
 
 The first two columns are fairly obvious. Lambda is in Angstroms. 
 
-The remainder indicate the luminosity, that is :math:`L_{\nu}` of the system for specific types of photons. The units are :math:`ergs\:cm^{-2} s^{-1} Hz^{-1}`. 
+The remainder indicate the luminosity, that is :math:`L_{\nu}` of the system for specific types of photons. The units are :math:`{\rm erg\: s}^{-1} {\rm Hz}^{-1}`. 
 
 The remaining columns are:
 
 * Created is the total spectrum of all of the photons paakets as created, that is before having been translated through the wind
 * WCreated is the spectrum of the photons that are created in the wind before translation
-* Emitted is the emergent spectrun after the photons have been translated through the wind
-* CenSrc is the emergent spectrum from photons bundles originating on the Star or BL, 
-* Disk photons the spectrum due to photons starting in the disk
-* and Wind are the same for photons originating in the disk and wind respectively. 
+* Emitted is the emergent spectrum after the photons have been translated through the wind
+* CenSrc is the emergent spectrum from photon bundles originating from the Star or BL, 
+* Disk is the emergent spectrum from photon bundles originating from the disk,
+* Wind is the emergent spectrum from photon bundles that have been reprocessed by the wind,
 * HitSurf represents photons that did not escape the system but ran into a boundary 
 
 
@@ -96,16 +96,13 @@ Where the first set columns are as follows:
 * The spectrum of all photons which are created in the wind (before processing by the wind)
 * The spectrum of all photons which escape the wind (after passing through the wind)
 * The spectrum of all photons created by the star or BH (after passing through the wind)
-* The spectrum of all photoons created by the wind (after passing though the wind)
-* The spectrum of all photons that are scattered by the win (after passing through the wind)
+* The spectrum of all photons created by the wind (after passing though the wind)
+* The spectrum of all photons that are scattered by the wind (after passing through the wind)
 
-These data in the first set of columns do not reflect the angular dependence of the emission. They are effectively an angle averaged spectrum.  
-Except for the fact that the units are different and the wavelength range is limited these should resemble the spectra in various ouput files showing 
-the spectra constructed in the ionization cycles.  
+These data in the first set of columns do not reflect the angular dependence of the emission. They are effectively an angle averaged spectrum. Except for the fact that the units are different and the wavelength range is limited these should resemble the spectra in the output files (such as .spec_tot) that record the spectra constructed in the ionization cycles.  
 
 
-The remaining columns are the spectra at various inclination angles and binary phase.  The name A30P0.50 implies the spectrum at an incination angle 
-of 30 degrees and an for a binary system one obtained when the orbital period was 0.5 that is when the secondary was located behind the primary.
+The remaining columns are the spectra at various inclination angles and binary phases.  The label A30P0.50 means the spectrum is viewed at an inclination angle of 30 degrees and at a phase of 0.5 -- for a binary system this is when the secondary was located behind the primary. 
 
 .log_spec
  Identical to the spectrum .spec file except with logarithmic intervals.  

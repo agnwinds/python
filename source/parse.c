@@ -85,7 +85,6 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-r") == 0)
       {
-        Log ("Restarting %s\n", files.root);
         restart_stat = 1;
         j = i;
       }
@@ -291,7 +290,7 @@ parse_command_line (argc, argv)
     sprintf (files.diagfolder, "diag_%.100s/", files.root);
     mkdir (files.diagfolder, 0777);
 
-    sprintf (dummy, "_%d.diag", rank_global);
+    sprintf (dummy, "_%02d.diag", rank_global);
 
     sprintf (files.diag, "%.50s/%.50s%.50s", files.diagfolder, files.root, dummy);
 
@@ -301,6 +300,13 @@ parse_command_line (argc, argv)
     {
       init_rng_directory (files.root, rank_global);
     }
+  }
+
+  if (restart_stat)
+  {
+    Log ("\n*****Restarting %s *****\n", files.root);
+    Log
+      ("WARNING: With  the execption of the number of ionization and spectral cycles\n any changes in the parameter files will be ignored\n\n");
   }
 
   return (restart_stat);

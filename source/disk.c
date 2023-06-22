@@ -25,7 +25,9 @@
 /** 
  * @brief      Calculate the temperature of the disk at a normalised distance x
  *
- * @param [in] double  x   distance from center of disk in units of r/rstar
+ * @param [in] double  x   distance from center of disk in units of the minimum
+ * radius of the disk
+
  * @return     The temperature
  *
  * The routine returns the effective temperature for the disk as a distance
@@ -43,6 +45,9 @@
  *
  *
  * ###Notes###
+ *
+ * For disks that start at a radius that is larger than r_star, the temperature
+ * is based on the minimum radius.
  *
  * A reference for the standard steady state disk is Wade, 1984 MNRAS 208, 381
  *
@@ -70,12 +75,12 @@ teff (x)
   }
 
 
-  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
+  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && ((x * geo.disk_rad_min) < blmod.r[blmod.n_blpts - 1]))
   {
     /* This is the case where the temperature profile is read in as an array, and so we
        simply find the array elements that bracket the requested radius and do a linear
        interpolation to calcualte the temperature at the requested radius. */
-    if ((r = (x * geo.rstar)) < blmod.r[0])
+    if ((r = (x * geo.disk_rad_min)) < blmod.r[0])
     {
       return (blmod.t[0]);
     }
@@ -87,11 +92,11 @@ teff (x)
   }
   else
   {
-    double t, r;
-    r = geo.rstar;
-    t = 3. * GRAV / (8. * PI * STEFAN_BOLTZMANN) * geo.mstar * geo.disk_mdot / (r * r * r);
-    t = pow (t, 0.25);
     /* This is a standard accretion disk */
+    double t, r;
+    r = geo.disk_rad_min;
+    t = 3. * GRAV / (8. * PI * STEFAN_BOLTZMANN) * geo.mstar * geo.disk_mdot / (r * r * r);
+    t = pow (t, 0.25);          /*This is the chaacteristic temperature */
 
     q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
     q = t * pow (q, 0.25e0);
@@ -110,7 +115,7 @@ teff (x)
        * the requested r
        * 
        */
-      r = x * geo.rstar;        // 04aug -- Requires fix if disk does not extend to rstar
+      r = x * geo.disk_rad_min;
       kkk = 1;                  // photon cannot hit the disk at r<qdisk.r[0]
       while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
         kkk++;
@@ -136,13 +141,22 @@ teff (x)
  * @param [in] double  x   distance from center in units of r/rmin
  * @return     log of gravity at x in cm s**-2
  *
- * The gravity is needed when one constructs a disk spectrum
- * from spectra from a grid of stellar atmospheres
- *
  *
  * ###Notes###
  *
- * See Long & Knigge for details
+ * The gravity is needed when one constructs a disk spectrum
+ * from spectra from a grid of stellar atmospheres
+ *
+ * Normally the gravity is calculated
+ * using the prescription defined by Herter et al (1979) for a steady
+ * state Sakura-Sunyaev disk.  See Long & Knigge for details.  
+ *
+ * For the case where a temperature and gravity are read from a 
+ * file then the gravity is based on the values that are read in.
+ *
+ * If only a temperature profile is read in, and the mdot of the disk
+ * is not, then the gravity is set to 1.0 so that log g will be 00
+ * 
  *
  **********************************************************/
 
@@ -167,7 +181,7 @@ geff (x)
       return (q);
     }
   }
-  else
+  else if (geo.disk_mdot > 0)
   {
     double g0;
     g0 = 0.625 * log10 (geo.mstar / MSOL) - 1.875 * log10 (geo.rstar / 1.e9) + 0.125 * log10 (geo.disk_mdot / 1.e16);
@@ -179,6 +193,10 @@ geff (x)
 
     q = log10 (q);
     return (q);
+  }
+  else
+  {
+    return (1.0);               // return a positive value if g could not be otherwise defined.
   }
 }
 
@@ -266,7 +284,7 @@ zdisk (r)
      double r;
 {
   double z;
-  z = geo.disk_z0 * pow (r / geo.diskrad, geo.disk_z1) * geo.diskrad;
+  z = geo.disk_z0 * pow (r / geo.disk_rad_max, geo.disk_z1) * geo.disk_rad_max;
   return (z);
 }
 
@@ -317,7 +335,7 @@ struct plane diskplane, disktop, diskbottom;
  *
  * The z-height of a vertically extended disk is defined by
  * zdisk.  The outside edge of the disk is assumed to be
- * a cylinder at geo.diskrad.  
+ * a cylinder at geo.disk_rad_max.  
  *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
@@ -393,9 +411,9 @@ ds_to_disk (p, allow_negative, hit)
   r_diskplane = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
 
-  if (geo.disk_type == DISK_FLAT)
+  if (geo.disk_type == DISK_FLAT || geo.disk_type == DISK_WITH_HOLE)
   {
-    if (r_diskplane > geo.diskrad)
+    if (r_diskplane > geo.disk_rad_max)
     {
       *hit = DISK_MISSED;
       return (VERY_BIG);
@@ -435,12 +453,12 @@ ds_to_disk (p, allow_negative, hit)
 
 
     disktop.x[0] = disktop.x[1] = 0.0;
-    disktop.x[2] = geo.diskrad * geo.disk_z0;
+    disktop.x[2] = geo.disk_rad_max * geo.disk_z0;
     disktop.lmn[0] = disktop.lmn[1] = 0.0;
     disktop.lmn[2] = 1.0;
 
     diskbottom.x[0] = diskbottom.x[1] = 0.0;
-    diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
+    diskbottom.x[2] = (-geo.disk_rad_max * geo.disk_z0);
     diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
     diskbottom.lmn[2] = 1.0;
 
@@ -475,7 +493,7 @@ ds_to_disk (p, allow_negative, hit)
      hits the disk
    */
 
-  s_cyl = ds_to_cylinder (geo.diskrad, p);
+  s_cyl = ds_to_cylinder (geo.disk_rad_max, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_cyl);
   z_cyl = phit.x[2];
@@ -483,10 +501,10 @@ ds_to_disk (p, allow_negative, hit)
   z_cyl2 = VERY_BIG;
   s_cyl2 = VERY_BIG;
 
-  if (r_phot > geo.diskrad)
+  if (r_phot > geo.disk_rad_max)
   {
     move_phot (&phit, DFUDGE);
-    s_cyl2 = ds_to_cylinder (geo.diskrad, &phit);
+    s_cyl2 = ds_to_cylinder (geo.disk_rad_max, &phit);
     move_phot (&phit, s_cyl2);
     z_cyl2 = phit.x[2];
     s_cyl2 += s_cyl;
@@ -511,7 +529,7 @@ ds_to_disk (p, allow_negative, hit)
   /* Return if if we are within a cm of the disk surface 
    */
 
-  if ((r_phot < geo.diskrad) && (fabs (delta_z) < 1.0))
+  if ((r_phot < geo.disk_rad_max) && (fabs (delta_z) < 1.0))
   {
     return (0);
   }
@@ -530,7 +548,7 @@ ds_to_disk (p, allow_negative, hit)
    */
 
 
-  if ((r_phot < geo.diskrad) && delta_z > 0)
+  if ((r_phot < geo.disk_rad_max) && delta_z > 0)
   {
 
     if (p->x[2] * p->lmn[2] > 0)
@@ -598,7 +616,7 @@ ds_to_disk (p, allow_negative, hit)
       phit.lmn[0] *= (-1);
       phit.lmn[1] *= (-1);
       phit.lmn[2] *= (-1);
-      s_cyl = ds_to_cylinder (geo.diskrad, &phit);
+      s_cyl = ds_to_cylinder (geo.disk_rad_max, &phit);
       s_cyl *= (-1);
 
       /* s_cyl should be negative and but it may be closer to 0 than 
@@ -650,7 +668,7 @@ ds_to_disk (p, allow_negative, hit)
 
    */
 
-  else if (r_phot < geo.diskrad && fabs (p->x[2]) < disktop.x[2])
+  else if (r_phot < geo.disk_rad_max && fabs (p->x[2]) < disktop.x[2])
   {
 /* Begin the case where the photon is OUTSIDE THE DISK, BUT INSIDE THE PILLBOX */
 
@@ -672,7 +690,7 @@ ds_to_disk (p, allow_negative, hit)
 
   }
 
-  else if (r_phot > geo.diskrad || fabs (p->x[2]) > disktop.x[2])
+  else if (r_phot > geo.disk_rad_max || fabs (p->x[2]) > disktop.x[2])
   {
     /* Begin the case where we are OUTSIDE THE PILLBOX */
 
@@ -698,8 +716,8 @@ ds_to_disk (p, allow_negative, hit)
 
     /* Identify photons that are outside the disk radius and the photon hits 
        the outer cylindrical edge of the disk */
-    // else if (r_diskplane > geo.diskrad && fabs (z_cyl) < disktop.x[2])
-    else if (r_phot > geo.diskrad && fabs (z_cyl) < disktop.x[2])
+    // else if (r_diskplane > geo.disk_rad_max && fabs (z_cyl) < disktop.x[2])
+    else if (r_phot > geo.disk_rad_max && fabs (z_cyl) < disktop.x[2])
     {
       *hit = DISK_HIT_EDGE;
       return (s_cyl);
@@ -708,7 +726,7 @@ ds_to_disk (p, allow_negative, hit)
     /* Identify photons outside the pill box, and do not  hit either
        the disk or the edges of the disk
      */
-    else if (r_diskplane > geo.diskrad && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
+    else if (r_diskplane > geo.disk_rad_max && fabs (z_cyl) > disktop.x[2] && fabs (z_cyl2) > disktop.x[2])
     {
       *hit = DISK_MISSED;
       return (VERY_BIG);
@@ -730,13 +748,13 @@ ds_to_disk (p, allow_negative, hit)
       {
         smax = s_diskplane;
       }
-      else if (r_phot < geo.diskrad && s_cyl < smax)
+      else if (r_phot < geo.disk_rad_max && s_cyl < smax)
       {
         smax = s_cyl;
       }
       else
       {
-        smax = 2 * geo.diskrad; /* this is a cheat */
+        smax = 2 * geo.disk_rad_max;    /* this is a cheat */
       }
 
       /* For the minimum, we need to either to be inside the
@@ -744,7 +762,7 @@ ds_to_disk (p, allow_negative, hit)
          pill box
        */
 
-      if (fabs (p->x[2]) < disktop.x[2] && r_phot < geo.diskrad)
+      if (fabs (p->x[2]) < disktop.x[2] && r_phot < geo.disk_rad_max)
       {
         smin = 0;
       }
@@ -844,7 +862,7 @@ ds_to_disk (p, allow_negative, hit)
 
     xdisk = xcyl = xcyl2 = FALSE;
 
-    if (r_diskplane < geo.diskrad)
+    if (r_diskplane < geo.disk_rad_max)
     {
       xdisk = TRUE;
     }
@@ -877,13 +895,13 @@ ds_to_disk (p, allow_negative, hit)
     Error
       ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
        p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
-    if (modes.save_photons)
-    {
-      save_photons (p, "ds_to_disk");
-      Diag
-        ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
-         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
-    }
+//    if (modes.save_photons)
+//    {
+    //     save_photons (p, "ds_to_disk");
+//      Diag
+//        ("ds_to_disk: Phot %d loc %d smin %e smax %e s at limit %e r_phot %e z_phot %e zdisk %e r_hit %e z_hit %e zdisk_hit %e\n",
+//         p->np, location, smin, smax, s, r_phot, fabs (p->x[2]), zdisk (r_phot), r_hit, fabs (phit.x[2]), zdisk (r_hit));
+//    }
   }
 
   if (p->x[2] > 0)

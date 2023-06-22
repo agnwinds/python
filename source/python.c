@@ -79,11 +79,10 @@ main (argc, argv)
   double time_max;
   double lstar;
 
+/* Initicialize MPI */
+
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
-
-
-
 
 
 #ifdef MPI_ON
@@ -99,6 +98,8 @@ main (argc, argv)
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
 
+/* This completes the intialization of mpi */
+
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
                                    the assumption is that we are reading from the command line */
@@ -111,7 +112,6 @@ main (argc, argv)
 
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
-  //OLD run_ztest = FALSE;
   NWAVE_MAX = (int) NWAVE_IONIZ;
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -126,7 +126,6 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
-//OLD  strict = 0;
 
   restart_stat = parse_command_line (argc, argv);
 
@@ -198,8 +197,7 @@ main (argc, argv)
     if (geo.disk_tprofile == DISK_TPROFILE_READIN)      //We also need to re-read in any previously used disk temperature profile
     {
       rdstr ("Disk.T_profile_file", files.tprofile);
-      geo.diskrad = read_non_standard_disk_profile (files.tprofile);
-      geo.disk_mdot = 0;
+      read_non_standard_disk_profile (files.tprofile);
     }
     if (geo.pcycle > 0)
     {
@@ -218,6 +216,8 @@ main (argc, argv)
 
     geo.system_type = SYSTEM_TYPE_STAR;
     geo.run_type = RUN_TYPE_NEW;
+    geo.mono_freq = 0;
+
 
     strcpy (answer, "star");
     sprintf (values, "%d,%d,%d,%d,%d", SYSTEM_TYPE_STAR, SYSTEM_TYPE_CV, SYSTEM_TYPE_BH, SYSTEM_TYPE_AGN, SYSTEM_TYPE_PREVIOUS);
@@ -371,7 +371,7 @@ main (argc, argv)
 
   /* If the disk radius is <0, assume no disk was intended. */
 
-  if (geo.diskrad <= 0.0)
+  if (geo.disk_rad_max <= 0.0)
   {
     geo.disk_type = DISK_NONE;
     geo.disk_radiation = 0;
@@ -425,16 +425,19 @@ main (argc, argv)
 
     if (geo.star_radiation)
     {
-      get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
+      geo.star_spectype = geo.star_ion_spectype;
+      get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.star_spectype);
     }
 
     if (geo.disk_radiation)
     {
-      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform)", &geo.disk_spectype);
+      geo.disk_spectype = geo.disk_ion_spectype;
+      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.disk_spectype);
     }
 
     if (geo.bl_radiation)
     {
+      geo.bl_spectype = geo.bl_ion_spectype;
       get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_in_final_spectrum(bb,models,uniform)", &geo.bl_spectype);
     }
 
@@ -442,12 +445,12 @@ main (argc, argv)
     {
       // This block will run for both AGN, *and* some versions of a boundary layer.
       // Even though we're setting the same params, we need to change the wording based on the system, unfortunately.
-      geo.agn_spectype = SPECTYPE_POW;
+      geo.agn_spectype = geo.agn_ion_spectype;
 
       // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
       if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
       {
-        get_spectype (geo.agn_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems)", &geo.agn_spectype);
+        get_spectype (geo.agn_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems,mono)", &geo.agn_spectype);
       }
       else
       {
@@ -524,7 +527,6 @@ main (argc, argv)
 
 
   if (rdpar_check ())
-//OLD  if (strict)
   {
     Log ("Some of the input have not been updated for the current version of Python.  Please correct and rerun\n");
     exit (0);
@@ -613,8 +615,8 @@ main (argc, argv)
  */
 
 
-  disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
-  qdisk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot);
+  disk_init (geo.disk_rad_min, geo.disk_rad_max, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
+  qdisk_init (geo.disk_rad_min, geo.disk_rad_max, geo.mstar, geo.disk_mdot);
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
 
@@ -624,6 +626,14 @@ main (argc, argv)
   if (run_xtest)
   {
     xtest ();
+  }
+
+
+  if (geo.wcycles == 0 && geo.pcycles == 0)
+  {
+    wind_save (files.windsave);
+    Log ("Both ionization and spectral cycles are set to 0; Saving windfile but then exiting\n");
+    exit (1);                   //There is really nothing to do!
   }
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */

@@ -76,7 +76,6 @@ init_log_and_windsave (restart_stat)
     else
     {
       /* It does not exist and so we start from scratch */
-//OLD      restart_stat = FALSE;
       xsignal_rm (files.root);
       xsignal (files.root, "%-20s %s \n", "START", files.root);
       Log_init (files.diag);
@@ -173,9 +172,7 @@ setup_created_files ()
 
   /* save python.phot and disk.diag files under diag_root folder */
   strcpy (files.phot, files.diagfolder);
-//OLD  strcpy (files.disk, files.diagfolder);
   strcat (files.phot, "python");
-//OLD  strcat (files.disk, files.root);
 
   sprintf (files.disk, "%.100s/%.100s", files.diagfolder, files.root);
 
@@ -198,6 +195,7 @@ setup_created_files ()
   strcat (files.specsave, ".spec_save");
   strcat (files.phot, ".phot");
   strcat (files.disk, ".disk.diag");
+
 
 
   return (opar_stat);

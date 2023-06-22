@@ -203,8 +203,8 @@ double max_time = -1.0;
 /** 
  * @brief      Set the maximum time the program should run
  *
- * @param [in, out] char *  root   Root name of the .sig file where the max time is recorded
- * @param [in, out] double  t   The maximum time one wants to proposal to run
+ * @param [in] char *  root   Root name of the .sig file where the max time is recorded
+ * @param [in] double  t   The maximum time one wants to proposal to run
  * @return     Always returns 0
  *
  * @details
@@ -218,8 +218,7 @@ double max_time = -1.0;
 int
 set_max_time (char *root, double t)
 {
-  Log ("Setting maximum time for program to run to be %d s\n", t);
-  xsignal (root, "MAXTIME set to %.0f\n", t);
+  xsignal (root, "MAXTIME set to %.0g s\n", t);
   max_time = t;
   return 0;
 }

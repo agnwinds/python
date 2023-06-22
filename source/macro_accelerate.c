@@ -45,11 +45,12 @@ calc_matom_matrix (xplasma, matom_matrix)
   int uplvl, target_level, escape_dummy;
   double Qcont;
   struct lines *line_ptr;
+  struct auger *auger_ptr;
   struct topbase_phot *cont_ptr;
   double rad_rate, coll_rate;
-  int n, i, nn, mm;
+  int n, i, nn, mm, iauger, nauger;
   double Qcont_kpkt, bb_cont, sp_rec_rate, bf_cont, lower_density, density_ratio;
-  double kpacket_to_rpacket_rate, norm, Rcont;
+  double kpacket_to_rpacket_rate, norm, Rcont, auger_rate;
   double *a_data;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
   struct photon pdummy;
@@ -86,72 +87,81 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
-    nbbd = config[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
-    nbbu = config[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
-    nbfd = config[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
-    nbfu = config[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
-
+    nbbd = xconfig[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
+    nbbu = xconfig[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
+    nbfd = xconfig[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
+    nbfu = xconfig[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
+    nauger = xconfig[uplvl].nauger;      /* number of Auger jumps */
+    iauger = xconfig[uplvl].iauger;
 
     /* bound-bound */
     for (n = 0; n < nbbd; n++)
     {
 
-      line_ptr = &line[config[uplvl].bbd_jump[n]];
+      line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
 
       rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
       coll_rate = q21 (line_ptr, t_e);  // this is multiplied by ne below
-
-//OLD Unneeded check.  There is already a check in q21
-//OLD      if (coll_rate < 0)
-//OLD      {
-//OLD        coll_rate = 0;
-//OLD      }
 
       bb_cont = rad_rate + (coll_rate * ne);
 
       target_level = line_ptr->nconfigl;
 
       //internal jump to another macro atom level
-      Q_matrix[uplvl][target_level] += Qcont = bb_cont * config[target_level].ex;       //energy of lower state
+      Q_matrix[uplvl][target_level] += Qcont = bb_cont * xconfig[target_level].ex;      //energy of lower state
 
       //jump to the k-packet pool (we used to call this "deactivation")
-      Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = (coll_rate * ne) * (config[uplvl].ex - config[target_level].ex);   //energy of lower state
+      Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = (coll_rate * ne) * (xconfig[uplvl].ex - xconfig[target_level].ex); //energy of lower state
 
       //deactivation back to r-packet
-      R_matrix[uplvl][uplvl] += Rcont = rad_rate * (config[uplvl].ex - config[target_level].ex);        //energy difference
+      R_matrix[uplvl][uplvl] += Rcont = rad_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);      //energy difference
 
       Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
+    }
+
+    /* Auger ionization */
+    if (xconfig[uplvl].iauger >= 0)
+    {
+      auger_ptr = &auger_macro[iauger];
+
+      for (n = 0; n < nauger; n++)
+      {
+        target_level = auger_ptr->nconfig_target[n];
+        auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
+
+        //internal jump to another macro atom level
+        Q_matrix[uplvl][target_level] += Qcont = auger_rate * xconfig[target_level].ex;  //energy of lower state
+
+        //jump to the k-packet pool (we used to call this "deactivation")
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);       //energy of lower state
+
+        //deactivation back to r-packet isn't possible for the Auger process
+        Q_norm[uplvl] += Qcont + Qcont_kpkt;
+      }
     }
 
     /* bound-free */
     for (n = 0; n < nbfd; n++)
     {
 
-      cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];  //pointer to continuum
-      if (n < 25)               //?
-      {
-        sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];     //need this twice so store it
-        bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
-      }
-      else
-      {
-        bf_cont = sp_rec_rate = 0.0;
-      }
+      cont_ptr = &phot_top[xconfig[uplvl].bfd_jump[n]]; //pointer to continuum
 
+      sp_rec_rate = mplasma->recomb_sp[xconfig[uplvl].bfd_indx_first + n];      //need this twice so store it
+      bf_cont = (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
 
-      target_level = phot_top[config[uplvl].bfd_jump[n]].nlev;
+      target_level = phot_top[xconfig[uplvl].bfd_jump[n]].nlev;
 
       if (bf_cont > 0.0)
       {
 
         //internal jump to another macro atom level
-        Q_matrix[uplvl][target_level] += Qcont = bf_cont * config[target_level].ex;     //energy of lower state
+        Q_matrix[uplvl][target_level] += Qcont = bf_cont * xconfig[target_level].ex;    //energy of lower state
 
         //jump to the k-packet pool (we used to call this "deactivation")
-        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (config[uplvl].ex - config[target_level].ex);       //energy difference
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = q_recomb (cont_ptr, t_e) * ne * ne * (xconfig[uplvl].ex - xconfig[target_level].ex);     //energy difference
 
         //deactivation back to r-packet
-        R_matrix[uplvl][uplvl] += Rcont = ne * sp_rec_rate * (config[uplvl].ex - config[target_level].ex);      //energy difference
+        R_matrix[uplvl][uplvl] += Rcont = ne * sp_rec_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);    //energy difference
 
         Q_norm[uplvl] += Qcont + Qcont_kpkt + Rcont;
       }
@@ -162,19 +172,13 @@ calc_matom_matrix (xplasma, matom_matrix)
     /* bound-bound */
     for (n = 0; n < nbbu; n++)
     {
-      line_ptr = &line[config[uplvl].bbu_jump[n]];
-      rad_rate = (b12 (line_ptr) * mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
+      line_ptr = &line[xconfig[uplvl].bbu_jump[n]];
+      rad_rate = (b12 (line_ptr) * mplasma->jbar_old[xconfig[uplvl].bbu_indx_first + n]);
 
       coll_rate = q12 (line_ptr, t_e);  // this is multiplied by ne below
 
-// Unneded check this has been checked previously
-//OLD      if (coll_rate < 0)
-//OLD      {
-//OLD        coll_rate = 0;
-//OLD      }
-      target_level = line[config[uplvl].bbu_jump[n]].nconfigu;
-      Q_matrix[uplvl][target_level] += Qcont = ((rad_rate) + (coll_rate * ne)) * config[uplvl].ex;      //energy of lower state
-
+      target_level = line[xconfig[uplvl].bbu_jump[n]].nconfigu;
+      Q_matrix[uplvl][target_level] += Qcont = ((rad_rate) + (coll_rate * ne)) * xconfig[uplvl].ex;     //energy of lower state
 
       Q_norm[uplvl] += Qcont;
     }
@@ -184,7 +188,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     {
       /* For bf ionization the jump probability is just gamma * energy
          gamma is the photoionisation rate. Stimulated recombination also included. */
-      cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];  //pointer to continuum
+      cont_ptr = &phot_top[xconfig[uplvl].bfu_jump[n]]; //pointer to continuum
 
       /* first let us take care of the situation where the lower level is zero or close to zero */
       lower_density = den_config (xplasma, cont_ptr->nlev);
@@ -195,8 +199,8 @@ calc_matom_matrix (xplasma, matom_matrix)
       else
         density_ratio = 0.0;
 
-      target_level = phot_top[config[uplvl].bfu_jump[n]].uplev;
-      Qcont = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;     //energy of lower state
+      target_level = phot_top[xconfig[uplvl].bfu_jump[n]].uplev;
+      Qcont = (mplasma->gamma_old[xconfig[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[xconfig[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * xconfig[uplvl].ex;  //energy of lower state
 
       /* this error condition can happen in unconverged hot cells where T_R >> T_E.
          for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
@@ -316,7 +320,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
     /* throw an error if this normalisation is not zero */
     /* note that the ground state is a special case here (improve error check) */
-    if ((fabs (norm) > 1e-15 && uplvl != ion[config[uplvl].nion].first_nlte_level) || sane_check (norm))
+    if ((fabs (norm) > 1e-14 && uplvl != ion[xconfig[uplvl].nion].first_nlte_level) || sane_check (norm))
       Error ("calc_matom_matrix: matom accelerator matrix has bad normalisation for level %d: %8.4e\n", norm, uplvl);
   }
 
@@ -331,16 +335,6 @@ calc_matom_matrix (xplasma, matom_matrix)
       a_data[mm * nrows + nn] = Q_matrix[mm][nn];
     }
   }
-
-//OLD  Log ("R:\n");
-//OLD  for (mm = 0; mm < nrows; mm++)
-//OLD  {
-//OLD    for (nn = 0; nn < nrows; nn++)
-//OLD    {
-//OLD      Log ("%10.3e ", R_matrix[mm][nn]);
-//OLD    }
-//OLD    Log ("\n");
-//OLD  }
 
 
   /* now get ready for the matrix operations. first let's assign variables for use with GSL */
@@ -491,7 +485,7 @@ fill_kpkt_rates (xplasma, escape, p)
       {
         upper_density = den_config (xplasma, ulvl);
         cooling_bf[i] = mplasma->cooling_bf[i] =
-          upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);
+          upper_density * PLANCK * cont_ptr->freq[0] * (mplasma->recomb_sp_e[xconfig[ulvl].bfd_indx_first + cont_ptr->down_index]);
       }
       else
       {
@@ -581,8 +575,8 @@ fill_kpkt_rates (xplasma, escape, p)
 
     if (one->inwind >= 0)
     {
-      cooling_ff = mplasma->cooling_ff = total_free (one, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;
-      cooling_ff += mplasma->cooling_ff_lofreq = total_free (one, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
+      cooling_ff = mplasma->cooling_ff = total_free (xplasma, xplasma->t_e, freqmin, freqmax) / xplasma->vol / xplasma->ne;
+      cooling_ff += mplasma->cooling_ff_lofreq = total_free (xplasma, xplasma->t_e, 0.0, freqmin) / xplasma->vol / xplasma->ne;
     }
     else
     {
@@ -700,8 +694,8 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
      /jumping from this configuration. Then choose one. */
 
 
-  nbbd = config[uplvl].n_bbd_jump;      //store these for easy access -- number of bb downward jumps
-  nbfd = config[uplvl].n_bfd_jump;      // number of bf downared jumps from this transition
+  nbbd = xconfig[uplvl].n_bbd_jump;     //store these for easy access -- number of bb downward jumps
+  nbfd = xconfig[uplvl].n_bfd_jump;     // number of bf downared jumps from this transition
 
 
   // Start by setting everything to 0
@@ -722,12 +716,12 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
 
   for (n = 0; n < nbbd; n++)
   {
-    line_ptr = &line[config[uplvl].bbd_jump[n]];
+    line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
     /* Since we are only interested in making an r-packet here we can (a) ignore collisional
        deactivation and (b) ignore lines outside the frequency range of interest. */
     bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 
-    eprbs[n] = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);      //energy difference
+    eprbs[n] = bb_cont * (xconfig[uplvl].ex - xconfig[line[xconfig[uplvl].bbd_jump[n]].nconfigl].ex);   //energy difference
 
     if (eprbs[n] < 0.)          //test (can be deleted eventually SS)
     {
@@ -747,12 +741,13 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
   /* bf downwards jumps */
   for (n = 0; n < nbfd; n++)
   {
-    cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];    //pointer to continuum
+    cont_ptr = &phot_top[xconfig[uplvl].bfd_jump[n]];   //pointer to continuum
 
     /* If the edge is above the frequency range we are interested in then we need not consider this
        bf process. */
     sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
-    eprbs[n + nbbd] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);      //energy difference
+    eprbs[n + nbbd] = sp_rec_rate * ne * (xconfig[uplvl].ex - xconfig[phot_top[xconfig[uplvl].bfd_jump[n]].nlev].ex);   //energy difference
+
     if (eprbs[n + nbbd] < 0.)   //test (can be deleted eventually SS)
     {
       Error ("Negative probability (matom, 4). Abort.");
@@ -841,16 +836,12 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   int i;
   int escape_dummy;
   struct topbase_phot *cont_ptr;
-//OLD  double electron_temperature;
   MacroPtr mplasma;
-  WindPtr one;
   struct photon pdummy;
   double ff_freq_min, ff_freq_max;
   double eprbs, eprbs_band, penorm, penorm_band;
   double flast, fthresh, bf_int_full, bf_int_inrange;
   double total_ff_lofreq, total_ff;
-
-  one = &wmain[xplasma->nwind];
 
   penorm = 0.0;
   penorm_band = 0.0;
@@ -945,8 +936,8 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   /* consult issues #187, #492 regarding free-free */
   penorm += eprbs = mplasma->cooling_ff + mplasma->cooling_ff_lofreq;
 
-  total_ff_lofreq = total_free (one, xplasma->t_e, 0, ff_freq_min);
-  total_ff = total_free (one, xplasma->t_e, ff_freq_min, ff_freq_max);
+  total_ff_lofreq = total_free (xplasma, xplasma->t_e, 0, ff_freq_min);
+  total_ff = total_free (xplasma, xplasma->t_e, ff_freq_min, ff_freq_max);
 
   /*
    * Do not increment penorm_band when the total free-free luminosity is zero
@@ -955,19 +946,19 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   if (freq_min > ff_freq_min)
   {
     if (total_ff > 0)
-      penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff * mplasma->cooling_ff;
+      penorm_band += total_free (xplasma, xplasma->t_e, freq_min, freq_max) / total_ff * mplasma->cooling_ff;
   }
   else if (freq_max > ff_freq_min)
   {
     if (total_ff > 0)
-      penorm_band += total_free (one, xplasma->t_e, ff_freq_min, freq_max) / total_ff * mplasma->cooling_ff;
+      penorm_band += total_free (xplasma, xplasma->t_e, ff_freq_min, freq_max) / total_ff * mplasma->cooling_ff;
     if (total_ff_lofreq > 0)
-      penorm_band += total_free (one, xplasma->t_e, freq_min, ff_freq_min) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
+      penorm_band += total_free (xplasma, xplasma->t_e, freq_min, ff_freq_min) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
   }
   else
   {
     if (total_ff_lofreq > 0)
-      penorm_band += total_free (one, xplasma->t_e, freq_min, freq_max) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
+      penorm_band += total_free (xplasma, xplasma->t_e, freq_min, freq_max) / total_ff_lofreq * mplasma->cooling_ff_lofreq;
   }
 
   penorm += eprbs = mplasma->cooling_adiabatic;

@@ -94,15 +94,8 @@ observer_to_local_frame (p_in, p_out)
 {
   WindPtr one;
   int ndom;
-  double f_out, f_in;
-  double x;
-  double v[3], vel;
-  double gamma;
-  int i, ierr;
-
-
-
-
+  double v[3];
+  int ierr;
 
 
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame");
@@ -116,31 +109,8 @@ observer_to_local_frame (p_in, p_out)
   ndom = one->ndom;
   vwind_xyz (ndom, p_in, v);
 
-  vel = dot (p_in->lmn, v);
+  ierr = lorentz_transform (p_in, p_out, v);
 
-
-  f_in = p_in->freq;
-
-  if (rel_mode == REL_MODE_LINEAR)
-  {
-    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
-    return (ierr);
-  }
-
-
-
-  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-
-  f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
-
-  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
-
-  for (i = 0; i < 3; i++)
-  {
-    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
-  }
-
-  p_out->w *= (f_out / f_in);
 
 
   return (ierr);
@@ -183,11 +153,7 @@ local_to_observer_frame (p_in, p_out)
 {
   WindPtr one;
   int ndom;
-  double f_out, f_in;
-  double x;
-  double v[3], vel;
-  double gamma;
-  int i;
+  double v[3];
   int ierr;
 
 
@@ -202,28 +168,9 @@ local_to_observer_frame (p_in, p_out)
   one = &wmain[p_in->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_in, v);
+  rescale (v, -1, v);
 
-  f_in = p_in->freq;
-
-  vel = dot (p_in->lmn, v);
-  if (rel_mode == REL_MODE_LINEAR)
-  {
-    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
-    return (ierr);
-  }
-  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-  f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
-
-
-/* Need to worry about sign changes, etc. here */
-  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
-
-  for (i = 0; i < 3; i++)
-  {
-    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] + x * v[i]);
-  }
-
-  p_out->w *= (f_out / f_in);
+  ierr = lorentz_transform (p_in, p_out, v);
 
 
   return (ierr);
@@ -259,17 +206,17 @@ local_to_observer_frame (p_in, p_out)
  *
  **********************************************************/
 
+
+
+
 int
 observer_to_local_frame_disk (p_in, p_out)
      PhotPtr p_in, p_out;
 {
-  double f_out, f_in;
-  double x;
-  double v[3], vel;
-  double gamma;
-  int i, ierr;
-
-
+//  WindPtr one;
+//int ndom;
+  double v[3];
+  int ierr;
 
 
   ierr = check_frame (p_in, F_OBSERVER, "Observer_to_local_frame_disk");
@@ -278,36 +225,12 @@ observer_to_local_frame_disk (p_in, p_out)
   stuff_phot (p_in, p_out);
   p_out->frame = F_LOCAL;
 
+
   /* Calculate the local velocity of the disk at this position */
   vdisk (p_in->x, v);
 
-  vel = dot (p_in->lmn, v);
+  ierr = lorentz_transform (p_in, p_out, v);
 
-
-  f_in = p_in->freq;
-
-  if (rel_mode == REL_MODE_LINEAR)
-  {
-    f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
-    return (ierr);
-  }
-
-
-
-  // beta=length(v)/VLIGHT;
-
-  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-
-  f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
-
-  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
-
-  for (i = 0; i < 3; i++)
-  {
-    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
-  }
-
-  p_out->w *= (f_out / f_in);
 
 
   return (ierr);
@@ -346,55 +269,33 @@ observer_to_local_frame_disk (p_in, p_out)
  *
  **********************************************************/
 
+
+
 int
 local_to_observer_frame_disk (p_in, p_out)
      PhotPtr p_in, p_out;
 {
-  double f_out, f_in;
-  double x;
-  double v[3], vel;
-  double gamma;
-  int i;
+  double v[3];
   int ierr;
 
-  ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame_disk");
+
+
+  ierr = check_frame (p_in, F_LOCAL, "local_to_observer_frame");
 
   /* Initialize the output photon */
   stuff_phot (p_in, p_out);
   p_out->frame = F_OBSERVER;
 
-
-  /* Calculate the local velocity of the disk at this position */
+  /* Calculate the local velocity of the wind at this position */
   vdisk (p_in->x, v);
-  vel = dot (p_in->lmn, v);
+  rescale (v, -1, v);
 
-  f_in = p_in->freq;
-
-
-
-  if (rel_mode == REL_MODE_LINEAR)
-  {
-    f_out = p_out->freq = f_in / (1. - vel / VLIGHT);
-    return (ierr);
-  }
-
-  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
-  f_out = p_out->freq = f_in * gamma * (1. + vel / VLIGHT);
-
-/* Need to worry about sign changes, etc. here */
-  x = gamma / VLIGHT * (1.0 + (gamma * vel / ((gamma + 1) * VLIGHT)));
-
-  for (i = 0; i < 3; i++)
-  {
-    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] + x * v[i]);
-  }
-
-  p_out->w *= (f_out / f_in);
-
+  ierr = lorentz_transform (p_in, p_out, v);
 
 
   return (ierr);
 }
+
 
 /**********************************************************/
 /**
@@ -424,7 +325,6 @@ observer_to_local_frame_ds (p_obs, ds_obs)
 {
   WindPtr one;
   int ndom;
-//OLD  double v[3], vel;
   double v[3];
   double gamma;
   double ds_cmf;
@@ -438,7 +338,6 @@ observer_to_local_frame_ds (p_obs, ds_obs)
   one = &wmain[p_obs->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_obs, v);
-//OLD  vel = dot (p_obs->lmn, v);
 
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
@@ -484,7 +383,6 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
 {
   WindPtr one;
   int ndom;
-//OLD  double v[3], vel;
   double v[3];
   double gamma;
   double ds_obs;
@@ -498,7 +396,6 @@ local_to_observer_frame_ds (p_obs, ds_cmf)
   one = &wmain[p_obs->grid];
   ndom = one->ndom;
   vwind_xyz (ndom, p_obs, v);
-//OLD  vel = dot (p_obs->lmn, v);
 
   gamma = 1. / sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT)));
 
@@ -761,4 +658,84 @@ observer_to_local_frame_ruler_transform (v, dx_obs, dx_cmf)
   return (0);
 
 
+}
+
+
+/**********************************************************/
+/**
+ * @brief      carries out the transformation of all the quantities
+ *      in a photon structure from one frame to another
+ *
+ * @param [in] PhotPtr  p_in   The photon in the observer frame
+ * @param [out] PhotPtr  p_out   The photon in the local frame
+ *
+ * @return    The routine returns 0, unless there was an error
+ *
+ *
+ * @details
+ *
+ *  This does a transfrom from the current frame into a frame moving with velocity v
+ *  with respect to the current frame.
+ *
+ * ### Notes ###
+ *
+ * One needs to be careful about the direction of the transformation
+ * As stated this tranforms into a frame that has a velocity v with
+ * respect to the current frame.
+ *
+ * It p_in and p_out are the same then the transformation will
+ * be performed in place.
+ *
+ **********************************************************/
+
+
+int
+lorentz_transform (p_in, p_out, v)
+     PhotPtr p_in, p_out;
+     double v[];
+{
+  double f_out, f_in;
+  double x;
+  double vel;
+  double gamma;
+  int i, ierr;
+
+  ierr = FALSE;
+
+
+  vel = dot (p_in->lmn, v);
+
+
+  f_in = p_in->freq;
+
+  if (rel_mode == REL_MODE_LINEAR)
+  {
+    if (p_in->frame == F_LOCAL)
+    {
+      f_out = p_out->freq = f_in * (1. - vel / VLIGHT);
+    }
+    else
+    {
+      f_out = p_out->freq = f_in / (1. + vel / VLIGHT);
+    }
+    return (ierr);
+  }
+
+
+
+  gamma = 1. / (sqrt (1 - (dot (v, v) / (VLIGHT * VLIGHT))));
+
+  f_out = p_out->freq = f_in * gamma * (1. - vel / VLIGHT);
+
+  x = gamma / VLIGHT * (1.0 - (gamma * vel / ((gamma + 1) * VLIGHT)));
+
+  for (i = 0; i < 3; i++)
+  {
+    p_out->lmn[i] = f_in / f_out * (p_in->lmn[i] - x * v[i]);
+  }
+
+  p_out->w *= (f_out / f_in);
+
+
+  return (ierr);
 }

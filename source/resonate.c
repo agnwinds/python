@@ -180,7 +180,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   if (fabs (dfreq) < EPSILON)
   {
-    Error ("calculate_ds: the frequency along the photon %d path's in cell %d is the same\n", one->nwind, p_now.np);
+    Error ("calculate_ds: frequency along photon %d path's in cell %d (nplasma %d) is the same (dfreq=%8.2e)\n", p_now.np, one->nwind,
+           one->nplasma, dfreq);
     limit_lines (freq_inner, freq_outer);
     nstart = nline_min;
     ndelt = 1;
@@ -704,6 +705,10 @@ sobolev (one, x, den_ion, lptr, dvds)
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
+  if (nplasma == NPLASMA)
+  {
+    Error ("sobelev: Asking for tau for a cell that is not in wind. windcell %d inwind %d\n", one->nwind, one->inwind);
+  }
   xplasma = &plasmamain[nplasma];
   ndom = wmain[plasmamain->nwind].ndom;
   nion = lptr->nion;
@@ -722,7 +727,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     // macro atom case SS
     d1 = den_config (xplasma, lptr->nconfigl);
     d2 = den_config (xplasma, lptr->nconfigu);
-    levden_upper = xplasma->levden[config[lptr->nconfigu].nden];
+    levden_upper = xplasma->levden[xconfig[lptr->nconfigu].nden];
   }
 
   else
@@ -866,6 +871,8 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
+//  double velocity_electron[3];
+//  double vel[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -969,9 +976,9 @@ scatter (p, nres, nnscat)
         llvl = phot_top[*nres - NLINES - 1].nlev;       //lower level
         ulvl = phot_top[*nres - NLINES - 1].uplev;      //upper level
 
-        for (m = 0; m < config[llvl].n_bfu_jump; m++)
+        for (m = 0; m < xconfig[llvl].n_bfu_jump; m++)
         {
-          if (config[llvl].bfu_jump[m] == *nres - NLINES - 1)
+          if (xconfig[llvl].bfu_jump[m] == *nres - NLINES - 1)
           {
             break;
           }
@@ -980,7 +987,7 @@ scatter (p, nres, nnscat)
         // m should now be the label to identify which of the bf processes from llvl
         // this is. Check that it is reasonable
 
-        if (m > config[llvl].n_bfu_jump - 1)
+        if (m > xconfig[llvl].n_bfu_jump - 1)
         {
           Error ("scatter (resonate.c): could not identify bf transition. Abort. \n");
           Exit (0);
@@ -991,9 +998,9 @@ scatter (p, nres, nnscat)
         stim_fact = den_config (xplasma, ulvl) / den_config (xplasma, llvl) / xplasma->ne;
 
         gamma_twiddle =
-          mplasma->gamma_old[config[llvl].bfu_indx_first + m] - (mplasma->alpha_st_old[config[llvl].bfu_indx_first + m] * stim_fact);
+          mplasma->gamma_old[xconfig[llvl].bfu_indx_first + m] - (mplasma->alpha_st_old[xconfig[llvl].bfu_indx_first + m] * stim_fact);
         gamma_twiddle_e =
-          mplasma->gamma_e_old[config[llvl].bfu_indx_first + m] - (mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] * stim_fact);
+          mplasma->gamma_e_old[xconfig[llvl].bfu_indx_first + m] - (mplasma->alpha_st_e_old[xconfig[llvl].bfu_indx_first + m] * stim_fact);
 
         /* Both gamma_twiddles must be greater that zero if this is going to work. If they
            are zero then it's probably because this is the first iteration and so the've not
@@ -1143,11 +1150,16 @@ scatter (p, nres, nnscat)
      bound free emission (>NLINES), allowing depending on the scattering mode for thermal trapping. 
      Note that this portion of the code is identical for both simple and macro atoms, except for the fact
      that ff and bf are only treated as scattering processes in macro-atom mode.
+
+     For electron scattering, we allow for thermal broadening, we obtain a velocity for the election
+     and transform into that frame, and then after we find the direction of the photon in the rest
+     frame of the electron, we transform back to the fluid frame.
    */
 
   if (*nres == NRES_ES)
   {
-    compton_dir (p);
+
+    compton_scatter (p);
   }
   else if (*nres == NRES_FF || *nres > NRES_BF || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
   {

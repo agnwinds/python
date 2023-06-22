@@ -34,7 +34,7 @@
  * @param [in] double  mdot   mass accretion rate
  * @param [in] double  freqmin   The minimum frequency
  * @param [in] double  freqmax   The maximum frequency
- * @param [in] int  ioniz_or_final   A flag indicating whether this is an ionization or
+ * @param [in] int  ioniz_or_extract   A flag indicating whether this is an ionization or
  * a detailed spectral cycle (used to determine the spectral type to use)
  * @param [out] double *  ftot   The band limited luminosity in the freqency interval
  * @return     the total luminosity of the disk
@@ -61,9 +61,9 @@
  **********************************************************/
 
 double
-disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
+disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
      double rmin, rmax, m, mdot, freqmin, freqmax, *ftot;
-     int ioniz_or_final;
+     int ioniz_or_extract;
 {
   double t;
   double log_g;
@@ -71,11 +71,12 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
   double q1;
-//OLD  int nrings, i, icheck;
   int nrings, i;
   int spectype;
   double emit;
   double factor;
+
+
 
 
   /*
@@ -119,7 +120,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   /* Now establish the type of spectrum to create */
 
-  if (ioniz_or_final == 1)
+  if (ioniz_or_extract == CYCLE_EXTRACT)
     spectype = geo.disk_spectype;
   else
     spectype = geo.disk_ion_spectype;
@@ -135,7 +136,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   q1 = 2. * PI;
 
   (*ftot) = 0;
-//OLD  icheck = 0;
 
 
   for (logr = logrmin; logr < logrmax; logr += logdr)
@@ -377,7 +377,10 @@ qdisk_save (diskfile, ztot)
   int n;
   double area, theat, ttot;
   qptr = fopen (diskfile, "w");
-  fprintf (qptr, "r          zdisk      t_disk    g      heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  fprintf (qptr,
+           "         r          v      zdisk    t_disk         g      heat  nhit nhit/emit    t_heat  t_irrad    W_irrad     t_tot\n");
+//  fprintf (qptr,
+//           "---------- ---------- ---------- --------- --------- --------- ----- --------- --------- --------- --------- ---------\n");
 
   for (n = 0; n < NRINGS; n++)
   {
@@ -403,8 +406,8 @@ qdisk_save (diskfile, ztot)
     ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
     ttot = pow (ttot, 0.25);
     fprintf (qptr,
-             "%9.4e %9.4e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
-             qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n], qdisk.g[n],
+             "%9.4e %9.4e %0.4e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             qdisk.r[n], qdisk.v[n], zdisk (qdisk.r[n]), qdisk.t[n], qdisk.g[n],
              qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
   }
 
@@ -421,13 +424,14 @@ qdisk_save (diskfile, ztot)
  * @brief      Read the temperature profile from a file
  *
  * @param [in] char *  tprofile   Name of the input file
- * @return     Returns the maximum radius
+ * @return     0
  *
  * @details
  *
  * Each line of the input file
  * a radius and a temperature in the first two columns.
- * Any extra columns are ignored.
+ * An optional 3rd column can contain a gravity
+ * for use with stellar atmospheres models
  *
  * Comment lines (and other lines) that can not
  * be parsed are ignored, but will be printed out
@@ -436,8 +440,8 @@ qdisk_save (diskfile, ztot)
  * The radius values shoule be in cm
  * The temperature in degrees Kelvin
  *
- * The maxium radius of the disk is set to the maximum
- * radius contained in the input file.
+ * The minimum and maximum radius of the disk is set to the minimum
+ * and maximum radius of the disk.  e 
  *
  * ###Notes###
  *
@@ -449,10 +453,9 @@ qdisk_save (diskfile, ztot)
  * changed so that if one reads in a non standard temperature
  * profile, it must include the entire disk..
  *
- *
  **********************************************************/
 
-double
+int
 read_non_standard_disk_profile (tprofile)
      char *tprofile;
 {
@@ -497,7 +500,7 @@ read_non_standard_disk_profile (tprofile)
     }
     else
     {
-      Error ("read_non_standard_disk_file: could not convert a line in %s, OK if comment\n", tprofile);
+      Error ("read_non_standard_disk_file: Could not convert a line in %s, OK if comment\n", tprofile);
     }
 
     if (blmod.n_blpts == NBLMODEL)
@@ -534,8 +537,37 @@ read_non_standard_disk_profile (tprofile)
   }
 
 
-
   fclose (fptr);
 
-  return (blmod.r[blmod.n_blpts - 1]);
+  geo.disk_rad_min = 0;
+  if (blmod.r[0] > geo.rstar)
+  {
+    geo.disk_rad_min = blmod.r[0];
+    geo.disk_type = DISK_WITH_HOLE;
+    Log ("The temperature profile begins at %e, which is larger than central object %e\n", geo.disk_rad_min, geo.rstar);
+    Log ("Treating the disk as having a hole through which photon can pass\n");
+  }
+  if (blmod.r[0] < geo.rstar)
+  {
+    Error ("The temperature profile which was read in begins at %e, which is less than central object %e\n", blmod.r[0], geo.rstar);
+    double frac;
+    frac = (geo.rstar - blmod.r[0]) / geo.rstar;
+    if (frac > 0.01 || blmod.r[1] < geo.rstar)
+    {
+      Error ("This does not appear to be a rounding error so exiting\n");
+      Exit (0);
+    }
+    else
+    {
+      Error ("This appears to be a rounding error, so continuining\n");
+      blmod.r[0] = geo.rstar;
+      geo.disk_rad_min = geo.rstar;;
+    }
+  }
+
+  geo.disk_rad_max = blmod.r[blmod.n_blpts - 1];
+  geo.disk_mdot = 0;
+
+
+  return (0);
 }

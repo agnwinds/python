@@ -18,7 +18,7 @@
 #include "models.h"
 
 double old_t, old_g, old_freqmin, old_freqmax;
-double jump[] = { 913.8 };
+//OLD double jump[] = { 913.8 };
 
 
 /**********************************************************/
@@ -26,7 +26,7 @@ double jump[] = { 913.8 };
  * @brief      get a photon frequency from a grid of stored spectra
  * from a continuum grid
  *
- * @param [in] int  spectype   An index to the continum grid which one want got obtaining a photon
+ * @param [in] int  spectype   An index to the continuum grid from which one wants to obtaing a photon
  * @param [in] double  t   The associated temperature (or first variable) defining the grid
  * @param [in] double  g   The associted gravity (or second variable)
  * @param [in] double  freqmin   The minimum frequency desiered for a photon
@@ -39,12 +39,11 @@ double jump[] = { 913.8 };
  * model grid is assumed to be based on two variables t (temperature) and
  * gravity (g).  This reflects the fact that most of the grids used in Python
  * to date (e.g Kurucz models) are these kinds of grids.  The routine linearly
- * interpolates  on these to variables to produce a spectrum at the desired
- * t and g.  It then creates a coumulative distribution of the portion of
+ * interpolates  on these two variables to produce a spectrum at the desired
+ * t and g.  It then creates a comulative distribution of the portion of
  * the spectrum bewtween fmin and fmax and then uses a random number to
- * obtain a frequncy for a single program.
+ * obtain a frequncy for a single photon. 
  *
- * The routine should already work for any grid.
  *
  * ### Notes ###
  *
@@ -55,8 +54,9 @@ double jump[] = { 913.8 };
  * found in trying to use this in other situations.  A more general routine is needed.
  * The first step in doing this is to replace much of the code here with
  * a call to the routine model (spectype, par) in models.c
- * This issue #539
- *
+ * This is issue #539, which as of 221109 remains open. The
+ * note there states correctly that we should not attack this problem
+ * until we have a specific example.
  *
  **********************************************************/
 
@@ -121,7 +121,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
       }
     }
 
-    /* No add a point at lambdamax.  Specicxally  check if upper bound is beyond lambdamax, and if so, 
+    /* No add a point at lambdamax.  Specificly,  check if upper bound is beyond lambdamax, and if so, 
        interpolate to get appropriate flux
        at lambda max. copy to w_local and f_local */
 
@@ -151,12 +151,16 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 
     /*  Get_model returns wavelengths in Ang and flux in ergs/cm**2/Ang */
 
+
+
     if (cdf_gen_from_array (&comp[spectype].xcdf, w_local, f_local, nwave, lambdamin, lambdamax) != 0)
     {
       Error ("One_continuum: after return from cdf_gen_from_array\n");
     }
+
     old_freqmin = freqmin;
     old_freqmax = freqmax;
+
   }
 
   /* generate the frequency from the CDF that has been built up from the model fluxes */
@@ -184,7 +188,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
  * stellar models
  *
  * @param [in] int  spectype   an integer identifying the set of models to use
- * @param [in] double  freqmin   The mimimum frequency
+ * @param [in] double  freqmin   The minimum frequency
  * @param [int] double  freqmax   The maximum frequency
  * @param [in] double  t   A temperature
  * @param [in] double  g   A gravity
@@ -195,11 +199,10 @@ one_continuum (spectype, t, g, freqmin, freqmax)
  * which are both in units of the Eddington flux (H).
  * To allow the same code to work with a much simpler model SED, where there is only
  * one model - there is a switch to disable interpolation. 
- * The total flux is calculated using Romberg integration
  *
  * ### Notes ###
  *
- * As indicated this is not a general purpose routine.  Not all spectral
+ * This is not a general purpose routine.  Not all spectral
  * models for stars are calculated in terms of the Eddington flux.  The
  * factor of 4 pi is the conversion from Eddington flux to physical flux
  *
@@ -233,39 +236,42 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
   lambdamin = VLIGHT / (freqmax * ANGSTROM);
   lambdamax = VLIGHT / (freqmin * ANGSTROM);
 
-  if (comp[spectype].nmods == 1)        //We only have one model - there is no way of interpolating
+  /* Get the spectrum for which we want to calculate the emittance, interpolating if there is
+     more than one model.
+   */
+  if (comp[spectype].nmods == 1)
   {
-    comp[spectype].xmod = mods[comp[spectype].modstart];        //Set the model to the only one we have
+    comp[spectype].xmod = mods[comp[spectype].modstart];
   }
   else
   {
     par[0] = t;
     par[1] = g;
-    model (spectype, par);      //Interpolate on the grid to get the model we are going to use
+    model (spectype, par);
   }
-  nwav = comp[spectype].nwaves; //The number of points in the model
+  nwav = comp[spectype].nwaves;
 
 
   if (lambdamax > comp[spectype].xmod.w[nwav - 1] || lambdamin < comp[spectype].xmod.w[0])
   {
-    Error ("emittance_contiuum: freqmin %e freqmax %e\n", freqmin, freqmax);
-    Error ("emittance_contiuum: emin %e emax %e\n", HEV * freqmin, HEV * freqmax);
+    Error ("emittance_continuum: freqmin %e freqmax %e for spectrum type  %d\n", freqmin, freqmax, spectype);
+    Error ("emittance_continuum: emin %e emax %e\n", HEV * freqmin, HEV * freqmax);
 
-    Error ("emittance_continum: Requested wavelengths extend beyond models wavelengths for list %s\n", comp[spectype].name);
+    Error ("emittance_continuum: Requested wavelengths extend beyond models wavelengths for list %s\n", comp[spectype].name);
     Error ("lambda %f %f  model %f %f\n", lambdamin, lambdamax, comp[spectype].xmod.w[0], comp[spectype].xmod.w[nwav - 1]);
   }
 
 
-//  if (comp[spectype].xmod.w[0]<lambdamin && lambdamax<comp[spectype].xmod.w[nwav-1])
-//  {
-  x = 0.0;                      //zero the integral
-  for (n = 0; n < nwav - 1; n++)        //loop over all the wavelengths in the model
+  /* Now integrate over the desired wavelength/frequency interval */
+  x = 0.0;
+  for (n = 0; n < nwav - 1; n++)
   {
-    w1 = comp[spectype].xmod.w[n];      //get the wavelength of the current point
+    w1 = comp[spectype].xmod.w[n];
     w2 = comp[spectype].xmod.w[n + 1];
+
     if (w2 < lambdamin || w1 > lambdamax)       //This band is outside the required band
     {
-      x += 0.0;
+      continue;
     }
     else if (w1 < lambdamin && w2 > lambdamin)  //The bin brackets the lower band boundary
     {
@@ -283,44 +289,9 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
     }
     else
     {
-      x += 0.0;
+      continue;
     }
   }
-//       x1=x;
-//       x=0;
-
-//  /   for (n = 0; n < nwav; n++)   //loop over all the wavelengths in the model
-//     {           
-//         w = comp[spectype].xmod.w[n];
-//          if (n == 0)
-//                       {
-//               dlambda = comp[spectype].xmod.w[1] - comp[spectype].xmod.w[0];
-//             }
-//       else if (n == nwav - 1)
-//       {
-//         dlambda = comp[spectype].xmod.w[n] - comp[spectype].xmod.w[n - 1];
-//       }
-//       else
-//                {
-//              dlambda = 0.5 * (comp[spectype].xmod.w[n + 1] - comp[spectype].xmod.w[n - 1]);
-//             }
-//                       if (lambdamin < w && w < lambdamax)
-//             {
-//               x += comp[spectype].xmod.f[n] * dlambda;
-//            }
-//    }
-//       x2=x;
-
-
-// else
-// {
-//  integ_spectype = spectype;
-//  x = qromb (model_int, lambdamin, lambdamax, 1e-4);
-//  printf ("Calling num_int %i %e %e %e %e\n",spectype, freqmin, freqmax, t, g);
-//    x = num_int (model_int, lambdamin, lambdamax, 1e-6);
-//      x3=x;
-  //}
-//      printf ("New %e (%i) Old %e num_int %e\n",x1,count,x2,x3);
 
   x *= 4. * PI;
 
