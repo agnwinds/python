@@ -23,6 +23,38 @@ standard_cmds = np.array(["1", "n","t", "r","v","1","2","3","-1",\
 
 ion_standard_variables = ["ionh1", "ionhe1", "ionhe2", "ionc4", "ionc5"]
 
+description_dict = {
+    "xx": "left-hand lower cell corner x-coordinate, cm", 
+    "z": "left-hand lower cell corner z-coordinate, cm", 
+    "xcen": "cell centre x-coordinate, cm", 
+    "zcen": "cell centre z-coordinate, cm", 
+    "i": "cell index (column)", 
+    "j": "cell index (row)", 
+    "inwind": "is the cell in wind (0), partially in wind (1) or out of wind (<0)", 
+    "converge": "how many convergence criteria is the cell failing?", 
+    "v_x": "x-velocity, cm/s", 
+    "v_y": "y-velocity, cm/s", 
+    "v_z": "z-velocity, cm/s",  
+    "vol": "volume in cm^3", 
+    "rho": "density in g/cm^3", 
+    "ne": "electron density in cm^-3", 
+    "t_e": "electron temperature in K", 
+    "t_r": "radiation temperature in K",  
+    "h1": "H1 ion fraction", 
+    "he2": "He2 ion fraction", 
+    "c4": "C4 ion fraction",  
+    "n5": "N5 ion fraction", 
+    "o6": "O6 ion fraction", 
+    "dmo_dt_x": "momentum rate, x-direction", 
+    "dmo_dt_y": "momentum rate, y-direction", 
+    "dmo_dt_z": "momentum rate, z-direction", 
+    "ip": "U ionization parameter", 
+    "xi": "xi ionization parameter", 
+    "ntot": "total photons passing through cell", 
+    "nrad": "total wind photons produced in cell", 
+    "nioniz": "total ionizing photons passing through cell"
+}
+
 def get_pywind_summary (fname, vers="", den_or_frac=0):
 
     '''
@@ -268,6 +300,17 @@ def parse_rcparams(fname = "params.rc"):
 
 
     return 0
+
+
+def get_windsave_descriptions(data, descr_dict=description_dict):
+
+    for name in data.colnames:
+        try:
+            print ("{:10s} --  {}".format(name, descr_dict[name]))
+        except KeyError:
+            print ("no description for column {}".format(name))
+
+    return (descr_dict)
 
 def get_flux_at_wavelength(lambda_array, flux_array, w):
 
