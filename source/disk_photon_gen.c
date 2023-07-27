@@ -57,8 +57,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   double freqmin, freqmax;
   int i, iend;
   double planck ();
-  double t, r, z, theta, phi;
-  int nring;
+  double r, z, theta, phi;
+  int nring = 0;
   double north[3];
 
   if ((iend = istart + nphot) > NPHOT)
@@ -87,71 +87,96 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     if (geo.reverb_disk == REV_DISK_UNCORRELATED)
       p[i].path = 0;            //If we're assuming disk photons are uncorrelated, leave them at 0
 
+
+    /* First set the photon postion for the  special case of searchlight mode */
+    if (modes.searchlight && geo.ioniz_or_extract == CYCLE_EXTRACT)
+    {
+      if (i == istart)
+      {
+        // we need to find the ring associated with the searchlight x
+        nring = 0;
+        while (disk.r[nring] < geo.searchlight_x[0] && nring < NRINGS - 1)
+          nring++;
+
+        if (nring == NRINGS)
+        {
+          Error ("disk_photon_gen: Trying to generate searchlight photons beyond the disk\n");
+          Exit (1);
+        }
+      }
+      stuff_v (geo.searchlight_lmn, p[i].lmn);
+      stuff_v (geo.searchlight_x, p[i].x);
+    }
+    else
+    {
+
 /* The ring boundaries are defined so that an equal number of photons are
  * generated in each ring.  Howver, there is a possibility that the number
  * of photons to be generated is small, and therefore we, we still randomly
  * generate photon.  04march -- ksl
  */
+      nring = random_number (0.0, 1.0) * (NRINGS - 1);
 
-    nring = random_number (0.0, 1.0) * (NRINGS - 1);
 
+      if ((nring < 0) || (nring > NRINGS - 2))
+      {
+        Error ("photon_gen: photon launch out of bounds. nring = %d\n", nring);
+        Exit (0);
+      }
 
-    if ((nring < 0) || (nring > NRINGS - 2))
-    {
-      Error ("photon_gen: photon launch out of bounds. nring = %d\n", nring);
-      Exit (0);
-    }
-
-    disk.nphot[nring]++;
+      disk.nphot[nring]++;
 
 /* The next line is really valid only if dr is small.  Otherwise one
  * should account for the area.  But haven't fixed this yet ?? 04Dec
  */
 
-    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * random_number (0.0, 1.0);
+      r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * random_number (0.0, 1.0);
 
-    /* Generate a photon in the plane of the disk a distance r */
-
-
-    phi = 2. * PI * random_number (0.0, 1.0);
-
-    p[i].x[0] = r * cos (phi);
-    p[i].x[1] = r * sin (phi);
+      /* Generate a photon in the plane of the disk a distance r */
 
 
-    z = 0.0;
-    north[0] = 0;
-    north[1] = 0;
-    north[2] = 1;
+      phi = 2. * PI * random_number (0.0, 1.0);
 
-    /* Correct photon direction of a vertically extended disk
-     */
+      p[i].x[0] = r * cos (phi);
+      p[i].x[1] = r * sin (phi);
 
-    if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {
-      if (r == 0)
-        theta = 0;
+
+      z = 0.0;
+      north[0] = 0;
+      north[1] = 0;
+      north[2] = 1;
+
+      /* Correct photon direction of a vertically extended disk
+       */
+
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+      {
+        if (r == 0)
+          theta = 0;
+        else
+        {
+          z = zdisk (r);
+          theta = atan ((zdisk (r * (1. + EPSILON)) - z) / (EPSILON * r));
+        }
+        north[0] = (-cos (phi) * sin (theta));
+        north[1] = (-sin (phi) * sin (theta));
+        north[2] = cos (theta);
+
+      }
+
+      if (random_number (-0.5, 0.5) > 0.0)
+      {                         /* Then the photon emerges in the upper hemisphere */
+        p[i].x[2] = (z + EPSILON);
+      }
       else
       {
-        z = zdisk (r);
-        theta = atan ((zdisk (r * (1. + EPSILON)) - z) / (EPSILON * r));
+        p[i].x[2] = -(z + EPSILON);
+        north[2] *= -1;
       }
-      north[0] = (-cos (phi) * sin (theta));
-      north[1] = (-sin (phi) * sin (theta));
-      north[2] = cos (theta);
 
+      randvcos (p[i].lmn, north);
     }
 
-    if (random_number (-0.5, 0.5) > 0.0)
-    {                           /* Then the photon emerges in the upper hemisphere */
-      p[i].x[2] = (z + EPSILON);
-    }
-    else
-    {
-      p[i].x[2] = -(z + EPSILON);
-      north[2] *= -1;
-    }
-    randvcos (p[i].lmn, north);
 
     /* Note that the next bit of code is almost duplicated in photo_gen_star.  It's
      * possilbe this should be collected into a single routine   080518 -ksl
@@ -159,8 +184,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     if (spectype == SPECTYPE_BB)
     {
-      t = disk.t[nring];
-      p[i].freq = planck (t, freqmin, freqmax);
+      p[i].freq = planck (disk.t[nring], freqmin, freqmax);
     }
     else if (spectype == SPECTYPE_UNIFORM)
     {
@@ -169,7 +193,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     else if (spectype == SPECTYPE_MONO)
     {
-      p[i].freq = MONO_FREQ;
+      p[i].w = 1.;
+      p[i].freq = geo.mono_freq;
     }
 
     else
@@ -185,16 +210,16 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
        to moving frame */
 
 
-    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
-      save_photons (&p[i], "gen_local");
+    // if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+    //   save_photons (&p[i], "gen_local");
 
     /* When given the same input photons the transformation is made in place */
     if (local_to_observer_frame_disk (&p[i], &p[i]))
     {
       Error ("photon_gen: Frame Error\n");
     }
-    if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
-      save_photons (&p[i], "gen_obs");
+    // if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+    //   save_photons (&p[i], "gen_obs");
 
 
 

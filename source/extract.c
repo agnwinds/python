@@ -488,6 +488,10 @@ extract_one (w, pp, nspec)
     }
   }
 
+//  if (modes.save_extract_photons)
+//    save_photons (pp, "EXT");
+
+
   if (istat == P_ESCAPE)
   {
 

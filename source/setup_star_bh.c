@@ -193,7 +193,7 @@ get_bl_and_agn_params (lstar)
     geo.star_radiation = 0;     // 70b - AGN do not have a star at the center */
     geo.bl_radiation = 0;
     if (geo.agn_radiation)
-      get_spectype (geo.agn_radiation, "Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems)", &geo.agn_ion_spectype);
+      get_spectype (geo.agn_radiation, "Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems,mono)", &geo.agn_ion_spectype);
 
   }
   else

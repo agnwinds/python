@@ -1,7 +1,7 @@
-Wind Models
-###########
+Wind Model Parameters
+######################
 
-Python allows for various types of models, which are defined by the following parameters
+Python allows for various types of models, which are defined by the following parameters. This page focuses on the actual parameters in the file, but further description of the wind models and instructions on how to import models can be found under :doc:`Wind Models <../wind_models>`.
 
 .. code::
 
@@ -44,8 +44,4 @@ The wind models incorporated into Python currently are:
   A model of a thin shell useful for diagnostic studies
 
 :ref:`Imported <Importing models>`
-  A general purpose mode for importing a wind from an ascii file
-
-.. todo::
-
-   Update paths as they move. Combine with :doc:`wind_models`?
+  A general purpose mode for importing a wind from an ascii file (see also :doc:`Python Script documentation <../wind_models/importing_models>`).

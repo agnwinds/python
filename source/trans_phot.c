@@ -510,8 +510,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     p->w = pp.w;
   }
 
-  if (modes.save_photons)
-    save_photons (&pp, "End");
+  /* This is set up for looking at photons in spectral cycles at present */
+  // if (modes.save_photons && geo.ioniz_or_extract == CYCLE_EXTRACT)
+  //   save_photons (&pp, "End");
 
   return (0);
 }

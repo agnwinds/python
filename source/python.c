@@ -112,7 +112,6 @@ main (argc, argv)
 
   rel_mode = REL_MODE_FULL;
   run_xtest = FALSE;
-  //OLD run_ztest = FALSE;
   NWAVE_MAX = (int) NWAVE_IONIZ;
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -127,7 +126,6 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
-//OLD  strict = 0;
 
   restart_stat = parse_command_line (argc, argv);
 
@@ -218,6 +216,8 @@ main (argc, argv)
 
     geo.system_type = SYSTEM_TYPE_STAR;
     geo.run_type = RUN_TYPE_NEW;
+    geo.mono_freq = 0;
+
 
     strcpy (answer, "star");
     sprintf (values, "%d,%d,%d,%d,%d", SYSTEM_TYPE_STAR, SYSTEM_TYPE_CV, SYSTEM_TYPE_BH, SYSTEM_TYPE_AGN, SYSTEM_TYPE_PREVIOUS);
@@ -426,7 +426,7 @@ main (argc, argv)
     if (geo.star_radiation)
     {
       geo.star_spectype = geo.star_ion_spectype;
-      get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform)", &geo.star_spectype);
+      get_spectype (geo.star_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.star_spectype);
     }
 
     if (geo.disk_radiation)
@@ -450,7 +450,7 @@ main (argc, argv)
       // If there is 'AGN radiation' that genuinely *is* AGN radiation (and not a star boundary layer
       if (geo.system_type == SYSTEM_TYPE_AGN || geo.system_type == SYSTEM_TYPE_BH)
       {
-        get_spectype (geo.agn_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems)", &geo.agn_spectype);
+        get_spectype (geo.agn_radiation, "Central_object.rad_type_in_final_spectrum(bb,models,power,cloudy,brems,mono)", &geo.agn_spectype);
       }
       else
       {
@@ -527,7 +527,6 @@ main (argc, argv)
 
 
   if (rdpar_check ())
-//OLD  if (strict)
   {
     Log ("Some of the input have not been updated for the current version of Python.  Please correct and rerun\n");
     exit (0);
@@ -627,6 +626,14 @@ main (argc, argv)
   if (run_xtest)
   {
     xtest ();
+  }
+
+
+  if (geo.wcycles == 0 && geo.pcycles == 0)
+  {
+    wind_save (files.windsave);
+    Log ("Both ionization and spectral cycles are set to 0; Saving windfile but then exiting\n");
+    exit (1);                   //There is really nothing to do!
   }
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */

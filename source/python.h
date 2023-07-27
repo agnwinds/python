@@ -141,8 +141,6 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
    It carries the variables which define the geometry.  Reasonable values of each of
    these should be defined before it is altered with inputs from the terminal. 
    The geometry structure is used to transfer all of the information about a wind
-
-
  */
 
 /* Definitions of spectral types, which are all negative because when
@@ -158,9 +156,6 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
 #define SPECTYPE_NONE	 -3
 #define SPECTYPE_MODEL	 -99    // This is just used briefly, before a model number is assigned
 
-//OLD#define  MONO_FREQ     2.997925e18/1500.   //Hardwired single freqency for diagnostic purposes
-#define  MONO_FREQ     2.997925e18/1000.   /**< Hardwired single freqency for diagnostic purposes
-                                             */
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -349,7 +344,7 @@ extern int current_domain;             // This integer is used by py_wind only
 /* RUN_TYPE differs from SYSTEM_TYPE in that
   it has implications on how the program is run
   wherease SYSTEM_TYPE refers (mainly) to the type
-  of sytem, with the exception 
+  of system, with the exception 
 */
 
 #define RUN_TYPE_NEW       0
@@ -405,6 +400,11 @@ struct geometry
   int wcycles, pcycles, pcycles_renorm; /**< The number of ionization and spectrum cycles desired, pcycles_renorm 
                                          * is only used on restarts.  See spectrum_restart_renormalize
                                          */
+#define CYCLE_IONIZ    0
+#define CYCLE_EXTRACT  1
+  int ioniz_or_extract;         /**<  Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
+                                   detailed spectrum.  
+                                 */
 
 
   /* This section stores information which specifies the spectra to be extracted.  Some of the parameters
@@ -412,12 +412,20 @@ struct geometry
    */
 
 #define NSPEC   20
-  int nangles;
-  double angle[NSPEC], phase[NSPEC];
-  int scat_select[NSPEC], top_bot_select[NSPEC];
-  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
+  int nangles;   /**< The number of anbles to create spectra for */
+  double angle[NSPEC], phase[NSPEC];  /**< The angle and associated binary phase (if relevant) for the extracted spectra */
+  int scat_select[NSPEC], top_bot_select[NSPEC];  /**< Variables to constrain the spectra by number of scatters
+                                                    * and whether the photons "originate" from above or relow the disk
+                                                    * plane
+                                                    */
+  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];  /**< Variables which can be used to
+                                                                                   * constrain the spectra by position
+                                                                                   */
   double swavemin, swavemax, sfmin, sfmax;      // The minimum and maximum wavelengths/freqs for detailed spectra
-  int select_extract, select_spectype;  //select_extract is TRUE if extract mode, FALSE if Live or Die
+  int select_extract, select_spectype;  /**< select_extract is TRUE if extract mode, FALSE if Live or Die
+                                          * select_spectype indicates what type of spectrum, e.g FLAMBA, will
+                                          * be created.
+                                          */
 
 /* Begin description of the actual geometry */
 
@@ -486,11 +494,6 @@ struct geometry
                                    populations are computed as for simple ions. By default it is set to
                                    MACRO_IONIZ_MODE_NO_ESTIMATORS initially and then set to  MACRO_IONIZ_MODE_ESTIMATORS the first time that
                                    Monte Carlo estimators are normalised. */
-#define CYCLE_IONIZ    1
-#define CYCLE_EXTRACT  0
-  int ioniz_or_extract;         /**<  Set to CYCLE_IONIZ during ionization cycles, set to CYCLE_EXTRACT during calculation of
-                                   detailed spectrum.  
-                                 */
   int macro_simple;             /**<  As default this is set to FALSE, in which case a full
                                    Macro Atom calculation is performed. If it is set to TRUE it means
                                    that although Macro Atom data has been read in, all lines/continua are treated
@@ -576,7 +579,15 @@ struct geometry
   int disk_ion_spectype, disk_spectype; /**<  Same as above but for the disk */
   int bl_ion_spectype, bl_spectype;     /**<  Same as above but for the boundary layer */
   int agn_ion_spectype, agn_spectype;   /**<  Same as above but for the AGN */
-  int search_light_ion_spectype, search_light_spectype; /**<  Same as above but for the search_light. Created for 1d test */
+
+  /* Searchlight mode is very experimental.  See notes in diag.c */
+  double searchlight_x[3],searchlight_lmn[3]; /**< location and direction of all photons in the spectral
+                                                * cycles when searchlight mode (an advanced option) is
+                                                * invoked
+                                                */
+  double mono_freq;                     /**< The frequency of all photons in the so-called monochromatic mode, which
+                                          *  can be use for certain diagnositc experiments
+                                          */
 
   char model_list[NCOMPS][LINELENGTH];  /**<  The file which contains the model names and the associated values for the model */
   int model_count;              /**< The number of distinct models that have been read in */
@@ -999,8 +1010,9 @@ typedef struct plasma
      created by the central object, or the disk, or in the simple case the wind, but which have not undergone
      any kind of interaction which would change their direction
    */
-  double j_direct, j_scatt;     /**<  Mean intensity due to direct photons and scattered photons */
-  double ip_direct, ip_scatt;   /**<  Mean intensity due to direct photons and scattered photons */
+  double j_direct, j_scatt;     /**<  Mean intensity due to direct photons and scattered photons.
+                                 Direct photons include photons created in the wind in simple mode. */
+  double ip_direct, ip_scatt;   /**<  Ionization parameter due  to direct photons and scattered photons. See ip */
   double max_freq;              /**<   The maximum frequency photon seen in this cell */
   double cool_tot;              /**< The total cooling in a cell */
   /* The total luminosity of all processes in the cell, basically the emissivity of the cell times it volume. Not the same 
@@ -1291,7 +1303,7 @@ typedef struct photon
      Comment - ksl - 180712 - The logic for all of this is obscure to me, since we keep track of the
      photons origin separately.  At some point one might want to revisit the necessity for this
    */
-  int np;                       /* The photon number, which used ease tracking a photon for diagnostic
+  int np;                       /* The photon number, which eases tracking a photon for diagnostic
                                    purposes */
   double path;                  /* The total path length of a photon (used for reverberation calcuations) */
   double ds;                    /* the distance a photon has moved since its creation or last interaction */
@@ -1409,6 +1421,7 @@ extern struct Cdf cdf_ff;
 extern struct Cdf cdf_fb;
 extern struct Cdf cdf_bb;
 extern struct Cdf cdf_brem;
+
 
 
 /* Variable used to allow something to be printed out the first few times
@@ -1587,6 +1600,14 @@ struct advanced_modes
                                    * tests.  
                                    */
   int partial_cells;             /**< Switch to decribe treatment of partial cells. */              
+  int searchlight;               /**< Switch to invoke search light option. This is 
+                                  a very experimental diagnostic mode in which photons
+                                  originate at a specific place in the grid in the 
+                                  detailed spectrum stage.  It probably should be 
+                                  used in conjunction with analysing individual photons
+                                  as they pass through the grid.  There are lots of
+                                  issues with how the detailed spectra are constucted
+                                  that make it less useful than it might seem. */
 };
 
 extern struct advanced_modes modes;
@@ -1690,11 +1711,11 @@ extern int xxxbound;
 
 
 /** Structure associated with rdchoice.  This 
- * shtructure is required only in cases where one 
+ * structure is required only in cases where one 
  * wants to use rdchoice multiple times with different
  * options.  But it can, or course be used for 
- * any such call.  It allows one to assoicated
- * a input word with an output value, using the routine
+ * any such call.  It allows one to associate
+ * an input word with an output value, using the routine
  * get_choices.  There needs to be one structure
  * for each input variable.  At present, this is only
  * used for the selection of spec_types

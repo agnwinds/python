@@ -181,7 +181,7 @@ calculate_ionization (restart_stat)
 
     nphot_to_define = (long) NPHOT;
 
-    define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+    define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_IONIZ, iwind, 1);
 
 
     photon_checks (p, freqmin, freqmax, "Check before transport");
@@ -225,12 +225,18 @@ calculate_ionization (restart_stat)
     trans_phot (w, p, FALSE);
 
     /* Determine how much energy was absorbed in the wind. first zero counters. 
-       There are counters for total energy absorbed and for each entry in the istat enum */
+       There are counters for total energy absorbed and for each entry in the istat enum,
+       The second loop is for the energy radiated (i.e. that actually escapes) */
     z_abs_all = z_else = 0.0;
     for (nn = 0; nn < N_ISTAT; nn++)
     {
       z_abs[nn] = 0.0;
       nphot_istat[nn] = 0.0;
+    }
+    for (nn = 0; nn < 20; nn++)
+    {
+      /* 20 entries to match declaration above */
+      radiated[nn] = 0.0;
     }
 
     /* loop over the different photon istats to determine where the luminosity went */
@@ -590,7 +596,7 @@ make_spectra (restart_stat)
     NPHOT = NPHOT_MAX;          // Assure that we really are creating as many photons as we expect.
 
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
-    define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
+    define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_EXTRACT, iwind, 0);
 
 //    if (modes.save_photons || modes.save_extract_photons)
 //    {

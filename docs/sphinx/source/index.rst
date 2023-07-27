@@ -77,10 +77,10 @@ Mandy Hewitt
 
    quick
    installation
-   updating
    running_python
    input
    output
+   plotting
    operation
    radiation
    wind_models

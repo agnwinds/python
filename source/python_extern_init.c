@@ -105,6 +105,7 @@ double *aaa;                    ///< A pointer to an array used by py_wind
 struct Cdf cdf_ff;
 struct Cdf cdf_fb;
 struct Cdf cdf_vcos;
+struct Cdf cdf_vdipole;
 struct Cdf cdf_bb;
 struct Cdf cdf_brem;
 
