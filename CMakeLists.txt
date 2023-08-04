@@ -19,8 +19,8 @@
 #       - check correct GSL is installed in system and use that instead
 #
 
-project(Python C)
 cmake_minimum_required(VERSION 3.0)
+project(Python C)
 
 # Set the Python version
 
@@ -32,7 +32,7 @@ message(STATUS "Python version : ${PYTHON_VERSION}")
 # exploit MPI to reduce runtimes. The compilation flags used here work both for
 # clang and gcc
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_COMPILER mpicc)
 add_definitions(-Wall -Wextra -D MPI_ON)
 
@@ -102,7 +102,7 @@ set(PYTHON_SOURCE
         source/knigge.c source/levels.c source/lines.c source/macro_gov.c
         source/matom.c source/matom_diag.c source/matrix_ion.c
         source/para_update.c source/parse.c source/partition.c source/paths.c
-        source/phot_util.c source/photo_gen_matom.c source/photon2d.c
+        source/phot_util.c source/photon2d.c
         source/photon_gen.c source/pi_rates.c source/radiation.c source/random.c
         source/rdpar.c source/rdpar_init.c source/recipes.c source/recomb.c
         source/resonate.c source/reverb.c source/roche.c
@@ -117,7 +117,7 @@ set(PYTHON_SOURCE
         source/wind_util.c source/windsave.c source/windsave2table_sub.c
         source/xlog.c source/xtest.c source/zeta.c source/macro_accelerate.c
         source/macro_gen_f.c source/atomic_extern_init.c source/python_extern_init.c
-        source/models_extern_init.c
+        source/models_extern_init.c source/photon_gen_matom.c source/disk_photon_gen.c
         )
 
 set(PY_WIND_SOURCE

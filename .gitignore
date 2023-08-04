@@ -15,6 +15,9 @@ bin/modify_wind*
 *.obj
 *.elf
 
+# Build directories
+cmake-build-*
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -38,7 +41,6 @@ bin/modify_wind*
 *.i*86
 *.x86_64
 *.hex
-
 
 # things from gsl, may not be necessary
 software/gsl-2.5/Makefile
@@ -99,3 +101,4 @@ logfile
 # IDE files
 .idea/
 py_progs/.idea/
+scratch/
