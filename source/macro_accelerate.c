@@ -87,11 +87,11 @@ calc_matom_matrix (xplasma, matom_matrix)
   /* loop over all macro-atom levels and populate the rate matrix */
   for (uplvl = 0; uplvl < nlevels_macro; uplvl++)
   {
-    nbbd = xconfig[uplvl].n_bbd_jump;    //store these for easy access -- number of bb downward jumps
-    nbbu = xconfig[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
-    nbfd = xconfig[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
-    nbfu = xconfig[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
-    nauger = xconfig[uplvl].nauger;      /* number of Auger jumps */
+    nbbd = xconfig[uplvl].n_bbd_jump;   //store these for easy access -- number of bb downward jumps
+    nbbu = xconfig[uplvl].n_bbu_jump;   // number of bb upward jump from this configuration
+    nbfd = xconfig[uplvl].n_bfd_jump;   // number of bf downward jumps from this transition
+    nbfu = xconfig[uplvl].n_bfu_jump;   // number of bf upward jumps from this transiion
+    nauger = xconfig[uplvl].nauger;     /* number of Auger jumps */
     iauger = xconfig[uplvl].iauger;
 
     /* bound-bound */
@@ -100,7 +100,7 @@ calc_matom_matrix (xplasma, matom_matrix)
 
       line_ptr = &line[xconfig[uplvl].bbd_jump[n]];
 
-      rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
+      rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
       coll_rate = q21 (line_ptr, t_e);  // this is multiplied by ne below
 
       bb_cont = rad_rate + (coll_rate * ne);
@@ -130,10 +130,10 @@ calc_matom_matrix (xplasma, matom_matrix)
         auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
 
         //internal jump to another macro atom level
-        Q_matrix[uplvl][target_level] += Qcont = auger_rate * xconfig[target_level].ex;  //energy of lower state
+        Q_matrix[uplvl][target_level] += Qcont = auger_rate * xconfig[target_level].ex; //energy of lower state
 
         //jump to the k-packet pool (we used to call this "deactivation")
-        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);       //energy of lower state
+        Q_matrix[uplvl][nlevels_macro] += Qcont_kpkt = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);     //energy of lower state
 
         //deactivation back to r-packet isn't possible for the Auger process
         Q_norm[uplvl] += Qcont + Qcont_kpkt;
