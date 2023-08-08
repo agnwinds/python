@@ -95,5 +95,6 @@ logfile
 
 # IDE files
 .idea/
+**/*.vscode/
 py_progs/.idea/
 scratch/
