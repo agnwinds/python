@@ -55,7 +55,11 @@ ifeq (mpicc, $(CC))
 			COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
 		endif
 	endif
-
+else ifeq (nvcc, $(CC))
+	MPI_FLAG =
+	CUDA_FLAG = -DCUDA_ON
+	LDFLAGS += -lcusolver
+	COMPILER_PRINT_STRING = Compiling with $(CC)
 else ifeq (gcc, $(CC))
 	# no mpicc,
 	MPI_FLAG =
@@ -84,8 +88,7 @@ endif
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
-
-
+INDENT = yes
 INCLUDE = ../include
 LIB = ../lib
 BIN = ../bin
@@ -94,18 +97,19 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python"
 # this can be altered to whatever is best
-	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
+	CFLAGS = -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) $(CUDA_FLAG)
 	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
         XDEBUG = True
 	ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
-		CFLAGS = -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
-		FFLAGS = -g 
+		CFLAGS = -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) $(CUDA_FLAG)
+		FFLAGS = -g
 		PRINT_VAR = DEBUGGING, -g -Wall flags
 	endif
+	INDENT = no
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
+	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) $(CUDA_FLAG)
 	FFLAGS =
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
@@ -122,8 +126,6 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
 VERSION = 87b
 
-INDENT = yes
-
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'Compiler is really  $(XVERSION)'
@@ -136,7 +138,7 @@ startup:
 
 
 # To ensure a uniform style within .c programs, we enforce a indent style on .c code whe
-# modifications are made. For this portion of the installation to work properly, one must have 
+# modifications are made. For this portion of the installation to work properly, one must have
 # the python scripting installed, as well as gnuindent.  On linux systems, this is generally
 # not an inssue, but this is not the case for MAC OSX.  The run_indent.py routine below tries
 # to sort out whether one has gindent installed; if not it issues a woraning but does not
@@ -224,7 +226,7 @@ prototypes:
 
 python: startup python.o $(python_objects)
 	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-	cp $@ $(BIN)/py 
+	cp $@ $(BIN)/py
         ifdef XDEBUG
 	  mv $@ $(BIN)/py$(VERSION)_debug
         else
@@ -335,9 +337,9 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 
 modify_wind:  $(modify_wind_objects)
 	$(CC) $(CFLAGS) $(modify_wind_objects) $(LDFLAGS) -o modify_wind
-	cp $@ $(BIN)                                                               
-	mv $@ $(BIN)/modify_wind$(VERSION)                                         
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
+	cp $@ $(BIN)
+	mv $@ $(BIN)/modify_wind$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
@@ -366,7 +368,7 @@ inspect_wind:  $(inspect_wind_objects)
 
 
 # unit_tests allows one to test low level routines, but one must be aware that one needs to define
-# everything in the main routine before one can probe a particular routine.  
+# everything in the main routine before one can probe a particular routine.
 unit_test: startup unit_test.o $(python_objects)
 	$(CC) ${CFLAGS} unit_test.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o unit_test
 	cp $@ $(BIN)/unit_test
