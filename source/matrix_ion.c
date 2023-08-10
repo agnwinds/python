@@ -12,14 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//gsl matrix solvers
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_mode.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 #include <float.h>
 #include "atomic.h"
@@ -105,7 +97,7 @@ matrix_ion_populations (xplasma, mode)
   }
 
   /* Dielectronic recombination, collisional ionization coefficients, three body recombination and
-     charge_exchange rate coefficients depend only on electron temperature, calculate them now - 
+     charge_exchange rate coefficients depend only on electron temperature, calculate them now -
      they will not change they are all stored in global arrays */
 
   compute_dr_coeffs (t_e);
@@ -125,7 +117,7 @@ matrix_ion_populations (xplasma, mode)
     xion[mm] = mm;              // xion is an array we use to track which ion is in which row of the matrix
     if (mm != ele[ion[mm].nelem].firstion)      // We can recombine since we are not in the first ionization stage
     {
-      rr_rates[mm] = total_rrate (mm, xplasma->t_e);    // radiative recombination rates          
+      rr_rates[mm] = total_rrate (mm, xplasma->t_e);    // radiative recombination rates
     }
     if (ion[mm].istate != ele[ion[mm].nelem].istate_max)        // we can photoionize, since we are not in the highest ionization state
     {
@@ -622,7 +614,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
     {
       ion_out = charge_exchange[mm].nion1;      //This is the ion that is being depopulated
       rate_matrix[ion_out][ion_out] -= charge_exchange_ioniz_rates[mm] * nh2;   //This is the depopulation
-      rate_matrix[ion_out + 1][ion_out] += charge_exchange_ioniz_rates[mm] * nh2;       //This is the population 
+      rate_matrix[ion_out + 1][ion_out] += charge_exchange_ioniz_rates[mm] * nh2;       //This is the population
     }
 
 

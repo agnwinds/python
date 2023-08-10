@@ -19,11 +19,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -300,7 +295,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
   /* End of main matom processing loop that began with while (escape==FALSE)
 
-     If it gets here, the escape is as a KPKT    
+     If it gets here, the escape is as a KPKT
    */
 
   /* Update the the photon origin to indicate the packet has been processed
