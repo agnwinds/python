@@ -6,15 +6,6 @@
 
 #include "atomic.h"
 #include "python.h"
-//gsl matrix solvers
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_mode.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
-
 
 /**********************************************************/
 /**
@@ -53,6 +44,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   int n, i, nn, mm, iauger, nauger;
   double Qcont_kpkt, bb_cont, sp_rec_rate, bf_cont, lower_density, density_ratio;
   double kpacket_to_rpacket_rate, norm, Rcont, auger_rate;
+  int matrix_error;
   double *a_data, *a_inverse;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
   struct photon pdummy;
@@ -320,26 +312,26 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
   }
 
-  invert_matrix (a_data, a_inverse, nrows);
+  matrix_error = invert_matrix (a_data, a_inverse, nrows);
+
+  if (matrix_error != EXIT_SUCCESS)
+  {
+    Error ("calc_matom_matrix: error %d whilst inverting Q_matrix in plasma cell %d\n", matrix_error, xplasma->nplasma);
+  }
+
+  free (a_data);
 
   /* We now copy our rate matrix into the prepared matrix */
   for (mm = 0; mm < nrows; mm++)
   {
     for (nn = 0; nn < nrows; nn++)
     {
-      /* copy the matrix from the gsl object to the array we return to user */
       /* in Christian Vogl's notation this is doing his equation 3: B = (N * R)
          where N is the inverse matrix we have just calculated. */
       /* the reason this matrix multiplication is so simple here is because R is a diagonal matrix */
-
-      /* todo: need to check the indices here */
       matom_matrix[mm][nn] = a_inverse[mm * nrows + nn] * R_matrix[nn][nn];
     }
   }
-
-  /* free memory */
-
-  free (a_data);
 
   /* need to free each calloc-ed row of the matrixes */
   for (i = 0; i < nrows; i++)
@@ -347,6 +339,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     free (R_matrix[i]);
     free (Q_matrix[i]);
   }
+
   free (R_matrix);
   free (Q_matrix);
   free (Q_norm);
