@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -15,19 +17,19 @@
 
 
 /**********************************************************/
-/** 
- * @brief calculate the matrix of probabilities for the accelerated macro-atom scheme 
+/**
+ * @brief calculate the matrix of probabilities for the accelerated macro-atom scheme
  *
- * @param [in] PlasmaPtr  xplasma  
- * @param [in,out] double **matom_matrix 
- *        the 2D matrix array we will populate with normalised probabilities 
+ * @param [in] PlasmaPtr  xplasma
+ * @param [in,out] double **matom_matrix
+ *        the 2D matrix array we will populate with normalised probabilities
  *
  * @details
  * given an activation state, this routine calculates the probability that a packet
- * will deactivate from a given state. Let's suppose that the \f$(i,j)\f$-th element of matrix 
- * \f$Q\f$ contains the **jumping** probability from state i to state j, and the diagonals 
- * \f$(i,i)\f$ of matrix \f$R\f$ contain the emission probabilities from each state, then it 
- * can be shown that (see short notes from Vogl, or 
+ * will deactivate from a given state. Let's suppose that the \f$(i,j)\f$-th element of matrix
+ * \f$Q\f$ contains the **jumping** probability from state i to state j, and the diagonals
+ * \f$(i,i)\f$ of matrix \f$R\f$ contain the emission probabilities from each state, then it
+ * can be shown that (see short notes from Vogl, or
  * <a href="Ergon et al. 2018">https://ui.adsabs.harvard.edu/abs/2018A%26A...620A.156E</a>)
  * the quantity we want is then \f$B = N R\f$, where \f$N = (I - Q)^{-1}\f$, where \f$I\f$
  * is the identity matrix. This routine does this calculation.
@@ -51,11 +53,11 @@ calc_matom_matrix (xplasma, matom_matrix)
   int n, i, nn, mm, iauger, nauger;
   double Qcont_kpkt, bb_cont, sp_rec_rate, bf_cont, lower_density, density_ratio;
   double kpacket_to_rpacket_rate, norm, Rcont, auger_rate;
-  double *a_data;
+  double *a_data, *a_inverse;
   mplasma = &macromain[xplasma->nplasma];       //telling us where in the matom structure we are
   struct photon pdummy;
 
-  t_e = xplasma->t_e;           //electron temperature 
+  t_e = xplasma->t_e;           //electron temperature
   ne = xplasma->ne;             //electron number density
 
   /* allocate arrays for matrices and normalsiations
@@ -268,27 +270,9 @@ calc_matom_matrix (xplasma, matom_matrix)
 
   /* end kpacket */
 
-
-//OLD  Log ("Q:\n");
-//OLD  for (mm = 0; mm < nrows; mm++)
-//OLD  {
-//OLD    for (nn = 0; nn < nrows; nn++)
-//OLD    {
-//OLD      if (Q_norm[mm] > 0)
-//OLD      {
-//OLD        Log ("%10.3e ", Q_matrix[mm][nn] / Q_norm[mm]);
-//OLD      }
-//OLD      else
-//OLD      {
-//OLD        Log ("%10.3e ", 0.0);
-//OLD      }
-//OLD    }
-//OLD    Log ("\n");
-//OLD  }
-
   /* now in one step, we multiply by the identity matrix and normalise the probabilities
-     this means that what is now stored in Q_matrix is no longer Q, but N=(I - Q) using Vogl 
-     notation. We check that Q_norm is 0, because some states (ground states) can have 0 
+     this means that what is now stored in Q_matrix is no longer Q, but N=(I - Q) using Vogl
+     notation. We check that Q_norm is 0, because some states (ground states) can have 0
      jumping probabilities and so zero normalisation too */
   for (uplvl = 0; uplvl < nrows; uplvl++)
   {
@@ -307,8 +291,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
   }
 
-
-  /* Check normalisation of the matrix. the diagonals of R, minus N which is now stored in 
+  /* Check normalisation of the matrix. the diagonals of R, minus N which is now stored in
      Q_matrix, should be zero */
   for (uplvl = 0; uplvl < nrows; uplvl++)
   {
@@ -325,7 +308,8 @@ calc_matom_matrix (xplasma, matom_matrix)
   }
 
   /* This next line produces an array of the correct size to hold the rate matrix */
-  a_data = (double *) calloc (sizeof (double), nrows * nrows);
+  a_data = (double *) calloc (nrows * nrows, sizeof (double));
+  a_inverse = (double *) calloc (nrows * nrows, sizeof (double));
 
   /* We now copy our rate matrix into the prepared matrix */
   for (mm = 0; mm < nrows; mm++)
@@ -336,30 +320,7 @@ calc_matom_matrix (xplasma, matom_matrix)
     }
   }
 
-
-  /* now get ready for the matrix operations. first let's assign variables for use with GSL */
-  gsl_matrix_view N;
-  gsl_matrix *inverse_matrix;
-  gsl_permutation *p;
-
-//OLD  int ierr, s;
-  int s;
-
-  /* create a view into the array we just created */
-  N = gsl_matrix_view_array (a_data, nrows, nrows);
-
-  /* permuations are special structures that contain integers 0 to nrows-1, which can
-   * be manipulated */
-  p = gsl_permutation_alloc (nrows);
-  inverse_matrix = gsl_matrix_alloc (nrows, nrows);
-
-  /* first we do the LU decomposition */
-//OLD  ierr = gsl_linalg_LU_decomp (&N.matrix, p, &s);
-  gsl_linalg_LU_decomp (&N.matrix, p, &s);
-
-  /* from the decomposition, get the inverse of the Q matrix */
-//OLD  ierr = gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
-  gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+  invert_matrix (a_data, a_inverse, nrows);
 
   /* We now copy our rate matrix into the prepared matrix */
   for (mm = 0; mm < nrows; mm++)
@@ -370,24 +331,14 @@ calc_matom_matrix (xplasma, matom_matrix)
       /* in Christian Vogl's notation this is doing his equation 3: B = (N * R)
          where N is the inverse matrix we have just calculated. */
       /* the reason this matrix multiplication is so simple here is because R is a diagonal matrix */
-      matom_matrix[mm][nn] = gsl_matrix_get (inverse_matrix, mm, nn) * R_matrix[nn][nn];
+
+      /* todo: need to check the indices here */
+      matom_matrix[mm][nn] = a_inverse[mm * nrows + nn] * R_matrix[nn][nn];
     }
   }
 
-//OLD  Log ("matom_matrix:\n");
-//OLD  for (mm = 0; mm < nrows; mm++)
-//OLD  {
-//OLD    for (nn = 0; nn < nrows; nn++)
-//OLD    {
-//OLD      Log ("%10.3e ", matom_matrix[mm][nn]);
-//OLD    }
-//OLD    Log ("\n");
-//OLD  }
-
-
   /* free memory */
-  gsl_permutation_free (p);
-  gsl_matrix_free (inverse_matrix);
+
   free (a_data);
 
   /* need to free each calloc-ed row of the matrixes */
@@ -403,16 +354,16 @@ calc_matom_matrix (xplasma, matom_matrix)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief calculate the cooling rates for the conversion of k-packets.
  *
- * @param [in] PlasmaPtr  xplasma  
- * @param [in,out] double **matom_matrix 
- *        the 2D matrix array we will populate with normalised probabilities 
+ * @param [in] PlasmaPtr  xplasma
+ * @param [in,out] double **matom_matrix
+ *        the 2D matrix array we will populate with normalised probabilities
  *
  *
  * @details
- * 
+ *
  *
  **********************************************************/
 
@@ -473,7 +424,7 @@ fill_kpkt_rates (xplasma, escape, p)
     mplasma->cooling_bb_simple_tot = 0.0;
 
     /* Start of BF calculation */
-    /* JM 1503 -- we used to loop over ntop_phot here, 
+    /* JM 1503 -- we used to loop over ntop_phot here,
        but we should really loop over the tabulated Verner Xsections too
        see #86, #141 */
     for (i = 0; i < nphot_total; i++)
@@ -603,7 +554,7 @@ fill_kpkt_rates (xplasma, escape, p)
 
 
     /* JM -- 1310 -- we now want to add adiabatic cooling as another way of destroying kpkts
-       this should have already been calculated and stored in the plasma structure. Note that 
+       this should have already been calculated and stored in the plasma structure. Note that
        adiabatic cooling does not depend on type of macro atom excited */
 
     /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
@@ -617,7 +568,7 @@ fill_kpkt_rates (xplasma, escape, p)
     }
 
 
-    /* If the next error occurs see issue #70.  It is ghought to be fixed, with the possiple 
+    /* If the next error occurs see issue #70.  It is ghought to be fixed, with the possiple
        exception of cells that are partially in the wind.
      */
     if (cooling_adiabatic < 0)
@@ -646,19 +597,19 @@ fill_kpkt_rates (xplasma, escape, p)
 
 
 /**********************************************************/
-/** 
- * @brief a routine which calculates what fraction of a level 
+/**
+ * @brief a routine which calculates what fraction of a level
  *         emissivity comes out in a given frequency range
  *
  * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
  * @param [in]      int         upper         macro-atom level
- * @param [in]      double      freq_min, freq    Frequency range requested 
+ * @param [in]      double      freq_min, freq    Frequency range requested
  *                                            (e.g. spectral cycle freq range)
  *
  * @details similar to routines like emit_matom, except that we calculate the fraction
- * of emission in a band rather than calculating frequencies for photons. Used to be 
+ * of emission in a band rather than calculating frequencies for photons. Used to be
  * done via a less efficient rejection method.
- * 
+ *
 ***********************************************************/
 
 double
@@ -680,7 +631,7 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
   double bb_cont;
   double flast, fthresh, bf_int_full, bf_int_inrange;
 
-//OLD  t_e = xplasma->t_e;           //electron temperature 
+//OLD  t_e = xplasma->t_e;           //electron temperature
   ne = xplasma->ne;             //electron number density
 
   /* The first step is to identify the configuration that has been excited. */
@@ -761,7 +712,7 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
       flast = cont_ptr->freq[cont_ptr->np - 1]; //last frequency in list
       bf_int_full = scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, 0, fthresh, flast);
 
-      /* the limits differ depending on whether the band covers all or part of the cross-section. 
+      /* the limits differ depending on whether the band covers all or part of the cross-section.
          four possibilities */
       if (fthresh < freq_min && flast > freq_max)
       {
@@ -808,22 +759,22 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief calculate what fraction of the thermal continuum emission comes out in the required band
  *
- * This routine uses the various cooling rates to work out which k->r processes contribute 
- * in the frequency range requested (between freq_min and freq_max). This involves doing a series 
+ * This routine uses the various cooling rates to work out which k->r processes contribute
+ * in the frequency range requested (between freq_min and freq_max). This involves doing a series
  * of band-limited integrals, for the bound-free "alpha" estimators, for each cross-section.
  * It also calls functions like total_free() to work out the fraction of free-free emission
- * that emerges in the frequency range. 
+ * that emerges in the frequency range.
  *
  *
  *
  * @param [in]      PlasmaPtr   xplasma       Plasma cell in question
  *
- * @param [in]      double      freq_min, freq    Frequency range requested 
+ * @param [in]      double      freq_min, freq    Frequency range requested
  *                                            (e.g. spectral cycle freq range)
- * 
+ *
  * @return penorm_band / penorm   total fraction of k->r emission that emerges in the band
 ************************************************************/
 
@@ -868,7 +819,7 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
   }
 
 
-  /* Now need to do k-packet processes. This subroutine calculates the k-packet 
+  /* Now need to do k-packet processes. This subroutine calculates the k-packet
      cooling rates and stores them in mplasma->cooling. Dummy variables are needed
      because this routine is also used in the main kpkt routine */
   escape_dummy = 0;
@@ -990,9 +941,9 @@ f_kpkt_emit_accelerate (xplasma, freq_min, freq_max)
  * @param[in] PlasmaPtr xplasma        The plasma cell in question
  * @param[in] int       uplvl          The level the macro-atom was activated with
  *
- * @return  int   j  the level the macro-atom will deactivate from 
+ * @return  int   j  the level the macro-atom will deactivate from
  *
- * @details 
+ * @details
  *
  **********************************************************/
 
@@ -1071,12 +1022,12 @@ matom_deactivation_from_matrix (xplasma, uplvl)
 
 /**********************************************************/
 /**
- * @brief calculate all the macro-atom matrices in advance 
+ * @brief calculate all the macro-atom matrices in advance
  * @return  0
- * 
- * @details calculate all the macro-atom B matrices in advance 
- * of the ionization cycles, and communicate them between 
- * parallel threads if necessary. Populates matom_matrix in 
+ *
+ * @details calculate all the macro-atom B matrices in advance
+ * of the ionization cycles, and communicate them between
+ * parallel threads if necessary. Populates matom_matrix in
  * macromain.
  **********************************************************/
 

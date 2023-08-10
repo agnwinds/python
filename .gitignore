@@ -17,6 +17,7 @@ bin/modify_wind*
 
 # Build directories
 cmake-build-*
+build
 
 # Precompiled Headers
 *.gch

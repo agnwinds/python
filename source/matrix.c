@@ -2,7 +2,7 @@
 /**
  *  @file matrix.c
  *  @author Edward J. Parkinson (e.parkinson@soton.ac.uk)
- *  @data August 2023
+ *  @date August 2023
  *
  *  @brief Functions for solving matrix problems, using both GSL and cuSOLVER.
  *
@@ -16,13 +16,14 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cusolverDn.h>
-#endif
-
+#else
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#endif
+
 
 #include "atomic.h"
 #include "python.h"
@@ -78,17 +79,22 @@
 
 #ifdef CUDA_ON
 
-cusolverDnHandle_t cu_handle;
+cusolverDnHandle_t cuDn_handle = NULL;
 
 static int
 gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x_vector)
 {
-  int error = EXIT_SUCCESS;
+  if (cuDn_handle == NULL)
+  {
+    CUSOLVER_CHECK (cusolverDnCreate (&cuDn_handle));
+  }
 
-  return error;
+  // cusolverDnDestroy(&cuDn_handle);
+
+  return EXIT_SUCCESS;
 }
 
-#endif
+#else
 
 /* ****************************************************************************************************************** */
 /**
@@ -256,6 +262,8 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
   return (ierr);
 }
 
+#endif
+
 /* ****************************************************************************************************************** */
 /**
  * @brief Solve the linear system A x = b, for the vector x
@@ -282,12 +290,115 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
 int
 solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma)
 {
-  int error = EXIT_SUCCESS;
+  int error;
 
 #ifdef CUDA_ON
-  error = gpu_solve_linear_system (a_matrix, b_matrix, size, x_matrix, nplasma);
+  error = gpu_solve_linear_system (a_matrix, b_matrix, size, x_matrix);
 #else
   error = cpu_solve_linear_system (a_matrix, b_matrix, size, x_matrix, nplasma);
+#endif
+
+  return error;
+}
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief
+ *
+ * @param  [in]  a_matrix
+ * @param  [out] a_inverse
+ * @param  [in]  num_rows
+ *
+ * @return an integer representing the error state
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+static int
+cpu_invert_matrix (double *a_data, double *a_inverse, int num_rows)
+{
+
+  /* now get ready for the matrix operations. first let's assign variables for use with GSL */
+  gsl_matrix_view N;
+  gsl_matrix *inverse_matrix;
+  gsl_permutation *p;
+
+  int s;
+
+  /* create a view into the array we just created */
+  N = gsl_matrix_view_array (a_data, num_rows, num_rows);
+
+  /* permuations are special structures that contain integers 0 to nrows-1, which can
+   * be manipulated */
+  p = gsl_permutation_alloc (num_rows);
+  inverse_matrix = gsl_matrix_alloc (num_rows, num_rows);
+
+  /* first we do the LU decomposition */
+  gsl_linalg_LU_decomp (&N.matrix, p, &s);
+
+  /* from the decomposition, get the inverse of the Q matrix */
+  gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+
+  int i, j;
+
+  for (i = 0; i < num_rows; ++i)
+  {
+    for (j = 0; j < num_rows; ++j)
+    {
+      a_inverse[i * num_rows + j] = gsl_matrix_get (inverse_matrix, i, j);
+    }
+  }
+
+  gsl_permutation_free (p);
+  gsl_matrix_free (inverse_matrix);
+
+  return EXIT_SUCCESS;
+}
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief
+ *
+ * @param  [in]  a_matrix
+ * @param  [out] a_inverse
+ * @param  [in]  num_rows
+ *
+ * @return an integer representing the error state
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+static int
+gpu_invert_matrix (double *matrix, double *inverse, int num_rows)
+{
+  return EXIT_SUCCESS;
+}
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief
+ *
+ * @param  [in]  a_matrix
+ * @param  [out] a_inverse
+ * @param  [in]  num_rows
+ *
+ * @return an integer representing the error state
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+int
+invert_matrix (double *matrix, double *inverted_matrix, int num_rows)
+{
+  int error;
+
+#ifdef CUDA_ON
+  ;
+#else
+  error = cpu_invert_matrix (matrix, inverted_matrix, num_rows);
 #endif
 
   return error;
