@@ -90,6 +90,7 @@ gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
   int *devInfo;
   int lwork;
   double *d_work;
+  int *d_pivot;                 // device array of pivoting sequence
 
   // Allocate memory on the GPU
   cudaMalloc ((void **) &d_A, size * size * sizeof (double));
@@ -104,13 +105,11 @@ gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
   cusolverDnDgetrf_bufferSize (cusolver_handle, size, size, d_A, size, &lwork);
   cudaMalloc ((void **) &d_work, lwork * sizeof (double));
 
-  int *d_pivot;                 // device array of pivoting sequence
   cudaMalloc ((void **) &d_pivot, size * sizeof (int));
 
   cusolverDnDgetrf (cusolver_handle, size, size, d_A, size, d_work, d_pivot, devInfo);
 
   // Solve the linear system
-  // cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, size, 1, d_A, size, d_pivot, d_b, size, devInfo);
   cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_T, size, 1, d_A, size, d_pivot, d_b, size, devInfo);
 
   // Transfer the solution back to the host

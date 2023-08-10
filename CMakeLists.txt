@@ -118,7 +118,7 @@ set(PYTHON_SOURCE
         source/xlog.c source/xtest.c source/zeta.c source/macro_accelerate.c
         source/macro_gen_f.c source/atomic_extern_init.c source/python_extern_init.c
         source/models_extern_init.c source/photon_gen_matom.c source/disk_photon_gen.c
-        source/matrix.c
+        source/matrix_cpu.c
         )
 
 set(PY_WIND_SOURCE

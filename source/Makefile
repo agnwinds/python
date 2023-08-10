@@ -12,9 +12,11 @@
 
 #MPICC is now default compiler
 CC = mpicc
-# CC = gcc	can use GCC either from command line or by uncommenting this
+# CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
+NVCC = nvcc
+# NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS =
 LDFLAGS =
@@ -55,11 +57,6 @@ ifeq (mpicc, $(CC))
 			COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
 		endif
 	endif
-else ifeq (nvcc, $(CC))
-	MPI_FLAG =
-	CUDA_FLAG = -DCUDA_ON
-	LDFLAGS += -lcusolver
-	COMPILER_PRINT_STRING = Compiling with $(CC)
 else ifeq (gcc, $(CC))
 	# no mpicc,
 	MPI_FLAG =
@@ -82,6 +79,14 @@ else	# you must be using clang or icc
 	# check the version we'll use this to print to the user
 	# COMPILER_VERSION = $(shell expr `$(CC) -dumpversion`)
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
+endif
+
+# If NVCC has been set (set in ./configure), we'll switch some functions out for
+# some written in CUDA -- e.g. matrix_gpu.cu
+ifneq ($(NVCC), )
+	CUDA_FLAG = -DCUDA_ON
+else
+	CUDA_FLAG =
 endif
 
 # this command finds out how many files with uncommitted changes there are
@@ -122,6 +127,7 @@ endif
 # LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas
 LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 
+
 #Note that version should be a single string without spaces.
 
 VERSION = 87b
@@ -130,7 +136,8 @@ startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'Compiler is really  $(XVERSION)'
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
-	@echo 'MPI_FLAG=' $(MPI_FLAG)
+	@echo 'MPI_FLAG='$(MPI_FLAG)
+	@echo 'CUDA_FLAG='$(CUDA_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
@@ -180,8 +187,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
-		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix.o
-
+		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 
@@ -204,12 +210,23 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c \
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c \
-		macro_accelerate.c atomic_extern_init.c  python_extern_init.o  models_extern_init.c matrix.c
+		macro_accelerate.c atomic_extern_init.c  python_extern_init.o  models_extern_init.c matrix_cpu.c
 
 #
 # kpar_source is now declared separately from python_source so that the file log.h
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c
+
+# if CUDA is enabled, we now need to define the source and any extra flags
+ifneq ($(CUDA_FLAG), )
+ 	CUDA_LIBS = -lcudart -lcusolver
+	CUDA_SOURCE := $(wildcard *.cu)
+	CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
+else
+	CUDA_LIBS =
+	CUDA_SOURCE =
+	CUDA_OBJECTS =
+endif
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c windsave2table.c windsave2table_sub.c
 
@@ -224,8 +241,13 @@ prototypes:
 	cproto  -I$(INCLUDE) atomicdata_init.c >> atomic_proto.h
 	cproto  -I$(INCLUDE) recipes.c random.c cdf.c vvector.c > math_proto.h
 
-python: startup python.o $(python_objects)
-	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
+cuda: startup $(CUDA_SOURCE)
+ifneq ($(CUDA_FLAG),)
+	$(NVCC) -c $(CUDA_SOURCE) ${CUDA_FLAG}
+endif
+
+python: startup cuda python.o $(python_objects)
+	$(CC) ${CFLAGS} python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) $(CUDA_LIBS) -o python
 	cp $@ $(BIN)/py
         ifdef XDEBUG
 	  mv $@ $(BIN)/py$(VERSION)_debug
@@ -254,7 +276,7 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
 		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o \
-		macro_accelerate.o  atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix.o
+		macro_accelerate.o  atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 
@@ -279,7 +301,7 @@ table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_in
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_wind_sub.o windsave.o py_wind_ion.o \
@@ -295,7 +317,7 @@ rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o 
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o frame.o walls.o charge_exchange.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 run_indent:
@@ -332,7 +354,7 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 modify_wind:  $(modify_wind_objects)
@@ -356,7 +378,7 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 
@@ -394,7 +416,7 @@ py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
 		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o \
-		py_optd_extern_init.o matrix.o
+		py_optd_extern_init.o matrix_cpu.o
 
 py_optd: startup $(py_optd_obj)
 	$(CC) $(CFLAGS) $(py_optd_obj) $(LDFLAGS) -o $@
