@@ -211,7 +211,7 @@ cpu_invert_matrix (double *matrix, double *inverted_matrix, int num_rows)
   gsl_linalg_LU_decomp (&N.matrix, p, &s);
   gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
 
-  for (i = 0; i < num_rows; ++i)        /* is i mm in macro_accelerate.c */
+  for (i = 0; i < num_rows; ++i)        /* i is mm in macro_accelerate.c */
   {
     for (j = 0; j < num_rows; ++j)      /* j is nn in macro_accelerate.c */
     {
@@ -282,8 +282,7 @@ invert_matrix (double *matrix, double *inverted_matrix, int num_rows)
   int error;
 
 #ifdef CUDA_ON
-  // error = gpu_invert_matrix (matrix, inverted_matrix, num_rows);
-  error = cpu_invert_matrix (matrix, inverted_matrix, num_rows);
+  error = gpu_invert_matrix (matrix, inverted_matrix, num_rows);
 #else
   error = cpu_invert_matrix (matrix, inverted_matrix, num_rows);
 #endif

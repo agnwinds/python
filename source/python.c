@@ -94,6 +94,10 @@ main (argc, argv)
   np_mpi = 1;
 #endif
 
+#ifdef CUDA_ON
+  cuda_init ();
+#endif
+
   np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
@@ -231,7 +235,7 @@ main (argc, argv)
          model,(presumably because that run produced a wind close to the one we are looking for,
          but we are going to change some parameters that do not affect the wind geometry,
          We will write use new filenames for the results, so all of the previous work is still saved,
-         Note that wind_read also reads the atomic data file that was used to create the previous run of the data. 
+         Note that wind_read also reads the atomic data file that was used to create the previous run of the data.
        */
 
       strcpy (files.old_windsave, "earlier.run");
@@ -599,10 +603,10 @@ main (argc, argv)
 
 
 /* The next section sets up two represenations of the disk structure
- * 
+ *
  * disk_init is called primarily to get
  * a defined set of annular rings which are kept throughout the
- * ionization calculation.  
+ * ionization calculation.
  * disk_init calculates the flux from the disk in the energy range set by
  * freqmin and freqmax, and uses is this to identify the position of the
  * rings in the disk, so that each ring contributes the same amount to

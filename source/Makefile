@@ -102,19 +102,18 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python"
 # this can be altered to whatever is best
-	CFLAGS = -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) $(CUDA_FLAG)
+	CFLAGS = -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
         XDEBUG = True
 	ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
-		CFLAGS = -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) $(CUDA_FLAG)
+		CFLAGS = -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 		FFLAGS = -g
 		PRINT_VAR = DEBUGGING, -g -Wall flags
 	endif
-	INDENT = no
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) $(CUDA_FLAG)
+	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS =
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
@@ -136,6 +135,8 @@ startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'Compiler is really  $(XVERSION)'
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
+	@echo 'CFLAGS='$(CFLAGS)
+	@echo 'LDFLAGS='$(LDFLAGS)
 	@echo 'MPI_FLAG='$(MPI_FLAG)
 	@echo 'CUDA_FLAG='$(CUDA_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
@@ -222,6 +223,7 @@ ifneq ($(CUDA_FLAG), )
  	CUDA_LIBS = -lcudart -lcusolver
 	CUDA_SOURCE := $(wildcard *.cu)
 	CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
+	LDFLAGS+=$(CUDA_LIBS)
 else
 	CUDA_LIBS =
 	CUDA_SOURCE =
@@ -281,8 +283,8 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 
 
 
-py_wind: startup $(py_wind_objects)
-	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
+py_wind: startup cuda $(py_wind_objects)
+	$(CC) $(CFLAGS) $(py_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o py_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -324,16 +326,16 @@ run_indent:
 	../py_progs/run_indent.py -all_no_headers
 
 
-windsave2table: $(table_objects)
-	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
+windsave2table: startup cuda $(table_objects)
+	$(CC) $(CFLAGS) $(table_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o windsave2table
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 
-rad_hydro_files: $(rhf_objects)
-	$(CC) $(CFLAGS) $(rhf_objects) $(LDFLAGS) -o rad_hydro_files
+rad_hydro_files: startup cuda $(rhf_objects)
+	$(CC) $(CFLAGS) $(rhf_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o rad_hydro_files
 	cp $@ $(BIN)
 	mv $@ $(BIN)/rad_hydro_files$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -357,8 +359,8 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
-modify_wind:  $(modify_wind_objects)
-	$(CC) $(CFLAGS) $(modify_wind_objects) $(LDFLAGS) -o modify_wind
+modify_wind: startup cuda $(modify_wind_objects)
+	$(CC) $(CFLAGS) $(modify_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o modify_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/modify_wind$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -382,8 +384,8 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 
 
 
-inspect_wind:  $(inspect_wind_objects)
-	$(CC) $(CFLAGS) $(inspect_wind_objects) $(LDFLAGS)  -o inspect_wind
+inspect_wind: startup cuda $(inspect_wind_objects)
+	$(CC) $(CFLAGS) $(inspect_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS)  -o inspect_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/inspect_wind$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -418,8 +420,8 @@ py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o \
 		py_optd_extern_init.o matrix_cpu.o
 
-py_optd: startup $(py_optd_obj)
-	$(CC) $(CFLAGS) $(py_optd_obj) $(LDFLAGS) -o $@
+py_optd: startup cuda $(py_optd_obj)
+	$(CC) $(CFLAGS) $(py_optd_obj) $(CUDA_OBJECTS) $(LDFLAGS) -o $@
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_optd$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi

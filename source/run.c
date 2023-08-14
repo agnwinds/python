@@ -4,8 +4,8 @@
  * @author ksl
  * @date   May, 2018
  *
- * @brief  the driving routines to carry out calculation of 
- * the ionization of the plasma and also to extract detailed 
+ * @brief  the driving routines to carry out calculation of
+ * the ionization of the plasma and also to extract detailed
  * spectra after the inputs have been collected.
  *
  * ### Programming Comment ###
@@ -28,13 +28,13 @@
 #include "python.h"
 
 /**********************************************************/
-/** 
- * @brief      run the ionization cycles for a 
+/**
+ * @brief      run the ionization cycles for a
  * python model
  *
  * @param [in] int  restart_stat   FALSE if the is run is beginning from
  * scratch,  TRUE if this was a restart
- * @return     Always returns 0 
+ * @return     Always returns 0
  *
  * @details
  * This is the main routine for running the ionization
@@ -95,7 +95,7 @@ calculate_ionization (restart_stat)
     xsignal (files.root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n", "COMMENT", geo.wcycle, geo.wcycles);
   else
   {
-    geo.pcycle = 0;             /* Set the spectrum cycles executed to 0, because 
+    geo.pcycle = 0;             /* Set the spectrum cycles executed to 0, because
                                    we are going to modify the wind and hence any
                                    previously calculated spectra must be recreated
                                  */
@@ -134,8 +134,8 @@ calculate_ionization (restart_stat)
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
 
 
-    /* calculate the B matrices if we are using the matrix macro-atom transition mode, 
-       and we are choosing to store the matrix in at least some cells and there are 
+    /* calculate the B matrices if we are using the matrix macro-atom transition mode,
+       and we are choosing to store the matrix in at least some cells and there are
        macro-atom levels */
 
     if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0 && modes.store_matom_matrix)
@@ -175,8 +175,8 @@ calculate_ionization (restart_stat)
 
     /* Create the photons that need to be transported through the wind
      *
-     * NPHOT is the number of photon bundles which will equal the luminosity; 
-     * 0 => for ionization calculation 
+     * NPHOT is the number of photon bundles which will equal the luminosity;
+     * 0 => for ionization calculation
      */
 
     nphot_to_define = (long) NPHOT;
@@ -224,7 +224,7 @@ calculate_ionization (restart_stat)
     /* Transport the photons through the wind */
     trans_phot (w, p, FALSE);
 
-    /* Determine how much energy was absorbed in the wind. first zero counters. 
+    /* Determine how much energy was absorbed in the wind. first zero counters.
        There are counters for total energy absorbed and for each entry in the istat enum */
     z_abs_all = z_else = 0.0;
     for (nn = 0; nn < N_ISTAT; nn++)
@@ -285,7 +285,7 @@ calculate_ionization (restart_stat)
 
 
 
-    /* At this point we should communicate all the useful infomation 
+    /* At this point we should communicate all the useful infomation
        that has been accummulated on differenet MPI tasks */
 
 #ifdef MPI_ON
@@ -341,7 +341,7 @@ calculate_ionization (restart_stat)
     {
 #endif
 
-/* The variables for spectrum_sumamry are the filename, the attribute for the file write, the minimum and maximum spectra to write out, 
+/* The variables for spectrum_sumamry are the filename, the attribute for the file write, the minimum and maximum spectra to write out,
  * the type of spectrum (RAW meaning internal luminosity units, the amount by which to renormalize (1 means use the existing
  * values, loglin (0=linear, 1=log for the wavelength scale), all photons or just wind photons
  */
@@ -357,7 +357,7 @@ calculate_ionization (restart_stat)
     MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
-    /* Save everything after each cycle and prepare for the next cycle 
+    /* Save everything after each cycle and prepare for the next cycle
        JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
     /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
@@ -367,8 +367,8 @@ calculate_ionization (restart_stat)
 
 
 /* Save only the windsave file from thread 0, to prevent many processors from writing to the same
- * file. 
-  
+ * file.
+
  Note that if one wants to write out the files from all threads, then one should comment out the
  MPI specific if statements below, leving MPI_Barrier, and replace the sprintf statment with
 
@@ -439,7 +439,7 @@ calculate_ionization (restart_stat)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      generates the detailed spectra
  *
  * @param [in] int  restart_stat   FALSE if the is run is beginning from
@@ -480,7 +480,7 @@ make_spectra (restart_stat)
   freqmin = VLIGHT / (geo.swavemax * ANGSTROM);
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
-     calculation of the spectrum.  
+     calculation of the spectrum.
 
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
@@ -490,7 +490,7 @@ make_spectra (restart_stat)
 /* Next steps to speed up extraction stage */
   if (!modes.keep_photoabs)
   {
-    DENSITY_PHOT_MIN = -1.0;    // Do not calculated photoabsorption in detailed spectrum 
+    DENSITY_PHOT_MIN = -1.0;    // Do not calculated photoabsorption in detailed spectrum
   }
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */
@@ -545,7 +545,7 @@ make_spectra (restart_stat)
     xsignal (files.root, "%-20s No spectrum needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
   else
   {
-    /* Then we are restarting a run with more spectral cycles, but we 
+    /* Then we are restarting a run with more spectral cycles, but we
        have already completed some. The memory for the spectral arrays
        should already have been allocated, and the spectrum was initialised
        on the original run, so we just need to renormalise the saved spectrum */
@@ -578,9 +578,9 @@ make_spectra (restart_stat)
     else
       iwind = 0;                /* Create wind photons but do not force reinitialization */
 
-    /* Create the initial photon bundles which need to be transported through the wind 
+    /* Create the initial photon bundles which need to be transported through the wind
 
-       For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 
+       For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity,
        1 implies that detailed spectra, as opposed to the ionization of the wind is being calculated
 
        JM 130306 must convert NPHOT and pcycles to double precision variable nphot_to_define
@@ -688,7 +688,7 @@ make_spectra (restart_stat)
 /* Finally done */
 
 #ifdef MPI_ON
-  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status    
+  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status
   error_summary (dummy);        // Summarize the errors that were recorded by the program
   Log ("Run py_error.py for full error report.\n");
 #else
@@ -701,6 +701,9 @@ make_spectra (restart_stat)
   Log_parallel ("Thread %d Finalized. All done\n", rank_global);
 #endif
 
+#ifdef CUDA_ON
+  cuda_finish ();
+#endif
 
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
   Log ("\nBrief Run Summary\nAt program completion, the elapsed TIME was %f\n", timer ());

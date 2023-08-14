@@ -78,7 +78,7 @@ static cusolverDnHandle_t cusolver_handle = NULL;
  *  ***************************************************************************************************************** */
 
 extern "C" void
-create_cusolver_handle (void)
+cuda_init (void)
 {
   CUSOLVER_CHECK (cusolverDnCreate (&cusolver_handle));
   Log ("Created a new cuSOLVER handle created\n");
@@ -95,10 +95,32 @@ create_cusolver_handle (void)
  *  ***************************************************************************************************************** */
 
 extern "C" void
-destroy_cusolver_handle (void)
+cuda_finish (void)
 {
   CUSOLVER_CHECK (cusolverDnDestroy (cusolver_handle));
   Log ("Destroyed the cuSOLVER handle\n");
+}
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief
+ *
+ * @return
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+__global__ void
+createIdentityMatrixKernel (double *d_identity, int size)
+{
+  int col = threadIdx.x + blockIdx.x * blockDim.x;
+  int row = threadIdx.y + blockIdx.y * blockDim.y;
+
+  if (row < size && col < size)
+  {
+    d_identity[row * size + col] = (row == col) ? 1.0 : 0.0;
+  }
 }
 
 /* ****************************************************************************************************************** */
@@ -121,9 +143,6 @@ destroy_cusolver_handle (void)
 extern "C" int
 gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x_vector)
 {
-  if (cusolver_handle == NULL)
-    create_cusolver_handle ();
-
   int *devInfo;
   int lwork;
   int *d_pivot;                 /* device array of pivoting sequence */
@@ -174,10 +193,38 @@ gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
  *  ***************************************************************************************************************** */
 
 extern "C" int
-gpu_invert_matrix (double *matrix, double *inverse, int num_rows)
+gpu_invert_matrix (double *matrix, double *inverse_matrix, int num_rows)
 {
-  if (!cusolver_handle)
-    create_cusolver_handle ();
+  int *d_pivot;
+  int work_size;
+  int *dev_info;
+  double *d_matrix;
+  double *d_identity;
+  double *d_workspace;
+
+  cudaMalloc ((void **) &d_matrix, num_rows * num_rows * sizeof (double));
+  cudaMalloc ((void **) &d_pivot, num_rows * sizeof (int));
+  cudaMalloc ((void **) &d_identity, num_rows * num_rows * sizeof (double));
+  cudaMalloc ((void **) &dev_info, sizeof (int));
+
+  cudaMemcpy (d_matrix, matrix, num_rows * num_rows * sizeof (double), cudaMemcpyHostToDevice);
+
+  dim3 blockSize (16, 16);
+  dim3 gridSize ((num_rows + blockSize.x - 1) / blockSize.x, (num_rows + blockSize.y - 1) / blockSize.y);
+  createIdentityMatrixKernel <<< gridSize, blockSize >>> (d_identity, num_rows);
+
+  cusolverDnDgetrf_bufferSize (cusolver_handle, num_rows, num_rows, d_matrix, num_rows, &work_size);
+  cudaMalloc ((void **) &d_workspace, work_size * sizeof (double));
+
+  cusolverDnDgetrf (cusolver_handle, num_rows, num_rows, d_matrix, num_rows, d_workspace, d_pivot, dev_info);
+  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_T, num_rows, num_rows, d_matrix, num_rows, d_pivot, d_identity, num_rows, dev_info);
+
+  cudaMemcpy (inverse_matrix, d_identity, num_rows * num_rows * sizeof (double), cudaMemcpyDeviceToHost);
+
+  cudaFree (d_matrix);
+  cudaFree (d_identity);
+  cudaFree (d_workspace);
+  cudaFree (dev_info);
 
   return EXIT_SUCCESS;
 }
