@@ -12,17 +12,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "log.h"
-
 #if CUDA_ON
 
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cusolverDn.h>
 
-// #include "matrix.h"
+/* NVCC is a C++ compiler at heart, so anything we re-use from regular C source
+   has to be defined here with `extern "C"` to tell the compiler that the
+   function has been compiled by a C compiler (and does some computer science
+   stuff to make linking possible) */
 
-cusolverDnHandle_t cusolver_handle = NULL;
+extern "C" int Exit (int error_code);
+extern "C" int Error (const char *format, ...);
+extern "C" int Log (const char *format, ...);
+
+/* `cusolver_handle` is a variable used to interact with the cuSolver/CUDA
+    runtime and is used to initialise and clean up the resources required for
+    both runtimes */
+
+static cusolverDnHandle_t cusolver_handle = NULL;
 
 /* ****************************************************************************************************************** */
 /**
@@ -36,8 +45,8 @@ cusolverDnHandle_t cusolver_handle = NULL;
   do {                                                                                                                 \
     cudaError_t err = status;                                                                                          \
     if (err != cudaSuccess) {                                                                                          \
-      printf((char *)"CUDA Error: %s\n", cudaGetErrorString(err));                                                              \
-      return(EXIT_FAILURE);                                                                                              \
+      Error("CUDA Error: %s\n", cudaGetErrorString(err));                                                              \
+      Exit(EXIT_FAILURE);                                                                                              \
     }                                                                                                                  \
   } while (0)
 
@@ -53,10 +62,44 @@ cusolverDnHandle_t cusolver_handle = NULL;
   do {                                                                                                                 \
     cusolverStatus_t err = status;                                                                                     \
     if (err != CUSOLVER_STATUS_SUCCESS) {                                                                              \
-      printf((char *)"cuSolver Error: %d\n", err);                                                                              \
-      return(EXIT_FAILURE);                                                                                              \
+      Error("cuSolver Error: %d\n", err);                                                                              \
+      Exit(EXIT_FAILURE);                                                                                              \
     }                                                                                                                  \
   } while (0)
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief
+ *
+ * @return
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+extern "C" void
+create_cusolver_handle (void)
+{
+  CUSOLVER_CHECK (cusolverDnCreate (&cusolver_handle));
+  Log ("Created a new cuSOLVER handle created\n");
+}
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief
+ *
+ * @return
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+extern "C" void
+destroy_cusolver_handle (void)
+{
+  CUSOLVER_CHECK (cusolverDnDestroy (cusolver_handle));
+  Log ("Destroyed the cuSOLVER handle\n");
+}
 
 /* ****************************************************************************************************************** */
 /**
@@ -79,48 +122,39 @@ extern "C" int
 gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x_vector)
 {
   if (cusolver_handle == NULL)
-  {
-    CUSOLVER_CHECK (cusolverDnCreate (&cusolver_handle));
-  }
+    create_cusolver_handle ();
 
-  printf ((char *) "We are in the GPU function\n");
-
-  // Device variables
-  double *d_A, *d_b;
   int *devInfo;
   int lwork;
-  double *d_work;
-  int *d_pivot;                 // device array of pivoting sequence
+  int *d_pivot;                 /* device array of pivoting sequence */
+  double *d_A, *d_b;
+  double *d_work;               /* cuSolver needs a "workspace" to do stuff, which we have to allocate manually */
 
-  // Allocate memory on the GPU
+  /* Allocate memory on the GPU (device) to store the matrices/vectors */
   cudaMalloc ((void **) &d_A, size * size * sizeof (double));
   cudaMalloc ((void **) &d_b, size * sizeof (double));
   cudaMalloc ((void **) &devInfo, sizeof (int));
 
-  // Transfer data to the GPU
+  /* Copy the matrix and vector to the device memory */
   cudaMemcpy (d_A, a_matrix, size * size * sizeof (double), cudaMemcpyHostToDevice);
   cudaMemcpy (d_b, b_vector, size * sizeof (double), cudaMemcpyHostToDevice);
+  cudaMalloc ((void **) &d_pivot, size * sizeof (int));
 
-  // Perform LU factorization
+  /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the linear
+     system being solved */
   cusolverDnDgetrf_bufferSize (cusolver_handle, size, size, d_A, size, &lwork);
   cudaMalloc ((void **) &d_work, lwork * sizeof (double));
 
-  cudaMalloc ((void **) &d_pivot, size * sizeof (int));
-
+  /* Perform LU factorization and solve the linear system. The vector d_b is not used in `getrs` (the solver), but
+     it's the same size of the solution vector so we'll re-use that. d_b is then copied back to host memory (CPU RAM) */
   cusolverDnDgetrf (cusolver_handle, size, size, d_A, size, d_work, d_pivot, devInfo);
-
-  // Solve the linear system
   cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_T, size, 1, d_A, size, d_pivot, d_b, size, devInfo);
-
-  // Transfer the solution back to the host
   cudaMemcpy (x_vector, d_b, size * sizeof (double), cudaMemcpyDeviceToHost);
 
-  // Clean up
   cudaFree (d_A);
   cudaFree (d_b);
   cudaFree (d_work);
   cudaFree (d_pivot);
-  cusolverDnDestroy (cusolver_handle);
 
   return EXIT_SUCCESS;
 }
@@ -142,10 +176,8 @@ gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
 extern "C" int
 gpu_invert_matrix (double *matrix, double *inverse, int num_rows)
 {
-  if (cusolver_handle == NULL)
-  {
-    CUSOLVER_CHECK (cusolverDnCreate (&cusolver_handle));
-  }
+  if (!cusolver_handle)
+    create_cusolver_handle ();
 
   return EXIT_SUCCESS;
 }
