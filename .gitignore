@@ -71,6 +71,7 @@ wiki/
 *.pyc
 *~
 *.DS_Store
+**/*foo.txt
 
 # some gsl files
 *.Plo
