@@ -338,7 +338,7 @@ macro_pops (xplasma, xne)
      double xne;
 {
   int i, j, index_element, index_lvl;
-  int gsl_err, numerical_error, populations_ok;
+  int matrix_err, numerical_error, populations_ok;
   int n_macro_lvl;
   int n_iterations, n_inversions;
   double *a_data, *b_data;
@@ -440,10 +440,10 @@ macro_pops (xplasma, xne)
 
           /* this next routine is a general routine which solves the matrix equation
              via LU decomposition */
-          gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
-          if (gsl_err)
+          matrix_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
+          if (matrix_err)
           {
-            Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
+            Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", matrix_err);
           }
 
           /* Now we take the population array and check to see if anything is very

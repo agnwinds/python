@@ -8,12 +8,15 @@
  *
  *  ***************************************************************************************************************** */
 
+#ifndef MATRIX_H
+#define MATRIX_H
 #ifdef CUDA_ON
 
-void cuda_init (void);
-void cuda_finish (void);
+int cuda_init (void);
+int cuda_finish (void);
 
 int gpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x_vector);
 int gpu_invert_matrix (double *matrix, double *inverse, int num_rows);
 
+#endif
 #endif

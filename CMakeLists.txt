@@ -20,7 +20,8 @@
 #
 
 cmake_minimum_required(VERSION 3.0)
-project(Python C)
+project(Python LANGUAGES C CUDA)
+
 
 # Set the Python version
 
@@ -34,7 +35,8 @@ message(STATUS "Python version : ${PYTHON_VERSION}")
 
 set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_COMPILER mpicc)
-add_definitions(-Wall -Wextra -D MPI_ON)
+enable_language(CUDA)
+add_definitions(-DMPI_ON -DCUDA_ON)
 
 # Setup any include directories, as well as any library directories. This is
 # used to link the GSL directories
@@ -118,29 +120,29 @@ set(PYTHON_SOURCE
         source/xlog.c source/xtest.c source/zeta.c source/macro_accelerate.c
         source/macro_gen_f.c source/atomic_extern_init.c source/python_extern_init.c
         source/models_extern_init.c source/photon_gen_matom.c source/disk_photon_gen.c
-        source/matrix_cpu.c
+        source/matrix_cpu.c source/matrix_gpu.cu
         )
 
 set(PY_WIND_SOURCE
-        source/py_wind_ion.c source/py_wind_macro.c
-        source/py_wind_sub.c source/py_wind_write.c
-        )
+       source/py_wind_ion.c source/py_wind_macro.c
+       source/py_wind_sub.c source/py_wind_write.c
+       )
 
 set(WINDSAVE2TABLE_SOURCE
-        source/windsave2table_sub.c
-        )
+       source/windsave2table_sub.c
+       )
 
 set(RAD_HYDRO_SOURCE
-        source/rad_hydro_files.c
-        )
+       source/rad_hydro_files.c
+       )
 
 set(INSPECT_WIND_SOURCE
-        source/inspect_wind.c
-        )
+       source/inspect_wind.c
+       )
 
 set(OPTICAL_DEPTH_SOURCE
-        source/py_optd.c source/py_optd_trans.c source/py_optd_util.c
-        source/py_optd_output.c source/py_optd_extern_init.c)
+       source/py_optd.c source/py_optd_trans.c source/py_optd_util.c
+       source/py_optd_output.c source/py_optd_extern_init.c)
 
 # Create the executables for each program, and link the required libraries
 
@@ -162,4 +164,5 @@ target_link_libraries(py_optd gsl gslcblas m)
 
 # Python
 add_executable(python source/python.c ${PYTHON_SOURCE})
+set_target_properties(python PROPERTIES CUDA_ARCHITECTURES "72")
 target_link_libraries(python gsl gslcblas m)

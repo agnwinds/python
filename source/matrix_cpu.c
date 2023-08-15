@@ -20,17 +20,44 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "matrix.h"
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief Get the error string for a error code from the GSL matrix solver
+ *
+ * @param [in] error_code the error code returned from the GSL matrix solver function
+ *
+ * @return The error string
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+const char *
+get_matrix_error_string (int error_code)
+{
+  switch (error_code)
+  {
+  case 2:
+    return "some matrix rows failing relative error check";
+  case 3:
+    return "some matrix rows failing absolute error check";
+  case 4:
+    return "Unsolvable matrix! Determinant is zero. Defaulting to no change";
+  default:
+    return "bad return from solve_matrix";
+  }
+}
 
 /* ****************************************************************************************************************** */
 /**
  * @brief  Solve the linear system A x = b, for the vector x
  *
- * @param  [in]  a_matrix - a square matrix on the LHS
- * @param  [in]  b_vector - the B resultant vector
- * @param  [in]  size - the number of rows (and columns) in the square matrix matrix and vectors
- * @param  [out] x_vector - the x vector on the RHS
- * @param  [in]  nplasma - the index of the plasma cell we are working on
+ * @param  [in]  a_matrix a square matrix on the LHS
+ * @param  [in]  b_vector the B resultant vector
+ * @param  [in]  matrix-size the number of rows (and columns) in the square matrix matrix and vectors
+ * @param  [out] x_vector the x vector on the RHS
+ * @param  [in]  nplasma the index of the plasma cell we are working on
  *
  * @return an integer representing the error state
  *
@@ -45,7 +72,7 @@
  *  ***************************************************************************************************************** */
 
 static int
-cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x_vector, int nplasma)
+cpu_solve_linear_system (double *a_matrix, double *b_vector, int matrix_size, double *x_vector, int nplasma)
 {
   int mm, ierr, s;
   double test_val;
@@ -68,11 +95,11 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
   /* create gsl matrix/vector views of the arrays of rates.
    * This is the structure that gsl uses do define an array.
    * It contains not only the data but the dimensions, etc.*/
-  m = gsl_matrix_view_array (a_matrix, size, size);
+  m = gsl_matrix_view_array (a_matrix, matrix_size, matrix_size);
 
   /* these are used for testing the solution below */
-  test_matrix = gsl_matrix_alloc (size, size);
-  test_vector = gsl_vector_alloc (size);
+  test_matrix = gsl_matrix_alloc (matrix_size, matrix_size);
+  test_vector = gsl_vector_alloc (matrix_size);
 
   gsl_matrix_memcpy (test_matrix, &m.matrix);   // create copy for testing
 
@@ -80,16 +107,16 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
    * It contains the data and the dimension, and other information about where
    * the vector is stored in memory etc.
    */
-  b = gsl_vector_view_array (b_vector, size);
+  b = gsl_vector_view_array (b_vector, matrix_size);
 
   /* the populations vector will be a gsl vector which stores populations */
-  solution_vector = gsl_vector_alloc (size);
+  solution_vector = gsl_vector_alloc (matrix_size);
 
 
   /* permuations are special structures that contain integers 0 to size-1, which can
    * be manipulated */
 
-  p = gsl_permutation_alloc (size);
+  p = gsl_permutation_alloc (matrix_size);
 
   /* Decomposes m into its LU Components.  Store the L part in m and the
    * U part in s and p is modified.
@@ -131,7 +158,7 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
 
-  for (mm = 0; mm < size; mm++)
+  for (mm = 0; mm < matrix_size; mm++)
   {
 
     /* get the element of the vector we want to check */
@@ -166,7 +193,7 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
   }
 
   /* copy the populations to a normal array */
-  for (mm = 0; mm < size; mm++)
+  for (mm = 0; mm < matrix_size; mm++)
   {
     x_vector[mm] = gsl_vector_get (solution_vector, mm);
   }
@@ -183,44 +210,47 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int size, double *x
 
 /* ****************************************************************************************************************** */
 /**
- * @brief
+ * @brief Calculate the inverse of the square matrix `matrix`
  *
- * @param  [in]  a_matrix
- * @param  [out] a_inverse
- * @param  [in]  num_rows
+ * @param  [in]  matrix the matrix to compute the inverse for
+ * @param  [out] inverse_inverse the inverse of `matrix`
+ * @param  [in]  matrix_size  the size of the matrix
  *
  * @return an integer representing the error state
  *
  * @details
  *
+ * Performs LU decomposition to compute the inverse of a matrix. Uses the GSL matrix library, which is (I think) a
+ * wrapper around lapack.
+ *
  *  ***************************************************************************************************************** */
 
 static int
-cpu_invert_matrix (double *matrix, double *inverted_matrix, int num_rows)
+cpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
 {
   int s;
   int i, j;
   gsl_matrix_view N;
-  gsl_matrix *inverse_matrix;
+  gsl_matrix *inverse;
   gsl_permutation *p;
 
-  N = gsl_matrix_view_array (matrix, num_rows, num_rows);
-  p = gsl_permutation_alloc (num_rows);
-  inverse_matrix = gsl_matrix_alloc (num_rows, num_rows);
+  N = gsl_matrix_view_array (matrix, matrix_size, matrix_size);
+  p = gsl_permutation_alloc (matrix_size);
+  inverse = gsl_matrix_alloc (matrix_size, matrix_size);
 
   gsl_linalg_LU_decomp (&N.matrix, p, &s);
-  gsl_linalg_LU_invert (&N.matrix, p, inverse_matrix);
+  gsl_linalg_LU_invert (&N.matrix, p, inverse);
 
-  for (i = 0; i < num_rows; ++i)        /* i is mm in macro_accelerate.c */
+  for (i = 0; i < matrix_size; ++i)     /* i is mm in macro_accelerate.c */
   {
-    for (j = 0; j < num_rows; ++j)      /* j is nn in macro_accelerate.c */
+    for (j = 0; j < matrix_size; ++j)   /* j is nn in macro_accelerate.c */
     {
-      inverted_matrix[i * num_rows + j] = gsl_matrix_get (inverse_matrix, i, j);
+      inverse_matrix[i * matrix_size + j] = gsl_matrix_get (inverse, i, j);
     }
   }
 
   gsl_permutation_free (p);
-  gsl_matrix_free (inverse_matrix);
+  gsl_matrix_free (inverse);
 
   return EXIT_SUCCESS;
 }

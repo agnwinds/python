@@ -66,7 +66,7 @@ matrix_ion_populations (xplasma, mode)
   double b_temp[nions];         //The b matrix
   double *b_data, *a_data;      //These arrays are allocated later and sent to the matrix solver
   double *populations;          //This array is allocated later and is retrieved from the matrix solver
-  int ierr, niterate;           //counters for errors and the number of iterations we have tried to get a converged electron density
+  int matrix_err, niterate;     //counters for errors and the number of iterations we have tried to get a converged electron density
   double xnew;
   int xion[nions];              // This array keeps track of what ion is in each line
 //OLD  int xelem[nions];             // This array keeps track of the element for each ion
@@ -292,24 +292,18 @@ matrix_ion_populations (xplasma, mode)
       b_data[nn] = b_temp[nn];
     }
 
-    ierr = solve_matrix (a_data, b_data, nrows, populations, xplasma->nplasma);
+    matrix_err = solve_matrix (a_data, b_data, nrows, populations, xplasma->nplasma);
 
-    if (ierr != 0)
-      Error ("matrix_ion_populations: bad return from solve_matrix\n", ierr);
-    if (ierr == 2)
-      Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
-    else if (ierr == 3)
-      Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
-    else if (ierr == 4)
-      Error ("matrix_ion_populations: Unsolvable matrix! Determinant is zero. Defaulting to no change.\n");
-
-
+    if (matrix_err)
+    {
+      Error ("matrix_ion_populations: %s\n", get_matrix_error_string (matrix_err));
+    }
 
     /* free memory */
     free (a_data);
     free (b_data);
 
-    if (ierr == 4)
+    if (matrix_err == 4)
     {
       free (populations);
       return (-1);
@@ -430,7 +424,6 @@ matrix_ion_populations (xplasma, mode)
    */
 
   partition_functions (xplasma, NEBULARMODE_LTE_GROUND);
-
 
   return (0);
 }
