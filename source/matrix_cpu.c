@@ -135,7 +135,7 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int matrix_size, do
   if (ierr)
   {
     lndet = gsl_linalg_LU_lndet (&m.matrix);    // get the determinant to report to user
-    Error ("Solve_matrix: gsl_linalg_LU_solve failure (%d %.3e) for cell %i \n", ierr, lndet, nplasma);
+    Error ("Solve_matrix: gsl_linalg_LU_solve failure (error %d determinant %.3e) for cell %i \n", ierr, lndet, nplasma);
 
     return (4);
   }
@@ -249,7 +249,7 @@ cpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
     }
   }
 
-  gsl_permutation_free (p);
+  // gsl_permutation_free (p);
   gsl_matrix_free (inverse);
 
   return EXIT_SUCCESS;
