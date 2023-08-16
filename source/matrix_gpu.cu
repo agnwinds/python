@@ -121,6 +121,9 @@ cusolverGetErrorString (cusolverStatus_t status)
 extern "C" int
 cuda_init (void)
 {
+  if (cusolver_handle)
+    return EXIT_SUCCESS;
+
 #ifdef MPI_ON
 #if defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT
   Log ("This MPI library has CUDA-aware support.\n");
@@ -132,7 +135,6 @@ cuda_init (void)
 #endif
 
   CUSOLVER_CHECK (cusolverDnCreate (&cusolver_handle));
-  Log ("cuSolver has been initialised\n");
 
   return EXIT_SUCCESS;
 }
@@ -153,7 +155,7 @@ extern "C" int
 cuda_finish (void)
 {
   CUSOLVER_CHECK (cusolverDnDestroy (cusolver_handle));
-  Log ("cuSolver has been cleaned up\n");
+  cusolver_handle = NULL;
 
   return EXIT_SUCCESS;
 }
@@ -295,7 +297,7 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
   /* We first need to facotrise the matrix to get the pivot indcies, for getrs. The function getrs is solves a linear
      system to solve for the inverse matrix. The inverse matrix is placed back into `d_identity` */
   cusolverDnDgetrf (cusolver_handle, matrix_size, matrix_size, d_matrix, matrix_size, d_workspace, d_pivot, dev_info);
-  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_T, matrix_size, matrix_size, d_matrix, matrix_size, d_pivot, d_identity, matrix_size,
+  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, matrix_size, matrix_size, d_matrix, matrix_size, d_pivot, d_identity, matrix_size,
                     dev_info);
 
   /* Copy the inverse matrix from host to device */
