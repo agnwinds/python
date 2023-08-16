@@ -323,7 +323,7 @@ init_advanced_modes ()
   modes.use_debug = FALSE;
   modes.print_dvds_info = FALSE;        // print information on velocity gradients
   modes.quit_after_inputs = FALSE;      // check inputs and quit
-  modes.quit_after_wind_defined = FALSE;        // define wind and quit
+  modes.quit_after_wind_defined = FALSE;      // define wind and quit
   modes.fixed_temp = FALSE;     // do not attempt to change temperature 
   modes.zeus_connect = FALSE;   // connect with zeus
 
