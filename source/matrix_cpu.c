@@ -249,7 +249,7 @@ cpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
     }
   }
 
-  // gsl_permutation_free (p);
+  gsl_permutation_free (p);
   gsl_matrix_free (inverse);
 
   return EXIT_SUCCESS;
