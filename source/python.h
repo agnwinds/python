@@ -1560,6 +1560,7 @@ struct advanced_modes
   int quit_after_inputs;        /**< when TRUE, quit after inputs are read in.  Note that
                                   ** this flag is set from the command line with the -i option
                                   */
+  int quit_after_wind_defined;  /**< when TRUE, quit after the wind grid has been defined and saved */
   int fixed_temp;               /**< do not alter temperature from that set in the parameter file */
   int zeus_connect;             /**< We are connecting to zeus, do not seek new temp and output 
                                   * a heating and cooling file
