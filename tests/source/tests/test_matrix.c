@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <check.h>
+
 #define LENGTH 256
 #define FRAC_TOLERANCE 0.01
 
@@ -163,11 +165,7 @@ internal_test_invert (int test_num)
   for (i = 0; i < size; ++i)
   {
     const double frac = fabs ((inverse[i] - test_inverse[i]) / test_inverse[i]);
-    if (frac > FRAC_TOLERANCE)
-    {
-      fprintf (stderr, "internal_test_invert failure");
-      return EXIT_FAILURE;
-    }
+    ck_assert_msg (frac < FRAC_TOLERANCE, "inverse result for test %d not within tolerate", test_num);
   }
 
   free (matrix);
@@ -184,7 +182,7 @@ internal_test_invert (int test_num)
  *  ***************************************************************************************************************** */
 
 static int
-internal_test_solve (const int test_num)
+internal_test_solve (test_num)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
@@ -218,11 +216,7 @@ internal_test_solve (const int test_num)
   for (i = 0; i < size; ++i)
   {
     const double frac = fabs ((vector_x[i] - test_vector_x[i]) / test_vector_x[i]);
-    if (frac > FRAC_TOLERANCE)
-    {
-      fprintf (stderr, "internal_test_solve failure\n");
-      return EXIT_FAILURE;
-    }
+    ck_assert_msg (frac < FRAC_TOLERANCE, "solve matrix result for test %d not within tolerate", test_num);
   }
 
   free (matrix_a);
@@ -239,28 +233,41 @@ internal_test_solve (const int test_num)
  *
  *  ***************************************************************************************************************** */
 
-int
-test_solve_matrix (void)
+START_TEST (test_solve_matrix)
 {
-  int error;
-
-  error = internal_test_solve (1);
-
-  return EXIT_SUCCESS;
+  internal_test_solve (1);
 }
 
+END_TEST
 /** *******************************************************************************************************************
  *
  *  @brief
  *
  *  ***************************************************************************************************************** */
-
-int
-test_invert_matrix (void)
+START_TEST (test_invert_matrix)
 {
-  int error;
+  internal_test_invert (1);
+}
 
-  error = internal_test_invert (1);
+END_TEST
+/** *******************************************************************************************************************
+ *
+ *  @brief
+ *
+ *  ***************************************************************************************************************** */
+  Suite * matrix_suite (void)
+{
+  Suite *s;
+  TCase *tc_solve;
 
-  return EXIT_SUCCESS;
+  s = suite_create ("Matrix");
+  tc_solve = tcase_create ("Solve Matrix");
+
+  // Add the test case to the suite
+  tcase_add_test (tc_solve, test_solve_matrix);
+
+  // Add the test case to the suite
+  suite_add_tcase (s, tc_solve);
+
+  return s;
 }
