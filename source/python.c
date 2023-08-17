@@ -620,6 +620,16 @@ main (argc, argv)
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
 
+  /* allow the user to quit after the wind has been defined */
+  if (modes.quit_after_wind_defined)
+  {
+    wind_save (files.windsave);
+    Log ("This was was run with the ---grid-only flag set, so quitting now wind has been defined.\n");
+    error_summary ("wind definition only (--grid-only).");
+    exit (0);
+  }
+
+
   /* Allow for the possibility of running a special diagnostic mode in
      a stand alone routine xtest. This will happen with the command line
      option -xtest.  */
