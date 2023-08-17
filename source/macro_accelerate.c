@@ -308,7 +308,7 @@ calc_matom_matrix (xplasma, matom_matrix)
   {
     for (nn = 0; nn < nrows; nn++)
     {
-      a_data[mm * nrows + nn] = Q_matrix[mm][nn];
+      a_data[mm * nrows + nn] = Q_matrix[mm][nn];       /* row-major */
     }
   }
 
@@ -332,6 +332,8 @@ calc_matom_matrix (xplasma, matom_matrix)
       matom_matrix[mm][nn] = a_inverse[mm * nrows + nn] * R_matrix[nn][nn];
     }
   }
+
+  free (a_inverse);
 
   /* need to free each calloc-ed row of the matrixes */
   for (i = 0; i < nrows; i++)

@@ -14,6 +14,9 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+
+#include <gsl/gsl_errno.h>
+
 #include "atomic.h"
 #include "python.h"
 #include "models.h"
@@ -72,18 +75,14 @@ main (argc, argv)
   char values[LINELENGTH], answer[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
   int dummy_spectype;
-
-  FILE *fopen ();
-
   int opar_stat, restart_stat;
   double time_max;
   double lstar;
 
-/* Initicialize MPI */
+/* Initialize MPI */
 
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
-
 
 #ifdef MPI_ON
   int mpi_err = MPI_Init (&argc, &argv);
@@ -108,12 +107,14 @@ main (argc, argv)
   }
 #endif
 
+  /* Turn off gsl error handling so that the code does not abort on error */
+  gsl_set_error_handler_off ();
+
   np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
 
-/* This completes the intialization of mpi */
-
+/* This completes the initialisation of mpi */
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
                                    the assumption is that we are reading from the command line */
