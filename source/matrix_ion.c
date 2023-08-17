@@ -182,10 +182,6 @@ matrix_ion_populations (xplasma, mode)
     }
   }
 
-
-
-
-
   /* This next line sets the partition function for each ion. This has always been the place here python calculates the
      partition functions and sets the level densities for each ion. It needs to be done, or other parts of the code which rely
      on sensible level populations don't work properly. In the case of the dilute blackbody, the code works well, however we do
@@ -269,7 +265,6 @@ matrix_ion_populations (xplasma, mode)
     /* This next line produces an array of the correct size to hold the rate matrix */
 
     a_data = (double *) calloc (sizeof (double), nrows * nrows);
-
     populations = (double *) calloc (nrows, sizeof (double));
 
     /* This b_data column matrix is the total number density for each element, placed into the row which relates to the neutral
@@ -283,7 +278,7 @@ matrix_ion_populations (xplasma, mode)
     {
       for (nn = 0; nn < nrows; nn++)
       {
-        a_data[mm * nrows + nn] = rate_matrix[mm][nn];
+        a_data[mm * nrows + nn] = rate_matrix[mm][nn];  /* row-major */
       }
     }
 

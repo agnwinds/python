@@ -16,8 +16,6 @@
 int cuda_init (void);
 int cuda_finish (void);
 
-
-
 /** *******************************************************************************************************************
  *
  *  @brief
@@ -50,11 +48,9 @@ main (void)
   // Clean up
   srunner_free (sr);
 
-  return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;    // Return 0 if all tests passed, 1 if there are failures
-
 #ifdef CUDA_ON
   cuda_finish ();
 #endif
 
-  return EXIT_SUCCESS;
+  return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;    // Return 0 if all tests passed, 1 if there are failures
 }

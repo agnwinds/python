@@ -231,7 +231,7 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
   /* Perform LU factorization and solve the linear system. The vector d_b is not used in `getrs` (the solver), but
      it's the same size of the solution vector so we'll re-use that. d_b is then copied back to host memory (CPU RAM) */
   cusolverDnDgetrf (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, d_work, d_pivot, devInfo);
-  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_T, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo);
+  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo);
   cudaMemcpy (x_vector, d_b, matrix_size * sizeof (double), cudaMemcpyDeviceToHost);
 
   cudaFree (d_A);
