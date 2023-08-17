@@ -205,7 +205,7 @@ createIdentityMatrix (double *d_identity, int size)
  *  ***************************************************************************************************************** */
 
 extern "C" int
-gpu_solve_linear_system (double *a_matrix, double *b_vector, int matrix_size, double *x_vector)
+gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x_vector)
 {
   int *devInfo;
   int lwork;

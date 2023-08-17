@@ -72,7 +72,7 @@ get_matrix_error_string (int error_code)
  *  ***************************************************************************************************************** */
 
 static int
-cpu_solve_linear_system (double *a_matrix, double *b_vector, int matrix_size, double *x_vector, int nplasma)
+cpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x_vector, int nplasma)
 {
   int mm, ierr, s;
   double test_val;
@@ -226,7 +226,7 @@ cpu_solve_linear_system (double *a_matrix, double *b_vector, int matrix_size, do
  *  ***************************************************************************************************************** */
 
 static int
-cpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
+cpu_invert_matrix (double *matrix, double *inverse_out, int matrix_size)
 {
   int s;
   int i, j;
@@ -240,16 +240,16 @@ cpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
 
   gsl_linalg_LU_decomp (&N.matrix, p, &s);
   gsl_linalg_LU_invert (&N.matrix, p, inverse);
+  gsl_permutation_free (p);
 
   for (i = 0; i < matrix_size; ++i)     /* i is mm in macro_accelerate.c */
   {
     for (j = 0; j < matrix_size; ++j)   /* j is nn in macro_accelerate.c */
     {
-      inverse_matrix[i * matrix_size + j] = gsl_matrix_get (inverse, i, j);
+      inverse_out[i * matrix_size + j] = gsl_matrix_get (inverse, i, j);
     }
   }
 
-  gsl_permutation_free (p);
   gsl_matrix_free (inverse);
 
   return EXIT_SUCCESS;
@@ -284,9 +284,9 @@ solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, in
   int error;
 
 #ifdef CUDA_ON
-  error = gpu_solve_linear_system (a_matrix, b_matrix, size, x_matrix);
+  error = gpu_solve_matrix (a_matrix, b_matrix, size, x_matrix);
 #else
-  error = cpu_solve_linear_system (a_matrix, b_matrix, size, x_matrix, nplasma);
+  error = cpu_solve_matrix (a_matrix, b_matrix, size, x_matrix, nplasma);
 #endif
 
   return error;
