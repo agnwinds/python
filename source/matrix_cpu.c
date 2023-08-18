@@ -52,8 +52,8 @@
  *
  *  ***************************************************************************************************************** */
 
-const char *
-get_matrix_error_string (int error_code)
+static const char *
+get_cpu_solve_matrix_error_string (int error_code)
 {
   switch (error_code)
   {
@@ -66,6 +66,28 @@ get_matrix_error_string (int error_code)
   default:
     return "bad return from solve_matrix";
   }
+}
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief Get the error string for a error code for `solve_matrix`
+ *
+ * @param [in] error_code the error code
+ *
+ * @return The error string
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+const char *
+get_solve_matrix_error_string (int error_code)
+{
+#ifdef CUDA_ON
+  return get_gpu_solve_matrix_error_string (error_code);
+#else
+  return get_cpu_solve_matrix_error_string (error_code);
+#endif
 }
 
 /* ****************************************************************************************************************** */
@@ -127,7 +149,7 @@ cpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
 
   /* Decomposes a_matrix (now m as a GSL matrix) into its LU Components. The L and U components are stored in m.
    */
-  gsl_err = gsl_linalg_LU_decomp (&m.matrix, p, &signnum);
+  gsl_err = gsl_linalg_LU_decomp (&m.matrix, p, &signnum);      /* this modifies a_matrix for some reason */
   if (gsl_err)
   {
     Error ("Solve_matrix: gsl_linalg_LU_decomp failure %d for cell %i \n", gsl_err, nplasma);

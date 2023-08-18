@@ -448,7 +448,7 @@ macro_pops (xplasma, xne)
 
           if (matrix_err)
           {
-            Error ("macro_pops: %s\n", get_matrix_error_string (matrix_err));
+            Error ("macro_pops: %s\n", get_solve_matrix_error_string (matrix_err));
           }
 
           /* Now we take the population array and check to see if anything is very

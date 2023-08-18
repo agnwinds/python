@@ -34,7 +34,7 @@ main (void)
   SRunner *sr;
 
   // Create the suite
-  s = matrix_suite ();
+  s = create_matrix_suite ();
 
   // Create a test runner
   sr = srunner_create (s);
