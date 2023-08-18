@@ -15,14 +15,44 @@
 #include <check.h>
 
 #define LENGTH 256
-#define FRAC_TOLERANCE 0.01
+#define EPSILON 1.0e-6
 
 int solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma);
 int invert_matrix (double *matrix, double *inverse_matrix, int matrix_size);
 
 /** *******************************************************************************************************************
  *
- *  @brief
+ *  @brief Compare two doubles
+ *
+ * @param [in] a the first double
+ * @param [in] b the second double
+ *
+ * @return 1 if a and b are close, or 0 if they are different
+ *
+ *  ***************************************************************************************************************** */
+
+double
+check_doubles_equal (double a, double b)
+{
+  return fabs (a - b) < EPSILON;
+}
+
+/** *******************************************************************************************************************
+ *
+ * @brief Load in test data for the matrix inversion tests
+ *
+ * @param [in] matrix_path filepath to the input matrix for the tests
+ * @param [in] inverse_path filepath to the input matrix for verification
+ * @param [out] matrix pointer to pointer for matrix input
+ * @param [out] inverse point to pointer for inverse used for verification
+ * @param [out] size the size of the matrices
+ *
+ * @return an error status
+ *
+ * @details
+ *
+ * The matrix and inverse variables are pointers to pointers, as the memory is allocated for those variables in this
+ * function.
  *
  *  ***************************************************************************************************************** */
 
@@ -70,7 +100,21 @@ get_invert_matrix_test_data (const char *matrix_path, const char *inverse_path, 
 
 /** *******************************************************************************************************************
  *
- *  @brief
+ * @brief Load in test data for the solve matrix tests
+ *
+ * @param [in] a_path the filepath to the A matrix for input
+ * @param [in] b_path the filepath to the b vector for input
+ * @param [in] x_path the filepath to the x vector for verification
+ * @param [out] a_matrix pointer to pointer for A matrix for input
+ * @param [out] b_vector pointer to pointer for b vector for input
+ * @param [out] x_vector pointer to pointer for x vector for verification
+ * @param [out] size the size of the vectors
+ *
+ * @return an error status
+ *
+ * @details
+ *
+ * Pointer to pointers are used for a_matrix and etc. because the memory for those pointers/arrays are allocated here.
  *
  *  ***************************************************************************************************************** */
 
@@ -130,12 +174,20 @@ get_solve_matrix_test_data (const char *a_path, const char *b_path, const char *
 
 /** *******************************************************************************************************************
  *
- *  @brief
+ * @brief Test case for invert_matrix
+ *
+ * @param [in] test_name the test name
+ *
+ * @return an error status
+ *
+ * @details
+ *
+ * Calls invert matrix with given input and checks the absolute tolerance.
  *
  *  ***************************************************************************************************************** */
 
 static int
-internal_test_invert (int test_num)
+internal_test_invert (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
@@ -149,23 +201,25 @@ internal_test_invert (int test_num)
   char matrix_filepath[LENGTH];
   char inverse_filepath[LENGTH];
 
-  sprintf (matrix_filepath, "%s/tests/test_data/matrices/invert_test%d/matrix.txt", python_path, test_num);
-  sprintf (inverse_filepath, "%s/tests/test_data/matrices/invert_test%d/inverse.txt", python_path, test_num);
+  sprintf (matrix_filepath, "%s/tests/test_data/matrix/%s/matrix.txt", python_path, test_name);
+  sprintf (inverse_filepath, "%s/tests/test_data/matrix/%s/inverse.txt", python_path, test_name);
 
-  int size;
-  const int get_err = get_invert_matrix_test_data (matrix_filepath, inverse_filepath, &matrix, &inverse, &size);
+  int matrix_size;
+  const int get_err = get_invert_matrix_test_data (matrix_filepath, inverse_filepath, &matrix, &inverse, &matrix_size);
 
-  if (get_err)
-    return EXIT_FAILURE;
+  ck_assert_msg (get_err == EXIT_SUCCESS, "Invert Matrix (%s): could not load test data", test_name);
 
-  double *test_inverse = malloc (size * sizeof (double));
-  const int matrix_err = invert_matrix (matrix, test_inverse, size);
+  double *test_inverse = malloc (matrix_size * sizeof (double));
+  const int matrix_err = invert_matrix (matrix, test_inverse, matrix_size);
+
+  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Invert Matrix (%s): numerical routine failed with error %d", test_name, matrix_err);
 
   int i;
-  for (i = 0; i < size; ++i)
+  for (i = 0; i < matrix_size; ++i)
   {
-    const double frac = fabs ((inverse[i] - test_inverse[i]) / test_inverse[i]);
-    ck_assert_msg (frac < FRAC_TOLERANCE, "inverse result for test %d not within tolerate", test_num);
+    ck_assert_msg (check_doubles_equal (inverse[i], test_inverse[i]),
+                   "Invert Matrix (%s): result not within tolerance (%e) inverse[%d] = %e test_inverse[%d] = %e", test_name, EPSILON, i,
+                   inverse[i], i, test_inverse[i]);
   }
 
   free (matrix);
@@ -177,18 +231,26 @@ internal_test_invert (int test_num)
 
 /** *******************************************************************************************************************
  *
- *  @brief
+ * @brief Test case for solve_matrix
+ *
+ * @param [in] test_name the test name
+ *
+ * @return an error status
+ *
+ * @details
+ *
+ * Calls solve_matrix with given input and checks the absolute tolerance.
  *
  *  ***************************************************************************************************************** */
 
 static int
-internal_test_solve (test_num)
+internal_test_solve (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
   {
-    fprintf (stderr, "$PYTHON env variable not set\n");
-    return EXIT_FAILURE;
+    fprintf (stderr, "$PYTHON variable not set\n");
+    exit (EXIT_FAILURE);
   }
 
   double *matrix_a;
@@ -198,25 +260,27 @@ internal_test_solve (test_num)
   char vector_b_filepath[LENGTH];
   char vector_x_filepath[LENGTH];
 
-  sprintf (matrix_a_filepath, "%s/tests/test_data/matrices/solve_test%d/A.txt", python_path, test_num);
-  sprintf (vector_b_filepath, "%s/tests/test_data/matrices/solve_test%d/b.txt", python_path, test_num);
-  sprintf (vector_x_filepath, "%s/tests/test_data/matrices/solve_test%d/x.txt", python_path, test_num);
+  sprintf (matrix_a_filepath, "%s/tests/test_data/matrix/%s/A.txt", python_path, test_name);
+  sprintf (vector_b_filepath, "%s/tests/test_data/matrix/%s/b.txt", python_path, test_name);
+  sprintf (vector_x_filepath, "%s/tests/test_data/matrix/%s/x.txt", python_path, test_name);
 
-  int size;
+  int vector_size;
   const int get_err =
-    get_solve_matrix_test_data (matrix_a_filepath, vector_b_filepath, vector_x_filepath, &matrix_a, &vector_b, &vector_x, &size);
+    get_solve_matrix_test_data (matrix_a_filepath, vector_b_filepath, vector_x_filepath, &matrix_a, &vector_b, &vector_x, &vector_size);
 
-  if (get_err)
-    return EXIT_FAILURE;
+  ck_assert_msg (get_err == EXIT_SUCCESS, "Solve Matrix (%s): could not load test data", test_name);
 
-  double *test_vector_x = malloc (size * sizeof (double));
-  const int matrix_err = solve_matrix (matrix_a, vector_b, size, test_vector_x, -1);
+  double *test_vector_x = malloc (vector_size * sizeof (double));
+  const int matrix_err = solve_matrix (matrix_a, vector_b, vector_size, test_vector_x, -1);
+
+  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Solve Matrix (%s): numerical routine failed with error %d", test_name, matrix_err);
 
   int i;
-  for (i = 0; i < size; ++i)
+  for (i = 0; i < vector_size; ++i)
   {
-    const double frac = fabs ((vector_x[i] - test_vector_x[i]) / test_vector_x[i]);
-    ck_assert_msg (frac < FRAC_TOLERANCE, "solve matrix result for test %d not within tolerate", test_num);
+    ck_assert_msg (check_doubles_equal (vector_x[i], test_vector_x[i]),
+                   "Solve Matrix (%s): result not within tolerance (%e) x[%d] = %e test_x[%d] = %e", test_name, EPSILON, i, vector_x[i],
+                   i, test_vector_x[i]);
   }
 
   free (matrix_a);
@@ -227,47 +291,53 @@ internal_test_solve (test_num)
   return EXIT_SUCCESS;
 }
 
-/** *******************************************************************************************************************
- *
- *  @brief
- *
- *  ***************************************************************************************************************** */
-
-START_TEST (test_solve_matrix)
+/* ********************************************************************************************************************/
+START_TEST (solve_matrix_small)
 {
-  internal_test_solve (1);
+  internal_test_solve ("small_matrix");
 }
 
 END_TEST
-/** *******************************************************************************************************************
- *
- *  @brief
- *
- *  ***************************************************************************************************************** */
-START_TEST (test_invert_matrix)
+/* ********************************************************************************************************************/
+START_TEST (solve_matrix_matrix_ion)
 {
-  internal_test_invert (1);
+  internal_test_solve ("matrix_ion");
 }
 
 END_TEST
+/* ********************************************************************************************************************/
+START_TEST (invert_matrix_small)
+{
+  internal_test_invert ("inverse_small");
+}
+
+END_TEST
+/* ********************************************************************************************************************/
 /** *******************************************************************************************************************
  *
- *  @brief
+ * @brief Create the test suite for the matrix tests
+ *
+ * @return the suite struct
+ *
+ * @details
  *
  *  ***************************************************************************************************************** */
-  Suite * matrix_suite (void)
+  Suite * create_matrix_suite (void)
 {
   Suite *s;
-  TCase *tc_solve;
+  TCase *tc_solve_matrix;
+  TCase *tc_invert_matrix;
+
+  tc_solve_matrix = tcase_create ("Solve Matrix");
+  tcase_add_test (tc_solve_matrix, solve_matrix_small);
+  tcase_add_test (tc_solve_matrix, solve_matrix_matrix_ion);
+
+  tc_invert_matrix = tcase_create ("Invert Matrix");
+  tcase_add_test (tc_invert_matrix, invert_matrix_small);
 
   s = suite_create ("Matrix");
-  tc_solve = tcase_create ("Solve Matrix");
-
-  // Add the test case to the suite
-  tcase_add_test (tc_solve, test_solve_matrix);
-
-  // Add the test case to the suite
-  suite_add_tcase (s, tc_solve);
+  suite_add_tcase (s, tc_solve_matrix);
+  suite_add_tcase (s, tc_invert_matrix);
 
   return s;
 }

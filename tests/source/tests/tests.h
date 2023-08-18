@@ -1,6 +1,6 @@
 #ifndef TESTS_H
 #define TESTS_H
 
-Suite *matrix_suite (void);
+Suite *create_matrix_suite (void);
 
 #endif

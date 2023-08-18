@@ -14,6 +14,7 @@
 
 int cuda_init (void);
 int cuda_finish (void);
+const char *get_gpu_solve_matrix_error_string (cusolverStatus_t status);
 
 int gpu_solve_matrix (double *a_matrix, double *b_vector, int size, double *x_vector);
 int gpu_invert_matrix (double *matrix, double *inverse, int num_rows);

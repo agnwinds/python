@@ -46,7 +46,7 @@ static cusolverDnHandle_t cusolver_handle = NULL;
  *  ***************************************************************************************************************** */
 
 const char *
-cusolverGetErrorString (cusolverStatus_t status)
+get_gpu_solve_matrix_error_string (cusolverStatus_t status)
 {
   switch (status)
   {
@@ -100,7 +100,7 @@ cusolverGetErrorString (cusolverStatus_t status)
   do {                                                                                                                 \
     cusolverStatus_t err = status;                                                                                     \
     if (err != CUSOLVER_STATUS_SUCCESS) {                                                                              \
-      Error("cuSolver Error: %s (%d)\n", cusolverGetErrorString(err), err);                                            \
+      Error("cuSolver Error: %s (%d)\n", get_gpu_solve_matrix_error_string(err), err);                                            \
       return err;                                                                                                      \
     }                                                                                                                  \
   } while (0)
@@ -162,6 +162,28 @@ cuda_finish (void)
 
 /* ****************************************************************************************************************** */
 /**
+ * @brief
+ *
+ * @param
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+__global__ void
+tranpose_matrix (double *input, double *output, int size)
+{
+  int row = blockIdx.y * blockDim.y + threadIdx.y;
+  int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if (row < size && col < size)
+  {
+    output[col * size + row] = input[row * size + col];
+  }
+}
+
+/* ****************************************************************************************************************** */
+/**
  * @brief Create an identity matrix of size `size`
  *
  * @param [out] d_identity A pointer to device memory of `size` * `size` elements
@@ -172,7 +194,7 @@ cuda_finish (void)
  *  ***************************************************************************************************************** */
 
 __global__ void
-createIdentityMatrix (double *d_identity, int size)
+create_identity_matrix (double *d_identity, int size)
 {
   const int col = threadIdx.x + blockIdx.x * blockDim.x;
   const int row = threadIdx.y + blockIdx.y * blockDim.y;
@@ -210,18 +232,23 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
   int *devInfo;
   int lwork;
   int *d_pivot;                 /* device array of pivoting sequence */
-  double *d_A, *d_b;
+  double *d_A, *d_A_row, *d_b;
   double *d_work;               /* cuSolver needs a "workspace" to do stuff, which we have to allocate manually */
 
   /* Allocate memory on the GPU (device) to store the matrices/vectors */
+  cudaMalloc ((void **) &d_A_row, matrix_size * matrix_size * sizeof (double));
   cudaMalloc ((void **) &d_A, matrix_size * matrix_size * sizeof (double));
   cudaMalloc ((void **) &d_b, matrix_size * sizeof (double));
   cudaMalloc ((void **) &devInfo, sizeof (int));
+  cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int));
 
   /* Copy the matrix and vector to the device memory */
-  cudaMemcpy (d_A, a_matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice);
+  cudaMemcpy (d_A_row, a_matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice);
   cudaMemcpy (d_b, b_vector, matrix_size * sizeof (double), cudaMemcpyHostToDevice);
-  cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int));
+
+  dim3 blockDim (16, 16);
+  dim3 gridDim ((matrix_size + blockDim.x - 1) / blockDim.x, (matrix_size + blockDim.y - 1) / blockDim.y);
+  tranpose_matrix <<< gridDim, blockDim >>> (d_A_row, d_A, matrix_size);
 
   /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the linear
      system being solved */
@@ -292,7 +319,7 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
      sending work to a bunch of GPU cores, which will construct their own element in the identity matrix */
   dim3 blockSize (16, 16);      /* a block size of (16, 16) is a commonly used value */
   dim3 gridSize ((matrix_size + blockSize.x - 1) / blockSize.x, (matrix_size + blockSize.y - 1) / blockSize.y);
-  createIdentityMatrix <<< gridSize, blockSize >>> (d_identity, matrix_size);
+  create_identity_matrix <<< gridSize, blockSize >>> (d_identity, matrix_size);
 
   /* We first need to facotrise the matrix to get the pivot indcies, for getrs. The function getrs is solves a linear
      system to solve for the inverse matrix. The inverse matrix is placed back into `d_identity` */
