@@ -1,5 +1,5 @@
 CC = gcc
-NVCC =
+NVCC = nvcc
 TARGET = test
 
 CFLAGS = -I../include -g
@@ -40,12 +40,15 @@ startup:
 
 cuda: startup $(CUDA_SOURCES)
 ifneq ($(NVCC),)
-	$(NVCC) -c $(CUDA_SOURCES) -DCUDA_ON -o $(CUDA_OBJS)
+	$(NVCC) -c -g $(CUDA_SOURCES) -DCUDA_ON -o $(CUDA_OBJS)
 endif
 
 # TODO: we should store objects in a directory local to test
 $(TARGET): startup cuda $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(LIBS)
+
+check: $(TARGET)
+	./$(TARGET)
 
 clean:
 	rm -f $(TARGET) $(OBJS) $(CUDA_OBJS)

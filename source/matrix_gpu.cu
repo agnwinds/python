@@ -45,9 +45,11 @@ static cusolverDnHandle_t cusolver_handle = NULL;
  *
  *  ***************************************************************************************************************** */
 
-const char *
-get_gpu_solve_matrix_error_string (cusolverStatus_t status)
+extern "C" const char *
+get_gpu_solve_matrix_error_string (int error)
 {
+  cusolverStatus_t status = (cusolverStatus_t) error;
+
   switch (status)
   {
   case CUSOLVER_STATUS_SUCCESS:
@@ -83,7 +85,7 @@ get_gpu_solve_matrix_error_string (cusolverStatus_t status)
   do {                                                                                                                 \
     cudaError_t err = status;                                                                                          \
     if (err != cudaSuccess) {                                                                                          \
-      Error("CUDA Error: %s (%d)\n", cudaGetErrorString(err), err);                                                    \
+      Error("CUDA Error: %s (%d) (%s:%d)\n", cudaGetErrorString(err), err, __FILE__, __LINE__);                        \
       return err;                                                                                                      \
     }                                                                                                                  \
   } while (0)
@@ -100,7 +102,7 @@ get_gpu_solve_matrix_error_string (cusolverStatus_t status)
   do {                                                                                                                 \
     cusolverStatus_t err = status;                                                                                     \
     if (err != CUSOLVER_STATUS_SUCCESS) {                                                                              \
-      Error("cuSolver Error: %s (%d)\n", get_gpu_solve_matrix_error_string(err), err);                                            \
+      Error("cuSolver Error: %s (%d) (%s:%d)\n", get_gpu_solve_matrix_error_string(err), err, __FILE__, __LINE__);     \
       return err;                                                                                                      \
     }                                                                                                                  \
   } while (0)
@@ -171,14 +173,26 @@ cuda_finish (void)
  *  ***************************************************************************************************************** */
 
 __global__ void
-tranpose_matrix (double *input, double *output, int size)
+transposeRowToColumn (double *inMatrix, double *outMatrix, int size)
 {
-  int row = blockIdx.y * blockDim.y + threadIdx.y;
-  int col = blockIdx.x * blockDim.x + threadIdx.x;
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  int idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if (row < size && col < size)
+  if (idx < size && idy < size)
   {
-    output[col * size + row] = input[row * size + col];
+    outMatrix[idx * size + idy] = inMatrix[idy * size + idx];
+  }
+}
+
+__global__ void
+transposeColumnToRow (double *inMatrix, double *outMatrix, int size)
+{
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  int idy = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if (idx < size && idy < size)
+  {
+    outMatrix[idy * size + idx] = inMatrix[idx * size + idy];
   }
 }
 
@@ -236,35 +250,42 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
   double *d_work;               /* cuSolver needs a "workspace" to do stuff, which we have to allocate manually */
 
   /* Allocate memory on the GPU (device) to store the matrices/vectors */
-  cudaMalloc ((void **) &d_A_row, matrix_size * matrix_size * sizeof (double));
-  cudaMalloc ((void **) &d_A, matrix_size * matrix_size * sizeof (double));
-  cudaMalloc ((void **) &d_b, matrix_size * sizeof (double));
-  cudaMalloc ((void **) &devInfo, sizeof (int));
-  cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int));
+  CUDA_CHECK (cudaMalloc ((void **) &d_A_row, matrix_size * matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_A, matrix_size * matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_b, matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &devInfo, sizeof (int)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int)));
 
   /* Copy the matrix and vector to the device memory */
-  cudaMemcpy (d_A_row, a_matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice);
-  cudaMemcpy (d_b, b_vector, matrix_size * sizeof (double), cudaMemcpyHostToDevice);
+  CUDA_CHECK (cudaMemcpy (d_A_row, a_matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
+  CUDA_CHECK (cudaMemcpy (d_b, b_vector, matrix_size * sizeof (double), cudaMemcpyHostToDevice));
 
   dim3 blockDim (16, 16);
   dim3 gridDim ((matrix_size + blockDim.x - 1) / blockDim.x, (matrix_size + blockDim.y - 1) / blockDim.y);
-  tranpose_matrix <<< gridDim, blockDim >>> (d_A_row, d_A, matrix_size);
+  transposeRowToColumn <<< gridDim, blockDim >>> (d_A_row, d_A, matrix_size);
 
   /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the linear
      system being solved */
-  cusolverDnDgetrf_bufferSize (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, &lwork);
-  cudaMalloc ((void **) &d_work, lwork * sizeof (double));
+  CUSOLVER_CHECK (cusolverDnDgetrf_bufferSize (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, &lwork));
+  CUDA_CHECK (cudaMalloc ((void **) &d_work, lwork * sizeof (double)));
 
   /* Perform LU factorization and solve the linear system. The vector d_b is not used in `getrs` (the solver), but
      it's the same size of the solution vector so we'll re-use that. d_b is then copied back to host memory (CPU RAM) */
-  cusolverDnDgetrf (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, d_work, d_pivot, devInfo);
-  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo);
-  cudaMemcpy (x_vector, d_b, matrix_size * sizeof (double), cudaMemcpyDeviceToHost);
+  CUSOLVER_CHECK (cusolverDnDgetrf (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, d_work, d_pivot, devInfo));
+  CUSOLVER_CHECK (cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo));
+  CUDA_CHECK (cudaMemcpy (x_vector, d_b, matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
 
-  cudaFree (d_A);
-  cudaFree (d_b);
-  cudaFree (d_work);
-  cudaFree (d_pivot);
+  int i;
+  for (i = 0; i < matrix_size; ++i)
+  {
+    printf ("%e ", x_vector[i]);
+  }
+  printf ("\n");
+
+  CUDA_CHECK (cudaFree (d_A));
+  CUDA_CHECK (cudaFree (d_b));
+  CUDA_CHECK (cudaFree (d_work));
+  CUDA_CHECK (cudaFree (d_pivot));
 
   return EXIT_SUCCESS;
 }
