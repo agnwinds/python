@@ -74,7 +74,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
   int nrings, i;
   int spectype;
   double emit;
-  double factor;
+  double factor, fcol;
 
 
 
@@ -159,10 +159,14 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
     {
       emit = emittance_continuum (spectype, freqmin, freqmax, t, log_g);
     }
+    else if (spectype == SPECTYPE_BB_FCOL)
+    {
+      fcol = disk_colour_correction(t);
+      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow(fcol, 4.0);
+    }
     else
     {
       emit = emittance_bb (freqmin, freqmax, t);
-
     }
     (*ftot) += emit * (2. * r + dr) * dr * factor;
   }
@@ -214,6 +218,11 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
     if (spectype > -1)
     {
       emit = emittance_continuum (spectype, freqmin, freqmax, t, log_g);
+    }
+    else if (spectype == SPECTYPE_BB_FCOL)
+    {
+      fcol = disk_colour_correction(t);
+      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow(fcol, 4.0);
     }
     else
     {

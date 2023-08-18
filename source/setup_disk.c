@@ -67,9 +67,20 @@ get_disk_params ()
   geo.disk_radiation = rdchoice ("Disk.radiation(yes,no)", "1,0", answer);
 
   if (geo.disk_radiation)
+  {
     get_spectype (geo.disk_radiation,
                   //"Disk.rad_type_to_make_wind(0=bb,1=models)", &geo.disk_ion_spectype);
-                  "Disk.rad_type_to_make_wind(bb,models)", &geo.disk_ion_spectype);
+                  "Disk.rad_type_to_make_wind(bb,models,fcol)", &geo.disk_ion_spectype);
+
+    printf("spectype %d\n", geo.disk_ion_spectype);
+    /* if we have chose a colour correction, ask the user which form to use */
+    if (geo.disk_ion_spectype == SPECTYPE_BB_FCOL)
+    {
+      strcpy (answer, "done");
+      sprintf (values, "%d", FCOL_DONE);
+      geo.colour_correction = rdchoice ("Disk.colour_correction(done)", values, answer);
+    }
+  }
 
 
   geo.disk_tprofile = DISK_TPROFILE_STANDARD;

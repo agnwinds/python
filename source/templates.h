@@ -226,6 +226,7 @@ double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative, int *hit);
 double disk_height(double s, void *params);
+double disk_colour_correction(double t);
 /* lines.c */
 double total_line_emission(PlasmaPtr xplasma, double f1, double f2);
 double lum_lines(PlasmaPtr xplasma, int nmin, int nmax);

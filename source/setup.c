@@ -115,6 +115,7 @@ init_geo ()
   geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
   geo.disk_rad_max = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
+  geo.colour_correction = FCOL_OFF;
 
   geo.t_bl = 100000.;
 

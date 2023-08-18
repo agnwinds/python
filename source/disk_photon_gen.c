@@ -60,6 +60,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   double r, z, theta, phi;
   int nring = 0;
   double north[3];
+  double fcol;
 
   if ((iend = istart + nphot) > NPHOT)
   {
@@ -185,6 +186,11 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     if (spectype == SPECTYPE_BB)
     {
       p[i].freq = planck (disk.t[nring], freqmin, freqmax);
+    }
+    else if (spectype == SPECTYPE_BB_FCOL)
+    {
+      fcol = disk_colour_correction(disk.t[nring]);
+      p[i].freq = planck (fcol * disk.t[nring], freqmin, freqmax);
     }
     else if (spectype == SPECTYPE_UNIFORM)
     {
