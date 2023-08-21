@@ -702,7 +702,7 @@ make_spectra (restart_stat)
 #endif
 
 #ifdef CUDA_ON
-  cuda_finish ();
+  cusolver_destroy ();
 #endif
 
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);

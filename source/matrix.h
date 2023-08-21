@@ -13,8 +13,8 @@
 
 #ifdef CUDA_ON
 /* initialise and destroy cuda/cusolver */
-int cuda_init (void);
-int cuda_finish (void);
+int cusolver_create (void);
+int cusolver_destroy (void);
 
 /* gpu matrix routines */
 int gpu_solve_matrix (double *a_matrix, double *b_vector, int size, double *x_vector);

@@ -122,7 +122,7 @@ cusolver_get_error_string (int error)
  *  ***************************************************************************************************************** */
 
 extern "C" int
-cuda_init (void)
+cusolver_create (void)
 {
   if (CUSOLVER_HANDLE)
     return EXIT_SUCCESS;
@@ -156,7 +156,7 @@ cuda_init (void)
  *  ***************************************************************************************************************** */
 
 extern "C" int
-cuda_finish (void)
+cusolver_destroy (void)
 {
   if (!CUSOLVER_HANDLE)
     return EXIT_SUCCESS;
