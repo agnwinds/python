@@ -271,6 +271,7 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
 
   /* Allocate memory on the GPU (device) to store the matrices/vectors */
   CUDA_CHECK (cudaMalloc ((void **) &d_A, matrix_size * matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_Arow, matrix_size * matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &d_b, matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &devInfo, sizeof (int)));
   CUDA_CHECK (cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int)));
@@ -334,13 +335,17 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
   int work_size;
   int *dev_info;
   double *d_matrix;
+  double *d_matrix_row;
   double *d_identity;
+  double *d_identity_row;
   double *d_workspace;
 
   /* Allocate memory on the GPU (device) to store the matrices/vectors */
+  CUDA_CHECK (cudaMalloc ((void **) &d_matrix_row, matrix_size * matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &d_matrix, matrix_size * matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int)));
   CUDA_CHECK (cudaMalloc ((void **) &d_identity, matrix_size * matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_identity_row, matrix_size * matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &dev_info, sizeof (int)));
 
   /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the matrix */
@@ -348,14 +353,16 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
   CUDA_CHECK (cudaMalloc ((void **) &d_workspace, work_size * sizeof (double)));
 
   /* Copy matrix from host (CPU) to device memory (d_matrix) */
-  CUDA_CHECK (cudaMemcpy (d_matrix, matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
+  dim3 blockDim (16, 16);
+  dim3 gridDim ((matrix_size + blockDim.x - 1) / blockDim.x, (matrix_size + blockDim.y - 1) / blockDim.y);
+  CUDA_CHECK (cudaMemcpy (d_matrix_row, matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
+  tranpose_row_to_column_major <<< gridDim, blockDim >>> (d_matrix_row, d_matrix, matrix_size);
+  CUDA_CHECK (cudaFree (d_matrix_row));
 
   /* We'll use a CUDA kernel to create an indentity matrix, which we'll use to solve for the inverse. The
      syntax is a bit strange. We can imagine this bit as being similar to OpenMP, as CUDA is shared memory. We're
      sending work to a bunch of GPU cores, which will construct their own element in the identity matrix */
-  dim3 blockSize (16, 16);      /* a block size of (16, 16) is a commonly used value */
-  dim3 gridSize ((matrix_size + blockSize.x - 1) / blockSize.x, (matrix_size + blockSize.y - 1) / blockSize.y);
-  create_identity_matrix <<< gridSize, blockSize >>> (d_identity, matrix_size);
+  create_identity_matrix <<< gridDim, blockDim >>> (d_identity, matrix_size);
 
   /* We first need to facotrise the matrix to get the pivot indcies, for getrs. The function getrs is solves a linear
      system to solve for the inverse matrix. The inverse matrix is placed back into `d_identity` */
@@ -365,7 +372,8 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
                    dev_info));
 
   /* Copy the inverse matrix from host to device */
-  CUDA_CHECK (cudaMemcpy (inverse_matrix, d_identity, matrix_size * matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
+  tranpose_column_to_row_major <<< gridDim, blockDim >>> (d_identity, d_identity_row, matrix_size);
+  CUDA_CHECK (cudaMemcpy (inverse_matrix, d_identity_row, matrix_size * matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
 
   CUDA_CHECK (cudaFree (d_matrix));
   CUDA_CHECK (cudaFree (d_identity));

@@ -9,13 +9,11 @@
  *  ***************************************************************************************************************** */
 
 #include <stdlib.h>
-#include <check.h>
+
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
 
 #include "tests/tests.h"
-
-#ifdef CUDA_ON
-#include <cuda_runtime.h>
-#endif
 
 /** *******************************************************************************************************************
  *
@@ -26,34 +24,49 @@
 int
 main (void)
 {
-  int number_failed;
-  Suite *matrix_suite;
-  SRunner *sr;
+  // Initialize the CUnit test registry
+  if (CU_initialize_registry () != CUE_SUCCESS)
+  {
+    return CU_get_error ();
+  }
 
 #ifdef CUDA_ON
-  cudaSetDevice (0);
-  cudaDeviceEnablePeerAccess (0, 0);
   cuda_init ();
 #endif
 
-  // Create the suite
-  matrix_suite = create_matrix_suite ();
+  // solve_matrix_small ();
+  // solve_matrix_matrix_ion ();
+  // invert_matrix_small ();
 
-  // Create a test runner
-  sr = srunner_create (matrix_suite);
+  // Add a suite to the registry
+  CU_pSuite suite = CU_add_suite ("Matrix Functions Suite", NULL, NULL);
+  if (suite == NULL)
+  {
+    CU_cleanup_registry ();
+    return CU_get_error ();
+  }
+
+  // Add the test cases to the suite
+  if ((CU_add_test (suite, "Solve Matrix: small", solve_matrix_small) == NULL) ||
+      (CU_add_test (suite, "Solve Matrix: matrix ion", solve_matrix_matrix_ion) == NULL) ||
+      (CU_add_test (suite, "Invert Matrix: small", invert_matrix_small) == NULL))
+  {
+    CU_cleanup_registry ();
+    return CU_get_error ();
+  }
 
   // Run the tests
-  srunner_run_all (sr, CK_NORMAL);
+  CU_basic_set_mode (CU_BRM_VERBOSE);
+  CU_basic_run_tests ();
 
-  // Get the number of failed tests
-  number_failed = srunner_ntests_failed (sr);
-
-  // Clean up
-  srunner_free (sr);
+  // Clean up the CUnit registry
+  CU_cleanup_registry ();
 
 #ifdef CUDA_ON
   cuda_finish ();
 #endif
 
-  return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;    // Return 0 if all tests passed, 1 if there are failures
+  return CU_get_error ();
+
+  return EXIT_SUCCESS;
 }
