@@ -11,30 +11,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <CUnit/CUnit.h>
 
 #include "../source/matrix.h"
 
 #define LENGTH 256
 #define EPSILON 1.0e-6
-
-/** *******************************************************************************************************************
- *
- *  @brief Compare two doubles
- *
- * @param [in] a the first double
- * @param [in] b the second double
- *
- * @return 1 if a and b are close, or 0 if they are different
- *
- *  ***************************************************************************************************************** */
-
-double
-check_doubles_equal (double a, double b)
-{
-  return fabs (a - b) < EPSILON;
-}
 
 /** *******************************************************************************************************************
  *
@@ -186,7 +168,7 @@ get_solve_matrix_test_data (const char *a_path, const char *b_path, const char *
  *  ***************************************************************************************************************** */
 
 static int
-internal_test_invert (const char *test_name)
+call_invert_matrix (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
@@ -205,23 +187,16 @@ internal_test_invert (const char *test_name)
 
   int matrix_size;
   const int get_err = get_invert_matrix_test_data (matrix_filepath, inverse_filepath, &matrix, &inverse, &matrix_size);
-
-  CU_ASSERT (get_err == EXIT_SUCCESS);
-  if (get_err)
-    return EXIT_FAILURE;
+  CU_ASSERT_EQUAL_FATAL (get_err, EXIT_SUCCESS);
 
   double *test_inverse = malloc (matrix_size * matrix_size * sizeof (double));
   const int matrix_err = invert_matrix (matrix, test_inverse, matrix_size);
-
-  CU_ASSERT (matrix_err == EXIT_SUCCESS);
-  if (matrix_err)
-    return EXIT_FAILURE;
+  CU_ASSERT_EQUAL_FATAL (matrix_err, EXIT_SUCCESS);
 
   int i;
   for (i = 0; i < matrix_size * matrix_size; ++i)
   {
-    CU_ASSERT (check_doubles_equal (inverse[i], test_inverse[i]));
-    // printf ("invert: %e %e\n", inverse[i], test_inverse[i]);
+    CU_ASSERT_DOUBLE_EQUAL_FATAL (test_inverse[i], inverse[i], EPSILON);
   }
 
   free (matrix);
@@ -246,7 +221,7 @@ internal_test_invert (const char *test_name)
  *  ***************************************************************************************************************** */
 
 int
-internal_test_solve (const char *test_name)
+call_solve_matrix (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
@@ -269,22 +244,16 @@ internal_test_solve (const char *test_name)
   int vector_size;
   const int get_err =
     get_solve_matrix_test_data (matrix_a_filepath, vector_b_filepath, vector_x_filepath, &matrix_a, &vector_b, &vector_x, &vector_size);
-
-  CU_ASSERT (get_err == EXIT_SUCCESS);
-  if (get_err)
-    return EXIT_FAILURE;
+  CU_ASSERT_EQUAL_FATAL (get_err, EXIT_SUCCESS);
 
   double *test_vector_x = malloc (vector_size * sizeof (double));
   const int matrix_err = solve_matrix (matrix_a, vector_b, vector_size, test_vector_x, -1);
-
-  CU_ASSERT (matrix_err == EXIT_SUCCESS);
-  if (matrix_err)
-    return EXIT_FAILURE;
+  CU_ASSERT_EQUAL_FATAL (matrix_err, EXIT_SUCCESS);
 
   int i;
   for (i = 0; i < vector_size; ++i)
   {
-    CU_ASSERT (check_doubles_equal (vector_x[i], test_vector_x[i]));
+    CU_ASSERT_DOUBLE_EQUAL_FATAL (test_vector_x[i], vector_x[i], EPSILON);
   }
 
   free (matrix_a);
@@ -295,20 +264,69 @@ internal_test_solve (const char *test_name)
   return EXIT_SUCCESS;
 }
 
-void
-solve_matrix_small (void)
-{
-  internal_test_solve ("small_matrix");
-}
+/** *******************************************************************************************************************
+ *
+ * @brief
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
 
 void
-solve_matrix_matrix_ion (void)
+cpu_test_solve_matrix (void)
 {
-  internal_test_solve ("matrix_ion");
+  call_solve_matrix ("small_matrix");
+  call_solve_matrix ("matrix_ion");
 }
 
+/** *******************************************************************************************************************
+ *
+ * @brief
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
 void
-invert_matrix_small (void)
+cpu_test_invert_matrix (void)
 {
-  internal_test_invert ("inverse_small");
+  call_invert_matrix ("inverse_small");
+}
+
+/** *******************************************************************************************************************
+ *
+ * @brief
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+void
+create_matrix_test_suite (void)
+{
+  CU_pSuite suite;
+
+  /* It's a pain to have two suites for GSL and cuSolver, so let's keep it conditionally
+     compiled */
+#ifdef CUDA_ON
+  suite = CU_add_suite ("Matrix Functions Suite: cuSolver", cusolver_create, cusolver_destroy);
+#else
+  suite = CU_add_suite ("Matrix Functions Suite: GSL", NULL, NULL);
+#endif
+
+  if (suite == NULL)
+  {
+    fprintf (stderr, "Failed to create `Matrix Functions Suite: CPU` suite\n");
+    CU_cleanup_registry ();
+    exit (CU_get_error ());
+  }
+
+  /* Add CPU tests to suite */
+  if ((CU_add_test (suite, "Solve Matrix", cpu_test_solve_matrix) == NULL) ||
+      (CU_add_test (suite, "Invert Matrix", cpu_test_invert_matrix) == NULL))
+  {
+    fprintf (stderr, "Failed to add tests to `Matrix Functions Suite: CPU`\n");
+    CU_cleanup_registry ();
+    exit (CU_get_error ());
+  }
 }

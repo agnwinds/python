@@ -1,10 +1,10 @@
 CC = gcc
-NVCC = nvcc
+NVCC =
 TARGET = test
 
-CFLAGS = -I../include -I/home/saultyevil/cunit/include -g
-NVCCFLAGS = -g -DCUDA_ON
-LIBS = -L/../lib -L/home/saultyevil/cunit/lib -lcunit -lgsl -lgslcblas -lm
+CFLAGS = -I../include
+NVCCFLAGS = -DCUDA_ON
+LIBS = -L/../lib -lcunit -lgsl -lgslcblas -lm
 
 # Source code from Python, which is what we'll be testing
 PYTHON_SOURCES = \
@@ -40,13 +40,13 @@ all: startup clean $(TARGET)
 startup:
 	@echo 'ALL SOURCES =' $(SOURCES) $(CUDA_SOURCES)
 
-cuda: startup $(CUDA_SOURCES)
+cuda: $(CUDA_SOURCES)
 ifneq ($(NVCC),)
 	$(NVCC) -c $(NVCCFLAGS) $(CUDA_SOURCES) -o $(CUDA_OBJS)
 endif
 
 # TODO: we should store objects in a directory local to test
-$(TARGET): startup cuda $(OBJS)
+$(TARGET): cuda $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
 
 check: $(TARGET)

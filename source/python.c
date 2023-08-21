@@ -99,7 +99,7 @@ main (argc, argv)
 #endif
 
 #ifdef CUDA_ON
-  int cuda_err = cuda_init ();
+  int cuda_err = cusolver_create ();
   if (cuda_err != EXIT_SUCCESS)
   {
     Error ("Failed to initialise CUDA/cuSolver\n");
