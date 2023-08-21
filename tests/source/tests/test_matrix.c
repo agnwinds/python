@@ -186,7 +186,7 @@ get_solve_matrix_test_data (const char *a_path, const char *b_path, const char *
  *  ***************************************************************************************************************** */
 
 static int
-internal_test_invert (const char *test_name)
+call_invert_matrix (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
@@ -246,7 +246,7 @@ internal_test_invert (const char *test_name)
  *  ***************************************************************************************************************** */
 
 int
-internal_test_solve (const char *test_name)
+call_solve_matrix (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
   if (!python_path)
@@ -295,20 +295,31 @@ internal_test_solve (const char *test_name)
   return EXIT_SUCCESS;
 }
 
-void
-solve_matrix_small (void)
-{
-  internal_test_solve ("small_matrix");
-}
+/** *******************************************************************************************************************
+ *
+ * @brief
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
 
 void
-solve_matrix_matrix_ion (void)
+test_solve_matrix (void)
 {
-  internal_test_solve ("matrix_ion");
+  call_solve_matrix ("small_matrix");
+  call_solve_matrix ("matrix_ion");
 }
 
+/** *******************************************************************************************************************
+ *
+ * @brief
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
 void
-invert_matrix_small (void)
+test_invert_matrix (void)
 {
-  internal_test_invert ("inverse_small");
+  call_invert_matrix ("inverse_small");
 }

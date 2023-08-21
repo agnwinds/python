@@ -9,11 +9,11 @@
  *  ***************************************************************************************************************** */
 
 #include <stdlib.h>
-
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
 #include "tests/tests.h"
+#include "../source/log.h"
 
 /** *******************************************************************************************************************
  *
@@ -24,6 +24,8 @@
 int
 main (void)
 {
+  Log_set_verbosity (0);
+
   // Initialize the CUnit test registry
   if (CU_initialize_registry () != CUE_SUCCESS)
   {
@@ -31,12 +33,8 @@ main (void)
   }
 
 #ifdef CUDA_ON
-  cuda_init ();
+  cusolver_create ();
 #endif
-
-  // solve_matrix_small ();
-  // solve_matrix_matrix_ion ();
-  // invert_matrix_small ();
 
   // Add a suite to the registry
   CU_pSuite suite = CU_add_suite ("Matrix Functions Suite", NULL, NULL);
@@ -47,9 +45,8 @@ main (void)
   }
 
   // Add the test cases to the suite
-  if ((CU_add_test (suite, "Solve Matrix: small", solve_matrix_small) == NULL) ||
-      (CU_add_test (suite, "Solve Matrix: matrix ion", solve_matrix_matrix_ion) == NULL) ||
-      (CU_add_test (suite, "Invert Matrix: small", invert_matrix_small) == NULL))
+  if ((CU_add_test (suite, "Solve Matrix", test_solve_matrix) == NULL) ||
+      (CU_add_test (suite, "Invert Matrix", test_invert_matrix) == NULL))
   {
     CU_cleanup_registry ();
     return CU_get_error ();
@@ -63,10 +60,8 @@ main (void)
   CU_cleanup_registry ();
 
 #ifdef CUDA_ON
-  cuda_finish ();
+  cusolver_destroy ();
 #endif
 
   return CU_get_error ();
-
-  return EXIT_SUCCESS;
 }
