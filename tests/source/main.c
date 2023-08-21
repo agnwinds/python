@@ -13,8 +13,9 @@
 
 #include "tests/tests.h"
 
-int cuda_init (void);
-int cuda_finish (void);
+#ifdef CUDA_ON
+#include <cuda_runtime.h>
+#endif
 
 /** *******************************************************************************************************************
  *
@@ -25,19 +26,21 @@ int cuda_finish (void);
 int
 main (void)
 {
+  int number_failed;
+  Suite *matrix_suite;
+  SRunner *sr;
+
 #ifdef CUDA_ON
+  cudaSetDevice (0);
+  cudaDeviceEnablePeerAccess (0, 0);
   cuda_init ();
 #endif
 
-  int number_failed;
-  Suite *s;
-  SRunner *sr;
-
   // Create the suite
-  s = create_matrix_suite ();
+  matrix_suite = create_matrix_suite ();
 
   // Create a test runner
-  sr = srunner_create (s);
+  sr = srunner_create (matrix_suite);
 
   // Run the tests
   srunner_run_all (sr, CK_NORMAL);

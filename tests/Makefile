@@ -2,7 +2,8 @@ CC = gcc
 NVCC = nvcc
 TARGET = test
 
-CFLAGS = -I../include -g
+CFLAGS = -I../include -g -pthread
+NVCCFLAGS = -g -DCUDA_ON
 LIBS = -L/../lib -lcheck -lsubunit -lgsl -lgslcblas -lm
 
 # Source code from Python, which is what we'll be testing
@@ -27,10 +28,11 @@ OBJS = $(patsubst %.c, %.o, $(SOURCES))
 
 ifneq ($(NVCC),)
 	CFLAGS += -DCUDA_ON
-	LIBS += -lcudart -lcusolver
+	CUDA_LIBS = -lcudart -lcusolver
 	CUDA_OBJS = $(patsubst %.cu, %.o, $(CUDA_SOURCES))
 else
 	CUDA_OBJS =
+	CUDA_LIBS =
 endif
 
 all: startup clean $(TARGET)
@@ -40,12 +42,12 @@ startup:
 
 cuda: startup $(CUDA_SOURCES)
 ifneq ($(NVCC),)
-	$(NVCC) -c -g $(CUDA_SOURCES) -DCUDA_ON -o $(CUDA_OBJS)
+	$(NVCC) -c $(NVCCFLAGS) $(CUDA_SOURCES) -o $(CUDA_OBJS)
 endif
 
 # TODO: we should store objects in a directory local to test
 $(TARGET): startup cuda $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
 
 check: $(TARGET)
 	./$(TARGET)

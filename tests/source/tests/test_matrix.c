@@ -14,11 +14,10 @@
 
 #include <check.h>
 
+#include "../source/matrix.h"
+
 #define LENGTH 256
 #define EPSILON 1.0e-6
-
-int solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma);
-int invert_matrix (double *matrix, double *inverse_matrix, int matrix_size);
 
 /** *******************************************************************************************************************
  *
@@ -212,7 +211,7 @@ internal_test_invert (const char *test_name)
   double *test_inverse = malloc (matrix_size * sizeof (double));
   const int matrix_err = invert_matrix (matrix, test_inverse, matrix_size);
 
-  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Invert Matrix (%s): numerical routine failed with error %d", test_name, matrix_err);
+  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Invert Matrix (%s): %s (%d)", test_name, cusolver_get_error_string (matrix_err), matrix_err);
 
   int i;
   for (i = 0; i < matrix_size; ++i)
@@ -243,7 +242,7 @@ internal_test_invert (const char *test_name)
  *
  *  ***************************************************************************************************************** */
 
-static int
+int
 internal_test_solve (const char *test_name)
 {
   const char *python_path = getenv ((const char *) "PYTHON");
@@ -273,7 +272,7 @@ internal_test_solve (const char *test_name)
   double *test_vector_x = malloc (vector_size * sizeof (double));
   const int matrix_err = solve_matrix (matrix_a, vector_b, vector_size, test_vector_x, -1);
 
-  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Solve Matrix (%s): numerical routine failed with error %d", test_name, matrix_err);
+  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Solve Matrix (%s): %s (%d)", test_name, get_matrix_error_string (matrix_err), matrix_err);
 
   int i;
   for (i = 0; i < vector_size; ++i)
