@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <check.h>
+#include <CUnit/CUnit.h>
 
 #include "../source/matrix.h"
 
@@ -70,7 +70,7 @@ get_invert_matrix_test_data (const char *matrix_path, const char *inverse_path, 
   *size = size_from_matrix;
 
   *matrix = malloc (size_from_matrix * size_from_matrix * sizeof (double));
-  *inverse = malloc (size_from_matrix * sizeof (double));
+  *inverse = malloc (size_from_matrix * size_from_matrix * sizeof (double));
 
   int i;
   for (i = 0; i < size_from_matrix * size_from_matrix; ++i)
@@ -87,7 +87,7 @@ get_invert_matrix_test_data (const char *matrix_path, const char *inverse_path, 
   }
 
   fscanf (fp_inverse, "%*d");
-  for (i = 0; i < size_from_matrix; ++i)
+  for (i = 0; i < size_from_matrix * size_from_matrix; ++i)
   {
     fscanf (fp_inverse, "%le", &(*inverse)[i]);
   }
@@ -206,19 +206,22 @@ internal_test_invert (const char *test_name)
   int matrix_size;
   const int get_err = get_invert_matrix_test_data (matrix_filepath, inverse_filepath, &matrix, &inverse, &matrix_size);
 
-  ck_assert_msg (get_err == EXIT_SUCCESS, "Invert Matrix (%s): could not load test data", test_name);
+  CU_ASSERT (get_err == EXIT_SUCCESS);
+  if (get_err)
+    return EXIT_FAILURE;
 
-  double *test_inverse = malloc (matrix_size * sizeof (double));
+  double *test_inverse = malloc (matrix_size * matrix_size * sizeof (double));
   const int matrix_err = invert_matrix (matrix, test_inverse, matrix_size);
 
-  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Invert Matrix (%s): %s (%d)", test_name, cusolver_get_error_string (matrix_err), matrix_err);
+  CU_ASSERT (matrix_err == EXIT_SUCCESS);
+  if (matrix_err)
+    return EXIT_FAILURE;
 
   int i;
-  for (i = 0; i < matrix_size; ++i)
+  for (i = 0; i < matrix_size * matrix_size; ++i)
   {
-    ck_assert_msg (check_doubles_equal (inverse[i], test_inverse[i]),
-                   "Invert Matrix (%s): result not within tolerance (%e) inverse[%d] = %e test_inverse[%d] = %e", test_name, EPSILON, i,
-                   inverse[i], i, test_inverse[i]);
+    CU_ASSERT (check_doubles_equal (inverse[i], test_inverse[i]));
+    // printf ("invert: %e %e\n", inverse[i], test_inverse[i]);
   }
 
   free (matrix);
@@ -267,19 +270,21 @@ internal_test_solve (const char *test_name)
   const int get_err =
     get_solve_matrix_test_data (matrix_a_filepath, vector_b_filepath, vector_x_filepath, &matrix_a, &vector_b, &vector_x, &vector_size);
 
-  ck_assert_msg (get_err == EXIT_SUCCESS, "Solve Matrix (%s): could not load test data", test_name);
+  CU_ASSERT (get_err == EXIT_SUCCESS);
+  if (get_err)
+    return EXIT_FAILURE;
 
   double *test_vector_x = malloc (vector_size * sizeof (double));
   const int matrix_err = solve_matrix (matrix_a, vector_b, vector_size, test_vector_x, -1);
 
-  ck_assert_msg (matrix_err == EXIT_SUCCESS, "Solve Matrix (%s): %s (%d)", test_name, get_matrix_error_string (matrix_err), matrix_err);
+  CU_ASSERT (matrix_err == EXIT_SUCCESS);
+  if (matrix_err)
+    return EXIT_FAILURE;
 
   int i;
   for (i = 0; i < vector_size; ++i)
   {
-    ck_assert_msg (check_doubles_equal (vector_x[i], test_vector_x[i]),
-                   "Solve Matrix (%s): result not within tolerance (%e) x[%d] = %e test_x[%d] = %e", test_name, EPSILON, i, vector_x[i],
-                   i, test_vector_x[i]);
+    CU_ASSERT (check_doubles_equal (vector_x[i], test_vector_x[i]));
   }
 
   free (matrix_a);
@@ -290,53 +295,20 @@ internal_test_solve (const char *test_name)
   return EXIT_SUCCESS;
 }
 
-/* ********************************************************************************************************************/
-START_TEST (solve_matrix_small)
+void
+solve_matrix_small (void)
 {
   internal_test_solve ("small_matrix");
 }
 
-END_TEST
-/* ********************************************************************************************************************/
-START_TEST (solve_matrix_matrix_ion)
+void
+solve_matrix_matrix_ion (void)
 {
   internal_test_solve ("matrix_ion");
 }
 
-END_TEST
-/* ********************************************************************************************************************/
-START_TEST (invert_matrix_small)
+void
+invert_matrix_small (void)
 {
   internal_test_invert ("inverse_small");
-}
-
-END_TEST
-/* ********************************************************************************************************************/
-/** *******************************************************************************************************************
- *
- * @brief Create the test suite for the matrix tests
- *
- * @return the suite struct
- *
- * @details
- *
- *  ***************************************************************************************************************** */
-  Suite * create_matrix_suite (void)
-{
-  Suite *s;
-  TCase *tc_solve_matrix;
-  TCase *tc_invert_matrix;
-
-  tc_solve_matrix = tcase_create ("Solve Matrix");
-  tcase_add_test (tc_solve_matrix, solve_matrix_small);
-  tcase_add_test (tc_solve_matrix, solve_matrix_matrix_ion);
-
-  tc_invert_matrix = tcase_create ("Invert Matrix");
-  tcase_add_test (tc_invert_matrix, invert_matrix_small);
-
-  s = suite_create ("Matrix");
-  suite_add_tcase (s, tc_solve_matrix);
-  suite_add_tcase (s, tc_invert_matrix);
-
-  return s;
 }

@@ -2,9 +2,9 @@ CC = gcc
 NVCC = nvcc
 TARGET = test
 
-CFLAGS = -I../include -g -pthread
+CFLAGS = -I../include -I/home/saultyevil/cunit/include -g
 NVCCFLAGS = -g -DCUDA_ON
-LIBS = -L/../lib -lcheck -lsubunit -lgsl -lgslcblas -lm
+LIBS = -L/../lib -L/home/saultyevil/cunit/lib -lcunit -lgsl -lgslcblas -lm
 
 # Source code from Python, which is what we'll be testing
 PYTHON_SOURCES = \
