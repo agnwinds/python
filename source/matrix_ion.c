@@ -291,7 +291,7 @@ matrix_ion_populations (xplasma, mode)
 
     if (matrix_err)
     {
-      Error ("matrix_ion_populations: %s\n", get_solve_matrix_error_string (matrix_err));
+      Error ("matrix_ion_populations: %s\n", get_matrix_error_string (matrix_err));
     }
 
     /* free memory */

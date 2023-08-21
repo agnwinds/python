@@ -20,6 +20,8 @@
 #include "atomic.h"
 #include "python.h"
 
+#ifndef CUDA_ON                 /* removes a compiler warning about unused functions */
+
 /* ****************************************************************************************************************** */
 /**
  *  @brief Check the return status of a GSL function
@@ -52,8 +54,9 @@
  *
  *  ***************************************************************************************************************** */
 
+
 static const char *
-get_cpu_solve_matrix_error_string (int error_code)
+cpu_matrix_error_string (int error_code)
 {
   switch (error_code)
   {
@@ -66,28 +69,6 @@ get_cpu_solve_matrix_error_string (int error_code)
   default:
     return "bad return from solve_matrix";
   }
-}
-
-/* ****************************************************************************************************************** */
-/**
- * @brief Get the error string for a error code for `solve_matrix`
- *
- * @param [in] error_code the error code
- *
- * @return The error string
- *
- * @details
- *
- *  ***************************************************************************************************************** */
-
-const char *
-get_solve_matrix_error_string (int error_code)
-{
-#ifdef CUDA_ON
-  return get_gpu_solve_matrix_error_string (error_code);
-#else
-  return get_cpu_solve_matrix_error_string (error_code);
-#endif
 }
 
 /* ****************************************************************************************************************** */
@@ -273,6 +254,30 @@ cpu_invert_matrix (double *matrix, double *inverse_out, int matrix_size)
   gsl_matrix_free (inverse);
 
   return EXIT_SUCCESS;
+}
+
+#endif
+
+/* ****************************************************************************************************************** */
+/**
+ * @brief Get the error string for a error code for `solve_matrix`
+ *
+ * @param [in] error_code the error code
+ *
+ * @return The error string
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
+
+const char *
+get_matrix_error_string (int error_code)
+{
+#ifdef CUDA_ON
+  return cusolver_get_error_string (error_code);
+#else
+  return cpu_matrix_error_string (error_code);
+#endif
 }
 
 /* ****************************************************************************************************************** */
