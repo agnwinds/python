@@ -633,7 +633,7 @@ int calc_all_matom_matrices(void);
 /* python_extern_init.o */
 /* models_extern_init.c */
 /* matrix_cpu.c */
-const char *get_solve_matrix_error_string(int error_code);
+const char *get_matrix_error_string(int error_code);
 int solve_matrix(double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma);
 int invert_matrix(double *matrix, double *inverted_matrix, int num_rows);
 /* py_wind_sub.c */

@@ -23,12 +23,13 @@
 extern "C" int Exit (int error_code);
 extern "C" int Error (const char *format, ...);
 extern "C" int Log (const char *format, ...);
+extern "C" int Debug (const char *format, ...);
 
 /* `cusolver_handle` is a variable used to interact with the cuSolver/CUDA
     runtime and is used to initialise and clean up the resources required for
     both runtimes */
 
-static cusolverDnHandle_t cusolver_handle = NULL;
+static cusolverDnHandle_t CUSOLVER_HANDLE = NULL;
 
 /* ****************************************************************************************************************** */
 /**
@@ -46,7 +47,7 @@ static cusolverDnHandle_t cusolver_handle = NULL;
  *  ***************************************************************************************************************** */
 
 extern "C" const char *
-get_gpu_solve_matrix_error_string (int error)
+cusolver_get_error_string (int error)
 {
   cusolverStatus_t status = (cusolverStatus_t) error;
 
@@ -59,7 +60,7 @@ get_gpu_solve_matrix_error_string (int error)
   case CUSOLVER_STATUS_ALLOC_FAILED:
     return "Resource allocation failed inside the cuSolver library";
   case CUSOLVER_STATUS_INVALID_VALUE:
-    return "An unupported value or parameter was passed to the function (e.g. negative vector size)";
+    return "An unsupported value or parameter was passed to the function (e.g. negative vector size)";
   case CUSOLVER_STATUS_ARCH_MISMATCH:
     return "The function requires a feature abscent from the device architecture";
   case CUSOLVER_STATUS_EXECUTION_FAILED:
@@ -85,7 +86,7 @@ get_gpu_solve_matrix_error_string (int error)
   do {                                                                                                                 \
     cudaError_t err = status;                                                                                          \
     if (err != cudaSuccess) {                                                                                          \
-      Error("CUDA Error: %s (%d) (%s:%d)\n", cudaGetErrorString(err), err, __FILE__, __LINE__);                        \
+      Error("CUDA Error (%d): %s (%s:%d)\n", err, cudaGetErrorString(err), __FILE__, __LINE__);                        \
       return err;                                                                                                      \
     }                                                                                                                  \
   } while (0)
@@ -102,7 +103,7 @@ get_gpu_solve_matrix_error_string (int error)
   do {                                                                                                                 \
     cusolverStatus_t err = status;                                                                                     \
     if (err != CUSOLVER_STATUS_SUCCESS) {                                                                              \
-      Error("cuSolver Error: %s (%d) (%s:%d)\n", get_gpu_solve_matrix_error_string(err), err, __FILE__, __LINE__);     \
+      Error("cuSolver Error (%d): %s (%s:%d)\n", err, cusolver_get_error_string(err), __FILE__, __LINE__);     \
       return err;                                                                                                      \
     }                                                                                                                  \
   } while (0)
@@ -123,7 +124,7 @@ get_gpu_solve_matrix_error_string (int error)
 extern "C" int
 cuda_init (void)
 {
-  if (cusolver_handle)
+  if (CUSOLVER_HANDLE)
     return EXIT_SUCCESS;
 
 #ifdef MPI_ON
@@ -136,7 +137,8 @@ cuda_init (void)
 #endif
 #endif
 
-  CUSOLVER_CHECK (cusolverDnCreate (&cusolver_handle));
+  CUSOLVER_CHECK (cusolverDnCreate (&CUSOLVER_HANDLE));
+  Debug ("cuSolver initialised\n");
 
   return EXIT_SUCCESS;
 }
@@ -156,43 +158,61 @@ cuda_init (void)
 extern "C" int
 cuda_finish (void)
 {
-  CUSOLVER_CHECK (cusolverDnDestroy (cusolver_handle));
-  cusolver_handle = NULL;
+  if (!CUSOLVER_HANDLE)
+    return EXIT_SUCCESS;
+
+  CUSOLVER_CHECK (cusolverDnDestroy (CUSOLVER_HANDLE));
+  CUSOLVER_HANDLE = NULL;
+  Debug ("cuSolver destroyed\n");
 
   return EXIT_SUCCESS;
 }
 
 /* ****************************************************************************************************************** */
 /**
- * @brief
+ * @brief Transpose a square row major matrix to column major
  *
- * @param
+ * @param [in] row_major the input matrix
+ * @param [out] column_major the output matrix
+ * @param [in] matrix_size the size of the matrix
  *
  * @details
  *
  *  ***************************************************************************************************************** */
 
 __global__ void
-transposeRowToColumn (double *inMatrix, double *outMatrix, int size)
+tranpose_row_to_column_major (double *row_major, double *column_major, int matrix_size)
 {
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  int idy = blockIdx.y * blockDim.y + threadIdx.y;
+  const int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  const int idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if (idx < size && idy < size)
+  if (idx < matrix_size && idy < matrix_size)
   {
-    outMatrix[idx * size + idy] = inMatrix[idy * size + idx];
+    column_major[idx * matrix_size + idy] = row_major[idy * matrix_size + idx];
   }
 }
 
-__global__ void
-transposeColumnToRow (double *inMatrix, double *outMatrix, int size)
-{
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  int idy = blockIdx.y * blockDim.y + threadIdx.y;
+/* ****************************************************************************************************************** */
+/**
+ * @brief Transpose a square column major matrix to row major
+ *
+ * @param [in] column_major the input matrix
+ * @param [out] row_major the output matrix
+ * @param [in] matrix_size the size of the matrix
+ *
+ * @details
+ *
+ *  ***************************************************************************************************************** */
 
-  if (idx < size && idy < size)
+__global__ void
+tranpose_column_to_row_major (double *column_major, double *row_major, int matrix_size)
+{
+  const int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  const int idy = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if (idx < matrix_size && idy < matrix_size)
   {
-    outMatrix[idy * size + idx] = inMatrix[idx * size + idy];
+    row_major[idy * matrix_size + idx] = column_major[idx * matrix_size + idy];
   }
 }
 
@@ -246,41 +266,36 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
   int *devInfo;
   int lwork;
   int *d_pivot;                 /* device array of pivoting sequence */
-  double *d_A, *d_A_row, *d_b;
+  double *d_A, *d_Arow, *d_b;   /* d_A_row is row-major (from C) */
   double *d_work;               /* cuSolver needs a "workspace" to do stuff, which we have to allocate manually */
 
   /* Allocate memory on the GPU (device) to store the matrices/vectors */
-  CUDA_CHECK (cudaMalloc ((void **) &d_A_row, matrix_size * matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &d_A, matrix_size * matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &d_b, matrix_size * sizeof (double)));
   CUDA_CHECK (cudaMalloc ((void **) &devInfo, sizeof (int)));
   CUDA_CHECK (cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int)));
 
   /* Copy the matrix and vector to the device memory */
-  CUDA_CHECK (cudaMemcpy (d_A_row, a_matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
+  CUDA_CHECK (cudaMemcpy (d_Arow, a_matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
   CUDA_CHECK (cudaMemcpy (d_b, b_vector, matrix_size * sizeof (double), cudaMemcpyHostToDevice));
 
   dim3 blockDim (16, 16);
   dim3 gridDim ((matrix_size + blockDim.x - 1) / blockDim.x, (matrix_size + blockDim.y - 1) / blockDim.y);
-  transposeRowToColumn <<< gridDim, blockDim >>> (d_A_row, d_A, matrix_size);
+  tranpose_row_to_column_major <<< gridDim, blockDim >>> (d_Arow, d_A, matrix_size);
+  CUDA_CHECK (cudaFree (d_Arow));
 
   /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the linear
      system being solved */
-  CUSOLVER_CHECK (cusolverDnDgetrf_bufferSize (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, &lwork));
+  CUSOLVER_CHECK (cusolverDnDgetrf_bufferSize (CUSOLVER_HANDLE, matrix_size, matrix_size, d_A, matrix_size, &lwork));
   CUDA_CHECK (cudaMalloc ((void **) &d_work, lwork * sizeof (double)));
 
   /* Perform LU factorization and solve the linear system. The vector d_b is not used in `getrs` (the solver), but
      it's the same size of the solution vector so we'll re-use that. d_b is then copied back to host memory (CPU RAM) */
-  CUSOLVER_CHECK (cusolverDnDgetrf (cusolver_handle, matrix_size, matrix_size, d_A, matrix_size, d_work, d_pivot, devInfo));
-  CUSOLVER_CHECK (cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo));
-  CUDA_CHECK (cudaMemcpy (x_vector, d_b, matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
+  CUSOLVER_CHECK (cusolverDnDgetrf (CUSOLVER_HANDLE, matrix_size, matrix_size, d_A, matrix_size, d_work, d_pivot, devInfo));
+  CUSOLVER_CHECK (cusolverDnDgetrs (CUSOLVER_HANDLE, CUBLAS_OP_N, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo));
 
-  int i;
-  for (i = 0; i < matrix_size; ++i)
-  {
-    printf ("%e ", x_vector[i]);
-  }
-  printf ("\n");
+  /* don't need to tranpose vectors */
+  CUDA_CHECK (cudaMemcpy (x_vector, d_b, matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
 
   CUDA_CHECK (cudaFree (d_A));
   CUDA_CHECK (cudaFree (d_b));
@@ -323,17 +338,17 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
   double *d_workspace;
 
   /* Allocate memory on the GPU (device) to store the matrices/vectors */
-  cudaMalloc ((void **) &d_matrix, matrix_size * matrix_size * sizeof (double));
-  cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int));
-  cudaMalloc ((void **) &d_identity, matrix_size * matrix_size * sizeof (double));
-  cudaMalloc ((void **) &dev_info, sizeof (int));
+  CUDA_CHECK (cudaMalloc ((void **) &d_matrix, matrix_size * matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_pivot, matrix_size * sizeof (int)));
+  CUDA_CHECK (cudaMalloc ((void **) &d_identity, matrix_size * matrix_size * sizeof (double)));
+  CUDA_CHECK (cudaMalloc ((void **) &dev_info, sizeof (int)));
 
   /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the matrix */
-  cusolverDnDgetrf_bufferSize (cusolver_handle, matrix_size, matrix_size, d_matrix, matrix_size, &work_size);
-  cudaMalloc ((void **) &d_workspace, work_size * sizeof (double));
+  CUSOLVER_CHECK (cusolverDnDgetrf_bufferSize (CUSOLVER_HANDLE, matrix_size, matrix_size, d_matrix, matrix_size, &work_size));
+  CUDA_CHECK (cudaMalloc ((void **) &d_workspace, work_size * sizeof (double)));
 
   /* Copy matrix from host (CPU) to device memory (d_matrix) */
-  cudaMemcpy (d_matrix, matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice);
+  CUDA_CHECK (cudaMemcpy (d_matrix, matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
 
   /* We'll use a CUDA kernel to create an indentity matrix, which we'll use to solve for the inverse. The
      syntax is a bit strange. We can imagine this bit as being similar to OpenMP, as CUDA is shared memory. We're
@@ -344,17 +359,18 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
 
   /* We first need to facotrise the matrix to get the pivot indcies, for getrs. The function getrs is solves a linear
      system to solve for the inverse matrix. The inverse matrix is placed back into `d_identity` */
-  cusolverDnDgetrf (cusolver_handle, matrix_size, matrix_size, d_matrix, matrix_size, d_workspace, d_pivot, dev_info);
-  cusolverDnDgetrs (cusolver_handle, CUBLAS_OP_N, matrix_size, matrix_size, d_matrix, matrix_size, d_pivot, d_identity, matrix_size,
-                    dev_info);
+  CUSOLVER_CHECK (cusolverDnDgetrf (CUSOLVER_HANDLE, matrix_size, matrix_size, d_matrix, matrix_size, d_workspace, d_pivot, dev_info));
+  CUSOLVER_CHECK (cusolverDnDgetrs
+                  (CUSOLVER_HANDLE, CUBLAS_OP_N, matrix_size, matrix_size, d_matrix, matrix_size, d_pivot, d_identity, matrix_size,
+                   dev_info));
 
   /* Copy the inverse matrix from host to device */
-  cudaMemcpy (inverse_matrix, d_identity, matrix_size * matrix_size * sizeof (double), cudaMemcpyDeviceToHost);
+  CUDA_CHECK (cudaMemcpy (inverse_matrix, d_identity, matrix_size * matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
 
-  cudaFree (d_matrix);
-  cudaFree (d_identity);
-  cudaFree (d_workspace);
-  cudaFree (dev_info);
+  CUDA_CHECK (cudaFree (d_matrix));
+  CUDA_CHECK (cudaFree (d_identity));
+  CUDA_CHECK (cudaFree (d_workspace));
+  CUDA_CHECK (cudaFree (dev_info));
 
   return EXIT_SUCCESS;
 }

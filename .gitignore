@@ -84,6 +84,9 @@ xmod/
 # we shouldn't be tracking version.h either
 source/version.h
 
+# we also should not track templates.h.old either
+source/templates.h.old
+
 # python output files
 *.diag
 *.spec
