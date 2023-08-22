@@ -45,6 +45,7 @@ build
 
 # things from gsl, may not be necessary
 software/gsl*
+software/cunit*
 include/gsl/
 include/CUnit/
 lib/pkgconfig/
