@@ -1,10 +1,10 @@
-CC = gcc
+CC = mpicc
 NVCC =
 TARGET = test
 
-CFLAGS = -I../include
+CFLAGS = -I../include -DMPI_ON
 NVCCFLAGS = -DCUDA_ON
-LIBS = -L/../lib -lcunit -lgsl -lgslcblas -lm
+LIBS = -L../lib -lcunit -lgsl -lgslcblas -lm
 
 # Source code from Python, which is what we'll be testing
 PYTHON_SOURCES = \
@@ -45,7 +45,6 @@ ifneq ($(NVCC),)
 	$(NVCC) -c $(NVCCFLAGS) $(CUDA_SOURCES) -o $(CUDA_OBJS)
 endif
 
-# TODO: we should store objects in a directory local to test
 $(TARGET): cuda $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
 

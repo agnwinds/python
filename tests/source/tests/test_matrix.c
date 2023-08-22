@@ -273,7 +273,7 @@ call_solve_matrix (const char *test_name)
  *  ***************************************************************************************************************** */
 
 void
-cpu_test_solve_matrix (void)
+test_solve_matrix (void)
 {
   call_solve_matrix ("small_matrix");
   call_solve_matrix ("matrix_ion");
@@ -288,7 +288,7 @@ cpu_test_solve_matrix (void)
  *  ***************************************************************************************************************** */
 
 void
-cpu_test_invert_matrix (void)
+test_invert_matrix (void)
 {
   call_invert_matrix ("inverse_small");
 }
@@ -316,14 +316,14 @@ create_matrix_test_suite (void)
 
   if (suite == NULL)
   {
-    fprintf (stderr, "Failed to create `Matrix Functions Suite: CPU` suite\n");
+    fprintf (stderr, "Failed to create `Matrix Functions Suite` suite\n");
     CU_cleanup_registry ();
     exit (CU_get_error ());
   }
 
   /* Add CPU tests to suite */
-  if ((CU_add_test (suite, "Solve Matrix", cpu_test_solve_matrix) == NULL) ||
-      (CU_add_test (suite, "Invert Matrix", cpu_test_invert_matrix) == NULL))
+  if ((CU_add_test (suite, "Solve Matrix", test_solve_matrix) == NULL) ||
+      (CU_add_test (suite, "Invert Matrix", test_invert_matrix) == NULL))
   {
     fprintf (stderr, "Failed to add tests to `Matrix Functions Suite: CPU`\n");
     CU_cleanup_registry ();
