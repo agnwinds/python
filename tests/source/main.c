@@ -42,9 +42,5 @@ main (void)
   // Clean up the CUnit registry
   CU_cleanup_registry ();
 
-#ifdef CUDA_ON
-  cusolver_destroy ();
-#endif
-
   return CU_get_error ();
 }
