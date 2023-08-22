@@ -10,7 +10,7 @@
 # for manual install.
 
 CMAKE = mpicc
-NVCC = nvcc
+NVCC =
 GSL = $(PYTHON)/software/gsl-2.6
 CUNIT = $(PYTHON)/software/cunit-2.1-3
 LIBS = True
@@ -64,13 +64,13 @@ install:
 
 	# Then make GSL library
 	@echo 'Installing GSL library...'
-	# $(INSTALL_GSL)
-	# $(MOVE_GSL)
+	$(INSTALL_GSL)
+	$(MOVE_GSL)
 
 	# Now make the unit test framework
 	@echo 'Installing CUnit...'
-	# $(INSTALL_CUNIT)
-	# $(MOVE_CUNIT)
+	$(INSTALL_CUNIT)
+	$(MOVE_CUNIT)
 
 	# Finally, make the latest release
 	@echo 'Making source code...'
