@@ -44,13 +44,13 @@ if [ "$with_cuda" = true ]; then
 	printf "Checking for nvcc..."
 	if hash nvcc 2>/dev/null; then
 		printf "yes\n"
-		sed -i "" "s/^NVCC =.*/NVCC = nvcc/" source/Makefile
+		sed -i -e "s/^NVCC =.*/NVCC = nvcc/" source/Makefile
 	else
 		printf "no\n"
-		sed -i "" "s/^NVCC =.*/NVCC = /" source/Makefile
+		sed -i -e "s/^NVCC =.*/NVCC = /" source/Makefile
 	fi
 else
-	sed -i "" "s/^NVCC =.*/NVCC = /" source/Makefile
+	sed -i -e "s/^NVCC =.*/NVCC = /" source/Makefile
 fi
 
 printf "Preparing Makefile..."
