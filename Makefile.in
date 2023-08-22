@@ -25,8 +25,8 @@ ifeq (True, $(LIBS))
 	MOVE_GSL = mkdir $(PYTHON)/include/gsl/; mv $(GSL)/include/gsl/* $(PYTHON)/include/gsl; mv $(GSL)/lib/lib* $(PYTHON)/lib/;
 
 	# CUnit -- unit test framework
-	INSTALL_CUNIT = cd $(CUNIT); autoreconf -vif; ./configure --disable-shared --prefix=$(CUNIT); make; make check; make install; make clean
-	INSTALL_CUNIT = cd $(CUNIT); autoreconf -vif; ./configure --disable-shared --prefix=$(CUNIT); make; make install; make clean
+	INSTALL_CUNIT = cd $(CUNIT); ./configure --disable-shared --prefix=$(CUNIT); make; make check; make install; make clean
+	INSTALL_CUNIT = cd $(CUNIT); ./configure --disable-shared --prefix=$(CUNIT); make; make install; make clean
 	MOVE_CUNIT = mv $(CUNIT)/include/CUnit $(PYTHON)/include; mv $(CUNIT)/lib/lib* $(PYTHON)/lib/
 else
 	INSTALL_GSL =
