@@ -17,8 +17,8 @@ PYTHON_SOURCES = \
 CUDA_SOURCES = ../matrix_gpu.cu
 
 # Source code for the testing framework and unit test files
-TARGET_SOURCES = source/main.c
-TEST_SOURCES = source/tests/test_matrix.c
+TARGET_SOURCES = main.c
+TEST_SOURCES = tests/test_matrix.c
 
 # This is all sources, to be compiled with CC
 SOURCES = $(TARGET_SOURCES) $(TEST_SOURCES) $(PYTHON_SOURCES)
