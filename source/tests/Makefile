@@ -1,6 +1,6 @@
 CC = mpicc
 NVCC =
-TARGET = test
+TARGET = py_unit_test
 
 CFLAGS = -I../../include -DMPI_ON
 NVCCFLAGS = -DCUDA_ON
@@ -47,11 +47,12 @@ endif
 
 $(TARGET): cuda $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
+	mv $(TARGET) ../../bin
 
 check: $(TARGET)
-	./$(TARGET)
+	../../bin/$(TARGET)
 
 clean:
-	rm -f $(TARGET) $(OBJS) $(CUDA_OBJS)
+	rm -f ../../bin/$(TARGET) $(OBJS) $(CUDA_OBJS)
 
 .PHONY: clean
