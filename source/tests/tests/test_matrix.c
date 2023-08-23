@@ -19,7 +19,7 @@ gsl_error_handler_t *old_handler;
 #endif
 
 #include "../assert.h"
-#include "../../../matrix.h"
+#include "../../matrix.h"
 
 #define BUFFER_LENGTH 512
 
