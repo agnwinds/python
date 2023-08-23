@@ -189,13 +189,13 @@ set(OPTICAL_DEPTH_SOURCE
     source/py_optd_output.c source/py_optd_extern_init.c)
 
 set(TEST_SOURCE
-        source/tests/main.c
-        source/tests/tests/test_matrix.c
-    source/xlog.c
-    source/rdpar.c
-    source/synonyms.c
-    source/matrix_cpu.c
-    ${CUDA_SOURCE})
+    source/tests/main.c
+    source/tests/tests/test_matrix.c
+    source/tests/tests/test_compton.c
+    ${PYTHON_SOURCE})
+
+#${CUDA_SOURCE})
+
 
 # Create the executables for each program, and link the required libraries
 
@@ -214,4 +214,4 @@ target_link_libraries(windsave2table gsl gslcblas m)
 
 # test
 add_executable(py_unit_test ${TEST_SOURCE})
-target_link_libraries(test m gsl gslcblas check subunit)
+target_link_libraries(py_unit_test m gsl gslcblas cunit)

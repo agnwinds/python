@@ -1,5 +1,5 @@
-/* ****************************************************************************************************************** */
-/**
+/** ********************************************************************************************************************
+ *
  *  @file main.c
  *  @author Edward J. Parkinson (e.parkinson@soton.ac.uk)
  *  @date August 2023
@@ -8,23 +8,27 @@
  *
  *  https://gitlab.com/cunity/cunit
  *
- *  ***************************************************************************************************************** */
+ * ****************************************************************************************************************** */
 
-#include "CUnit/CUnit.h"
-#include "CUnit/Basic.h"
+#include <time.h>
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
 
 /* Test suite prototypes */
 #include "tests/tests.h"
 
-/* Python source code */
+/* Python logging prototypes */
 #include "../log.h"
 
+/* Including templates.h has so undesired effects, so we'll define the prototypes
+   as we need them */
+int init_rand(int seed);
 
 /** *******************************************************************************************************************
  *
  *  @brief Entry point for unit tests
  *
- *  ***************************************************************************************************************** */
+ * ****************************************************************************************************************** */
 
 int
 main (void)
@@ -38,7 +42,11 @@ main (void)
     return CU_get_error ();
   }
 
+  /* Initialise some stuff for Python -- e.g. RNG */
+  init_rand((int)time(NULL));
+
   /* Create test suites */
+  create_compton_test_suite();
   create_matrix_test_suite ();
 
   /* Run the test suites */

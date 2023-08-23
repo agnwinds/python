@@ -451,3 +451,4 @@ libatomic.a:  atomicdata.o atomicdata_init.o atomic.o
 
 clean :
 	rm -f *.o  *~
+	cd tests && make clean

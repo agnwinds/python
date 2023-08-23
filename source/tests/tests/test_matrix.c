@@ -297,6 +297,7 @@ void
 test_invert_matrix (void)
 {
   call_invert_matrix ("inverse_small");
+  call_invert_matrix ("inverse_macro");
 }
 
 /** *******************************************************************************************************************
@@ -367,7 +368,6 @@ matrix_suite_teardown (void)
 void
 create_matrix_test_suite (void)
 {
-
 #ifdef CUDA_ON
   char *suite_name = "Matrix Functions: cuSolver";
 #else

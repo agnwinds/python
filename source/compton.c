@@ -387,6 +387,36 @@ double sigma_rand;              //The randomised cross section that our photon w
 double sigma_max;               //The cross section for the maxmimum energy loss
 double x1;                      //The ratio of photon eneergy to electron energy
 
+/** ****************************************************************************
+ *
+ * @brief Set the value for parameters used in comp_func
+ *
+ * @param [in] rand_cs The random cross section to set
+ * @param [in] max_cs The maximum cross section to set
+ * @param [in] energy_ratio The photon to electron energy ratio to set
+ *
+ * @details
+ *
+ * `sigma_rand`, `sigma_max` and `x1` are used in `comp_func` to calculate the
+ * fractional energy change for a given frequency and photon. These variables
+ * are "external" (i.e. global in this file), as they are not passed as
+ * parameters to `comp_func` due to how a root finding algorithm is setup.
+ *
+ * The existence of this function is justified by some usages of comp_func
+ * outside of this file, e.g. for unit testing. The other option would be to
+ * write the unit tests in this file, or to have a compton.h header where the
+ * globals are stored.
+ *
+ * ************************************************************************** */
+
+void
+set_comp_func_values (double rand_cs, double max_cs, double energy_ratio)
+{
+  sigma_rand = rand_cs;
+  sigma_max = max_cs;
+  x1 = energy_ratio;
+}
+
 /**********************************************************/
 /** 
  * @brief      find a new (random) direction for a photon undergoing Compton scattering.
