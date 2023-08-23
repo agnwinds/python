@@ -189,8 +189,8 @@ set(OPTICAL_DEPTH_SOURCE
     source/py_optd_output.c source/py_optd_extern_init.c)
 
 set(TEST_SOURCE
-    tests/source/main.c
-    tests/source/tests/test_matrix.c
+        source/tests/main.c
+        source/tests/tests/test_matrix.c
     source/xlog.c
     source/rdpar.c
     source/synonyms.c
@@ -213,5 +213,5 @@ add_executable(windsave2table source/windsave2table.c ${PYTHON_SOURCE}
 target_link_libraries(windsave2table gsl gslcblas m)
 
 # test
-add_executable(test ${TEST_SOURCE})
+add_executable(py_unit_test ${TEST_SOURCE})
 target_link_libraries(test m gsl gslcblas check subunit)
