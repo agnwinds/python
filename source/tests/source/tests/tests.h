@@ -1,0 +1,17 @@
+/** ********************************************************************************************************************
+ *
+ *  @file tests.h
+ *  @author Edward J. Parkinson (e.parkinson@soton.ac.uk)
+ *  @date August 2023
+ *
+ *  @brief Function prototypes for test suites
+ *
+ * ****************************************************************************************************************** */
+
+#ifndef TESTS_H
+#define TESTS_H
+
+/* test_matrix.c */
+void create_matrix_test_suite (void);
+
+#endif
