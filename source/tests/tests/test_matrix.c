@@ -297,6 +297,7 @@ void
 test_invert_matrix (void)
 {
   call_invert_matrix ("inverse_small");
+  call_invert_matrix ("inverse_macro");
 }
 
 /** *******************************************************************************************************************
