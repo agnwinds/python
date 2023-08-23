@@ -6,17 +6,18 @@
  *
  *  @brief Main function for unit tests
  *
+ *  https://gitlab.com/cunity/cunit
+ *
  *  ***************************************************************************************************************** */
 
-#include <stdlib.h>
-#include <CUnit/CUnit.h>
-#include <CUnit/Basic.h>
+#include "CUnit/CUnit.h"
+#include "CUnit/Basic.h"
 
 /* Test suite prototypes */
 #include "tests/tests.h"
 
 /* Python source code */
-#include "../source/log.h"
+#include "../log.h"
 
 
 /** *******************************************************************************************************************

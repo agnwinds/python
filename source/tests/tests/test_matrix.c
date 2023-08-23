@@ -11,15 +11,15 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <CUnit/CUnit.h>
+#include "CUnit/CUnit.h"
 
 #ifndef CUDA_ON
-#include <gsl/gsl_errno.h>
+#include "gsl/gsl_errno.h"
 gsl_error_handler_t *old_handler;
 #endif
 
 #include "../assert.h"
-#include "../source/matrix.h"
+#include "../../matrix.h"
 
 #define BUFFER_LENGTH 512
 
@@ -181,21 +181,21 @@ call_invert_matrix (const char *test_name)
   char matrix_filepath[BUFFER_LENGTH];
   char inverse_filepath[BUFFER_LENGTH];
 
-  sprintf (matrix_filepath, "%s/tests/test_data/matrix/%s/matrix.txt", python_path, test_name);
-  sprintf (inverse_filepath, "%s/tests/test_data/matrix/%s/inverse.txt", python_path, test_name);
+  sprintf (matrix_filepath, "%s/source/tests/data/matrix/%s/matrix.txt", python_path, test_name);
+  sprintf (inverse_filepath, "%s/source/tests/data/matrix/%s/inverse.txt", python_path, test_name);
 
   int matrix_size;
   const int get_err = get_invert_matrix_test_data (matrix_filepath, inverse_filepath, &matrix, &inverse, &matrix_size);
   if (get_err)
   {
-    CU_FAIL_MSG_FATAL ("Unable to load test data for %s\n", test_name);
+    CU_FAIL_MSG_FATAL ("Unable to load test data");
   }
 
   double *test_inverse = malloc (matrix_size * matrix_size * sizeof (double));
   const int matrix_err = invert_matrix (matrix, test_inverse, matrix_size);
   if (matrix_err)
   {
-    CU_FAIL_MSG_FATAL ("`invert_matrix` failed with error %s (%d)\n", get_matrix_error_string (matrix_err), matrix_err);
+    CU_FAIL_MSG_FATAL ("`invert_matrix` failed with error");
   }
 
   CU_CHECK_DOUBLE_ARRAY_EQ_FATAL (test_inverse, inverse, matrix_size, EPSILON);
@@ -237,23 +237,23 @@ call_solve_matrix (const char *test_name)
   char vector_b_filepath[BUFFER_LENGTH];
   char vector_x_filepath[BUFFER_LENGTH];
 
-  sprintf (matrix_a_filepath, "%s/tests/test_data/matrix/%s/A.txt", python_path, test_name);
-  sprintf (vector_b_filepath, "%s/tests/test_data/matrix/%s/b.txt", python_path, test_name);
-  sprintf (vector_x_filepath, "%s/tests/test_data/matrix/%s/x.txt", python_path, test_name);
+  sprintf (matrix_a_filepath, "%s/source/tests/data/matrix/%s/A.txt", python_path, test_name);
+  sprintf (vector_b_filepath, "%s/source/tests/data/matrix/%s/b.txt", python_path, test_name);
+  sprintf (vector_x_filepath, "%s/source/tests/data/matrix/%s/x.txt", python_path, test_name);
 
   int vector_size;
   const int get_err =
     get_solve_matrix_test_data (matrix_a_filepath, vector_b_filepath, vector_x_filepath, &matrix_a, &vector_b, &vector_x, &vector_size);
   if (get_err)
   {
-    CU_FAIL_MSG_FATAL ("Unable to load test data for %s\n", test_name);
+    CU_FAIL ("Unable to load test data");
   }
 
   double *test_vector_x = malloc (vector_size * sizeof (double));
   const int matrix_err = solve_matrix (matrix_a, vector_b, vector_size, test_vector_x, -1);
   if (matrix_err)
   {
-    CU_FAIL_MSG_FATAL ("`solve_matrix` failed with error %s (%d)\n", get_matrix_error_string (matrix_err), matrix_err);
+    CU_FAIL ("`solve_matrix` failed with error");
   }
 
   CU_CHECK_DOUBLE_ARRAY_EQ_FATAL (test_vector_x, vector_x, vector_size, EPSILON);

@@ -1,20 +1,20 @@
 CC = mpicc
 NVCC =
-TARGET = test
+TARGET = py_unit_test
 
-CFLAGS = -I../include -DMPI_ON
+CFLAGS = -I../../include -DMPI_ON
 NVCCFLAGS = -DCUDA_ON
-LIBS = -L../lib -lcunit -lgsl -lgslcblas -lm
+LIBS = -L../../lib -lcunit -lgsl -lgslcblas -lm
 
 # Source code from Python, which is what we'll be testing
 PYTHON_SOURCES = \
-	../source/xlog.c \
-	../source/rdpar.c \
-	../source/synonyms.c \
-	../source/matrix_cpu.c
+	../xlog.c \
+	../rdpar.c \
+	../synonyms.c \
+	../matrix_cpu.c
 
 # This is sources to be compiled with NVCC
-CUDA_SOURCES = ../source/matrix_gpu.cu
+CUDA_SOURCES = ../matrix_gpu.cu
 
 # Source code for the testing framework and unit test files
 TARGET_SOURCES = source/main.c
@@ -47,11 +47,12 @@ endif
 
 $(TARGET): cuda $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
+	mv $(TARGET) ../../bin
 
 check: $(TARGET)
-	./$(TARGET)
+	../../bin/$(TARGET)
 
 clean:
-	rm -f $(TARGET) $(OBJS) $(CUDA_OBJS)
+	rm -f ../../bin/$(TARGET) $(OBJS) $(CUDA_OBJS)
 
 .PHONY: clean
