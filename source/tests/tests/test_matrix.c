@@ -368,7 +368,6 @@ matrix_suite_teardown (void)
 void
 create_matrix_test_suite (void)
 {
-
 #ifdef CUDA_ON
   char *suite_name = "Matrix Functions: cuSolver";
 #else
