@@ -247,22 +247,8 @@ matrix_ion_populations (xplasma, mode)
                                    low rates) connecting them to other rows. This may improve stability but will need to be
                                    done carefully */
 
-    /* The solver routine was taken largely wholesale from the matom routine. I have left in most of the original comments, and
-       added a few of my own for clarification */
-
-
-
-    /* The block that follows (down to next line of ***s) is to do the matrix inversion. It uses LU decomposition - the code
-       for doing this is taken from the GSL manual with very few modifications. */
-    /* here we solve the matrix equation M x = b, where x is our vector containing level populations as a fraction w.r.t the
-       whole element */
-    /* The actual LU decomposition- the process of obtaining a solution - is done by the routine solve_matrix() */
-
-
-    /* Replaced inline array allocation with calloc, which will work with older version of c compilers calloc also sets the
-       elements to zero, which is required */
-
-    /* This next line produces an array of the correct size to hold the rate matrix */
+    /* Here we solve the matrix equation M x = b, where x is our vector containing level populations as a fraction w.r.t the
+       whole element. The actual LU decomposition- the process of obtaining a solution - is done by the routine solve_matrix() */
 
     a_data = (double *) calloc (sizeof (double), nrows * nrows);
     populations = (double *) calloc (nrows, sizeof (double));
@@ -307,7 +293,11 @@ matrix_ion_populations (xplasma, mode)
     /* Calculate level populations for macro-atoms */
     if (geo.macro_ioniz_mode == MACRO_IONIZ_MODE_ESTIMATORS)
     {
-      macro_pops (xplasma, xne);
+      int mp_err = macro_pops (xplasma, xne);
+      if (mp_err != EXIT_SUCCESS)
+      {
+        return -1;
+      }
     }
 
     /* We now have the populations of all the ions stored in the matrix populations. We copy this data into the newden array

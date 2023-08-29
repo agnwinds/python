@@ -11,14 +11,15 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_permutation.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_permutation.h>
 
 #include "atomic.h"
 #include "python.h"
+#include "matrix_gpu.h"
 
 #ifndef CUDA_ON                 /* removes a compiler warning about unused functions */
 
