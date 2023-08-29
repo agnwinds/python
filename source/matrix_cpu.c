@@ -19,7 +19,6 @@
 
 #include "atomic.h"
 #include "python.h"
-#include "matrix_gpu.h"
 
 #ifndef CUDA_ON                 /* removes a compiler warning about unused functions */
 
@@ -303,6 +302,9 @@ get_matrix_error_string (int error_code)
  * `nplasma` is only used to indicate a cell number, if the calculation fails.
  *
  *  ***************************************************************************************************************** */
+
+#include <time.h>
+#include <sys/time.h>
 
 int
 solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma)

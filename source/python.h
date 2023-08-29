@@ -1784,3 +1784,7 @@ extern struct Import *imported_model;   // MaxDom is defined in python.h and as 
 #include "log.h"
 #include "version.h"
 #include "templates.h"
+
+#ifdef CUDA_ON
+#include "matrix_gpu.h"
+#endif
