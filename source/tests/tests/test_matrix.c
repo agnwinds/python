@@ -19,9 +19,11 @@ gsl_error_handler_t *old_handler;
 #endif
 
 #include "../assert.h"
-#include "../../matrix.h"
 
 #define BUFFER_LENGTH 512
+
+int solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma);
+int invert_matrix (double *matrix, double *inverted_matrix, int num_rows);
 
 /** *******************************************************************************************************************
  *

@@ -493,6 +493,12 @@ macro_pops (xplasma, xne)
           }
 
           free (populations);
+
+          if (n_iterations == MAXITERATIONS)
+          {
+            Error ("macro_pops: failed to converge for plasma cell %d\n", xplasma->nplasma);
+            return EXIT_FAILURE;
+          }
         }
       }                         // end of populations_ok == FALSE sane loop
     }                           // end of if statement for macro-atoms

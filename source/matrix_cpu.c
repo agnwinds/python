@@ -11,11 +11,11 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_permutation.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_permutation.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -302,6 +302,9 @@ get_matrix_error_string (int error_code)
  * `nplasma` is only used to indicate a cell number, if the calculation fails.
  *
  *  ***************************************************************************************************************** */
+
+#include <time.h>
+#include <sys/time.h>
 
 int
 solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma)
