@@ -2,8 +2,9 @@ CC = mpicc
 NVCC =
 TARGET = py_unit_test
 
-CFLAGS = -I../../include -DMPI_ON
-NVCCFLAGS = -DCUDA_ON
+C_FLAGS = -I../../include -DMPI_ON
+NVCC_FLAGS = -DCUDA_ON
+
 LIBS = -L../../lib -lcunit -lgsl -lgslcblas -lm
 
 # Source code from Python, which is what we'll be testing
@@ -41,8 +42,10 @@ PYTHON_SOURCES := $(patsubst %,../%, $(PYTHON_SOURCES))
 # This is sources to be compiled with NVCC
 CUDA_SOURCES = ../matrix_gpu.cu
 
-# Source code for the testing framework and unit test files
+# Source code for the testing framework
 TARGET_SOURCES = main.c
+
+# Source code for unit tests
 TEST_SOURCES = \
 	tests/test_matrix.c \
 	tests/test_compton.c
@@ -54,29 +57,29 @@ SOURCES = $(TARGET_SOURCES) $(TEST_SOURCES) $(PYTHON_SOURCES)
 OBJS = $(patsubst %.c, %.o, $(SOURCES))
 
 ifneq ($(NVCC),)
-	CFLAGS += -DCUDA_ON
-	CUDA_LIBS = -lcudart -lcusolver
 	CUDA_OBJS = $(patsubst %.cu, %.o, $(CUDA_SOURCES))
-else
-	CUDA_OBJS =
-	CUDA_LIBS =
+	LIBS += -lcudart -lcusolver
+	C_FLAGS += -DCUDA_ON
+	OBJS += $(CUDA_OBJS)
 endif
 
 all: startup clean $(TARGET)
 
 startup:
-	@echo 'ALL SOURCES =' $(SOURCES) $(CUDA_SOURCES)
+	@echo "C_FLAGS = " $(C_FLAGS)
+	@echo "NVCC_FLAGS =" $(NVCC_FLAGS)
+	@echo "LIBS =" $(LIBS)
 
 cuda: $(CUDA_SOURCES)
 ifneq ($(NVCC),)
-	$(NVCC) -c $(NVCCFLAGS) $(CUDA_SOURCES) -o $(CUDA_OBJS)
+	$(NVCC) -c $(NVCC_FLAGS) $(CUDA_SOURCES) -o $(CUDA_OBJS)
 endif
 
 $(TARGET): cuda $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
+	$(CC) $(C_FLAGS) $(OBJS) -o $(TARGET) $(LIBS)
 	mv $(TARGET) ../../bin
 
-check: $(TARGET)
+check: startup $(TARGET)
 	../../bin/$(TARGET)
 
 clean:
