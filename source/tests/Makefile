@@ -2,10 +2,10 @@ CC = mpicc
 NVCC =
 TARGET = py_unit_test
 
-C_FLAGS = -I../../include -DMPI_ON
+C_FLAGS = -I../../include
 NVCC_FLAGS = -DCUDA_ON
 
-LIBS = -L../../lib -lcunit -lgsl -lgslcblas -lm
+LIBS = -L../../lib -lcunit -lgsl -lgslcblas -lm -lstdc++
 
 # Source code from Python, which is what we'll be testing
 #PYTHON_SOURCES = \
@@ -55,6 +55,10 @@ SOURCES = $(TARGET_SOURCES) $(TEST_SOURCES) $(PYTHON_SOURCES)
 
 # Object files, again keeping C and CUDA sources separate
 OBJS = $(patsubst %.c, %.o, $(SOURCES))
+
+ifeq ($(CC), mpicc)
+	C_FLAGS += -DMPI_ON
+endif
 
 ifneq ($(NVCC),)
 	CUDA_OBJS = $(patsubst %.cu, %.o, $(CUDA_SOURCES))
