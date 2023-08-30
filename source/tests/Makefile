@@ -80,6 +80,7 @@ check: $(TARGET)
 	../../bin/$(TARGET)
 
 clean:
-	rm -f ../../bin/$(TARGET) $(OBJS) $(CUDA_OBJS)
+	rm -f source/*.o
+	rm -f ../*.o
 
 .PHONY: clean

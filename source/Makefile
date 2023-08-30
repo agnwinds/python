@@ -15,7 +15,7 @@ CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-NVCC =
+NVCC = nvcc
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS =
@@ -224,6 +224,7 @@ ifneq ($(CUDA_FLAG), )
 	CUDA_SOURCE := $(wildcard *.cu)
 	CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
 	LDFLAGS+=$(CUDA_LIBS)
+	CUDA_FLAG += -O3
 else
 	CUDA_LIBS =
 	CUDA_SOURCE =
@@ -249,7 +250,7 @@ ifneq ($(CUDA_FLAG),)
 endif
 
 python: startup cuda python.o $(python_objects)
-	$(CC) ${CFLAGS} python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) $(CUDA_LIBS) -o python
+	$(CC) ${CFLAGS} python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) -o python
 	cp $@ $(BIN)/py
         ifdef XDEBUG
 	  mv $@ $(BIN)/py$(VERSION)_debug
@@ -451,4 +452,4 @@ libatomic.a:  atomicdata.o atomicdata_init.o atomic.o
 
 clean :
 	rm -f *.o  *~
-	cd tests && make clean
+	rm -f tests/source/*.o
