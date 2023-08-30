@@ -80,7 +80,8 @@ check: $(TARGET)
 	../../bin/$(TARGET)
 
 clean:
-	rm -f source/*.o
+	rm -f *.o
+	rm -f tests/*.o
 	rm -f ../*.o
 
 .PHONY: clean
