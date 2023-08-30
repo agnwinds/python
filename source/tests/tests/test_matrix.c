@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include "CUnit/CUnit.h"
 
-#ifndef CUDA_ON
+#ifdef CUDA_ON
+#include "../../matrix_gpu.h"
+#else
 #include "gsl/gsl_errno.h"
 gsl_error_handler_t *old_handler;
 #endif

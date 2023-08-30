@@ -224,6 +224,7 @@ ifneq ($(CUDA_FLAG), )
 	CUDA_SOURCE := $(wildcard *.cu)
 	CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
 	LDFLAGS+=$(CUDA_LIBS)
+	CUDA_FLAG += -O3
 else
 	CUDA_LIBS =
 	CUDA_SOURCE =
@@ -249,7 +250,7 @@ ifneq ($(CUDA_FLAG),)
 endif
 
 python: startup cuda python.o $(python_objects)
-	$(CC) ${CFLAGS} python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) $(CUDA_LIBS) -o python
+	$(CC) ${CFLAGS} python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) -o python
 	cp $@ $(BIN)/py
         ifdef XDEBUG
 	  mv $@ $(BIN)/py$(VERSION)_debug
@@ -431,7 +432,7 @@ py_optd: startup cuda $(py_optd_obj)
 # the Makefile in tests/ will compile what is requried
 
 check:
-	cd tests && make check NVCC=$(NVCC) CC=$(CC)
+	cd tests; make check NVCC=$(NVCC) CC=$(CC)
 
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
@@ -451,4 +452,4 @@ libatomic.a:  atomicdata.o atomicdata_init.o atomic.o
 
 clean :
 	rm -f *.o  *~
-	cd tests && make clean
+	cd tests; make clean

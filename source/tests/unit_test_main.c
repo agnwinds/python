@@ -22,7 +22,7 @@
 
 /* Including templates.h has so undesired effects, so we'll define the prototypes
    as we need them */
-int init_rand(int seed);
+int init_rand (int seed);
 
 /** *******************************************************************************************************************
  *
@@ -43,18 +43,29 @@ main (void)
   }
 
   /* Initialise some stuff for Python -- e.g. RNG */
-  init_rand((int)time(NULL));
+  init_rand ((int) time (NULL));
 
   /* Create test suites */
-  create_compton_test_suite();
+  create_compton_test_suite ();
   create_matrix_test_suite ();
 
   /* Run the test suites */
   CU_basic_set_mode (CU_BRM_VERBOSE);
   CU_basic_run_tests ();
 
+  const int num_tests_failed = CU_get_number_of_tests_failed ();
+
+  if (num_tests_failed > 0)
+  {
+    printf ("\033[1;31m%d test(s) failed\n\033[1;0m", num_tests_failed);
+  }
+  else
+  {
+    printf ("\033[1;32mAll tests ran successfully\n\033[1;0m");
+  }
+
   /* Clean up the CUnit registry */
   CU_cleanup_registry ();
 
-  return CU_get_error ();
+  return num_tests_failed;
 }

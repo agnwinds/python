@@ -1,17 +1,14 @@
-CC = mpicc
+C = gcc
 NVCC =
 TARGET = py_unit_test
 
-CFLAGS = -I../../include -DMPI_ON
-NVCCFLAGS = -DCUDA_ON
-LIBS = -L../../lib -lcunit -lgsl -lgslcblas -lm
+I_FLAGS = -I$(PYTHON)/include
+L_FLAGS = -L$(PYTHON)/lib
+C_FLAGS = -O3 -Wall
+CU_FLAGS = -O3
 
-# Source code from Python, which is what we'll be testing
-#PYTHON_SOURCES = \
-#	../xlog.c \
-#	../rdpar.c \
-#	../synonyms.c \
-#	../matrix_cpu.c \
+INCLUDES =
+LIBS = -lstdc++ -lcunit -lgsl -lgslcblas -lm
 
 # This is less than ideal, but it's far too complicated and time consuming to
 # figure out what tests needs which source files. So as we've done in the past,
@@ -36,50 +33,70 @@ PYTHON_SOURCES = \
 	vvector.c walls.c wind.c wind2d.c wind_sum.c wind_updates2d.c wind_util.c  \
 	windsave.c windsave2table_sub.c xlog.c xtest.c zeta.c get_models.c rdpar_init.c
 
-PYTHON_SOURCES := $(patsubst %,../%, $(PYTHON_SOURCES))
-
 # This is sources to be compiled with NVCC
-CUDA_SOURCES = ../matrix_gpu.cu
+CUDA_SOURCES = \
+	matrix_gpu.cu
 
-# Source code for the testing framework and unit test files
-TARGET_SOURCES = main.c
+# Source code for unit tests
 TEST_SOURCES = \
+	unit_test_main.c \
 	tests/test_matrix.c \
 	tests/test_compton.c
 
+# Using absolute paths
+PYTHON_SOURCES := $(patsubst %,$(PYTHON)/source/%, $(PYTHON_SOURCES))
+CUDA_SOURCES := $(patsubst %,$(PYTHON)/source/%, $(CUDA_SOURCES))
+TEST_SOURCES := $(patsubst %,$(PYTHON)/source/tests/%, $(TEST_SOURCES))
+
 # This is all sources, to be compiled with CC
-SOURCES = $(TARGET_SOURCES) $(TEST_SOURCES) $(PYTHON_SOURCES)
+C_SOURCES := $(TEST_SOURCES) $(PYTHON_SOURCES)
 
 # Object files, again keeping C and CUDA sources separate
-OBJS = $(patsubst %.c, %.o, $(SOURCES))
+C_OBJS := $(C_SOURCES:.c=.o)
+
+ifeq ($(CC), mpicc)
+	C_FLAGS += -DMPI_ON
+endif
 
 ifneq ($(NVCC),)
-	CFLAGS += -DCUDA_ON
-	CUDA_LIBS = -lcudart -lcusolver
-	CUDA_OBJS = $(patsubst %.cu, %.o, $(CUDA_SOURCES))
+	CUDA_OBJS := $(CUDA_SOURCES:.cu=.o)
+	LIBS += -lcudart -lcusolver
+	C_FLAGS += -DCUDA_ON
+	CU_FLAGS += -DCUDA_ON
 else
 	CUDA_OBJS =
-	CUDA_LIBS =
 endif
 
 all: startup clean $(TARGET)
 
 startup:
-	@echo 'ALL SOURCES =' $(SOURCES) $(CUDA_SOURCES)
+	@echo "CC        =" $(CC)
+	@echo "NVCC      =" $(NVCC)
+	@echo "I_FLAGS   =" $(I_FLAGS)
+	@echo "L_FLAGS   =" $(L_FLAGS)
+	@echo "C_FLAGS   =" $(C_FLAGS)
+	@echo "CU_FLAGS  =" $(CU_FLAGS)
+	@echo "INCLUDES  =" $(INCLUDES)
+	@echo "LIBS      =" $(LIBS)
 
-cuda: $(CUDA_SOURCES)
+$(CUDA_OBJS): %.o : %.cu
 ifneq ($(NVCC),)
-	$(NVCC) -c $(NVCCFLAGS) $(CUDA_SOURCES) -o $(CUDA_OBJS)
+	$(NVCC) $(CU_FLAGS) $(I_FLAGS) $(INCLUDES) -c $< -o $@
 endif
 
-$(TARGET): cuda $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(CUDA_OBJS) -o $(TARGET) $(CUDA_LIBS) $(LIBS)
-	mv $(TARGET) ../../bin
+$(C_OBJS): %.o : %.c
+	$(CC) $(C_FLAGS) $(I_FLAGS) $(INCLUDES) -c $< -o $@
 
-check: $(TARGET)
-	../../bin/$(TARGET)
+$(TARGET): $(C_OBJS) $(CUDA_OBJS)
+	$(CC) $(C_OBJS) $(CUDA_OBJS) $(L_FLAGS) $(LIBS) -o $@
+	mv $@ $(PYTHON)/bin
+
+check: startup $(TARGET)
+	$(PYTHON)/bin/$(TARGET)
 
 clean:
-	rm -f ../../bin/$(TARGET) $(OBJS) $(CUDA_OBJS)
+	rm -f *.o
+	rm -f tests/*.o
+	rm -f ../*.o
 
 .PHONY: clean
