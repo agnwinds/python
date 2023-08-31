@@ -432,7 +432,7 @@ py_optd: startup cuda $(py_optd_obj)
 # the Makefile in tests/ will compile what is requried
 
 check:
-	cd tests && make NVCC=$(NVCC) CC=$(CC) && make check CC=$(CC) NVCC=$(NVCC)
+	cd tests; make all NVCC=$(NVCC) CC=$(CC); make check NVCC=$(NVCC) CC=$(CC)
 
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
