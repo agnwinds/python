@@ -38,7 +38,7 @@ ifeq (True, $(INSTALL_LIBS))
 			rm -r build;
 		MAKE_CHECK = \
 			cd $(PYTHON)/source; \
-			make check
+			make check CC=$(CMAKE)
 	else
 		@echo 'CMake is not installed, will not try build CUnit'
 		INSTALL_CUNIT =
