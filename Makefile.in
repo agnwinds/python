@@ -42,7 +42,6 @@ ifeq (True, $(INSTALL_LIBS))
 	else
 		@echo 'CMake is not installed, will not try build CUnit'
 		INSTALL_CUNIT =
-		MOVE_CUNIT =
 		MAKE_CHECK =
 	endif
 else
@@ -50,7 +49,6 @@ else
 	INSTALL_GSL_NO_CHECK =
 	MOVE_GSL =
 	INSTALL_CUNIT =
-	MOVE_CUNIT =
 endif
 
 # install for travis
@@ -65,8 +63,7 @@ gh_workflow_install:
 
 	# Then make CUnit Library
 	@echo 'Installing CUnit library...'
-	$(INSTALL_CUNIT_NO_CHECK)
-	$(MOVE_CUNIT)
+	$(INSTALL_CUNIT)
 
 	#finally, make the latest release
 	@echo 'Making source code...'
@@ -86,7 +83,6 @@ install:
 	# Now make the unit test framework
 	@echo 'Installing CUnit library...'
 	$(INSTALL_CUNIT)
-	$(MOVE_CUNIT)
 
 	# Finally, make the latest release
 	@echo 'Making source code...'
