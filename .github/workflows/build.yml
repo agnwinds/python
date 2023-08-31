@@ -29,7 +29,7 @@ jobs:
     - name: configure
       run: ./configure
     - name: make gh_workflow_install
-      run: make gh_workflow_install
+      run: make gh_workflow_install && make clean
 
   run:
     runs-on: ubuntu-latest
@@ -47,15 +47,15 @@ jobs:
         cd $PYTHON/examples/gh-workflow/
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: compile helper programs and setup
-      run: |
-        cd $PYTHON/source/
-        make clean
-        make CC=gcc INDENT=no all
-        make check CC=gcc
-        make clean
-        cd $PYTHON/examples/gh-workflow/
-        $PYTHON/bin/Setup_Py_Dir
+    # - name: compile helper programs and setup
+    #   run: |
+    #     cd $PYTHON/source/
+    #     make clean
+    #     make CC=gcc INDENT=no all
+    #     make check CC=gcc
+    #     make clean
+    #     cd $PYTHON/examples/gh-workflow/
+    #     $PYTHON/bin/Setup_Py_Dir
 
     - name: balmer test
       run: |
@@ -66,6 +66,7 @@ jobs:
     - name: read in parameter files
       run: |
         cd $PYTHON/examples/gh-workflow/
+        $PYTHON/bin/Setup_Py_Dir
         $PYTHON/bin/py -i cv_macro_benchmark
         $PYTHON/bin/py -i cv_standard
         $PYTHON/bin/py -i fiducial_agn
