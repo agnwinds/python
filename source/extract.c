@@ -287,7 +287,7 @@ extract (w, p, itype)
        * thesis
      */
 
-    if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
+    if (itype == PTYPE_STAR || itype == PTYPE_BL || (itype == PTYPE_AGN && geo.pl_geometry == PL_GEOMETRY_SPHERE))
     {
       stuff_v (pp.x, x);
       renorm (x, 1.);
