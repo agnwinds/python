@@ -52,7 +52,7 @@ jobs:
         cd $PYTHON/source/
         make clean
         make CC=gcc INDENT=no all
-        make check
+        make check CC=gcc
         make clean
         cd $PYTHON/examples/gh-workflow/
         $PYTHON/bin/Setup_Py_Dir
