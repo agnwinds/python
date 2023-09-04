@@ -15,7 +15,7 @@ CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-NVCC = 
+NVCC =
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS =
@@ -432,7 +432,7 @@ py_optd: startup cuda $(py_optd_obj)
 # the Makefile in tests/ will compile what is requried
 
 check:
-	cd tests; make all NVCC=$(NVCC) CC=$(CC); make check NVCC=$(NVCC) CC=$(CC)
+	cd tests; make check NVCC=$(NVCC) CC=$(CC)
 
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
@@ -452,4 +452,4 @@ libatomic.a:  atomicdata.o atomicdata_init.o atomic.o
 
 clean :
 	rm -f *.o  *~
-	rm -f tests/source/*.o
+	cd tests; make clean

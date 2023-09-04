@@ -5,6 +5,7 @@ TARGET = py_unit_test
 I_FLAGS = -I$(PYTHON)/include
 L_FLAGS = -L$(PYTHON)/lib
 C_FLAGS = -O3 -Wall
+CU_FLAGS = -O3
 
 INCLUDES =
 LIBS = -lstdc++ -lcunit -lgsl -lgslcblas -lm
@@ -32,11 +33,9 @@ PYTHON_SOURCES = \
 	vvector.c walls.c wind.c wind2d.c wind_sum.c wind_updates2d.c wind_util.c  \
 	windsave.c windsave2table_sub.c xlog.c xtest.c zeta.c get_models.c rdpar_init.c
 
-PYTHON_SOURCES := $(patsubst %,../%, $(PYTHON_SOURCES))
-
 # This is sources to be compiled with NVCC
 CUDA_SOURCES = \
-	../matrix_gpu.cu
+	matrix_gpu.cu
 
 # Source code for unit tests
 TEST_SOURCES = \
@@ -44,20 +43,26 @@ TEST_SOURCES = \
 	tests/test_matrix.c \
 	tests/test_compton.c
 
+# Using absolute paths
+PYTHON_SOURCES := $(patsubst %,$(PYTHON)/source/%, $(PYTHON_SOURCES))
+CUDA_SOURCES := $(patsubst %,$(PYTHON)/source/%, $(CUDA_SOURCES))
+TEST_SOURCES := $(patsubst %,$(PYTHON)/source/tests/%, $(TEST_SOURCES))
+
 # This is all sources, to be compiled with CC
-C_SOURCE := $(TEST_SOURCES) $(PYTHON_SOURCES)
+C_SOURCES := $(TEST_SOURCES) $(PYTHON_SOURCES)
 
 # Object files, again keeping C and CUDA sources separate
-C_OBJS := $(C_SOURCE:.c=.o)
+C_OBJS := $(C_SOURCES:.c=.o)
 
 ifeq ($(CC), mpicc)
 	C_FLAGS += -DMPI_ON
 endif
 
 ifneq ($(NVCC),)
-	CUDA_OBJS :=  $(CUDA_SOURCE:.cu=.o)
+	CUDA_OBJS := $(CUDA_SOURCES:.cu=.o)
 	LIBS += -lcudart -lcusolver
 	C_FLAGS += -DCUDA_ON
+	CU_FLAGS += -DCUDA_ON
 else
 	CUDA_OBJS =
 endif
@@ -65,15 +70,18 @@ endif
 all: startup clean $(TARGET)
 
 startup:
+	@echo "CC        =" $(CC)
+	@echo "NVCC      =" $(NVCC)
 	@echo "I_FLAGS   =" $(I_FLAGS)
 	@echo "L_FLAGS   =" $(L_FLAGS)
 	@echo "C_FLAGS   =" $(C_FLAGS)
+	@echo "CU_FLAGS  =" $(CU_FLAGS)
 	@echo "INCLUDES  =" $(INCLUDES)
 	@echo "LIBS      =" $(LIBS)
 
 $(CUDA_OBJS): %.o : %.cu
 ifneq ($(NVCC),)
-	$(NVCC) $(C_FLAGS) $(I_FLAGS) $(INCLUDES) -c $<
+	$(NVCC) $(CU_FLAGS) $(I_FLAGS) $(INCLUDES) -c $< -o $@
 endif
 
 $(C_OBJS): %.o : %.c
