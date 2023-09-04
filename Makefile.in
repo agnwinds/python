@@ -15,7 +15,6 @@ GSL_LOCATION = $(PYTHON)/software/gsl-2.6
 CUNIT_LOCATION = $(PYTHON)/software/cunit-3.2.7
 INSTALL_LIBS = True
 
-
 ifeq (True, $(INSTALL_LIBS))
 	# GNU Science library -- math routines
 	MOVE_GSL = \
@@ -97,7 +96,7 @@ install:
 
 	# Then make GSL library
 	@echo 'Installing GSL library...'
-	$(INSTALL_GSL_NO_CHECK)
+	$(INSTALL_GSL)
 
 	# Now make the unit test framework
 	@echo 'Installing CUnit library...'
@@ -113,16 +112,16 @@ install:
 clean:
 	rm -f *.o *~
 	cd $(GSL_LOCATION); make clean;
-	cd $(PYTHON)/source/; make clean
 	rm -rf $(CUNIT_LOCATION)/build
+	cd $(PYTHON)/source/; make clean
 
 # Runs a more rigorous clean for the libraries and Python. CUnit doesn't need
 # this, as we delete the CMake build directory after installing it
 distclean:
 	rm -f *.o *~
 	cd $(GSL_LOCATION); make distclean
-	cd $(PYTHON)/source/; make clean
 	rm -rf $(CUNIT_LOCATION)/build
+	cd $(PYTHON)/source/; make clean
 
 # Remove just the libraries
 rm_lib:
