@@ -66,7 +66,7 @@ test_compton_func (void)
 void
 test_compton_beta (void)
 {
-  CU_ASSERT_DOUBLE_EQUAL_FATAL (compton_beta (1e168), 1.0, EPSILON);
+  CU_ASSERT_DOUBLE_EQUAL_FATAL (compton_beta (1e16), 1.0, EPSILON);
   CU_ASSERT_DOUBLE_EQUAL_FATAL (compton_beta (1e17), 0.9991066689339109, EPSILON);
 }
 
