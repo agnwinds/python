@@ -9,7 +9,7 @@
 # and build for debugging. But isn't complex enough to fully emulate the
 # behaviour of the Makefile in $PYTHON/source.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(Python LANGUAGES C)
 
 # The C standard is being set to 90. The compiler is being set to mpicc
@@ -189,7 +189,7 @@ set(OPTICAL_DEPTH_SOURCE
     source/py_optd_output.c source/py_optd_extern_init.c)
 
 set(TEST_SOURCE
-    source/tests/main.c
+    source/tests/unit_test_main.c
     source/tests/tests/test_matrix.c
     source/tests/tests/test_compton.c
     ${PYTHON_SOURCE})
