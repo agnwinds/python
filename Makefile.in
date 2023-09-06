@@ -89,6 +89,14 @@ gh_workflow_install:
 	$(MAKE_PYTHON)
 	@echo 'all done'
 
+gsl:
+	@echo 'Installing the GNU Science Library'
+	$(INSTALL_GSL)
+
+cunit:
+	@echo 'Installing CUnit unit test framework'
+	$(INSTALL_CUNIT)
+
 # Compile and install the libraries and Python
 install:
 	@echo 'Installing Python. the radiative transfer code'
