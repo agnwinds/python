@@ -81,13 +81,20 @@ else	# you must be using clang or icc
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 endif
 
-# If NVCC has been set (set in ./configure), we'll switch some functions out for
-# some written in CUDA -- e.g. matrix_gpu.cu
+# If NVCC has been set, then we can define CUDA_FLAG = -DCUDA_ON, so the CUDA
+# options in the C source are compiled
 ifneq ($(NVCC), )
 	CUDA_FLAG = -DCUDA_ON
 else
 	CUDA_FLAG =
 endif
+
+# These variables are used to compile CUDA code, and don't have to be defined
+# conditionally
+NVCC_FLAGS = -O3 -Werror all-warnings
+CUDA_LIBS = -lcudart -lcusolver
+CUDA_SOURCE := $(wildcard *.cu)
+CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
 
 # this command finds out how many files with uncommitted changes there are
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
@@ -124,7 +131,7 @@ endif
 # LDFLAGS= -L$(LIB)  -lm -lkpar  -lgslcblas ../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
 # LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas
-LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
+LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 
 
 #Note that version should be a single string without spaces.
@@ -190,8 +197,6 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
 		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
-
-
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
 # Problems ocurr due to the prototypes that are generated.  ksl 160705
 python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c photon2d.c photon_gen.c parse.c \
@@ -213,24 +218,9 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c \
 		macro_accelerate.c atomic_extern_init.c  python_extern_init.o  models_extern_init.c matrix_cpu.c
 
-#
 # kpar_source is now declared separately from python_source so that the file log.h
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c
-
-# if CUDA is enabled, we now need to define the source and any extra flags
-ifneq ($(CUDA_FLAG), )
- 	CUDA_LIBS = -lcudart -lcusolver
-	CUDA_SOURCE := $(wildcard *.cu)
-	CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
-	LDFLAGS+=$(CUDA_LIBS)
-	CUDA_FLAG += -O3
-else
-	CUDA_LIBS =
-	CUDA_SOURCE =
-	CUDA_OBJECTS =
-endif
-
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c windsave2table.c windsave2table_sub.c
 
 prototypes:
@@ -244,13 +234,15 @@ prototypes:
 	cproto  -I$(INCLUDE) atomicdata_init.c >> atomic_proto.h
 	cproto  -I$(INCLUDE) recipes.c random.c cdf.c vvector.c > math_proto.h
 
-cuda: startup $(CUDA_SOURCE)
+# Recipe to create CUDA object code. If NVCC is blank, then nothing happens
+# in thie recipe
+$(CUDA_OBJECTS): $(CUDA_SOURCE)
 ifneq ($(CUDA_FLAG),)
-	$(NVCC) -c $(CUDA_SOURCE) ${CUDA_FLAG}
+	$(NVCC) $(NVCC_FLAGS) -DCUDA_ON -I$(INCLUDE) -c $< -o $@
 endif
 
-python: startup cuda python.o $(python_objects)
-	$(CC) ${CFLAGS} python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) -o python
+python: startup python.o $(python_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) -o python
 	cp $@ $(BIN)/py
         ifdef XDEBUG
 	  mv $@ $(BIN)/py$(VERSION)_debug
@@ -284,7 +276,7 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 
 
 
-py_wind: startup cuda $(py_wind_objects)
+py_wind: startup $(py_wind_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(py_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o py_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
@@ -327,7 +319,7 @@ run_indent:
 	../py_progs/run_indent.py -all_no_headers
 
 
-windsave2table: startup cuda $(table_objects)
+windsave2table: startup $(table_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(table_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o windsave2table
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
@@ -335,7 +327,7 @@ windsave2table: startup cuda $(table_objects)
 
 
 
-rad_hydro_files: startup cuda $(rhf_objects)
+rad_hydro_files: startup $(rhf_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(rhf_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o rad_hydro_files
 	cp $@ $(BIN)
 	mv $@ $(BIN)/rad_hydro_files$(VERSION)
@@ -360,7 +352,7 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
-modify_wind: startup cuda $(modify_wind_objects)
+modify_wind: startup $(modify_wind_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(modify_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o modify_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/modify_wind$(VERSION)
@@ -385,7 +377,7 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 
 
 
-inspect_wind: startup cuda $(inspect_wind_objects)
+inspect_wind: startup $(inspect_wind_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(inspect_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS)  -o inspect_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/inspect_wind$(VERSION)
@@ -421,7 +413,7 @@ py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o \
 		py_optd_extern_init.o matrix_cpu.o
 
-py_optd: startup cuda $(py_optd_obj)
+py_optd: startup $(py_optd_obj) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(py_optd_obj) $(CUDA_OBJECTS) $(LDFLAGS) -o $@
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_optd$(VERSION)
