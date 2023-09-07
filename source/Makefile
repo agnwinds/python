@@ -85,15 +85,16 @@ endif
 # options in the C source are compiled
 ifneq ($(NVCC), )
 	CUDA_FLAG = -DCUDA_ON
+	CUDA_SOURCE := $(wildcard *.cu)
 else
 	CUDA_FLAG =
+	CUDA_SOURCE =
 endif
 
 # These variables are used to compile CUDA code, and don't have to be defined
 # conditionally
 NVCC_FLAGS = -O3 -Werror all-warnings
 CUDA_LIBS = -lcudart -lcusolver
-CUDA_SOURCE := $(wildcard *.cu)
 CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
 
 # this command finds out how many files with uncommitted changes there are
