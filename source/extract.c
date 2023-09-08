@@ -239,7 +239,11 @@ extract (w, p, itype)
        an an effect of special relativty which accounts for solid angle
        corrections.
 
-       PTYPE_STAR, PTYPE_BL do not need this test
+       PTYPE_STAR, PTYPE_BL do not need to be modified.  The rather
+       peculiar rel_mode != REL_MODE_LINEAR arises because there
+       are two modes that REL_MODE_SR_FREQ and  REL_MODE_FULL 
+       that need frame transformations.
+
      */
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)

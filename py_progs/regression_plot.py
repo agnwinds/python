@@ -36,7 +36,7 @@ History:
 import os
 import sys
 from astropy.io import ascii
-import numpy
+import numpy as np
 import pylab
 from glob import glob
 
@@ -450,11 +450,22 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
         flux1=xsmooth(spec1['Emitted'],21)
         flux2=xsmooth(spec2['Emitted'],21)
         diff_emitted=flux2-flux1
-        pylab.plot(spec1['Lambda'],flux1,label='Emitted1')
-        pylab.plot(spec2['Lambda'],flux2,label='Emitted2')
 
-        ymax=numpy.max(flux1)
-        ymin=numpy.min(flux1)
+
+        xmean=np.average(flux1)
+        xmed=np.median(flux1)
+        if xmed >0.01*xmean :
+            pylab.plot(spec1['Lambda'],flux1,label='Emitted1')
+            pylab.plot(spec2['Lambda'],flux2,label='Emitted2')
+        else:
+            pylab.semilogy(spec1['Lambda'],flux1,label='Emitted1')
+            pylab.semilogy(spec2['Lambda'],flux2,label='Emitted2')
+            y=pylab.ylim()
+            pylab.ylim(y[1]/1e5,y[1])
+        
+
+        ymax=np.max(flux1)
+        ymin=np.min(flux1)
         pylab.ylim(0.5*ymin,1.5*ymax)
 
         pylab.legend(loc='best')
@@ -472,8 +483,19 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
         flux1=xsmooth(spec1[name],21)
         flux2=xsmooth(spec2[name],21)
         diff_spec=flux2-flux1
-        pylab.plot(spec1['Lambda'],flux1,label=name)
-        pylab.plot(spec2['Lambda'],flux2,label=name)
+
+        xmean=np.average(flux1)
+        xmed=np.median(flux1)
+        if xmed >0.01*xmean :
+            pylab.plot(spec1['Lambda'],flux1,label=name)
+            pylab.plot(spec2['Lambda'],flux2,label=name)
+        else:
+            pylab.semilogy(spec1['Lambda'],flux1,label=name)
+            pylab.semilogy(spec2['Lambda'],flux2,label=name)
+            y=pylab.ylim()
+            pylab.ylim(y[1]/1e5,y[1])
+        
+
 
 
 
