@@ -30,13 +30,15 @@
  *
  * The extract option is used
  * normally during the spectral extraction cycles.
- * However, as an advanced option one can use the live or die
+ * However, one can use the live or die
  * to construct the detailed spectrum.  One would not normally
  * want to do this, as many photons are "wasted" since they
  * don't scatter at the desired angle.  With sufficient numbers
  * of photons however the results of the two methods should
  * (by construction) be identical (or at least very very
- * similar).
+ * similar).  As a result the live or die option is useful
+ * if one has questions about whether the more complex 
+ * extract option is functioning properly.  
  *
  *
  ***********************************************************/
@@ -97,7 +99,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
     p[nphot].np = nphot;
-    check_frame (&p[nphot], F_OBSERVER, "trans_phot_start\n");
+    check_frame (&p[nphot], F_OBSERVER, "trans_phot: photon not in observer frame as expeced\n");
 
     if (nphot % nreport == 0)
     {
@@ -156,7 +158,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * @brief      Transport a single photon photon through the wind.
  *
  * @param [in] WindPtr  w   The entire wind
- * @param [in, out] PhotPtr  p   A single photon
+ * @param [in, out] PhotPtr  p   A single photon (in the observer frame)
  * @param [in] int  iextract   If 0, then process this photon in the live or die option, without
  * calling extract
  *
@@ -171,7 +173,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * Basically what the routine does is generate a random number which is used to
  * determine the optical depth to a scatter, and then it calles translate
  * multiple times.   translate involves moving the photon only a single cell
- * (or alternatively a single tranfer in the windless region), and returns
+ * (or alternatively a single transfer in the windless region), and returns
  * a status.  Depending on what this status is, trans_phot_single calls
  * trans_phot again doing nothing, but if the scattering depth has been
  * reached, then trans_phot_single causes the photon to scatter,
@@ -183,7 +185,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * or scattered depending on the reflection/absorption mode. If the
  * reflection/absorption mode is set to reflection, then the 
  * program is redirected in the main loop, but if the surfaces are
- * set to aborb, hitting a surface will exist the routine.
+ * set to absorb, hitting a surface will exit the routine.
  *
  *
  *
@@ -194,6 +196,9 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * the photon has reached, and p is the location where it is going.  At
  * the end of the main loop before a new cycle, pp is updated.
  *
+ * The photon starts in the observer frame (and remains that 
+ * in this routine).  Comversions to the local frame occur
+ * in the routines that are called, however.
  *
  **********************************************************/
 
@@ -210,7 +215,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double normal[3];
   double rho, dz;
 
-  check_frame (p, F_OBSERVER, "trans_phot_single: photon not in the observer frame when coming into trans_phot_single\n");
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
 

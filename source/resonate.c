@@ -842,14 +842,11 @@ calls to two_level atom
  *
  * @details
  * The routine calculates a new direction and frequency for a photon in both the
- * resonant and non-resonant cases.  In the frame of the wind, scattering is assumed
- * to be isotropic.
+ * resonant and non-resonant cases.  
  *
  * ### Notes ###
  * This is the routine that is called when a resonant scatter does occur.  It is
  * relevant for both simple and macro atoms
- *
- * The equations for the frequency shifts are accurate only to first order in beta
  *
  * This routine should not move the photon at all, because other routines need to
  * take this photon in differing directions, and if one moves it here they may
