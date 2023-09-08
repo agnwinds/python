@@ -97,6 +97,9 @@ cunit:
 	@echo 'Installing CUnit unit test framework'
 	$(INSTALL_CUNIT)
 
+check:
+	cd $(PYTHON)/source; make check
+
 # Compile and install the libraries and Python
 install:
 	@echo 'Installing Python. the radiative transfer code'
