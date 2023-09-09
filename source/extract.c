@@ -311,6 +311,16 @@ extract (w, p, itype)
       pp.w *= zz * (2.0 + 3.0 * zz);
 
     }
+    else if (pp.nres == NRES_ES)
+    {
+      /* Reweight for electron scattering */
+
+
+      zz = dot (pp.lmn, p_in.lmn);
+      pp.w *= 0.75 * (1 + zz * zz);
+
+
+    }
     else if (pp.nres > -1 && pp.nres < NLINES)
     {
 
