@@ -258,12 +258,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     istat = walls (&pp, p, normal);
 
-    /*
-     * The photon has hit the star. Reflect or absorb.
-     */
 
     if (istat == P_HIT_STAR)
     {
+
+      /*
+       * The photon has hit the star. Reflect or absorb.
+       */
+
       geo.lum_star_back += pp.w;
       spec_add_one (&pp, SPEC_HITSURF);
 
@@ -292,19 +294,19 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           extract (w, &pextract, PTYPE_STAR);   // Treat as stellar photon for purpose of extraction
         }
       }
-      else                      /*In this case, photons that hit the star are simply absorbed so this is the end of the line. */
+      else                      /*Photons that hit the star are simply absorbed  */
       {
         stuff_phot (&pp, p);
         break;
       }
     }
 
-    /*
-     * The photon has hit the disk. Reflect or absorb.
-     */
-
     if (istat == P_HIT_DISK)
     {
+      /*
+       * The photon has hit the disk. Reflect or absorb.
+       */
+
       /* Store the energy of the photon bundle into a disk structure so that one
          can determine later how much and where the disk was heated by photons.
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the
@@ -365,19 +367,20 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           extract (w, &pextract, PTYPE_DISK);
         }
       }
-      else                      /* In this case, photons that hit the disk are to be absorbed */
+      else                      /* Photons that hit the disk are to be absorbed */
       {
         stuff_phot (&pp, p);
         break;
       }
     }
 
-    /*
-     * The photon has scattered, as either a resonance or continuum scatter.
-     */
-
     if (istat == P_SCAT)
     {
+
+      /*
+       * The photon has scattered, as either a resonance or continuum scatter.
+       */
+
       pp.grid = n_grid = where_in_grid (wmain[pp.grid].ndom, pp.x);
 
       if (n_grid < 0)
@@ -419,8 +422,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       nnscat = 1;
       pp.nscat++;
 
-      ierr = scatter (&pp, &current_nres, &nnscat);     // pp is modified
-      if (ierr)
+      if (current_nres == NRES_ES)
+      {
+        stuff_phot (&pp, &pextract);
+      }
+
+      if ((ierr = scatter (&pp, &current_nres, &nnscat)))       // pp is modified
       {
         Error ("trans_phot_single: photon %d returned error code %d whilst scattering \n", pp.np, ierr);
       }
@@ -433,7 +440,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         break;
       }
 
-      /* If the photon interacted with a resonance, calculate the line heating
+      /* If this is a BB interaction, calculate the line heating
        * and break the transport loop if it was absorbed */
 
       if (current_nres > -1 && current_nres < nlines)
@@ -463,13 +470,19 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        * N.B. To use the anisotropic scattering option, extract needs to follow scatter.
        * This is because the re-weighting which occurs in extract needs the pdf for scattering
        * to have been initialized
+       *
+       * For BB photons the photon we pass to extract is the one that has been scattered, but
+       * for ES we pass the photon prior to scattering.
        */
 
       if (iextract)
       {
-        stuff_phot (&pp, &pextract);
+        if (current_nres != NRES_ES)
+        {
+          stuff_phot (&pp, &pextract);
+        }
         pextract.nnscat = nnscat;
-        extract (w, &pextract, PTYPE_WIND);     // Treat as wind photon for purpose of extraction
+        extract (w, &pextract, PTYPE_WIND);
       }
 
       /* Reinitialize parameters for the scattered photon so it can can continue through the wind

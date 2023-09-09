@@ -457,6 +457,9 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
         if xmed >0.01*xmean :
             pylab.plot(spec1['Lambda'],flux1,label='Emitted1')
             pylab.plot(spec2['Lambda'],flux2,label='Emitted2')
+            ymax=np.max(flux1)
+            ymin=np.min(flux1)
+            pylab.ylim(0.5*ymin,1.5*ymax)
         else:
             pylab.semilogy(spec1['Lambda'],flux1,label='Emitted1')
             pylab.semilogy(spec2['Lambda'],flux2,label='Emitted2')
@@ -464,9 +467,6 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
             pylab.ylim(y[1]/1e5,y[1])
         
 
-        ymax=np.max(flux1)
-        ymin=np.min(flux1)
-        pylab.ylim(0.5*ymin,1.5*ymax)
 
         pylab.legend(loc='best')
         pylab.ylabel('Flux')
@@ -495,9 +495,6 @@ def doit_two(run1='py82i_181127',run2='py82i_181126',model='cv_kur',outdir=''):
             y=pylab.ylim()
             pylab.ylim(y[1]/1e5,y[1])
         
-
-
-
 
 
         pylab.legend(loc='best')
