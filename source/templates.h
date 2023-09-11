@@ -433,6 +433,8 @@ double sigma_compton_partial(double f, double x);
 double compton_alpha(double nu);
 double compton_beta(double nu);
 double comp_cool_integrand(double nu, void *params);
+double compton_reweight_norm(double nu);
+int compton_reweight(PhotPtr p_in, PhotPtr p_out);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int mode);
 /* dielectronic.c */
