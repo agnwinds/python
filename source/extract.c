@@ -315,9 +315,24 @@ extract (w, p, itype)
     {
       /* Reweight for electron scattering */
 
+      double x1;
 
-      zz = dot (pp.lmn, p_in.lmn);
-      pp.w *= 0.75 * (1 + zz * zz);
+      x1 = PLANCK * p_in.freq / MELEC / VLIGHT / VLIGHT;
+      if (x1 < 0.0001)
+      {
+        zz = dot (pp.lmn, p_in.lmn);
+        pp.w *= 0.75 * (1 + zz * zz);
+      }
+
+      else
+      {
+        zz = dot (pp.lmn, p_in.lmn);
+        pp.w *= 0.75 * (1 + zz * zz);
+      }
+
+
+
+
 
 
     }
