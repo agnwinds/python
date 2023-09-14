@@ -326,8 +326,9 @@ extract (w, p, itype)
 
       else
       {
-        zz = dot (pp.lmn, p_in.lmn);
-        pp.w *= 0.75 * (1 + zz * zz);
+
+        compton_reweight (&p_in, &pp);
+
       }
 
 

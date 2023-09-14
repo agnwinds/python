@@ -786,6 +786,8 @@ compton_reweight_norm (nu)
 
 
   v = x1 + x2 * x3 - x4 + x5;
+
+  v *= 2. * PI;
   return v;
 }
 
@@ -827,9 +829,9 @@ compton_reweight (p_in, p_out)
 
   reweight = xr * xr * (xr + 1. / xr - sin (theta) * sin (theta));
 
-  reweight *= sin (theta);
-
   reweight *= 4. * PI / compton_reweight_norm (p_in->freq);
+
+
 
   /* This accounts for the reweighting that is due to
    * The anistorpy, but we must also change the
