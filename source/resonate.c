@@ -833,7 +833,7 @@ calls to two_level atom
  *
  * @param [in,out] PhotPtr  p   the  photon of interest
  * @param [in] int *  nres   either the number of the scatter
- * or a nonresonant scatter if nres < 0
+ * or a non-resonant scatter if nres < 0
  * @param [out] int *  nnscat   Returned from anisotropic thermal scattering model
  * @return  Always returns 0
  *
@@ -842,14 +842,11 @@ calls to two_level atom
  *
  * @details
  * The routine calculates a new direction and frequency for a photon in both the
- * resonant and non-resonant cases.  In the frame of the wind, scattering is assumed
- * to be isotropic.
+ * resonant and non-resonant cases.  
  *
  * ### Notes ###
  * This is the routine that is called when a resonant scatter does occur.  It is
  * relevant for both simple and macro atoms
- *
- * The equations for the frequency shifts are accurate only to first order in beta
  *
  * This routine should not move the photon at all, because other routines need to
  * take this photon in differing directions, and if one moves it here they may
@@ -871,8 +868,6 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
-//  double velocity_electron[3];
-//  double vel[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;

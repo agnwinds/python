@@ -30,13 +30,15 @@
  *
  * The extract option is used
  * normally during the spectral extraction cycles.
- * However, as an advanced option one can use the live or die
+ * However, one can use the live or die
  * to construct the detailed spectrum.  One would not normally
  * want to do this, as many photons are "wasted" since they
  * don't scatter at the desired angle.  With sufficient numbers
  * of photons however the results of the two methods should
  * (by construction) be identical (or at least very very
- * similar).
+ * similar).  As a result the live or die option is useful
+ * if one has questions about whether the more complex 
+ * extract option is functioning properly.  
  *
  *
  ***********************************************************/
@@ -97,7 +99,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   for (nphot = 0; nphot < NPHOT; nphot++)
   {
     p[nphot].np = nphot;
-    check_frame (&p[nphot], F_OBSERVER, "trans_phot_start\n");
+    check_frame (&p[nphot], F_OBSERVER, "trans_phot: photon not in observer frame as expeced\n");
 
     if (nphot % nreport == 0)
     {
@@ -156,7 +158,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * @brief      Transport a single photon photon through the wind.
  *
  * @param [in] WindPtr  w   The entire wind
- * @param [in, out] PhotPtr  p   A single photon
+ * @param [in, out] PhotPtr  p   A single photon (in the observer frame)
  * @param [in] int  iextract   If 0, then process this photon in the live or die option, without
  * calling extract
  *
@@ -171,7 +173,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * Basically what the routine does is generate a random number which is used to
  * determine the optical depth to a scatter, and then it calles translate
  * multiple times.   translate involves moving the photon only a single cell
- * (or alternatively a single tranfer in the windless region), and returns
+ * (or alternatively a single transfer in the windless region), and returns
  * a status.  Depending on what this status is, trans_phot_single calls
  * trans_phot again doing nothing, but if the scattering depth has been
  * reached, then trans_phot_single causes the photon to scatter,
@@ -183,7 +185,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * or scattered depending on the reflection/absorption mode. If the
  * reflection/absorption mode is set to reflection, then the 
  * program is redirected in the main loop, but if the surfaces are
- * set to aborb, hitting a surface will exist the routine.
+ * set to absorb, hitting a surface will exit the routine.
  *
  *
  *
@@ -194,6 +196,9 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * the photon has reached, and p is the location where it is going.  At
  * the end of the main loop before a new cycle, pp is updated.
  *
+ * The photon starts in the observer frame (and remains that 
+ * in this routine).  Comversions to the local frame occur
+ * in the routines that are called, however.
  *
  **********************************************************/
 
@@ -210,7 +215,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double normal[3];
   double rho, dz;
 
-  check_frame (p, F_OBSERVER, "trans_phot_single: photon not in the observer frame when coming into trans_phot_single\n");
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
 
@@ -254,12 +258,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     istat = walls (&pp, p, normal);
 
-    /*
-     * The photon has hit the star. Reflect or absorb.
-     */
 
     if (istat == P_HIT_STAR)
     {
+
+      /*
+       * The photon has hit the star. Reflect or absorb.
+       */
+
       geo.lum_star_back += pp.w;
       spec_add_one (&pp, SPEC_HITSURF);
 
@@ -288,19 +294,19 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           extract (w, &pextract, PTYPE_STAR);   // Treat as stellar photon for purpose of extraction
         }
       }
-      else                      /*In this case, photons that hit the star are simply absorbed so this is the end of the line. */
+      else                      /*Photons that hit the star are simply absorbed  */
       {
         stuff_phot (&pp, p);
         break;
       }
     }
 
-    /*
-     * The photon has hit the disk. Reflect or absorb.
-     */
-
     if (istat == P_HIT_DISK)
     {
+      /*
+       * The photon has hit the disk. Reflect or absorb.
+       */
+
       /* Store the energy of the photon bundle into a disk structure so that one
          can determine later how much and where the disk was heated by photons.
          Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the
@@ -361,19 +367,20 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           extract (w, &pextract, PTYPE_DISK);
         }
       }
-      else                      /* In this case, photons that hit the disk are to be absorbed */
+      else                      /* Photons that hit the disk are to be absorbed */
       {
         stuff_phot (&pp, p);
         break;
       }
     }
 
-    /*
-     * The photon has scattered, as either a resonance or continuum scatter.
-     */
-
     if (istat == P_SCAT)
     {
+
+      /*
+       * The photon has scattered, as either a resonance or continuum scatter.
+       */
+
       pp.grid = n_grid = where_in_grid (wmain[pp.grid].ndom, pp.x);
 
       if (n_grid < 0)
@@ -415,8 +422,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       nnscat = 1;
       pp.nscat++;
 
-      ierr = scatter (&pp, &current_nres, &nnscat);     // pp is modified
-      if (ierr)
+      if (current_nres == NRES_ES)
+      {
+        stuff_phot (&pp, &pextract);
+      }
+
+      if ((ierr = scatter (&pp, &current_nres, &nnscat)))       // pp is modified
       {
         Error ("trans_phot_single: photon %d returned error code %d whilst scattering \n", pp.np, ierr);
       }
@@ -429,7 +440,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         break;
       }
 
-      /* If the photon interacted with a resonance, calculate the line heating
+      /* If this is a BB interaction, calculate the line heating
        * and break the transport loop if it was absorbed */
 
       if (current_nres > -1 && current_nres < nlines)
@@ -459,13 +470,19 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        * N.B. To use the anisotropic scattering option, extract needs to follow scatter.
        * This is because the re-weighting which occurs in extract needs the pdf for scattering
        * to have been initialized
+       *
+       * For BB photons the photon we pass to extract is the one that has been scattered, but
+       * for ES we pass the photon prior to scattering.
        */
 
       if (iextract)
       {
-        stuff_phot (&pp, &pextract);
+        if (current_nres != NRES_ES)
+        {
+          stuff_phot (&pp, &pextract);
+        }
         pextract.nnscat = nnscat;
-        extract (w, &pextract, PTYPE_WIND);     // Treat as wind photon for purpose of extraction
+        extract (w, &pextract, PTYPE_WIND);
       }
 
       /* Reinitialize parameters for the scattered photon so it can can continue through the wind
