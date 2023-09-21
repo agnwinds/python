@@ -231,7 +231,8 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   }
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity in CMF frame
-  kap_cont_obs = kap_cont / observer_to_local_frame_ds (p, 1.); // Multiply by scale factor to get to observer frame
+//  kap_cont_obs = kap_cont / observer_to_local_frame_ds (p, 1.); // Multiply by scale factor to get to observer frame
+  kap_cont_obs = kap_cont * plasmamain[p->grid].xgamma;
 
   /* Finally begin the loop over the resonances that can interact
    * with the photon in the cell
