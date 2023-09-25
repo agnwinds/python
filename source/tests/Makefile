@@ -31,7 +31,8 @@ PYTHON_SOURCES = \
 	setup_star_bh.c shell_wind.c signal.c spectra.c spectral_estimators.c  \
 	spherical.c stellar_wind.c sv.c synonyms.c time.c trans_phot.c  \
 	vvector.c walls.c wind.c wind2d.c wind_sum.c wind_updates2d.c wind_util.c  \
-	windsave.c windsave2table_sub.c xlog.c xtest.c zeta.c get_models.c rdpar_init.c
+	windsave.c windsave2table_sub.c xlog.c xtest.c zeta.c get_models.c \
+	rdpar_init.c
 
 # This is sources to be compiled with NVCC
 CUDA_SOURCES = \

@@ -12,8 +12,7 @@
 #define TESTS_H
 
 /* test_compton.c */
-
-void create_compton_test_suite(void);
+void create_compton_test_suite (void);
 
 /* test_matrix.c */
 void create_matrix_test_suite (void);
