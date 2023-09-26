@@ -116,18 +116,176 @@ initialise the CUDA environment.
 Implementation
 ==============
 
-Writing CUDA
-------------
+This part of the documentation covers the important implementation details of the matrix acceleration. For the most
+part, cuSolver can be treated as a library just like GSL where we write wrapper functions around the functionality of
+GSL to solve a problem.
 
-- .cu files (C++)
 - writing wrapper functions
 - conditional compilation
 - extern "C" linkage
 
-Compiling and Linking CUDA
---------------------------
+Basics
+------
+
+.. code:: cpp
+    :caption: A CUDA kernel to transpose a matrix from row to column major
+
+    __global__ void
+    tranpose_row_to_column_major(double *row_major, double *column_major, int matrix_size)
+    {
+        const int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        const int idy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (idx < matrix_size && idy < matrix_size) {
+            column_major[idx * matrix_size + idy] = row_major[idy * matrix_size + idx];
+        }
+    }
+
+.. code:: c
+    :caption: A useful macro for error checking cuSolver returns
+
+    #define CUSOLVER_CHECK(status)                                                                                     \
+        do {                                                                                                           \
+            cusolverStatus_t err = status;                                                                             \
+            if (err != CUSOLVER_STATUS_SUCCESS) {                                                                      \
+                Error("cuSolver Error (%d): %s (%s:%d)\n", err, cusolver_get_error_string(err), __FILE__, __LINE__);   \
+                return err;                                                                                            \
+            }                                                                                                          \
+        } while (0)
+
+Structure
+---------
+
+To separate CPU and GPU code, it is convention to put CUDA code into :code:`.cu` files. Therefore most of the code
+associated with the GPU accelerated matrix code are in the file :code:`$PYTHON/source/matrix_gpu.cu` with the header
+file :code:`$PYTHON/source/matrix_gpu.h` which defines function prototypes. The GSL matrix operations are now kept in
+the file :code:`$PYTHON/source/matrix_cpu.c` and function prototypes are kept in :code:`$PYTHON/source/templates.h`.
+
+.. code:: c
+    :caption: The wrapper function which calls the appropriate matrix solver
+
+    int solve_matrix(double *a_matrix, double *b_vector, int matrix_size, double *x_vector)
+    {
+        int error;
+
+    #ifdef CUDA_ON
+        error = gpu_solve_matrix(...);  /* CUDA implementation */
+    #else
+        error = cpu_solve_matrix(...);  /* GSL implementation */
+    #endif
+
+        return error;
+    }
+
+Compiling and Linking
+---------------------
 
 - modifying the Makefile
 - the CUDA compiler (nvcc)
 - additional libraries, lcudart, lcusolver
 - linking object code
+
+.. code:: bash
+    :caption: A brief overview on how to compile and link C and CUDA code
+
+    # Define compilers
+    CC = mpicc
+    NVCC = nvcc
+
+    # Define C and CUDA libraries
+    C_LIBS = -lgsl -lgslcblas -lm
+    CUDA_LIBS = -lcudart -lcusolver
+
+    # Define flags for C and CUDA compilers
+    C_FLAGS = -O3 -DCUDA_ON -DMPI_ON -I../includes -L../libs
+    CUDA_FLAGS = -O3 -DCUDA_ON
+
+    # Compile CUDA source to object code
+    $(NVCC) $(CUDA_FLAGS) $(CUDA_SOURCE) -c -o $(CUDA_OBJECTS)
+
+    # Compile the C code
+    $(CC) $(C_FLAGS) $(C_SOURCE) -c -o $(C_OBJECTS)
+
+    # Link the CUDA and C object code together
+    $(CC) $(CUDA_OBJECTS) $(C_OBJECTS) -o python $(CUDA_LIBS) $(C_LIBS)
+
+
+.. code:: bash
+    :caption: The recipe in the Python Makefile to build CUDA objects
+
+    # Recipe to create CUDA object code. If NVCC is blank, then nothing happens
+    # in thie recipe
+    $(CUDA_OBJECTS): $(CUDA_SOURCE)
+    ifneq ($(CUDA_FLAG),)
+        $(NVCC) $(NVCC_FLAGS) -DCUDA_ON -I$(INCLUDE) -c $< -o $@
+    endif
+
+Code Example
+------------
+
+Using cuSolver is like using any other CPU library. Below is an example of using the cuSolverDn (dense matrix) library
+to perform LU decomposition and to solve a linear system.
+
+.. code:: c
+    :caption: A pedagogical (and in-complete) examples of a cuSolver implementation for solving a linear system
+
+    #include <stdlib.h>
+    #include <cuSolverDn.h>
+
+    extern "C" int  /* extern "C" has to be used to make it available to the C run time */
+    gpu_solve_matrix(double *a_matrix, double *b_vector, int matrix_size, double *x_vector)
+    {
+        /* First of all, allocate memory on the GPU and copy data from the CPU to the
+        GPU. This is part of the code which takes the most time. */
+        allocate_memory_for_gpu();
+        copy_data_to_gpu();
+
+        /* cuSolver and cuBLAS are both ports of Fortran libraries, which expect arrays to
+        be in column-major format and we therefore need to transpose our row-major arrays */
+        transpose_row_to_column_major<<<grid_dim, block_dim>>>(d_matrix_row, d_matrix_col, matrix_size);
+
+        /* Perform LU decomposition. Variables prefixed with d_ are kept in GPU memory where we
+        allocated space for them in `allocate_memory_for_gpu` */
+        CUSOLVER_CHECK(cusolverDnDgetrf(
+            CUSOLVER_HANDLE, matrix_size, matrix_size, d_matrix_col, matrix_size, d_workspace, d_pivot, d_info
+        ));
+
+        /* Solve the linear system A x = b. The final solution is returned in the variable d_v_vector */
+        CUSOLVER_CHECK(cusolverDnDgetrs(
+            CUSOLVER_HANDLE, CUSOLVER_OP_N, matrix_size, matrix_size, d_matrix_col, matrix_size, d_pivot,
+            d_b_vector, matrix_size, d_info
+        ));
+
+        /* We now have to copy d_b_vector back to the CPU, so we can use that value in
+        the rest of Python */
+        copy_data_to_cpu();
+
+        return EXIT_SUCCESS;
+    }
+
+
+.. code:: c
+    :caption: Fundamentally, the API hasn't changed at all
+
+    #include <stdlib.h>
+    #include "python.h"
+
+    double *populations = malloc(nions * sizeof(*populations));
+    double *ion_density = malloc(nions * sizeof(*populations));
+    double *rate_matrix = malloc(nions * nions * sizeof(*populations));
+
+    /* The wrapper function is named the same as the original GSL implementation
+       and accepts the same arguments */
+    int error = solve_matrix(
+        rate_matrix, ion_density, nions, populations, xplasma->nplasma
+    );
+
+    /* One user difference is that error handling is more robust now, and there
+       is a function to convert error codes into error messages */
+    if (error != EXIT_SUCCESS) {
+        Error(
+            "Error whilst solving for ion populations: %d (%d)\n",
+            get_matrix_error_string(error), error
+        );
+    }
+
