@@ -181,7 +181,7 @@ cusolver_destroy (void)
  *  ***************************************************************************************************************** */
 
 __global__ void
-tranpose_row_to_column_major (double *row_major, double *column_major, int matrix_size)
+transpose_row_to_column_major (double *row_major, double *column_major, int matrix_size)
 {
   const int idx = blockIdx.x * blockDim.x + threadIdx.x;
   const int idy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -205,7 +205,7 @@ tranpose_row_to_column_major (double *row_major, double *column_major, int matri
  *  ***************************************************************************************************************** */
 
 __global__ void
-tranpose_column_to_row_major (double *column_major, double *row_major, int matrix_size)
+transpose_column_to_row_major (double *column_major, double *row_major, int matrix_size)
 {
   const int idx = blockIdx.x * blockDim.x + threadIdx.x;
   const int idy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -282,7 +282,7 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
 
   dim3 blockDim (16, 16);
   dim3 gridDim ((matrix_size + blockDim.x - 1) / blockDim.x, (matrix_size + blockDim.y - 1) / blockDim.y);
-  tranpose_row_to_column_major <<< gridDim, blockDim >>> (d_Arow, d_A, matrix_size);
+  transpose_row_to_column_major <<< gridDim, blockDim >>> (d_Arow, d_A, matrix_size);
   CUDA_CHECK (cudaFree (d_Arow));
 
   /* XXXX_bufferSize is used to compute the size of the workspace we need, and depends on the size of the linear
@@ -295,7 +295,7 @@ gpu_solve_matrix (double *a_matrix, double *b_vector, int matrix_size, double *x
   CUSOLVER_CHECK (cusolverDnDgetrf (CUSOLVER_HANDLE, matrix_size, matrix_size, d_A, matrix_size, d_work, d_pivot, devInfo));
   CUSOLVER_CHECK (cusolverDnDgetrs (CUSOLVER_HANDLE, CUBLAS_OP_N, matrix_size, 1, d_A, matrix_size, d_pivot, d_b, matrix_size, devInfo));
 
-  /* don't need to tranpose vectors */
+  /* don't need to transpose vectors */
   CUDA_CHECK (cudaMemcpy (x_vector, d_b, matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
 
   CUDA_CHECK (cudaFree (d_A));
@@ -356,7 +356,7 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
   dim3 blockDim (16, 16);
   dim3 gridDim ((matrix_size + blockDim.x - 1) / blockDim.x, (matrix_size + blockDim.y - 1) / blockDim.y);
   CUDA_CHECK (cudaMemcpy (d_matrix_row, matrix, matrix_size * matrix_size * sizeof (double), cudaMemcpyHostToDevice));
-  tranpose_row_to_column_major <<< gridDim, blockDim >>> (d_matrix_row, d_matrix, matrix_size);
+  transpose_row_to_column_major <<< gridDim, blockDim >>> (d_matrix_row, d_matrix, matrix_size);
   CUDA_CHECK (cudaFree (d_matrix_row));
 
   /* We'll use a CUDA kernel to create an indentity matrix, which we'll use to solve for the inverse. The
@@ -372,7 +372,7 @@ gpu_invert_matrix (double *matrix, double *inverse_matrix, int matrix_size)
                    dev_info));
 
   /* Copy the inverse matrix from host to device */
-  tranpose_column_to_row_major <<< gridDim, blockDim >>> (d_identity, d_identity_row, matrix_size);
+  transpose_column_to_row_major <<< gridDim, blockDim >>> (d_identity, d_identity_row, matrix_size);
   CUDA_CHECK (cudaMemcpy (inverse_matrix, d_identity_row, matrix_size * matrix_size * sizeof (double), cudaMemcpyDeviceToHost));
 
   CUDA_CHECK (cudaFree (d_matrix));
