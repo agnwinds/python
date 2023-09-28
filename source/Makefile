@@ -86,15 +86,16 @@ endif
 ifneq ($(NVCC), )
 	CUDA_FLAG = -DCUDA_ON
 	CUDA_SOURCE := $(wildcard *.cu)
+	CUDA_LIBS = -lcudart -lcusolver
 else
 	CUDA_FLAG =
 	CUDA_SOURCE =
+	CUDA_LIBS =
 endif
 
 # These variables are used to compile CUDA code, and don't have to be defined
 # conditionally
 NVCC_FLAGS = -O3 -Werror all-warnings
-CUDA_LIBS = -lcudart -lcusolver
 
 # this command finds out how many files with uncommitted changes there are
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
