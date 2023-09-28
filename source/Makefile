@@ -15,7 +15,7 @@ CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-NVCC = 
+NVCC =
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS =
@@ -95,7 +95,6 @@ endif
 # conditionally
 NVCC_FLAGS = -O3 -Werror all-warnings
 CUDA_LIBS = -lcudart -lcusolver
-CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
 
 # this command finds out how many files with uncommitted changes there are
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
