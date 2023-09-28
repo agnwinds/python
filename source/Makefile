@@ -15,7 +15,7 @@ CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-NVCC = nvcc
+NVCC =
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS =
@@ -153,7 +153,6 @@ startup:
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
-	@echo 'CUDA_SOURCE='$(CUDA_SOURCE)
 
 
 
