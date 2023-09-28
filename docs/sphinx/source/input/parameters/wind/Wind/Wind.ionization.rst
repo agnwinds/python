@@ -1,6 +1,6 @@
 Wind.ionization
 ===============
-The apprach used by Python to calculate the ioniztion
+The approach used by Python to calculate the ionization
 of the wind during ionization cycles.  A number of these
 modes are historical or included for diagnostic purposes.
 
@@ -26,8 +26,12 @@ Values
 
   fixed
     Read the ion aboundances in from a file.  All cells will have
-    the same abundances..  (This is intended
-    as a diagnostic mode.)
+    the same abundances.  (This is intended
+    as a diagnostic mode, mainly to investigate the details of raditive transrfer.
+    It should be used with caution.  In particular, if the elements for which
+    abundances are provided differ from the elements to be used as described in the
+    elements/ions portion of the atomic data, then one should not expect the calculated
+    electron density to be that that comes simply from the fixd concetnrations file.)
 
   matrix_bb
     Estimate photoionization rates by approximating the spectrum in
