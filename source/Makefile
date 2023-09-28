@@ -121,11 +121,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
 #Note that version should be a single string without spaces.
 
 
-<<<<<<< HEAD
-VERSION = 87x
-=======
 VERSION = 87e
->>>>>>> james
 
 
 INDENT = yes
