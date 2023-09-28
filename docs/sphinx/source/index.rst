@@ -80,6 +80,7 @@ Mandy Hewitt
    running_python
    input
    output
+   plotting
    operation
    radiation
    wind_models

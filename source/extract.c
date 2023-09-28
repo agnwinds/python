@@ -110,23 +110,23 @@ extract (w, p, itype)
   {
     Error ("extract: check_frame failure at very start for itype %d\n", itype);
   }
-  stuff_phot (p, &p_in);
 
-  /*
-   * We increase weight to account for the number of scatters. This is
-   * done because in extract we multiply by the escape probability
-   * along a given direction, but we also need to divide the weight by
-   * the mean escape probability, which is equal to 1/nnscat.  See
-   * issue #710 for a more extended explanation of how the weight is
-   * renormalized stocahstically.
-   */
+  stuff_phot (p, &p_in);
 
   if (itype == PTYPE_WIND)
   {
     if (geo.scatter_mode == SCATTER_MODE_THERMAL && p_in.nres <= NLINES && p_in.nres > -1)
     {
-      /*
-       * we normalised our rejection method by the escape
+      /* Bound - Bound Scattering 
+
+       * We increase weight to account for the number of scatters. This is
+       * done because in extract we multiply by the escape probability
+       * along a given direction, but we also need to divide the weight by
+       * the mean escape probability, which is equal to 1/nnscat.  See
+       * issue #710 for a more extended explanation of how the weight is
+       * renormalized stochastically.
+       *
+       * We normalised our rejection method by the escape
        * probability along the vector of maximum velocity
        * gradient. First find the sobolev optical depth
        * along that vector. The -1 enforces calculation of
@@ -135,30 +135,36 @@ extract (w, p, itype)
 
       dvds_max = get_dvds_max (&p_in);
       tau_norm = sobolev (&wmain[p_in.grid], p_in.x, -1.0, lin_ptr[p_in.nres], dvds_max);
-
       p_norm = p_escape_from_tau (tau_norm);
+      p_in.w *= p_in.nnscat / p_norm;
+      if ((ierr = observer_to_local_frame (&p_in, &p_in)))
+        Error ("extract: wind photon not in observer frame %d\n", ierr);
 
     }
+
+    else if (p_in.nres == NRES_ES)
+    {
+      /* Compton Scattering */
+
+      if ((ierr = observer_to_local_frame (&p_in, &p_in)))
+        Error ("extract: wind photon not in observer frame %d\n", ierr);
+
+      lorentz_transform (&p_in, &p_in, velocity_electron);
+      rescale (velocity_electron, -1, vel);     // Only need to do this once
+    }
+
     else
     {
-      p_norm = 1.0;
 
       if (p_in.nnscat != 1)
         Error
           ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
            p_in.nnscat, p_in.np, geo.scatter_mode, p_in.nres, NLINES);
+      if ((ierr = observer_to_local_frame (&p_in, &p_in)))
+        Error ("extract: wind photon not in observer frame %d\n", ierr);
     }
 
-    p_in.w *= p_in.nnscat / p_norm;
 
-    if ((ierr = observer_to_local_frame (&p_in, &p_in)))
-      Error ("extract: wind photon not in observer frame %d\n", ierr);
-
-    if (p_in.nres == NRES_ES)
-    {
-      lorentz_transform (&p_in, &p_in, velocity_electron);
-      rescale (velocity_electron, -1, vel);     // Only need to do this once
-    }
 
   }
   else if (itype == PTYPE_DISK)
@@ -233,7 +239,11 @@ extract (w, p, itype)
        an an effect of special relativty which accounts for solid angle
        corrections.
 
-       PTYPE_STAR, PTYPE_BL do not need this test
+       PTYPE_STAR, PTYPE_BL do not need to be modified.  The rather
+       peculiar rel_mode != REL_MODE_LINEAR arises because there
+       are two modes that REL_MODE_SR_FREQ and  REL_MODE_FULL 
+       that need frame transformations.
+
      */
 
     if (itype == PTYPE_WIND && rel_mode != REL_MODE_LINEAR)
@@ -287,7 +297,7 @@ extract (w, p, itype)
        * thesis
      */
 
-    if (itype == PTYPE_STAR || itype == PTYPE_BL || itype == PTYPE_AGN)
+    if (itype == PTYPE_STAR || itype == PTYPE_BL || (itype == PTYPE_AGN && geo.pl_geometry == PL_GEOMETRY_SPHERE))
     {
       stuff_v (pp.x, x);
       renorm (x, 1.);
@@ -299,6 +309,32 @@ extract (w, p, itype)
 
       zz = fabs (pp.lmn[2]);
       pp.w *= zz * (2.0 + 3.0 * zz);
+
+    }
+    else if (pp.nres == NRES_ES)
+    {
+      /* Reweight for electron scattering */
+
+      double x1;
+
+      x1 = PLANCK * p_in.freq / MELEC / VLIGHT / VLIGHT;
+      if (x1 < 0.0001)
+      {
+        zz = dot (pp.lmn, p_in.lmn);
+        pp.w *= 0.75 * (1 + zz * zz);
+      }
+
+      else
+      {
+
+        compton_reweight (&p_in, &pp);
+
+      }
+
+
+
+
+
 
     }
     else if (pp.nres > -1 && pp.nres < NLINES)

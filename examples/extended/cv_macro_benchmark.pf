@@ -10,7 +10,7 @@ Binary.mass_sec(msol)                      0.6
 Binary.period(hr)                          5.57
 
 ### Parameters for the Disk (if there is one)
-Disk.type(none,flat,vertically.extended)                 flat
+Disk.type(none,flat,vertically.extended,rmin>central.obj.rad)                 flat
 Disk.radiation(yes,no)                          yes
 Disk.rad_type_to_make_wind(bb,models)                   bb
 Disk.temperature.profile(standard,readin)             standard
@@ -21,7 +21,6 @@ Disk.radmax(cm)                            2.4e+10
 Boundary_layer.radiation(yes,no)                   no
 
 ### Parameters describing the various winds or coronae in the system
-Wind.radiation(yes,no)                          yes
 Wind.number_of_components                  1
 Wind.type(SV,star,hydro,corona,kwd,homologous,shell,imported)                   sv
 Wind.coord_system(spherical,cylindrical,polar,cyl_var)          cylindrical
@@ -32,8 +31,9 @@ Wind.dim.in.z_or_theta.direction           30
 Photons_per_cycle                          1e5
 Ionization_cycles                          30
 Spectrum_cycles                            10
-Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)                 ml93
-Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping) macro_atoms_thermal_trapping
+Wind.ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow,matrix_est)                 ml93
+Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms_escape_prob,macro_atoms_thermal_trapping) macro_atoms_thermal_trapping
+Matom_transition_mode(mc_jumps,matrix)               matrix
 Atomic_data                                data/h20_hetop_standard80.dat
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
@@ -57,11 +57,11 @@ Wind.filling_factor(1=smooth,<1=clumped)   1
 
 ### Parameters defining the spectra seen by observers
 
-Central_object.rad_type_in_final_spectrum(bb,models,uniform)                   bb
-Disk.rad_type_in_final_spectrum(bb,models,uniform)                   bb
+Central_object.rad_type_in_final_spectrum(bb,models,uniform,mono)                   bb
+Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)                   bb
 
-### The minimum and maximum wavelengths in the final spectra
-Spectrum.nwave                    10000
+### The minimum and maximum wavelengths in the final spectra and the number of wavelength bins
+Spectrum.nwave                             10000
 Spectrum.wavemin(Angstroms)                3000
 Spectrum.wavemax(Angstroms)                6950
 
@@ -88,4 +88,4 @@ Spectrum.type(flambda,fnu,basic)              flambda
 Reverb.type(none,photon,wind,matom)                 none
 
 ### Other parameters
-Photon_sampling.approach(T_star,cv,yso,AGN,tde_bb,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                    cv
+Photon_sampling.approach(T_star,cv,yso,AGN,tde_bb,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv

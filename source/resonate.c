@@ -756,7 +756,7 @@ calls to two_level atom
  * macro atoms are involved or not
  */
 
-  /* Check whether both d1 and d2 are below a minium value where we expect tau to be zero and where 
+  /* Check whether both d1 and d2 are below a minimum value where we expect tau to be zero and where 
    * we can be subject to the effects of roundoff errors in terms of the determination of densities.
    * If densities are this low we expect the sobolev optical depth to be extremely small in any event
    * JM -- I've added something that checks if the fractional population for the upper level is below 
@@ -796,13 +796,20 @@ calls to two_level atom
     tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
     tau = tau_x_dvds / dvds;
 
-    tau *= zdom[ndom].fill;     // filling factor is on a domain basis
+    tau *= zdom[ndom].fill;
 
     if (tau > 1.e-3)
     {
       /* JM -- I'm not sure why this particular value of tau is chosen, but I've added 
          an error message to give more information and make sure no ambiguity for code exit */
       Error ("sobolev: tau is >1e-3 and nu < gu/gl * nl. Exiting.\n");
+      Error
+        ("sobolev: ATTENTON: The exact cause of this error is unknown, but it is associted with a poor choice of initial conditions,\n");
+      Error
+        ("sobolev: A sympton of an approaching problem is that w (the ratio of the intenstity/to the intensity expecrted from a BB with T=T_r) is large,\n");
+      Error ("sobolev: If the problem occurs during the first ionization cycle, raising the temperature in the starting model may help.\n");
+      Error
+        ("sobelev: If that does not work, please reopen issue #1019 on github, and provide the .pf file and anything else needed to duplicate the problem.\n");
       Exit (0);
     }
 
@@ -833,7 +840,7 @@ calls to two_level atom
  *
  * @param [in,out] PhotPtr  p   the  photon of interest
  * @param [in] int *  nres   either the number of the scatter
- * or a nonresonant scatter if nres < 0
+ * or a non-resonant scatter if nres < 0
  * @param [out] int *  nnscat   Returned from anisotropic thermal scattering model
  * @return  Always returns 0
  *
@@ -842,14 +849,11 @@ calls to two_level atom
  *
  * @details
  * The routine calculates a new direction and frequency for a photon in both the
- * resonant and non-resonant cases.  In the frame of the wind, scattering is assumed
- * to be isotropic.
+ * resonant and non-resonant cases.  
  *
  * ### Notes ###
  * This is the routine that is called when a resonant scatter does occur.  It is
  * relevant for both simple and macro atoms
- *
- * The equations for the frequency shifts are accurate only to first order in beta
  *
  * This routine should not move the photon at all, because other routines need to
  * take this photon in differing directions, and if one moves it here they may
@@ -871,8 +875,6 @@ scatter (p, nres, nnscat)
   WindPtr one;
   double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
-//  double velocity_electron[3];
-//  double vel[3];
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;

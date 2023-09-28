@@ -765,3 +765,111 @@ comp_cool_integrand (double nu, void *params)
   value = THOMPSON * compton_beta (nu) * mean_intensity (xplasma, nu, MEAN_INTENSITY_ESTIMATOR_MODEL);
   return (value);
 }
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Calculate the renormalization needed for reweighting photons due to 
+ *  the anisotropic nature of Compton scattering 
+ *
+ * @param [in] double  nu   - frequency of the unscattered photon
+ *
+ * @return     the value to use for the renormaliztion
+ *
+ * @details
+ *
+ * The normalization required depends only on the input photon
+ *
+ * ### Notes ###
+ *
+ * At very low values of frequency, provide the answer at
+ * in the Thompson limit to avoid spurious results
+ *
+ **********************************************************/
+
+
+double
+compton_reweight_norm (nu)
+     double nu;
+{
+  double v;
+  double x1, x2, x3, x4, x5, xx;
+  double r;
+
+  r = PLANCK * nu / (MELEC * VLIGHT * VLIGHT);
+
+  if (r < 0.00001)
+  {
+    v = 16. * PI / 3.;
+    return v;
+  }
+
+  x1 = (2 / (r * r));
+  xx = 1. + 2. * r;
+  x2 = log (xx);
+  x3 = 1 / r - 2 / (r * r) - 2 / (r * r * r);
+
+  x4 = 1. / (2 * r) * (1 / (xx * xx) - 1.);
+
+  x5 = 1 / xx * (-2 / (r * r) - 1. / (r * r * r)) + (2 / (r * r) + 1. / (r * r * r));
+
+
+  v = x1 + x2 * x3 - x4 + x5;
+
+  v *= 2. * PI;
+  return v;
+}
+
+
+/**********************************************************/
+/** 
+ * @brief      Reweight a phton in order to extract it in a new direction due to 
+ *  the anisotropic nature of Compton scattering 
+ *
+ * @param [in] double  nu   - frequency of the unscattered photon
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * An explanation of the philosophy behind the reweighting
+ * can be found in docs/notes/compton_scattering/Compton_reweighting.ipynb
+ *
+ **********************************************************/
+
+
+int
+compton_reweight (p_in, p_out)
+     PhotPtr p_in, p_out;
+
+
+{
+  double nu_in, nu_out, xr, reweight;
+  double theta, ctheta;
+
+  nu_in = p_in->freq;
+
+  ctheta = dot (p_in->lmn, p_out->lmn);
+
+  p_out->freq = nu_out = nu_in / (1 + PLANCK * nu_in / (MELEC * VLIGHT * VLIGHT) * (1 - ctheta));
+
+  xr = nu_out / nu_in;
+  theta = acos (ctheta);
+
+  reweight = xr * xr * (xr + 1. / xr - sin (theta) * sin (theta));
+
+  reweight *= 4. * PI / compton_reweight_norm (p_in->freq);
+
+
+
+  /* This accounts for the reweighting that is due to
+   * The anistorpy, but we must also change the
+   * weight due simply to the change in freqency
+   */
+
+  p_out->w *= nu_out / nu_in * reweight;
+
+
+  return (0);
+}

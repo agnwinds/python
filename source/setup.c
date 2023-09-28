@@ -323,6 +323,7 @@ init_advanced_modes ()
   modes.use_debug = FALSE;
   modes.print_dvds_info = FALSE;        // print information on velocity gradients
   modes.quit_after_inputs = FALSE;      // check inputs and quit
+  modes.quit_after_wind_defined = FALSE;        // define wind and quit
   modes.fixed_temp = FALSE;     // do not attempt to change temperature 
   modes.zeus_connect = FALSE;   // connect with zeus
 
@@ -705,6 +706,19 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
+    char *a_warning;
+
+    a_warning = "\
+\n\
+Warning: Fixed concentrations is intended primarily as a diagnostic mode  \n\
+for studying the details of radiative transfer.   The calculated ne will   \n\
+only agree with what is in the Fixed_concentrations file, if the elements/ions \n\
+section of the input data agrees with the elements containted in the  \n\
+fixed concentration file. \n\
+\n\
+";
+    printf ("%s", a_warning);
+
     rdstr ("Wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
   }
 
