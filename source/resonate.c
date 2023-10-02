@@ -1070,6 +1070,11 @@ scatter (p, nres, nnscat)
         if (*nres - NLINES - 1 >= 0)
         {
           xplasma->n_bf_in[*nres - NLINES - 1] += 1;
+
+          if (*nres - NLINES - 1 == 117)
+          {
+            printf ("What is going on\n");
+          }
         }
 
         if (prob_kpkt < 0)
