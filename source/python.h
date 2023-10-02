@@ -1036,10 +1036,13 @@ typedef struct plasma
                                    and freqmax.  This will depend on the last call to total_emission */
   double heat_shock;            /**<  An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project */
 
-  /* these variables are for the BF_SIMPLE_EMISSIVITY_APPROACH
-     they allow one to inspect the net flow of energy into and from the simple ion 
-     ionization pool */
-  double bf_simple_ionpool_in, bf_simple_ionpool_out;
+  double bf_simple_ionpool_in, bf_simple_ionpool_out; /**<Varibles to track net flow of energy
+                                                        into and from ionization pool
+                                                        in BF_SIMPLE_EMISSIVITY_APPROACH
+                                                        */
+#define N_PHOT_PROC 500
+  int n_bf_in[N_PHOT_PROC],n_bf_out[N_PHOT_PROC];/**<Counters to track bf excitations and de-exitations.
+                                                   */
 
   double comp_nujnu;            /**<  The integral of alpha(nu)nuj(nu) used to 
                                    compute compton cooling-  only needs computing once per cycle 

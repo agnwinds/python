@@ -1067,6 +1067,11 @@ scatter (p, nres, nnscat)
 
         prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
+        if (*nres - NLINES - 1 >= 0)
+        {
+          xplasma->n_bf_in[*nres - NLINES - 1] += 1;
+        }
+
         if (prob_kpkt < 0)
         {
           /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
@@ -1118,6 +1123,11 @@ scatter (p, nres, nnscat)
           }
         }
 
+
+        if (*nres - NLINES - 1 >= 0)
+        {
+          xplasma->n_bf_out[*nres - NLINES - 1] += 1;
+        }
       }
       else
       {
