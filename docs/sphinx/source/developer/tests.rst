@@ -10,8 +10,10 @@ Installing CUnit
 
 Python has been tested to work with CUnit (and CUnity) versions newer than 2.1-3. A recent version of CUnit is provided
 in the :code:`$PYTHON/software` directory and can be installed as a static library by using the Makefile in Python's
-root directory. CUnit will be installed (as a static library) at the same time as GSL and Python during
-the first-time install, e.g.,
+root directory. To build CUnit from source, you will need `CMake <https://cmake.org/>`_ installed, which is a modern
+build system for C and C++ projects.
+
+CUnit will be installed (as a static library) at the same time as GSL and Python during the first-time install, e.g.,
 
 .. code:: bash
 
@@ -24,6 +26,17 @@ system,
 .. code:: bash
 
     $ [$PYTHON] make cunit
+
+If compilation of CUnit fails, it's more than likely that you could install a dynamic version of an older version of the
+library from your system's package manager, e.g.
+
+.. code:: bash
+
+    # on macOS using homebrew
+    $ brew install cunit
+
+    # on Debian based Linux distributions
+    $ sudo apt install libcunit1 libcunit1-doc libcunit1-dev
 
 Running Tests
 =============
@@ -137,6 +150,21 @@ implementation. If you need to create your own assertion, these should be kept i
       return EXIT_SUCCESS;
     }
 
+
+.. admonition:: Including :code:`python.h` in your tests
+
+    If you need to access various structures or other things defined in :code:`python.h`, it is possible to include
+    the header file in your test source code as in the example below (there are some data structures which depend
+    on values defined in :code:`atomic.h`),
+
+    .. code:: c
+
+        #include "../../atomic.h"
+        #include "../../python.h"
+
+    In some situations this might complicate compilation of the unit test. In those cases, it could be better to
+    re-define anything you need in the source file for the unit test.
+
 Creating a test suite
 ---------------------
 
@@ -183,14 +211,16 @@ indicate if everything went OK or not.
 .. code:: c
     :caption: :code:`$PYTHON/source/tests/tests/test_matrix.c`
 
+
+
     int matrix_suite_init(void) {
         int error = EXIT_SUCCESS;
 
-        #ifdef CUDA_ON  /* initialise cusolver */
-            error = cusolver_create();
-        #else
-            old_handler = gsl_set_error_handler_off();  /* for GSL, we want to disable the default error handler */
-        #endif
+    #ifdef CUDA_ON  /* initialise cusolver */
+        error = cusolver_create();
+    #else  /* for GSL, we want to disable the default error handler */
+        old_handler = gsl_set_error_handler_off();
+    #endif
 
         return error;
     }
