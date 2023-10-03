@@ -12,16 +12,9 @@
 #include <stdlib.h>
 #include <CUnit/CUnit.h>
 
+#include "../../atomic.h"
+#include "../../python.h"
 #include "../assert.h"
-#include "../../constants.h"
-
-/* Prototype functions for Compton processes being tested */
-double klein_nishina (double nu);
-double compton_alpha (double nu);
-double compton_beta (double nu);
-double compton_func (double f, void *params);
-void set_comp_func_values (double rand, double max, double ratio);
-double sigma_compton_partial (double f, double x);
 
 /** *******************************************************************************************************************
  *

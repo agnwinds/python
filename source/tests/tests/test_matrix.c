@@ -11,21 +11,19 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "CUnit/CUnit.h"
+#include <CUnit/CUnit.h>
 
-#ifdef CUDA_ON
-#include "../../matrix_gpu.h"
-#else
+#ifndef CUDA_ON
 #include "gsl/gsl_errno.h"
 gsl_error_handler_t *old_handler;
 #endif
 
+#include "../../atomic.h"
+#include "../../python.h"
 #include "../assert.h"
 
 #define BUFFER_LENGTH 512
 
-int solve_matrix (double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma);
-int invert_matrix (double *matrix, double *inverted_matrix, int num_rows);
 
 /** *******************************************************************************************************************
  *
