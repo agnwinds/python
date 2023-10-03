@@ -46,7 +46,8 @@ TEST_SOURCES = \
 	tests/test_matrix.c \
 	tests/test_compton.c \
 	tests/test_define_wind.c \
-	tests/test_run_mode.c
+	tests/test_run_mode.c \
+	tests/test_translate.c
 
 # Using absolute paths
 PYTHON_SOURCES := $(patsubst %,$(PYTHON)/source/%, $(PYTHON_SOURCES))
