@@ -55,14 +55,13 @@ ifeq (True, $(INSTALL_LIBS))
 			cd $(PYTHON)/source; \
 			make check CC=$(CMAKE)
 	else
-		@echo 'CMake is not installed, will not try build CUnit'
-		INSTALL_CUNIT =
+		INSTALL_CUNIT = echo 'Unable to install CUnit as CMake (https://cmake.org) is not installed'
 		MAKE_CHECK =
 	endif
 else
-	INSTALL_GSL =
-	INSTALL_GSL_NO_CHECK =
-	INSTALL_CUNIT =
+	INSTALL_GSL = echo 'Not installing GSL due to INSTALL_LIBS != True'
+	INSTALL_GSL_NO_CHECK = echo 'Not installing GSL due to INSTALL_LIBS != True'
+	INSTALL_CUNIT = echo 'Not installing CUnit due to INSTALL_LIBS != True'
 	MAKE_CHECK =
 endif
 
@@ -70,35 +69,6 @@ MAKE_PYTHON = \
 	cd $(PYTHON)/source; \
 	make CC=$(CMAKE) INDENT=no all \
 	$(MAKE_CHECK)
-
-# install for travis
-gh_workflow_install:
-	@echo 'Installing Python. the radiative transfer code'
-	@echo 'Installing in directory '$(PYTHON)
-
-	# Then make GSL library
-	@echo 'Installing GSL library...'
-	$(INSTALL_GSL_NO_CHECK)
-
-	# Then make CUnit Library
-	@echo 'Installing CUnit library...'
-	$(INSTALL_CUNIT)
-
-	#finally, make the latest release
-	@echo 'Making source code...'
-	$(MAKE_PYTHON)
-	@echo 'all done'
-
-gsl:
-	@echo 'Installing the GNU Science Library'
-	$(INSTALL_GSL)
-
-cunit:
-	@echo 'Installing CUnit unit test framework'
-	$(INSTALL_CUNIT)
-
-check:
-	cd $(PYTHON)/source; make check
 
 # Compile and install the libraries and Python
 install:
@@ -117,6 +87,38 @@ install:
 	@echo 'Making source code...'
 	$(MAKE_PYTHON)
 	@echo 'all done'
+
+# Install Python for travis -- as above, minus post-installation checks for GSL
+gh_workflow_install:
+	@echo 'Installing Python. the radiative transfer code'
+	@echo 'Installing in directory '$(PYTHON)
+
+	# Then make GSL library
+	@echo 'Installing GSL library...'
+	$(INSTALL_GSL_NO_CHECK)
+
+	# Then make CUnit Library
+	@echo 'Installing CUnit library...'
+	$(INSTALL_CUNIT)
+
+	#finally, make the latest release
+	@echo 'Making source code...'
+	$(MAKE_PYTHON)
+	@echo 'all done'
+
+# Runs Python's unit tests
+check:
+	cd $(PYTHON)/source; make check
+
+# Runs through the install for GSL and post-installation checks
+gsl:
+	@echo 'Installing the GNU Science Library'
+	$(INSTALL_GSL)
+
+# Runs through the install for CUnit
+cunit:
+	@echo 'Installing CUnit unit test framework'
+	$(INSTALL_CUNIT)
 
 # Run the regular clean for the libraries and Python. CUnit doesn't need this,
 # as we delete the CMake build directory after installing it
