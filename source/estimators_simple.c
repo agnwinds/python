@@ -273,21 +273,28 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
      int ndom;
 {
   double flux[3];
-  double flux_orig[3];
+  double p_dir_cos[3];
   int iangle;
   double binw, angle;
 
-/* Compute the weighted flux for this photon */
+/* The lines below compute the flux element of this photon */
 
-  stuff_v (phot_mid->lmn, flux_orig);   //Get the direction of the photon packet
-  renorm (flux_orig, w_ave * ds_obs);   //Renormalise the direction into a flux vector 
+  stuff_v (phot_mid->lmn, p_dir_cos);   //Get the direction of the photon packet
 
-  project_from_xyz_cyl (phot_mid->x, flux_orig, flux);  //Transform to the frame ine which fluxes are summed 
+  renorm (p_dir_cos, w_ave * ds_obs);   //Renormalise the direction into a flux element
+  project_from_xyz_cyl (phot_mid->x, p_dir_cos, flux);  //Go from a direction cosine into a cartesian vector
 
-  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere, reverse the sense of the z flux
+  double theta;
+  double r = sqrt(pow(phot_mid->x[0],2)+pow(phot_mid->x[1],2));
+
+  if (phot_mid->x[2] < 0) {      //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
-  angle = 0.0;
+    theta = atan2(r,-phot_mid->x[2]);
+  } else {
+    theta = atan2(r,phot_mid->x[2]);
+  } 
 
+  angle = 0.0;
 
   if (flux[2] > 0 && flux[0] > 0)
     angle = (atan (flux[0] / flux[2]) * RADIAN);
@@ -302,22 +309,21 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 
 
   iangle = (angle) / binw;      //Turn the angle into an integer to pass into the flux array
-  xplasma->F_UV_ang_x[iangle] += flux[0];
-  xplasma->F_UV_ang_y[iangle] += flux[1];
-  xplasma->F_UV_ang_z[iangle] += flux[2];
+  
+  //xplasma->F_UV_ang_x[iangle] += flux[0];
+  //xplasma->F_UV_ang_y[iangle] += flux[1];
+  //xplasma->F_UV_ang_z[iangle] += flux[2];
+  
+  xplasma->F_UV_ang_r[iangle] += flux[0]*sin(theta)+flux[2]*cos(theta);
+  xplasma->F_UV_ang_phi[iangle] += flux[1];
+  xplasma->F_UV_ang_theta[iangle] += flux[0]*cos(theta)-flux[2]*sin(theta);
 
-
-
-  /* This ends the calculation of the overall intensity as a funciton of solid angle 
-   * The quantities calculated below are simply the weighted fluxes at the posiiton
-   * of the photons
-   */
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     renorm (phot_mid->x, 1);    //Create a unit vector in the direction of the photon from the origin
-    flux[0] = dot (flux_orig, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
+    flux[0] = dot (p_dir_cos, phot_mid->x);     //In the spherical geometry, the first comonent is the radial flux
     flux[1] = flux[2] = 0.0;    //In the spherical geomerry, the theta and phi compnents are zero    
   }
 
@@ -615,9 +621,9 @@ normalise_simple_estimators (xplasma)
 //OLD    thetamax = (i + 1) * RADIAN;
 
 //OLD    wedge_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
-    xplasma->F_UV_ang_x[i] /= volume_obs;
-    xplasma->F_UV_ang_y[i] /= volume_obs;
-    xplasma->F_UV_ang_z[i] /= volume_obs;
+    xplasma->F_UV_ang_theta[i] /= volume_obs;
+    xplasma->F_UV_ang_phi[i] /= volume_obs;
+    xplasma->F_UV_ang_r[i] /= volume_obs;
 
     //   xplasma->idomega[i] /= (4. * PI * volume_obs);
 

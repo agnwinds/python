@@ -379,9 +379,9 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].F_UV_ang_theta, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].F_UV_ang_phi, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n].F_UV_ang_r, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&dt_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&dt_r, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&nmax_e, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -529,9 +529,9 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_theta, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_phi, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_r, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_r_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_e_temp, 1, MPI_INT, MPI_COMM_WORLD);
@@ -610,9 +610,9 @@ WindPtr (w);
 
       for (n = 0; n < NFLUX_ANGLES; n++)
       {
-        plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n];
-        plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n];
-        plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n];
+        plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] + plasmamain[nplasma].F_UV_ang_theta[n];
+        plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] + plasmamain[nplasma].F_UV_ang_phi[n];
+        plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] + plasmamain[nplasma].F_UV_ang_r[n];
       }
     }
     else
@@ -637,16 +637,16 @@ WindPtr (w);
       for (n = 0; n < NFLUX_ANGLES; n++)
       {
 
-        plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] * (1 - flux_persist_scale);
-        plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] * (1 - flux_persist_scale);
-        plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] * (1 - flux_persist_scale);
+        plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] * (1 - flux_persist_scale);
+        plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] * (1 - flux_persist_scale);
+        plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] * (1 - flux_persist_scale);
 
-        plasmamain[nplasma].F_UV_ang_x_persist[n] =
-          plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n] * flux_persist_scale;
-        plasmamain[nplasma].F_UV_ang_y_persist[n] =
-          plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n] * flux_persist_scale;
-        plasmamain[nplasma].F_UV_ang_z_persist[n] =
-          plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n] * flux_persist_scale;
+        plasmamain[nplasma].F_UV_ang_theta_persist[n] =
+          plasmamain[nplasma].F_UV_ang_theta_persist[n] + plasmamain[nplasma].F_UV_ang_theta[n] * flux_persist_scale;
+        plasmamain[nplasma].F_UV_ang_phi_persist[n] =
+          plasmamain[nplasma].F_UV_ang_phi_persist[n] + plasmamain[nplasma].F_UV_ang_phi[n] * flux_persist_scale;
+        plasmamain[nplasma].F_UV_ang_r_persist[n] =
+          plasmamain[nplasma].F_UV_ang_r_persist[n] + plasmamain[nplasma].F_UV_ang_r[n] * flux_persist_scale;
 
 
       }
@@ -669,9 +669,9 @@ WindPtr (w);
      vadd (plasmamain[nplasma].F_Xray_persistent, plasmamain[nplasma].F_Xray, plasmamain[nplasma].F_Xray_persistent);
      for (n = 0; n < NFLUX_ANGLES; n++)
      {
-     plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n];
-     plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n];
-     plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n];
+     plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] + plasmamain[nplasma].F_UV_ang_theta[n];
+     plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] + plasmamain[nplasma].F_UV_ang_phi[n];
+     plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] + plasmamain[nplasma].F_UV_ang_r[n];
      }
      }
      else
@@ -691,17 +691,17 @@ WindPtr (w);
 
      for (n = 0; n < NFLUX_ANGLES; n++)
      {
-     plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] * geo.wcycle;
-     plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] * geo.wcycle;
-     plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] * geo.wcycle;
+     plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] * geo.wcycle;
+     plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] * geo.wcycle;
+     plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] * geo.wcycle;
 
-     plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n];
-     plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n];
-     plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n];
+     plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] + plasmamain[nplasma].F_UV_ang_theta[n];
+     plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] + plasmamain[nplasma].F_UV_ang_phi[n];
+     plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] + plasmamain[nplasma].F_UV_ang_r[n];
 
-     plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] / (geo.wcycle + 1);
-     plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] / (geo.wcycle + 1);
-     plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] / (geo.wcycle + 1);
+     plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] / (geo.wcycle + 1);
+     plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] / (geo.wcycle + 1);
+     plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] / (geo.wcycle + 1);
      }
 
      }
@@ -729,7 +729,7 @@ WindPtr (w);
 
     fprintf (fptr,
              "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z bf_f_w bf_f_phi bf_f_z\n");
-    fprintf (fptr2, "i j F_vis_x F_vis_y F_vis_z F_UV_x F_UV_y F_UV_z F_Xray_x F_Xray_y F_Xray_z\n");   //directional flux by band
+    fprintf (fptr2, "i j F_vis_x F_vis_y F_vis_z F_UV_theta F_UV_phi F_UV_r F_Xray_x F_Xray_y F_Xray_z\n");   //directional flux by band
 
     fprintf (fptr3, "nions %i\n", nions);
     for (i = 0; i < nions; i++)
@@ -1289,14 +1289,14 @@ wind_rad_init ()
     {
       if (geo.wcycle == 0)
       {
-        plasmamain[n].F_UV_ang_x_persist[i] = 0.0;
-        plasmamain[n].F_UV_ang_y_persist[i] = 0.0;
-        plasmamain[n].F_UV_ang_z_persist[i] = 0.0;
+        plasmamain[n].F_UV_ang_theta_persist[i] = 0.0;
+        plasmamain[n].F_UV_ang_phi_persist[i] = 0.0;
+        plasmamain[n].F_UV_ang_r_persist[i] = 0.0;
       }
       if (i == 0 && n == 0)
-        plasmamain[n].F_UV_ang_x[i] = 0.0;
-      plasmamain[n].F_UV_ang_x[i] = 0.0;
-      plasmamain[n].F_UV_ang_x[i] = 0.0;
+        plasmamain[n].F_UV_ang_theta[i] = 0.0;
+      plasmamain[n].F_UV_ang_theta[i] = 0.0;
+      plasmamain[n].F_UV_ang_theta[i] = 0.0;
 
     }
 
