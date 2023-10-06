@@ -204,9 +204,9 @@ main (argc, argv)
   fptr5 = fopen ("py_pcon_data.dat", "w");
   fptr6 = fopen ("py_debug_data.dat", "w");
   fptr7 = fopen ("py_fluxes.dat", "w");
-  fptr8 = fopen ("directional_flux_x.dat", "w");
-  fptr9 = fopen ("directional_flux_y.dat", "w");
-  fptr10 = fopen ("directional_flux_z.dat", "w");
+  fptr8 = fopen ("directional_flux_theta.dat", "w");
+  fptr9 = fopen ("directional_flux_phi.dat", "w");
+  fptr10 = fopen ("directional_flux_r.dat", "w");
 
 //  fptr11 = fopen ("idomega.dat", "w");
 
@@ -267,13 +267,13 @@ main (argc, argv)
   }
   else if (zdom[domain].coord_type == CYLIND)
   {
-    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod F_vis_x2 F_vis_y2 F_vis_z2 F_vis_mod2 F_UV_x2 F_UV_y2 F_UV_z2 F_UV_mod2 F_Xray_x2 F_Xray_y2 F_Xray_z2 F_Xray_mod2 es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");  //directional flux by band
-    fprintf (fptr7, "i j rcen zcen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");   //directional flux by band
+    fprintf (fptr2, "i j rcen zcen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_theta F_UV_phi F_UV_r F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod F_vis_x2 F_vis_y2 F_vis_z2 F_vis_mod2 F_UV_theta2 F_UV_phi2 F_UV_r2 F_UV_mod2 F_Xray_x2 F_Xray_y2 F_Xray_z2 F_Xray_mod2 es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");  //directional flux by band
+    fprintf (fptr7, "i j rcen zcen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_theta F_UV_phi F_UV_r F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");   //directional flux by band
   }
   else if (zdom[domain].coord_type == RTHETA)
   {
-    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");        //directional flux by band
-    fprintf (fptr7, "i j rcen thetacen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_x F_UV_y F_UV_z F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");       //directional flux by band
+    fprintf (fptr2, "i j rcen thetacen vol rho ne F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_theta F_UV_phi F_UV_r F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod es_f_x es_f_y es_f_z es_f_mod bf_f_x bf_f_y bf_f_z bf_f_mod\n");        //directional flux by band
+    fprintf (fptr7, "i j rcen thetacen F_vis_x F_vis_y F_vis_z F_vis_mod F_UV_theta F_UV_phi F_UV_r F_UV_mod F_Xray_x F_Xray_y F_Xray_z F_Xray_mod\n");       //directional flux by band
   }
 
   fprintf (fptr8, "NANGLES %i\n", NFLUX_ANGLES);
@@ -314,9 +314,9 @@ main (argc, argv)
 //      fprintf (fptr11, "%d %d %e %e %e ", i, j, wmain[plasmamain[nplasma].nwind].rcen, wmain[plasmamain[nplasma].nwind].thetacen / RADIAN, wmain[plasmamain[nplasma].nwind].theta / RADIAN);    //output geometric things
       for (ii = 0; ii < NFLUX_ANGLES; ii++)
       {
-        fprintf (fptr8, "%e ", plasmamain[nplasma].F_UV_ang_x_persist[ii]);
-        fprintf (fptr9, "%e ", plasmamain[nplasma].F_UV_ang_y_persist[ii]);
-        fprintf (fptr10, "%e ", plasmamain[nplasma].F_UV_ang_z_persist[ii]);
+        fprintf (fptr8, "%e ", plasmamain[nplasma].F_UV_ang_theta_persist[ii]);
+        fprintf (fptr9, "%e ", plasmamain[nplasma].F_UV_ang_phi_persist[ii]);
+        fprintf (fptr10, "%e ", plasmamain[nplasma].F_UV_ang_r_persist[ii]);
 
 //        fprintf (fptr11, "%e ", plasmamain[nplasma].idomega[ii]);
       }
