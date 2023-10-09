@@ -14,6 +14,9 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+
+#include <gsl/gsl_errno.h>
+
 #include "atomic.h"
 #include "python.h"
 #include "models.h"
@@ -72,21 +75,22 @@ main (argc, argv)
   char values[LINELENGTH], answer[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
   int dummy_spectype;
-
-  FILE *fopen ();
-
   int opar_stat, restart_stat;
   double time_max;
   double lstar;
 
-/* Initicialize MPI */
+/* Initialize MPI */
 
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
 
-
 #ifdef MPI_ON
-  MPI_Init (&argc, &argv);
+  int mpi_err = MPI_Init (&argc, &argv);
+  if (mpi_err != EXIT_SUCCESS)
+  {
+    Error ("Failed to initialise MPI\n");
+    Exit (mpi_err);
+  }
   MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size (MPI_COMM_WORLD, &np_mpi);
 #else
@@ -94,12 +98,23 @@ main (argc, argv)
   np_mpi = 1;
 #endif
 
+#ifdef CUDA_ON
+  int cuda_err = cusolver_create ();
+  if (cuda_err != EXIT_SUCCESS)
+  {
+    Error ("Failed to initialise CUDA/cuSolver\n");
+    Exit (cuda_err);
+  }
+#endif
+
+  /* Turn off gsl error handling so that the code does not abort on error */
+  gsl_set_error_handler_off ();
+
   np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
 
-/* This completes the intialization of mpi */
-
+/* This completes the initialisation of mpi */
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
                                    the assumption is that we are reading from the command line */
@@ -231,7 +246,7 @@ main (argc, argv)
          model,(presumably because that run produced a wind close to the one we are looking for,
          but we are going to change some parameters that do not affect the wind geometry,
          We will write use new filenames for the results, so all of the previous work is still saved,
-         Note that wind_read also reads the atomic data file that was used to create the previous run of the data. 
+         Note that wind_read also reads the atomic data file that was used to create the previous run of the data.
        */
 
       strcpy (files.old_windsave, "earlier.run");
@@ -599,10 +614,10 @@ main (argc, argv)
 
 
 /* The next section sets up two represenations of the disk structure
- * 
+ *
  * disk_init is called primarily to get
  * a defined set of annular rings which are kept throughout the
- * ionization calculation.  
+ * ionization calculation.
  * disk_init calculates the flux from the disk in the energy range set by
  * freqmin and freqmax, and uses is this to identify the position of the
  * rings in the disk, so that each ring contributes the same amount to

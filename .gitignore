@@ -15,6 +15,10 @@ bin/modify_wind*
 *.obj
 *.elf
 
+# Build directories
+cmake-build-*
+build
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -39,19 +43,15 @@ bin/modify_wind*
 *.x86_64
 *.hex
 
-
 # things from gsl, may not be necessary
-software/gsl-2.5/Makefile
-software/gsl-2.5/*/Makefile
-software/gsl-2.5/*.dSYM
-software/gsl-2.5/*/*.dSYM
-software/gsl-2.5/bin/
-software/gsl-2.5/share/
+software/gsl*
+software/cunit*
 include/gsl/
+include/CUnit/
 lib/pkgconfig/
 
 # the configure Makefile should not be tracked
-./Makefile
+Makefile
 
 # sphinx stuff
 docs/sphinx/html/
@@ -73,6 +73,7 @@ wiki/
 *.pyc
 *~
 *.DS_Store
+**/*foo.txt
 
 # some gsl files
 *.Plo
@@ -82,8 +83,11 @@ wiki/
 data/
 xmod/
 
-# we shouldn't be tracking version.h either 
+# we shouldn't be tracking version.h either
 source/version.h
+
+# we also should not track templates.h.old either
+source/templates.h.old
 
 # python output files
 *.diag
@@ -98,4 +102,6 @@ logfile
 
 # IDE files
 .idea/
+**/*.vscode/
 py_progs/.idea/
+scratch/

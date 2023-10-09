@@ -20,8 +20,8 @@ The name Python is today unfortunate, and changing the name is an ongoing debate
 The program is written in C and can be compiled on systems runining various flavors of linux, including OSX on Macs.
 
 
-The code is is available on `github <https://github.com/agnwinds/python>`_  Issues regarding the code and suggestions for improvement the code regarding the should be reported there.  We actively 
-encourage other to make use of the code for their own science.  If anyone has questions about 
+The code is is available on `github <https://github.com/agnwinds/python>`_  Issues regarding the code and suggestions for improvement the code regarding the should be reported there.  We actively
+encourage other to make use of the code for their own science.  If anyone has questions about
 whether the code might be useful for a project, we encourage you to contact one of the authors of
 the code.
 
@@ -89,4 +89,5 @@ Mandy Hewitt
    physics
    atomic
    meta
+   developer
    *

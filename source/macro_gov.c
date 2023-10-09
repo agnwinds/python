@@ -19,11 +19,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -300,7 +295,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
   /* End of main matom processing loop that began with while (escape==FALSE)
 
-     If it gets here, the escape is as a KPKT    
+     If it gets here, the escape is as a KPKT
    */
 
   /* Update the the photon origin to indicate the packet has been processed
@@ -343,7 +338,7 @@ macro_pops (xplasma, xne)
      double xne;
 {
   int i, j, index_element, index_lvl;
-  int gsl_err, numerical_error, populations_ok;
+  int matrix_err, numerical_error, populations_ok;
   int n_macro_lvl;
   int n_iterations, n_inversions;
   double *a_data, *b_data;
@@ -419,24 +414,25 @@ macro_pops (xplasma, xne)
            Here we solve the matrix equation M x = b, where x is our vector containing
            level populations as a fraction w.r.t the whole element */
 
-        a_data = (double *) calloc (n_macro_lvl * n_macro_lvl, sizeof (double));
-
-        for (i = 0; i < n_macro_lvl; i++)
-        {
-          for (j = 0; j < n_macro_lvl; j++)
-          {
-            a_data[i * n_macro_lvl + j] = rate_matrix[i][j];
-          }
-        }
-
         /* 211101 - ksl - Check added to avoid gcc11 warning */
-        if (n_macro_lvl > SIZE_MAX / sizeof (double))
+        if (n_macro_lvl > SIZE_MAX / sizeof (double) || n_macro_lvl * n_macro_lvl > SIZE_MAX / sizeof (double))
         {
-          Error ("macro_gov:n_macro_lvl %d too large for calloc\n", n_macro_lvl);
-          Exit (0);
+          Error ("macro_pops: n_macro_lvl %d too large for memory allocation\n", n_macro_lvl);
+          Exit (EXIT_FAILURE);
         }
         else
         {
+
+          a_data = (double *) calloc (n_macro_lvl * n_macro_lvl, sizeof (double));
+
+          for (i = 0; i < n_macro_lvl; i++)
+          {
+            for (j = 0; j < n_macro_lvl; j++)
+            {
+              a_data[i * n_macro_lvl + j] = rate_matrix[i][j];  /* row-major ordering */
+            }
+          }
+
           b_data = (double *) calloc (n_macro_lvl, sizeof (double));
           populations = (double *) calloc (n_macro_lvl, sizeof (double));
 
@@ -445,10 +441,14 @@ macro_pops (xplasma, xne)
 
           /* this next routine is a general routine which solves the matrix equation
              via LU decomposition */
-          gsl_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
-          if (gsl_err)
+          matrix_err = solve_matrix (a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
+
+          free (a_data);
+          free (b_data);
+
+          if (matrix_err)
           {
-            Error ("macro_pops: GSL error return of %d from solve_matrix: see err/gsl_errno.h for more details\n", gsl_err);
+            Error ("macro_pops: %s\n", get_matrix_error_string (matrix_err));
           }
 
           /* Now we take the population array and check to see if anything is very
@@ -462,9 +462,6 @@ macro_pops (xplasma, xne)
               populations[i] = 0.0;
             }
           }
-
-          free (a_data);
-          free (b_data);
 
           n_inversions = macro_pops_check_for_population_inversion (index_element, populations, radiative_flag, conf_to_matrix);
 
@@ -496,6 +493,12 @@ macro_pops (xplasma, xne)
           }
 
           free (populations);
+
+          if (n_iterations == MAXITERATIONS)
+          {
+            Error ("macro_pops: failed to converge for plasma cell %d\n", xplasma->nplasma);
+            return EXIT_FAILURE;
+          }
         }
       }                         // end of populations_ok == FALSE sane loop
     }                           // end of if statement for macro-atoms
