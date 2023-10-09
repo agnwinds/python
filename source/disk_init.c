@@ -34,7 +34,7 @@
  * @param [in] double  mdot   mass accretion rate
  * @param [in] double  freqmin   The minimum frequency
  * @param [in] double  freqmax   The maximum frequency
- * @param [in] int  ioniz_or_final   A flag indicating whether this is an ionization or
+ * @param [in] int  ioniz_or_extract   A flag indicating whether this is an ionization or
  * a detailed spectral cycle (used to determine the spectral type to use)
  * @param [out] double *  ftot   The band limited luminosity in the freqency interval
  * @return     the total luminosity of the disk
@@ -61,9 +61,9 @@
  **********************************************************/
 
 double
-disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
+disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
      double rmin, rmax, m, mdot, freqmin, freqmax, *ftot;
-     int ioniz_or_final;
+     int ioniz_or_extract;
 {
   double t;
   double log_g;
@@ -120,7 +120,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   /* Now establish the type of spectrum to create */
 
-  if (ioniz_or_final == 1)
+  if (ioniz_or_extract == CYCLE_EXTRACT)
     spectype = geo.disk_spectype;
   else
     spectype = geo.disk_ion_spectype;
@@ -566,7 +566,7 @@ read_non_standard_disk_profile (tprofile)
   }
 
   geo.disk_rad_max = blmod.r[blmod.n_blpts - 1];
-      geo.disk_mdot = 0;
+  geo.disk_mdot = 0;
 
 
   return (0);

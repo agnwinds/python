@@ -32,8 +32,6 @@
 
 #include "atomic.h"
 #include "python.h"
-//OLD #include "import.h"
-
 
 char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH];
 int model_flag, ksl_flag, cmf2obs_flag, obs2cmf_flag;

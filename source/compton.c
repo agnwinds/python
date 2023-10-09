@@ -18,6 +18,116 @@
 PlasmaPtr xplasma;              /// Pointer to current plasma cell
 
 
+
+/**********************************************************/
+/** 
+ * @brief      carry out the process of Compton scattering a photon    
+ *
+ * @param [in] Photpr p  A photon                        
+ * @return     0
+ *
+ * @details
+ * 
+ * ### Notes ###
+ *
+ * This routine oversees the compton scatterin of a single photon
+ *
+ **********************************************************/
+
+
+int
+compton_scatter (p)
+     PhotPtr p;                 // Pointer to the current photon
+{
+  double t_e;
+  double vel[3];
+  double v;
+
+
+  WindPtr one;
+  PlasmaPtr xplasma;
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+
+
+
+
+  t_e = xplasma->t_e;
+
+  compton_get_thermal_velocity (t_e, velocity_electron);
+
+  /* Now account for the fact that the photons sees fewer 
+     electrons traveling in the direction of the initial
+     photon than those which are moving towards it
+
+     What we want to assure is that the fraction of photons
+     that go in the direction of the photon is given
+     by 
+
+     0.5 (1-v/c)
+
+     and the fraction that goes in the opposite direction
+     of the photon is
+
+     0.5 (1+v/c)
+
+     where v is the component of the velocity vector of
+     the electron going the same direction as the photon.
+
+     If the electron were going near the speed of light
+     in this direction, then an observer in the rest
+     frame would see that the photon was always encontuering
+     photons moving towards the photons, and none moveing
+     with it.
+
+     Note that because the velocities in the 3 directions
+     are uncorrellated, we do not have to go into the frame
+     aligned with the photon, and revese only that component
+     and transform back
+
+     This calculation is carried out non-relativistically,
+     as is the thermal velocity calculation.
+   */
+
+  v = dot (p->lmn, velocity_electron);
+
+  if (random_number (0.0, 1.0) < 0.5 * (1. + fabs (v / VLIGHT)))
+  {
+    /* Then we want the photon to be headed  towards the photon */
+    if (v > 0)
+    {
+      velocity_electron[0] = (-velocity_electron[0]);
+      velocity_electron[2] = (-velocity_electron[1]);
+      velocity_electron[2] = (-velocity_electron[2]);
+    }
+  }
+  else if (v < 0)
+  {
+    velocity_electron[0] = (-velocity_electron[0]);
+    velocity_electron[2] = (-velocity_electron[1]);
+    velocity_electron[2] = (-velocity_electron[2]);
+  }
+
+
+
+
+
+  lorentz_transform (p, p, velocity_electron);
+  if (modes.save_extract_photons)
+    save_photons (p, "BeforeC");
+  compton_dir (p);
+  if (modes.save_extract_photons)
+    save_photons (p, "AfterC");
+  rescale (velocity_electron, -1, vel);
+  lorentz_transform (p, p, vel);
+
+
+  return (0);
+}
+
+
+
+
 /**********************************************************/
 /** 
  * @brief      computes the effective Compton opacity in the cell.
@@ -327,17 +437,18 @@ compton_dir (p)
 
   n = l = m = 0.0;
 
-  if (x1 < 0.0001)              //If the photon energy is low, we just have Thompson scattering - scattering is isotropic
+  if (x1 < 0.0001)              //If the photon energy is low, we use the diple approximation            
   {
-    randvec (lmn, 1.0);
+    randvdipole (lmn, p->lmn);
     stuff_v (lmn, p->lmn);
   }
   else
   {
+
     /* The process is as follows:
        Generate a random number between 0 and 1 - this represents a randomised cross section (normalised to the maximum which out photon packet sees
-       Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 detgress
-       Calculate sigma_max, a varialbe that is communicted externnaly to the zero_find routine.  This is used to xcale the K_N function to lie between 
+       Calculate the mininumum and max energy change, corresponding to scattering angles of 0 and 180 degrees
+       Calculate sigma_max, a variable that is communicated externally to the zero_find routine.  This is used to scale the K_N function to lie between 
        0 and 1. This is essentually the chance of a photon scattering through 180 degrees - or the angle giving the maximum energy loss
        Find the zero that represents our randomised fractional energy loss z_rand.
      */
@@ -623,4 +734,112 @@ comp_cool_integrand (double nu, void *params)
   double value;
   value = THOMPSON * compton_beta (nu) * mean_intensity (xplasma, nu, MEAN_INTENSITY_ESTIMATOR_MODEL);
   return (value);
+}
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Calculate the renormalization needed for reweighting photons due to 
+ *  the anisotropic nature of Compton scattering 
+ *
+ * @param [in] double  nu   - frequency of the unscattered photon
+ *
+ * @return     the value to use for the renormaliztion
+ *
+ * @details
+ *
+ * The normalization required depends only on the input photon
+ *
+ * ### Notes ###
+ *
+ * At very low values of frequency, provide the answer at
+ * in the Thompson limit to avoid spurious results
+ *
+ **********************************************************/
+
+
+double
+compton_reweight_norm (nu)
+     double nu;
+{
+  double v;
+  double x1, x2, x3, x4, x5, xx;
+  double r;
+
+  r = PLANCK * nu / (MELEC * VLIGHT * VLIGHT);
+
+  if (r < 0.00001)
+  {
+    v = 16. * PI / 3.;
+    return v;
+  }
+
+  x1 = (2 / (r * r));
+  xx = 1. + 2. * r;
+  x2 = log (xx);
+  x3 = 1 / r - 2 / (r * r) - 2 / (r * r * r);
+
+  x4 = 1. / (2 * r) * (1 / (xx * xx) - 1.);
+
+  x5 = 1 / xx * (-2 / (r * r) - 1. / (r * r * r)) + (2 / (r * r) + 1. / (r * r * r));
+
+
+  v = x1 + x2 * x3 - x4 + x5;
+
+  v *= 2. * PI;
+  return v;
+}
+
+
+/**********************************************************/
+/** 
+ * @brief      Reweight a phton in order to extract it in a new direction due to 
+ *  the anisotropic nature of Compton scattering 
+ *
+ * @param [in] double  nu   - frequency of the unscattered photon
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * An explanation of the philosophy behind the reweighting
+ * can be found in docs/notes/compton_scattering/Compton_reweighting.ipynb
+ *
+ **********************************************************/
+
+
+int
+compton_reweight (p_in, p_out)
+     PhotPtr p_in, p_out;
+
+
+{
+  double nu_in, nu_out, xr, reweight;
+  double theta, ctheta;
+
+  nu_in = p_in->freq;
+
+  ctheta = dot (p_in->lmn, p_out->lmn);
+
+  p_out->freq = nu_out = nu_in / (1 + PLANCK * nu_in / (MELEC * VLIGHT * VLIGHT) * (1 - ctheta));
+
+  xr = nu_out / nu_in;
+  theta = acos (ctheta);
+
+  reweight = xr * xr * (xr + 1. / xr - sin (theta) * sin (theta));
+
+  reweight *= 4. * PI / compton_reweight_norm (p_in->freq);
+
+
+
+  /* This accounts for the reweighting that is due to
+   * The anistorpy, but we must also change the
+   * weight due simply to the change in freqency
+   */
+
+  p_out->w *= nu_out / nu_in * reweight;
+
+
+  return (0);
 }

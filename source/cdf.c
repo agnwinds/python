@@ -48,7 +48,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-//OLD #include "atomic.h"
+#include <math.h>
 #include "constants.h"
 #include "math_struc.h"
 #include "math_proto.h"
@@ -57,7 +57,7 @@
 //#include "models.h"
 
 /// This is the initial value of PDFSTEPS
-#define PDFSTEPS 10000
+#define PDFSTEPS 100000
 
 /// This is the value of pdfsteps at this point in time         
 int pdf_steps_current;
@@ -672,12 +672,17 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 /**
  * @brief      Generate a single sample from a cdf
  *
- * @param [in] CdfPtr  cdf   a structure which contains the cumulative distribution function.
+ * @param [in] CdfPtr  cdf   a structure which contains a cumulative distribution function.
+ *
  * @return   x  a random value fronm the cdf between xmin and xmax
  *
  * @details
  *
  * ### Notes ###
+ *
+ * The quadratic equation that is solved is intended to assure
+ * that the recreated pdf is continuous at the boundaries
+ * between the points that ae contained in the cdf structure
  *
  **********************************************************/
 
@@ -690,33 +695,46 @@ cdf_get_rand (cdf)
   double q;
   double a, b, c, s[2];
   int quadratic ();
-/* Find the interval within which x lies */
-  r = random_number (0.0, 1.0); //This *exludes* 0.0 and 1.0.
-  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);     //find the interval in the CDF where this number lies
 
-/* Now calculate a place within that interval - we use the gradient of the CDF to get a more accurate value between the CDF points */
+/* Gnerate a random number and then find the interval n the cdf in which x lies */
+  r = random_number (0.0, 1.0); //This *excludes* 0.0 and 1.0.
+  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);
+
+/* Now calculate a place within that interval - we use the gradient of the 
+ * CDF to get a more accurate value between the CDF points
+ * 
+ * To avoid round-off errors and wasted CPU cycles we check that there
+ * is that the gradient change is significant
+ */
   q = random_number (0.0, 1.0);
-  a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
-  b = cdf->d[i];
-  c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
-  if ((j = quadratic (a, b, c, s)) < 0)
+
+  if (fabs (a = (cdf->d[i + 1] - cdf->d[i])) > 1.e-6)
   {
-    Error ("cdf_get_rand: %d\n", j);
-  }
-  else
-  {
-    q = s[j];
-    if (q < 0 || q > 1)
+    a *= 0.5;
+    b = cdf->d[i];
+    c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
+
+    if ((j = quadratic (a, b, c, s)) < 0)
     {
-      Error ("cdf_get_rand: q out of range %d  %f\n", j, q);
+      Error ("cdf_get_rand: No positive roots found %d\n", j);
+    }
+    else
+    {
+      q = s[j];
+      if (q < 0 || q > 1)
+      {
+        Error ("cdf_get_rand: q out of range %d  %f\n", j, q);
+      }
     }
   }
 
   x = cdf->x[i] * (1. - q) + cdf->x[i + 1] * q;
+
   if (!(cdf->x[0] <= x && x <= cdf->x[cdf->ncdf]))
   {
     Error ("cdf_get_rand: %g %d %g %g\n", r, i, q, x);
   }
+
   return (x);
 }
 
@@ -900,7 +918,7 @@ int cdf_write_init = 0;
  * @return     Always returns 0
  *
  * @details
- * This is a diagnostic routine that wirtes a cdf to a file for analysis
+ * This is a diagnostic routine that writes a cdf to a file for analysis
  *
  * This routine should really be parallelized so that it only
  * writes to a file from thread 0, but cdf.c has
@@ -919,20 +937,20 @@ cdf_to_file (cdf, comment)
   int n;
   if (cdf_write_init == 0)
   {
-    fptr = fopen ("cdf_diag", "w");
+    fptr = fopen ("cdf_diag.txt", "w");
     cdf_write_init++;
   }
   else
   {
-    fptr = fopen ("cdf_diag", "a");
+    fptr = fopen ("cdf_diag.txt", "a");
   }
   fprintf (fptr, "# %s\n", comment);
   fprintf (fptr, "# limits (portion.to.sample)   %10.4g %10.4g\n", cdf->limit1, cdf->limit2);
   fprintf (fptr, "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n", cdf->x1, cdf->x2);
   fprintf (fptr, "# norm   Scale.factor          %10.4g \n", cdf->norm);
-  fprintf (fptr, "#n x y  1-y d\n");
+  fprintf (fptr, "# n x y  1-y d\n");
   for (n = 0; n <= cdf->ncdf; n++)
-    fprintf (fptr, "%3d %14.8e	%14.8e %14.8e  %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
+    fprintf (fptr, "%6d %14.8e %14.8e %14.8e %14.8e\n", n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
   fclose (fptr);
   return (0);
 }

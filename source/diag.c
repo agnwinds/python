@@ -200,8 +200,12 @@ get_extra_diagnostics ()
     rdchoice ("@Diag.turn_off_upweighting_of_simple_macro_atoms(yes,no)", "1,0", answer);
 
   strcpy (answer, "zero_densities");
-  n += modes.turn_off_upweighting_of_simple_macro_atoms =
+  n += modes.partial_cells =
     rdchoice ("@Diag.partial_cells(include,zero_densities,extend_full_cells)", "0,1,2", answer);
+
+  strcpy (answer, "no");
+  n += modes.searchlight = rdchoice ("@Diag.invoke_searchlight_option(yes,no)", "1,0", answer);
+
 
   if (n > 0)
   {
@@ -212,10 +216,116 @@ get_extra_diagnostics ()
     modes.extra_diagnostics = FALSE;
   }
 
+  if (modes.searchlight)
+  {
+    init_searchlight ();
+  }
+
   return 0;
 }
 
 
+
+/**********************************************************/
+/**
+ * @brief      define the characteristics of
+ *  for the searchlight options which causes all the 
+ *  photons to arise from a certain location and
+ *  to point in a fixed direction
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * Searchlight mode is only useful in limited situation
+ * and is probably most useful when used in conjunction
+ * with saving photons.
+ *
+ * The main issue, especially for understanding scattering,
+ * is the way spectra are accumulated at specific angles
+ *
+ * For live or die mode, one accepts an annulus above or
+ * below the plane
+ *
+ * For extract, a photons are extracted in a specific 
+ * direction.  
+ *
+ * For these reasons, searchlight mode should most
+ * likely be used in situations where one analyses
+ * each photon path.
+ *
+ * ksl-230131
+ *
+ *
+ **********************************************************/
+
+int
+init_searchlight ()
+{
+  char answer[LINELENGTH];
+  int ichoice;
+  double angle, rho;
+
+  Log ("WARNING: Searchlight mode is experimental and should be used with extreme care\n");
+  Log ("The primary problem is that spectra are not accumulated at specific places on the sphere\n");
+  Log ("Instead they are acumulated in annulae with with postive and negative angles with respect to the xy plane\n");
+  Log ("Extract mode has similar issues; as a result if one uses this mode one should proably use it in conjunction with saving photons\n");
+
+  strcpy (answer, "central_object");
+
+  ichoice = rdchoice ("@Diag.location(central_object,disk)", "1,2", answer);
+
+  if (ichoice == 1)
+  {
+    angle = 45.;
+    rddoub ("@Diag.angle(0=pole)", &angle);
+    angle /= RADIAN;
+
+    geo.searchlight_lmn[0] = sin (angle);
+    geo.searchlight_lmn[1] = 0;
+    geo.searchlight_lmn[2] = cos (angle);
+
+    geo.searchlight_x[0] = 1.001 * geo.rstar * sin (angle);
+    geo.searchlight_x[1] = 0;
+    geo.searchlight_x[2] = 1.001 * geo.rstar * cos (angle);
+
+    modes.searchlight = 1;
+  }
+  else if (ichoice == 2)
+  {
+    angle = 0.;
+    rho = 4.;
+    rddoub ("@Diag.r(units_of_rstar", &rho);
+    rddoub ("@Diag.angle(0=pole", &angle);
+
+    geo.searchlight_x[0] = geo.rstar * rho;
+    geo.searchlight_x[1] = 0;
+    geo.searchlight_x[2] = 0;
+
+    angle /= RADIAN;
+    geo.searchlight_lmn[0] = sin (angle);
+    geo.searchlight_lmn[1] = 0;
+    geo.searchlight_lmn[2] = cos (angle);
+
+    modes.searchlight = 2;
+  }
+  else
+  {
+    Error ("init_searchlight:Houston, we have a problem");
+
+  }
+
+
+  Log ("Searchlight mode has been activated:\n");
+  Log (" From  location %10.1e %10.1e %10.1e\n", geo.searchlight_x[0], geo.searchlight_x[1], geo.searchlight_x[2]);
+  Log (" In   direction %10.3f %10.3f %10.3f\n", geo.searchlight_lmn[0], geo.searchlight_lmn[1], geo.searchlight_lmn[2]);
+
+
+  return (0);
+
+}
 
 
 
@@ -225,6 +335,7 @@ int eplinit = 0;
 int pstatinit = 0;
 
 /// Extra diagnostics file
+
 FILE *epltptr;
 
 
@@ -235,11 +346,11 @@ FILE *epltptr;
  *  extra diagnostics.  In some cases reads a file
  *  that specifies in which cells ones wants diagnostics
  *
- * @return     Always retuns 0
+ * @return     Always returns 0
  *
  * @details
- * This routine gets some residual inforamtion needed
- * to specify exactlay what one wants to track, and opens
+ * This routine gets some residual information needed
+ * to specify exactly what one wants to track, and opens
  * files that will be used to write the diagnostics.
  *
  * ### Notes ###
@@ -362,8 +473,6 @@ int save_photon_number = 0;
  * a photon at any time.
  *
  * ### Notes ###
- * It was written as part of the effort to
- *    debug imports for the fu_ori project.
  *
  **********************************************************/
 
@@ -376,8 +485,9 @@ save_photons (p, comment)
 
   fprintf (epltptr,
 //OLD           "PHOTON %3d %3d %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %3d %3d %s \n",
-           "PHOTON %3d %7d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
-           geo.wcycle, p->np, p->freq_orig, p->freq, p->w_orig, p->w, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+//OLD           "PHOTON %3d %7d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %12.5e %12.5e %12.5e %12.5e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
+           "PHOTON %3d %7d %11.5e %11.5e %10.4e %10.4e %10.3e %10.3e %10.3e %15e %15e %15e %15e %9.2e %4d %3d %3d %3d %6d %3d %s \n",
+           geo.pcycle, p->np, p->freq_orig, p->freq, p->w_orig, p->w, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
 //OLD           p->lmn[2], p->ds, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
            p->lmn[2], p->ds, p->tau, p->grid, p->istat, p->origin, p->nscat, p->nres, p->frame, comment);
 

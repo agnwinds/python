@@ -193,6 +193,7 @@ get_spectype (yesno, question, spectype)
   int i;
   int init_choices (), get_choices ();
 
+
   if (yesno)
   {
     init_choices ();            // Populate the spect array
@@ -203,7 +204,7 @@ get_spectype (yesno, question, spectype)
        have negative values
      */
 
-    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS || geo.ioniz_or_extract == CYCLE_EXTRACT))
+    if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS || geo.ioniz_or_extract == CYCLE_IONIZ))
     {
       *spectype = SPECTYPE_MODEL;
     }
@@ -228,6 +229,15 @@ get_spectype (yesno, question, spectype)
     get_choices (question, choices, &zz_spec);
     *spectype = rdchoice (question, choices, one_choice);
 
+    if (*spectype == SPECTYPE_MONO)
+    {
+      double x;
+      x = 1000.;
+      rddoub ("monochromatic.wavelength", &x);
+      geo.mono_freq = VLIGHT * 1e8 / x;
+    }
+
+
     if (*spectype == SPECTYPE_MODEL)
     {
       if (geo.run_type == RUN_TYPE_PREVIOUS)
@@ -249,7 +259,6 @@ get_spectype (yesno, question, spectype)
           return (*spectype);
         }
       }
-
       get_models (model_list, 2, spectype);
       strcpy (geo.model_list[geo.model_count], model_list);     // Copy it to geo
       strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
@@ -257,6 +266,8 @@ get_spectype (yesno, question, spectype)
       geo.model_count++;
     }
   }
+
+
   else
   {
     *spectype = SPECTYPE_NONE;  // No radiation
@@ -312,6 +323,7 @@ init_advanced_modes ()
   modes.use_debug = FALSE;
   modes.print_dvds_info = FALSE;        // print information on velocity gradients
   modes.quit_after_inputs = FALSE;      // check inputs and quit
+  modes.quit_after_wind_defined = FALSE;        // define wind and quit
   modes.fixed_temp = FALSE;     // do not attempt to change temperature 
   modes.zeus_connect = FALSE;   // connect with zeus
 
@@ -414,8 +426,17 @@ init_observers ()
    * Now read in the read of the variables for the spectra
    */
 
+  if (geo.mono_freq > 0)
+  {
+    geo.swavemax = 1.5 * VLIGHT * 1e8 / geo.mono_freq;
+    geo.swavemin = 0.667 * VLIGHT * 1e8 / geo.mono_freq;
+  }
+
   rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
   rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
+
+
+
   if (geo.swavemin > geo.swavemax)
   {
     geo.swavemax = geo.swavemin;
@@ -427,6 +448,16 @@ init_observers ()
 
   geo.sfmin = VLIGHT / (geo.swavemax * 1.e-8);
   geo.sfmax = VLIGHT / (geo.swavemin * 1.e-8);
+
+  if (geo.mono_freq > 0)
+  {
+    if (geo.mono_freq < geo.sfmin || geo.mono_freq > geo.sfmax)
+    {
+      Error ("Monochromatic frequency %e out of range of frequency limits %e %e\n", geo.mono_freq, geo.sfmin, geo.sfmax);
+      Exit (1);
+    }
+  }
+
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 
@@ -596,10 +627,16 @@ init_photons ()
   rdint ("Spectrum_cycles", &geo.pcycles);
 
 
+  /* If both geo.wcycles and geo.pcycles are 0, there is nothing to do, but for
+   * except that for diagnostic reasons one migh want to inspect the initial
+   * setup in the windsave file.  So now we wait to exit until this actually
+   * written out.
+   */
+
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
-    Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    exit (1);                   //There is really nothing to do!
+    Log ("Both ionization and spectral cycles are set to 0; the rest of the inputs will be gathered\n ");
+    Log ("After that, the windsave file will be written to disk but then the program will exit\n");
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -669,6 +706,19 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
+    char *a_warning;
+
+    a_warning = "\
+\n\
+Warning: Fixed concentrations is intended primarily as a diagnostic mode  \n\
+for studying the details of radiative transfer.   The calculated ne will   \n\
+only agree with what is in the Fixed_concentrations file, if the elements/ions \n\
+section of the input data agrees with the elements containted in the  \n\
+fixed concentration file. \n\
+\n\
+";
+    printf ("%s", a_warning);
+
     rdstr ("Wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
   }
 

@@ -11,6 +11,5 @@ Inputs
 
    input/overview
    input/system_description
-   input/wind_models
-   input/importing_models
+   input/wind_model_params
    input/parameters
