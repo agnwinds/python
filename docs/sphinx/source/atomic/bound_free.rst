@@ -63,7 +63,8 @@ The TopBase energies are inaccurate and so generally adjustments are made using 
 
 Python structure
 ================
-Where the data is stored internally in Python
+
+The data are stored in the Topbase_phot stucture which can be found in atomic.h
 
 Comments
 ========
@@ -81,6 +82,6 @@ This is the shape of a hydrogenic cross-section and whilst it is not accurate
 for non-hydrogenic ions, it is more realistic (and conservative) than some of 
 the unphysically shallow gradients that were being found.
 This is also briefly described in section~3.7.2 of Matthews PhD thesis.
-The python scripts can be found in progs/extrapolate\_xs/ 
+The python scripts can be found in the `data-gen <https://github.com/agnwinds/data-gen>`_ repository progs/extrapolate\_xs/ 
 with docstrings describing their use.
 
