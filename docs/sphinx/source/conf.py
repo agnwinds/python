@@ -74,7 +74,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'python'
-copyright = '2018, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
+copyright = '2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
 author = 'Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt'
 
 # The version info for the project you're documenting, acts as replacement for
