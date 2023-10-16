@@ -47,6 +47,8 @@ Notes:
 History:
 
 191227 ksl Coding begun
+221227 ksl Relooked at routine, verified it seemed to work and cleaned up some of the comments.
+           The functionality is unchanged.
 
 """
 
@@ -85,7 +87,7 @@ from astropy.io import ascii
 def get_levels(ion="h_1", nlevels=10):
     """
     Extract the information needed to write out the
-    the levels file, and return it as an astropy Table.
+    the levels file, and return it as an astropy table.
     
     Note:  In Keara's notes, she derives the multiplicity
     from J, but the multiplicity can be accessed directly
@@ -318,7 +320,7 @@ def get_lines(ion="h_4", nlevels=10):
 
     lev = get_levels(ion, nlevels)
     # Next bit is duplicated if I decide to put into a single routine
-    x = ch.ion(ion, temperature=1e5)
+    x = ch.ion(ion, temperature=1e6)
     # End of duplication
 
     wavelength = x.Wgfa["wvl"]
@@ -392,9 +394,10 @@ def get_lines(ion="h_4", nlevels=10):
 
 # We have to first get the data from TopBase and then we have to format it propoerly
 #
-# There is a search form on the web page, but you can also retrieve the files directly with wget.  The formats are slightly different, and so converting them to Python nputs is also going to be. bit different, but this allows one to retrieve things without going through a web page.
+# There is a search form on the web page, but you can also retrieve the files directly with wget.  
+# The formats are slightly different, and so converting them to Python nputs is also going to be a
+# bit different, but this allows one to retrieve things without going through a web page.
 
-# In[291]:
 
 
 def get_phot(ion="c_4"):
@@ -579,7 +582,7 @@ def make_phot(ion="c_4",macro=True):
 #
 # so the first line is unique, but then you need to find the remainder
 #
-# The second line ends up being ISLP and ILV and the second quantity in the second line is the number of points I believe
+# The second line ends up being ISLP and ILV and the second quantity in the second line is the number of points
 #
 # The line after this gives the number of x-sections (as the second number). I do not know what the third number is
 #
@@ -640,10 +643,10 @@ def make_phot(ion="c_4",macro=True):
 #
 # PhotMac energy[eV] cross sections [cm2]
 #
-#
 # The hard part here is getting the levels to be right.  If I understand Keara's notes, there are fewer sets of
 # photoinzation x-sections in top base than there are in Chianti, and so often one needs to have the same set
 # of x-section data for multiple Chianti levels, and when you do this you have to right the data out multiple times.
+# because Python expects a photionzation x-section for each level
 #
 # Alternatively, I suspect you can combine some of the levels into a single simpler level, if you know how to modify
 # various factors, e.g g, and you make some kind of assumption about what you need to do interms of adding f together.
@@ -688,8 +691,8 @@ def write_phot(ion="c_4"):
         dtype=["i", "i", "i", "i", "i", "f", "i"],
     )
 
+    # Write what we have so far for diagnostica prurposes. This file is not used.
     xxhead.write("head.txt", format="ascii.fixed_width_two_line", overwrite=True)
-    # xxhead.info()
 
     # Now find, if we can the parts of the photon file that match what we need
 
@@ -701,7 +704,7 @@ def write_phot(ion="c_4"):
 
     # lev.info()
 
-    # In princple a join of some of this would allow us to find everything we need
+    # Joine the levels to the photoionization data                                 
 
     try:
         foo = join(
@@ -713,20 +716,33 @@ def write_phot(ion="c_4"):
         lev.info()
         xxhead.write("head.txt", format="ascii.fixed_width_two_line", overwrite=True)
         lev.write("levels.txt", format="ascii.fixed_width_two_line", overwrite=True)
+
+
+
+    # Reorder the table so that the photoionization x-sections can be written in 
+    # level order
+
     foo.sort(["Ion", "lvl"])
 
     foo["delta_e"] = foo["ion_pot"] + foo["e_thresh"]
     foo["delta_e"].format = "8.2f"
 
+    # This write is diagnostic and lev2phot is not used anywhere.  The Row columin 
+    # refers to the row in the input file, and has nothing to do with 
+    # The location of a particular x-section in the ouput PhotFile, which
+    # is reordered to be in energy level order
+
     foo.write(
         ion + "_lev2phot.txt", format="ascii.fixed_width_two_line", overwrite=True
     )
 
-    # Now in principle we can write out the PhotFile
+    # Now write out the PhotFile. We use the row in the original file
+    # to understand which lines to write out.  
 
     output_file = ion + "_phot.dat"
     f = open(output_file, "w")
     for one in foo:
+        # print(one)
         if one["e_thresh"] > 0:
             xstring = "PhotMacS  %2d %2d %2d %2d  %10.6f %3d" % (
                 z,
@@ -741,6 +757,7 @@ def write_phot(ion="c_4"):
             nphot = int(one["np"])
             j = i + 1
             jstop = j + nphot
+            # print('%d %d %s'% (j,jstop,lines[j]))
             while j < jstop:
                 try:
                     xstring = "PhotMac       13.598430   6.3039999e-18"
@@ -811,12 +828,14 @@ def get_collisions(ion="h_1", nlev=20):
         names=["ll", "ul", "de", "lim", "ntemp", "btemp", "bscups", "ttype", "cups"],
     )
 
+    print(xtab)
+
     npossible = 0
     for one in xtab:
         if one["ul"] <= nlev:
             npossible += 1
 
-    xtab.write("T_cups.txt", format="ascii.fixed_width_two_line", overwrite=True)
+    # xtab.write("T_cups.txt", format="ascii.fixed_width_two_line", overwrite=True)
     # Get the lines
 
     linetab = get_lines(ion=ion, nlevels=nlev)
@@ -824,7 +843,7 @@ def get_collisions(ion="h_1", nlev=20):
     linetab.write("T_lines.txt", format="ascii.fixed_width_two_line", overwrite=True)
 
     xxtab = join(xtab, linetab)
-    xxtab.write("T_all.txt", format="ascii.fixed_width_two_line", overwrite=True)
+    # xxtab.write("T_all.txt", format="ascii.fixed_width_two_line", overwrite=True)
     xxtab["gf"] = xxtab["gl"] * xxtab["f"]
 
     print(
