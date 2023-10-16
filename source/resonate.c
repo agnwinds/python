@@ -587,20 +587,21 @@ kappa_bf (xplasma, freq, macro_all)
  *
  * @details
  *
- * This routine is now called before various cylces of the Monte Carlo calculation.
+ * This routine is now called before various cycles of the Monte Carlo calculation.
  * (in run.c) It determines which
  * bf processes are worth considering during the calculation that follows.
  *
- * To do this
- * it uses the edge position (must be inside, or close to, the spectral region of
- * interest) and the edge opacity (must be greater than a threshold value, currently
+ * To do this, it uses a typical distance a photon can travel within the cell,
+ * the threshold x-section, and the density of the ion of interest.  It retains
+ * x-sections if tau at the threshold frequency is greater than 
+ * a value set to
  * 10^-6.
  *
  * The need for the routine is just to prevent wasting time on unimportant bf
- * transitions.  It is called (currently) from resonate.
+ * transitions. 
  *
  * ### Notes ###
- * The dimensionalty of kbf_use is currently set to NTOP_PHOT, which is large enough
+ * The dimensionalty of kbf_use is set to nphot_total, which is large enough
  * to store every transition if necessary.
  *
  **********************************************************/
@@ -1080,6 +1081,15 @@ scatter (p, nres, nnscat)
 
         prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
+        if (*nres - NLINES - 1 >= 0)
+        {
+          xplasma->n_bf_in[*nres - NLINES - 1] += 1;
+
+
+          //  XXXXXXXXXXXXXXXXXX  117 had and inordinate
+
+        }
+
         if (prob_kpkt < 0)
         {
           /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
@@ -1131,6 +1141,11 @@ scatter (p, nres, nnscat)
           }
         }
 
+
+        if (*nres - NLINES - 1 >= 0)
+        {
+          xplasma->n_bf_out[*nres - NLINES - 1] += 1;
+        }
       }
       else
       {

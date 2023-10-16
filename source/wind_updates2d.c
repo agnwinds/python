@@ -110,6 +110,8 @@ WindPtr (w);
     8 * (n_inner_tot + 10 * nions + nlte_levels + 3 * nphot_total + 15 * NXBANDS + 133 * NFLUX_ANGLES) * (floor (NPLASMA / np_mpi_global) +
                                                                                                           1);
 
+  size_of_commbuffer += 2 * 4 * NPLASMA * N_PHOT_PROC;  /* Add space for storing number of bf transitions, up and down */
+
   size_of_specbuffer = 8 * NPLASMA * NBINS_IN_CELL_SPEC;
 
   size_of_commbuffer += size_of_specbuffer;
@@ -378,6 +380,11 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].xi, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+
+        MPI_Pack (&plasmamain[n].n_bf_in, N_PHOT_PROC, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].n_bf_out, N_PHOT_PROC, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+
+
         MPI_Pack (plasmamain[n].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -527,6 +534,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].xi, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].n_bf_in, N_PHOT_PROC, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].n_bf_out, N_PHOT_PROC, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE,
                     MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1245,6 +1254,13 @@ wind_rad_init ()
     plasmamain[n].bf_simple_ionpool_out = 0.0;
     plasmamain[n].bf_simple_ionpool_in = 0.0;
 
+    for (i = 0; i < nphot_total; i++)
+    {
+      plasmamain[n].n_bf_in[i] = 0;
+      plasmamain[n].n_bf_out[i] = 0;
+    }
+
+
     for (i = 0; i < 3; i++)
       plasmamain[n].dmo_dt[i] = 0.0;
     for (i = 0; i < 4; i++)
@@ -1399,7 +1415,8 @@ wind_rad_init ()
 int
 report_bf_simple_ionpool ()
 {
-  int n;
+  int n, m;
+  int in_tot, out_tot;
   double total_in = 0.0;
   double total_out = 0.0;
 
@@ -1416,6 +1433,26 @@ report_bf_simple_ionpool ()
   }
 
   Log ("!! report_bf_simple_ionpool: Total flow into: %8.4e and out of: %8.4e bf_simple ion pool\n", total_in, total_out);
+
+  total_in = total_out = 0;
+  for (m = 0; m < nphot_total; m++)
+  {
+    in_tot = out_tot = 0;
+    for (n = 0; n < NPLASMA; n++)
+    {
+      in_tot += plasmamain[n].n_bf_in[m];
+      out_tot += plasmamain[n].n_bf_out[m];
+    }
+
+
+    Log ("!! report_bf:  %3d   %3d %3d %7d  %7d\n", m, phot_top[m].z, phot_top[m].istate, in_tot, out_tot);
+
+    total_in += in_tot;
+    total_out += out_tot;
+  }
+
+  Log ("!! report_bf tots:   %10.0f  %10.0f\n", total_in, total_out);
+
 
   return (0);
 }

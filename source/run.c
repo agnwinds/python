@@ -49,8 +49,8 @@ calculate_ionization (restart_stat)
      int restart_stat;
 {
   int n, nn;
-  double zz, z_abs_all, z_abs[N_ISTAT], z_else, ztot;
-  double radiated[20];
+  double zz, z_abs_all, z_abs_all_orig, z_orig[N_ISTAT], z_abs[N_ISTAT], z_else, z_else_orig, ztot;
+  double radiated[20], radiated_orig[20];
   int nphot_istat[N_ISTAT];
   WindPtr w;
   PhotPtr p;
@@ -227,40 +227,78 @@ calculate_ionization (restart_stat)
     /* Determine how much energy was absorbed in the wind. first zero counters. 
        There are counters for total energy absorbed and for each entry in the istat enum,
        The second loop is for the energy radiated (i.e. that actually escapes) */
-    z_abs_all = z_else = 0.0;
+    z_abs_all = z_else = z_abs_all_orig = z_else_orig = 0.0;
     for (nn = 0; nn < N_ISTAT; nn++)
     {
       z_abs[nn] = 0.0;
+      z_orig[nn] = 0.0;
       nphot_istat[nn] = 0.0;
     }
     for (nn = 0; nn < 20; nn++)
     {
-      /* 20 entries to match declaration above */
       radiated[nn] = 0.0;
+      radiated_orig[nn] = 0.0;
     }
 
     /* loop over the different photon istats to determine where the luminosity went */
     for (nn = 0; nn < NPHOT; nn++)
     {
+
       z_abs_all += p[nn].w;
+      z_abs_all_orig += p[nn].w_orig;
 
       /* we want the istat to be >1 (not P_SCAT or P_INWIND) */
-      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
+//      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
+      if (p[nn].istat < N_ISTAT)
       {
         z_abs[p[nn].istat] += p[nn].w;
+        z_orig[p[nn].istat] += p[nn].w_orig;
         nphot_istat[p[nn].istat]++;
       }
       if (p[nn].istat == P_ESCAPE)
       {
         radiated[p[nn].origin] += p[nn].w;
+        radiated_orig[p[nn].origin] += p[nn].w_orig;
       }
       else
+      {
         z_else += p[nn].w;
+        z_else_orig += p[nn].w_orig;
+      }
     }
 
+
+    for (nn = 0; nn < N_ISTAT; nn++)
+    {
+      Log ("XXX stat %8d     %8d      %12.3e    %12.3e\n", nn, nphot_istat[nn], z_abs[nn], z_orig[nn]);
+    }
+    for (nn = 0; nn < 20; nn++)
+    {
+      Log ("XXX rad %8d     %12.3e    %12.3e\n", nn, radiated[nn], radiated_orig[nn]);
+    }
+    Log ("XXX  rad  abs_all  %12.3e    %12.3e\n", z_abs_all, z_abs_all_orig);
+    Log ("XXX  rad  else  l  %12.3e    %12.3e\n", z_else, z_else_orig);
+
+
+
+
+
     Log
-      ("!!python: Total photon luminosity after transphot  %18.12e (absorbed or lost  %18.12e). Radiated luminosity %18.12e\n",
-       z_abs_all, z_abs_all - zz, z_abs[P_ESCAPE]);
+      ("!!python: luminosity (radiated or lost) after transphot %18.12e (absorbed or lost  %18.12e  %18.12e). \n",
+       z_abs_all, z_abs_all - zz, z_abs_all - z_abs_all_orig);
+    Log ("\n");
+    Log ("!!python:  luminosity escaping                          %18.12e\n", z_abs[P_ESCAPE]);
+    Log ("!!python: stellar photon luminosity escaping            %18.12e \n", radiated[PTYPE_STAR] + radiated[PTYPE_STAR_MATOM]);
+    Log ("!!python: boundary layer photon luminosity escaping     %18.12e \n", radiated[PTYPE_BL] + radiated[PTYPE_BL_MATOM]);
+    Log ("!!python: disk photon luminosity escaping               %18.12e \n", radiated[PTYPE_DISK] + radiated[PTYPE_DISK_MATOM]);
+    Log ("!!python: wind photon luminosity escaping               %18.12e \n", radiated[PTYPE_WIND] + radiated[PTYPE_WIND_MATOM]);
+    Log ("!!python: agn photon luminosity escaping                %18.12e \n", radiated[PTYPE_AGN] + radiated[PTYPE_AGN_MATOM]);
+    Log ("!!python: luminosity lost by any process                %18.12e \n", z_else);
+    Log ("\n");
+    Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
+    Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
+    Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
+    Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", z_abs[P_HIT_DISK]);
     if (geo.rt_mode == RT_MODE_MACRO)
     {
       Log ("!!python: luminosity lost by adiabatic kpkt destruction %18.12e number of packets %d\n", z_abs[P_ADIABATIC],
@@ -268,20 +306,8 @@ calculate_ionization (restart_stat)
       Log ("!!python: luminosity lost to low-frequency free-free    %18.12e number of packets %d\n", z_abs[P_LOFREQ_FF],
            nphot_istat[P_LOFREQ_FF]);
     }
-    Log ("\n");
-    Log ("!!python: stellar photon luminosity escaping            %18.12e \n", radiated[PTYPE_STAR]);
-    Log ("!!python: boundary layer photon luminosity escaping     %18.12e \n", radiated[PTYPE_BL]);
-    Log ("!!python: disk photon luminosity escaping               %18.12e \n", radiated[PTYPE_DISK]);
-    Log ("!!python: wind photon luminosity escaping               %18.12e \n", radiated[PTYPE_WIND]);
-    Log ("!!python: agn photon luminosity escaping                %18.12e \n", radiated[PTYPE_AGN]);
-    Log ("\n");
-    Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
-    Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
-    Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
-    Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", z_abs[P_HIT_DISK]);
     Log ("!!python: luminosity lost by errors                     %18.12e \n",
          z_abs[P_ERROR] + z_abs[P_ERROR_MATOM] + z_abs[P_REPOSITION_ERROR]);
-    Log ("!!python: luminosity lost by the unknown                %18.12e \n", z_else);
     if (geo.binary == TRUE)
       Log ("!!python: luminosity lost by hitting the secondary %18.12e \n", z_abs[P_SEC]);
 
