@@ -67,6 +67,9 @@ Edward Parkinson
 Mandy Hewitt
   School of Mathematics and Physics, Queen's University Belfast, University Road, Belfast, BT7 1NN, UK
 
+Nicolas Scepi
+  Univ. Grenoble Alpes, CNRS, IPAG, 38000 Grenoble, France
+
 ----------------------------------------
 
 .. toctree::
