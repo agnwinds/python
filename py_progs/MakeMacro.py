@@ -9,10 +9,12 @@ can be used as the basis for creating macro-atom models of various ions
 
 Command line usage (if any):
 
-    usage: MakeHMacro.py ion_name nlevels  
+    usage: MakeHMacro.py ion_name nlevels [True] 
 
     where the ion name is in Chianti notation, e.g c_4 for C IV, fe_25 for Fe XXV and
     nlevels is the number of energy levels to include in the model
+
+    and the optional True implies this is the top ion to include.  
     
     *Changes as per 27/08/20
     
@@ -1007,5 +1009,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         doit(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 4:
+        if sys.argv[3]=='True':
+            sys.argv[3]=True
+        doit(sys.argv[1], sys.argv[2],sys.argv[3])
     else:
         print(__doc__)

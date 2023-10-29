@@ -68,8 +68,9 @@ atomicdata2file ()
   for (n = 0; n < nions; n++)
   {
     fprintf (fptr,
-             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  phot_info %3d\n",
-             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].phot_info);
+             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  macro_info %2d phot_info %3d ntop %2d \n",
+             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].macro_info,
+             ion[n].phot_info, ion[n].ntop);
   }
 
   /* Write the excitation level data */
@@ -779,7 +780,7 @@ upsilon (n_coll, u0)
  **********************************************************/
 
 void
-skiplines (FILE * fptr, int nskip)
+skiplines (FILE *fptr, int nskip)
 {
   int i, c;
 
