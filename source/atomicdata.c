@@ -918,7 +918,7 @@ described as macro-levels. */
           {
             // It's a Macro atom entry - similar format to TOPBASE - see below (SS)
             sscanf (aline, "%*s %d %d %d %d %le %d \n", &z, &istate, &levl, &levu, &exx, &np);
-            Log ("Get_atomic_data:PhotMacS  %d %d %d %d %le %d Start\n", z, istate, levl, levu, exx, np);
+            Log_silent ("Get_atomic_data:PhotMacS  %d %d %d %d %le %d Start\n", z, istate, levl, levu, exx, np);
             islp = -1;
             ilv = -1;
 
@@ -947,22 +947,18 @@ described as macro-levels. */
             while ((xconfig[n].z != z || xconfig[n].istate != (istate + 1)      //note that the upper config will (SS)
                     || xconfig[n].ilv != levu) && n < nlevels)
             {                   //be the next ion up (istate +1) (SS)
-              if (z == 7)
-              {
-                Log ("xxx %d %d %d %d %d %d %d\n", xconfig[n].z, z, xconfig[n].istate, (istate + 1), xconfig[n].ilv, levu, n);
-              }
               n++;
             }
 
             if (n == nlevels)
             {
-              Log ("Get_atomic_data: PhotMacS No configuration found to match upper state for phot. line %d\n", lineno);
+              Log_silent ("Get_atomic_data: PhotMacS No configuration found to match upper state for phot. line %d\n", lineno);
               break;            //Need to match the configuration for macro atoms - break if not found.
             }
             else
             {
-              Log ("Get_atomic_data: PhotMacS Matched upper level configuration  %d %d %d %d %d %d %d\n", xconfig[n].z, z,
-                   xconfig[n].istate, (istate + 1), xconfig[n].ilv, levu, n);
+              Log_silent ("Get_atomic_data: PhotMacS Matched upper level configuration  %d %d %d %d %d %d %d\n", xconfig[n].z, z,
+                          xconfig[n].istate, (istate + 1), xconfig[n].ilv, levu, n);
             }
 
 
@@ -973,12 +969,12 @@ described as macro-levels. */
               m++;
             if (m == nlevels)
             {
-              Log ("Get_atomic_data: PhotMacS No configuration found to match lower state (%d) for phot. line %d\n", levl, lineno);
+              Log_silent ("Get_atomic_data: PhotMacS No configuration found to match lower state (%d) for phot. line %d\n", levl, lineno);
               break;            //Need to match the configuration for macro atoms - break if not found.
             }
             else
             {
-              Log ("Get_atomic_data: PhotMacS Matched lower level configuration (%d) for phot. line %d\n", levl, lineno);
+              Log_silent ("Get_atomic_data: PhotMacS Matched lower level configuration (%d) for phot. line %d\n", levl, lineno);
             }
 
             // Populate upper state info
@@ -1029,7 +1025,7 @@ described as macro-levels. */
             ion[xconfig[m].nion].ntop++;
 
             // Finish up this section by storing the photionization data properly
-            Log ("Get_atomic_data:PhotMacS  %d %d %d %d %le %d   Success\n", z, istate, levl, levu, exx, np);
+            Log_silent ("Get_atomic_data:PhotMacS  %d %d %d %d %le %d   Success\n", z, istate, levl, levu, exx, np);
 
             for (n = 0; n < np; n++)
             {
@@ -1043,7 +1039,6 @@ described as macro-levels. */
             ntop_phot_macro++;
             ntop_phot++;
             nphot_total++;
-            Log ("Completed macro x-section %d %d %d\n", ntop_phot, ntop_phot_macro, nphot_total);
 
             if (nphot_total > NTOP_PHOT)
             {
@@ -2759,16 +2754,14 @@ or zero so that simple checks of true and false can be used for them */
 
   if (geo.ioniz_mode > 4)       //Only do this check if we are requiring an ionization mode that needs PI rates
   {
-    Error ("xxx start %d\n", nions);
     for (n = 0; n < nions; n++)
     {
-      Error ("xxx %d phot_info %d < 0 ion.istate %d != ion[n].z+1 %d\n", n, ion[n].phot_info, ion[n].istate, ion[n].z + 1);
       if (ion[n].phot_info < 0 && ion[n].istate != ion[n].z + 1)
       {
-        Error ("There is no PI rate associated with ion %d (element %d ion %d) - use a simpler ionization scheme or add PI rates\n", n,
-               ion[n].z, ion[n].istate);
-        atomicdata2file ();
-        exit (0);
+        Error
+          ("There is no PI rate associated with ion %d (element %d ion %d) - add PI rates and check that uppper level/ion is included in level population\n",
+           n, ion[n].z, ion[n].istate);
+        ierr = 1;
       }
     }
   }
