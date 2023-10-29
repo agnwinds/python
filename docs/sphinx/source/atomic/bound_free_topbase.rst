@@ -80,8 +80,28 @@ The items that must match are:
 - the upper level, which will be a level in the next ion (ilv)
 - the lower level, which will be in the ion that is being photoionized
 
+
 Comments
 ========
+
+**The upper level in the MacroAtom case**
+
+A common error that creates problems in reading in photoionization x-sections in the MacroAtom case is not to include the next ion up, partiulary the bare ion. If one encounters errors where the upper level is
+not found, one should check the level file to verify that that the upper level ion is present, and that the inputs allow for the existence of at least the first level
+of that ion.
+
+For example, if one wishes to read in photoionization x-sections for N VII (hydrogenic), the levels file should include lines like::
+
+    IonM    N   7   7   2  667.05100 1000   5     1s(2S_{1/2})
+    IonM    N   7   8   1 1.0000e+20   1   1     Bare
+
+The following is incorect::
+
+    IonM    N   7   7   2  667.05100 1000   5     1s(2S_{1/2})
+    IonM    N   7   8   1 1.0000e+20   0   0     Bare
+
+because although the bare ion is present, the maximum number of levels is set to 0.   This is not an issue for the simple atom case.
+
 
 **Extrapolation to higher energies**
 
