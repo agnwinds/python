@@ -917,7 +917,8 @@ described as macro-levels. */
           if (strncmp (word, "PhotMacS", 8) == 0)
           {
             // It's a Macro atom entry - similar format to TOPBASE - see below (SS)
-            sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate, &levl, &levu, &exx, &np);
+            sscanf (aline, "%*s %d %d %d %d %le %d \n", &z, &istate, &levl, &levu, &exx, &np);
+            Log_silent ("Get_atomic_data:PhotMacS  %d %d %d %d %le %d Start\n", z, istate, levl, levu, exx, np);
             islp = -1;
             ilv = -1;
 
@@ -944,12 +945,20 @@ described as macro-levels. */
             // Locate upper state
             n = 0;
             while ((xconfig[n].z != z || xconfig[n].istate != (istate + 1)      //note that the upper config will (SS)
-                    || xconfig[n].ilv != levu) && n < nlevels)  //be the next ion up (istate +1) (SS)
+                    || xconfig[n].ilv != levu) && n < nlevels)
+            {                   //be the next ion up (istate +1) (SS)
               n++;
+            }
+
             if (n == nlevels)
             {
-              Error_silent ("get_atomic_data: No configuration found to match upper state for phot. line %d\n", lineno);
+              Log_silent ("Get_atomic_data: PhotMacS No configuration found to match upper state for phot. line %d\n", lineno);
               break;            //Need to match the configuration for macro atoms - break if not found.
+            }
+            else
+            {
+              Log_silent ("Get_atomic_data: PhotMacS Matched upper level configuration  %d %d %d %d %d %d %d\n", xconfig[n].z, z,
+                          xconfig[n].istate, (istate + 1), xconfig[n].ilv, levu, n);
             }
 
 
@@ -960,8 +969,12 @@ described as macro-levels. */
               m++;
             if (m == nlevels)
             {
-              Error_silent ("get_atomic_data: No configuration found to match lower state for phot. line %d\n", lineno);
+              Log_silent ("Get_atomic_data: PhotMacS No configuration found to match lower state (%d) for phot. line %d\n", levl, lineno);
               break;            //Need to match the configuration for macro atoms - break if not found.
+            }
+            else
+            {
+              Log_silent ("Get_atomic_data: PhotMacS Matched lower level configuration (%d) for phot. line %d\n", levl, lineno);
             }
 
             // Populate upper state info
@@ -971,7 +984,7 @@ described as macro-levels. */
             xconfig[n].n_bfd_jump += 1; //note that there is one more downwards bf jump available (SS)
             if (xconfig[n].n_bfd_jump > NBFJUMPS)
             {
-              Error ("get_atomic_data: Too many downward b-f jump for ion %d\n", xconfig[n].istate);
+              Error ("get_atomic_data: PhotMacS Too many downward b-f jump for ion %d\n", xconfig[n].istate);
               exit (0);
             }
 
@@ -983,7 +996,7 @@ described as macro-levels. */
             xconfig[m].n_bfu_jump += 1; //note that there is one more upwards bf jump available (SS)
             if (xconfig[m].n_bfu_jump > NBFJUMPS)
             {
-              Error ("get_atomic_data: Too many upward b-f jump for ion %d\n", xconfig[m].istate);
+              Error ("get_atomic_data: PhotMacS Too many upward b-f jump for ion %d\n", xconfig[m].istate);
               exit (0);
             }
 
@@ -1012,6 +1025,7 @@ described as macro-levels. */
             ion[xconfig[m].nion].ntop++;
 
             // Finish up this section by storing the photionization data properly
+            Log_silent ("Get_atomic_data:PhotMacS  %d %d %d %d %le %d   Success\n", z, istate, levl, levu, exx, np);
 
             for (n = 0; n < np; n++)
             {
@@ -1033,8 +1047,6 @@ described as macro-levels. */
             }
             break;
           }
-
-
 
           else if (strncmp (word, "PhotTopS", 8) == 0)
           {
@@ -1752,6 +1764,7 @@ would like to have simple lines for macro-ions */
                 break;
               }
 
+              atomicdata2file ();
               if (ion[n].macro_info == -1 && mflag == 1)
               {
                 Error ("Getatomic_data: Macro Atom line data supplied for ion %d\n but there is no suitable level data\n", n);
@@ -2612,7 +2625,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   for (n = 0; n < NIONS; n++)
   {
     if (simple_line_ignore[n] > 0)
-      Error ("Ignored %d simple lines for macro-ion %d\n", simple_line_ignore[n], n);
+      Error ("Ignored %d simple lines for macro-ion %d  (z %d ion %d) \n", simple_line_ignore[n], n, ion[n].z, ion[n].istate);
   }
   /* report ignored collision strengths */
   if (cstren_no_line > 0)
@@ -2745,9 +2758,10 @@ or zero so that simple checks of true and false can be used for them */
     {
       if (ion[n].phot_info < 0 && ion[n].istate != ion[n].z + 1)
       {
-        Error ("There is no PI rate associated with ion %d (element %d ion %d) - use a simpler ionization scheme or add PI rates\n", n,
-               ion[n].z, ion[n].istate);
-        exit (0);
+        Error
+          ("There is no PI rate associated with ion %d (element %d ion %d) - add PI rates and check that uppper level/ion is included in level population\n",
+           n, ion[n].z, ion[n].istate);
+        ierr = 1;
       }
     }
   }

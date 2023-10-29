@@ -109,13 +109,9 @@ typedef struct ions
   int nlte;                     /**<  Actual number of nlte levels for this ion */
   int phot_info;                /**< 
                                   ** -1 means there are no photoionization cross sections for this ion, 
-				  
                                   ** 0  means the photoionization is given on an ion basis (e.g. for the 
-				  
                                   ** ground state using VFKY and the xphot structure
-				  
                                   ** 1 means photoionization is given on a level basis, using topbase value
-                                  
                                   ** Topbase photoinization trumps VFKY photoionization
 				  */
   int macro_info;               /**< Identifies whether ion is to be treated using a Macro Atom approach.
@@ -317,7 +313,7 @@ extern int nxphot;                     /**< The actual number of ions for which 
 extern double phot_freq_min;           /**< The lowest frequency for which photoionization can occur */
 extern double inner_freq_min;          /**< The lowest frequency for which inner shell ionization can take place */
 
-#define NCROSS 2000             /**<  Maximum number of x-sections for a single photionization process */
+#define NCROSS 3000            /**<  Maximum number of x-sections for a single photionization process */
 #define NTOP_PHOT 400           /**<  Maximum number of photoionisation processes.  */
 /* AUGER NOTE: recommended to increase NTOP_PHOT to 1000 for Auger macro-atoms */
 extern int ntop_phot;                  /**<  The actual number of TopBase photoionzation x-sections */
