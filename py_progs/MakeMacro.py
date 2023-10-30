@@ -831,6 +831,7 @@ def get_collisions(ion="h_1", nlev=20):
     )
 
     print(xtab)
+    xtab=xtab[xtab['ttype']<5]
 
     npossible = 0
     for one in xtab:

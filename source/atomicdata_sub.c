@@ -703,7 +703,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
 
@@ -733,7 +733,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
   return (upsilon);
