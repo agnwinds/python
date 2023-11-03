@@ -62,6 +62,7 @@ import ChiantiPy.core as ch
 import numpy as np
 from astropy.table import Table, join
 from astropy.io import ascii
+import RedoPhot
 
 
 # The levels format looks like
@@ -999,6 +1000,7 @@ def doit(atom="h_1", nlev=10, next_ion = False):
     get_phot(atom)
     make_phot(atom)
     write_phot(atom)
+    RedoPhot.redo_one('%s_phot.dat' % atom, atom)
 
     xcol = get_collisions(atom, nlev)
     return
