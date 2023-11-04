@@ -243,6 +243,10 @@ structure does not have this property! */
           choice = 'c';         /* ! are also treated as  a comment */
         else if (strncmp (word, "#", 1) == 0)
           choice = 'c';         /* # is treated as  a comment */
+        else if (strncmp (word, "-", 1) == 0)
+          choice = 'c';         /* # is treated as  a comment */
+        else if (strncmp (word, "Dtype", 5) == 0)
+          choice = 'c';         /* # is treated as  a comment */
         else if (strncmp (word, "CSTREN", 6) == 0)
           choice = 'C';         /* It's a collision strength line */
         else if (strncmp (word, "Element", 5) == 0)
@@ -2558,6 +2562,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
         case 'c':              /* It was a comment line so do nothing */
           break;
         case 'z':
+
         default:
           Error ("get_atomicdata: (Case default) Could not interpret line %d in file %s: %s %d \n", lineno, file, aline, LINELENGTH);
           break;
