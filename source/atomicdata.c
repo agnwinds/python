@@ -234,6 +234,8 @@ structure does not have this property! */
       {
         lineno++;
 
+        Log ("0  %s", aline);
+
         strcpy (word, "");      /*For reasons which are not clear, word needs to be reinitialized every time to
                                    properly deal with blank lines */
 
@@ -2473,6 +2475,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
  *		  */
 
         case 'C':
+          Log ("A  %s", aline);
           nparam =
             (sscanf
              (aline,
@@ -2512,10 +2515,12 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               //We now read in two lines of fitting data
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {
-                Error ("Get_atomic_data: Problem reading collision strength record\n");
+                Error ("Get_atomic_data: Problem reading collision strength record 2\n");
                 Error ("Get_atomic_data: %s\n", aline);
-                exit (0);
+                Exit (0);
+                //exit (0);
               }
+              Log ("B  %s", aline);
 
               /* JM 1709 -- increased number of entries read up to max of 20 */
               nparam =
@@ -2532,10 +2537,12 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               }
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {
-                Error ("Get_atomic_data: Problem reading collision strength record\n");
+                Error ("Get_atomic_data: Problem reading collision strength record 3\n");
                 Error ("Get_atomic_data: %s\n", aline);
                 exit (0);
               }
+
+              Log ("C  %s", aline);
 
               nparam =
                 sscanf (aline,
