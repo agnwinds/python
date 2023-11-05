@@ -225,7 +225,7 @@ structure does not have this property! */
         exit (1);
       }
 
-      Log_silent ("Get_atomic_data: Reading data from %s\n", atomic_file);
+      Log_silent ("Get_atomic_data: Reading data from %s\n", file);
       lineno = 1;
 
       /* Main loop for reading each data file line by line */
@@ -2475,7 +2475,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
  *		  */
 
         case 'C':
-          Log ("A  %s", aline);
+          Log ("A  %d %s", lineno, aline);
           nparam =
             (sscanf
              (aline,
@@ -2513,14 +2513,15 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               line[n].coll_index = n_coll_stren;        //point the line to its matching collision strength
 
               //We now read in two lines of fitting data
+              lineno++;
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {
-                Error ("Get_atomic_data: Problem reading collision strength record 2\n");
+                Error ("Get_atomic_data: Problem reading collision strength record 2 in line %d of %s\n", lineno, file);
                 Error ("Get_atomic_data: %s\n", aline);
                 Exit (0);
                 //exit (0);
               }
-              Log ("B  %s", aline);
+              Log ("B  %d %s", lineno, aline);
 
               /* JM 1709 -- increased number of entries read up to max of 20 */
               nparam =
@@ -2535,14 +2536,15 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               {
                 coll_stren[n_coll_stren].sct[nn] = temp[nn];
               }
+              lineno++;
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {
-                Error ("Get_atomic_data: Problem reading collision strength record 3\n");
+                Error ("Get_atomic_data: Problem reading collision strength record 3 in line %d of %s\n", lineno, file);
                 Error ("Get_atomic_data: %s\n", aline);
                 exit (0);
               }
 
-              Log ("C  %s", aline);
+              Log ("C  %d %s", lineno, aline);
 
               nparam =
                 sscanf (aline,
@@ -2561,8 +2563,10 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
           }
           if (match == 0)       //Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
           {
+            Log ("Skpping lines\n");
             skiplines (fptr, 2);
             cstren_no_line++;
+            lineno += 2;
           }
           break;
 
