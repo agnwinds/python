@@ -234,7 +234,7 @@ structure does not have this property! */
       {
         lineno++;
 
-        Log ("0  %s", aline);
+        Log ("0  %d %s", lineno, aline);
 
         strcpy (word, "");      /*For reasons which are not clear, word needs to be reinitialized every time to
                                    properly deal with blank lines */
@@ -2512,7 +2512,9 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 
               line[n].coll_index = n_coll_stren;        //point the line to its matching collision strength
 
+
               //We now read in two lines of fitting data
+              Log ("About to read B\n");
               lineno++;
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {

@@ -215,7 +215,7 @@ def write_phot_tab(out_name,xsum,xcross):
     i=0
     while i<len(xsum):
         one=xsum[i]
-        string='%s %2d %2d %2d %d %12.4f %4d' % (one['Label'],one['z'],one['ion'],one['ll'],one['ul'],one['e_thresh'],len(xcross[i]))
+        string='%s %2d %2d %2d %d %12.6f %4d' % (one['Label'],one['z'],one['ion'],one['ll'],one['ul'],one['e_thresh'],len(xcross[i]))
         # print(string)
         f.write('%s\n' % string)
         for one_x in xcross[i]:

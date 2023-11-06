@@ -380,6 +380,8 @@ def get_lines(ion="h_4", nlevels=10):
     # Check for lines that have a Wavelength of 0 and if tis happens fix the
     # wavelegnth using el and eu, but issue a warning when you do this
 
+    f_min=0.000001
+
     for one in xxtab:
         if one["Wave"] == 0:
             one["Wave"] = 12396.1914 / (one["eu"] - one["el"])
@@ -387,8 +389,12 @@ def get_lines(ion="h_4", nlevels=10):
                 "Line with ll %d and ul %d is missing wavelength.  Correcting to %.3f using el and eu"
                 % (one["ll"], one["ul"], one["Wave"])
             )
+        if one["f"]==0:
+            one['f']=f_min
+            print("Line with ll %d and ul %d is missing f.  Changing to %.6f so line has way out" 
+                  % (one["ll"], one["ul"],one["f"]))
 
-    xxtab["Wave"].format = "10.3f"
+    xxtab["Wave"].format = "10.6f"
     xxxtab = xxtab["Dtype", "z", "ion", "Wave", "f", "gl", "gu", "el", "eu", "ll", "ul"]
     return xxxtab
 
