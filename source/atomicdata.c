@@ -24,7 +24,7 @@
 #ifdef LINELENGTH
 #undef LINELENGTH
 #endif
-#define LINELENGTH 400
+#define LINELENGTH 500
 
 
 #define MAXWORDS    20
@@ -97,7 +97,6 @@ int
 get_atomic_data (masterfile)
      char masterfile[];
 {
-  int match;
   FILE *fptr, *mptr;
   char aline[LINELENGTH];
   char bline[LINELENGTH];
@@ -122,7 +121,7 @@ get_atomic_data (masterfile)
   int levl, levu;
   int in, il;                   //The levels used in inner shell data
   double q;
-  double freq, f, exx, et, p;
+  double wave, freq, f, exx, et, p;
   double the_ground_frac[20];
   double auger_branches[NAUGER_ELECTRONS];      /* array to hold branching ratios for number of Auger electrons */
   double Avalue_auger;          /* Auger A value for macro-atom data */
@@ -163,6 +162,7 @@ get_atomic_data (masterfile)
   int z2, istate2;
   double delta_E_ovr_k;
   int ierr;
+  double dlambda;
 
 
   /* Initialize the atomic data structures and various counters */
@@ -236,7 +236,7 @@ structure does not have this property! */
       {
         lineno++;
 
-        Log ("0  %d %s", lineno, aline);
+        Debug ("0  %d %s", lineno, aline);
 
         strcpy (word, "");      /*For reasons which are not clear, word needs to be reinitialized every time to
                                    properly deal with blank lines */
@@ -1665,7 +1665,7 @@ described as macro-levels. */
               n++;
             if (n == nlevels)
             {
-              Error_silent ("Get_atomic_data: No configuration found to match lower level of line %d\n", lineno);
+              Error_silent ("Get_atomic_data: LinMacro No configuration found to match lower level of line %d\n", lineno);
               break;
             }
 
@@ -1675,7 +1675,7 @@ described as macro-levels. */
               m++;
             if (m == nlevels)
             {
-              Error_silent ("Get_atomic_data: No configuration found to match upper level of line %d\n", lineno);
+              Error_silent ("Get_atomic_data: LinMacro No configuration found to match upper level of line %d\n", lineno);
               break;
             }
 
@@ -2478,21 +2478,43 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 
         case 'C':
           Debug ("A  %d %s", lineno, aline);
+          lineno++;
+          if (fgets (bline, LINELENGTH, fptr) == NULL)
+          {
+            Error ("Get_atomic_data: Problem reading collision strength record 2 in line %d of %s\n", lineno, file);
+            Error ("Get_atomic_data: %s\n", aline);
+            Exit (0);
+            //exit (0);
+          }
+          Debug ("B  %d %s", lineno, aline);
+          lineno++;
+          if (fgets (cline, LINELENGTH, fptr) == NULL)
+          {
+            Error ("Get_atomic_data: Problem reading collision strength record 2 in line %d of %s\n", lineno, file);
+            Error ("Get_atomic_data: %s\n", aline);
+            Exit (0);
+            //exit (0);
+          }
+          Debug ("C  %d %s", lineno, aline);
+
+          /* Finished reading the data for a collision strength */
+
           nparam =
             (sscanf
              (aline,
               "%*s %*s %d %2d %le %le %le %le %le %le %d %d %d %d %le %le %le %d %d %le",
-              &z, &istate, &freq, &f, &gl, &gu, &el, &eu, &levl, &levu, &c_l, &c_u, &en, &gf, &hlt, &np, &type, &sp));
+              &z, &istate, &wave, &f, &gl, &gu, &el, &eu, &levl, &levu, &c_l, &c_u, &en, &gf, &hlt, &np, &type, &sp));
           if (nparam != 18)
           {
             Error ("Get_atomic_data: file %s line %d: Collision strength line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
             exit (0);
           }
-          match = 0;
           for (n = 0; n < nlines; n++)  //loop over all the lines we have read in - look for a match
           {
-            if (line[n].z == z && line[n].istate == istate
+            dlambda = fabs (wave - VLIGHT * 1e8 / line[n].freq);
+
+            if (line[n].z == z && line[n].istate == istate && dlambda < 2e-6
                 && line[n].levl == levl && line[n].levu == levu && line[n].gl == gl && line[n].gu == gu && line[n].f == f)
             {
               if (line[n].coll_index > -1)      //We already have a collision strength record from this line - throw an error and quit
@@ -2501,7 +2523,17 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
                 Error ("Get_atomic_data: %s\n", aline);
                 exit (0);
               }
-              match = 1;
+
+
+              /* The number of allowd entries in atomic.h needs to be greater than the number one is trying to read in. 
+               * If this needs to be increased be sure to modify the scanf line below
+               */
+              if (np > N_COLL_STREN_PTS)
+              {
+                Error ("Get_atomic_data: np %d > %d N_COLL_STREN_PTS in file %s line %d\n", np, N_COLL_STREN_PTS, file, lineno);
+                np = N_COLL_STREN_PTS;
+              }
+
               coll_stren[n_coll_stren].n = n_coll_stren;
               coll_stren[n_coll_stren].lower = c_l;
               coll_stren[n_coll_stren].upper = c_u;
@@ -2514,22 +2546,8 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 
               line[n].coll_index = n_coll_stren;        //point the line to its matching collision strength
 
-
-              //We now read in two lines of fitting data
-              Debug ("About to read B\n");
-              lineno++;
-              if (fgets (aline, LINELENGTH, fptr) == NULL)
-              {
-                Error ("Get_atomic_data: Problem reading collision strength record 2 in line %d of %s\n", lineno, file);
-                Error ("Get_atomic_data: %s\n", aline);
-                Exit (0);
-                //exit (0);
-              }
-              Debug ("B  %d %s", lineno, aline);
-
-              /* JM 1709 -- increased number of entries read up to max of 20 */
               nparam =
-                sscanf (aline,
+                sscanf (bline,
                         "%*s %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le",
                         &temp[0], &temp[1], &temp[2], &temp[3],
                         &temp[4], &temp[5], &temp[6], &temp[7],
@@ -2540,18 +2558,9 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               {
                 coll_stren[n_coll_stren].sct[nn] = temp[nn];
               }
-              lineno++;
-              if (fgets (aline, LINELENGTH, fptr) == NULL)
-              {
-                Error ("Get_atomic_data: Problem reading collision strength record 3 in line %d of %s\n", lineno, file);
-                Error ("Get_atomic_data: %s\n", aline);
-                exit (0);
-              }
-
-              Debug ("C  %d %s", lineno, aline);
 
               nparam =
-                sscanf (aline,
+                sscanf (cline,
                         "%*s %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le",
                         &temp[0], &temp[1], &temp[2], &temp[3],
                         &temp[4], &temp[5], &temp[6], &temp[7],
@@ -2564,13 +2573,6 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
               }
               n_coll_stren++;
             }
-          }
-          if (match == 0)       //Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
-          {
-            Debug ("Skpping lines\n");
-            skiplines (fptr, 2);
-            cstren_no_line++;
-            lineno += 2;
           }
           break;
 
@@ -2623,21 +2625,21 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   Log
     ("Simple  %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
      nelements, nions_simple, nlevels_simple, nlines_simple, ntop_phot_simple);
-  Log ("We have read in %3d photoionization cross sections\n", nphot_total);
-  Log ("                %3d are topbase \n", ntop_phot);
-  Log ("                %3d are VFKY \n", nxphot);
+  Log ("We have read in %5d photoionization cross sections\n", nphot_total);
+  Log ("                %5d are topbase \n", ntop_phot);
+  Log ("                %5d are VFKY \n", nxphot);
   Log ("We have read in %5d   Chiantic collision strengths\n", n_coll_stren);   //1701 nsh collision strengths
-  Log ("We have read in %3d Inner shell photoionization cross sections\n", n_inner_tot);        //110818 nsh added a reporting line about dielectronic recombination coefficients
-  Log ("                %3d have matching electron yield data\n", n_elec_yield_tot);
-//  Log ("                %3d have matching fluorescent yield data\n", n_fluor_yield_tot);
-  Log ("We have read in %3d Auger ionization records for macro-atoms\n", nauger_macro);
+  Log ("We have read in %5d Inner shell photoionization cross sections\n", n_inner_tot);        //110818 nsh added a reporting line about dielectronic recombination coefficients
+  Log ("                %5d have matching electron yield data\n", n_elec_yield_tot);
+//  Log ("                %5d have matching fluorescent yield data\n", n_fluor_yield_tot);
+  Log ("We have read in %5d Auger ionization records for macro-atoms\n", nauger_macro);
 
 
-  Log ("We have read in %3d Dielectronic recombination coefficients\n", ndrecomb);      //110818 nsh added a reporting line about dielectronic recombination coefficients
-  Log ("We have read in %3d Badnell totl Radiative rate coefficients\n", n_total_rr);
-  Log ("We have read in %3d Badnell GS   Radiative rate coefficients over the temp range %e to %e\n", n_bad_gs_rr, gstmin, gstmax);
-  Log ("We have read in %3d Scaled electron temperature frequency averaged gaunt factors\n", gaunt_n_gsqrd);
-  Log ("We have read in %3d Charge exchange rates\n", n_charge_exchange);
+  Log ("We have read in %5d Dielectronic recombination coefficients\n", ndrecomb);      //110818 nsh added a reporting line about dielectronic recombination coefficients
+  Log ("We have read in %5d Badnell totl Radiative rate coefficients\n", n_total_rr);
+  Log ("We have read in %5d Badnell GS   Radiative rate coefficients over the temp range %e to %e\n", n_bad_gs_rr, gstmin, gstmax);
+  Log ("We have read in %5d Scaled electron temperature frequency averaged gaunt factors\n", gaunt_n_gsqrd);
+  Log ("We have read in %5d Charge exchange rates\n", n_charge_exchange);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
   Log ("The minimum frequency for inner shell ionization is %8.2e\n", inner_freq_min);
 
@@ -2645,7 +2647,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
   for (n = 0; n < NIONS; n++)
   {
     if (simple_line_ignore[n] > 0)
-      Error ("Ignored %d simple lines for macro-ion %d  (z %d ion %d) \n", simple_line_ignore[n], n, ion[n].z, ion[n].istate);
+      Error ("Ignored %5d simple lines for macro-ion %5d  (z %5d ion %5d) \n", simple_line_ignore[n], n, ion[n].z, ion[n].istate);
   }
   /* report ignored collision strengths */
   if (cstren_no_line > 0)
@@ -2701,8 +2703,9 @@ exit if there is an element with no ions */
     if (ele[nelem].firstion == nions)
     {
       ele[nelem].firstion = -1; /* There were no ions for this element */
-// In principle, there might be a program which uses elements but not ions, but it seems unlikely,
-// therefore stop if there is not at least one ion for each element
+      /* In principle, there might be a program which uses elements but not ions, but it seems unlikely,
+         therefore stop if there is not at least one ion for each element
+       */
       Error ("Get_atomic_data: There were no ions for element %d %s\n", nelem, ele[nelem].name);
       exit (0);
     }
@@ -2715,7 +2718,7 @@ a total emission oscillator strength for the level....really ought to be radiati
 
 /* This next loop is connects levels to configurations for "simple atoms".
  For Macro Atoms files, the data files already contain this infomration and
- so the check is avoided by checking tte macro_info flag SS
+ so the check is avoided by checking the macro_info flag SS
 */
 
   ierr = 0;
