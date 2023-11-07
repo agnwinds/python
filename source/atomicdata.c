@@ -98,9 +98,11 @@ get_atomic_data (masterfile)
      char masterfile[];
 {
   int match;
-  FILE *fptr, *mptr;            //, fopen ();
-  char aline[LINELENGTH];       //, *fgets ();
-  char file[LINELENGTH], atomic_file[LINELENGTH];
+  FILE *fptr, *mptr;
+  char aline[LINELENGTH];
+  char bline[LINELENGTH];
+  char cline[LINELENGTH];
+  char file[LINELENGTH];
 
   char word[LINELENGTH];
   int n, m, i, j;
@@ -2475,7 +2477,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
  *		  */
 
         case 'C':
-          Log ("A  %d %s", lineno, aline);
+          Debug ("A  %d %s", lineno, aline);
           nparam =
             (sscanf
              (aline,
@@ -2514,7 +2516,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
 
 
               //We now read in two lines of fitting data
-              Log ("About to read B\n");
+              Debug ("About to read B\n");
               lineno++;
               if (fgets (aline, LINELENGTH, fptr) == NULL)
               {
@@ -2523,7 +2525,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
                 Exit (0);
                 //exit (0);
               }
-              Log ("B  %d %s", lineno, aline);
+              Debug ("B  %d %s", lineno, aline);
 
               /* JM 1709 -- increased number of entries read up to max of 20 */
               nparam =
@@ -2546,7 +2548,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
                 exit (0);
               }
 
-              Log ("C  %d %s", lineno, aline);
+              Debug ("C  %d %s", lineno, aline);
 
               nparam =
                 sscanf (aline,
@@ -2565,7 +2567,7 @@ SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
           }
           if (match == 0)       //Fix for an error where a line match isn't found - this then causes the next two lines to be skipped
           {
-            Log ("Skpping lines\n");
+            Debug ("Skpping lines\n");
             skiplines (fptr, 2);
             cstren_no_line++;
             lineno += 2;
