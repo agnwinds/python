@@ -1194,35 +1194,13 @@ WindPtr (w);
 }
 
 
-
-
-/**********************************************************/
-/**
- * @brief      zeros those portions of the wind which contain the radiation properties
- * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
- * 	wind has been changed or when you simply want to start off a calculation in a known state
- *
- * @return    Always returns 0
- *
- * @details
- * The routine is called at the beginning of each ionization calculation
- * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
- * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
- * cooling terms are also rezeroed there as well.
- *
- * ### Notes ###
- *
- **********************************************************/
-
 int
-wind_rad_init ()
+init_plasma (const int n_cells, const int n_start, const int n_stop)
 {
-  int n, i;
-  int njump;
-  double alpha_store;
+  int i;
+  int n;
 
-
-  for (n = 0; n < NPLASMA; n++)
+  for (n = n_start; n < n_stop; ++n)
   {
     plasmamain[n].j = plasmamain[n].ave_freq = plasmamain[n].ntot = 0;
     plasmamain[n].j_direct = plasmamain[n].j_scatt = 0.0;
@@ -1249,7 +1227,7 @@ wind_rad_init ()
     plasmamain[n].heat_auger = 0.0;
     plasmamain[n].heat_ch_ex = 0.0;
 
-    /* zero the counters that record the flow into and out of the 
+    /* zero the counters that record the flow into and out of the
        ionization pool in indivisible packet mode */
     plasmamain[n].bf_simple_ionpool_out = 0.0;
     plasmamain[n].bf_simple_ionpool_in = 0.0;
@@ -1270,12 +1248,6 @@ wind_rad_init ()
     for (i = 0; i < 4; i++)
       plasmamain[n].rad_force_bf[i] = 0.0;
 
-
-    if (geo.rt_mode == RT_MODE_MACRO)
-    {
-      macromain[n].kpkt_rates_known = FALSE;
-    }
-
 /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell*/
 
     for (i = 0; i < geo.nxfreq; i++)
@@ -1288,7 +1260,7 @@ wind_rad_init ()
 
     for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
     {
-      plasmamain[n].cell_spec_flux[i] = 0;
+      plasmamain[n].cell_spec_flux[i] = 0.0;
     }
 
     for (i = 0; i < 4; i++)
@@ -1316,10 +1288,6 @@ wind_rad_init ()
 
     }
 
-
-
-
-
     for (i = 0; i < nions; i++)
     {
       plasmamain[n].ioniz[i] = plasmamain[n].recomb[i] = plasmamain[n].heat_ion[i] = plasmamain[n].cool_rr_ion[i] =
@@ -1331,75 +1299,156 @@ wind_rad_init ()
       plasmamain[n].inner_ioniz[i] = 0.0;
 
     }
-    /*Block added (Dec 08) to zero the auger rate estimators */
-    /* commented out by NSH 2018 - removed code */
-//    for (i = 0; i < nauger; i++)
-//    {
-//      plasmamain[n].gamma_inshl[i] = 0.0;
-//    }
-
-    /* Zero the Macro Atom estimators. */
-
-
-    for (i = 0; i < nlevels_macro; i++)
-    {
-      for (njump = 0; njump < xconfig[i].n_bbu_jump; njump++)
-      {
-        macromain[n].jbar[xconfig[i].bbu_indx_first + njump] = 0.0;
-      }
-      for (njump = 0; njump < xconfig[i].n_bfu_jump; njump++)
-      {
-        macromain[n].gamma[xconfig[i].bfu_indx_first + njump] = 0.0;
-        macromain[n].gamma_e[xconfig[i].bfu_indx_first + njump] = 0.0;
-        macromain[n].alpha_st[xconfig[i].bfd_indx_first + njump] = 0.0;
-        macromain[n].alpha_st_e[xconfig[i].bfd_indx_first + njump] = 0.0;
-      }
-
-
-      for (njump = 0; njump < xconfig[i].n_bfd_jump; njump++)
-      {
-        if (plasmamain[n].t_e > 1.0)
-        {
-          macromain[n].recomb_sp[xconfig[i].bfd_indx_first + njump] = alpha_sp (&phot_top[xconfig[i].bfd_jump[njump]], &plasmamain[n], 0);
-          macromain[n].recomb_sp_e[xconfig[i].bfd_indx_first + njump] = alpha_sp (&phot_top[xconfig[i].bfd_jump[njump]], &plasmamain[n], 2);
-        }
-        else
-        {
-          macromain[n].recomb_sp[xconfig[i].bfd_indx_first + njump] = 0.0;
-          macromain[n].recomb_sp_e[xconfig[i].bfd_indx_first + njump] = 0.0;
-        }
-
-      }
-    }
-
-
-    for (i = 0; i < ntop_phot; i++)
-    {
-      if ((geo.macro_simple == FALSE && phot_top[i].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
-      {
-        plasmamain[n].recomb_simple[i] = 0.0;
-        plasmamain[n].recomb_simple_upweight[i] = 1.0;
-      }
-      else
-      {                         //we want a macro approach, but not for this ion so need recomb_simple
-        plasmamain[n].recomb_simple[i] = alpha_store = alpha_sp (&phot_top[i], &plasmamain[n], 2);
-        plasmamain[n].recomb_simple_upweight[i] = alpha_sp (&phot_top[i], &plasmamain[n], 1) / alpha_store;
-      }
-    }
-
-
-    plasmamain[n].kpkt_emiss = 0.0;
-    plasmamain[n].kpkt_abs = 0.0;
-    for (i = 0; i < nlevels_macro; i++)
-    {
-      macromain[n].matom_abs[i] = 0.0;
-
-      macromain[n].matom_emiss[i] = 0.0;
-
-    }
 
   }
 
+  return EXIT_SUCCESS;
+}
+
+int
+init_macro (const int n_cells, const int n_start, const int n_stop)
+{
+  int cell;
+  int jump;
+  int top_phot;
+  int macro_level;
+
+  /* We are going to count the number of integers and doubles we are initialising,
+   * we need to know this for MPI communication buffers */
+  int num_ints = 0;
+  int num_doubles = 0;
+  int int_size;
+  int double_size;
+
+  for (cell = n_start; cell < n_stop; ++cell)
+  {
+    if (geo.rt_mode == RT_MODE_MACRO)
+    {
+      macromain[cell].kpkt_rates_known = FALSE;
+    }
+    num_ints += 1;
+
+    plasmamain[cell].kpkt_emiss = 0.0;
+    plasmamain[cell].kpkt_abs = 0.0;
+    num_doubles += 2;
+
+    for (macro_level = 0; macro_level < nlevels_macro; ++macro_level)
+    {
+      macromain[cell].matom_abs[macro_level] = 0.0;
+      macromain[cell].matom_emiss[macro_level] = 0.0;
+
+      for (jump = 0; jump < xconfig[macro_level].n_bbu_jump; ++jump)
+      {
+        macromain[cell].jbar[xconfig[macro_level].bbu_indx_first + jump] = 0.0;
+      }
+      for (jump = 0; jump < xconfig[macro_level].n_bfu_jump; ++jump)
+      {
+        macromain[cell].gamma[xconfig[macro_level].bfu_indx_first + jump] = 0.0;
+        macromain[cell].gamma_e[xconfig[macro_level].bfu_indx_first + jump] = 0.0;
+        macromain[cell].alpha_st[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
+        macromain[cell].alpha_st_e[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
+      }
+      for (jump = 0; jump < xconfig[macro_level].n_bfd_jump; ++jump)
+      {
+        if (plasmamain[cell].t_e > 1.0)
+        {
+          macromain[cell].recomb_sp[xconfig[macro_level].bfd_indx_first + jump] =
+            alpha_sp (&phot_top[xconfig[macro_level].bfd_jump[jump]], &plasmamain[cell], 0);
+          macromain[cell].recomb_sp_e[xconfig[macro_level].bfd_indx_first + jump] =
+            alpha_sp (&phot_top[xconfig[macro_level].bfd_jump[jump]], &plasmamain[cell], 2);
+        }
+        else
+        {
+          macromain[cell].recomb_sp[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
+          macromain[cell].recomb_sp_e[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
+        }
+      }
+      /* This is the number of doubles updated each macro level. Have been kept in
+       * brackets to make it clearer what belongs to what */
+      num_doubles +=
+        (2) + (xconfig[macro_level].n_bbu_jump) + (4 * xconfig[macro_level].n_bfu_jump) + (2 * xconfig[macro_level].n_bfd_jump);
+    }
+
+    for (top_phot = 0; top_phot < ntop_phot; ++top_phot)
+    {
+      if ((geo.macro_simple == FALSE && phot_top[top_phot].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
+      {
+        plasmamain[cell].recomb_simple[top_phot] = 0.0;
+        plasmamain[cell].recomb_simple_upweight[top_phot] = 1.0;
+      }
+      else                      // we want a macro approach, but not for this ion so need recomb_simple instead
+      {
+        const double alpha_store = plasmamain[cell].recomb_simple[top_phot] = alpha_sp (&phot_top[top_phot], &plasmamain[cell], 2);
+        plasmamain[cell].recomb_simple_upweight[top_phot] = alpha_sp (&phot_top[top_phot], &plasmamain[cell], 1) / alpha_store;
+      }
+    }
+  }
+  num_doubles += 2 * ntop_phot; // 2 things changed for each nphot_top index
+
+#ifdef MPI_ON
+  /* Using MPI_Pack_size for safety, incase there is any data alignment required */
+  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &int_size);
+  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
+#else
+  int_size = sizeof (int) * num_ints;
+  double_size = sizeof (double) * num_doubles;
+#endif
+
+  return num_ints + num_doubles;
+}
+
+int
+communicate_initialised_cells (const int n_cells, const int n_start, const int n_stop, const int plasma_buffer_size,
+                               const int macro_buffer_size)
+{
+#ifdef MPI_ON
+#endif
+
+  return EXIT_SUCCESS;
+}
+
+/**********************************************************/
+/**
+ * @brief      zeros those portions of the wind which contain the radiation properties
+ * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
+ * 	wind has been changed or when you simply want to start off a calculation in a known state
+ *
+ * @return    Always returns 0
+ *
+ * @details
+ * The routine is called at the beginning of each ionization calculation
+ * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
+ * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
+ * cooling terms are also rezeroed there as well.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+int
+wind_rad_init ()
+{
+  int n_cells;
+  int n_start;
+  int n_stop;
+
+#ifdef MPI_ON
+  n_cells = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &n_start, &n_stop);
+#else
+  n_start = 0;
+  n_stop = NPLASMA;
+  n_cells = NPLASMA;
+#endif
+
+  const int plasma_buffer_size = init_plasma (n_cells, n_start, n_stop);
+  const int macro_buffer_size = init_macro (n_cells, n_start, n_stop);
+
+  const int error = communicate_initialised_cells (n_cells, n_start, n_stop, plasma_buffer_size, macro_buffer_size);
+  if (error)
+  {
+    Error ("wind_rad_init: error during cell communication");
+    Exit (EXIT_FAILURE);
+  }
 
   return (0);
 }
