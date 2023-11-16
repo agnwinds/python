@@ -147,8 +147,8 @@ int normalise_simple_estimators(PlasmaPtr xplasma);
 int init_log_and_windsave(int restart_stat);
 int setup_created_files(void);
 /* wind_updates2d.c */
-int wind_update(WindPtr (w));
-int wind_rad_init(void);
+int wind_update(WindPtr w);
+void wind_rad_init(void);
 int report_bf_simple_ionpool(void);
 /* windsave.c */
 int wind_save(char filename[]);
@@ -425,6 +425,7 @@ double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
+void set_comp_func_values(double rand_cs, double max_cs, double energy_ratio);
 int compton_dir(PhotPtr p);
 double pdf_thermal(double x, void *params);
 int compton_get_thermal_velocity(double t, double *v);

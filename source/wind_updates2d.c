@@ -53,8 +53,7 @@ int num_updates = 0;
  *
  **********************************************************/
 int
-wind_update (w)
-WindPtr (w);
+wind_update (WindPtr w)
 {
   int n, i, j, ii;
 
@@ -82,7 +81,7 @@ WindPtr (w);
   double c_dr, n_dr, o_dr, fe_dr;
   int my_nmin, my_nmax;         //Note that these variables are still used even without MPI on
   int ndom;
-  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5, *fopen ();        /*This is the file to communicate with zeus */
+  FILE *fptr, *fptr2, *fptr3, *fptr4, *fptr5;   /*This is the file to communicate with zeus */
   double t_opt, t_UV, t_Xray, v_th, fhat[3];    /*This is the dimensionless optical depth parameter computed for communication to rad-hydro. */
   struct photon ptest;          //We need a test photon structure in order to compute t
   double kappa_es;              //The electron scattering opacity used for t
@@ -1193,266 +1192,313 @@ WindPtr (w);
   return (0);
 }
 
+/**********************************************************/
+/**
+ * @brief      zeros those portions of the wind which contain the radiation properties
+ * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
+ * 	wind has been changed or when you simply want to start off a calculation in a known state
+ *
+ * @return    Always returns 0
+ *
+ * @details
+ * The routine is called at the beginning of each ionization calculation
+ * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
+ * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
+ * cooling terms are also rezeroed there as well.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
-int
-init_plasma (const int n_cells, const int n_start, const int n_stop)
+static void
+init_plasma (void)
 {
   int i;
-  int cell;
+  int j;
 
-  /* We are going to count the number of integers and doubles we are initialising,
-   * we need to know this for MPI communication buffers */
-  int num_ints = 0;
-  int num_doubles = 0;
-  int int_size;
-  int double_size;
-
-  for (cell = n_start; cell < n_stop; ++cell)
+  for (i = 0; i < NPLASMA; ++i)
   {
     /* Start by initialising integer fields */
-    plasmamain[cell].j = 0;
-    plasmamain[cell].ave_freq = 0;
-    plasmamain[cell].ntot = 0;
-    plasmamain[cell].n_ds = 0;
-    plasmamain[cell].ntot_disk = 0;
-    plasmamain[cell].ntot_agn = 0;
-    plasmamain[cell].ntot_star = 0;
-    plasmamain[cell].ntot_bl = 0;
-    plasmamain[cell].ntot_wind = 0;
-    plasmamain[cell].nrad = 0;
-    plasmamain[cell].nioniz = 0;
-    for (i = 0; i < nphot_total; i++)
+    plasmamain[i].j = 0;
+    plasmamain[i].ave_freq = 0;
+    plasmamain[i].ntot = 0;
+    plasmamain[i].n_ds = 0;
+    plasmamain[i].ntot_disk = 0;
+    plasmamain[i].ntot_agn = 0;
+    plasmamain[i].ntot_star = 0;
+    plasmamain[i].ntot_bl = 0;
+    plasmamain[i].ntot_wind = 0;
+    plasmamain[i].nrad = 0;
+    plasmamain[i].nioniz = 0;
+    for (j = 0; j < nphot_total; j++)
     {
-      plasmamain[cell].n_bf_in[i] = 0;
-      plasmamain[cell].n_bf_out[i] = 0;
+      plasmamain[i].n_bf_in[j] = 0;
+      plasmamain[i].n_bf_out[j] = 0;
     }
-    num_ints += 11 + (2 * nphot_total);
 
     /* Next we'll initialise the rest of the fields, which are doubles */
-    plasmamain[cell].j_direct = 0.0;
-    plasmamain[cell].j_scatt = 0.0;
-    plasmamain[cell].ip = 0.0;
-    plasmamain[cell].xi = 0.0;
-    plasmamain[cell].ip_direct = 0.0;
-    plasmamain[cell].ip_scatt = 0.0;
-    plasmamain[cell].mean_ds = 0.0;
-    plasmamain[cell].heat_tot = 0.0;
-    plasmamain[cell].heat_ff = 0.0;
-    plasmamain[cell].heat_photo = 0.0;
-    plasmamain[cell].heat_lines = 0.0;
-    plasmamain[cell].abs_tot = 0.0;
-    plasmamain[cell].abs_auger = 0.0;
-    plasmamain[cell].abs_photo = 0.0;
-    plasmamain[cell].heat_z = 0.0;
-    plasmamain[cell].max_freq = 0.0;
-    plasmamain[cell].cool_tot = 0.0;
-    plasmamain[cell].lum_tot = 0.0;
-    plasmamain[cell].lum_lines = 0.0;
-    plasmamain[cell].lum_ff = 0.0;
-    plasmamain[cell].cool_rr = 0.0;
-    plasmamain[cell].cool_rr_metals = 0.0;
-    plasmamain[cell].lum_rr = 0.0;
-    plasmamain[cell].comp_nujnu = -1e99;
-    plasmamain[cell].cool_comp = 0.0;
-    plasmamain[cell].heat_comp = 0.0;
-    plasmamain[cell].heat_ind_comp = 0.0;
-    plasmamain[cell].heat_auger = 0.0;
-    plasmamain[cell].heat_ch_ex = 0.0;
-    plasmamain[cell].bf_simple_ionpool_out = 0.0;
-    plasmamain[cell].bf_simple_ionpool_in = 0.0;
-    num_doubles += 31;
+    plasmamain[i].j_direct = 0.0;
+    plasmamain[i].j_scatt = 0.0;
+    plasmamain[i].ip = 0.0;
+    plasmamain[i].xi = 0.0;
+    plasmamain[i].ip_direct = 0.0;
+    plasmamain[i].ip_scatt = 0.0;
+    plasmamain[i].mean_ds = 0.0;
+    plasmamain[i].heat_tot = 0.0;
+    plasmamain[i].heat_ff = 0.0;
+    plasmamain[i].heat_photo = 0.0;
+    plasmamain[i].heat_lines = 0.0;
+    plasmamain[i].abs_tot = 0.0;
+    plasmamain[i].abs_auger = 0.0;
+    plasmamain[i].abs_photo = 0.0;
+    plasmamain[i].heat_z = 0.0;
+    plasmamain[i].max_freq = 0.0;
+    plasmamain[i].cool_tot = 0.0;
+    plasmamain[i].lum_tot = 0.0;
+    plasmamain[i].lum_lines = 0.0;
+    plasmamain[i].lum_ff = 0.0;
+    plasmamain[i].cool_rr = 0.0;
+    plasmamain[i].cool_rr_metals = 0.0;
+    plasmamain[i].lum_rr = 0.0;
+    plasmamain[i].comp_nujnu = -1e99;
+    plasmamain[i].cool_comp = 0.0;
+    plasmamain[i].heat_comp = 0.0;
+    plasmamain[i].heat_ind_comp = 0.0;
+    plasmamain[i].heat_auger = 0.0;
+    plasmamain[i].heat_ch_ex = 0.0;
+    plasmamain[i].bf_simple_ionpool_out = 0.0;
+    plasmamain[i].bf_simple_ionpool_in = 0.0;
 
-    for (i = 0; i < NUM_RAD_FORCE_DIRECTIONS; i++)
+    for (j = 0; j < NUM_RAD_FORCE_DIRECTIONS; j++)
     {
-      plasmamain[cell].dmo_dt[i] = 0.0;
+      plasmamain[i].dmo_dt[j] = 0.0;
     }
-    num_doubles += NUM_RAD_FORCE_DIRECTIONS;
-    for (i = 0; i < NUM_FORCE_EST_DIRECTIONS; i++)
+    for (j = 0; j < NUM_FORCE_EST_DIRECTIONS; j++)
     {
-      plasmamain[cell].rad_force_es[i] = 0.0;
-      plasmamain[cell].rad_force_ff[i] = 0.0;
-      plasmamain[cell].rad_force_bf[i] = 0.0;
-      plasmamain[cell].F_vis[i] = 0.0;
-      plasmamain[cell].F_UV[i] = 0.0;
-      plasmamain[cell].F_Xray[i] = 0.0;
-      num_doubles += 6;
+      plasmamain[i].rad_force_es[j] = 0.0;
+      plasmamain[i].rad_force_ff[j] = 0.0;
+      plasmamain[i].rad_force_bf[j] = 0.0;
+      plasmamain[i].F_vis[j] = 0.0;
+      plasmamain[i].F_UV[j] = 0.0;
+      plasmamain[i].F_Xray[j] = 0.0;
       if (geo.wcycle == 0)      // Persistent values, so only initialise for first ionisation cycle
       {
-        plasmamain[cell].F_vis_persistent[i] = 0.0;
-        plasmamain[cell].F_UV_persistent[i] = 0.0;
-        plasmamain[cell].F_Xray_persistent[i] = 0.0;
-        plasmamain[cell].rad_force_bf_persist[i] = 0.0;
-        num_doubles += 4;
+        plasmamain[i].F_vis_persistent[j] = 0.0;
+        plasmamain[i].F_UV_persistent[j] = 0.0;
+        plasmamain[i].F_Xray_persistent[j] = 0.0;
+        plasmamain[i].rad_force_bf_persist[j] = 0.0;
       }
     }
-    for (i = 0; i < NFLUX_ANGLES; i++)
+    for (j = 0; j < NFLUX_ANGLES; j++)
     {
       if (geo.wcycle == 0)      // Persistent values, so only initialise for first ionisation cycle
       {
-        plasmamain[cell].F_UV_ang_x_persist[i] = 0.0;
-        plasmamain[cell].F_UV_ang_y_persist[i] = 0.0;
-        plasmamain[cell].F_UV_ang_z_persist[i] = 0.0;
-        num_doubles += 3;
+        plasmamain[i].F_UV_ang_x_persist[j] = 0.0;
+        plasmamain[i].F_UV_ang_y_persist[j] = 0.0;
+        plasmamain[i].F_UV_ang_z_persist[j] = 0.0;
       }
-      plasmamain[cell].F_UV_ang_x[i] = 0.0;
-      plasmamain[cell].F_UV_ang_y[i] = 0.0;
-      plasmamain[cell].F_UV_ang_z[i] = 0.0;
-      num_doubles += 3;
+      plasmamain[i].F_UV_ang_x[j] = 0.0;
+      plasmamain[i].F_UV_ang_y[j] = 0.0;
+      plasmamain[i].F_UV_ang_z[j] = 0.0;
     }
 
-    /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell */
-    for (i = 0; i < NXBANDS; i++)
+    /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each i */
+    for (j = 0; j < NXBANDS; j++)
     {
-      plasmamain[cell].nxtot[i] = 0;
-      plasmamain[cell].xj[i] = 0.0;
-      plasmamain[cell].xave_freq[i] = 0.0;
-      plasmamain[cell].xsd_freq[i] = 0.0;
-      plasmamain[cell].fmin[i] = geo.xfreq[i + 1];      /* Set the minium frequency to the max frequency in the band */
-      plasmamain[cell].fmax[i] = geo.xfreq[i];  /* Set the maximum frequency to the min frequency in the band */
+      plasmamain[i].nxtot[j] = 0;
+      plasmamain[i].xj[j] = 0.0;
+      plasmamain[i].xave_freq[j] = 0.0;
+      plasmamain[i].xsd_freq[j] = 0.0;
+      plasmamain[i].fmin[j] = geo.xfreq[j + 1]; /* Set the minium frequency to the max frequency in the band */
+      plasmamain[i].fmax[j] = geo.xfreq[j];     /* Set the maximum frequency to the min frequency in the band */
     }
-    num_doubles += 6 * NXBANDS;
-    for (i = 0; i < NBINS_IN_CELL_SPEC; ++i)
+    for (j = 0; j < NBINS_IN_CELL_SPEC; ++j)
     {
-      plasmamain[cell].cell_spec_flux[i] = 0.0;
+      plasmamain[i].cell_spec_flux[j] = 0.0;
     }
-    num_doubles += 1 * NBINS_IN_CELL_SPEC;
 
-    for (i = 0; i < nions; i++)
+    for (j = 0; j < nions; j++)
     {
-      plasmamain[cell].ioniz[i] = 0.0;
-      plasmamain[cell].recomb[i] = 0.0;
-      plasmamain[cell].heat_ion[i] = 0.0;
-      plasmamain[cell].cool_rr_ion[i] = 0.0;
-      plasmamain[cell].lum_rr_ion[i] = 0.0;
-      plasmamain[cell].heat_inner_ion[i] = 0.0;
+      plasmamain[i].ioniz[j] = 0.0;
+      plasmamain[i].recomb[j] = 0.0;
+      plasmamain[i].heat_ion[j] = 0.0;
+      plasmamain[i].cool_rr_ion[j] = 0.0;
+      plasmamain[i].lum_rr_ion[j] = 0.0;
+      plasmamain[i].heat_inner_ion[j] = 0.0;
 
     }
-    num_doubles += 6 * nions;
-    for (i = 0; i < n_inner_tot; i++)
+    for (j = 0; j < n_inner_tot; j++)
     {
-      plasmamain[cell].inner_ioniz[i] = 0.0;
+      plasmamain[i].inner_ioniz[j] = 0.0;
     }
-    num_doubles += 1 * n_inner_tot;
   }
-
-#ifdef MPI_ON
-  /* Using MPI_Pack_size for safety, incase there is any data alignment required */
-  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &int_size);
-  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
-#else
-  int_size = sizeof (int) * num_ints;
-  double_size = sizeof (double) * num_doubles;
-#endif
-
-  const int total_size = int_size + double_size;
-  Debug ("init_plasma: require %f MB for communication buffer (%d ints %d doubles)\n", (float) total_size * 1e-6, num_ints, num_doubles);
-
-  return total_size;
 }
 
-int
-init_macro (const int n_cells, const int n_start, const int n_stop)
-{
-  int cell;
-  int jump;
-  int top_phot;
-  int macro_level;
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
-  /* We are going to count the number of integers and doubles we are initialising,
-   * we need to know this for MPI communication buffers */
-  int num_ints = 0;
-  int num_doubles = 0;
+static void
+communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_rank)
+{
+#ifdef MPI_ON
+  int i;
   int int_size;
   int double_size;
+  int n_cells_max;
+  int current_rank;
 
-  for (cell = n_start; cell < n_stop; ++cell)
+  MPI_Allreduce (&n_cells_rank, &n_cells_max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
+  MPI_Pack_size (2 * n_cells_max * size_alpha_est + 2 * n_cells_max * nphot_total, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
+  int comm_buffer_size = double_size + int_size;
+  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+
+  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
+  {
+    if (rank_global == current_rank)
+    {
+      int pack_position = 0;
+      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);      // how many cells to unpack
+      for (i = n_start; i < n_stop; ++i)
+      {
+        MPI_Pack (&i, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);       // which cell we're working on
+        MPI_Pack (macromain[i].recomb_sp, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[i].recomb_sp_e, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[i].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[i].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position,
+                  MPI_COMM_WORLD);
+      }
+    }
+
+    // TODO: this should be non-blocking eventually
+    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
+
+    if (rank_global != current_rank)
+    {
+      int unpack_position = 0;
+      int n_cells_to_do;
+      MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &n_cells_to_do, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < n_cells_to_do; ++i)
+      {
+        int current_cell;
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &current_cell, 1, MPI_INT, MPI_COMM_WORLD);
+
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp, size_alpha_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp_e, size_alpha_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple, nphot_total, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple_upweight, nphot_total,
+                    MPI_DOUBLE, MPI_COMM_WORLD);
+      }
+    }
+    MPI_Barrier (MPI_COMM_WORLD);
+  }
+
+  free (comm_buffer);
+#endif
+}
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+static void
+init_macro (void)
+{
+  int i;
+  int k;
+  int j;
+
+  for (i = 0; i < NPLASMA; ++i)
   {
     if (geo.rt_mode == RT_MODE_MACRO)
     {
-      macromain[cell].kpkt_rates_known = FALSE;
-    }
-    num_ints += 1;
-
-    plasmamain[cell].kpkt_emiss = 0.0;
-    plasmamain[cell].kpkt_abs = 0.0;
-    num_doubles += 2;
-
-    for (macro_level = 0; macro_level < nlevels_macro; ++macro_level)
-    {
-      macromain[cell].matom_abs[macro_level] = 0.0;
-      macromain[cell].matom_emiss[macro_level] = 0.0;
-
-      for (jump = 0; jump < xconfig[macro_level].n_bbu_jump; ++jump)
-      {
-        macromain[cell].jbar[xconfig[macro_level].bbu_indx_first + jump] = 0.0;
-      }
-      for (jump = 0; jump < xconfig[macro_level].n_bfu_jump; ++jump)
-      {
-        macromain[cell].gamma[xconfig[macro_level].bfu_indx_first + jump] = 0.0;
-        macromain[cell].gamma_e[xconfig[macro_level].bfu_indx_first + jump] = 0.0;
-        macromain[cell].alpha_st[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
-        macromain[cell].alpha_st_e[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
-      }
-      for (jump = 0; jump < xconfig[macro_level].n_bfd_jump; ++jump)
-      {
-        if (plasmamain[cell].t_e > 1.0)
-        {
-          macromain[cell].recomb_sp[xconfig[macro_level].bfd_indx_first + jump] =
-            alpha_sp (&phot_top[xconfig[macro_level].bfd_jump[jump]], &plasmamain[cell], 0);
-          macromain[cell].recomb_sp_e[xconfig[macro_level].bfd_indx_first + jump] =
-            alpha_sp (&phot_top[xconfig[macro_level].bfd_jump[jump]], &plasmamain[cell], 2);
-        }
-        else
-        {
-          macromain[cell].recomb_sp[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
-          macromain[cell].recomb_sp_e[xconfig[macro_level].bfd_indx_first + jump] = 0.0;
-        }
-      }
-      /* This is the number of doubles updated each macro level. Have been kept in
-       * brackets to make it clearer what belongs to what */
-      num_doubles +=
-        (2) + (xconfig[macro_level].n_bbu_jump) + (4 * xconfig[macro_level].n_bfu_jump) + (2 * xconfig[macro_level].n_bfd_jump);
+      macromain[i].kpkt_rates_known = FALSE;
     }
 
-    for (top_phot = 0; top_phot < ntop_phot; ++top_phot)
+    plasmamain[i].kpkt_emiss = 0.0;
+    plasmamain[i].kpkt_abs = 0.0;
+
+    for (j = 0; j < nlevels_macro; ++j)
     {
-      if ((geo.macro_simple == FALSE && phot_top[top_phot].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
+      macromain[i].matom_abs[j] = 0.0;
+      macromain[i].matom_emiss[j] = 0.0;
+
+      for (k = 0; k < xconfig[j].n_bbu_jump; ++k)
       {
-        plasmamain[cell].recomb_simple[top_phot] = 0.0;
-        plasmamain[cell].recomb_simple_upweight[top_phot] = 1.0;
+        macromain[i].jbar[xconfig[j].bbu_indx_first + k] = 0.0;
       }
-      else                      // we want a macro approach, but not for this ion so need recomb_simple instead
+      for (k = 0; k < xconfig[j].n_bfu_jump; ++k)
       {
-        const double alpha_store = plasmamain[cell].recomb_simple[top_phot] = alpha_sp (&phot_top[top_phot], &plasmamain[cell], 2);
-        plasmamain[cell].recomb_simple_upweight[top_phot] = alpha_sp (&phot_top[top_phot], &plasmamain[cell], 1) / alpha_store;
+        macromain[i].gamma[xconfig[j].bfu_indx_first + k] = 0.0;
+        macromain[i].gamma_e[xconfig[j].bfu_indx_first + k] = 0.0;
+        macromain[i].alpha_st[xconfig[j].bfd_indx_first + k] = 0.0;
+        macromain[i].alpha_st_e[xconfig[j].bfd_indx_first + k] = 0.0;
       }
     }
   }
-  num_doubles += 2 * ntop_phot; // 2 things changed for each nphot_top index
+
+  int n_start;
+  int n_stop;
+  int n_cells;
 
 #ifdef MPI_ON
-  /* Using MPI_Pack_size for safety, incase there is any data alignment required */
-  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &int_size);
-  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
+  n_cells = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &n_start, &n_stop);
 #else
-  int_size = sizeof (int) * num_ints;
-  double_size = sizeof (double) * num_doubles;
+  n_start = 0;
+  n_stop = NPLASMA;
+  n_cells = NPLASMA;
 #endif
 
-  const int total_size = int_size + double_size;
-  Debug ("init_macro: require %f MB for communication buffer (%d ints %d doubles)\n", (float) total_size * 1e-6, num_ints, num_doubles);
+  for (i = n_start; i < n_stop; ++i)
+  {
+    for (j = 0; j < nlevels_macro; ++j)
+    {
+      for (k = 0; k < xconfig[j].n_bfd_jump; ++k)
+      {
+        if (plasmamain[i].t_e > 1.0)
+        {
+          macromain[i].recomb_sp[xconfig[j].bfd_indx_first + k] = alpha_sp (&phot_top[xconfig[j].bfd_jump[k]], &plasmamain[i], 0);
+          macromain[i].recomb_sp_e[xconfig[j].bfd_indx_first + k] = alpha_sp (&phot_top[xconfig[j].bfd_jump[k]], &plasmamain[i], 2);
+        }
+        else
+        {
+          macromain[i].recomb_sp[xconfig[j].bfd_indx_first + k] = 0.0;
+          macromain[i].recomb_sp_e[xconfig[j].bfd_indx_first + k] = 0.0;
+        }
+      }
+    }
+    for (j = 0; j < ntop_phot; ++j)
+    {
+      if ((geo.macro_simple == FALSE && phot_top[j].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
+      {
+        plasmamain[i].recomb_simple[j] = 0.0;
+        plasmamain[i].recomb_simple_upweight[j] = 1.0;
+      }
+      else                      // we want a macro approach, but not for this ion so need recomb_simple instead
+      {
+        const double alpha_store = plasmamain[i].recomb_simple[j] = alpha_sp (&phot_top[j], &plasmamain[i], 2);
+        plasmamain[i].recomb_simple_upweight[j] = alpha_sp (&phot_top[j], &plasmamain[i], 1) / alpha_store;
+      }
+    }
+  }
 
-  return total_size;
-}
-
-int
-communicate_initialised_cells (const int n_cells, const int n_start, const int n_stop, const int plasma_buffer_size,
-                               const int macro_buffer_size)
-{
-#ifdef MPI_ON
-#endif
-
-  return EXIT_SUCCESS;
+  communicate_alpha_sp (n_start, n_stop, n_cells);
 }
 
 /**********************************************************/
@@ -1473,32 +1519,47 @@ communicate_initialised_cells (const int n_cells, const int n_start, const int n
  *
  **********************************************************/
 
-int
+void
 wind_rad_init ()
 {
-  int n_cells;
-  int n_start;
-  int n_stop;
+  init_plasma ();
+  init_macro ();
 
-#ifdef MPI_ON
-  n_cells = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &n_start, &n_stop);
-#else
-  n_start = 0;
-  n_stop = NPLASMA;
-  n_cells = NPLASMA;
-#endif
-
-  const int plasma_buffer_size = init_plasma (n_cells, n_start, n_stop);
-  const int macro_buffer_size = init_macro (n_cells, n_start, n_stop);
-
-  const int error = communicate_initialised_cells (n_cells, n_start, n_stop, plasma_buffer_size, macro_buffer_size);
-  if (error)
-  {
-    Error ("wind_rad_init: error during cell communication");
-    Exit (EXIT_FAILURE);
-  }
-
-  return (0);
+  /* XXX Debug code --------------------------------------------------------- */
+  /* TODO: let's put this into a unit test */
+//  int i, j, k;
+//  const int n_start = 0;
+//  const int n_stop = NPLASMA;
+//
+//  for (i = n_start; i < n_stop; ++i)
+//  {
+//    for (j = 0; j < nlevels_macro; ++j)
+//    {
+//      Log ("macromain[%d].recomb_sp = [", i);
+//      for (k = 0; k < xconfig[j].n_bfd_jump; ++k)
+//      {
+//        Log (" %g ", macromain[i].recomb_sp[xconfig[j].bfd_indx_first + k]);
+//      }
+//      Log ("]\nmacromain[%d].recomb_sp_e = [", i);
+//      for (k = 0; k < xconfig[j].n_bfd_jump; ++k)
+//      {
+//        Log (" %g ", macromain[i].recomb_sp_e[xconfig[j].bfd_indx_first + k]);
+//      }
+//      Log ("]\n");
+//    }
+//    Log ("plasmamain[%d].recomb_simple = [", i);
+//    for (j = 0; j < ntop_phot; ++j)
+//    {
+//      Log (" %g ", plasmamain[i].recomb_simple[j]);
+//    }
+//    Log ("]\nplasmamain[%d].recomb_simple_upweight = [", i);
+//    for (j = 0; j < ntop_phot; ++j)
+//    {
+//      Log (" %g ", plasmamain[i].recomb_simple_upweight[j]);
+//    }
+//    Log ("]\n");
+//  }
+  /* XXX Debug code --------------------------------------------------------- */
 }
 
 /**********************************************************/
