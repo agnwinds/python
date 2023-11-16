@@ -1041,21 +1041,25 @@ typedef struct plasma
                                                         in BF_SIMPLE_EMISSIVITY_APPROACH
                                                         */
 #define N_PHOT_PROC 500
-  int n_bf_in[N_PHOT_PROC],n_bf_out[N_PHOT_PROC];/**<Counters to track bf excitations and de-exitations.
+  int n_bf_in[N_PHOT_PROC], n_bf_out[N_PHOT_PROC];
+                                                 /**<Counters to track bf excitations and de-exitations.
                                                    */
 
   double comp_nujnu;            /**<  The integral of alpha(nu)nuj(nu) used to
                                    compute compton cooling-  only needs computing once per cycle
                                  */
 
-  double dmo_dt[3];             /**< Radiative force of wind */
-  double rad_force_es[4];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_ff[4];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_bf[4];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+#define NUM_RAD_FORCE_DIRECTIONS 3
+#define NUM_FORCE_EST_DIRECTIONS 4
 
-  double rad_force_es_persist[4];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_ff_persist[4];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_bf_persist[4];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double dmo_dt[NUM_RAD_FORCE_DIRECTIONS];             /**< Radiative force of wind */
+  double rad_force_es[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_ff[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_bf[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+
+  double rad_force_es_persist[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_ff_persist[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_bf_persist[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
 
   double gain;                  /**<  The gain being used in iterations of the structure */
   double converge_t_r, converge_t_e, converge_hc;

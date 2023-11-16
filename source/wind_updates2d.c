@@ -1198,111 +1198,156 @@ int
 init_plasma (const int n_cells, const int n_start, const int n_stop)
 {
   int i;
-  int n;
+  int cell;
 
-  for (n = n_start; n < n_stop; ++n)
+  /* We are going to count the number of integers and doubles we are initialising,
+   * we need to know this for MPI communication buffers */
+  int num_ints = 0;
+  int num_doubles = 0;
+  int int_size;
+  int double_size;
+
+  for (cell = n_start; cell < n_stop; ++cell)
   {
-    plasmamain[n].j = plasmamain[n].ave_freq = plasmamain[n].ntot = 0;
-    plasmamain[n].j_direct = plasmamain[n].j_scatt = 0.0;
-    plasmamain[n].ip = 0.0;
-    plasmamain[n].xi = 0.0;
-
-    plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
-    plasmamain[n].mean_ds = 0.0;
-    plasmamain[n].n_ds = 0;
-    plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;
-    plasmamain[n].ntot_star = plasmamain[n].ntot_bl = plasmamain[n].ntot_wind = 0;
-    plasmamain[n].heat_tot = plasmamain[n].heat_ff = plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
-    plasmamain[n].abs_tot = plasmamain[n].abs_auger = plasmamain[n].abs_photo = 0.0;
-
-    plasmamain[n].heat_z = 0.0;
-    plasmamain[n].max_freq = 0.0;
-    plasmamain[n].cool_tot = plasmamain[n].lum_tot = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
-    plasmamain[n].cool_rr = plasmamain[n].cool_rr_metals = plasmamain[n].lum_rr = 0.0;
-    plasmamain[n].nrad = plasmamain[n].nioniz = 0;
-    plasmamain[n].comp_nujnu = -1e99;
-    plasmamain[n].cool_comp = 0.0;
-    plasmamain[n].heat_comp = 0.0;
-    plasmamain[n].heat_ind_comp = 0.0;
-    plasmamain[n].heat_auger = 0.0;
-    plasmamain[n].heat_ch_ex = 0.0;
-
-    /* zero the counters that record the flow into and out of the
-       ionization pool in indivisible packet mode */
-    plasmamain[n].bf_simple_ionpool_out = 0.0;
-    plasmamain[n].bf_simple_ionpool_in = 0.0;
-
+    /* Start by initialising integer fields */
+    plasmamain[cell].j = 0;
+    plasmamain[cell].ave_freq = 0;
+    plasmamain[cell].ntot = 0;
+    plasmamain[cell].n_ds = 0;
+    plasmamain[cell].ntot_disk = 0;
+    plasmamain[cell].ntot_agn = 0;
+    plasmamain[cell].ntot_star = 0;
+    plasmamain[cell].ntot_bl = 0;
+    plasmamain[cell].ntot_wind = 0;
+    plasmamain[cell].nrad = 0;
+    plasmamain[cell].nioniz = 0;
     for (i = 0; i < nphot_total; i++)
     {
-      plasmamain[n].n_bf_in[i] = 0;
-      plasmamain[n].n_bf_out[i] = 0;
+      plasmamain[cell].n_bf_in[i] = 0;
+      plasmamain[cell].n_bf_out[i] = 0;
     }
+    num_ints += 11 + (2 * nphot_total);
 
+    /* Next we'll initialise the rest of the fields, which are doubles */
+    plasmamain[cell].j_direct = 0.0;
+    plasmamain[cell].j_scatt = 0.0;
+    plasmamain[cell].ip = 0.0;
+    plasmamain[cell].xi = 0.0;
+    plasmamain[cell].ip_direct = 0.0;
+    plasmamain[cell].ip_scatt = 0.0;
+    plasmamain[cell].mean_ds = 0.0;
+    plasmamain[cell].heat_tot = 0.0;
+    plasmamain[cell].heat_ff = 0.0;
+    plasmamain[cell].heat_photo = 0.0;
+    plasmamain[cell].heat_lines = 0.0;
+    plasmamain[cell].abs_tot = 0.0;
+    plasmamain[cell].abs_auger = 0.0;
+    plasmamain[cell].abs_photo = 0.0;
+    plasmamain[cell].heat_z = 0.0;
+    plasmamain[cell].max_freq = 0.0;
+    plasmamain[cell].cool_tot = 0.0;
+    plasmamain[cell].lum_tot = 0.0;
+    plasmamain[cell].lum_lines = 0.0;
+    plasmamain[cell].lum_ff = 0.0;
+    plasmamain[cell].cool_rr = 0.0;
+    plasmamain[cell].cool_rr_metals = 0.0;
+    plasmamain[cell].lum_rr = 0.0;
+    plasmamain[cell].comp_nujnu = -1e99;
+    plasmamain[cell].cool_comp = 0.0;
+    plasmamain[cell].heat_comp = 0.0;
+    plasmamain[cell].heat_ind_comp = 0.0;
+    plasmamain[cell].heat_auger = 0.0;
+    plasmamain[cell].heat_ch_ex = 0.0;
+    plasmamain[cell].bf_simple_ionpool_out = 0.0;
+    plasmamain[cell].bf_simple_ionpool_in = 0.0;
+    num_doubles += 31;
 
-    for (i = 0; i < 3; i++)
-      plasmamain[n].dmo_dt[i] = 0.0;
-    for (i = 0; i < 4; i++)
-      plasmamain[n].rad_force_es[i] = 0.0;
-    for (i = 0; i < 4; i++)
-      plasmamain[n].rad_force_ff[i] = 0.0;
-    for (i = 0; i < 4; i++)
-      plasmamain[n].rad_force_bf[i] = 0.0;
-
-/* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell*/
-
-    for (i = 0; i < geo.nxfreq; i++)
+    for (i = 0; i < NUM_RAD_FORCE_DIRECTIONS; i++)
     {
-      plasmamain[n].xj[i] = plasmamain[n].xave_freq[i] = plasmamain[n].nxtot[i] = 0;
-      plasmamain[n].xsd_freq[i] = 0.0;
-      plasmamain[n].fmin[i] = geo.xfreq[i + 1]; /* Set the minium frequency to the max frequency in the band */
-      plasmamain[n].fmax[i] = geo.xfreq[i];     /* Set the maximum frequency to the min frequency in the band */
+      plasmamain[cell].dmo_dt[i] = 0.0;
     }
-
-    for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+    num_doubles += NUM_RAD_FORCE_DIRECTIONS;
+    for (i = 0; i < NUM_FORCE_EST_DIRECTIONS; i++)
     {
-      plasmamain[n].cell_spec_flux[i] = 0.0;
-    }
-
-    for (i = 0; i < 4; i++)
-    {
-      plasmamain[n].F_vis[i] = plasmamain[n].F_UV[i] = plasmamain[n].F_Xray[i] = 0.0;
-      if (geo.wcycle == 0)
+      plasmamain[cell].rad_force_es[i] = 0.0;
+      plasmamain[cell].rad_force_ff[i] = 0.0;
+      plasmamain[cell].rad_force_bf[i] = 0.0;
+      plasmamain[cell].F_vis[i] = 0.0;
+      plasmamain[cell].F_UV[i] = 0.0;
+      plasmamain[cell].F_Xray[i] = 0.0;
+      num_doubles += 6;
+      if (geo.wcycle == 0)      // Persistent values, so only initialise for first ionisation cycle
       {
-        plasmamain[n].F_vis_persistent[i] = plasmamain[n].F_UV_persistent[i] = plasmamain[n].F_Xray_persistent[i] =
-          plasmamain[n].rad_force_bf_persist[i] = 0.0;
+        plasmamain[cell].F_vis_persistent[i] = 0.0;
+        plasmamain[cell].F_UV_persistent[i] = 0.0;
+        plasmamain[cell].F_Xray_persistent[i] = 0.0;
+        plasmamain[cell].rad_force_bf_persist[i] = 0.0;
+        num_doubles += 4;
       }
     }
-
     for (i = 0; i < NFLUX_ANGLES; i++)
     {
-      if (geo.wcycle == 0)
+      if (geo.wcycle == 0)      // Persistent values, so only initialise for first ionisation cycle
       {
-        plasmamain[n].F_UV_ang_x_persist[i] = 0.0;
-        plasmamain[n].F_UV_ang_y_persist[i] = 0.0;
-        plasmamain[n].F_UV_ang_z_persist[i] = 0.0;
+        plasmamain[cell].F_UV_ang_x_persist[i] = 0.0;
+        plasmamain[cell].F_UV_ang_y_persist[i] = 0.0;
+        plasmamain[cell].F_UV_ang_z_persist[i] = 0.0;
+        num_doubles += 3;
       }
-      if (i == 0 && n == 0)
-        plasmamain[n].F_UV_ang_x[i] = 0.0;
-      plasmamain[n].F_UV_ang_x[i] = 0.0;
-      plasmamain[n].F_UV_ang_x[i] = 0.0;
-
+      plasmamain[cell].F_UV_ang_x[i] = 0.0;
+      plasmamain[cell].F_UV_ang_y[i] = 0.0;
+      plasmamain[cell].F_UV_ang_z[i] = 0.0;
+      num_doubles += 3;
     }
+
+    /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each cell */
+    for (i = 0; i < NXBANDS; i++)
+    {
+      plasmamain[cell].nxtot[i] = 0;
+      plasmamain[cell].xj[i] = 0.0;
+      plasmamain[cell].xave_freq[i] = 0.0;
+      plasmamain[cell].xsd_freq[i] = 0.0;
+      plasmamain[cell].fmin[i] = geo.xfreq[i + 1];      /* Set the minium frequency to the max frequency in the band */
+      plasmamain[cell].fmax[i] = geo.xfreq[i];  /* Set the maximum frequency to the min frequency in the band */
+    }
+    num_doubles += 6 * NXBANDS;
+    for (i = 0; i < NBINS_IN_CELL_SPEC; ++i)
+    {
+      plasmamain[cell].cell_spec_flux[i] = 0.0;
+    }
+    num_doubles += 1 * NBINS_IN_CELL_SPEC;
 
     for (i = 0; i < nions; i++)
     {
-      plasmamain[n].ioniz[i] = plasmamain[n].recomb[i] = plasmamain[n].heat_ion[i] = plasmamain[n].cool_rr_ion[i] =
-        plasmamain[n].lum_rr_ion[i] = plasmamain[n].heat_inner_ion[i] = 0.0;
+      plasmamain[cell].ioniz[i] = 0.0;
+      plasmamain[cell].recomb[i] = 0.0;
+      plasmamain[cell].heat_ion[i] = 0.0;
+      plasmamain[cell].cool_rr_ion[i] = 0.0;
+      plasmamain[cell].lum_rr_ion[i] = 0.0;
+      plasmamain[cell].heat_inner_ion[i] = 0.0;
 
     }
+    num_doubles += 6 * nions;
     for (i = 0; i < n_inner_tot; i++)
     {
-      plasmamain[n].inner_ioniz[i] = 0.0;
-
+      plasmamain[cell].inner_ioniz[i] = 0.0;
     }
-
+    num_doubles += 1 * n_inner_tot;
   }
 
-  return EXIT_SUCCESS;
+#ifdef MPI_ON
+  /* Using MPI_Pack_size for safety, incase there is any data alignment required */
+  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &int_size);
+  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
+#else
+  int_size = sizeof (int) * num_ints;
+  double_size = sizeof (double) * num_doubles;
+#endif
+
+  const int total_size = int_size + double_size;
+  Debug ("init_plasma: require %f MB for communication buffer (%d ints %d doubles)\n", (float) total_size * 1e-6, num_ints, num_doubles);
+
+  return total_size;
 }
 
 int
@@ -1394,7 +1439,10 @@ init_macro (const int n_cells, const int n_start, const int n_stop)
   double_size = sizeof (double) * num_doubles;
 #endif
 
-  return num_ints + num_doubles;
+  const int total_size = int_size + double_size;
+  Debug ("init_macro: require %f MB for communication buffer (%d ints %d doubles)\n", (float) total_size * 1e-6, num_ints, num_doubles);
+
+  return total_size;
 }
 
 int
