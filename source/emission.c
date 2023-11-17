@@ -135,9 +135,6 @@ wind_luminosity (f1, f2, mode)
 #ifdef MPI_ON
   int n, ndo;
   ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
-  // Log parallel gets each thread as does printf
-  Log_parallel ("xxxwind_luminosity: thread %d lum %d to %d %d \n", rank_global, my_nmin, my_nmax, ndo);
-  Log ("wind_luminosity: thread %d lum %d to %d %d \n", rank_global, my_nmin, my_nmax, ndo);
 #else
   my_nmin = 0;
   my_nmax = NPLASMA;
@@ -188,21 +185,12 @@ wind_luminosity (f1, f2, mode)
 
 
 
-  size_of_commbuffer = 36 * (floor (NPLASMA / np_mpi_global) + 1) + 4;
-
+  size_of_commbuffer = 36.0 * (floor ((double) NPLASMA / np_mpi_global) + 1) + 4;
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
-
-  Log ("commbuffer size %d  %d\n", size_of_commbuffer, (floor (NPLASMA / np_mpi_global) + 1));
-
-
-  MPI_Barrier (MPI_COMM_WORLD);
 
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
   {
-//    Log ("MPI task %d is working on cells %d to max %d (total size %d).\n", rank_global, my_nmin, my_nmax, NPLASMA);
-
     position = 0;
-
     if (rank_global == n_mpi)
     {
       // First tansmit ndo, whikch is the number of tasks (elements) this thread is working on (4)
@@ -213,22 +201,15 @@ wind_luminosity (f1, f2, mode)
       {
         // Next  transimit number of the the plasma cell (4) 
         MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        //   Log ("Position2 %d %d\n", n, position);
         // Now transimit the values we want (8)
         MPI_Pack (&plasmamain[n].lum_tot, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_lines, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_rr, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_ff, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-
-        //    Log ("Position3 %d %d\n", n, position);
       }
     }
-//    Log ("Luminoisity,MPI task %d broadcasting plasma update information.\n", rank_global);
 
-    MPI_Barrier (MPI_COMM_WORLD);
     MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
-    MPI_Barrier (MPI_COMM_WORLD);
-    Log ("Luminosity: MPI task %d survived plasma update information.\n", rank_global);
 
     position = 0;
 
@@ -251,7 +232,7 @@ wind_luminosity (f1, f2, mode)
 #endif
 
 
-  lum = lum_lines = lum_rr = lum_ff = factor = 0.0;
+  lum_lines = lum_rr = lum_ff = 0.0;
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
   {
@@ -275,7 +256,6 @@ wind_luminosity (f1, f2, mode)
     geo.lum_ff = lum_ff;
   }
 
-  Log ("wind_luminosity: f1 %e f2 %e mode %d --> %.3e\n", f1, f2, mode, lum);
   return (lum);
 }
 

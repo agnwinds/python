@@ -397,10 +397,7 @@ wind_update (WindPtr w)
       Log ("MPI task %d broadcasting plasma update information.\n", rank_global);
     }
 
-    MPI_Barrier (MPI_COMM_WORLD);
     MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
-    MPI_Barrier (MPI_COMM_WORLD);
-    Log_silent ("MPI task %d survived broadcasting plasma update information.\n", rank_global);
 
     position = 0;
 
@@ -1351,10 +1348,9 @@ communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_ran
   int i;
   int int_size;
   int double_size;
-  int n_cells_max;
   int current_rank;
 
-  MPI_Allreduce (&n_cells_rank, &n_cells_max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
   MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
   MPI_Pack_size (2 * n_cells_max * size_alpha_est + 2 * n_cells_max * nphot_total, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
   int comm_buffer_size = double_size + int_size;
@@ -1400,7 +1396,6 @@ communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_ran
                     MPI_DOUBLE, MPI_COMM_WORLD);
       }
     }
-    MPI_Barrier (MPI_COMM_WORLD);
   }
 
   free (comm_buffer);

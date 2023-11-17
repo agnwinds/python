@@ -88,7 +88,6 @@ communicate_estimators_para ()
   flux_helper = calloc (sizeof (double), NPLASMA * NFLUX_ANGLES * 3);
   flux_helper2 = calloc (sizeof (double), NPLASMA * NFLUX_ANGLES * 3);
 
-  MPI_Barrier (MPI_COMM_WORLD);
   // the following blocks gather all the estimators to the zeroth (Master) thread
 
 
@@ -168,7 +167,6 @@ communicate_estimators_para ()
 
 
   /* 131213 NSH communicate the min and max band frequencies these use MPI_MIN or MPI_MAX */
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (minbandfreqhelper, minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
   MPI_Reduce (maxbandfreqhelper, maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
   MPI_Reduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
@@ -181,13 +179,6 @@ communicate_estimators_para ()
   /* JM 1607 -- sum up the qdisk values */
   MPI_Reduce (qdisk_helper, qdisk_helper2, 2 * NRINGS, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-  if (rank_global == 0)
-  {
-
-    Log_parallel ("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
-  }
-
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Bcast (redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   /* 131213 NSH Send out the global min and max band limited frequencies to all threads */
@@ -276,7 +267,6 @@ communicate_estimators_para ()
     qdisk.heat[mpi_i] = qdisk_helper2[mpi_i];
     qdisk.ave_freq[mpi_i] = qdisk_helper2[mpi_i + NRINGS];
   }
-  Log_silent ("Thread %d happy after broadcast.\n", rank_global);
 
   /* now we've done all the doubles so we can free their helper arrays */
   free (qdisk_helper);
@@ -300,7 +290,6 @@ communicate_estimators_para ()
   iqdisk_helper2 = calloc (sizeof (int), NRINGS * 2);
   iredhelper = calloc (sizeof (int), plasma_int_helpers);
   iredhelper2 = calloc (sizeof (int), plasma_int_helpers);
-  MPI_Barrier (MPI_COMM_WORLD);
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
   {
@@ -324,19 +313,11 @@ communicate_estimators_para ()
     iqdisk_helper[mpi_i + NRINGS] = qdisk.nhit[mpi_i];
   }
 
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (iqdisk_helper, iqdisk_helper2, 2 * NRINGS, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
-  if (rank_global == 0)
-  {
-    Log_parallel ("Zeroth thread successfully received the integer sum. About to broadcast.\n");
-  }
-
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Bcast (iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast (iqdisk_helper2, NRINGS, MPI_INT, 0, MPI_COMM_WORLD);
-
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
   {
@@ -372,7 +353,6 @@ communicate_estimators_para ()
 
   if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
-    MPI_Barrier (MPI_COMM_WORLD);
     size_of_commbuffer = NPLASMA * NBINS_IN_CELL_SPEC;
 //OLD    nspec = NPLASMA;
 
@@ -388,13 +368,8 @@ communicate_estimators_para ()
       }
     }
 
-
-
-    MPI_Barrier (MPI_COMM_WORLD);
     MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-
 
     for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
     {
@@ -404,14 +379,9 @@ communicate_estimators_para ()
 
       }
     }
-    MPI_Barrier (MPI_COMM_WORLD);
-
-
 
     free (redhelper);
     free (redhelper2);
-
-
   }
 
 
@@ -465,7 +435,6 @@ gather_spectra_para ()
     }
   }
 
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -479,7 +448,6 @@ gather_spectra_para ()
       xxspec[mpi_j].lf_wind[mpi_i] = redhelper2[mpi_i * nspec + mpi_j + (3 * NWAVE_MAX * nspec)];
     }
   }
-  MPI_Barrier (MPI_COMM_WORLD);
 
   free (redhelper);
   free (redhelper2);
@@ -548,11 +516,6 @@ communicate_matom_estimators_para ()
   cooling_bb_helper2 = calloc (sizeof (double), NPLASMA * nlines);
 
 
-  /* set an mpi barrier before we start */
-  MPI_Barrier (MPI_COMM_WORLD);
-
-
-
   /* now we loop through each cell and copy the values of our variables
      into our helper arrays */
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
@@ -609,7 +572,6 @@ communicate_matom_estimators_para ()
 
   /* because in the above loop we have already divided by number of processes, we can now do a sum
      with MPI_Reduce, passing it MPI_SUM as an argument. This will give us the mean across threads */
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (cell_helper, cell_helper2, NPLASMA * 8, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (level_helper, level_helper2, NPLASMA * nlevels_macro, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (jbar_helper, jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -618,13 +580,6 @@ communicate_matom_estimators_para ()
   MPI_Reduce (cooling_bf_helper, cooling_bf_helper2, NPLASMA * 2 * nphot_total, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (cooling_bb_helper, cooling_bb_helper2, NPLASMA * nlines, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-
-  if (rank_global == 0)
-  {
-    Log_parallel ("Zeroth thread successfully received the macro-atom estimators. About to broadcast.\n");
-  }
-
-  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Bcast (cell_helper2, NPLASMA * 8, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (level_helper2, NPLASMA * nlevels_macro, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -689,16 +644,6 @@ communicate_matom_estimators_para ()
       macromain[mpi_i].cooling_bb[n] = cooling_bb_helper2[mpi_i + (n * NPLASMA)];
     }
   }
-
-
-  /* at this stage each thread should have the correctly averaged estimators */
-  Log_silent ("Thread %d happy after broadcast.\n", rank_global);
-
-
-
-  /* set a barrier and free the memory for the helper arrays */
-
-  MPI_Barrier (MPI_COMM_WORLD);
 
   free (cell_helper);
   free (level_helper);
@@ -791,11 +736,9 @@ communicate_matom_matrices ()
   int my_nmax, my_nmin, ndo, n, position, i;
   char *commbuffer;
   ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
-  Log_parallel ("communicate_matom_matrices: Thread %d is communicating matom matrices for cells %d to %d.\n", rank_global, my_nmin,
-                my_nmax);
 
   nrows = nlevels_macro + 1;
-  size_of_commbuffer = 8 * ((nrows * nrows) + 2) * (floor (NPLASMA / np_mpi_global) + 1);
+  size_of_commbuffer = 8.0 * ((nrows * nrows) + 2) * (floor ((double) NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
@@ -819,10 +762,7 @@ communicate_matom_matrices ()
         }
       }
     }
-    MPI_Barrier (MPI_COMM_WORLD);
     MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
-    MPI_Barrier (MPI_COMM_WORLD);
-    Log_silent ("communicate_matom_matrices: MPI task %d survived broadcasting matom_matrix update information.\n", rank_global);
 
     position = 0;
 

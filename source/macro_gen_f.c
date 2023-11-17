@@ -339,9 +339,6 @@ get_matom_f (mode)
        This is done much the same way as in wind_update */
 #ifdef MPI_ON
 
-    /* JM Add an MPI Barrier here */
-    MPI_Barrier (MPI_COMM_WORLD);
-
     for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
     {
       /* here we loop over the number of threads. If the thread is this thread then we pack the macromain information
@@ -350,31 +347,19 @@ get_matom_f (mode)
 
       if (rank_global == n_mpi)
       {
-
-        Log ("MPI task %d is working on matoms %d to max %d (total size %d).\n", rank_global, my_nmin, my_nmax, NPLASMA);
-
         MPI_Pack (&ndo, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         for (n = my_nmin; n < my_nmax; n++)
         {
-
           /* pack the number of the cell, and the kpkt and macro atom emissivites for that cell // */
           MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
           MPI_Pack (&plasmamain[n].kpkt_emiss, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
           MPI_Pack (macromain[n].matom_emiss, nlevels_macro, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 
         }
-
-        Log_silent ("MPI task %d broadcasting matom emissivity information.\n", rank_global);
       }
 
-
       /* Set MPI_Barriers and broadcast information to other threads */
-      MPI_Barrier (MPI_COMM_WORLD);
       MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
-      MPI_Barrier (MPI_COMM_WORLD);
-      Log_parallel ("MPI task %d survived broadcasting matom emissivity information.\n", rank_global);
-
-
 
       position = 0;
 
@@ -385,7 +370,6 @@ get_matom_f (mode)
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
         for (n_mpi2 = 0; n_mpi2 < num_comm; n_mpi2++)
         {
-
           /* unpack the number of the cell, and the kpkt and macro atom emissivites for that cell */
           MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
           MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].kpkt_emiss, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -395,7 +379,6 @@ get_matom_f (mode)
     }                           // end of parallelised section
 
     /* add an MPI Barrier after unpacking stage */
-    MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
 #ifdef MPI_ON
@@ -596,9 +579,6 @@ get_matom_f_accelerate (mode)
        This is done much the same way as in wind_update */
 #ifdef MPI_ON
 
-    /* JM Add an MPI Barrier here */
-    MPI_Barrier (MPI_COMM_WORLD);
-
     for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
     {
       /* here we loop over the number of threads. If the thread is this thread then we pack the macromain information
@@ -607,9 +587,6 @@ get_matom_f_accelerate (mode)
 
       if (rank_global == n_mpi)
       {
-
-        Log ("MPI task %d is working on matoms %d to max %d (total size %d).\n", rank_global, my_nmin, my_nmax, NPLASMA);
-
         MPI_Pack (&ndo, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         for (n = my_nmin; n < my_nmax; n++)
         {
@@ -620,18 +597,10 @@ get_matom_f_accelerate (mode)
           MPI_Pack (macromain[n].matom_emiss, nlevels_macro, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 
         }
-
-        Log_silent ("MPI task %d broadcasting matom emissivity information.\n", rank_global);
       }
 
-
       /* Set MPI_Barriers and broadcast information to other threads */
-      MPI_Barrier (MPI_COMM_WORLD);
       MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
-      MPI_Barrier (MPI_COMM_WORLD);
-      Log_parallel ("MPI task %d survived broadcasting matom emissivity information.\n", rank_global);
-
-
 
       position = 0;
 
@@ -651,8 +620,6 @@ get_matom_f_accelerate (mode)
       }
     }                           // end of parallelised section
 
-    /* add an MPI Barrier after unpacking stage */
-    MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
 #ifdef MPI_ON
