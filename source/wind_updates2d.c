@@ -1365,11 +1365,17 @@ communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_ran
       for (i = n_start; i < n_stop; ++i)
       {
         MPI_Pack (&i, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);       // which cell we're working on
-        MPI_Pack (macromain[i].recomb_sp, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (macromain[i].recomb_sp_e, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[i].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[i].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position,
-                  MPI_COMM_WORLD);
+        if (nlevels_macro > 0)
+        {
+          MPI_Pack (macromain[i].recomb_sp, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+          MPI_Pack (macromain[i].recomb_sp_e, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        }
+        if (nphot_total > 0)
+        {
+          MPI_Pack (plasmamain[i].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+          MPI_Pack (plasmamain[i].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size,
+                    &pack_position, MPI_COMM_WORLD);
+        }
       }
     }
 
@@ -1386,14 +1392,20 @@ communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_ran
         int current_cell;
         MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &current_cell, 1, MPI_INT, MPI_COMM_WORLD);
 
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp, size_alpha_est, MPI_DOUBLE,
-                    MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp_e, size_alpha_est, MPI_DOUBLE,
-                    MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple, nphot_total, MPI_DOUBLE,
-                    MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple_upweight, nphot_total,
-                    MPI_DOUBLE, MPI_COMM_WORLD);
+        if (nlevels_macro > 0)
+        {
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp, size_alpha_est,
+                      MPI_DOUBLE, MPI_COMM_WORLD);
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp_e,
+                      size_alpha_est, MPI_DOUBLE, MPI_COMM_WORLD);
+        }
+        if (nphot_total > 0)
+        {
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple,
+                      nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple_upweight,
+                      nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
+        }
       }
     }
   }
@@ -1459,6 +1471,8 @@ init_macro (void)
   n_stop = NPLASMA;
   n_cells = NPLASMA;
 #endif
+
+  // TODO: should be reworked so we use non-blocking communication: do nlevels_macro first and then nphot_tot
 
   for (i = n_start; i < n_stop; ++i)
   {
