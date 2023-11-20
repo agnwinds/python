@@ -98,7 +98,7 @@ wind_update (WindPtr w)
   double dt_e_temp, dt_r_temp;
 
 
-  /* The commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines 
+  /* The commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines
    * The cmombuffer is currently sized to be the minimum requred.  Therefore when variables are added, the
    * size must must be increased.
    *
@@ -143,7 +143,7 @@ wind_update (WindPtr w)
   {
     t_r_ave_old += plasmamain[n].t_r;
     t_e_ave_old += plasmamain[n].t_e;
-    /* macro-atom estimators need to be normalised for all cells. 
+    /* macro-atom estimators need to be normalised for all cells.
        Note they should have already been averaged over threads here */
     if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
     {
@@ -875,18 +875,18 @@ wind_update (WindPtr w)
         fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_bf[0]);     //bound free scattering radiation force in the w(x) direction
         fprintf (fptr, "%e ", plasmamain[nplasma].rad_force_bf[1]);     //bound free scattering radiation force in the phi(rotational) direction
         fprintf (fptr, "%e \n", plasmamain[nplasma].rad_force_bf[2]);   //bound free scattering radiation force in the z direction
-        fprintf (fptr2, "%d %d ", i, j);        //output geometric things               
+        fprintf (fptr2, "%d %d ", i, j);        //output geometric things
         fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_vis[0], plasmamain[nplasma].F_vis[1], plasmamain[nplasma].F_vis[2]); //directional flux by band
         fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_UV[0], plasmamain[nplasma].F_UV[1], plasmamain[nplasma].F_UV[2]);    //directional flux by band
         fprintf (fptr2, "%e %e %e ", plasmamain[nplasma].F_Xray[0], plasmamain[nplasma].F_Xray[1], plasmamain[nplasma].F_Xray[2]);      //directional flux by band
 
         fprintf (fptr2, "\n");
-        fprintf (fptr3, "%d %d ", i, j);        //output geometric things               
+        fprintf (fptr3, "%d %d ", i, j);        //output geometric things
         for (ii = 0; ii < nions; ii++)
           fprintf (fptr3, "%e ", plasmamain[nplasma].density[ii]);
         fprintf (fptr3, "\n");
 
-        fprintf (fptr4, "%d %d ", i, j);        //output geometric things       
+        fprintf (fptr4, "%d %d ", i, j);        //output geometric things
         for (ii = 0; ii < geo.nxfreq; ii++)
           fprintf (fptr4, "%e %e %i %e %e %e %e ",
                    plasmamain[nplasma].fmin_mod[ii], plasmamain[nplasma].fmax_mod[ii], plasmamain[nplasma].spec_mod_type[ii],
@@ -900,26 +900,26 @@ wind_update (WindPtr w)
 
         v_th = pow ((2. * BOLTZMANN * plasmamain[nplasma].t_e / MPROT), 0.5);   //We need the thermal velocity for hydrogen
         stuff_v (w[plasmamain[nplasma].nwind].xcen, ptest.x);   //place our test photon at the centre of the cell
-        ptest.grid = nwind;     //We need our test photon to know where it is 
+        ptest.grid = nwind;     //We need our test photon to know where it is
         kappa_es = THOMPSON * plasmamain[nplasma].ne / plasmamain[nplasma].rho;
 
-        //First for the optical band (up to 4000AA)     
+        //First for the optical band (up to 4000AA)
         if (length (plasmamain[nplasma].F_vis) > 0.0)   //Only makes sense if flux in this band is non-zero
         {
           stuff_v (plasmamain[nplasma].F_vis, fhat);
           renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell
           t_opt = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
         }
         else
           t_opt = 0.0;          //Essentually a flag that there is no way of computing t (and hence M) in this cell.
 
-        //Now for the UV band (up to 4000AA->100AA)                                             
+        //Now for the UV band (up to 4000AA->100AA)
         if (length (plasmamain[nplasma].F_UV) > 0.0)    //Only makes sense if flux in this band is non-zero
         {
           stuff_v (plasmamain[nplasma].F_UV, fhat);
           renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell
           t_UV = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
         }
         else
@@ -931,11 +931,11 @@ wind_update (WindPtr w)
         {
           stuff_v (plasmamain[nplasma].F_Xray, fhat);
           renorm (fhat, 1.);    //A unit vector in the direction of the flux - this can be treated as the lmn vector of a pretend photon
-          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell            
+          stuff_v (fhat, ptest.lmn);    //place our test photon at the centre of the cell
           t_Xray = kappa_es * plasmamain[nplasma].rho * v_th / fabs (dvwind_ds_cmf (&ptest));
         }
         else
-          t_Xray = 0.0;         //Essentually a flag that there is no way of computing t (and hence M) in this cell.                
+          t_Xray = 0.0;         //Essentually a flag that there is no way of computing t (and hence M) in this cell.
 
         fprintf (fptr5, "%i %i %e %e %e %e %e %e %e\n", i, j, plasmamain[nplasma].t_e, plasmamain[nplasma].rho,
                  plasmamain[nplasma].rho * rho2nh, plasmamain[nplasma].ne, t_opt, t_UV, t_Xray);
@@ -982,7 +982,7 @@ wind_update (WindPtr w)
 
   if (!modes.turn_off_upweighting_of_simple_macro_atoms)
   {
-    /* If we have "indivisible packet" mode on but are using the 
+    /* If we have "indivisible packet" mode on but are using the
        new BF_SIMPLE_EMISSIVITY_APPROACH then we report the flows into and out of the ion pool */
     if (geo.rt_mode == RT_MODE_MACRO)
       report_bf_simple_ionpool ();
@@ -1191,17 +1191,63 @@ wind_update (WindPtr w)
 
 /**********************************************************/
 /**
- * @brief      zeros those portions of the wind which contain the radiation properties
- * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
- * 	wind has been changed or when you simply want to start off a calculation in a known state
+ * @brief This summarises the flows into and out of the ionization pool for
+ *        simple ions in RT_MODE_MACRO
  *
  * @return    Always returns 0
  *
+ **********************************************************/
+int
+report_bf_simple_ionpool ()
+{
+  int n, m;
+  int in_tot, out_tot;
+  double total_in = 0.0;
+  double total_out = 0.0;
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    total_in += plasmamain[n].bf_simple_ionpool_in;
+    total_out += plasmamain[n].bf_simple_ionpool_out;
+
+    if (plasmamain[n].bf_simple_ionpool_out > plasmamain[n].bf_simple_ionpool_in)
+    {
+      Error ("The net flow out of simple ion pool (%8.4e) > than the net flow in (%8.4e) in cell %d\n",
+             plasmamain[n].bf_simple_ionpool_out, plasmamain[n].bf_simple_ionpool_in, n);
+    }
+  }
+
+  Log ("!! report_bf_simple_ionpool: Total flow into: %8.4e and out of: %8.4e bf_simple ion pool\n", total_in, total_out);
+
+  total_in = total_out = 0;
+  for (m = 0; m < nphot_total; m++)
+  {
+    in_tot = out_tot = 0;
+    for (n = 0; n < NPLASMA; n++)
+    {
+      in_tot += plasmamain[n].n_bf_in[m];
+      out_tot += plasmamain[n].n_bf_out[m];
+    }
+
+
+    Log ("!! report_bf:  %3d   %3d %3d %7d  %7d\n", m, phot_top[m].z, phot_top[m].istate, in_tot, out_tot);
+
+    total_in += in_tot;
+    total_out += out_tot;
+  }
+
+  Log ("!! report_bf tots:   %10.0f  %10.0f\n", total_in, total_out);
+
+
+  return (0);
+}
+
+
+/**********************************************************/
+/**
+ * @brief
+ *
  * @details
- * The routine is called at the beginning of each ionization calculation
- * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
- * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
- * cooling terms are also rezeroed there as well.
  *
  * ### Notes ###
  *
@@ -1331,6 +1377,8 @@ init_plasma (void)
   }
 }
 
+#ifdef MPI_ON
+
 /**********************************************************/
 /**
  * @brief
@@ -1344,7 +1392,6 @@ init_plasma (void)
 static void
 communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_rank)
 {
-#ifdef MPI_ON
   int i;
   int int_size;
   int double_size;
@@ -1411,8 +1458,9 @@ communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_ran
   }
 
   free (comm_buffer);
-#endif
 }
+
+#endif
 
 /**********************************************************/
 /**
@@ -1507,7 +1555,9 @@ init_macro (void)
     }
   }
 
+#ifdef MPI_ON
   communicate_alpha_sp (n_start, n_stop, n_cells);
+#endif
 }
 
 /**********************************************************/
@@ -1515,8 +1565,6 @@ init_macro (void)
  * @brief      zeros those portions of the wind which contain the radiation properties
  * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
  * 	wind has been changed or when you simply want to start off a calculation in a known state
- *
- * @return    Always returns 0
  *
  * @details
  * The routine is called at the beginning of each ionization calculation
@@ -1569,57 +1617,4 @@ wind_rad_init ()
 //    Log ("]\n");
 //  }
   /* XXX Debug code --------------------------------------------------------- */
-}
-
-/**********************************************************/
-/**
- * @brief This summarises the flows into and out of the ionization pool for
- *        simple ions in RT_MODE_MACRO
- *
- * @return    Always returns 0
- *
- **********************************************************/
-int
-report_bf_simple_ionpool ()
-{
-  int n, m;
-  int in_tot, out_tot;
-  double total_in = 0.0;
-  double total_out = 0.0;
-
-  for (n = 0; n < NPLASMA; n++)
-  {
-    total_in += plasmamain[n].bf_simple_ionpool_in;
-    total_out += plasmamain[n].bf_simple_ionpool_out;
-
-    if (plasmamain[n].bf_simple_ionpool_out > plasmamain[n].bf_simple_ionpool_in)
-    {
-      Error ("The net flow out of simple ion pool (%8.4e) > than the net flow in (%8.4e) in cell %d\n",
-             plasmamain[n].bf_simple_ionpool_out, plasmamain[n].bf_simple_ionpool_in, n);
-    }
-  }
-
-  Log ("!! report_bf_simple_ionpool: Total flow into: %8.4e and out of: %8.4e bf_simple ion pool\n", total_in, total_out);
-
-  total_in = total_out = 0;
-  for (m = 0; m < nphot_total; m++)
-  {
-    in_tot = out_tot = 0;
-    for (n = 0; n < NPLASMA; n++)
-    {
-      in_tot += plasmamain[n].n_bf_in[m];
-      out_tot += plasmamain[n].n_bf_out[m];
-    }
-
-
-    Log ("!! report_bf:  %3d   %3d %3d %7d  %7d\n", m, phot_top[m].z, phot_top[m].istate, in_tot, out_tot);
-
-    total_in += in_tot;
-    total_out += out_tot;
-  }
-
-  Log ("!! report_bf tots:   %10.0f  %10.0f\n", total_in, total_out);
-
-
-  return (0);
 }
