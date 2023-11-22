@@ -607,21 +607,77 @@ normalise_simple_estimators (xplasma)
 
   for (i = 0; i < NFLUX_ANGLES; i++)
   {
-
-//ksl - commented out set but not used variables
-//OLD    rmin = wmain[xplasma->nwind].r;
-//OLD    rmax = wmain[xplasma->nwind + 1].r;
-//OLD    thetamin = i * RADIAN;
-//OLD    thetamax = (i + 1) * RADIAN;
-
-//OLD    wedge_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
     xplasma->F_UV_ang_x[i] /= volume_obs;
     xplasma->F_UV_ang_y[i] /= volume_obs;
     xplasma->F_UV_ang_z[i] /= volume_obs;
-
-    //   xplasma->idomega[i] /= (4. * PI * volume_obs);
-
   }
 
   return (0);
+}
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+int
+update_persistent_directional_flux_estimators (int nplasma, double flux_persist_scale)
+{
+  int n;
+  double flux_helper[3];
+
+  if (geo.wcycle == 0)          //If this is the first time through, then the persistent flux is empty.
+  {
+    vadd (plasmamain[nplasma].F_vis_persistent, plasmamain[nplasma].F_vis, plasmamain[nplasma].F_vis_persistent);
+    vadd (plasmamain[nplasma].F_UV_persistent, plasmamain[nplasma].F_UV, plasmamain[nplasma].F_UV_persistent);
+    vadd (plasmamain[nplasma].F_Xray_persistent, plasmamain[nplasma].F_Xray, plasmamain[nplasma].F_Xray_persistent);
+    vadd (plasmamain[nplasma].rad_force_bf_persist, plasmamain[nplasma].rad_force_bf, plasmamain[nplasma].rad_force_bf_persist);
+
+    for (n = 0; n < NFLUX_ANGLES; n++)
+    {
+      plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n];
+      plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n];
+      plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n];
+    }
+  }
+  else
+  {
+    rescale (plasmamain[nplasma].F_vis_persistent, (1 - flux_persist_scale), plasmamain[nplasma].F_vis_persistent);
+    rescale (plasmamain[nplasma].F_vis, flux_persist_scale, flux_helper);
+    vadd (plasmamain[nplasma].F_vis_persistent, flux_helper, plasmamain[nplasma].F_vis_persistent);
+
+    rescale (plasmamain[nplasma].F_UV_persistent, (1 - flux_persist_scale), plasmamain[nplasma].F_UV_persistent);
+    rescale (plasmamain[nplasma].F_UV, flux_persist_scale, flux_helper);
+    vadd (plasmamain[nplasma].F_UV_persistent, flux_helper, plasmamain[nplasma].F_UV_persistent);
+
+    rescale (plasmamain[nplasma].F_Xray_persistent, (1 - flux_persist_scale), plasmamain[nplasma].F_Xray_persistent);
+    rescale (plasmamain[nplasma].F_Xray, flux_persist_scale, flux_helper);
+    vadd (plasmamain[nplasma].F_Xray_persistent, flux_helper, plasmamain[nplasma].F_Xray_persistent);
+
+    rescale (plasmamain[nplasma].rad_force_bf_persist, (1 - flux_persist_scale), plasmamain[nplasma].rad_force_bf_persist);
+    rescale (plasmamain[nplasma].rad_force_bf, flux_persist_scale, flux_helper);
+    vadd (plasmamain[nplasma].rad_force_bf_persist, flux_helper, plasmamain[nplasma].rad_force_bf_persist);
+
+    for (n = 0; n < NFLUX_ANGLES; n++)
+    {
+      plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] * (1 - flux_persist_scale);
+      plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] * (1 - flux_persist_scale);
+      plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] * (1 - flux_persist_scale);
+      plasmamain[nplasma].F_UV_ang_x_persist[n] =
+        plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n] * flux_persist_scale;
+      plasmamain[nplasma].F_UV_ang_y_persist[n] =
+        plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n] * flux_persist_scale;
+      plasmamain[nplasma].F_UV_ang_z_persist[n] =
+        plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n] * flux_persist_scale;
+    }
+  }
+  plasmamain[nplasma].F_vis_persistent[3] = length (plasmamain[nplasma].F_vis_persistent);
+  plasmamain[nplasma].F_UV_persistent[3] = length (plasmamain[nplasma].F_UV_persistent);
+  plasmamain[nplasma].F_Xray_persistent[3] = length (plasmamain[nplasma].F_Xray_persistent);
+  plasmamain[nplasma].rad_force_bf_persist[3] = length (plasmamain[nplasma].rad_force_bf_persist);
 }
