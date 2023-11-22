@@ -84,26 +84,6 @@ wind_update (WindPtr w)
   my_nmax = NPLASMA;
 #endif
 
-  /* Start with a call to the routine which normalises all the macro atom
-     monte carlo radiation field estimators. It's best to do this first since
-     some of the estimators include temperature terms (stimulated correction
-     terms) which were included during the monte carlo simulation so we want
-     to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
-
-  for (n = 0; n < NPLASMA; n++)
-  {
-    /* normalise macro estimators: TODO: add to comm buffer */
-    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
-    {
-      nwind = plasmamain[n].nwind;
-      normalise_macro_estimators (nwind);       // todo: update to use nplasma instead
-
-      /* force recalculation of kpacket rates and matrices, if applicable */
-      macromain[n].kpkt_rates_known = FALSE;
-      macromain[n].matrix_rates_known = FALSE;
-    }
-  }
-
   /* we now know how many cells this thread has to process - note this will be
      0-NPLASMA in serial mode */
 
@@ -131,6 +111,19 @@ wind_update (WindPtr w)
 
     /* this routine normalises the unbanded and banded estimators for simple atoms in this cell */
     normalise_simple_estimators (&plasmamain[n]);
+
+
+    /* Start with a call to the routine which normalises all the macro atom
+       monte carlo radiation field estimators. It's best to do this first since
+       some of the estimators include temperature terms (stimulated correction
+       terms) which were included during the monte carlo simulation so we want
+       to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
+
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
+    {
+      nwind = plasmamain[n].nwind;
+      normalise_macro_estimators (nwind);       // todo: update to use nplasma instead
+    }
 
     /* If geo.adiabatic is true, then calculate the adiabatic cooling using the current, i.e
      * previous value of t_e.  Note that this may not be  best way to determine the cooling.
@@ -162,7 +155,13 @@ wind_update (WindPtr w)
   }
 
   /*This is the end of the update loop that is parallised. We now need to exchange data between the tasks. */
+
   communicate_plasma_cells (my_nmin, my_nmax);
+
+  if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
+  {
+    communicate_macro_cells (my_nmin, my_nmax);
+  }
 
   /* Each rank now has the updated plasma cells, so we can now find out what the max d_t is
    * in the wind */
@@ -580,91 +579,6 @@ init_plasma (void)
   }
 }
 
-#ifdef MPI_ON
-
-/**********************************************************/
-/**
- * @brief
- *
- * @details
- *
- * ### Notes ###
- *
- **********************************************************/
-
-static void
-communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_rank)
-{
-  int i;
-  int int_size;
-  int double_size;
-  int current_rank;
-
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
-  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
-  MPI_Pack_size (2 * n_cells_max * size_alpha_est + 2 * n_cells_max * nphot_total, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
-  int comm_buffer_size = double_size + int_size;
-  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
-
-  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
-  {
-    if (rank_global == current_rank)
-    {
-      int pack_position = 0;
-      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);      // how many cells to unpack
-      for (i = n_start; i < n_stop; ++i)
-      {
-        MPI_Pack (&i, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);       // which cell we're working on
-        if (nlevels_macro > 0)
-        {
-          MPI_Pack (macromain[i].recomb_sp, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-          MPI_Pack (macromain[i].recomb_sp_e, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        }
-        if (nphot_total > 0)
-        {
-          MPI_Pack (plasmamain[i].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-          MPI_Pack (plasmamain[i].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size,
-                    &pack_position, MPI_COMM_WORLD);
-        }
-      }
-    }
-
-    // TODO: this should be non-blocking eventually
-    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
-
-    if (rank_global != current_rank)
-    {
-      int unpack_position = 0;
-      int n_cells_to_do;
-      MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &n_cells_to_do, 1, MPI_INT, MPI_COMM_WORLD);
-      for (i = 0; i < n_cells_to_do; ++i)
-      {
-        int current_cell;
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &current_cell, 1, MPI_INT, MPI_COMM_WORLD);
-
-        if (nlevels_macro > 0)
-        {
-          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp, size_alpha_est,
-                      MPI_DOUBLE, MPI_COMM_WORLD);
-          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp_e,
-                      size_alpha_est, MPI_DOUBLE, MPI_COMM_WORLD);
-        }
-        if (nphot_total > 0)
-        {
-          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple,
-                      nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
-          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple_upweight,
-                      nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
-        }
-      }
-    }
-  }
-
-  free (comm_buffer);
-}
-
-#endif
-
 /**********************************************************/
 /**
  * @brief
@@ -758,9 +672,7 @@ init_macro (void)
     }
   }
 
-#ifdef MPI_ON
   communicate_alpha_sp (n_start, n_stop, n_cells);
-#endif
 }
 
 /**********************************************************/

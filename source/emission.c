@@ -16,76 +16,6 @@
 #include "atomic.h"
 #include "python.h"
 
-#ifdef MPI_ON
-
-/**********************************************************/
-/**
- * @brief
- *
- * @details
- *
- * ### Notes ###
- *
- **********************************************************/
-
-static void
-communicate_wind_luminosity (const int n_start, const int n_stop, const int n_cells_rank)
-{
-  int n_plasma;
-  int size_doubles;
-  int size_ints;
-  int current_rank;
-  int num_comm;
-
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
-  const int num_ints = 1 + 1 * n_cells_max;
-  const int num_doubles = 4 * n_cells_max;
-
-  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
-  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &size_ints);
-  const int comm_buffer_size = size_doubles + size_ints;
-  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
-
-  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
-  {
-    if (rank_global == current_rank)
-    {
-      int pack_position = 0;
-      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-      for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
-      {
-        MPI_Pack (&n_plasma, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-      }
-    }
-
-    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
-
-    if (rank_global != current_rank)
-    {
-      int num_cells;
-      int unpack_position = 0;
-      MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &num_cells, 1, MPI_INT, MPI_COMM_WORLD);
-      for (n_plasma = 0; n_plasma < num_cells; ++n_plasma)
-      {
-        int cell;
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &cell, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-
-      }
-    }
-  }
-  free (comm_buffer);
-}
-
-#endif
-
 /**********************************************************/
 /**
  * @brief      calculate the energy radiated by the wind
@@ -171,9 +101,7 @@ wind_luminosity (double f1, double f2, int mode)
     total_emission (&plasmamain[n_plasma], f1, f2);
   }
 
-#ifdef MPI_ON
   communicate_wind_luminosity (n_start, n_stop, n_cells_rank);
-#endif
 
   total_lum = 0.0;
   lum_lines = 0.0;

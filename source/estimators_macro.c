@@ -570,6 +570,10 @@ normalise_macro_estimators (n)
 
   geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
 
+  /* force recalculation of kpacket rates and matrices, if applicable */
+  mplasma->kpkt_rates_known = FALSE;
+  mplasma->matrix_rates_known = FALSE;
+
   return (0);
 }
 

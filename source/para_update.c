@@ -16,6 +16,55 @@
 #include "atomic.h"
 #include "python.h"
 
+/**********************************************************/
+/**
+ * @brief helper routine for splitting up tasks in MPI
+ * @param   [in]      int   rank       processor rank (typically set from rank_global)
+ * @param   [in]      int   ntotal     total number of tasks, e.g. NPLASMA
+ * @param   [in]       int   nproc      total number of MPI processors
+ * @param   [in,out]  int   *my_nmax   pointer to integer value of first task
+ * @param   [in,out]  int   *my_nmax   pointer to integer value of final task
+ * @return            int   ndo        number of tasks this thread is working on
+
+ * @details  For a process with ntotal tasks,
+ * this routine calculates which thread will be given each task.
+ * typically ntotal is NPLASMA and the thread is splitting up wind cells.
+ * The routine deals with remainders by distributing the remainder over the
+ * threads if the cells do not divide evenly by thread
+ **********************************************************/
+
+int
+get_parallel_nrange (rank, ntotal, nproc, my_nmin, my_nmax)
+     int rank;
+     int ntotal;
+     int nproc;
+     int *my_nmin;
+     int *my_nmax;
+{
+  /* divide the cells between the threads */
+  int ndo;
+  int num_mpi_cells = floor (ntotal / nproc);
+
+  /* the remainder from the above division */
+  int num_mpi_extra = ntotal - (nproc * num_mpi_cells);
+
+  /* this section distributes the remainder over the threads if the cells
+     do not divide evenly by thread */
+  if (rank < num_mpi_extra)
+  {
+    *my_nmin = rank_global * (num_mpi_cells + 1);
+    *my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
+  }
+  else
+  {
+    *my_nmin = num_mpi_extra * (num_mpi_cells + 1) + (rank - num_mpi_extra) * (num_mpi_cells);
+    *my_nmax = num_mpi_extra * (num_mpi_cells + 1) + (rank - num_mpi_extra + 1) * (num_mpi_cells);
+  }
+  ndo = *my_nmax - *my_nmin;
+
+  return ndo;
+}
+
 
 /**********************************************************/
 /** 
@@ -55,12 +104,12 @@ communicate_estimators_para ()
   // int size_of_helpers;
   int plasma_double_helpers, plasma_int_helpers;
 
-  /* The size of the helper array for doubles. We transmit 10 numbers 
+  /* The size of the helper array for doubles. We transmit 10 numbers
      for each cell, plus three arrays, each of length NXBANDS */
 
   plasma_double_helpers = (39 + 3 * NXBANDS) * NPLASMA;
 
-  /* The size of the helper array for integers. We transmit 7 numbers 
+  /* The size of the helper array for integers. We transmit 7 numbers
      for each cell, plus one array of length NXBANDS */
   plasma_int_helpers = (7 + NXBANDS) * NPLASMA;
 
@@ -80,7 +129,7 @@ communicate_estimators_para ()
   inner_ion_helper = calloc (sizeof (double), NPLASMA * n_inner_tot);
   inner_ion_helper2 = calloc (sizeof (double), NPLASMA * n_inner_tot);
   /* JM -- added routine to average the qdisk quantities. The 2 is because
-     we only have two doubles to worry about (heat and ave_freq) and 
+     we only have two doubles to worry about (heat and ave_freq) and
      two integers (nhit and nphot) */
   qdisk_helper = calloc (sizeof (double), NRINGS * 2);
   qdisk_helper2 = calloc (sizeof (double), NRINGS * 2);
@@ -668,56 +717,6 @@ communicate_matom_estimators_para ()
 
 /**********************************************************/
 /**
- * @brief helper routine for splitting up tasks in MPI
- * @param   [in]      int   rank       processor rank (typically set from rank_global)
- * @param   [in]      int   ntotal     total number of tasks, e.g. NPLASMA
- * @param   [in]       int   nproc      total number of MPI processors
- * @param   [in,out]  int   *my_nmax   pointer to integer value of first task
- * @param   [in,out]  int   *my_nmax   pointer to integer value of final task
- * @return            int   ndo        number of tasks this thread is working on 
-
- * @details  For a process with ntotal tasks, 
- * this routine calculates which thread will be given each task.
- * typically ntotal is NPLASMA and the thread is splitting up wind cells.
- * The routine deals with remainders by distributing the remainder over the 
- * threads if the cells do not divide evenly by thread
- **********************************************************/
-
-int
-get_parallel_nrange (rank, ntotal, nproc, my_nmin, my_nmax)
-     int rank;
-     int ntotal;
-     int nproc;
-     int *my_nmin;
-     int *my_nmax;
-{
-  /* divide the cells between the threads */
-  int ndo;
-  int num_mpi_cells = floor (ntotal / nproc);
-
-  /* the remainder from the above division */
-  int num_mpi_extra = ntotal - (nproc * num_mpi_cells);
-
-  /* this section distributes the remainder over the threads if the cells
-     do not divide evenly by thread */
-  if (rank < num_mpi_extra)
-  {
-    *my_nmin = rank_global * (num_mpi_cells + 1);
-    *my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
-  }
-  else
-  {
-    *my_nmin = num_mpi_extra * (num_mpi_cells + 1) + (rank - num_mpi_extra) * (num_mpi_cells);
-    *my_nmax = num_mpi_extra * (num_mpi_cells + 1) + (rank - num_mpi_extra + 1) * (num_mpi_cells);
-  }
-  ndo = *my_nmax - *my_nmin;
-
-  return ndo;
-}
-
-
-/**********************************************************/
-/**
  * @brief communicates the macro-atom B matrices between threads
  *
  *
@@ -830,14 +829,7 @@ communicate_plasma_cells (int n_start_rank, int n_stop_rank)
   size_of_commbuffer += size_of_specbuffer;
   commbuffer = malloc (size_of_commbuffer);
 
-  /* Initialise parallel only variables */
-//  nmax_r_temp = nmax_e_temp = -1;
-//  dt_e_temp = dt_r_temp = 0.0;
-
-//  double dt_e = my_dt_e;        // Largest change in dT_e or dT_rad
-//  double dt_r = my_dt_r;
-//  int nmax_e = my_nmax_e;       // I think these are tracking which cells has the max dT_e or dT_rad
-//  int nmax_r = my_nmax_r;
+  Log ("Beginning communication for plasma cells\n");
 
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
   {
@@ -981,10 +973,6 @@ communicate_plasma_cells (int n_start_rank, int n_stop_rank)
         MPI_Pack (plasmamain[n].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-//        MPI_Pack (&dt_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-//        MPI_Pack (&dt_r, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-//        MPI_Pack (&nmax_e, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-//        MPI_Pack (&nmax_r, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
       }
     }
 
@@ -1128,35 +1116,276 @@ communicate_plasma_cells (int n_start_rank, int n_stop_rank)
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-//        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-//        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_r_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-//        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_e_temp, 1, MPI_INT, MPI_COMM_WORLD);
-//        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_r_temp, 1, MPI_INT, MPI_COMM_WORLD);
-
-//        /* JM 1409 -- Altered for issue #110 to ensure correct reporting in parallel */
-//        if (fabs (dt_e_temp) >= fabs (dt_e))
-//        {
-//          /* Check if any other threads found a higher maximum for te */
-//          dt_e = dt_e_temp;
-//          nmax_e = nmax_e_temp;
-//        }
-//
-//        if (fabs (dt_r_temp) >= fabs (dt_r))
-//        {
-//          /* Check if any other threads found a higher maximum for tr */
-//          dt_r = dt_r_temp;
-//          nmax_r = nmax_r_temp;
-//        }
-//
-//        t_r_ave += plasmamain[n].t_r;
-//        t_e_ave += plasmamain[n].t_e;
-//        iave++;
-//
       }
     }
   }
 
   free (commbuffer);
+  Log ("Ending communication for plasma cells\n");
+#endif
+  return EXIT_SUCCESS;
+}
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+void
+communicate_wind_luminosity (const int n_start, const int n_stop, const int n_cells_rank)
+{
+#ifdef MPI_ON
+  int n_plasma;
+  int size_doubles;
+  int size_ints;
+  int current_rank;
+
+  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
+  const int num_ints = 1 + 1 * n_cells_max;
+  const int num_doubles = 4 * n_cells_max;
+
+  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
+  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &size_ints);
+  const int comm_buffer_size = size_doubles + size_ints;
+  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+
+  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
+  {
+    if (rank_global == current_rank)
+    {
+      int pack_position = 0;
+      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+      for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
+      {
+        MPI_Pack (&n_plasma, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+      }
+    }
+
+    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
+
+    if (rank_global != current_rank)
+    {
+      int num_cells;
+      int unpack_position = 0;
+      MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &num_cells, 1, MPI_INT, MPI_COMM_WORLD);
+      for (n_plasma = 0; n_plasma < num_cells; ++n_plasma)
+      {
+        int cell;
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &cell, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &plasmamain[cell].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+
+      }
+    }
+  }
+  free (comm_buffer);
+#endif
+}
+
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+void
+communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_rank)
+{
+#ifdef MPI_ON
+  int i;
+  int int_size;
+  int double_size;
+  int current_rank;
+
+  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
+  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
+  MPI_Pack_size (n_cells_max * (2 * size_alpha_est + 2 * nphot_total), MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
+  int comm_buffer_size = double_size + int_size;
+  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+
+
+  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
+  {
+    if (rank_global == current_rank)
+    {
+      int pack_position = 0;
+      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);      // how many cells to unpack
+      for (i = n_start; i < n_stop; ++i)
+      {
+        MPI_Pack (&i, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);       // which cell we're working on
+        if (nlevels_macro > 0)
+        {
+          MPI_Pack (macromain[i].recomb_sp, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+          MPI_Pack (macromain[i].recomb_sp_e, size_alpha_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        }
+        if (nphot_total > 0)
+        {
+          MPI_Pack (plasmamain[i].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+          MPI_Pack (plasmamain[i].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, comm_buffer_size,
+                    &pack_position, MPI_COMM_WORLD);
+        }
+      }
+    }
+
+    // TODO: this should be non-blocking eventually
+    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
+
+    if (rank_global != current_rank)
+    {
+      int unpack_position = 0;
+      int n_cells_to_do;
+      MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &n_cells_to_do, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < n_cells_to_do; ++i)
+      {
+        int current_cell;
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &current_cell, 1, MPI_INT, MPI_COMM_WORLD);
+
+        if (nlevels_macro > 0)
+        {
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp, size_alpha_est,
+                      MPI_DOUBLE, MPI_COMM_WORLD);
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].recomb_sp_e,
+                      size_alpha_est, MPI_DOUBLE, MPI_COMM_WORLD);
+        }
+        if (nphot_total > 0)
+        {
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple,
+                      nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
+          MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, plasmamain[current_cell].recomb_simple_upweight,
+                      nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
+        }
+      }
+    }
+  }
+
+  free (comm_buffer);
+#endif
+}
+
+
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+int
+communicate_macro_cells (int n_start, int n_stop)
+{
+#ifdef MPI_ON
+  int n_plasma;
+  int current_rank;
+  int i;
+  int size_ints;
+  int size_doubles;
+
+  const int n_do = n_stop - n_start;
+  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
+  const int num_ints = 1 + n_cells_max + 2 * n_cells_max;
+  const int num_doubles = ((6 * size_gamma_est) + (2 * size_Jbar_est)) * n_cells_max;
+  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &size_ints);
+  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
+  const int comm_buffer_size = size_ints + size_doubles;
+  char *comm_buffer = malloc (comm_buffer_size);
+
+  Log ("Beginning communication for macro cells\n");
+
+  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
+  {
+    if (rank_global == current_rank)
+    {
+      int pack_position = 0;
+      MPI_Pack (&n_do, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+      for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
+      {
+        MPI_Pack (&n_plasma, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (&macromain[n_plasma].kpkt_rates_known, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (&macromain[n_plasma].matrix_rates_known, 1, MPI_INT, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+
+        // gamma
+        MPI_Pack (macromain[n_plasma].gamma, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].gamma_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+
+        // gamma_e
+        MPI_Pack (macromain[n_plasma].gamma_e, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].gamma_e_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size,
+                  &pack_position, MPI_COMM_WORLD);
+
+        // alpha_st
+        MPI_Pack (macromain[n_plasma].alpha_st, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].alpha_st_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size,
+                  &pack_position, MPI_COMM_WORLD);
+
+        // jbar
+        MPI_Pack (macromain[n_plasma].jbar, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].jbar_old, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
+      }
+    }
+
+    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
+
+    if (rank_global != current_rank)
+    {
+      int unpack_position = 0;
+      int n_cells_to_do;
+      MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &n_cells_to_do, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < n_cells_to_do; ++i)
+      {
+        int current_cell;
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &current_cell, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &macromain[current_cell].kpkt_rates_known, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, &macromain[current_cell].matrix_rates_known, 1, MPI_INT,
+                    MPI_COMM_WORLD);
+
+        // gamma
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].gamma, size_gamma_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].gamma_old, size_gamma_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+
+        // gamma_e
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].gamma_e, size_gamma_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].gamma_e_old, size_gamma_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+
+        // alpha_st
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].alpha_st, size_gamma_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].alpha_st_old, size_gamma_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+
+        // jbar
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].jbar, size_Jbar_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &unpack_position, macromain[current_cell].jbar_old, size_Jbar_est, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+      }
+    }
+  }
+
+  free (comm_buffer);
+  Log ("Ending communication for macro cells\n");
 #endif
   return EXIT_SUCCESS;
 }
