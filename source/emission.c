@@ -115,7 +115,7 @@ wind_luminosity (double f1, double f2, int mode)
     {
       gamma_factor = 1.0 / plasmamain[n_plasma].xgamma; /* this is dt_cmf */
     }
-    else if (mode == MODE_CMF_TIME)
+    else
     {
       gamma_factor = 1.0;
     }

@@ -77,7 +77,7 @@ wind_update (WindPtr w)
      Note that the mynmim and mynmax variables are still used even without MPI on */
 
 #ifdef MPI_ON
-  int ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
+  get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #else
   my_nmin = 0;
   my_nmax = NPLASMA;
