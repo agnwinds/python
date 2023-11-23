@@ -112,7 +112,6 @@ wind_update (WindPtr w)
     /* this routine normalises the unbanded and banded estimators for simple atoms in this cell */
     normalise_simple_estimators (&plasmamain[n]);
 
-
     /* Start with a call to the routine which normalises all the macro atom
        monte carlo radiation field estimators. It's best to do this first since
        some of the estimators include temperature terms (stimulated correction
@@ -151,7 +150,7 @@ wind_update (WindPtr w)
     ion_abundances (&plasmamain[n], geo.ioniz_mode);
 
     /* update the persistent fluxes */
-//    update_persistent_directional_flux_estimators (n, flux_persist_scale);      // TODO: this needs communicating as well
+    update_persistent_directional_flux_estimators (n, flux_persist_scale);      // TODO: this needs communicating as well
   }
 
   /*This is the end of the update loop that is parallised. We now need to exchange data between the tasks. */
@@ -167,7 +166,6 @@ wind_update (WindPtr w)
    * in the wind */
   for (n = 0; n < NPLASMA; ++n)
   {
-    update_persistent_directional_flux_estimators (n, flux_persist_scale);      // TODO: put into parallel loop
     if ((fabs (plasmamain[n].t_r_old - plasmamain[n].t_r)) > fabs (dt_r))
     {
       dt_r = plasmamain[n].t_r - plasmamain[n].t_r_old;
@@ -518,7 +516,7 @@ init_plasma (void)
     {
       plasmamain[i].dmo_dt[j] = 0.0;
     }
-    for (j = 0; j < NUM_FORCE_EST_DIRECTIONS; j++)
+    for (j = 0; j < NFORCE_DIRECTIONS; j++)
     {
       plasmamain[i].rad_force_es[j] = 0.0;
       plasmamain[i].rad_force_ff[j] = 0.0;

@@ -1050,16 +1050,16 @@ typedef struct plasma
                                  */
 
 #define NUM_RAD_FORCE_DIRECTIONS 3
-#define NUM_FORCE_EST_DIRECTIONS 4
+#define NFORCE_DIRECTIONS 4
 
   double dmo_dt[NUM_RAD_FORCE_DIRECTIONS];             /**< Radiative force of wind */
-  double rad_force_es[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_ff[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_bf[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_es[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_ff[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_bf[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
 
-  double rad_force_es_persist[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_ff_persist[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
-  double rad_force_bf_persist[NUM_FORCE_EST_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_es_persist[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_ff_persist[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
+  double rad_force_bf_persist[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
 
   double gain;                  /**<  The gain being used in iterations of the structure */
   double converge_t_r, converge_t_e, converge_hc;

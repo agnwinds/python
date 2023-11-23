@@ -625,7 +625,7 @@ normalise_simple_estimators (xplasma)
  *
  **********************************************************/
 
-int
+void
 update_persistent_directional_flux_estimators (int nplasma, double flux_persist_scale)
 {
   int n;
@@ -680,4 +680,5 @@ update_persistent_directional_flux_estimators (int nplasma, double flux_persist_
   plasmamain[nplasma].F_UV_persistent[3] = length (plasmamain[nplasma].F_UV_persistent);
   plasmamain[nplasma].F_Xray_persistent[3] = length (plasmamain[nplasma].F_Xray_persistent);
   plasmamain[nplasma].rad_force_bf_persist[3] = length (plasmamain[nplasma].rad_force_bf_persist);
+
 }
