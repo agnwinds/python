@@ -61,16 +61,15 @@ wind_update (WindPtr w)
   double apsum, aausum, abstot; //Absorbed photon energy from PI and auger
   double flux_persist_scale;
   double volume;
-  double t_r_old, t_e_old, dt_r, dt_e;
+  double dt_r, dt_e;
   double t_r_ave_old, t_r_ave, t_e_ave_old, t_e_ave;
-  int iave, nmax_r, nmax_e;
+  int nmax_r, nmax_e;
   int nplasma;
   int nwind;
   int my_nmin, my_nmax;         //Note that these variables are still used even without MPI on
   int ndom;
 
   dt_r = dt_e = 0.0;
-  iave = 0;
   nmax_r = nmax_e = -1;
   t_r_ave_old = t_r_ave = t_e_ave_old = t_e_ave = 0.0;
 
@@ -150,7 +149,7 @@ wind_update (WindPtr w)
     ion_abundances (&plasmamain[n], geo.ioniz_mode);
 
     /* update the persistent fluxes */
-    update_persistent_directional_flux_estimators (n, flux_persist_scale);      // TODO: this needs communicating as well
+    update_persistent_directional_flux_estimators (n, flux_persist_scale);
   }
 
   /*This is the end of the update loop that is parallised. We now need to exchange data between the tasks. */
@@ -180,7 +179,6 @@ wind_update (WindPtr w)
     t_e_ave += plasmamain[n].t_e;
     t_r_ave_old += plasmamain[n].t_r_old;
     t_e_ave_old += plasmamain[n].t_e_old;
-//    iave++;                     // TODO: do we need to do this? iave will be NPLASMA
   }
 
   t_r_ave /= NPLASMA;
@@ -205,17 +203,25 @@ wind_update (WindPtr w)
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
     if (zdom[ndom].coord_type == CYLIND)
+    {
       cylind_extend_density (ndom, w);
+    }
     else if (zdom[ndom].coord_type == RTHETA)
+    {
       rtheta_extend_density (ndom, w);
+    }
     else if (zdom[ndom].coord_type == SPHERICAL)
+    {
       spherical_extend_density (ndom, w);
+    }
     else if (zdom[ndom].coord_type == CYLVAR)
+    {
       cylvar_extend_density (ndom, w);
+    }
     else
     {
       Error ("Wind_update2d: Unknown coordinate type %d for domain %d \n", zdom[ndom].coord_type, ndom);
-      Exit (0);
+      Exit (EXIT_FAILURE);
     }
   }
   /* Finished updating region outside of wind */
@@ -223,6 +229,7 @@ wind_update (WindPtr w)
   /* Check the balance between the absorbed and the emitted flux */
   /* NSH 0717 - ensure the cooling and luminosities reflect the current temperature */
 
+  // TODO, we should do this in parallel
   cool_sum = wind_cooling ();   /* We call wind_cooling here to obtain an up to date set of cooling rates */
   lum_sum = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);     /* and we also call wind_luminosity to get the luminosities */
 
