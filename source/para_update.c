@@ -1242,6 +1242,81 @@ communicate_wind_luminosity (const int n_start, const int n_stop, const int n_ce
 #endif
 }
 
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+void
+communicate_wind_cooling (const int n_start, const int n_stop, const int n_cells_rank)
+{
+#ifdef MPI_ON
+  int i;
+  int int_size;
+  int double_size;
+  int current_rank;
+
+  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
+  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
+  MPI_Pack_size (n_cells_max * 9, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
+  int comm_buffer_size = double_size + int_size;
+  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+
+  for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
+  {
+    int position = 0;
+
+    if (rank_global == current_rank)
+    {
+      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+      for (i = n_start; i < n_stop; ++i)
+      {
+        MPI_Pack (&i, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_tot, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_rr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_comp, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_dr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_di, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].lum_ff, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_adiabatic, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].heat_shock, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+      }
+    }
+
+    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
+
+    position = 0;
+
+    if (rank_global != current_rank)
+    {
+      int num_to_do;
+      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_to_do, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < num_to_do; ++i)
+      {
+        int n;
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_di, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].heat_shock, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+      }
+    }
+  }
+
+  free (comm_buffer);
+#endif
+}
 
 /**********************************************************/
 /**
@@ -1382,8 +1457,8 @@ communicate_macro_cells (int n_start, int n_stop)
 
         // alpha_st
         MPI_Pack (macromain[n_plasma].alpha_st, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);
-        MPI_Pack (macromain[n_plasma].alpha_st_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size,
-                  &pack_position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].alpha_st_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position,
+                  MPI_COMM_WORLD);
 
         // jbar
         MPI_Pack (macromain[n_plasma].jbar, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &pack_position, MPI_COMM_WORLD);

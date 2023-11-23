@@ -487,6 +487,7 @@ int communicate_matom_estimators_para(void);
 int communicate_matom_matrices(void);
 int communicate_plasma_cells(int n_start_rank, int n_stop_rank);
 void communicate_wind_luminosity(const int n_start, const int n_stop, const int n_cells_rank);
+void communicate_wind_cooling(const int n_start, const int n_stop, const int n_cells_rank);
 void communicate_alpha_sp(const int n_start, const int n_stop, const int n_cells_rank);
 int communicate_macro_cells(int n_start, int n_stop);
 /* setup_star_bh.c */
