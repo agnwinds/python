@@ -14,7 +14,7 @@ project(Python LANGUAGES C)
 
 # The C standard is being set to 90. The compiler is being set to mpicc
 
-set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_COMPILER mpicc)
 include_directories(include)
 link_directories(lib)
