@@ -6,8 +6,9 @@
  * @brief  This file contains the main routines for updating
  * and then reinitializing the wind after an ionization cycle
  *
- * The routines in this file are generic.  There is no dependence on a particlar wind model or
- * any coordinate system dependences.
+ * The routines in this file are generic.  There is no dependence on a
+ * particular wind model or any coordinate system dependencies.
+ *
  ***********************************************************/
 
 #include <stdio.h>
@@ -45,8 +46,8 @@
  * function of the updates, various variables in geo are updated,  and for
  * a hydro model the results are written to a file
  *
- *
  **********************************************************/
+
 int
 wind_update (WindPtr w)
 {
@@ -62,6 +63,7 @@ wind_update (WindPtr w)
   int nwind;
   int my_nmin, my_nmax;         //Note that these variables are still used even without MPI on
   int ndom;
+  int n_cells_rank;
 
   dt_r = 0.0;
   dt_e = 0.0;
@@ -73,10 +75,11 @@ wind_update (WindPtr w)
   t_e_ave = 0.0;
 
 #ifdef MPI_ON
-  get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
+  n_cells_rank = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #else
   my_nmin = 0;
   my_nmax = NPLASMA;
+  n_cells_rank = NPLASMA;
 #endif
 
   flux_persist_scale = 0.5;     //The amount of the latest flux that gets added into the persistent flux
@@ -149,13 +152,11 @@ wind_update (WindPtr w)
 
   /*This is the end of the update loop that is parallised. We now need to exchange data between the tasks. */
 
-  communicate_plasma_cells (my_nmin, my_nmax);
+  communicate_plasma_cells (my_nmin, my_nmax, n_cells_rank);
   if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == FALSE)
   {
-    communicate_macro_cells (my_nmin, my_nmax);
+    communicate_macro_cells (my_nmin, my_nmax, n_cells_rank);
   }
-
-
 
   /* Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
@@ -240,7 +241,8 @@ wind_update (WindPtr w)
     t_r_ave_old += plasmamain[n_plasma].t_r_old;
     t_e_ave_old += plasmamain[n_plasma].t_e_old;
 
-    check_heating_cooling_rates_for_plasma_cell (n_plasma);
+    check_heating_rates_for_plasma_cell (n_plasma);
+
     plasmamain[n_plasma].cool_tot_ioniz = plasmamain[n_plasma].cool_tot;
     plasmamain[n_plasma].lum_ff_ioniz = plasmamain[n_plasma].lum_ff;
     plasmamain[n_plasma].cool_rr_ioniz = plasmamain[n_plasma].cool_rr;
@@ -369,62 +371,11 @@ wind_update (WindPtr w)
   xtemp_rad (w);
 
 /* This next block is to allow the output of data relating to the abundances of ions when python is being tested
- * with thin shell mode.We will only want this to run if the wind mode is 9, for test or thin shell mode.
- * Note that this section is very dependent on the peculiar structure of the single shell model, which has only
- * one element (namely element 2) in the wind.  nshell below correspond to that particular plasma shell. Recognizing
- * this was a key element to solving bug #412.
+ * with thin shell mode.
  */
   shell_output_wind_update_diagnostics (xsum, psum, fsum, csum, icsum, lsum, ausum, chexsum, cool_sum, lum_sum);
 
   return (0);
-}
-
-/**********************************************************/
-/**
- * @brief
- *
- * @details
- *
- * ### Notes ###
- *
- **********************************************************/
-
-void
-check_heating_cooling_rates_for_plasma_cell (int n_plasma)
-{
-
-  if (sane_check (plasmamain[n_plasma].heat_tot))
-  {
-    Error ("wind_update:sane_check w(%d).heat_tot is %e\n", n_plasma, plasmamain[n_plasma].heat_tot);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_photo))
-  {
-    Error ("wind_update:sane_check w(%d).heat_photo is %e\n", n_plasma, plasmamain[n_plasma].heat_photo);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_auger))
-  {
-    Error ("wind_update:sane_check w(%d).heat_auger is %e\n", n_plasma, plasmamain[n_plasma].heat_auger);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_photo_macro))
-  {
-    Error ("wind_update:sane_check w(%d).heat_photo_macro is %e\n", n_plasma, plasmamain[n_plasma].heat_photo_macro);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_ff))
-  {
-    Error ("wind_update:sane_check w(%d).heat_ff is %e\n", n_plasma, plasmamain[n_plasma].heat_ff);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_lines))
-  {
-    Error ("wind_update:sane_check w(%d).heat_lines is %e\n", n_plasma, plasmamain[n_plasma].heat_lines);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_lines_macro))
-  {
-    Error ("wind_update:sane_check w(%d).heat_lines_macro is %e\n", n_plasma, plasmamain[n_plasma].heat_lines_macro);
-  }
-  if (sane_check (plasmamain[n_plasma].heat_comp))
-  {
-    Error ("wind_update:sane_check w(%d).heat_comp is %e\n", n_plasma, plasmamain[n_plasma].heat_comp);
-  }
 }
 
 /**********************************************************/
@@ -479,14 +430,94 @@ report_bf_simple_ionpool (void)
   return (0);
 }
 
+/**********************************************************/
+/**
+ * @brief      zeros those portions of the wind which contain the radiation properties
+ * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
+ * 	wind has been changed or when you simply want to start off a calculation in a known state
+ *
+ * @details
+ * The routine is called at the beginning of each ionization calculation
+ * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
+ * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
+ * cooling terms are also rezeroed there as well.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
+void
+wind_rad_init ()
+{
+  init_plasma_rad_properties ();
+  init_macro_rad_properties ();
+}
 
 /**********************************************************/
 /**
- * @brief
+ * @brief Check for inf or NaN for a plasma cell's heating rates
+ *
+ * @params [in]  int n_plasma  the index of the plasma cell
  *
  * @details
  *
- * ### Notes ###
+ * This function uses `sane_check()` to check for NaN, inf and etc. for the
+ * heating rates heat_tot, heat_photo, heat_auger, heat_photo_macro, heat_ff, heat_lines,
+ * heat_lines_macro and heat_comp.
+ *
+ * When a heating rate iis not "sane", an error is printed.
+ *
+ * @TODO: this should really also include the cooling rates
+ *
+ **********************************************************/
+
+void
+check_heating_rates_for_plasma_cell (const int n_plasma)
+{
+  if (sane_check (plasmamain[n_plasma].heat_tot))
+  {
+    Error ("wind_update:sane_check w(%d).heat_tot is %e\n", n_plasma, plasmamain[n_plasma].heat_tot);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_photo))
+  {
+    Error ("wind_update:sane_check w(%d).heat_photo is %e\n", n_plasma, plasmamain[n_plasma].heat_photo);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_auger))
+  {
+    Error ("wind_update:sane_check w(%d).heat_auger is %e\n", n_plasma, plasmamain[n_plasma].heat_auger);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_photo_macro))
+  {
+    Error ("wind_update:sane_check w(%d).heat_photo_macro is %e\n", n_plasma, plasmamain[n_plasma].heat_photo_macro);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_ff))
+  {
+    Error ("wind_update:sane_check w(%d).heat_ff is %e\n", n_plasma, plasmamain[n_plasma].heat_ff);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_lines))
+  {
+    Error ("wind_update:sane_check w(%d).heat_lines is %e\n", n_plasma, plasmamain[n_plasma].heat_lines);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_lines_macro))
+  {
+    Error ("wind_update:sane_check w(%d).heat_lines_macro is %e\n", n_plasma, plasmamain[n_plasma].heat_lines_macro);
+  }
+  if (sane_check (plasmamain[n_plasma].heat_comp))
+  {
+    Error ("wind_update:sane_check w(%d).heat_comp is %e\n", n_plasma, plasmamain[n_plasma].heat_comp);
+  }
+}
+
+/**********************************************************/
+/**
+ * @brief Initialises the radiative properties for all plasma cells
+ *
+ * @details
+ *
+ * This works over all plasma cells and does so in a serial loop. At the moment
+ * there is no scope for making this parallelised, as NPLASMA is going to be
+ * small enough for the far foreseeable future that setting the values of various
+ * fields in each cell to zero is not a bottleneck.
  *
  **********************************************************/
 
@@ -616,53 +647,65 @@ init_plasma_rad_properties (void)
 
 /**********************************************************/
 /**
- * @brief
+ * @brief Initialise the radiative properties for all the macro cells.
  *
  * @details
  *
- * ### Notes ###
+ * Parts of this are parallelised, as calculating the stimulated recombination
+ * rate alpha_sp is expensive. Especially for "high" resolution grids. The other
+ * parts of this function are inexpensive due to NPLASMA being quite small for
+ * the foreseeable future.
+ *
+ * The reason to not parallelise everything is to avoid communication overheads,
+ * as the latency of communication (and packing and unpacking data) will
+ * comparable or larger than the time it takes to do it in serial.
+ *
+ * @TODO: blocking broadcast should be replaced with non-blocking
  *
  **********************************************************/
 
 void
 init_macro_rad_properties (void)
 {
-  int i;
+  int n_plasma;
   int k;
-  int j;
+  int macro_level;
+  int n_start;
+  int n_stop;
+  int n_cells;
 
-  for (i = 0; i < NPLASMA; ++i)
+  /* Initialising these properties are inexpensive, so is not parallelised */
+  for (n_plasma = 0; n_plasma < NPLASMA; ++n_plasma)
   {
     if (geo.rt_mode == RT_MODE_MACRO)
     {
-      macromain[i].kpkt_rates_known = FALSE;
+      macromain[n_plasma].kpkt_rates_known = FALSE;
     }
 
-    plasmamain[i].kpkt_emiss = 0.0;
-    plasmamain[i].kpkt_abs = 0.0;
+    plasmamain[n_plasma].kpkt_emiss = 0.0;
+    plasmamain[n_plasma].kpkt_abs = 0.0;
 
-    for (j = 0; j < nlevels_macro; ++j)
+    for (macro_level = 0; macro_level < nlevels_macro; ++macro_level)
     {
-      macromain[i].matom_abs[j] = 0.0;
-      macromain[i].matom_emiss[j] = 0.0;
+      macromain[n_plasma].matom_abs[macro_level] = 0.0;
+      macromain[n_plasma].matom_emiss[macro_level] = 0.0;
 
-      for (k = 0; k < xconfig[j].n_bbu_jump; ++k)
+      for (k = 0; k < xconfig[macro_level].n_bbu_jump; ++k)
       {
-        macromain[i].jbar[xconfig[j].bbu_indx_first + k] = 0.0;
+        macromain[n_plasma].jbar[xconfig[macro_level].bbu_indx_first + k] = 0.0;
       }
-      for (k = 0; k < xconfig[j].n_bfu_jump; ++k)
+      for (k = 0; k < xconfig[macro_level].n_bfu_jump; ++k)
       {
-        macromain[i].gamma[xconfig[j].bfu_indx_first + k] = 0.0;
-        macromain[i].gamma_e[xconfig[j].bfu_indx_first + k] = 0.0;
-        macromain[i].alpha_st[xconfig[j].bfd_indx_first + k] = 0.0;
-        macromain[i].alpha_st_e[xconfig[j].bfd_indx_first + k] = 0.0;
+        macromain[n_plasma].gamma[xconfig[macro_level].bfu_indx_first + k] = 0.0;
+        macromain[n_plasma].gamma_e[xconfig[macro_level].bfu_indx_first + k] = 0.0;
+        macromain[n_plasma].alpha_st[xconfig[macro_level].bfd_indx_first + k] = 0.0;
+        macromain[n_plasma].alpha_st_e[xconfig[macro_level].bfd_indx_first + k] = 0.0;
       }
     }
   }
 
-  int n_start;
-  int n_stop;
-  int n_cells;
+  /* calculating recomb_sp and recomb_simple is expensive due to calls to
+   * `alpha_sp()` , so we do this part of the initialisation in parallel */
 
 #ifdef MPI_ON
   n_cells = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &n_start, &n_stop);
@@ -672,74 +715,57 @@ init_macro_rad_properties (void)
   n_cells = NPLASMA;
 #endif
 
-  // TODO: should be reworked so we use non-blocking communication: do nlevels_macro first and then nphot_tot
-
-  for (i = n_start; i < n_stop; ++i)
+  for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
   {
-    for (j = 0; j < nlevels_macro; ++j)
+    for (macro_level = 0; macro_level < nlevels_macro; ++macro_level)
     {
-      for (k = 0; k < xconfig[j].n_bfd_jump; ++k)
+      for (k = 0; k < xconfig[macro_level].n_bfd_jump; ++k)
       {
-        if (plasmamain[i].t_e > 1.0)
+        if (plasmamain[n_plasma].t_e > 1.0)
         {
-          macromain[i].recomb_sp[xconfig[j].bfd_indx_first + k] = alpha_sp (&phot_top[xconfig[j].bfd_jump[k]], &plasmamain[i], 0);
-          macromain[i].recomb_sp_e[xconfig[j].bfd_indx_first + k] = alpha_sp (&phot_top[xconfig[j].bfd_jump[k]], &plasmamain[i], 2);
+          macromain[n_plasma].recomb_sp[xconfig[macro_level].bfd_indx_first + k] =
+            alpha_sp (&phot_top[xconfig[macro_level].bfd_jump[k]], &plasmamain[n_plasma], 0);
+          macromain[n_plasma].recomb_sp_e[xconfig[macro_level].bfd_indx_first + k] =
+            alpha_sp (&phot_top[xconfig[macro_level].bfd_jump[k]], &plasmamain[n_plasma], 2);
         }
         else
         {
-          macromain[i].recomb_sp[xconfig[j].bfd_indx_first + k] = 0.0;
-          macromain[i].recomb_sp_e[xconfig[j].bfd_indx_first + k] = 0.0;
+          macromain[n_plasma].recomb_sp[xconfig[macro_level].bfd_indx_first + k] = 0.0;
+          macromain[n_plasma].recomb_sp_e[xconfig[macro_level].bfd_indx_first + k] = 0.0;
         }
       }
     }
-    for (j = 0; j < ntop_phot; ++j)
+    for (macro_level = 0; macro_level < ntop_phot; ++macro_level)
     {
-      if ((geo.macro_simple == FALSE && phot_top[j].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
+      if ((geo.macro_simple == FALSE && phot_top[macro_level].macro_info == TRUE) || geo.rt_mode == RT_MODE_2LEVEL)
       {
-        plasmamain[i].recomb_simple[j] = 0.0;
-        plasmamain[i].recomb_simple_upweight[j] = 1.0;
+        plasmamain[n_plasma].recomb_simple[macro_level] = 0.0;
+        plasmamain[n_plasma].recomb_simple_upweight[macro_level] = 1.0;
       }
       else                      // we want a macro approach, but not for this ion so need recomb_simple instead
       {
-        const double alpha_store = plasmamain[i].recomb_simple[j] = alpha_sp (&phot_top[j], &plasmamain[i], 2);
-        plasmamain[i].recomb_simple_upweight[j] = alpha_sp (&phot_top[j], &plasmamain[i], 1) / alpha_store;
+        const double alpha_store = plasmamain[n_plasma].recomb_simple[macro_level] =
+          alpha_sp (&phot_top[macro_level], &plasmamain[n_plasma], 2);
+        plasmamain[n_plasma].recomb_simple_upweight[macro_level] =
+          alpha_sp (&phot_top[macro_level], &plasmamain[n_plasma], 1) / alpha_store;
       }
     }
   }
 
-  communicate_macro_alpha_sp_recomb (n_start, n_stop, n_cells);
+  communicate_macro_recomb_sp_recomb_simple (n_start, n_stop, n_cells);
 }
 
 /**********************************************************/
 /**
- * @brief      zeros those portions of the wind which contain the radiation properties
- * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
- * 	wind has been changed or when you simply want to start off a calculation in a known state
- *
- * @details
- * The routine is called at the beginning of each ionization calculation
- * cycle.  It should zero all heating and radiation induced cooling in the Plasma structure.  Since
- * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
- * cooling terms are also rezeroed there as well.
- *
- * ### Notes ###
- *
- **********************************************************/
-
-void
-wind_rad_init ()
-{
-  init_plasma_rad_properties ();
-  init_macro_rad_properties ();
-}
-
-/**********************************************************/
-/**
- * @brief
+ * @brief  Print extra diagnostics for a shell wind
  *
  * @details
  *
- * ### Notes ###
+ * This diagnostic information is for shell wind models, which should only
+ * be used for testing purposes. This function is used to output data relating
+ * to the abundances of ions. Note that this is very dependent on the peculiar
+ * structure of the single shell model, which has only a single element in the
+ * wind.
  *
  **********************************************************/
 
@@ -753,9 +779,9 @@ shell_output_wind_update_diagnostics (double xsum, double psum, double fsum, dou
   int nn;
   int m;
   int nshell;
-  int first;                    //ion
-  int last;                     //ion
-  double tot;                   //ion?
+  int first_ion_index;
+  int last_ion_index;
+  double total_density;
   double lum_h_line;
   double lum_he_line;
   double lum_c_line;
@@ -890,17 +916,17 @@ shell_output_wind_update_diagnostics (double xsum, double psum, double fsum, dou
 
       for (n = 0; n < nelements; n++)
       {
-        first = ele[n].firstion;
-        last = first + ele[n].nions;
+        first_ion_index = ele[n].firstion;
+        last_ion_index = first_ion_index + ele[n].nions;
         Log ("OUTPUT %-5s ", ele[n].name);
-        tot = 0;
-        for (m = first; m < last; m++)
+        total_density = 0;
+        for (m = first_ion_index; m < last_ion_index; m++)
         {
-          tot += plasmamain[nshell].density[m];
+          total_density += plasmamain[nshell].density[m];
         }
-        for (m = first; m < last; m++)
+        for (m = first_ion_index; m < last_ion_index; m++)
         {
-          Log (" %8.2e", plasmamain[nshell].density[m] / tot);
+          Log (" %8.2e", plasmamain[nshell].density[m] / total_density);
         }
         Log ("\n");
       }
