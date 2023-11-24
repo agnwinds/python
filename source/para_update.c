@@ -1329,7 +1329,7 @@ communicate_wind_cooling (const int n_start, const int n_stop, const int n_cells
  **********************************************************/
 
 void
-communicate_alpha_sp (const int n_start, const int n_stop, const int n_cells_rank)
+communicate_macro_alpha_sp_recomb (const int n_start, const int n_stop, const int n_cells_rank)
 {
 #ifdef MPI_ON
   int i;
