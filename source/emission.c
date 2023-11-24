@@ -81,12 +81,14 @@ wind_luminosity (double f1, double f2, int mode)
   double lum_rad_recomb;
   double lum_free_free;
   double gamma_factor;
+  int n_cells_rank;
 
 #ifdef MPI_ON
-  const int n_cells_rank = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &n_start, &n_stop);
+  n_cells_rank = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &n_start, &n_stop);
 #else
   n_start = 0;
   n_stop = NPLASMA;
+  n_cells_rank = 0;
 #endif
 
   /* Each rank will find the total emission for a subset of the wind grid */
