@@ -111,18 +111,18 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python"
 # this can be altered to whatever is best
-	CFLAGS = -std=c99 -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
+	CFLAGS = -std=gnu99 -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
         XDEBUG = True
 	ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
-		CFLAGS = -std=c99 -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
+		CFLAGS = -std=gnu99 -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 		FFLAGS = -g
 		PRINT_VAR = DEBUGGING, -g -Wall flags
 	endif
 else
 # Use this for large runs
-	CFLAGS = -std=c99 -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
+	CFLAGS = -std=gnu99 -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS =
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
