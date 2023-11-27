@@ -22,7 +22,7 @@ add_definitions(-DMPI_ON)
 
 # Set the Python version, which is going to be appended to source/version.h
 
-set(PYTHON_VERSION 87b)
+set(PYTHON_VERSION 87g)
 message(STATUS "Python version : ${PYTHON_VERSION}")
 
 # Create the version.h file. During the configure process, the file version.h

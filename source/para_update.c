@@ -62,6 +62,63 @@ get_parallel_nrange (int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax
   return ndo;
 }
 
+/**********************************************************/
+/**
+ * @brief  Get the max cells a rank will operate on
+ *
+ * @param [in]  int n_total  The number of cells to split
+ *
+ * @return  int  The largest number of cells a rank will work on
+ *
+ * @details
+ *
+ * This should be used to determine how big a communication buffer should be
+ * when each rank is working on a different number of cells. This is required
+ * in case of some ranks having a smaller number of cells to work on than the
+ * rest. If value from this function is not used, then a MPI_TRUNCATE will
+ * likely occur or a segmentation fault.
+ *
+ **********************************************************/
+
+int
+get_max_cells_per_rank (const int n_total)
+{
+  return ceil ((double) n_total / np_mpi_global);
+}
+
+/**********************************************************/
+/**
+ * @brief Calculate the minimum size for MPI_PACKED comm buffer for ints and doubles
+ *
+ * @param [in] int num_ints     The number of ints going into the comm buffer
+ * @param [in] int num_doubles  The number of doubles going into the comm buffer
+ *
+ * @return  int  the size of the comm buffer
+ *
+ * @details
+ *
+ * This makes use of MPI_Pack_size which takes into account any data alignment
+ * or system dependent properties which would affect the size of the
+ * communication buffer required. This function was designed to be used for
+ * packed buffers. However, there is no reason why it won't work for regular
+ * communication buffered communication buffers.
+ *
+ * As of original writing, only ints and doubles were ever communicated. As more
+ * types are introduced, this function should be extended or refactored.
+ *
+ **********************************************************/
+
+int
+calculate_comm_buffer_size (const int num_ints, const int num_doubles)
+{
+  int int_bytes;
+  int double_bytes;
+
+  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &int_bytes);
+  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &double_bytes);
+
+  return int_bytes + double_bytes;
+}
 
 /**********************************************************/
 /** 
@@ -819,23 +876,13 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
   int n_mpi;
   int num_cells_communicated;
 
-  /* The comm buffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines
-   * The comm buffer is currently sized to be the minimum required. Therefor when variables are added, the
-   * size must be increased.
-   */
-
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int num_ints = 1 + n_cells_max * (20 + nphot_total + 2 * NXBANDS + 2 * N_PHOT_PROC);
   const int num_doubles =
     n_cells_max * (71 + 1 * 3 + 9 * 4 + 6 * NFLUX_ANGLES + 3 * NUM_RAD_FORCE_DIRECTIONS + 9 * nions + 1 * nlte_levels + 3 * nphot_total +
                    1 * n_inner_tot + 9 * NXBANDS + 1 * NBINS_IN_CELL_SPEC);
-
-  int size_ints;
-  int size_doubles;
-  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &size_ints);
-  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
-  const int size_of_comm_buffer = size_ints + size_doubles;
-  char *comm_buffer = malloc (size_of_comm_buffer);
+  const int size_of_comm_buffer = calculate_comm_buffer_size (num_ints, num_doubles);
+  char *const comm_buffer = malloc (size_of_comm_buffer);
 
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
   {
@@ -1192,27 +1239,22 @@ int
 communicate_macro_cells (const int n_start, const int n_stop, const int n_cells_rank)
 {
 #ifdef MPI_ON
+  int i;
   int n_plasma;
   int current_rank;
-  int i;
-  int size_ints;
-  int size_doubles;
   int position;
-  int num_cells_communicated;
+  int num_comm;
 
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
-  const int num_ints = 1 + n_cells_max + 2 * n_cells_max;
-  const int num_doubles = ((6 * size_gamma_est) + (2 * size_Jbar_est)) * n_cells_max;
-  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &size_ints);
-  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
-  const int comm_buffer_size = size_ints + size_doubles;
-  char *comm_buffer = malloc (comm_buffer_size);
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
+  const int comm_buffer_size = calculate_comm_buffer_size (1 + 3 * n_cells_max, n_cells_max * (6 * size_gamma_est + 2 * size_Jbar_est));
+  char *const comm_buffer = malloc (comm_buffer_size);
 
   for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
   {
+    position = 0;
+
     if (rank_global == current_rank)
     {
-      position = 0;
       MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
       for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
       {
@@ -1232,11 +1274,12 @@ communicate_macro_cells (const int n_start, const int n_stop, const int n_cells_
 
     MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
 
+    position = 0;
+
     if (rank_global != current_rank)
     {
-      position = 0;
-      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_cells_communicated, 1, MPI_INT, MPI_COMM_WORLD);
-      for (i = 0; i < num_cells_communicated; ++i)
+      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < num_comm; ++i)
       {
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n_plasma, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &macromain[n_plasma].kpkt_rates_known, 1, MPI_INT, MPI_COMM_WORLD);
@@ -1285,26 +1328,20 @@ communicate_wind_luminosity (const int n_start, const int n_stop, const int n_ce
 {
 #ifdef MPI_ON
   int n_plasma;
-  int size_doubles;
-  int size_ints;
   int current_rank;
   int position;
-  int num_cells_communicated;
+  int num_comm;
 
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
-  const int num_ints = 1 + 1 * n_cells_max;
-  const int num_doubles = 4 * n_cells_max;
-
-  MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
-  MPI_Pack_size (num_ints, MPI_INT, MPI_COMM_WORLD, &size_ints);
-  const int comm_buffer_size = size_doubles + size_ints;
-  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
+  const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, 4 * n_cells_max);
+  char *const comm_buffer = malloc (comm_buffer_size);
 
   for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
   {
+    position = 0;
+
     if (rank_global == current_rank)
     {
-      position = 0;
       MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
       for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
       {
@@ -1318,11 +1355,12 @@ communicate_wind_luminosity (const int n_start, const int n_stop, const int n_ce
 
     MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
 
+    position = 0;
+
     if (rank_global != current_rank)
     {
-      position = 0;
-      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_cells_communicated, 1, MPI_INT, MPI_COMM_WORLD);
-      for (n_plasma = 0; n_plasma < num_cells_communicated; ++n_plasma)
+      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
+      for (n_plasma = 0; n_plasma < num_comm; ++n_plasma)
       {
         int cell;
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &cell, 1, MPI_INT, MPI_COMM_WORLD);
@@ -1365,17 +1403,13 @@ communicate_wind_cooling (const int n_start, const int n_stop, const int n_cells
 {
 #ifdef MPI_ON
   int i;
-  int int_size;
-  int double_size;
   int current_rank;
   int position;
-  int num_cells_communicated;
+  int num_comm;
 
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
-  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
-  MPI_Pack_size (n_cells_max * 9, MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
-  int comm_buffer_size = double_size + int_size;
-  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
+  const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, 9 * n_cells_max);
+  char *const comm_buffer = malloc (comm_buffer_size);
 
   for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
   {
@@ -1401,12 +1435,12 @@ communicate_wind_cooling (const int n_start, const int n_stop, const int n_cells
 
     MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
 
+    position = 0;
 
     if (rank_global != current_rank)
     {
-      position = 0;
-      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_cells_communicated, 1, MPI_INT, MPI_COMM_WORLD);
-      for (i = 0; i < num_cells_communicated; ++i)
+      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < num_comm; ++i)
       {
         int n;
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
@@ -1447,23 +1481,20 @@ communicate_macro_recomb_sp_recomb_simple (const int n_start, const int n_stop, 
 #ifdef MPI_ON
   int i;
   int n_plasma;
-  int int_size;
-  int double_size;
   int current_rank;
   int position;
-  int num_cells_communicated;
+  int num_comm;
 
-  const int n_cells_max = ceil ((double) NPLASMA / np_mpi_global);
-  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &int_size);
-  MPI_Pack_size (n_cells_max * (2 * size_alpha_est + 2 * nphot_total), MPI_DOUBLE, MPI_COMM_WORLD, &double_size);
-  int comm_buffer_size = double_size + int_size;
-  char *comm_buffer = malloc (comm_buffer_size);        // comm_buffer_size is already in bytes
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
+  const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * (2 * size_alpha_est + 2 * nphot_total));
+  char *const comm_buffer = malloc (comm_buffer_size);
 
   for (current_rank = 0; current_rank < np_mpi_global; ++current_rank)
   {
+    position = 0;
+
     if (rank_global == current_rank)
     {
-      position = 0;
       MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);   // how many cells to unpack
       for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
       {
@@ -1484,11 +1515,12 @@ communicate_macro_recomb_sp_recomb_simple (const int n_start, const int n_stop, 
 
     MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
 
+    position = 0;
+
     if (rank_global != current_rank)
     {
-      position = 0;
-      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_cells_communicated, 1, MPI_INT, MPI_COMM_WORLD);
-      for (i = 0; i < num_cells_communicated; ++i)
+      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
+      for (i = 0; i < num_comm; ++i)
       {
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n_plasma, 1, MPI_INT, MPI_COMM_WORLD);
 
@@ -1531,18 +1563,14 @@ void
 communicate_macro_atom_emissivities (const int n_start, const int n_stop, const int n_cells_rank)
 {
 #ifdef MPI_ON
-  int current_rank;
   int i;
+  int n_plasma;
+  int current_rank;
   int num_comm;
   int position;
-  int n_plasma;
 
-  int size_ints;
-  int size_doubles;
-  int n_cells_max = floor ((double) NPLASMA / np_mpi_global);
-  MPI_Pack_size (1 + n_cells_max, MPI_INT, MPI_COMM_WORLD, &size_ints);
-  MPI_Pack_size (n_cells_max * (1 + nlevels_macro), MPI_DOUBLE, MPI_COMM_WORLD, &size_doubles);
-  const int comm_buffer_size = size_ints + size_doubles;
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
+  const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * (1 + nlevels_macro));
   char *comm_buffer = malloc (comm_buffer_size);
 
   for (current_rank = 0; current_rank < np_mpi_global; current_rank++)

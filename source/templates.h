@@ -484,15 +484,18 @@ int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne, double nh1, double nh2);
 /* para_update.c */
 int get_parallel_nrange(int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax);
+int get_max_cells_per_rank(const int n_total);
+int calculate_comm_buffer_size(const int num_ints, const int num_doubles);
 int communicate_estimators_para(void);
 int gather_spectra_para(void);
 int communicate_matom_estimators_para(void);
 int communicate_matom_matrices(void);
 int communicate_plasma_cells(const int n_start_rank, const int n_stop_rank, const int n_cells_rank);
+int communicate_macro_cells(const int n_start, const int n_stop, const int n_cells_rank);
 void communicate_wind_luminosity(const int n_start, const int n_stop, const int n_cells_rank);
 void communicate_wind_cooling(const int n_start, const int n_stop, const int n_cells_rank);
 void communicate_macro_recomb_sp_recomb_simple(const int n_start, const int n_stop, const int n_cells_rank);
-int communicate_macro_cells(int n_start, int n_stop, int n_cells_rank);
+void communicate_macro_atom_emissivities(const int n_start, const int n_stop, const int n_cells_rank);
 /* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);

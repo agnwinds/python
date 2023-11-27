@@ -1036,7 +1036,6 @@ calc_all_matom_matrices ()
   PlasmaPtr xplasma;
 #ifdef MPI_ON
   ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
-  Log_parallel ("calc_all_matom_matrices: thread %d calculating matrix for cells %d to %d %d \n", rank_global, my_nmin, my_nmax, ndo);
 #else
   my_nmin = 0;
   my_nmax = NPLASMA;
