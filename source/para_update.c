@@ -862,7 +862,6 @@ communicate_matom_matrices (void)
  * you need to increase the size of the comm buffer.
  *
  * @TODO: we need to find out what data is not required
- * @TODO: re-order Pack/Unpack into same order as field members
  *
  **********************************************************/
 
@@ -895,40 +894,23 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
       {
         // cell number
         MPI_Pack (&n_plasma, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // single ints
         MPI_Pack (&plasmamain[n_plasma].nwind, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].nplasma, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].nscat_es, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].kbf_nuse, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ntot, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ntot_star, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ntot_bl, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ntot_disk, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ntot_wind, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ntot_agn, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].n_ds, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].nrad, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].nioniz, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].trcheck, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].techeck, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].hccheck, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].converge_whole, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].converging, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].scatters, nions, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // int arrays
-        MPI_Pack (plasmamain[n_plasma].kbf_use, nphot_total, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].nxtot, NXBANDS, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].spec_mod_type, NXBANDS, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].n_bf_in, N_PHOT_PROC, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].n_bf_out, N_PHOT_PROC, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // single doubles
         MPI_Pack (&plasmamain[n_plasma].ne, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].rho, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].vol, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].xgamma, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].density, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].partition, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].levden, nlte_levels, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].kappa_ff_factor, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+                  MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].kpkt_emiss, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].kpkt_abs, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].kbf_use, nphot_total, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].kbf_nuse, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].t_r, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].t_r_old, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].t_e, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
@@ -936,8 +918,8 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
         MPI_Pack (&plasmamain[n_plasma].dt_e, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].dt_e_old, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].abs_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_tot_old, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].abs_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_lines, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_ff, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_comp, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
@@ -945,66 +927,53 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
         MPI_Pack (&plasmamain[n_plasma].heat_lines_macro, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_photo_macro, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_photo, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].heat_z, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].heat_auger, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].heat_ch_ex, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].abs_photo, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].abs_auger, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].heat_z, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].w, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ntot, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ntot_star, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ntot_bl, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ntot_disk, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ntot_wind, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ntot_agn, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].nscat_es, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].mean_ds, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].n_ds, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].nrad, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].nioniz, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].ioniz, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].recomb, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].inner_ioniz, n_inner_tot, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].scatters, nions, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].xscatters, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].heat_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].heat_inner_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].cool_rr_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].lum_rr_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].j, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].j_direct, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].j_scatt, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].ave_freq, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].max_freq, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_adiabatic, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].comp_nujnu, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_comp, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_dr, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].heat_ch_ex, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_di, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_rr, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_rr_metals, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_rr_metals, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_tot_old, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_tot_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_lines_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_ff_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_adiabatic_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_comp_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_dr_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_di_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_rr_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_rr_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].cool_rr_metals_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_tot_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].heat_shock, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].gain, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].converge_t_r, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].converge_t_e, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].converge_hc, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ip, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ip_direct, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].ip_scatt, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].xi, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].bf_simple_ionpool_in, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].bf_simple_ionpool_out, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // double arrays - magic numbers
-        MPI_Pack (plasmamain[n_plasma].dmo_dt, 3, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].xj, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].xave_freq, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].fmin_mod, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].fmax_mod, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].xsd_freq, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].nxtot, NXBANDS, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].spec_mod_type, NXBANDS, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].pl_alpha, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].pl_log_w, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].exp_temp, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].exp_w, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+                  MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_vis, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_UV, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_Xray, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].rad_force_es, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].rad_force_ff, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].rad_force_bf, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_vis_persistent, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_UV_persistent, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_Xray_persistent, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // double arrays - NFLUX_ANGLES
         MPI_Pack (plasmamain[n_plasma].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
@@ -1014,44 +983,63 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
                   MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_UV_ang_z_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
-        // double arrays - NFORCE_DIRECTIONS
-        MPI_Pack (plasmamain[n_plasma].rad_force_bf_persist, NFORCE_DIRECTIONS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
-                  MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].j_direct, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].j_scatt, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ip_direct, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ip_scatt, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].max_freq, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_adiabatic, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_rr_metals, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_comp, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_di, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_dr, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_rr, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_rr_metals, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_tot_old, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_tot_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_lines_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_ff_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_adiabatic_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_rr_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_comp_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_di_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_dr_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_rr_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].cool_rr_metals_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_tot_ioniz, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].heat_shock, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].bf_simple_ionpool_in, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].bf_simple_ionpool_out, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].n_bf_in, N_PHOT_PROC, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].n_bf_out, N_PHOT_PROC, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].comp_nujnu, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].dmo_dt, 3, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].rad_force_es, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].rad_force_ff, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].rad_force_bf, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].rad_force_es_persist, NFORCE_DIRECTIONS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].rad_force_ff_persist, NFORCE_DIRECTIONS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
-        // double arrays - nions
-        MPI_Pack (plasmamain[n_plasma].density, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].partition, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].ioniz, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].recomb, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].xscatters, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].heat_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].heat_inner_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].cool_rr_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].lum_rr_ion, nions, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // double arrays - nlte_levels
-        MPI_Pack (plasmamain[n_plasma].levden, nlte_levels, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // double arrays - nphot_total
-        MPI_Pack (plasmamain[n_plasma].recomb_simple, nphot_total, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].recomb_simple_upweight, nphot_total, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+        MPI_Pack (plasmamain[n_plasma].rad_force_bf_persist, NFORCE_DIRECTIONS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
-        // double arrays - n_inner_tot
-        MPI_Pack (plasmamain[n_plasma].inner_ioniz, n_inner_tot, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // double arrays - NXBANDS
-        MPI_Pack (plasmamain[n_plasma].xj, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].xave_freq, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].xsd_freq, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].pl_alpha, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].pl_log_w, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].exp_temp, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].exp_w, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].fmin_mod, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].fmax_mod, NXBANDS, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        // double arrays - NBINS_IN_CELL_SPEC
-        MPI_Pack (plasmamain[n_plasma].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
-                  MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].gain, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].converge_t_r, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].converge_t_e, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].converge_hc, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].trcheck, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].techeck, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].hccheck, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].converge_whole, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].converging, 1, MPI_INT, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].ip, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].xi, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+
       }
     }
 
@@ -1067,35 +1055,22 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &n_plasma, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nwind, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nplasma, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nscat_es, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].kbf_nuse, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_star, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_bl, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_disk, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_wind, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_agn, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].n_ds, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nrad, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nioniz, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].trcheck, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].techeck, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].hccheck, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_whole, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converging, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].scatters, nions, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].kbf_use, nphot_total, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].nxtot, NXBANDS, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].spec_mod_type, NXBANDS, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].n_bf_in, N_PHOT_PROC, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].n_bf_out, N_PHOT_PROC, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ne, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].rho, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].vol, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].xgamma, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].density, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].partition, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].levden, nlte_levels, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].kappa_ff_factor, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].recomb_simple, nphot_total, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].recomb_simple_upweight, nphot_total, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].kpkt_emiss, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].kpkt_abs, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].kbf_use, nphot_total, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].kbf_nuse, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].t_r, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].t_r_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].t_e, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1103,8 +1078,8 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].dt_e, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].dt_e_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].abs_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_tot_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].abs_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1112,62 +1087,50 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_lines_macro, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_photo_macro, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_photo, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_z, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_auger, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_ch_ex, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].abs_photo, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].abs_auger, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_z, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].w, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_star, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_bl, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_disk, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_wind, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ntot_agn, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nscat_es, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].mean_ds, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].n_ds, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nrad, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].nioniz, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].ioniz, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].recomb, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].inner_ioniz, n_inner_tot, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].scatters, nions, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xscatters, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].heat_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].heat_inner_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].cool_rr_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].lum_rr_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ave_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].max_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].comp_nujnu, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_ch_ex, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_di, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr_metals, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_rr_metals, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_tot_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_lines_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_ff_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_adiabatic_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_comp_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_dr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_di_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_rr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr_metals_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_shock, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].gain, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_t_r, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_t_e, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_hc, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].xi, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].bf_simple_ionpool_in, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].bf_simple_ionpool_out, 1, MPI_DOUBLE,
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xj, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xave_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].fmin_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].fmax_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xsd_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].nxtot, NXBANDS, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].spec_mod_type, NXBANDS, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].pl_alpha, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].pl_log_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].exp_temp, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].exp_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_vis, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_Xray, 4, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_es, 4, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_ff, 4, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_bf, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_vis_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_Xray_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1180,38 +1143,63 @@ communicate_plasma_cells (const int n_start_rank, const int n_stop_rank, const i
                     MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_z_persist, NFLUX_ANGLES, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_bf_persist, NFORCE_DIRECTIONS, MPI_DOUBLE,
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].max_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_rr_metals, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_di, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr_metals, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_tot_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_lines_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_ff_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_adiabatic_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_rr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_comp_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_di_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_dr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].cool_rr_metals_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].lum_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].heat_shock, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].bf_simple_ionpool_in, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].bf_simple_ionpool_out, 1, MPI_DOUBLE,
                     MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].n_bf_in, N_PHOT_PROC, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].n_bf_out, N_PHOT_PROC, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].comp_nujnu, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_es, 4, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_ff, 4, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_bf, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_es_persist, NFORCE_DIRECTIONS, MPI_DOUBLE,
                     MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_ff_persist, NFORCE_DIRECTIONS, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].density, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].partition, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].ioniz, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].recomb, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xscatters, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].heat_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].heat_inner_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].cool_rr_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].lum_rr_ion, nions, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].levden, nlte_levels, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].recomb_simple, nphot_total, MPI_DOUBLE,
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].rad_force_bf_persist, NFORCE_DIRECTIONS, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].recomb_simple_upweight, nphot_total, MPI_DOUBLE,
-                    MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].inner_ioniz, n_inner_tot, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xj, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xave_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].xsd_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].pl_alpha, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].pl_log_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].exp_temp, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].exp_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].fmin_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].fmax_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].cell_spec_flux, NBINS_IN_CELL_SPEC, MPI_DOUBLE,
-                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].gain, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_t_r, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_t_e, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_hc, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].trcheck, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].techeck, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].hccheck, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converge_whole, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].converging, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].xi, 1, MPI_DOUBLE, MPI_COMM_WORLD);
       }
     }
   }
@@ -1259,16 +1247,16 @@ communicate_macro_cells (const int n_start, const int n_stop, const int n_cells_
       for (n_plasma = n_start; n_plasma < n_stop; ++n_plasma)
       {
         MPI_Pack (&n_plasma, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&macromain[n_plasma].kpkt_rates_known, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&macromain[n_plasma].matrix_rates_known, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].jbar, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (macromain[n_plasma].jbar_old, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (macromain[n_plasma].gamma, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (macromain[n_plasma].gamma_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (macromain[n_plasma].gamma_e, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (macromain[n_plasma].gamma_e_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (macromain[n_plasma].alpha_st, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (macromain[n_plasma].alpha_st_old, size_gamma_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (macromain[n_plasma].jbar, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (macromain[n_plasma].jbar_old, size_Jbar_est, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&macromain[n_plasma].kpkt_rates_known, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&macromain[n_plasma].matrix_rates_known, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
       }
     }
 
@@ -1282,16 +1270,16 @@ communicate_macro_cells (const int n_start, const int n_stop, const int n_cells_
       for (i = 0; i < num_comm; ++i)
       {
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n_plasma, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &macromain[n_plasma].kpkt_rates_known, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &macromain[n_plasma].matrix_rates_known, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].jbar, size_Jbar_est, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].jbar_old, size_Jbar_est, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].gamma, size_gamma_est, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].gamma_old, size_gamma_est, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].gamma_e, size_gamma_est, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].gamma_e_old, size_gamma_est, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].alpha_st, size_gamma_est, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].alpha_st_old, size_gamma_est, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].jbar, size_Jbar_est, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n_plasma].jbar_old, size_Jbar_est, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &macromain[n_plasma].kpkt_rates_known, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &macromain[n_plasma].matrix_rates_known, 1, MPI_INT, MPI_COMM_WORLD);
       }
     }
   }
@@ -1347,9 +1335,9 @@ communicate_wind_luminosity (const int n_start, const int n_stop, const int n_ce
       {
         MPI_Pack (&n_plasma, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].lum_tot, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].lum_ff, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_rr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n_plasma].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
       }
     }
 
@@ -1365,9 +1353,9 @@ communicate_wind_luminosity (const int n_start, const int n_stop, const int n_ce
         int cell;
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &cell, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[cell].lum_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[cell].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[cell].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[cell].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[cell].lum_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[cell].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
       }
     }
@@ -1422,12 +1410,12 @@ communicate_wind_cooling (const int n_start, const int n_stop, const int n_cells
       {
         MPI_Pack (&i, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[i].cool_tot, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].lum_ff, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[i].cool_rr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[i].cool_comp, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[i].cool_dr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[i].cool_di, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[i].lum_lines, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[i].lum_ff, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[i].cool_dr, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[i].cool_adiabatic, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[i].heat_shock, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
       }
@@ -1445,12 +1433,12 @@ communicate_wind_cooling (const int n_start, const int n_stop, const int n_cells
         int n;
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_di, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].cool_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &plasmamain[n].heat_shock, 1, MPI_DOUBLE, MPI_COMM_WORLD);
       }
