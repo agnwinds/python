@@ -610,8 +610,8 @@ sigma_phot (x_ptr, freq)
     nlast = x_ptr->nlast;
     if ((fbot = x_ptr->freq[nlast]) < freq && freq < (ftop = x_ptr->freq[nlast + 1]))
     {
-      //  frac = (log (freq) - log (fbot)) / (log (ftop) - log (fbot));
-      // xsection = exp ((1. - frac) * log (x_ptr->x[nlast]) + frac * log (x_ptr->x[nlast + 1]));
+//  frac = (log (freq) - log (fbot)) / (log (ftop) - log (fbot));
+// xsection = exp ((1. - frac) * log (x_ptr->x[nlast]) + frac * log (x_ptr->x[nlast + 1]));
       frac = (log (freq) - x_ptr->log_freq[nlast]) / (x_ptr->log_freq[nlast + 1] - x_ptr->log_freq[nlast]);
       xsection = exp ((1. - frac) * x_ptr->log_x[nlast] + frac * x_ptr->log_x[nlast + 1]);
 
