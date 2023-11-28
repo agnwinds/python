@@ -317,6 +317,11 @@ main (argc, argv)
         geo.ndomain = 1;
         rdint ("Wind.number_of_components", &geo.ndomain);
 
+        if (geo.ndomain > MaxDom)
+        {
+          Error ("Maximum number of wind components allowed is %d\n", MaxDom);
+          Exit (EXIT_FAILURE);
+        }
 
         for (n = 0; n < geo.ndomain; n++)
         {
@@ -328,6 +333,10 @@ main (argc, argv)
 
     }
   }
+
+  /* zdom only temporarily needs to be MaxDom. Now that we know the number of domains, we'll reallocate
+   * the domain to make it smaller */
+  zdom = realloc (zdom, sizeof (domain_dummy) * geo.ndomain);
 
 
 /* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,

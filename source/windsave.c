@@ -220,7 +220,6 @@ wind_read (filename)
   NDIM2 = geo.ndim2;
   NPLASMA = geo.nplasma;
 
-  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
   n += fread (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
 
   calloc_wind (NDIM2);
