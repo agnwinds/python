@@ -111,6 +111,7 @@ get_max_cells_per_rank (const int n_total)
 int
 calculate_comm_buffer_size (const int num_ints, const int num_doubles)
 {
+#ifdef MPI_ON
   int int_bytes;
   int double_bytes;
 
@@ -118,6 +119,9 @@ calculate_comm_buffer_size (const int num_ints, const int num_doubles)
   MPI_Pack_size (num_doubles, MPI_DOUBLE, MPI_COMM_WORLD, &double_bytes);
 
   return int_bytes + double_bytes;
+#else
+  return 0;
+#endif
 }
 
 /**********************************************************/
