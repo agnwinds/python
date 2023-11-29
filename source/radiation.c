@@ -321,8 +321,8 @@ radiation (PhotPtr p, double ds)
                 }
                 if (density > DENSITY_PHOT_MIN)
                 {
-//                  kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
-                  kappa_tot += x = exp (log_sigma_phot (x_top_ptr, log (freq_xs))) * density * frac_path * zdom[ndom].fill;
+                  kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
+//xxxx                  kappa_tot += x = exp (log_sigma_phot (x_top_ptr, log (freq_xs))) * density * frac_path * zdom[ndom].fill;
 
                   if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield != -1)    // Calculate during ionization cycles only
                   {
