@@ -1038,7 +1038,9 @@ described as macro-levels. */
             for (n = 0; n < np; n++)
             {
               phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / PLANCK;   // convert from eV to freqency
+              phot_top[ntop_phot].log_freq[n] = log (xe[n] * EV2ERGS / PLANCK); // log version
               phot_top[ntop_phot].x[n] = xx[n]; // leave cross sections in  CGS
+              phot_top[ntop_phot].log_x[n] = log (xx[n]);       // log version
             }
             if (phot_freq_min > phot_top[ntop_phot].freq[0])
               phot_freq_min = phot_top[ntop_phot].freq[0];

@@ -114,6 +114,8 @@ int fbfr;
  * Recast in log space for speedup purposes
  *
  *
+ *  231128 - working with log_sigma_phot removed. ksl
+ *
  **********************************************************/
 
 double
@@ -158,7 +160,8 @@ fb_topbase_partial (freq)
 
   log_gion = ion[nion + 1].log_g;       // Want the g factor of the next ion up in log space
 
-  logx = log_sigma_phot (fb_xtop, log_freq);
+//  logx = log_sigma_phot (fb_xtop, log_freq);
+  logx = log (sigma_phot (fb_xtop, freq));
 
 
 

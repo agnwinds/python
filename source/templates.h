@@ -132,7 +132,6 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 double radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
-double log_sigma_phot(struct topbase_phot *x_ptr, double log_freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
