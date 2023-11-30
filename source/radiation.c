@@ -615,8 +615,15 @@ sigma_phot (x_ptr, freq)
       frac = (log (freq) - x_ptr->log_freq[nlast]) / (x_ptr->log_freq[nlast + 1] - x_ptr->log_freq[nlast]);
       xsection = exp ((1. - frac) * x_ptr->log_x[nlast] + frac * x_ptr->log_x[nlast + 1]);
 
+      if (sane_check (xsection))
+      {
+        Error ("sigma_phot: on retry  %e\n", xsection);
+        xsection = 0.0;
+      }
+
       x_ptr->sigma = xsection;
       x_ptr->f = freq;
+
       return (xsection);
     }
   }
@@ -625,6 +632,20 @@ sigma_phot (x_ptr, freq)
   nmax = x_ptr->np;
   x_ptr->nlast = linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection, 1);     //call linterp in log space
 
+//XXX remove once errors are understoodn
+
+  if (sane_check (xsection))
+  {
+    Error ("sigma_phot: on first calc  %e at freq %e\n", xsection, freq);
+    Error ("sigma_phot: on first calc  %d %d  %d %d\n", x_ptr->z, x_ptr->istate, x_ptr->nlev, x_ptr->uplev);
+    int n;
+    for (n = 0; n < nmax; n++)
+    {
+      Log ("%10.6e  %10.6e\n", x_ptr->freq[n], x_ptr->x[n]);
+    }
+
+    xsection = 0.0;
+  }
 
 
   x_ptr->sigma = xsection;

@@ -1114,8 +1114,8 @@ typedef struct matom_photon_store
 } matom_photon_store_dummy, *MatomPhotStorePtr;
 
 extern MatomPhotStorePtr matomphotstoremain;
-#define MATOM_BF_PDF 1000       /**< number of points to use in a macro atom bf PDF
-                                  */
+//OLD #define MATOM_BF_PDF 1000       /**< number of points to use in a macro atom bf PDF
+//OLD                                   */
 
 
 /*******************************MACRO STRUCTURE*****************************/
