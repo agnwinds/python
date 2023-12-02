@@ -653,7 +653,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
       integrand *= (freq - fthresh) / fthresh;  // difference case
     }
 
-    dfreq = cont_ptr->freq[n + 1] = freq;
+    dfreq = cont_ptr->freq[n + 1] - freq;
     alpha_sp_value += integrand + dfreq;
 
   }

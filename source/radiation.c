@@ -637,11 +637,11 @@ sigma_phot (x_ptr, freq)
   if (sane_check (xsection))
   {
     Error ("sigma_phot: on first calc  %e at freq %e\n", xsection, freq);
-    Error ("sigma_phot: on first calc  %d %d  %d %d\n", x_ptr->z, x_ptr->istate, x_ptr->nlev, x_ptr->uplev);
+    Error ("sigma_phot: on first calc  %d %d  %d %d np %4d\n", x_ptr->z, x_ptr->istate, x_ptr->nlev, x_ptr->uplev, nmax);
     int n;
-    for (n = 0; n < nmax; n++)
+    for (n = 0; n < nmax; n += 10)
     {
-      Log ("%10.6e  %10.6e\n", x_ptr->freq[n], x_ptr->x[n]);
+      Error ("%4d %10.6e  %10.6e  %10.6e %10.6e\n", n, x_ptr->freq[n], x_ptr->x[n], x_ptr->log_freq[n], x_ptr->log_x[n]);
     }
 
     xsection = 0.0;

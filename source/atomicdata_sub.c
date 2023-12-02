@@ -113,7 +113,7 @@ atomicdata2file ()
 
 
   /* Write the photoionization data  */
-  Log ("Writing photionization data\n");
+
   fprintf (fptr, "# Photoionization data: There are %d edges\n", ntop_phot + nxphot);
   for (n = 0; n < ntop_phot + nxphot; n++)
   {
@@ -121,15 +121,12 @@ atomicdata2file ()
              n, phot_top[n].z, phot_top[n].istate, phot_top[n].x[0], phot_top[n].freq[0],
              phot_top[n].nlev, phot_top[n].uplev, phot_top[n].macro_info, phot_top[n].down_index, phot_top[n].up_index, phot_top[n].use);
 
-    Log ("Writing photionization data for %d \n", n);
     int nn;
     for (nn = 0; nn < phot_top[n].np; nn++)
     {
       fprintf (fptr, "Photz %4d %10.6e %10.6e %10.6f %10.6f\n", nn, phot_top[n].freq[nn], phot_top[n].x[nn], phot_top[n].log_freq[nn],
                phot_top[n].log_x[nn]);
     }
-
-    Log ("Finished photionization data for %d \n", n);
 
 
   }
