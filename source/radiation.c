@@ -615,8 +615,10 @@ sigma_phot (x_ptr, freq)
       frac = (log (freq) - x_ptr->log_freq[nlast]) / (x_ptr->log_freq[nlast + 1] - x_ptr->log_freq[nlast]);
       xsection = exp ((1. - frac) * x_ptr->log_x[nlast] + frac * x_ptr->log_x[nlast + 1]);
 
+
       x_ptr->sigma = xsection;
       x_ptr->f = freq;
+
       return (xsection);
     }
   }
@@ -624,8 +626,6 @@ sigma_phot (x_ptr, freq)
 /* Calculate the x-section */
   nmax = x_ptr->np;
   x_ptr->nlast = linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection, 1);     //call linterp in log space
-
-
 
   x_ptr->sigma = xsection;
   x_ptr->f = freq;

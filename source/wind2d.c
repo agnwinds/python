@@ -781,13 +781,7 @@ vwind_xyz (ndom, p, v)
   v[1] = vv[0] * stheta + vv[1] * ctheta;
   v[2] = vv[2];
 
-  if (sane_check (v[0]) || sane_check (v[1]) || sane_check (v[2]))
-  {
-    Error ("vwind_xyz: %f %f %f\n", v[0], v[1], v[2]);
-  }
-
   /* Now populate the buffer */
-
 
 
   if (nvwind < NVWIND)

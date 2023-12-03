@@ -125,10 +125,10 @@ fb_topbase_partial (freq)
   int nion;
   double partial, log_freq;
   double logx;
-//  double gn, gion;
   double log_gn, log_gion;
   double fthresh;
   double test;
+  double x;
 
   log_freq = log (freq);        //Go into log space
 
@@ -160,8 +160,19 @@ fb_topbase_partial (freq)
 
   log_gion = ion[nion + 1].log_g;       // Want the g factor of the next ion up in log space
 
-//  logx = log_sigma_phot (fb_xtop, log_freq);
-  logx = log (sigma_phot (fb_xtop, freq));
+  x = sigma_phot (fb_xtop, freq);
+  if (x < VERY_SMALL)
+  {
+    return (0.0);
+  }
+
+  logx = log (x);
+
+  if (sane_check (logx))
+  {
+    Error ("fb_topbase_partial: x %e logx %e\n", x, logx);
+    return (0.0);
+  }
 
 
 
@@ -184,6 +195,14 @@ fb_topbase_partial (freq)
     partial /= (PLANCK * freq);
 
 
+  if (sane_check (partial))
+  {
+    Error ("fb_topbase_partial: Failed test %e partial %e\n", test, partial);
+    Error ("log_gn %e log_gion %e log_freq %e log_fbt %e fthresh %e  freq %e  fbt %e logx %e\n",
+           log_gn, log_gion, log_freq, log_fbt, fthresh, freq, fbt, logx);
+    partial = 0.0;
+
+  }
 
   return (partial);
 }
@@ -1766,9 +1785,9 @@ matom_select_bf_freq (WindPtr one, int nconf)
 
 
 
-  dfreq = (f2 - f1) / (MATOM_BF_PDF - 1);       //This is the frequency spacing for the equally spaced elements
+  dfreq = (f2 - f1) / (ARRAY_PDF - 1);  //This is the frequency spacing for the equally spaced elements
 
-  for (n = 0; n < MATOM_BF_PDF; n++)    //We keep going until n=ARRAY_PDF-1, which will give the maximum required frequency
+  for (n = 0; n < ARRAY_PDF; n++)       //We keep going until n=ARRAY_PDF-1, which will give the maximum required frequency
   {
     freq = f1 + dfreq * n;      //The frequency of the array element we would make in the normal run of things
     fb_x[n] = freq;             //Set the next array element frequency
@@ -1779,11 +1798,11 @@ matom_select_bf_freq (WindPtr one, int nconf)
   }
 
 
-  if (MATOM_BF_PDF > NCDF)
-  {
-    Error ("matom_select_bf_freq: Overflow of working array\n");
-    Exit (0);
-  }
+//OLD  if (ARRAY_PDF > NCDF)
+//OLD  {
+//OLD    Error ("matom_select_bf_freq: Overflow of working array\n");
+//OLD    Exit (0);
+//OLD  }
 
 
   /* At this point, the variable nnn stores the number of points */
@@ -1792,6 +1811,16 @@ matom_select_bf_freq (WindPtr one, int nconf)
   if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, ARRAY_PDF, f1, f2) != 0)
   {
     Error ("matom_select_bf_freq after cdf_gen_from_array: f1 %g f2 %g te %g \n", f1, f2, xplasma->t_e);
+    Error ("matomc_selct_fb_freg: Printing inputs to macro_recomb.txt\n");
+    FILE *fptr;
+    fptr = fopen ("macro_recomb.txt", "w");
+    fprintf (fptr, "# fmin %e fmax %e\n", f1, f2);
+    for (n = 0; n < ARRAY_PDF; n++)
+    {
+      fprintf (fptr, "%12.6e  %12.6e \n", fb_x[n], fb_y[n]);
+    }
+    fclose (fptr);
+
     Error ("Giving up\n");
     Exit (0);
   }

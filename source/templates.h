@@ -327,6 +327,7 @@ void print_timer_duration(char *msg, struct timeval timer_t0);
 /* matom.c */
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
+double xalpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double freq_min, double freq_max);
 double alpha_sp_integrand(double freq, void *params);

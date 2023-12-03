@@ -1774,7 +1774,7 @@ would like to have simple lines for macro-ions */
                 break;
               }
 
-              atomicdata2file ();
+              // atomicdata2file ();
               if (ion[n].macro_info == -1 && mflag == 1)
               {
                 Error ("Getatomic_data: Macro Atom line data supplied for ion %d\n but there is no suitable level data\n", n);

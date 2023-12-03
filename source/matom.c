@@ -563,7 +563,7 @@ int temp_choice;                //choice of type of calcualation for alpha_sp
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
 double
-alpha_sp (cont_ptr, xplasma, ichoice)
+xalpha_sp (cont_ptr, xplasma, ichoice)
      struct topbase_phot *cont_ptr;
      PlasmaPtr xplasma;
      int ichoice;
@@ -596,6 +596,89 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   }
 
   alpha_sp_value = alpha_sp_value * ALPHA_SP_CONSTANT;
+
+  return (alpha_sp_value);
+}
+
+
+double
+alpha_sp (cont_ptr, xplasma, ichoice)
+     struct topbase_phot *cont_ptr;
+     PlasmaPtr xplasma;
+     int ichoice;
+{
+  double alpha_sp_value, integrand;
+  double fthresh, flast;
+  int n, nmax;
+  double freq, dfreq;
+  double temp;
+  double x;
+
+  temp_choice = ichoice;
+  temp = xplasma->t_e;          //external for use in alph_sp_integrand
+  cont_ext_ptr = cont_ptr;      //"
+  fthresh = cont_ptr->freq[0];  //first frequency in list
+  flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+  if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+  {
+    //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+    flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+  }
+  /* This is the line we want to replace */
+  // alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
+  alpha_sp_value = 0;
+  nmax = cont_ptr->np - 2;      // so that there is one past this poit
+
+
+  for (n = 0; n < nmax; n++)
+  {
+
+    x = cont_ptr->x[n];
+    freq = cont_ptr->freq[n];
+
+    if (freq > flast)
+    {
+      break;
+    }
+
+    integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / temp);
+
+    if (ichoice == 1)
+    {
+      integrand *= freq / fthresh;
+
+    }
+    else if (ichoice == 2)
+    {
+      integrand *= (freq - fthresh) / fthresh;  // difference case
+    }
+
+    dfreq = cont_ptr->freq[n + 1] - freq;
+    alpha_sp_value += integrand + dfreq;
+
+  }
+
+
+  /* This is the end of the modification */
+
+  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
+     through by the appropriate constant. */
+  if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
+  {
+    alpha_sp_value = alpha_sp_value * xconfig[cont_ptr->nlev].g / xconfig[cont_ptr->uplev].g * pow (xplasma->t_e, -1.5);
+  }
+  else                          //case for simple element
+  {
+    alpha_sp_value = alpha_sp_value * xconfig[cont_ptr->nlev].g / ion[cont_ptr->nion + 1].g * pow (xplasma->t_e, -1.5); //g for next ion up used
+  }
+
+  alpha_sp_value = alpha_sp_value * ALPHA_SP_CONSTANT;
+
+  if (sane_check (alpha_sp_value))
+  {
+    Error ("alpha_sp:sane_check value is %e\n", alpha_sp_value);
+
+  }
 
   return (alpha_sp_value);
 }
