@@ -2855,11 +2855,21 @@ or zero so that simple checks of true and false can be used for them */
 
 /* Now, write the data to a file so you can check it later if you wish */
 /* this is controlled by one of the -d flag modes, defined in atomic.h */
-  if (write_atomicdata || ierr)
+#ifdef MPI_ON
+  if (rank_global == 0)
   {
-    atomicdata2file ();
+#endif
 
-  }                             // end of if statement based on modes.write_atomicdata
+    if (write_atomicdata || ierr)
+    {
+      atomicdata2file ();
+
+
+    }                           // end of if statement based on modes.write_atomicdata
+
+#ifdef MPI_ON
+  }
+#endif
 
   if (ierr)
   {
