@@ -615,11 +615,6 @@ sigma_phot (x_ptr, freq)
       frac = (log (freq) - x_ptr->log_freq[nlast]) / (x_ptr->log_freq[nlast + 1] - x_ptr->log_freq[nlast]);
       xsection = exp ((1. - frac) * x_ptr->log_x[nlast] + frac * x_ptr->log_x[nlast + 1]);
 
-      if (sane_check (xsection))
-      {
-        Error ("sigma_phot: on retry  %e\n", xsection);
-        xsection = 0.0;
-      }
 
       x_ptr->sigma = xsection;
       x_ptr->f = freq;
