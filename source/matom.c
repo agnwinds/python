@@ -633,8 +633,9 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   for (n = 0; n < nmax; n++)
   {
 
-    x = cont_ptr->x[n];
-    freq = cont_ptr->freq[n];
+    freq = 0.5 * (cont_ptr->freq[n] + cont_ptr->freq[n + 1]);
+    x = 0.5 * (cont_ptr->x[n] + cont_ptr->x[n + 1]);
+    dfreq = cont_ptr->freq[n + 1] - cont_ptr->freq[n];
 
     if (freq > flast)
     {
@@ -653,8 +654,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
       integrand *= (freq - fthresh) / fthresh;  // difference case
     }
 
-    dfreq = cont_ptr->freq[n + 1] - freq;
-    alpha_sp_value += integrand + dfreq;
+    alpha_sp_value += integrand * dfreq;
 
   }
 
