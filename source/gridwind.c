@@ -80,7 +80,7 @@
  **********************************************************/
 
 int
-create_maps ()
+create_wind_and_plasma_cell_maps ()
 {
   int i, j;
   j = 0;
@@ -97,7 +97,7 @@ create_maps ()
       if (wmain[i].inwind < 0)
       {
         Error
-          ("create_maps: wind cell %d (nplasma %d) has volume but not flagged as in wind! Critical error, could cause undefined behaviour. Exiting.\n",
+          ("create_wind_and_plasma_cell_maps: wind cell %d (nplasma %d) has volume but not flagged as in wind! Critical error, could cause undefined behaviour. Exiting.\n",
            i, j);
         Exit (0);
       }
@@ -108,14 +108,15 @@ create_maps ()
       if (wmain[i].inwind >= 0)
       {
         Error
-          ("create_maps: wind cell %d has zero volume but flagged inwind! Critical error, could cause undefined behaviour. Exiting.\n", i);
+          ("create_wind_and_plasma_cell_maps: wind cell %d has zero volume but flagged inwind! Critical error, could cause undefined behaviour. Exiting.\n",
+           i);
         Exit (0);
       }
     }
   }
   if (j != NPLASMA)
   {
-    Error ("create_maps: Problems with matching cells -- Expected %d Got %d\n", NPLASMA, j);
+    Error ("create_wind_and_plasma_cell_maps: Problems with matching cells -- Expected %d Got %d\n", NPLASMA, j);
     Exit (0);
   }
 
@@ -155,7 +156,7 @@ calloc_wind (nelem)
     free (wmain);
   }
 
-  wmain = (WindPtr) calloc (sizeof (wind_dummy), nelem + 1);
+  wmain = (WindPtr) calloc (nelem + 1, sizeof (wind_dummy));
 
   if (wmain == NULL)
   {
@@ -166,7 +167,7 @@ calloc_wind (nelem)
   {
     Log
       ("Allocated %10d bytes for each of %5d elements of             totaling %10.1f Mb\n",
-       sizeof (wind_dummy), nelem, 1.e-6 * nelem * sizeof (wind_dummy));
+       sizeof (wind_dummy), nelem + 1, 1.e-6 * (nelem + 1) * sizeof (wind_dummy));
   }
 
   return (0);
@@ -710,7 +711,6 @@ calloc_matom_matrix (nelem)
 {
   int nrows = nlevels_macro + 1;
   int j, n;
-  n = j = 0;
   int nmatrices_allocated = 0;
   if (nlevels_macro == 0 && geo.nmacro == 0)
   {
@@ -723,20 +723,33 @@ calloc_matom_matrix (nelem)
   {
     if (macromain[n].store_matom_matrix == TRUE)
     {
-      /* allocate space for the macro-atom matrix */
-      if ((macromain[n].matom_matrix = calloc (sizeof (double *), nrows)) == NULL)
+      /* We're doing a trick here to allocate a contiguous chunk of memory
+       * for a 2d array. The first step is we allocate nrow pointers, which
+       * will be the rows of the matrix. */
+      macromain[n].matom_matrix = calloc (nrows, sizeof (*macromain[n].matom_matrix));
+      if (macromain[n].matom_matrix == NULL)
       {
-        Error ("calloc_estimators: Error in allocating memory for MA matrix\n");
-        Exit (0);
+        Error ("calloc_matom_matrix: unable to allocate memory for macro cell %d\n", nelem);
+        Exit (EXIT_FAILURE);
       }
-      for (j = 0; j < nrows; j++)
+
+      /* Now allocate the memory required for the entire matrix on the first row */
+      macromain[n].matom_matrix[0] = calloc (nrows * nrows, sizeof (double));
+      if (macromain[n].matom_matrix[0] == NULL)
       {
-        if ((macromain[n].matom_matrix[j] = calloc (sizeof (double), nrows)) == NULL)
-        {
-          Error ("calloc_estimators: Error in allocating memory for MA matrix entry %d\n", j);
-          Exit (0);
-        }
+        Error ("calloc_matom_matrix: unable to allocate memory for macro matrix\n");
+        Exit (EXIT_FAILURE);
       }
+
+      /* The final step is to reshape the big allocation on the first row into
+       * smaller chunks by using pointer arithmetic to point the pointer in the
+       * first allocation to some offset into second allocation. We're basically
+       * moving memory around manually. */
+      for (j = 1; j < nrows; ++j)
+      {
+        macromain[n].matom_matrix[j] = macromain[n].matom_matrix[j - 1] + nrows;
+      }
+
       nmatrices_allocated += 1;
     }
   }
@@ -745,5 +758,6 @@ calloc_matom_matrix (nelem)
   {
     Log ("Allocated %10.1f Mb for MA matrix \n", 1.e-6 * (nmatrices_allocated + 1) * (nrows * nrows) * sizeof (double));
   }
+
   return (0);
 }

@@ -69,6 +69,7 @@ endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
 set(CUDA_SOURCE source/matrix_gpu.cu)
 
 set(PYTHON_SOURCE
+    ${CUDA_SOURCE}
     source/agn.c
     source/atomicdata.c
     source/atomicdata_init.c
@@ -173,12 +174,22 @@ set(PYTHON_SOURCE
     source/photon_gen_matom.c
     source/disk_photon_gen.c
     source/matrix_cpu.c
-    ${CUDA_SOURCE})
+    source/define_wind.c
+    source/communicate_wind.c
+    source/communicate_plasma.c
+    source/communicate_macro.c
+)
+
+
 
 set(PY_WIND_SOURCE source/py_wind_ion.c source/py_wind_macro.c
-                   source/py_wind_sub.c source/py_wind_write.c)
+                   source/py_wind_sub.c source/py_wind_write.c
+        source/define_wind.c
+        source/communicate_wind.c)
 
-set(WINDSAVE2TABLE_SOURCE source/windsave2table_sub.c)
+set(WINDSAVE2TABLE_SOURCE source/windsave2table_sub.c
+        source/define_wind.c
+        source/communicate_wind.c)
 
 set(RAD_HYDRO_SOURCE source/rad_hydro_files.c)
 
@@ -192,7 +203,10 @@ set(TEST_SOURCE
     source/tests/unit_test_main.c
     source/tests/tests/test_matrix.c
     source/tests/tests/test_compton.c
-    ${PYTHON_SOURCE})
+    ${PYTHON_SOURCE}
+        source/define_wind.c
+        source/tests/tests/test_define_wind.c
+        source/communicate_wind.c)
 
 #${CUDA_SOURCE})
 

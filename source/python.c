@@ -347,11 +347,21 @@ main (argc, argv)
 
   /* All operating modes */
   rdpar_comment ("Parameters associated with photon number, cycles,ionization and radiative transfer options");
-
+  /* Getting the atomic data has been moved here as when it was deeply nested in init_ionization, it made it very
+   * difficult to write unit tests or other tests. The key issue is that init_ionization is initialising too
+   * much all at once, which makes it very difficult to initialise or modify specific things for testing or debug
+   * purposes */
+  if (geo.run_type == RUN_TYPE_NEW)
+  {
+    rdstr ("Atomic_data", geo.atomic_filename);
+  }
   init_photons ();
-
-
   init_ionization ();
+  if (geo.run_type == RUN_TYPE_NEW)
+  {
+    setup_atomic_data (geo.atomic_filename);
+  }
+
 
   /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where
    * one is starting from an early wind file as implemented this is quite restrictive about what one
@@ -650,7 +660,11 @@ main (argc, argv)
     wind_save (files.windsave);
     Log ("This was was run with the ---grid-only flag set, so quitting now wind has been defined.\n");
     error_summary ("wind definition only (--grid-only).");
-    exit (0);
+#ifdef MPI_ON
+    MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Finalize ();
+#endif
+    return EXIT_SUCCESS;
   }
 
 
