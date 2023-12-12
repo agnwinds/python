@@ -710,7 +710,7 @@ calloc_matom_matrix (nelem)
      int nelem;
 {
   int nrows = nlevels_macro + 1;
-  int j, n;
+  int n;
   int nmatrices_allocated = 0;
   if (nlevels_macro == 0 && geo.nmacro == 0)
   {
@@ -723,33 +723,7 @@ calloc_matom_matrix (nelem)
   {
     if (macromain[n].store_matom_matrix == TRUE)
     {
-      /* We're doing a trick here to allocate a contiguous chunk of memory
-       * for a 2d array. The first step is we allocate nrow pointers, which
-       * will be the rows of the matrix. */
-      macromain[n].matom_matrix = calloc (nrows, sizeof (*macromain[n].matom_matrix));
-      if (macromain[n].matom_matrix == NULL)
-      {
-        Error ("calloc_matom_matrix: unable to allocate memory for macro cell %d\n", nelem);
-        Exit (EXIT_FAILURE);
-      }
-
-      /* Now allocate the memory required for the entire matrix on the first row */
-      macromain[n].matom_matrix[0] = calloc (nrows * nrows, sizeof (double));
-      if (macromain[n].matom_matrix[0] == NULL)
-      {
-        Error ("calloc_matom_matrix: unable to allocate memory for macro matrix\n");
-        Exit (EXIT_FAILURE);
-      }
-
-      /* The final step is to reshape the big allocation on the first row into
-       * smaller chunks by using pointer arithmetic to point the pointer in the
-       * first allocation to some offset into second allocation. We're basically
-       * moving memory around manually. */
-      for (j = 1; j < nrows; ++j)
-      {
-        macromain[n].matom_matrix[j] = macromain[n].matom_matrix[j - 1] + nrows;
-      }
-
+      allocate_macro_matrix (&macromain[n].matom_matrix, nrows);
       nmatrices_allocated += 1;
     }
   }
@@ -760,4 +734,58 @@ calloc_matom_matrix (nelem)
   }
 
   return (0);
+}
+
+/**********************************************************/
+/**
+ * @brief  Allocate memory for a square matom_matrix array
+ *
+ * @param [in, out]  double ***  matrix_addr  The address to the double pointer
+ * @param [in]       int         matrix_size  The size of the square matrix
+ *
+ * @details
+ *
+ * This will allocate a square matrix of size matrix_size * matrix_size. To
+ * use this function,
+ *
+ * double ***matrix;
+ * int matrix_size = 10;
+ * allocate_macro_matrix(&matrix, matrix_size);
+ *
+ * To free memory allocated by this function,
+ *
+ * free(matrix[0]);
+ * free(matrix);
+ *
+ **********************************************************/
+
+void
+allocate_macro_matrix (double ***matrix_addr, int matrix_size)
+{
+  /* We're doing a trick here to allocate a contiguous chunk of memory
+   * for a 2d array. The first step is we allocate nrow pointers, which
+   * will be the rows of the matrix. */
+  *matrix_addr = calloc (matrix_size, sizeof (double *));
+  if (matrix_addr == NULL)
+  {
+    Error ("allocate_macro_matrix: unable to allocate rows for macro matrix_addr");
+    Exit (EXIT_FAILURE);
+  }
+
+  /* Now allocate the memory required for the entire matrix on the first row */
+  (*matrix_addr)[0] = calloc (matrix_size * matrix_size, sizeof (double));
+  if ((*matrix_addr)[0] == NULL)
+  {
+    Error ("allocate_macro_matrix: unable to allocate elements for macro matrix_addr\n");
+    Exit (EXIT_FAILURE);
+  }
+
+  /* The final step is to reshape the big allocation on the first row into
+   * smaller chunks by using pointer arithmetic to point the pointer in the
+   * first allocation to some offset into second allocation. We're basically
+   * moving memory around manually. */
+  for (int row = 1; row < matrix_size; ++row)
+  {
+    (*matrix_addr)[row] = (*matrix_addr)[row - 1] + matrix_size;
+  }
 }

@@ -261,7 +261,7 @@ broadcast_macro_atom_B_matrices (void)
 {
 #ifdef MPI_ON
   int size_of_commbuffer, nrows, n_mpi, n_mpi2, num_comm;
-  int my_nmax, my_nmin, ndo, n, position, i;
+  int my_nmax, my_nmin, ndo, n, position;
   char *commbuffer;
   ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 

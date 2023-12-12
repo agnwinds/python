@@ -398,45 +398,31 @@ get_matom_f_accelerate (mode)
        for the macro-atom probabilities and various other quantities */
     PlasmaPtr xplasma;
     int nrows = nlevels_macro + 1;
-    double **matom_matrix = (double **) calloc (sizeof (double *), nrows);
 
-    for (i = 0; i < nrows; i++)
-    {
-      matom_matrix[i] = (double *) calloc (sizeof (double), nrows);
-    }
-
+    /* We'll be using a pointer arithmetic trick to allocate a contiguous chunk
+     * or memory -- see `calloc_matom_matrix()` in gridwind.c. It has to be allocated
+     * like this as MPI expects contiguous memory blocks */
+    double **matom_matrix;
+    allocate_macro_matrix (&matom_matrix, nrows);
 
     /* add the non-radiative k-packet heating to the kpkt_abs quantity */
     get_kpkt_heating_f ();
 
-//OLD    which_out = 0;
-//OLD    n_tries = 5000000;
     geo.matom_radiation = 0;
-//OLD    n_tries_local = 0;
-
-
 
     /* zero all the emissivity counters and check absorbed quantities */
-//OLD    norm = 0;
     for (n = 0; n < NPLASMA; n++)
     {
       for (m = 0; m < nlevels_macro; m++)
       {
-//OLD        norm += macromain[n].matom_abs[m];
         macromain[n].matom_emiss[m] = 0.0;
         if (sane_check (macromain[n].matom_abs[m]))
           Error ("matom_abs is %8.4e in matom %i level %i\n", macromain[n].matom_abs[m], n, m);
       }
-//OLD      norm += plasmamain[n].kpkt_abs;
       plasmamain[n].kpkt_emiss = 0.0;
       if (sane_check (plasmamain[n].kpkt_abs))
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);
     }
-
-
-
-    Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
-    Log ("Number of macro-atom levels: %d\n", nlevels_macro);
 
 
     /* For MPI parallelisation, the following loop will be distributed over multiple tasks.
@@ -449,11 +435,14 @@ get_matom_f_accelerate (mode)
     my_n_cells = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #endif
 
+    Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
+    Log ("Number of cells for rank: %d\n", my_n_cells);
+    Log ("Number of macro-atom levels: %d\n", nlevels_macro);
+
     nreport = my_nmax / 10;
 
     for (n = my_nmin; n < my_nmax; n++)
     {
-
       /* JM 1309 -- these lines are just log statements which track nreport, as this section
          can take a long time */
 #ifdef MPI_ON
@@ -465,7 +454,6 @@ get_matom_f_accelerate (mode)
       if (n % nreport == 0)
         Log ("Calculating macro atom emissivity for macro atom %7d of %7d or %6.3f per cent\n", n, my_nmax, n * 100. / my_nmax);
 #endif
-
 
       /* use the accelerated macro-atom scheme */
       xplasma = &plasmamain[n];
@@ -505,13 +493,8 @@ get_matom_f_accelerate (mode)
        This is done much the same way as in wind_update */
     broadcast_macro_atom_emissivities (my_nmin, my_nmax, my_n_cells);
 
-    for (i = 0; i < nrows; i++)
-    {
-      free (matom_matrix[i]);
-    }
-
+    free (matom_matrix[0]);
     free (matom_matrix);
-
   }                             // end of if loop which controls whether to compute the emissivities or not
 
 

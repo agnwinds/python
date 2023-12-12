@@ -160,7 +160,7 @@ void shell_output_wind_update_diagnostics (double xsum, double psum, double fsum
 /* windsave.c */
 int wind_save (char filename[]);
 int wind_read (char filename[]);
-void wind_complete ();
+void wind_complete (void);
 int spec_save (char filename[]);
 int spec_read (char filename[]);
 /* extract.c */
@@ -412,6 +412,7 @@ int calloc_macro (int nelem);
 int calloc_estimators (int nelem);
 int calloc_dyn_plasma (int nelem);
 int calloc_matom_matrix (int nelem);
+void allocate_macro_matrix (double ***matrix_addr, int matrix_size);
 /* partition.c */
 int partition_functions (PlasmaPtr xplasma, int mode);
 int partition_functions_2 (PlasmaPtr xplasma, int xnion, double temp, double weight);
