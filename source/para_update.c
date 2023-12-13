@@ -49,8 +49,8 @@ get_parallel_nrange (int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax
      do not divide evenly by thread */
   if (rank < num_mpi_extra)
   {
-    *my_nmin = rank_global * (num_mpi_cells + 1);
-    *my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
+    *my_nmin = rank * (num_mpi_cells + 1);
+    *my_nmax = (rank + 1) * (num_mpi_cells + 1);
   }
   else
   {

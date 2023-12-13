@@ -730,7 +730,7 @@ make_spectra (restart_stat)
 
 #ifdef MPI_ON
   MPI_Finalize ();
-  Log_parallel ("Thread %d Finalized. All done\n", rank_global);
+  Log ("Thread %d Finalized. All done\n", rank_global);
 #endif
 
 #ifdef CUDA_ON

@@ -257,17 +257,16 @@ broadcast_updated_macro_atom_properties (const int n_start, const int n_stop, co
  **********************************************************/
 
 int
-broadcast_macro_atom_B_matrices (void)
+broadcast_macro_atom_state_matrix (int n_start, int n_stop, int n_cells_rank)
 {
 #ifdef MPI_ON
-  int size_of_commbuffer, nrows, n_mpi, n_mpi2, num_comm;
-  int my_nmax, my_nmin, ndo, n, position;
-  char *commbuffer;
-  ndo = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
+  int n_mpi, n_mpi2, num_comm;
+  int n, position;
 
-  nrows = nlevels_macro + 1;
-  size_of_commbuffer = 8.0 * ((nrows * nrows) + 2) * (floor ((double) NPLASMA / np_mpi_global) + 1);
-  commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
+  const int matrix_size = nlevels_macro + 1;
+  const int n_cells_max = get_max_cells_per_rank (NPLASMA);
+  const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * (matrix_size * matrix_size));
+  char *comm_buffer = malloc (comm_buffer_size);
 
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
   {
@@ -275,40 +274,42 @@ broadcast_macro_atom_B_matrices (void)
 
     if (rank_global == n_mpi)
     {
-      MPI_Pack (&ndo, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-      for (n = my_nmin; n < my_nmax; n++)
+      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+      for (n = n_start; n < n_stop; n++)
       {
-        MPI_Pack (&n, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&n, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
 
         /* we only communicate the matrix if it is being stored in this cell */
         if (macromain[n].store_matom_matrix == TRUE)
         {
-          MPI_Pack (macromain[n].matom_matrix[0], nrows * nrows, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+          MPI_Pack (macromain[n].matom_matrix[0], matrix_size * matrix_size, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position,
+                    MPI_COMM_WORLD);
         }
       }
     }
 
-    MPI_Bcast (commbuffer, size_of_commbuffer, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
+    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, n_mpi, MPI_COMM_WORLD);
 
     position = 0;
 
     if (rank_global != n_mpi)
     {
-      MPI_Unpack (commbuffer, size_of_commbuffer, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
+      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
       for (n_mpi2 = 0; n_mpi2 < num_comm; n_mpi2++)
       {
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
 
         /* we only communicate the matrix if it is being stored in this cell */
         if (macromain[n].store_matom_matrix == TRUE)
         {
-          MPI_Unpack (commbuffer, size_of_commbuffer, &position, macromain[n].matom_matrix[0], nrows * nrows, MPI_DOUBLE, MPI_COMM_WORLD);
+          MPI_Unpack (comm_buffer, comm_buffer_size, &position, macromain[n].matom_matrix[0], matrix_size * matrix_size, MPI_DOUBLE,
+                      MPI_COMM_WORLD);
         }
       }
     }
   }
 
-  free (commbuffer);
+  free (comm_buffer);
 #endif
   return (0);
 }

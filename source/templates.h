@@ -669,7 +669,7 @@ int broadcast_simple_estimators (void);
 void broadcast_macro_atom_emissivities (const int n_start, const int n_stop, const int n_cells_rank);
 void broadcast_macro_atom_recomb (const int n_start, const int n_stop, const int n_cells_rank);
 int broadcast_updated_macro_atom_properties (const int n_start, const int n_stop, const int n_cells_rank);
-int broadcast_macro_atom_B_matrices (void);
+int broadcast_macro_atom_state_matrix (int n_start, int n_stop, int n_cells_rank);
 void reduce_macro_atom_estimators (void);
 /* py_wind_sub.c */
 int zoom (int direction);

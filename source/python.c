@@ -149,7 +149,7 @@ main (argc, argv)
 
   init_log_and_windsave (restart_stat);
 
-  Log_parallel ("Thread %d starting.\n", my_rank);
+  Log ("Thread %d starting.\n", my_rank);
 
   /* Start logging of errors and comments */
 
@@ -163,7 +163,7 @@ main (argc, argv)
     Log ("!!Git: This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
 
   Log ("!!Python is running with %d processors\n", np_mpi_global);
-  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
+  Log ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 

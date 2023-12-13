@@ -96,12 +96,6 @@ get_matom_f (mode)
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);
     }
 
-
-
-    Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
-    Log ("Number of macro-atom levels: %d\n", nlevels_macro);
-
-
     /* For MPI parallelisation, the following loop will be distributed over multiple tasks.
        Note that the mynmim and mynmax variables are still used even without MPI on */
     my_nmin = 0;
@@ -112,7 +106,10 @@ get_matom_f (mode)
     my_n_cells = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #endif
 
-    nreport = my_nmax / 10;
+    Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
+    Log ("Number of cells for rank: %d\n", my_n_cells);
+    Log ("Number of macro-atom levels: %d\n", nlevels_macro);
+    nreport = my_n_cells / 10;
 
     for (n = my_nmin; n < my_nmax; n++)
     {
@@ -397,13 +394,13 @@ get_matom_f_accelerate (mode)
     /* if we are using the accelerated macro-atom scheme then we want to allocate an array
        for the macro-atom probabilities and various other quantities */
     PlasmaPtr xplasma;
-    int nrows = nlevels_macro + 1;
+    int matrix_size = nlevels_macro + 1;
 
     /* We'll be using a pointer arithmetic trick to allocate a contiguous chunk
      * or memory -- see `calloc_matom_matrix()` in gridwind.c. It has to be allocated
      * like this as MPI expects contiguous memory blocks */
     double **matom_matrix;
-    allocate_macro_matrix (&matom_matrix, nrows);
+    allocate_macro_matrix (&matom_matrix, matrix_size);
 
     /* add the non-radiative k-packet heating to the kpkt_abs quantity */
     get_kpkt_heating_f ();
@@ -438,8 +435,7 @@ get_matom_f_accelerate (mode)
     Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
     Log ("Number of cells for rank: %d\n", my_n_cells);
     Log ("Number of macro-atom levels: %d\n", nlevels_macro);
-
-    nreport = my_nmax / 10;
+    nreport = my_n_cells / 10;
 
     for (n = my_nmin; n < my_nmax; n++)
     {
