@@ -109,7 +109,14 @@ get_matom_f (mode)
     Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
     Log ("Number of cells for rank: %d\n", my_n_cells);
     Log ("Number of macro-atom levels: %d\n", nlevels_macro);
-    nreport = my_n_cells / 10;
+    if (my_n_cells <= 10)
+    {
+      nreport = my_n_cells;
+    }
+    else
+    {
+      nreport = my_n_cells / 10;
+    }
 
     for (n = my_nmin; n < my_nmax; n++)
     {
@@ -435,7 +442,14 @@ get_matom_f_accelerate (mode)
     Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
     Log ("Number of cells for rank: %d\n", my_n_cells);
     Log ("Number of macro-atom levels: %d\n", nlevels_macro);
-    nreport = my_n_cells / 10;
+    if (my_n_cells <= 10)
+    {
+      nreport = my_n_cells;
+    }
+    else
+    {
+      nreport = my_n_cells / 10;
+    }
 
     for (n = my_nmin; n < my_nmax; n++)
     {
