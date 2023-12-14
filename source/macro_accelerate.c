@@ -1027,7 +1027,7 @@ matom_deactivation_from_matrix (xplasma, uplvl)
  **********************************************************/
 
 int
-calc_all_matom_matrices ()
+calc_all_matom_matrices (void)
 {
   int ndo, my_nmin, my_nmax, n;
   struct timeval timer_t0;
@@ -1060,7 +1060,7 @@ calc_all_matom_matrices ()
   print_timer_duration (message, timer_t0);
 
   /* this deals with communicating the matrices between threads (does nothing in serial mode) */
-  communicate_matom_matrices ();
+  broadcast_macro_atom_state_matrix (my_nmin, my_nmax, ndo);
 
   /* flag the matrix rates as known */
   for (n = 0; n < NPLASMA; n++)

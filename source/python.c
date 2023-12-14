@@ -71,7 +71,7 @@ main (argc, argv)
   WindPtr w;
 
   double freqmin, freqmax;
-  unsigned int n;
+  int n;
   char values[LINELENGTH], answer[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
   int dummy_spectype;
@@ -149,7 +149,7 @@ main (argc, argv)
 
   init_log_and_windsave (restart_stat);
 
-  Log_parallel ("Thread %d starting.\n", my_rank);
+  Log ("Thread %d starting.\n", my_rank);
 
   /* Start logging of errors and comments */
 
@@ -163,7 +163,7 @@ main (argc, argv)
     Log ("!!Git: This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
 
   Log ("!!Python is running with %d processors\n", np_mpi_global);
-  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
+  Log ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
@@ -317,6 +317,11 @@ main (argc, argv)
         geo.ndomain = 1;
         rdint ("Wind.number_of_components", &geo.ndomain);
 
+        if (geo.ndomain > MaxDom)
+        {
+          Error ("Maximum number of wind components allowed is %d\n", MaxDom);
+          Exit (EXIT_FAILURE);
+        }
 
         for (n = 0; n < geo.ndomain; n++)
         {
@@ -329,6 +334,14 @@ main (argc, argv)
     }
   }
 
+  /* zdom only temporarily needs to be MaxDom. Now that we know the number of domains, we'll reallocate
+   * the domain to make it smaller */
+  zdom = realloc (zdom, sizeof (domain_dummy) * geo.ndomain);
+  if (zdom == NULL)
+  {
+    Error ("python: unable to re-allocate space for domain structure from %d domains to %d domains\n", MaxDom, geo.ndomain);
+    Exit (EXIT_FAILURE);
+  }
 
 /* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,
    because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in
@@ -336,12 +349,8 @@ main (argc, argv)
    the flow of reading in data.
  */
 
-  /* All operating modes */
   rdpar_comment ("Parameters associated with photon number, cycles,ionization and radiative transfer options");
-
   init_photons ();
-
-
   init_ionization ();
 
   /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where
@@ -350,6 +359,13 @@ main (argc, argv)
 
   if (geo.run_type == RUN_TYPE_NEW)
   {
+
+    /* Getting the atomic data has been moved here as when it was deeply nested in init_ionization, it made it very
+     * difficult to write unit tests or other tests. The key issue is that init_ionization is initialising too
+     * much all at once, which makes it very difficult to initialise or modify specific things for testing or debug
+     * purposes */
+    rdstr ("Atomic_data", geo.atomic_filename);
+    setup_atomic_data (geo.atomic_filename);
 
     /* Describe the wind, by calling get_wind_params one or more times
        and then gets params by calling e.g. get_sv_wind_params() */
@@ -641,7 +657,11 @@ main (argc, argv)
     wind_save (files.windsave);
     Log ("This was was run with the ---grid-only flag set, so quitting now wind has been defined.\n");
     error_summary ("wind definition only (--grid-only).");
-    exit (0);
+#ifdef MPI_ON
+    MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Finalize ();
+#endif
+    return EXIT_SUCCESS;
   }
 
 
