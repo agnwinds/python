@@ -737,5 +737,7 @@ main (argc, argv)
 
   make_spectra (restart_stat);
 
+  clean_on_exit ();
+
   return (0);
 }

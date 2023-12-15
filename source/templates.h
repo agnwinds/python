@@ -671,6 +671,14 @@ void broadcast_macro_atom_recomb (const int n_start, const int n_stop, const int
 int broadcast_updated_macro_atom_properties (const int n_start, const int n_stop, const int n_cells_rank);
 int broadcast_macro_atom_state_matrix (int n_start, int n_stop, int n_cells_rank);
 void reduce_macro_atom_estimators (void);
+/* janitor.c */
+void free_wind_grid (void);
+void free_plasma_grid (void);
+void free_macro_grid (void);
+void free_photons (void);
+void free_atomic_data (void);
+void free_spectra (void);
+void clean_on_exit (void);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);

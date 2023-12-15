@@ -214,7 +214,8 @@ set(TEST_SOURCE
 # Create the executables for each program, and link the required libraries
 
 # Python
-add_executable(python source/python.c ${PYTHON_SOURCE})
+add_executable(python source/python.c ${PYTHON_SOURCE}
+        source/janitor.c)
 target_link_libraries(python gsl gslcblas m)
 
 # Py_wind
