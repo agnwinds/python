@@ -1760,12 +1760,12 @@ extern struct rdpar_choices zz_spec;
  */
 
 #define READ_NO_TEMP_1D          4
-#define READ_ELECTRON_TEMP_1D    READ_NO_TEMP_1D + 1
-#define READ_BOTH_TEMP_1D        READ_NO_TEMP_1D + 2
+#define READ_ELECTRON_TEMP_1D    (READ_NO_TEMP_1D + 1)
+#define READ_BOTH_TEMP_1D        (READ_NO_TEMP_1D + 2)
 
 #define READ_NO_TEMP_2D          9
-#define READ_ELECTRON_TEMP_2D    READ_NO_TEMP_2D + 1
-#define READ_BOTH_TEMP_2D        READ_NO_TEMP_2D + 2
+#define READ_ELECTRON_TEMP_2D    (READ_NO_TEMP_2D + 1)
+#define READ_BOTH_TEMP_2D        (READ_NO_TEMP_2D + 2)
 
 /**
  * The Import structure will contain all of the required information for
