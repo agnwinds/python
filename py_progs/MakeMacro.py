@@ -62,6 +62,7 @@ import ChiantiPy.core as ch
 import numpy as np
 from astropy.table import Table, join
 from astropy.io import ascii
+import RedoPhot
 
 
 # The levels format looks like
@@ -378,6 +379,13 @@ def get_lines(ion="h_4", nlevels=10):
 
     # Check for lines that have a Wavelength of 0 and if tis happens fix the
     # wavelegnth using el and eu, but issue a warning when you do this
+    # Also assure that the f values are not zero.  Note that this
+    # value may be higher than we want, as the f values for forbidden lines
+    # may be even lower than this.  Howevever, if one decides to change this
+    # One needs to be that output formats for various routines capture the full range, as the
+    # f value is compared to the value for collisions.
+
+    f_min=0.000001
 
     for one in xxtab:
         if one["Wave"] == 0:
@@ -386,8 +394,12 @@ def get_lines(ion="h_4", nlevels=10):
                 "Line with ll %d and ul %d is missing wavelength.  Correcting to %.3f using el and eu"
                 % (one["ll"], one["ul"], one["Wave"])
             )
+        if one["f"]<f_min:
+            one['f']=f_min
+            print("Line with ll %d and ul %d is missing f.  Changing to %.6f so line has way out" 
+                  % (one["ll"], one["ul"],one["f"]))
 
-    xxtab["Wave"].format = "10.3f"
+    xxtab["Wave"].format = "10.6f"
     xxxtab = xxtab["Dtype", "z", "ion", "Wave", "f", "gl", "gu", "el", "eu", "ll", "ul"]
     return xxxtab
 
@@ -831,6 +843,7 @@ def get_collisions(ion="h_1", nlev=20):
     )
 
     print(xtab)
+    xtab=xtab[xtab['ttype']<5]
 
     npossible = 0
     for one in xtab:
@@ -858,7 +871,7 @@ def get_collisions(ion="h_1", nlev=20):
     xout = open(ion + "_upsilon.dat", "w")
     for one in xxtab:
         # print(one)
-        xstring = "CSTREN Line %3d %3d %10.3f %9.6f %2d %2d  %10.6f %10.6f " % (
+        xstring = "CSTREN Line %3d %3d %10.6f %9.6f %2d %2d  %10.6f %10.6f " % (
             one["z"],
             one["ion"],
             one["Wave"],
@@ -998,6 +1011,7 @@ def doit(atom="h_1", nlev=10, next_ion = False):
     get_phot(atom)
     make_phot(atom)
     write_phot(atom)
+    RedoPhot.redo_one('%s_phot.dat' % atom, atom)
 
     xcol = get_collisions(atom, nlev)
     return

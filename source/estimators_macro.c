@@ -530,7 +530,7 @@ normalise_macro_estimators (n)
         Error ("normalise_macro_estimators: bb stimulated correction factor is out of bounds, 0 <= stimfac < 1 but got %g\n", stimfac);
         Error ("normalise_macro_estimators: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
                upper_density, lower_density, xplasma->levden[xconfig[nlev_upper].nden]);
-        Exit (EXIT_FAILURE);
+        // Exit (EXIT_FAILURE);
         stimfac = 0.0;
       }
       else

@@ -3,7 +3,9 @@ Bound-bound electron collision strengths
 
 Source
 ======
-We use the Chianti atomic database, specifically the \*.scups files. These "contain the effective electron collision strengths scaled according to the rules formulated by `Burgess & Tully 1992, A&A, 254, 436 <http://articles.adsabs.harvard.edu/full/1992A%26A...254..436B>`_
+We use the Chianti atomic database, specifically the \*.scups files. These "contain the effective electron collision strengths 
+scaled according to the rules formulated by 
+`Burgess & Tully 1992, A&A, 254, 436 <https://ui.adsabs.harvard.edu/abs/1992A%26A...254..436B/abstract>`_
 The values in the file are functional fits to :math:`\Upsilon(T)`$ which we referred to as :math:`\Omega` in our calculations for collisional de-excitation rate coefficient
 
 
@@ -87,4 +89,24 @@ There is also a member in the line structure (coll_index) which points to the re
 Comments
 ========
 
-This data has been generated to match the Verner line list. If we want to use the Kurukz line list, then a new set of data should be made
+
+There are currenly 4 types of transitions that are read from the Chianti data
+
+- 1 - Allowed transition
+- 2 - Forbiddent transitions
+- 3 - Intercombination trantions
+- 4 - Allowed transitions with 
+
+which correspond to the transition types idenitfied by Burgess & Tully
+
+There are addtional transition types in the Chianti database
+
+- 5 - Dielectronic capture tranisitions
+- 6 - Proton transitions
+
+
+The latter are not currently used in **Python**
+
+Discussion of how Chianti handles transitions can be found in 
+`The CHIANTI upsilon files (ups and scups) <http://www.chiantidatabase.org/tech_reports/13_scups/chianti_report_13.pdf>`_
+

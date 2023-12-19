@@ -109,6 +109,29 @@ atomicdata2file ()
              ground_frac[n].frac[19]);
   }
 
+  /* Finally write out the actual photionization data */
+
+
+  /* Write the photoionization data  */
+
+  fprintf (fptr, "# Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
+  {
+    fprintf (fptr, "Photx n %5d z %2d istate %3d sigma %8.2e freq[0] %8.2e nlev %5d uplev %2d macro %2d  %2d %2d use %2d\n",
+             n, phot_top[n].z, phot_top[n].istate, phot_top[n].x[0], phot_top[n].freq[0],
+             phot_top[n].nlev, phot_top[n].uplev, phot_top[n].macro_info, phot_top[n].down_index, phot_top[n].up_index, phot_top[n].use);
+
+    int nn;
+    for (nn = 0; nn < phot_top[n].np; nn++)
+    {
+      fprintf (fptr, "Photz %4d %10.6e %10.6e %10.6f %10.6f\n", nn, phot_top[n].freq[nn], phot_top[n].x[nn], phot_top[n].log_freq[nn],
+               phot_top[n].log_x[nn]);
+    }
+
+
+  }
+
+
   fclose (fptr);
 
   return (0);
@@ -703,7 +726,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
 
@@ -733,7 +756,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
   return (upsilon);
@@ -780,7 +803,7 @@ upsilon (n_coll, u0)
  **********************************************************/
 
 void
-skiplines (FILE *fptr, int nskip)
+skiplines (FILE * fptr, int nskip)
 {
   int i, c;
 

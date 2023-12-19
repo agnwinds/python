@@ -129,7 +129,7 @@ def write_phot(outfile,xtab,xsec):
     i=0
     while i<len(xtab):
         one=xtab[i]
-        string='PhotMacS  %3d %3d %3d %3d %10.6e %3d' %  (one['z'],one['ion'],one['ll'],one['ul'],one['ethresh'],one['nlines'])
+        string='PhotMacS  %3d %3d %3d %3d %10.6f %3d' %  (one['z'],one['ion'],one['ll'],one['ul'],one['ethresh'],one['nlines'])
         print(string)
         f.write('%s\n' %string)
         one_x=xsec[i]
