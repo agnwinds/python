@@ -150,7 +150,7 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
 #define SPECTYPE_POW     -4
-#define SPECTYPE_CL_TAB  -5
+#define SPECTYPE_CL_TAB  -5   // This is to emulate cloudy
 #define SPECTYPE_BREM    -6
 #define SPECTYPE_MONO    -7
 #define SPECTYPE_NONE	 -3
