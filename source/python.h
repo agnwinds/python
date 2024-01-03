@@ -1081,8 +1081,10 @@ typedef struct plasma
 #define CONVERGENCE_CHECK_FAIL 1        /* Cell has failed a convergence check */
 #define CONVERGENCE_CHECK_OVER_TEMP 2   /* Cell has electron temperature is more than TMAX */
 
-  double ip;                    /**<  Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  double xi;                    /**<  Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
+  double ip;                    /**<  Ionization parameter calculated as number of photons over the lyman limit entering a cell, 
+                                  divided by the number density of hydrogen for the cell.  This is the definnition used in Cloudy */
+  double xi;                    /**<  Ionization parameter as defined by Tarter, Tucker, and Salpeter  1969 (ApJ 156, 943).  
+                                  It is the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
 extern PlasmaPtr plasmamain;
