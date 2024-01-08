@@ -110,12 +110,14 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python"
 # this can be altered to whatever is best
-	CFLAGS = -std=gnu99 -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
+	CFLAGS = -std=gnu99 -g -pg -Wl,-Ttext-segment=0x68000000 -Wall -Werror $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS = -g -pg
-	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
-        XDEBUG = True
+	PRINT_VAR = DEBUGGING, -g -pg -Wl,-Ttext-segment=0x68000000 -Wall flags
+	XDEBUG = True
+# Make the assumption that when using Clang the user is on MacOS, which doesn't
+# have (easy?) access to the GNU profiler or CUDA
 	ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
-		CFLAGS = -std=gnu99 -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
+		CFLAGS = -std=gnu99 -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
 		FFLAGS = -g
 		PRINT_VAR = DEBUGGING, -g -Wall flags
 	endif
