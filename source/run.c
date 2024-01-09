@@ -131,8 +131,9 @@ calculate_ionization (restart_stat)
     spectrum_init (freqmin, freqmax, geo.nangles, geo.angle, geo.phase,
                    geo.scat_select, geo.top_bot_select, geo.select_extract, geo.rho_select, geo.z_select, geo.az_select, geo.r_select);
 
+    xsignal (files.root, "%-20s Begin wind radiative property initialisation\n", "NOK");
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
-
+    xsignal (files.root, "%-20s Finished wind radiative property initialisation\n", "OK");
 
     /* calculate the B matrices if we are using the matrix macro-atom transition mode,
        and we are choosing to store the matrix in at least some cells and there are
@@ -142,7 +143,7 @@ calculate_ionization (restart_stat)
     {
       xsignal (files.root, "%-20s Begin state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
       calc_all_matom_matrices ();
-      xsignal (files.root, "%-20s Finished state machine calculation in cycle %3d  \n", "NOK", geo.wcycle + 1);
+      xsignal (files.root, "%-20s Finished state machine calculation in cycle %3d  \n", "OK", geo.wcycle + 1);
     }
 
     geo.n_ioniz = 0.0;
@@ -181,9 +182,8 @@ calculate_ionization (restart_stat)
 
     nphot_to_define = (long) NPHOT;
 
+    xsignal (files.root, "%-20s Creating photons before transport\n", "NOK");
     define_phot (p, freqmin, freqmax, nphot_to_define, CYCLE_IONIZ, iwind, 1);
-
-
     photon_checks (p, freqmin, freqmax, "Check before transport");
 
     /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
@@ -232,7 +232,7 @@ calculate_ionization (restart_stat)
     {
       z_abs[nn] = 0.0;
       z_orig[nn] = 0.0;
-      nphot_istat[nn] = 0.0;
+      nphot_istat[nn] = 0;
     }
     for (nn = 0; nn < 20; nn++)
     {
@@ -248,7 +248,6 @@ calculate_ionization (restart_stat)
       z_abs_all_orig += p[nn].w_orig;
 
       /* we want the istat to be >1 (not P_SCAT or P_INWIND) */
-//      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
       if (p[nn].istat < N_ISTAT)
       {
         z_abs[p[nn].istat] += p[nn].w;
@@ -267,7 +266,6 @@ calculate_ionization (restart_stat)
       }
     }
 
-
     for (nn = 0; nn < N_ISTAT; nn++)
     {
       Log ("XXX stat %8d     %8d      %12.3e    %12.3e\n", nn, nphot_istat[nn], z_abs[nn], z_orig[nn]);
@@ -278,10 +276,6 @@ calculate_ionization (restart_stat)
     }
     Log ("XXX  rad  abs_all  %12.3e    %12.3e\n", z_abs_all, z_abs_all_orig);
     Log ("XXX  rad  else  l  %12.3e    %12.3e\n", z_else, z_else_orig);
-
-
-
-
 
     Log
       ("!!python: luminosity (radiated or lost) after transphot %18.12e (absorbed or lost  %18.12e  %18.12e). \n",
@@ -315,19 +309,15 @@ calculate_ionization (restart_stat)
     photon_checks (p, freqmin, freqmax, "Check after transport");
     spectrum_create (p, geo.nangles, geo.select_extract);
 
-
-
-    /* At this point we should communicate all the useful infomation
-       that has been accummulated on differenet MPI tasks */
+    /* At this point we should communicate all the useful information
+       that has been accumulated on different MPI tasks */
 
 #ifdef MPI_ON
-
+    xsignal (files.root, "%-20s Begin estimator communication\n", "NOK");
     broadcast_simple_estimators ();
-
     reduce_macro_atom_estimators ();    // this will return 0 if nlevels_macro == 0
+    xsignal (files.root, "%-20s Finished estimator communication\n", "OK");
 #endif
-
-
 
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
     /* We only want one process to write to the file, and we only do this if there is a disk */
@@ -340,7 +330,6 @@ calculate_ionization (restart_stat)
         qdisk_save (files.disk, ztot);
 #ifdef MPI_ON
     }
-    MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
 /* Completed writing file describing disk heating */
@@ -350,25 +339,18 @@ calculate_ionization (restart_stat)
 /* Note that this step is parallelized */
 
     xsignal (files.root, "%-20s Start wind update\n", "NOK");
-
     wind_update (w);
-
     xsignal (files.root, "%-20s Finished wind update\n", "NOK");
 
 
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle + 1, timer ());
 
-    /* Do an MPI reduce to get the spectra all gathered to the master thread */
+    xsignal (files.root, "%-20s Begin spectrum summary for ionisation cycle\n", "NOK");
 
 #ifdef MPI_ON
-
+    /* Do an MPI reduce to get the spectra all gathered to the master thread */
     gather_extracted_spectrum ();
 
-#endif
-
-
-
-#ifdef MPI_ON
     if (rank_global == 0)
     {
 #endif
@@ -386,8 +368,9 @@ calculate_ionization (restart_stat)
                                                    by the disk */
 #ifdef MPI_ON
     }
-    MPI_Barrier (MPI_COMM_WORLD);
 #endif
+
+    xsignal (files.root, "%-20s Finished spectrum summary for ionisation cycle\n", "OK");
 
     /* Save everything after each cycle and prepare for the next cycle
        JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
@@ -412,6 +395,7 @@ calculate_ionization (restart_stat)
     if (rank_global == 0)
     {
 #endif
+      xsignal (files.root, "%-20s Checkpoint wind structure\n", "NOK");
       wind_save (files.windsave);
       Log_silent ("Saved wind structure in %s after cycle %d\n", files.windsave, geo.wcycle);
 
@@ -430,18 +414,14 @@ calculate_ionization (restart_stat)
         sprintf (dummy, "diag_%.100s/%.100s.%02d", files.root, files.root, geo.wcycle);
         do_windsave2table (dummy, 0, FALSE);
       }
-
       if (modes.keep_ioncycle_spectra)
       {
         strcpy (dummy, "");
         sprintf (dummy, "python%02d.log_spec_tot", geo.wcycle);
         spectrum_summary (dummy, 0, 6, SPECTYPE_RAW, 1., 1, 0); /* .log_spec_tot */
-
       }
-
 #ifdef MPI_ON
     }
-    MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
     if (modes.save_rng)
@@ -455,7 +435,6 @@ calculate_ionization (restart_stat)
   }                             // End of Cycle loop
 
 /* END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
-
 
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
