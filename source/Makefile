@@ -138,9 +138,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 
 
 #Note that version should be a single string without spaces.
-
-
-VERSION = 87g
+VERSION = 87h
 
 
 startup:

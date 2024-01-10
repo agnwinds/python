@@ -15,11 +15,15 @@ The purpose of documentation is as follows:
 * to explain where the data currently used in Python and to explain how the raw data 
   is translated in to a format the Python accepts
 
-The routines used to translate raw data format (as well as much of the raw data)
+The routines used to translate raw data format for two-level atoms (as well as much of the raw data)
 are contained in a separate github `repository <https://github.com/agnwinds/data-gen>`_
 These routines are very "rough-and-ready", and not extensively documented, but so users
 should beware.  On the other hand, they are not exceptionally complicated so in most cases
 it should be fairly clear from the code what the various routines do. 
+
+The routines used to generate data for MacroAtoms are described in :doc:`Generating Macro Atom data <./py_progs/MakeMacro>`
+
+
 
 The "masterfile" that determines what data will be read into Python is determined by the
 line in the parameter file, which will read something like::

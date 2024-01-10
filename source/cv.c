@@ -31,14 +31,15 @@
 /**
  * @brief  Calculate the radius of a WD from its mass using a standard
  * mass radius relation 
- * @param  [in] double m  The mas of the wd in gm
+ * @param  [in] double m  The mass of the wd in gm
  *
- * @return The predicted radius of the WD
+ * @return The predicted radius of the WD (in cm)
  * 
  *
  * @details     
  *
- * @bug A refernce for this mass-radius relationshipe is needed
+ * This is the mass radius relationship given by 
+ * Anderson, N 1988 (ApJ 225, 266)
  *
 **********************************************************/
 double
@@ -47,7 +48,7 @@ wdrad (m)
 {
   double r;
 
-  m /= MSOL;                    // In Python, mass is stored in grams and so we need to convert to MSOL
+  m /= MSOL;                   
 
   r = pow ((m / 1.458), 4. / 3.);
   r = pow (1 - r, 0.47);
@@ -70,15 +71,14 @@ wdrad (m)
  * @details     
  * 
  * The routine calculates the size of the Roche lobe of the primary
- * and returns 0.9 of this value as a plausible extimate of the 
+ * and returns 0.9 of this value as a plausible estimate of the 
  * size of the disk
  *
- * someone's thesis.
  *
  * ### Notes ###
  *
  * Various other choices are possible, e.g the circularization radius
- * as discussed in Frank, King and Reine.
+ * as discussed in Frank, King and Raine (Accretion Power in Astophysics)
  * 
 **********************************************************/
 double

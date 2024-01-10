@@ -824,7 +824,7 @@ calls to two_level atom
       Error ("sobolev: If the problem occurs during the first ionization cycle, raising the temperature in the starting model may help.\n");
       Error
         ("sobelev: If that does not work, please reopen issue #1019 on github, and provide the .pf file and anything else needed to duplicate the problem.\n");
-      Exit (0);
+      // Exit (0);
     }
 
     else
