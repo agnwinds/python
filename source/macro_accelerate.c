@@ -537,7 +537,7 @@ fill_kpkt_rates (xplasma, escape, p)
 
     if (cooling_ff < 0)
     {
-      Error ("kpkt: np %d ff cooling rate negative. Abort.", p->np);
+      Error ("kpkt: np %d ff cooling rate negative. Abort.\n", p->np);
       *escape = TRUE;
       p->istat = P_ERROR_MATOM;
       return (0);
@@ -671,8 +671,10 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
 
     if (eprbs[n] < 0.)          //test (can be deleted eventually SS)
     {
-      Error ("Negative probability (matom, 2). Abort.");
-      Exit (0);
+      //Error ("Negative probability (matom, 2) for number %d at %e. Abort.\n", n, eprbs[n]);
+      //Exit (0);
+      Error ("Negative probability (matom, 2) for number %d at %e. Setting to 0.\n", n, eprbs[n]);
+      eprbs[n] = 0.0;
     }
 
     penorm += eprbs[n];
@@ -696,8 +698,11 @@ f_matom_emit_accelerate (xplasma, upper, freq_min, freq_max)
 
     if (eprbs[n + nbbd] < 0.)   //test (can be deleted eventually SS)
     {
-      Error ("Negative probability (matom, 4). Abort.");
-      Exit (0);
+      //Error ("Negative probability (matom, 4) for %d at %e. Abort.\n", n, eprbs[n + nbbd]);
+      //Exit (0);
+      Error ("Negative probability (matom, 4) for %d at %e. Setting to 0\n", n, eprbs[n + nbbd]);
+      eprbs[n + nbbd] = 0.0;
+
     }
     penorm += eprbs[n + nbbd];
     if (cont_ptr->freq[0] < freq_max && cont_ptr->freq[cont_ptr->np - 1] > freq_min)    //means that it may contribute

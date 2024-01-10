@@ -14,7 +14,7 @@ CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-NVCC = 
+NVCC =
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS = -Wno-deprecated-non-prototype
@@ -140,7 +140,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 #Note that version should be a single string without spaces.
 
 
-VERSION = 87g
+VERSION = 87h
 
 
 startup:

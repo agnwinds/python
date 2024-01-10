@@ -6,6 +6,7 @@
 top=$PYTHON
 xdata=xdata
 xmod=xmod
+zdata=zdata
 
 if [ -d "data" ]; then 
     rm data
@@ -15,12 +16,23 @@ if [ -d "xmod" ]; then
     rm xmod
 fi
 
+
+if [ -d "zdata" ]; then 
+    rm zdata
+fi
+
 if [ -d "$top/$xdata" ]; then
     ln -s -f $top/$xdata data
 fi
 
 if [ -d "$top/$xmod" ]; then
     ln -s -f $top/$xmod xmod
+fi
+
+
+
+if [ -d "$top/$zdata" ]; then
+    ln -s -f $top/$zdata zdata
 fi
 
 
