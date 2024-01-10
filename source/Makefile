@@ -143,6 +143,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 VERSION = 87h
 
 
+
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'Compiler is really  $(XVERSION)'
