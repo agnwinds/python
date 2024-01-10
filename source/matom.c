@@ -570,16 +570,18 @@ xalpha_sp (cont_ptr, xplasma, ichoice)
 {
   double alpha_sp_value;
   double fthresh, flast;
+  double temp;
 
   temp_choice = ichoice;
-  temp_ext = xplasma->t_e;      //external for use in alph_sp_integrand
+  temp = temp_ext = xplasma->t_e;       //external for use in alph_sp_integrand
   cont_ext_ptr = cont_ptr;      //"
+
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-  if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+  if ((H_OVER_K * (flast - fthresh) / temp) > ALPHA_MATOM_NUMAX_LIMIT)
   {
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-    flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    flast = fthresh + temp * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
   // alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
   alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
@@ -615,14 +617,15 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   double x;
 
   temp_choice = ichoice;
-  temp = xplasma->t_e;          //external for use in alph_sp_integrand
+  temp = temp_ext = xplasma->t_e;       //external for use in alph_sp_integrand
   cont_ext_ptr = cont_ptr;      //"
+
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-  if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+  if ((H_OVER_K * (flast - fthresh) / temp) > ALPHA_MATOM_NUMAX_LIMIT)
   {
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-    flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    flast = fthresh + temp * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
   /* This is the line we want to replace */
   // alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
@@ -725,16 +728,18 @@ scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, freq_min, fre
 {
   double alpha_sp_value;
   double fthresh, flast;
+  double temp;
 
   temp_choice = ichoice;
-  temp_ext = xplasma->t_e;      //external for use in alph_sp_integrand
+  temp = temp_ext = xplasma->t_e;       //external for use in alph_sp_integrand
   cont_ext_ptr = cont_ptr;      //"
+
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
-  if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+  if ((H_OVER_K * (flast - fthresh) / temp) > ALPHA_MATOM_NUMAX_LIMIT)
   {
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
-    flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    flast = fthresh + temp * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
   if (flast < freq_max)
   {
