@@ -17,13 +17,19 @@ Command line usage (if any):
 
 Description:  
 
+    The routine variies the ionization parameter for an optically thin shell
+    illuminated by a power law.  
+
 Primary routines:
 
 Notes:
+
+    Currently the power law has a higher cutoff than the one in Cloudy 
                                        
 History:
 
 081214 nsh Commented
+231217 ksl Updated to work with Cloudy 23
 
 '''
 
@@ -121,7 +127,7 @@ if __name__ == "__main__":        # allows one to run from command line without 
         inp.write('save element helium "helium.dat"\n')
         inp.write('save element hydrogen "hydrogen.dat"\n')
         inp.close()
-        subprocess.check_call("time cl input",shell=True)
+        subprocess.check_call("time cl -r input",shell=True)
         inp=open('heat.dat','r')
         inp.readline()
         line=inp.readline()

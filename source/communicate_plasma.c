@@ -1044,31 +1044,16 @@ broadcast_simple_estimators (void)
   }
 
 
-  /* 131213 NSH communicate the min and max band frequencies these use MPI_MIN or MPI_MAX */
-  MPI_Reduce (minbandfreqhelper, minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-  MPI_Reduce (maxbandfreqhelper, maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-  MPI_Reduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-  MPI_Reduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce (flux_helper, flux_helper2, NPLASMA * 3 * NFLUX_ANGLES, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-  MPI_Reduce (ion_helper, ion_helper2, NPLASMA * nions, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce (inner_ion_helper, inner_ion_helper2, NPLASMA * n_inner_tot, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-  /* JM 1607 -- sum up the qdisk values */
-  MPI_Reduce (qdisk_helper, qdisk_helper2, 2 * NRINGS, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-  MPI_Bcast (redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  /* 131213 NSH Send out the global min and max band limited frequencies to all threads */
-  MPI_Bcast (minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (flux_helper2, NPLASMA * 3 * NFLUX_ANGLES, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (ion_helper2, NPLASMA * nions, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (inner_ion_helper2, NPLASMA * n_inner_tot, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-  /* JM 1607 -- send out the qdisk values to all threads */
-  MPI_Bcast (qdisk_helper2, NRINGS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
+  /* Reduced and communicate all ranks. Some operations are MIN/MAX but most are
+   * sums to compute the average across ranks */
+  MPI_Allreduce (minbandfreqhelper, minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+  MPI_Allreduce (maxbandfreqhelper, maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce (flux_helper, flux_helper2, NPLASMA * 3 * NFLUX_ANGLES, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce (ion_helper, ion_helper2, NPLASMA * nions, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce (inner_ion_helper, inner_ion_helper2, NPLASMA * n_inner_tot, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce (qdisk_helper, qdisk_helper2, 2 * NRINGS, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
   {
@@ -1191,11 +1176,8 @@ broadcast_simple_estimators (void)
     iqdisk_helper[mpi_i + NRINGS] = qdisk.nhit[mpi_i];
   }
 
-  MPI_Reduce (iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce (iqdisk_helper, iqdisk_helper2, 2 * NRINGS, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-
-  MPI_Bcast (iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast (iqdisk_helper2, NRINGS, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Allreduce (iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce (iqdisk_helper, iqdisk_helper2, 2 * NRINGS, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
   {
@@ -1246,8 +1228,7 @@ broadcast_simple_estimators (void)
       }
     }
 
-    MPI_Reduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Bcast (redhelper2, size_of_commbuffer, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Allreduce (redhelper, redhelper2, size_of_commbuffer, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
     for (mpi_i = 0; mpi_i < NBINS_IN_CELL_SPEC; mpi_i++)
     {
