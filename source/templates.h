@@ -216,11 +216,6 @@ double local_to_observer_frame_velocity(double *v_cmf, double *v, double *v_obs)
 int local_to_observer_frame_ruler_transform(double v[], double dx_cmf[], double dx_obs[]);
 int observer_to_local_frame_ruler_transform(double v[], double dx_obs[], double dx_cmf[]);
 int lorentz_transform(PhotPtr p_in, PhotPtr p_out, double v[]);
-/* get_models.c */
-int calloc_models(int nmods);
-int get_models(char modellist[], int npars, int *spectype);
-int get_one_model(char filename[], struct Model *onemod);
-int model(int spectype, double par[]);
 /* gradv.c */
 double dvwind_ds_cmf(PhotPtr p);
 int calculate_cell_dvds_ave(int ndom, WindPtr cell);

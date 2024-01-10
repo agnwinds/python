@@ -191,7 +191,7 @@ python_source = agn.c anisowind.c atomic_extern_init.c atomicdata.c atomicdata_i
 	communicate_plasma.c communicate_wind.c compton.c continuum.c cooling.c corona.c  \
 	cv.c cylind_var.c cylindrical.c define_wind.c density.c diag.c dielectronic.c direct_ion.c  \
 	disk.c disk_init.c disk_photon_gen.c emission.c estimators_macro.c estimators_simple.c  \
-	extract.c frame.c get_models.c gradv.c gridwind.c homologous.c hydro_import.c import.c  \
+	extract.c frame.c  gradv.c gridwind.c homologous.c hydro_import.c import.c  \
 	import_calloc.c import_cylindrical.c import_rtheta.c import_spherical.c ionization.c  \
 	janitor.c knigge.c levels.c lines.c macro_accelerate.c macro_gen_f.c macro_gov.c  \
 	matom.c matom_diag.c matrix_cpu.c matrix_ion.c models_extern_init.c para_update.c  \
@@ -205,8 +205,9 @@ python_source = agn.c anisowind.c atomic_extern_init.c atomicdata.c atomicdata_i
 
 # these are the objects required for compilation of python. We are using pattern
 # substitution so we don't have to maintain two identical lists but with .o instead of
-# .c. Previously these two lists were slightly different.
-python_objects := $(python_source:.c=.o)
+# .c. Previously these two lists were slightly different. For some reason, get_models.c
+# cannot be included in the sources, but we can define it OK in the objects.
+python_objects := $(python_source:.c=.o) get_models.o
 
 # kpar_source is now declared separately from python_source so that the file log.h
 # can be made using cproto
