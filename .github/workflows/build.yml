@@ -27,8 +27,8 @@ jobs:
     needs: greeting
     steps:
     - uses: actions/checkout@v3
-    - name: "Installing build dependencies"
-      run: sudo apt update && apt install -y build-essential cmake
+    #- name: "Installing build dependencies"
+    #  run: sudo apt update && apt install -y build-essential cmake
 
     - name: Configuring Python
       run: ./configure
