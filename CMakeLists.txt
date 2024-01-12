@@ -185,7 +185,8 @@ set(PYTHON_SOURCE
 set(PY_WIND_SOURCE source/py_wind_ion.c source/py_wind_macro.c
                    source/py_wind_sub.c source/py_wind_write.c
         source/define_wind.c
-        source/communicate_wind.c)
+        source/communicate_wind.c
+        source/communicate_spectra.c)
 
 set(WINDSAVE2TABLE_SOURCE source/windsave2table_sub.c
         source/define_wind.c
@@ -215,7 +216,8 @@ set(TEST_SOURCE
 
 # Python
 add_executable(python source/python.c ${PYTHON_SOURCE}
-        source/janitor.c)
+        source/janitor.c
+        source/communicate_spectra.c)
 target_link_libraries(python gsl gslcblas m)
 
 # Py_wind
