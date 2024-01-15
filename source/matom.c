@@ -597,6 +597,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
   alpha_sp_value = alpha_sp_value * ALPHA_SP_CONSTANT;
 
+//  Log ("Xxxx %e  %e %d %d %d %d\n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev);
+
   return (alpha_sp_value);
 }
 
