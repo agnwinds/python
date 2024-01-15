@@ -217,6 +217,12 @@ bf_estimators_increment (one, p, ds)
   /* JM1411 -- the below processes have the factor zdom[ndom].fill incorporated directly
      into the kappa subroutines */
 
+  if (xplasma->nwind < 0)
+  {
+    Error ("bf_estimators: Bad plasma cell %d  %d\n", xplasma->nplasma, xplasma->nwind);
+    return (0);
+  }
+
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */
 
   weight_of_packet = p->w;
