@@ -2,6 +2,15 @@
 #include "mpi.h"
 #endif
 
+/* Integer representations for the logging level in Python's logging functions,
+ * as defined in xlog.c */
+#define SHOW_PARALLEL	     1
+#define SHOW_ERROR	       2
+#define SHOW_LOG  	       3
+#define SHOW_DEBUG	       4
+#define SHOW_LOG_SILENT    5
+#define SHOW_ERROR_SILENT  5
+
 #define UV_low 7.4e14           /**< The lower frequency bound of the UV band as defined in IOS 21348
                                   */
 #define UV_hi 3e16              /**< The lower frequency bound of the UV band as defined in IOS 21348
@@ -150,7 +159,7 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
 #define SPECTYPE_POW     -4
-#define SPECTYPE_CL_TAB  -5   // This is to emulate cloudy
+#define SPECTYPE_CL_TAB  -5     // This is to emulate cloudy
 #define SPECTYPE_BREM    -6
 #define SPECTYPE_MONO    -7
 #define SPECTYPE_NONE	 -3

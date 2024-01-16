@@ -56,11 +56,9 @@ calculate_ionization (restart_stat)
   PhotPtr p;
 
   char dummy[LINELENGTH];
-
   double freqmin, freqmax, x;
   long nphot_to_define, nphot_min;
   int iwind;
-
 
 
   /* Save the the windfile before the first ionization cycle in order to
@@ -308,48 +306,37 @@ calculate_ionization (restart_stat)
 
     photon_checks (p, freqmin, freqmax, "Check after transport");
     spectrum_create (p, geo.nangles, geo.select_extract);
+    Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.cool_tot_ioniz);
 
-    /* At this point we should communicate all the useful information
-       that has been accumulated on different MPI tasks */
 
 #ifdef MPI_ON
-    xsignal (files.root, "%-20s Begin estimator communication\n", "NOK");
-    broadcast_simple_estimators ();
-    reduce_macro_atom_estimators ();    // this will return 0 if nlevels_macro == 0
-    xsignal (files.root, "%-20s Finished estimator communication\n", "OK");
-#endif
+    /* At this point we should communicate all the useful information
+       that has been accumulated on different MPI tasks */
+    reduce_simple_estimators ();
+    reduce_macro_atom_estimators ();
 
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
     /* We only want one process to write to the file, and we only do this if there is a disk */
 
-#ifdef MPI_ON
     if (rank_global == 0)
     {
 #endif
       if (geo.disk_type != DISK_NONE)
+      {
         qdisk_save (files.disk, ztot);
+      }
 #ifdef MPI_ON
     }
 #endif
 
 /* Completed writing file describing disk heating */
 
-    Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.cool_tot_ioniz);
-
-/* Note that this step is parallelized */
-
-    xsignal (files.root, "%-20s Start wind update\n", "NOK");
     wind_update (w);
-    xsignal (files.root, "%-20s Finished wind update\n", "NOK");
-
-
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle + 1, timer ());
-
-    xsignal (files.root, "%-20s Begin spectrum summary for ionisation cycle\n", "NOK");
 
 #ifdef MPI_ON
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
-    gather_extracted_spectrum ();
+    normalize_spectra_across_ranks ();
 
     if (rank_global == 0)
     {
@@ -369,8 +356,6 @@ calculate_ionization (restart_stat)
 #ifdef MPI_ON
     }
 #endif
-
-    xsignal (files.root, "%-20s Finished spectrum summary for ionisation cycle\n", "OK");
 
     /* Save everything after each cycle and prepare for the next cycle
        JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
@@ -477,10 +462,6 @@ make_spectra (restart_stat)
   long nphot_to_define;
   int iwind;
   int n;
-
-#ifdef MPI_ON
-  char dummy[LINELENGTH];
-#endif
 
   int icheck;
 
@@ -630,11 +611,8 @@ make_spectra (restart_stat)
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-    gather_extracted_spectrum ();
-#endif
+    normalize_spectra_across_ranks ();
 
-
-#ifdef MPI_ON
     if (rank_global == 0)
     {
 #endif
@@ -695,49 +673,5 @@ make_spectra (restart_stat)
     delay_dump_combine (np_mpi_global); // Combine results if necessary
 #endif
 
-
-/* Finally done */
-
-#ifdef MPI_ON
-  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status
-  error_summary (dummy);        // Summarize the errors that were recorded by the program
-  Log ("Run py_error.py for full error report.\n");
-#else
-  error_summary ("End of program");     // Summarize the errors that were recorded by the program
-#endif
-
-
-#ifdef MPI_ON
-  MPI_Finalize ();
-  Log ("Thread %d Finalized. All done\n", rank_global);
-#endif
-
-#ifdef CUDA_ON
-  cusolver_destroy ();
-#endif
-
-  xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
-  Log ("\nBrief Run Summary\nAt program completion, the elapsed TIME was %f\n", timer ());
-  Log ("There were %d of %d ionization cycles and %d of %d spectral cycles run\n", geo.wcycle, geo.wcycles, geo.pcycle, geo.pcycles);
-  if (geo.rt_mode == RT_MODE_MACRO)
-  {
-    if (nlevels_macro == 0)
-    {
-      Log ("THIS WAS A MACROATOM CALCULATION WITH NO MACROLEVELS. (Use for diagnostics only)\n");
-    }
-    else
-    {
-      Log ("This was a macro-atom calculation\n");
-    }
-  }
-  else
-  {
-    Log ("This was a simple atom calculation\n");
-  }
-
-  Log ("Convergence statistics for the wind after the ionization calculation:\n");
-  check_convergence ();
-  Log ("Information about luminosities and apparent fluxes due to various portions of the system:\n");
-  phot_status ();
   return EXIT_SUCCESS;
 }

@@ -30,7 +30,7 @@
  **********************************************************/
 
 int
-nomralize_spectra_across_ranks (void)
+normalize_spectra_across_ranks (void)
 {
 #ifdef MPI_ON
   int i;
@@ -39,7 +39,7 @@ nomralize_spectra_across_ranks (void)
   int size_of_commbuffer;;
   double *spectrum_buffer;
 
-  xsignal (files.root, "%-20s Begin spectrum reduction in ionization cycles\n", "NOK");
+  d_xsignal (files.root, "%-20s Begin spectrum reduction\n", "NOK");
 
   /* In ionization cycles, we don't need to normalize/reduce an additional
    * geo.nangles, as these are for the observer angles in spectrum cycles */
@@ -80,7 +80,7 @@ nomralize_spectra_across_ranks (void)
   }
 
   free (spectrum_buffer);
-  xsignal (files.root, "%-20s Finished spectrum reduction in ionization cycles\n", "OK");
+  d_xsignal (files.root, "%-20s Finished spectrum reduction\n", "OK");
 #endif
   return (0);
 }

@@ -48,6 +48,8 @@ broadcast_wind_grid (const int n_start, const int n_stop, const int n_cells_rank
 
   WindPtr cell;
 
+  d_xsignal (files.root, "%-20s Begin communication of wind grid\n", "NOK");
+
   /* For the wcone field, we should create a derived type to send the struct
    * more efficiently. Although, it may just as easy and quick to communicate
    * each field one by one... but this is the right way to do it */
@@ -151,73 +153,6 @@ broadcast_wind_grid (const int n_start, const int n_stop, const int n_cells_rank
 
   MPI_Type_free (&wcone_derived_type);
   free (comm_buffer);
-#endif
-}
-
-/**********************************************************/
-/**
- * @brief
- *
- * @param [in] int n_start       The index of the first cell updated by this rank
- * @param [in] int n_stop        The index of the last cell updated by this rank
- * @param [in] int n_cells_rank  The number of cells this rank updated
- *
- * @details
- *
- * The communication pattern is as outlined in broadcast_updated_plasma_properties.
- *
- * TODO: consider modifying to send only neighbouring velocity cells to cut down on communicated data
- *
- **********************************************************/
-
-void
-broadcast_wind_velocity (const int n_start, const int n_stop, const int n_cells_rank)
-{
-#ifdef MPI_ON
-  int i;
-  int n_wind;
-  int current_rank;
-  int num_comm;
-  int position;
-
-  WindPtr cell;
-
-  const int n_cells_max = get_max_cells_per_rank (NDIM2);
-  const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * 3);
-  char *comm_buffer = malloc (comm_buffer_size);
-
-  for (current_rank = 0; current_rank < np_mpi_global; current_rank++)
-  {
-    position = 0;
-
-    if (rank_global == current_rank)
-    {
-      MPI_Pack (&n_cells_rank, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-      for (n_wind = n_start; n_wind < n_stop; ++n_wind)
-      {
-        cell = &wmain[n_wind];
-        MPI_Pack (&n_wind, 1, MPI_INT, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->v, 3, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-      }
-    }
-
-    MPI_Bcast (comm_buffer, comm_buffer_size, MPI_PACKED, current_rank, MPI_COMM_WORLD);
-
-    position = 0;
-
-    if (rank_global != current_rank)
-    {
-      MPI_Unpack (comm_buffer, comm_buffer_size, &position, &num_comm, 1, MPI_INT, MPI_COMM_WORLD);
-      for (i = 0; i < num_comm; i++)
-      {
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, &n_wind, 1, MPI_INT, MPI_COMM_WORLD);
-        cell = &wmain[n_wind];
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->v, 3, MPI_DOUBLE, MPI_COMM_WORLD);
-
-      }
-    }
-  }
-
-  free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished communication of wind grid\n", "NOK");
 #endif
 }
