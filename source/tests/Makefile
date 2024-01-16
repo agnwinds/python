@@ -33,7 +33,7 @@ PYTHON_SOURCES = \
 	vvector.c walls.c wind.c wind2d.c wind_sum.c wind_updates2d.c wind_util.c  \
 	windsave.c windsave2table_sub.c xlog.c xtest.c zeta.c get_models.c \
 	rdpar_init.c define_wind.c communicate_wind.c communicate_plasma.c \
-	communicate_macro.c
+	communicate_macro.c communicate_spectra.c
 
 # This is sources to be compiled with NVCC
 CUDA_SOURCES = \
