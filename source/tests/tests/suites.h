@@ -20,5 +20,7 @@ void create_define_wind_test_suite (void);
 /* test_matrix.c */
 void create_matrix_test_suite (void);
 
+/* test_run_mode.c */
+void create_run_mode_test_suite (void);
 
 #endif

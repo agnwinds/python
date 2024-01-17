@@ -19,6 +19,30 @@
 
 /** *******************************************************************************************************************
  *
+ * @brief
+ *
+ * @return
+ *
+ * @details
+ *
+ *
+ * ****************************************************************************************************************** */
+
+const char *
+get_python_env_variable (void)
+{
+  const char *env = getenv ("PYTHON");
+  if (env == NULL)
+  {
+    fprintf (stderr, "Failed to find PYTHON environment variable\n");
+    return NULL;
+  }
+
+  return env;
+}
+
+/** *******************************************************************************************************************
+ *
  * @brief Free a pointer and set to NULL
  *
  * @param [in]  void** ptr  An address to the pointer to free and set to null

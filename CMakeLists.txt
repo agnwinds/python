@@ -178,6 +178,7 @@ set(PYTHON_SOURCE
     source/communicate_wind.c
     source/communicate_plasma.c
     source/communicate_macro.c
+    source/communicate_spectra.c
 )
 
 
@@ -209,6 +210,7 @@ set(TEST_SOURCE
         source/tests/tests/test_define_wind.c
         source/communicate_wind.c
         source/tests/unit_test_model.c
+        source/tests/tests/test_run_mode.c
 )
 
 #${CUDA_SOURCE})

@@ -13,5 +13,6 @@
 
 int cleanup_model (const char *root_name);
 int setup_model_grid (const char *root_name, const char *atomic_data_location);
+const char *get_python_env_variable (void);
 
 #endif

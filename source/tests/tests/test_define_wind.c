@@ -289,7 +289,7 @@ test_sv_cv_wind (void)
   /* For the CV model, we want to save the wind_save to use in another test */
   snprintf (windsave_filename, LINELENGTH, "%s/source/tests/test_data/define_wind/restart_cv.wind_save", PYTHON_ENV);
   const int err = wind_save (windsave_filename);
-  if (err != 0)
+  if (err == 0)
   {
     CU_FAIL ("Failed to produce wind_save for CV test case");
   }
