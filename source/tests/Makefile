@@ -42,6 +42,7 @@ CUDA_SOURCES = \
 # Source code for unit tests
 TEST_SOURCES = \
 	unit_test_main.c \
+	unit_test_model.c \
 	tests/test_matrix.c \
 	tests/test_compton.c \
 	tests/test_define_wind.c

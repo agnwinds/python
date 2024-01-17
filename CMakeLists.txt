@@ -207,10 +207,11 @@ set(TEST_SOURCE
     ${PYTHON_SOURCE}
         source/define_wind.c
         source/tests/tests/test_define_wind.c
-        source/communicate_wind.c)
+        source/communicate_wind.c
+        source/tests/unit_test_model.c
+)
 
 #${CUDA_SOURCE})
-
 
 # Create the executables for each program, and link the required libraries
 
