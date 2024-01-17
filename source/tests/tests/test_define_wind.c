@@ -177,6 +177,7 @@ test_sv_cv_wind (void)
   FILE *fp;
   char test_data_line[TEST_DATA_LENGTH];
   char test_data_filename[LINELENGTH];
+  char windsave_filename[LINELENGTH];
 
   WindPtr wind_cell;
   PlasmaPtr plasma_cell;
@@ -184,6 +185,7 @@ test_sv_cv_wind (void)
   const int init_error = setup_model_grid ("cv", ATOMIC_DATA_DEST);
   if (init_error)
   {
+    cleanup_model ("cv");
     CU_FAIL_FATAL ("Unable to initialise CV model");
   }
 
@@ -195,6 +197,7 @@ test_sv_cv_wind (void)
   fp = fopen (test_data_filename, "r");
   if (fp == NULL)
   {
+    cleanup_model ("cv");
     CU_FAIL_FATAL ("Unable to open test data for CV model");
   }
 
@@ -213,6 +216,7 @@ test_sv_cv_wind (void)
   /* Skip the first line */
   if (fgets (test_data_line, TEST_DATA_LENGTH, fp) == NULL)
   {
+    cleanup_model ("cv");
     CU_FAIL_FATAL ("Unable to read first line of test data");
   }
 
@@ -280,6 +284,14 @@ test_sv_cv_wind (void)
     const double n_h = rho2nh * plasma_cell->rho;
     CU_ASSERT_DOUBLE_FRACTIONAL_EQUAL_FATAL (plasma_cell->density[0] / (n_h * ele[0].abun), h1, FRACTIONAL_ERROR);
     CU_ASSERT_DOUBLE_FRACTIONAL_EQUAL_FATAL (plasma_cell->density[8] / (n_h * ele[2].abun), c4, FRACTIONAL_ERROR);
+  }
+
+  /* For the CV model, we want to save the wind_save to use in another test */
+  snprintf (windsave_filename, LINELENGTH, "%s/source/tests/test_data/define_wind/restart_cv.wind_save", PYTHON_ENV);
+  const int err = wind_save (windsave_filename);
+  if (err != 0)
+  {
+    CU_FAIL ("Failed to produce wind_save for CV test case");
   }
 
   fclose (fp);
