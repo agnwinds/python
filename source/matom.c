@@ -616,6 +616,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   double freq, dfreq;
   double temp;
   double x;
+  double integrand1, integrand2, freq1, freq2;
 
   temp_choice = ichoice;
   temp = temp_ext = xplasma->t_e;       //external for use in alph_sp_integrand
@@ -637,8 +638,10 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   for (n = 0; n < nmax; n++)
   {
 
-    freq = 0.5 * (cont_ptr->freq[n] + cont_ptr->freq[n + 1]);
-    x = 0.5 * (cont_ptr->x[n] + cont_ptr->x[n + 1]);
+    //  freq = 0.5 * (cont_ptr->freq[n] + cont_ptr->freq[n + 1]);
+    freq1 = cont_ptr->freq[n];
+    freq2 = cont_ptr->freq[n + 1];
+    // x = 0.5 * (cont_ptr->x[n] + cont_ptr->x[n + 1]);
     dfreq = cont_ptr->freq[n + 1] - cont_ptr->freq[n];
 
     if (freq > flast)
@@ -646,19 +649,26 @@ alpha_sp (cont_ptr, xplasma, ichoice)
       break;
     }
 
-    integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / temp);
+    // integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / temp);
+    integrand1 = cont_ptr->x[n] * freq1 * freq1 * exp (H_OVER_K * (fthresh - freq1) / temp);
+    integrand2 = cont_ptr->x[n + 1] * freq2 * freq2 * exp (H_OVER_K * (fthresh - freq2) / temp);
 
     if (ichoice == 1)
     {
-      integrand *= freq / fthresh;
+      //  integrand *= freq / fthresh;
+      integrand1 *= freq1 / fthresh;
+      integrand2 *= freq2 / fthresh;
 
     }
     else if (ichoice == 2)
     {
-      integrand *= (freq - fthresh) / fthresh;  // difference case
+      //  integrand *= (freq - fthresh) / fthresh;  // difference case
+      integrand1 *= (freq1 - fthresh) / fthresh;        // difference case
+      integrand2 *= (freq2 - fthresh) / fthresh;        // difference case
     }
 
-    alpha_sp_value += integrand * dfreq;
+    // alpha_sp_value += integrand * dfreq;
+    alpha_sp_value += 0.5 * (integrand1 + integrand2) * dfreq;
 
   }
 
