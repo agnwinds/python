@@ -1,24 +1,33 @@
 The Disk
 ########
 
-The disk is normally treated as infinitely thin and defined by an inner boundary and an outer boundary.  It assumed to be in  Keplerian  rotation about 
-the central object in the system.   The temperature distribution of the disk
-is normally assumed to be that of a standard Shakura-Sunyaev disk, with a hard
-boundary at its inner edge.   Options are provided for reading in a non-standard
-temperature distribution.
+The disk is normally treated as infinitely thin and defined by an inner boundary and an outer boundary.  It assumed to be in  Keplerian  rotation about the central object in the system.   The temperature distribution of the disk is normally assumed to be that of a standard Shakura-Sunyaev disk, with a hard boundary at its inner edge. Options are provided for reading in a non-standard temperature distribution.
 
 An option is provide for a vertically extended disk, whose thickness increases
-as with distance from the central object object.   
+as with distance from the  central object object.   
 
 The parameters involved in describing a flat disk are::
 
     Disk.type(none,flat,vertically.extended)                 flat
     Disk.radiation(yes,no)                          yes
-    Disk.rad_type_to_make_wind(bb,models)                   bb
+    Disk.rad_type_to_make_wind(bb,models,mod_bb)                   bb
     Disk.temperature.profile(standard,readin)             standard
     Disk.mdot(msol/yr)                         5
     Disk.radmax(cm)                            1e17
 
+Colour Correction (mod_bb)
+=============================
+
+A simple form of the disc colour correction is available in the code, accessible via the 
+:ref:`Disk.rad_type_to_make_wind(bb,models,mod_bb)` keyword. The colour correction factor, :math:`f_{\rm col}`, is defined such that 
+
+.. math::
+    B_\nu (\nu, T) \to f_{\rm col}^{-4} B_\nu (\nu, f_{\rm col} T). 
+
+This correction is designed to approximate the effect of radiative transfer in the disc atmosphere. We adopt the form given by `Done et al. 2012 <https://academic.oup.com/mnras/article/420/3/1848/977649>`_, in which :math:`f_{\rm col}=1` for :math:`T<3\times10^4~{\rm K}`, and for :math:`T>3\times10^4~{\rm K}`
+
+.. math::
+    f_{\rm col}(T)=\left(\frac{T}{3\times10^4~{\rm K}} \right)^{0.82}.
 
 
 Vertically Extended disk (Details)
@@ -52,16 +61,9 @@ not take into account the fact that the disk area of a vertically extended disk 
 Non-Standard Temperature Profile
 ================================================
 
-If desired the user can read the temperature profile for the disk from a file. Each
-line in the file should consist of a radius and a temperature (and optionally a value of log g)
-separated by whitespace (in the
-first two columns)  The values are assumed to be entered in a logical order, that is in 
-ascending values of radius. Lines, such as comments or header names of an astropy table, will be ignored.
+If desired the user can read the temperature profile for the disk from a file. Each line in the file should consist of a radius (in cm) and a temperature (in K), and optionally a value of :math:`\log g`. The values separated by whitespace (in the first two columns). The values are assumed to be entered in a logical order, that is in  ascending values of radius. Lines such as comments or header names of an astropy table, will be ignored.
 
-The log g value is not required to generate BB spectra, but is required if the spectrum from the disk is to be generated from a 
-two-dimensional grid of models, usually a set of spectra generated to represent the spectra from a set of stellar 
-atmospheres calculations.  
+The :math:`\log g` value is not required to generate BB spectra, but is required if the spectrum from the disk is to be generated from a two-dimensional grid of models, usually a set of spectra generated to represent the spectra from a set of stellar atmospheres calculations.  
 
-With this option, the radius of the disk will be set to the maximum radius (the last value of r) in 
-the file.  
+With this option, the radius of the disk will be set to the maximum radius (the last value of r) in  the file.  
 
