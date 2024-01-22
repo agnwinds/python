@@ -538,8 +538,10 @@ translate_in_wind (w, p, tau_scat, tau, nres)
  * smax can be found in various ways depending on if the photon is in the wind
  * or not.
  *
+ * This routine operates in the global/observer frame.
+ *
  * This section of code was put into its own function in an attempt to avoid
- * code duplication for the optical depth diagnostic ray tracing thing.
+ * code duplication in the optical depth diagnostic ray tracing routine.
  *
  * ************************************************************************** */
 
