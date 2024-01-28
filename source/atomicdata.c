@@ -2786,6 +2786,7 @@ or zero so that simple checks of true and false can be used for them */
         Error
           ("There is no PI rate associated with ion %d (element %d ion %d) - add PI rates and check that uppper level/ion is included in level population\n",
            n, ion[n].z, ion[n].istate);
+        Error ("Also check masterfile to see that PI files appear after all of the level files for this atom\n");
         ierr = 1;
       }
     }
