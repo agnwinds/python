@@ -116,6 +116,7 @@ init_geo ()
   geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
   geo.disk_rad_max = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
+  geo.colour_correction = FCOL_OFF;
 
   geo.t_bl = 100000.;
 
@@ -325,7 +326,7 @@ init_advanced_modes ()
   modes.use_debug = FALSE;
   modes.print_dvds_info = FALSE;        // print information on velocity gradients
   modes.quit_after_inputs = FALSE;      // check inputs and quit
-  modes.quit_after_wind_defined = FALSE;        // define wind and quit
+  modes.quit_after_wind_defined = FALSE;      // define wind and quit
   modes.fixed_temp = FALSE;     // do not attempt to change temperature 
   modes.zeus_connect = FALSE;   // connect with zeus
 

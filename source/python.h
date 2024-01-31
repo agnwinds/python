@@ -166,6 +166,9 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
 #define SPECTYPE_MONO    (-7)
 #define SPECTYPE_MODEL	 (-99)  // This is just used briefly, before a model number is assigned
 
+/* definitions of types of colour correction */
+#define FCOL_OFF  0
+#define FCOL_DONE 1 
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -578,6 +581,8 @@ struct geometry
   int disk_ion_spectype, disk_spectype; /**<  Same as above but for the disk */
   int bl_ion_spectype, bl_spectype;     /**<  Same as above but for the boundary layer */
   int agn_ion_spectype, agn_spectype;   /**<  Same as above but for the AGN */
+
+  int colour_correction;    /** colour correction mode */
 
   /* Searchlight mode is very experimental.  See notes in diag.c */
   double searchlight_x[3], searchlight_lmn[3];/**< location and direction of all photons in the spectral

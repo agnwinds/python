@@ -461,7 +461,7 @@ main (argc, argv)
     if (geo.disk_radiation)
     {
       geo.disk_spectype = geo.disk_ion_spectype;
-      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.disk_spectype);
+      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono,mod_bb)", &geo.disk_spectype);
     }
 
     if (geo.bl_radiation)
