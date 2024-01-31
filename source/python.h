@@ -164,11 +164,12 @@ extern int NWAVE_NOW;         /**< Either NWAVE_IONIZ or NWAVE_EXTRACT depending
 #define SPECTYPE_CL_TAB  (-5)   // This is to emulate cloudy
 #define SPECTYPE_BREM    (-6)
 #define SPECTYPE_MONO    (-7)
+#define SPECTYPE_BB_FCOL (-8)
 #define SPECTYPE_MODEL	 (-99)  // This is just used briefly, before a model number is assigned
 
 /* definitions of types of colour correction */
 #define FCOL_OFF  0
-#define FCOL_DONE 1 
+#define FCOL_DONE 1
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
