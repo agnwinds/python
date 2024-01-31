@@ -159,6 +159,7 @@ double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative, int *hit);
 double disk_height(double s, void *params);
+double disk_colour_correction(double t);
 /* disk_init.c */
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_extract, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
