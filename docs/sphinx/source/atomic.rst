@@ -62,7 +62,7 @@ is irrelevant, that is one can read the collision data (which is indexed to line
 photoionization cross sections  (which are indexed to energy levels) in either order
 
 *It is important that all of the ions, energy levels, and line for an atom, appear before 
-photoionization cross sections and collisional data for that atom this data is only read in if it can e indexed to the corresponding levels and lines*
+photoionization cross sections and collisional data for that atom this data is only read in if it can be indexed to the corresponding levels and lines*
 
     
 
