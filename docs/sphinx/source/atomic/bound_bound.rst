@@ -61,7 +61,7 @@ For LinMacro the columns are
 * the absorption oscillator strength, 
 * the lower and upper level multiplicities, 
 * the energy of the lower level and upper level. 
-8 the lower and upper level indicies (matched back to the energy levels)
+* the lower and upper level indicies (matched back to the energy levels)
 
 The ultimate source for this information is usually NIST . The main issue with all of this is that 
 one needs to index everything self-consistentl
