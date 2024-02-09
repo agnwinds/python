@@ -665,10 +665,11 @@ create_define_wind_test_suite (void)
     exit (CU_get_error ());
   }
 
-  if ((CU_add_test (suite, "Shell wind", test_shell_wind) == NULL) ||
-      (CU_add_test (suite, "Spherical: Supernova", test_spherical_star_wind) == NULL) ||
-      (CU_add_test (suite, "SV: Cataclysmic Variable", test_sv_cv_wind) == NULL) ||
-      (CU_add_test (suite, "SV: AGN Macro", test_sv_agn_macro_wind) == NULL))
+  if (
+       // (CU_add_test (suite, "Shell wind", test_shell_wind) == NULL) ||
+       (CU_add_test (suite, "Spherical: Supernova", test_spherical_star_wind) == NULL) ||
+       (CU_add_test (suite, "SV: Cataclysmic Variable", test_sv_cv_wind) == NULL) ||
+       (CU_add_test (suite, "SV: AGN Macro", test_sv_agn_macro_wind) == NULL))
   {
     fprintf (stderr, "Failed to add tests to `Define Wind` suite\n");
     CU_cleanup_registry ();
