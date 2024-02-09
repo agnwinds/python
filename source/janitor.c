@@ -233,6 +233,6 @@ clean_on_exit (void)
     free_macro_grid ();
   }
   free_photons ();
-  // free_spectra ();
-  // free_atomic_data ();
+  free_spectra ();
+  free_atomic_data ();
 }
