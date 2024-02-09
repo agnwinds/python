@@ -68,10 +68,11 @@ void broadcast_plasma_grid(const int n_start, const int n_stop, const int n_cell
 void broadcast_wind_luminosity(const int n_start, const int n_stop, const int n_cells_rank);
 void broadcast_wind_cooling(const int n_start, const int n_stop, const int n_cells_rank);
 int broadcast_updated_plasma_properties(const int n_start_rank, const int n_stop_rank, const int n_cells_rank);
-int broadcast_simple_estimators(void);
+int reduce_simple_estimators(void);
+/* communicate_spectra.c */
+int normalize_spectra_across_ranks(void);
 /* communicate_wind.c */
 void broadcast_wind_grid(const int n_start, const int n_stop, const int n_cells_rank);
-void broadcast_wind_velocity(const int n_start, const int n_stop, const int n_cells_rank);
 /* compton.c */
 int compton_scatter(PhotPtr p);
 double kappa_comp(PlasmaPtr xplasma, double freq);
@@ -117,6 +118,7 @@ int cylvar_where_in_grid(int ndom, double x[], int ichoice, double *fx, double *
 int cylvar_get_random_location(int n, double x[]);
 int cylvar_extend_density(int ndom, WindPtr w);
 int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
+void cylvar_allocate_domain(int ndom);
 /* cylindrical.c */
 double cylind_ds_in_cell(int ndom, PhotPtr p);
 int cylind_make_grid(int ndom, WindPtr w);
@@ -157,6 +159,7 @@ double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative, int *hit);
 double disk_height(double s, void *params);
+double disk_colour_correction(double t);
 /* disk_init.c */
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_extract, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
@@ -289,6 +292,7 @@ double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
 double zero_emit2(double t, void *params);
 /* janitor.c */
+void free_domains(void);
 void free_wind_grid(void);
 void free_plasma_grid(void);
 void free_macro_grid(void);
@@ -334,7 +338,6 @@ void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *po
 /* matom.c */
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
-double xalpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double freq_min, double freq_max);
 double alpha_sp_integrand(double freq, void *params);
@@ -356,7 +359,6 @@ int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[n
 int get_parallel_nrange(int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax);
 int get_max_cells_per_rank(const int n_total);
 int calculate_comm_buffer_size(const int num_ints, const int num_doubles);
-int gather_extracted_spectrum(void);
 /* parse.c */
 int parse_command_line(int argc, char *argv[]);
 void help(void);
@@ -547,6 +549,7 @@ void setup_atomic_data(const char *atomic_filename);
 double get_disk_params(void);
 /* setup_domains.c */
 int get_domain_params(int ndom);
+void allocate_domain_wind_coords(int ndom);
 int get_wind_params(int ndom);
 int setup_windcone(void);
 int init_windcone(double r, double z, double dzdr, int allow_negative_dzdr, ConePtr one_windcone);
@@ -566,6 +569,7 @@ int get_shell_wind_params(int ndom);
 int shell_make_grid(int ndom, WindPtr w);
 /* signal.c */
 int xsignal(char *root, char *format, ...);
+int d_xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);
 int set_max_time(char *root, double t);
 int check_time(char *root);

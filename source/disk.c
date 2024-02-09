@@ -957,3 +957,47 @@ disk_height (double s, void *params)
   return (z1);
 
 }
+
+
+/**********************************************************/
+/**
+ * @brief      Calculate the colour correction 
+ *
+ * @param [in] double  t temperature in the disk
+
+ * @return     
+ *
+ **********************************************************/
+
+double disk_colour_correction(double t)
+{
+  double fcol;
+  fcol = 1.0;
+
+  if (geo.colour_correction == FCOL_OFF)
+  {
+    Error("trying to apply colour correction when it is turned off! Exiting.\n");
+    Exit (0);
+  }
+  /* apply the Done et al. 2012 colour correction */
+  else if (geo.colour_correction == FCOL_DONE)
+  {
+    if (t < 3.0e4)
+      fcol = 1.0;
+    else if (t > 1e5)
+    {
+      fcol = 2.7;
+    }
+    else 
+    {
+      fcol = pow(t / 3.0e4, 0.82);
+    }
+  }
+  else 
+  {
+    Error ("Did not understand colour correction mode. Setting fcol to 1");
+    fcol = 1.0; 
+  }
+
+  return (fcol);
+}

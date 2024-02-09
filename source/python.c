@@ -173,7 +173,7 @@ main (argc, argv)
 
 /* Allocate the domain structure */
 
-  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MAX_DOM);
 
   /* BEGIN GATHERING INPUT DATA */
 
@@ -317,29 +317,27 @@ main (argc, argv)
         geo.ndomain = 1;
         rdint ("Wind.number_of_components", &geo.ndomain);
 
-        if (geo.ndomain > MaxDom)
+        if (geo.ndomain > MAX_DOM)
         {
-          Error ("Maximum number of wind components allowed is %d\n", MaxDom);
+          Error ("Maximum number of wind components allowed is %d\n", MAX_DOM);
           Exit (EXIT_FAILURE);
         }
 
         for (n = 0; n < geo.ndomain; n++)
         {
-
           get_domain_params (n);
-
         }
       }
 
     }
   }
 
-  /* zdom only temporarily needs to be MaxDom. Now that we know the number of domains, we'll reallocate
+  /* zdom only temporarily needs to be MAX_DOM. Now that we know the number of domains, we'll reallocate
    * the domain to make it smaller */
   zdom = realloc (zdom, sizeof (domain_dummy) * geo.ndomain);
   if (zdom == NULL)
   {
-    Error ("python: unable to re-allocate space for domain structure from %d domains to %d domains\n", MaxDom, geo.ndomain);
+    Error ("python: unable to re-allocate space for domain structure from %d domains to %d domains\n", MAX_DOM, geo.ndomain);
     Exit (EXIT_FAILURE);
   }
 
@@ -463,7 +461,7 @@ main (argc, argv)
     if (geo.disk_radiation)
     {
       geo.disk_spectype = geo.disk_ion_spectype;
-      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.disk_spectype);
+      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono,mod_bb)", &geo.disk_spectype);
     }
 
     if (geo.bl_radiation)
@@ -733,9 +731,48 @@ main (argc, argv)
 
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
 
-  // optical_depth_diagnostics (w);
-
   make_spectra (restart_stat);
+
+
+/* Finally done */
+
+#ifdef MPI_ON
+  char dummy[LINELENGTH];
+  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status
+  error_summary (dummy);        // Summarize the errors that were recorded by the program
+  Log ("Run py_error.py for full error report.\n");
+  MPI_Finalize ();
+#else
+  error_summary ("End of program");     // Summarize the errors that were recorded by the program
+#endif
+
+#ifdef CUDA_ON
+  cusolver_destroy ();
+#endif
+
+  xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
+  Log ("\nBrief Run Summary\nAt program completion, the elapsed TIME was %f\n", timer ());
+  Log ("There were %d of %d ionization cycles and %d of %d spectral cycles run\n", geo.wcycle, geo.wcycles, geo.pcycle, geo.pcycles);
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    if (nlevels_macro == 0)
+    {
+      Log ("THIS WAS A MACROATOM CALCULATION WITH NO MACROLEVELS. (Use for diagnostics only)\n");
+    }
+    else
+    {
+      Log ("This was a macro-atom calculation\n");
+    }
+  }
+  else
+  {
+    Log ("This was a simple atom calculation\n");
+  }
+
+  Log ("Convergence statistics for the wind after the ionization calculation:\n");
+  check_convergence ();
+  Log ("Information about luminosities and apparent fluxes due to various portions of the system:\n");
+  phot_status ();
 
   clean_on_exit ();
 

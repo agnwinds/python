@@ -74,6 +74,8 @@ wind_update (WindPtr w)
   t_e_ave_old = 0.0;
   t_e_ave = 0.0;
 
+  xsignal (files.root, "%-20s Start wind update\n", "NOK");
+
 #ifdef MPI_ON
   n_cells_rank = get_parallel_nrange (rank_global, NPLASMA, np_mpi_global, &my_nmin, &my_nmax);
 #else
@@ -374,6 +376,8 @@ wind_update (WindPtr w)
  * with thin shell mode.
  */
   shell_output_wind_update_diagnostics (xsum, psum, fsum, csum, icsum, lsum, ausum, chexsum, cool_sum, lum_sum);
+
+  xsignal (files.root, "%-20s Finished wind update\n", "NOK");
 
   return (0);
 }

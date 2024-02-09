@@ -77,9 +77,10 @@ main (int argc, char **argv)
   init_rand ((int) time (NULL));
 
   /* Create test suites */
+  create_matrix_test_suite ();
   create_compton_test_suite ();
   create_define_wind_test_suite ();
-  create_matrix_test_suite ();
+//  create_run_mode_test_suite ();
 
   /* Run the test suites */
   CU_basic_set_mode (CU_BRM_VERBOSE);

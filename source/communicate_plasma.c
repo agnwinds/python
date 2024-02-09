@@ -43,6 +43,7 @@ broadcast_plasma_grid (const int n_start, const int n_stop, const int n_cells_ra
 
   PlasmaPtr cell;
 
+  d_xsignal (files.root, "%-20s Begin communicating plasma grid\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max * (1 + 20 + nphot_total + nions + NXBANDS + 2 * N_PHOT_PROC),
                                                            n_cells_max * (71 + 11 * nions + nlte_levels + 2 * nphot_total + n_inner_tot +
@@ -361,6 +362,7 @@ broadcast_plasma_grid (const int n_start, const int n_stop, const int n_cells_ra
   }
 
   free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished communicating plasma grid\n", "OK");
 #endif
 }
 
@@ -395,6 +397,7 @@ broadcast_wind_luminosity (const int n_start, const int n_stop, const int n_cell
   int position;
   int num_comm;
 
+  d_xsignal (files.root, "%-20s Begin communicating wind luminosity\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, 4 * n_cells_max);
   char *const comm_buffer = malloc (comm_buffer_size);
@@ -435,6 +438,8 @@ broadcast_wind_luminosity (const int n_start, const int n_stop, const int n_cell
       }
     }
   }
+
+  d_xsignal (files.root, "%-20s Finished communicating wind luminosity\n", "OK");
   free (comm_buffer);
 #endif
 }
@@ -470,6 +475,7 @@ broadcast_wind_cooling (const int n_start, const int n_stop, const int n_cells_r
   int position;
   int num_comm;
 
+  d_xsignal (files.root, "%-20s Begin communicating wind cooling\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, 9 * n_cells_max);
   char *const comm_buffer = malloc (comm_buffer_size);
@@ -520,6 +526,7 @@ broadcast_wind_cooling (const int n_start, const int n_stop, const int n_cells_r
     }
   }
 
+  d_xsignal (files.root, "%-20s Finished communicating wind cooling\n", "OK");
   free (comm_buffer);
 #endif
 }
@@ -561,6 +568,7 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
   int n_mpi;
   int num_cells_communicated;
 
+  d_xsignal (files.root, "%-20s Begin communicating updated plasma properties\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int num_ints = 1 + n_cells_max * (20 + nphot_total + 2 * NXBANDS + 2 * N_PHOT_PROC);
   const int num_doubles =
@@ -891,6 +899,7 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
   }
 
   free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished communicating updated plasma properties\n", "OK");
 #endif
   return EXIT_SUCCESS;
 }
@@ -913,7 +922,7 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
  **********************************************************/
 
 int
-broadcast_simple_estimators (void)
+reduce_simple_estimators (void)
 {
 #ifdef MPI_ON                   // these routines should only be called anyway in parallel but we need these to compile
 
@@ -932,6 +941,8 @@ broadcast_simple_estimators (void)
   int *iredhelper, *iredhelper2, *iqdisk_helper, *iqdisk_helper2;
   // int size_of_helpers;
   int plasma_double_helpers, plasma_int_helpers;
+
+  d_xsignal (files.root, "%-20s Begin reduction of simple estimators\n", "NOK");
 
   /* The size of the helper array for doubles. We transmit 10 numbers
      for each cell, plus three arrays, each of length NXBANDS */
@@ -967,8 +978,6 @@ broadcast_simple_estimators (void)
   flux_helper2 = calloc (sizeof (double), NPLASMA * NFLUX_ANGLES * 3);
 
   // the following blocks gather all the estimators to the zeroth (Master) thread
-
-
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
   {
     maxfreqhelper[mpi_i] = plasmamain[mpi_i].max_freq;
@@ -1055,6 +1064,7 @@ broadcast_simple_estimators (void)
   MPI_Allreduce (inner_ion_helper, inner_ion_helper2, NPLASMA * n_inner_tot, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   MPI_Allreduce (qdisk_helper, qdisk_helper2, 2 * NRINGS, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
+  /* Unpacking stuff */
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
   {
     plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
@@ -1148,6 +1158,7 @@ broadcast_simple_estimators (void)
 
   free (inner_ion_helper);
   free (inner_ion_helper2);
+
   /* allocate the integer helper arrays, set a barrier, then do all the integers. */
   iqdisk_helper = calloc (sizeof (int), NRINGS * 2);
   iqdisk_helper2 = calloc (sizeof (int), NRINGS * 2);
@@ -1214,7 +1225,6 @@ broadcast_simple_estimators (void)
   if (geo.ioniz_or_extract == CYCLE_IONIZ)
   {
     size_of_commbuffer = NPLASMA * NBINS_IN_CELL_SPEC;
-//OLD    nspec = NPLASMA;
 
     redhelper = calloc (sizeof (double), size_of_commbuffer);
     redhelper2 = calloc (sizeof (double), size_of_commbuffer);
@@ -1243,6 +1253,7 @@ broadcast_simple_estimators (void)
     free (redhelper2);
   }
 
+  d_xsignal (files.root, "%-20s Finished reduction of simple estimators\n", "OK");
 
 #endif
   return (0);

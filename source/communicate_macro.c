@@ -41,6 +41,7 @@ broadcast_macro_atom_emissivities (const int n_start, const int n_stop, const in
   int num_comm;
   int position;
 
+  d_xsignal (files.root, "%-20s Begin macro atom emissivity communication\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * (1 + nlevels_macro));
   char *comm_buffer = malloc (comm_buffer_size);
@@ -77,6 +78,7 @@ broadcast_macro_atom_emissivities (const int n_start, const int n_stop, const in
   }
 
   free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished macro atom emissivity communication\n", "OK");
 #endif
 }
 
@@ -104,6 +106,7 @@ broadcast_macro_atom_recomb (const int n_start, const int n_stop, const int n_ce
   int position;
   int num_comm;
 
+  d_xsignal (files.root, "%-20s Begin macro atom recombination communication\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * (2 * size_alpha_est + 2 * nphot_total));
   char *const comm_buffer = malloc (comm_buffer_size);
@@ -161,6 +164,7 @@ broadcast_macro_atom_recomb (const int n_start, const int n_stop, const int n_ce
   }
 
   free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished macro atom recombination communication\n", "OK");
 #endif
 }
 
@@ -188,6 +192,7 @@ broadcast_updated_macro_atom_properties (const int n_start, const int n_stop, co
   int position;
   int num_comm;
 
+  d_xsignal (files.root, "%-20s Begin macro atom updated properties communication\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + 3 * n_cells_max, n_cells_max * (6 * size_gamma_est + 2 * size_Jbar_est));
   char *const comm_buffer = malloc (comm_buffer_size);
@@ -240,6 +245,7 @@ broadcast_updated_macro_atom_properties (const int n_start, const int n_stop, co
   }
 
   free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished macro atom updated properties communication\n", "OK");
 #endif
   return EXIT_SUCCESS;
 }
@@ -263,6 +269,7 @@ broadcast_macro_atom_state_matrix (int n_start, int n_stop, int n_cells_rank)
   int n_mpi, n_mpi2, num_comm;
   int n, position;
 
+  d_xsignal (files.root, "%-20s Begin macro atom state matrix communication\n", "NOK");
   const int matrix_size = nlevels_macro + 1;
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int comm_buffer_size = calculate_comm_buffer_size (1 + n_cells_max, n_cells_max * (matrix_size * matrix_size));
@@ -310,6 +317,7 @@ broadcast_macro_atom_state_matrix (int n_start, int n_stop, int n_cells_rank)
   }
 
   free (comm_buffer);
+  d_xsignal (files.root, "%-20s Finished macro atom state matrix communication\n", "OK");
 #endif
   return (0);
 }
@@ -339,14 +347,14 @@ reduce_macro_atom_estimators (void)
   double *cooling_bf_helper, *cooling_bb_helper;
   double *cooling_bf_helper2, *cooling_bb_helper2;
 
+  d_xsignal (files.root, "%-20s Begin reduction of macro atom estimators\n", "NOK");
+
   if (nlevels_macro == 0 && geo.nmacro == 0)
   {
     /* in this case no space would have been allocated for macro-atom estimators */
     Log ("No need to communicate matom estimators as no macro-atoms!\n");
     return;
   }
-
-
 
   /* allocate helper arrays for the estimators we want to communicate */
   /* the sizes of these arrays should match the allocation in calloc_estimators in gridwind.c */
@@ -368,7 +376,6 @@ reduce_macro_atom_estimators (void)
   cell_helper2 = calloc (sizeof (double), 8 * NPLASMA);
   cooling_bf_helper2 = calloc (sizeof (double), NPLASMA * 2 * nphot_total);
   cooling_bb_helper2 = calloc (sizeof (double), NPLASMA * nlines);
-
 
   /* now we loop through each cell and copy the values of our variables
      into our helper arrays */
@@ -503,5 +510,7 @@ reduce_macro_atom_estimators (void)
   free (alpha_helper2);
   free (cooling_bf_helper2);
   free (cooling_bb_helper2);
+
+  d_xsignal (files.root, "%-20s Finished reduction of macro atom estimators\n", "OK");
 #endif
 }

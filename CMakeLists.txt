@@ -16,6 +16,7 @@ project(Python LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_COMPILER mpicc)
+set(CMAKE_CXX_COMPILER mpixx)
 include_directories(include)
 link_directories(lib)
 add_definitions(-DMPI_ON)
@@ -178,20 +179,22 @@ set(PYTHON_SOURCE
     source/communicate_wind.c
     source/communicate_plasma.c
     source/communicate_macro.c
+    source/communicate_spectra.c
 )
-
-
 
 set(PY_WIND_SOURCE source/py_wind_ion.c source/py_wind_macro.c
                    source/py_wind_sub.c source/py_wind_write.c
         source/define_wind.c
-        source/communicate_wind.c)
+        source/communicate_wind.c
+        source/communicate_spectra.c)
 
 set(WINDSAVE2TABLE_SOURCE source/windsave2table_sub.c
         source/define_wind.c
         source/communicate_wind.c)
 
 set(RAD_HYDRO_SOURCE source/rad_hydro_files.c)
+
+set(MODIFY_WIND_SOURCE source/modify_wind.c)
 
 set(INSPECT_WIND_SOURCE source/inspect_wind.c)
 
@@ -206,16 +209,15 @@ set(TEST_SOURCE
     ${PYTHON_SOURCE}
         source/define_wind.c
         source/tests/tests/test_define_wind.c
-        source/communicate_wind.c)
-
-#${CUDA_SOURCE})
-
+        source/communicate_wind.c
+        source/tests/unit_test_model.c
+        source/tests/tests/test_run_mode.c
+)
 
 # Create the executables for each program, and link the required libraries
 
 # Python
-add_executable(python source/python.c ${PYTHON_SOURCE}
-        source/janitor.c)
+add_executable(python source/python.c ${PYTHON_SOURCE})
 target_link_libraries(python gsl gslcblas m)
 
 # Py_wind
@@ -226,6 +228,22 @@ target_link_libraries(py_wind gsl gslcblas m)
 add_executable(windsave2table source/windsave2table.c ${PYTHON_SOURCE}
                               ${WINDSAVE2TABLE_SOURCE})
 target_link_libraries(windsave2table gsl gslcblas m)
+
+# rad_hydro_files
+add_executable(rad_hydro_files ${PYTHON_SOURCE} ${RAD_HYDRO_SOURCE})
+target_link_libraries(rad_hydro_files gsl gslcblas m)
+
+# modify_wind
+add_executable(modify_wind ${PYTHON_SOURCE} ${MODIFY_WIND_SOURCE})
+target_link_libraries(modify_wind gsl gslcblas m)
+
+# inspect_wind
+add_executable(inspect_wind ${PYTHON_SOURCE} ${INSPECT_WIND_SOURCE})
+target_link_libraries(inspect_wind gsl gslcblas m)
+
+# py_optd
+add_executable(py_optd ${PYTHON_SOURCE} ${OPTICAL_DEPTH_SOURCE})
+target_link_libraries(py_optd gsl gslcblas m)
 
 # test
 add_executable(py_unit_test ${TEST_SOURCE})

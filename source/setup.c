@@ -66,6 +66,8 @@ init_geo ()
                                    be called at all if we are simply continuing a previous
                                    run */
   geo.hydro_domain_number = -1;
+  geo.nplasma = 0;
+  geo.nmacro = 0;
 
   if (geo.system_type == SYSTEM_TYPE_CV || geo.system_type == SYSTEM_TYPE_BH)
   {
@@ -116,6 +118,7 @@ init_geo ()
   geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
   geo.disk_rad_max = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
+  geo.colour_correction = FCOL_OFF;
 
   geo.t_bl = 100000.;
 
@@ -123,23 +126,13 @@ init_geo ()
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
   geo.bubble_size = 0.0;        // should only be used if geo.pl_geometry is PL_GEOMETRY_BUBBLE_
 
-
   strcpy (geo.atomic_filename, "data/standard80.dat");
   strcpy (geo.fixed_con_file, "none");
-
-  // Note that geo.model_list is initialized through get_spectype
-
-  /* Initialize a few other variables in python.h */
-  x_axis[0] = 1.0;
-  x_axis[1] = x_axis[2] = 0.0;
-  y_axis[1] = 1.0;
-  y_axis[0] = y_axis[2] = 0.0;
-  z_axis[2] = 1.0;
-  z_axis[1] = z_axis[0] = 0.0;
 
   geo.wcycles = geo.pcycles = 1;
   geo.wcycle = geo.pcycle = 0;
 
+  // Note that geo.model_list is initialized through get_spectype
   geo.model_count = 0;          //The number of models read in
 
   /* We should set the frame ASAP in the geo struct, so the grid initialisation
