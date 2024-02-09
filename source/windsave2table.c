@@ -271,6 +271,13 @@ main (argc, argv)
 
 /* Read in the wind file */
 
+  zdom = calloc (MAX_DOM, sizeof (domain_dummy));
+  if (zdom == NULL)
+  {
+    printf ("Unable to allocate memory for domain\n");
+    return EXIT_FAILURE;
+  }
+
   if (wind_read (windsavefile) < 0)
   {
     Error ("py_wind: Could not open %s", windsavefile);
