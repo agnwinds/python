@@ -66,6 +66,8 @@ init_geo ()
                                    be called at all if we are simply continuing a previous
                                    run */
   geo.hydro_domain_number = -1;
+  geo.nplasma = 0;
+  geo.nmacro = 0;
 
   if (geo.system_type == SYSTEM_TYPE_CV || geo.system_type == SYSTEM_TYPE_BH)
   {
@@ -326,7 +328,7 @@ init_advanced_modes ()
   modes.use_debug = FALSE;
   modes.print_dvds_info = FALSE;        // print information on velocity gradients
   modes.quit_after_inputs = FALSE;      // check inputs and quit
-  modes.quit_after_wind_defined = FALSE;      // define wind and quit
+  modes.quit_after_wind_defined = FALSE;        // define wind and quit
   modes.fixed_temp = FALSE;     // do not attempt to change temperature 
   modes.zeus_connect = FALSE;   // connect with zeus
 

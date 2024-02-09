@@ -16,7 +16,7 @@ Boundary_layer.radiation(yes,no)                   no
 ### Parameters for the Disk (if there is one)
 Disk.type(none,flat,vertically.extended,rmin>central.obj.rad)                 flat
 Disk.radiation(yes,no)                          yes
-Disk.rad_type_to_make_wind(bb,models)                   bb
+Disk.rad_type_to_make_wind(bb,models,mod_bb)                   bb
 Disk.temperature.profile(standard,readin)             standard
 Disk.mdot(msol/yr)                         1e-8
 Disk.radmax(cm)                            2.4e+10
