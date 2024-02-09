@@ -16,6 +16,7 @@ project(Python LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_COMPILER mpicc)
+set(CMAKE_CXX_COMPILER mpixx)
 include_directories(include)
 link_directories(lib)
 add_definitions(-DMPI_ON)
