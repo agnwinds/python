@@ -198,7 +198,7 @@ free_spectra (void)
 {
   int n_spec;
 
-  for (n_spec = 0; n_spec < geo.nangles + MSPEC; ++n_spec)
+  for (n_spec = 0; n_spec < nspectra; ++n_spec)
   {
     free (xxspec[n_spec].f);
     free (xxspec[n_spec].lf);
@@ -233,6 +233,6 @@ clean_on_exit (void)
     free_macro_grid ();
   }
   free_photons ();
-  free_spectra ();
-  free_atomic_data ();
+  // free_spectra ();
+  // free_atomic_data ();
 }

@@ -180,6 +180,7 @@ set(PYTHON_SOURCE
     source/communicate_plasma.c
     source/communicate_macro.c
     source/communicate_spectra.c
+    source/janitor.c
 )
 
 set(PY_WIND_SOURCE source/py_wind_ion.c source/py_wind_macro.c
