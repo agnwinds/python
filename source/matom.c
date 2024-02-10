@@ -673,6 +673,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   }
 
 
+  Log ("Xxxx %e  %e %d %d %d %d\n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev);
+
   /* This is the end of the modification */
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
@@ -694,7 +696,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
   }
 
-  Log ("Xxxx %e  %e %d %d %d %d\n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev);
+  // Log ("Xxxx %e  %e %d %d %d %d\n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev);
   return (alpha_sp_value);
 }
 
