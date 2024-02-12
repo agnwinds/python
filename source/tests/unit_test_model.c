@@ -101,17 +101,19 @@ cleanup_model (const char *root_name)
   }
 
   /* free domains */
-  for(int n_dom = 0; n_dom < geo.ndomain; ++n_dom)
+  for (int n_dom = 0; n_dom < geo.ndomain; ++n_dom)
   {
-    free_and_null((void **) &zdom[n_dom].wind_x);
-    free_and_null((void **) &zdom[n_dom].wind_midx);
-    free_and_null((void **) &zdom[n_dom].wind_z);
-    free_and_null((void **) &zdom[n_dom].wind_midz);
+    free_and_null ((void **) &zdom[n_dom].wind_x);
+    free_and_null ((void **) &zdom[n_dom].wind_midx);
+    free_and_null ((void **) &zdom[n_dom].wind_z);
+    free_and_null ((void **) &zdom[n_dom].wind_midz);
 
-    if(zdom[n_dom].coord_type == RTHETA) {
-      free_and_null((void **) &zdom[n_dom].cones_rtheta);
+    if (zdom[n_dom].coord_type == RTHETA)
+    {
+      free_and_null ((void **) &zdom[n_dom].cones_rtheta);
     }
-    else if (zdom[n_dom].coord_type == CYLVAR) {
+    else if (zdom[n_dom].coord_type == CYLVAR)
+    {
       free ((void **) &zdom[n_dom].wind_z_var[0]);
       free ((void **) &zdom[n_dom].wind_z_var);
       free ((void **) &zdom[n_dom].wind_midz_var[0]);
@@ -122,9 +124,10 @@ cleanup_model (const char *root_name)
 
   /* free dynamic grid properties */
 
-  for (int n_wind = 0; n_wind < NDIM2; ++n_wind) {
-    free_and_null((void **) &wmain[n_wind].paths);
-    free_and_null((void **) &wmain[n_wind].line_paths);
+  for (int n_wind = 0; n_wind < NDIM2; ++n_wind)
+  {
+    free_and_null ((void **) &wmain[n_wind].paths);
+    free_and_null ((void **) &wmain[n_wind].line_paths);
   }
 
   free_and_null ((void **) &wmain);

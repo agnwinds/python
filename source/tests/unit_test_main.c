@@ -60,7 +60,7 @@ main (int argc, char **argv)
   gsl_set_error_handler_off ();
 
   /* I don't want any output from Python, thank you very much */
-  Log_init("logfile");
+  Log_init ("logfile");
   Log_set_verbosity (0);
   rdpar_set_verbose (0);
   Log_set_mpi_rank (rank_global, np_mpi_global);
@@ -97,7 +97,7 @@ main (int argc, char **argv)
 
   /* Clean up the CUnit registry */
   CU_cleanup_registry ();
-  Log_close();
+  Log_close ();
 
 #ifdef MPI_ON
   MPI_Finalize ();
