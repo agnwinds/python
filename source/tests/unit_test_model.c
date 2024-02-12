@@ -101,9 +101,32 @@ cleanup_model (const char *root_name)
   }
 
   /* free domains */
+  for(int n_dom = 0; n_dom < geo.ndomain; ++n_dom)
+  {
+    free_and_null((void **) &zdom[n_dom].wind_x);
+    free_and_null((void **) &zdom[n_dom].wind_midx);
+    free_and_null((void **) &zdom[n_dom].wind_z);
+    free_and_null((void **) &zdom[n_dom].wind_midz);
+
+    if(zdom[n_dom].coord_type == RTHETA) {
+      free_and_null((void **) &zdom[n_dom].cones_rtheta);
+    }
+    else if (zdom[n_dom].coord_type == CYLVAR) {
+      free ((void **) &zdom[n_dom].wind_z_var[0]);
+      free ((void **) &zdom[n_dom].wind_z_var);
+      free ((void **) &zdom[n_dom].wind_midz_var[0]);
+      free ((void **) &zdom[n_dom].wind_midz_var);
+    }
+  }
   free_and_null ((void **) &zdom);
 
   /* free dynamic grid properties */
+
+  for (int n_wind = 0; n_wind < NDIM2; ++n_wind) {
+    free_and_null((void **) &wmain[n_wind].paths);
+    free_and_null((void **) &wmain[n_wind].line_paths);
+  }
+
   free_and_null ((void **) &wmain);
 
   /* NPLASMA + 1 is the dummy plasma cell */
@@ -288,44 +311,53 @@ setup_model_grid (const char *root_name, const char *atomic_data_location)
     fprintf (stderr, "Unable to allocate space for domain structure\n");
     return EXIT_FAILURE;
   }
+
+  strncpy (rdchoice_answer, "star", LINELENGTH);
+  snprintf (rdchoice_choices, LINELENGTH, "%d,%d,%d,%d,%d", SYSTEM_TYPE_STAR, SYSTEM_TYPE_CV, SYSTEM_TYPE_BH, SYSTEM_TYPE_AGN,
+            SYSTEM_TYPE_PREVIOUS);
+  geo.system_type = rdchoice ("System_type(star,cv,bh,agn,previous)", rdchoice_choices, rdchoice_answer);
   init_geo ();
 
-  /* Now when we call the initialisation functions or use rdXXX, the rdchoice_choices
-   * for the parameter will come from the parameter file */
+  /* These routines don't seem to depend on the atomic data or anything which
+   * depends on the atomic data */
+  const double star_lum = get_stellar_params ();
+  get_disk_params ();
+  get_bl_and_agn_params (star_lum);
+
   rdint ("Wind.number_of_components", &geo.ndomain);
   if (geo.ndomain > MAX_DOM)
   {
     fprintf (stderr, "Using more domains (%d) in model than MAX_DOM (%d)\n", geo.ndomain, MAX_DOM);
     return EXIT_FAILURE;
   }
-  strncpy (rdchoice_answer, "star", LINELENGTH);
-  snprintf (rdchoice_choices, LINELENGTH, "%d,%d,%d,%d,%d", SYSTEM_TYPE_STAR, SYSTEM_TYPE_CV, SYSTEM_TYPE_BH, SYSTEM_TYPE_AGN,
-            SYSTEM_TYPE_PREVIOUS);
-  geo.system_type = rdchoice ("System_type(star,cv,bh,agn,previous)", rdchoice_choices, rdchoice_answer);
 
-  /* These routines don't seem to depend on the atomic data or anything which
-   * depends on the atomic data */
-  const double star_lum = get_stellar_params ();
-  get_bl_and_agn_params (star_lum);
-  get_disk_params ();
+  for (n_dom = 0; n_dom < geo.ndomain; ++n_dom)
+  {
+    get_domain_params (n_dom);
+  }
 
   /* We have to be a bit creative with the atomic data, to munge the correct
    * filepath with what's in the parameter file */
+  init_ionization ();
   rdstr ("Atomic_data", geo.atomic_filename);
   if (set_atomic_data_filename (atomic_data_location))
   {
     return EXIT_FAILURE;
   }
+  setup_atomic_data (geo.atomic_filename);
 
   /* We should now be able to initialise everything else which seems to have
    * some dependence on the ionisation settings or atomic data */
-  init_ionization ();
-  setup_atomic_data (geo.atomic_filename);
   for (n_dom = 0; n_dom < geo.ndomain; ++n_dom)
   {
-    get_domain_params (n_dom);
     get_wind_params (n_dom);
   }
+
+  if (geo.system_type == SYSTEM_TYPE_CV)
+  {
+    binary_basics ();
+  }
+
   setup_windcone ();
   DFUDGE = setup_dfudge ();
 

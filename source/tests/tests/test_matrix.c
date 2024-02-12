@@ -13,11 +13,6 @@
 #include <stdlib.h>
 #include <CUnit/CUnit.h>
 
-#ifndef CUDA_ON
-#include "gsl/gsl_errno.h"
-gsl_error_handler_t *old_handler;
-#endif
-
 #include "../../atomic.h"
 #include "../../python.h"
 #include "../assert.h"
@@ -321,8 +316,6 @@ matrix_suite_init (void)
 
 #ifdef CUDA_ON
   error = cusolver_create ();
-#else
-  old_handler = gsl_set_error_handler_off ();
 #endif
 
   return error;
@@ -347,8 +340,6 @@ matrix_suite_teardown (void)
 
 #ifdef CUDA_ON
   error = cusolver_destroy ();
-#else
-  gsl_set_error_handler (old_handler);
 #endif
 
   return error;

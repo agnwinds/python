@@ -18,17 +18,14 @@
 #include <stdlib.h>
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
+#include <gsl/gsl_errno.h>
 
 /* Test suite prototypes */
 #include "tests/suites.h"
 
 /* Python logging prototypes */
-#include "../log.h"
-
-/* Including templates.h also includes main() from another program for some
- * reason, so we can't include python.h or templates.h. This means we need to
- * define function prototypes manually */
-int init_rand (int seed);
+#include "../atomic.h"
+#include "../python.h"
 
 /** *******************************************************************************************************************
  *
@@ -39,9 +36,6 @@ int init_rand (int seed);
 int
 main (int argc, char **argv)
 {
-  int my_rank;
-  int num_ranks;
-
 #ifdef MPI_ON
   int mpi_err = MPI_Init (&argc, &argv);
   if (mpi_err != EXIT_SUCCESS)
@@ -49,23 +43,27 @@ main (int argc, char **argv)
     Error ("Failed to initialise MPI\n");
     Exit (mpi_err);
   }
-  MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
-  MPI_Comm_size (MPI_COMM_WORLD, &num_ranks);
+  MPI_Comm_rank (MPI_COMM_WORLD, &rank_global);
+  MPI_Comm_size (MPI_COMM_WORLD, &np_mpi_global);
 #else
-  my_rank = 0;
-  num_ranks = 1;
+  rank_global = 0;
+  np_mpi_global = 1;
 #endif
 
-  if (num_ranks != 1)
+  if (np_mpi_global != 1)
   {
     fprintf (stderr, "Using multiple MPI ranks is not supported\n");
     return EXIT_FAILURE;
   }
 
+  /* We don't want this to get in the way, like in Python */
+  gsl_set_error_handler_off ();
+
   /* I don't want any output from Python, thank you very much */
+  Log_init("logfile");
   Log_set_verbosity (0);
   rdpar_set_verbose (0);
-  Log_set_mpi_rank (my_rank, num_ranks);
+  Log_set_mpi_rank (rank_global, np_mpi_global);
 
   /* Initialize the CUnit test registry */
   if (CU_initialize_registry () != CUE_SUCCESS)
@@ -99,6 +97,7 @@ main (int argc, char **argv)
 
   /* Clean up the CUnit registry */
   CU_cleanup_registry ();
+  Log_close();
 
 #ifdef MPI_ON
   MPI_Finalize ();

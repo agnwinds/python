@@ -207,14 +207,13 @@ spherical_wind_complete (ndom, w)
   ndim = zdom[ndom].ndim;
   nstart = zdom[ndom].nstart;
 
-
   for (i = 0; i < ndim; i++)
     zdom[ndom].wind_x[i] = w[nstart + i].r;
   for (i = 0; i < ndim - 1; i++)
     zdom[ndom].wind_midx[i] = w[nstart + i].rcen;
   /* Add something plausible for the edges */
   zdom[ndom].wind_midx[ndim - 1] = 2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
-  zdom[ndom].wind_midz[ndim - 1] = 2. * zdom[ndom].wind_z[ndim - 1] - zdom[ndom].wind_midz[ndim - 2];
+  zdom[ndom].wind_midz[0] = zdom[ndom].wind_z[0] / 2;
 
   return (0);
 }

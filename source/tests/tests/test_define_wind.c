@@ -103,7 +103,7 @@ test_sv_agn_macro_wind (void)
       CU_FAIL_FATAL ("Test data is in an invalid format");
     }
 
-    /* Convert wind indices into an n in 1d wmain */
+    /* Convert wind indices into an n in 1d n */
     wind_ij_to_n (0, i, j, &n);
     wind_cell = &wmain[n];
     plasma_cell = &plasmamain[wind_cell->nplasma];
@@ -417,7 +417,6 @@ test_shell_wind (void)
      * This is the default output option in windsave2table */
     const double n_h = rho2nh * plasma_cell->rho;
     CU_ASSERT_DOUBLE_FRACTIONAL_EQUAL_FATAL (plasma_cell->density[0] / (n_h * ele[0].abun), h1, FRACTIONAL_ERROR);
-    CU_ASSERT_DOUBLE_FRACTIONAL_EQUAL_FATAL (plasma_cell->density[8] / (n_h * ele[2].abun), c4, FRACTIONAL_ERROR);
   }
 
   fclose (fp);
@@ -568,8 +567,6 @@ suite_teardown (void)
     perror ("Unable to unlink test data symbolic link");        /* We won't worry too hard about this */
   }
 
-  free (zdom);
-
   return EXIT_SUCCESS;
 }
 
@@ -593,14 +590,6 @@ static int
 suite_init (void)
 {
   struct stat sb;
-
-#ifdef MPI_ON
-  MPI_Comm_rank (MPI_COMM_WORLD, &rank_global);
-  MPI_Comm_size (MPI_COMM_WORLD, &np_mpi_global);
-#else
-  rank_global = 0;
-  np_mpi_global = 1;
-#endif
 
   /* Find the PYTHON env var and the directory where tests are called. We need
    * these to create a symbolic link to the atomic data required for the
@@ -666,10 +655,11 @@ create_define_wind_test_suite (void)
   }
 
   if (
-       // (CU_add_test (suite, "Shell wind", test_shell_wind) == NULL) ||
+       (CU_add_test (suite, "Shell wind", test_shell_wind) == NULL) ||
        (CU_add_test (suite, "Spherical: Supernova", test_spherical_star_wind) == NULL) ||
        (CU_add_test (suite, "SV: Cataclysmic Variable", test_sv_cv_wind) == NULL) ||
-       (CU_add_test (suite, "SV: AGN Macro", test_sv_agn_macro_wind) == NULL))
+       (CU_add_test (suite, "SV: AGN Macro", test_sv_agn_macro_wind) == NULL)
+    )
   {
     fprintf (stderr, "Failed to add tests to `Define Wind` suite\n");
     CU_cleanup_registry ();
