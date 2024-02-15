@@ -1604,7 +1604,7 @@ struct advanced_modes
                                       * cyles, which is currently controlled directly
                                       * from the normal .pf file
                                       */
-  int turn_off_upweighting_of_simple_macro_atoms; /**< If TURE, use the deprecated method for simple atoms
+  int use_upweighting_of_simple_macro_atoms; /**< If TURE, use the deprecated method for simple atoms
                                                     *in macro scheme
                                                     */
   int run_xtest_diagnostics;     /**< If TRUE, then xtest is being run, which is

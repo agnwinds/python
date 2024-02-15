@@ -1111,7 +1111,7 @@ scatter (p, nres, nnscat)
            then the photon weight gets multiplied down by a factor (nu-nu_0)/nu
            and we force a kpkt to be created */
 
-        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
+        if (modes.use_upweighting_of_simple_macro_atoms)
         {
           /* This is the new approach which does not explicityly conserve energy.
              Re record the amount of energy going into the simple ion ionization pool.  This
