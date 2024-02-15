@@ -584,6 +584,9 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   // alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
   alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
 
+  // Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
+  //     cont_ptr->freq[0], cont_ptr->x[0]);
+
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
      through by the appropriate constant. */
   if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
