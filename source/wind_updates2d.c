@@ -992,6 +992,13 @@ WindPtr (w);
       report_bf_simple_ionpool ();
   }
 
+  /* report a warning if the induced Compton heating is greater than 10% of the heating, see #1016 */
+  if (icsum >= (0.1 * xsum))
+  {
+    Error ("!!wind_update: Induced Compton is responsible for %3.1f percent of radiative heating. Could cause problems.\n",
+           icsum / xsum * 100.0);
+  }
+
 
 
   if (modes.zeus_connect == 1 || modes.fixed_temp == 1) //There is no point in computing temperature changes, because we have fixed them!
