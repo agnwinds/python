@@ -67,9 +67,22 @@ ion_abundances (PlasmaPtr xplasma, int mode)
 
     ireturn = fix_concentrations (xplasma, 0);
   }
-  else if (mode == IONMODE_ML93 || mode == IONMODE_MATRIX_BB)
+  else if (mode == IONMODE_ML93)
   {
-    /* On the spot, with one_shot at updating t_e before calculating densities */
+    /* On the spot, setting te to 0.9 t_r before calculating densities */
+
+    xplasma->dt_e_old = xplasma->dt_e;
+    xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
+    xplasma->t_e_old = xplasma->t_e;
+    xplasma->lum_tot_old = xplasma->lum_tot;
+    xplasma->heat_tot_old = xplasma->heat_tot;
+    ireturn = 0;
+    xplasma->t_e = 0.9 * xplasma->t_r;
+    convergence (xplasma);
+
+  }
+  else if (mode == IONMODE_MATRIX_BB)
+  {
 
     xplasma->dt_e_old = xplasma->dt_e;
     xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;

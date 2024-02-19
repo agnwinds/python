@@ -524,7 +524,12 @@ init_observers ()
     }
     strcpy (answer, "no");
     ichoice = rdchoice ("@Spectrum.select_photons_by_position(yes,no)", "1,0", answer);
-    if (ichoice)
+    if (ichoice && !geo.select_extract)
+    {
+      Error ("setup.c: Cannot select photons by position if in Live.or.die mode. Use Extract mode!\n");
+      Exit (0);
+    }
+    else if (ichoice)
     {
       for (n = 0; n < geo.nangles; n++)
       {

@@ -19,14 +19,16 @@
 
 /**********************************************************/
 /**
- * @brief      returns the specific band-limited luminosity in macro-atoms
+ * @brief      returns the specific band-limited luminosity in macro-atoms (and depending
+ * on the mode calculates the band-limited emisivities for the cells in the wind for
+ * use in detailed spectral models via a MC process.
  *
  * @param [in] int  mode   variable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
  *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
  *            see #define statements in python.h and code in xdefine_phot().
  * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the
- *            wavelength range required for the specrum calculation.
+ *            wavelength range required for the spectrum calculation.
  *
  * @details
  * this routine calculates the luminosity in the band needed for the computation of the
@@ -35,8 +37,10 @@
  * (at least with our method) to work out where a photon is going to come out when a
  * macro-atom is generated
  *
+ * This routine has been largely replaced by get_matom_f_accelerate()
+ *
  * ### Notes ###
- * Consult Matthews thesis.
+ * Consult Matthews thesis section 3.6.1.
  *
  **********************************************************/
 
@@ -429,7 +433,9 @@ get_matom_f (mode)
 
 /**********************************************************/
 /**
- * @brief      returns the specific band-limited luminosity in macro-atoms
+ * @brief      returns the specific band-limited luminosity in macro-atoms (and depending
+ * on the mode) calcuates the emisivities in each cell in the wind (using a matrix approach)
+ * used for the generation of detailed spectra.
  *
  * @param [in] int  mode   vvariable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
@@ -441,12 +447,15 @@ get_matom_f (mode)
  * @details
  * this routine calculates the luminosity in the band needed for the computation of the
  * spectrum. It gets the total energy radiated by the deactivation of macro atoms in the
- * required wavelength range. This can be a slow process, as there is no priori way
- * (at least with our method) to work out where a photon is going to come out when a
- * macro-atom is generated
+ * required wavelength range. 
+ *
+ * When called in (CALCULATE_MATOM_EMISSIVITIES) mode it also calculatees the emissities
+ * that are used to generate kpkts from the wind.
  *
  * ### Notes ###
- * Consult Matthews thesis.
+ * Consult Matthews thesis section 3.6.1.
+ *
+ * This routine is considerably faster thasn get_matom_f() 
  *
  **********************************************************/
 
@@ -457,9 +466,6 @@ get_matom_f_accelerate (mode)
   int n, m, mm;
   double lum;
   double level_emit_doub[NLEVELS_MACRO], kpkt_emit_doub;
-//OLD  int n_tries, n_tries_local;
-//OLD  double norm;
-//OLD  int which_out;
   int i, j;
   int my_nmin, my_nmax;         //These variables are used even if not in parallel mode
 
@@ -498,25 +504,18 @@ get_matom_f_accelerate (mode)
     /* add the non-radiative k-packet heating to the kpkt_abs quantity */
     get_kpkt_heating_f ();
 
-//OLD    which_out = 0;
-//OLD    n_tries = 5000000;
     geo.matom_radiation = 0;
-//OLD    n_tries_local = 0;
-
 
 
     /* zero all the emissivity counters and check absorbed quantities */
-//OLD    norm = 0;
     for (n = 0; n < NPLASMA; n++)
     {
       for (m = 0; m < nlevels_macro; m++)
       {
-//OLD        norm += macromain[n].matom_abs[m];
         macromain[n].matom_emiss[m] = 0.0;
         if (sane_check (macromain[n].matom_abs[m]))
           Error ("matom_abs is %8.4e in matom %i level %i\n", macromain[n].matom_abs[m], n, m);
       }
-//OLD      norm += plasmamain[n].kpkt_abs;
       plasmamain[n].kpkt_emiss = 0.0;
       if (sane_check (plasmamain[n].kpkt_abs))
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);
