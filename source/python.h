@@ -247,7 +247,7 @@ extern double velocity_electron[3];     // velocity of the electron when thermal
 /* End of structures which are used to define boundaries to the emission regions */
 /*******************DOMAIN structure***********************************************/
 
-#define NDIM_MAX 1000           /**< maximum size of the grid in each dimension
+#define NDIM_MAX 3000           /**< maximum size of the grid in each dimension
                                   */
 
 /**
@@ -1002,15 +1002,17 @@ typedef struct plasma
 
 #define NFLUX_ANGLES 36 /**< The number of bins into which the directional flux is calculated */
 
-  /*Binned fluxes */
-  double F_UV_ang_x[NFLUX_ANGLES];
-  double F_UV_ang_y[NFLUX_ANGLES];
-  double F_UV_ang_z[NFLUX_ANGLES];
+  
+  /*Binned fluxes*/
+  double F_UV_ang_theta[NFLUX_ANGLES];
+  double F_UV_ang_phi[NFLUX_ANGLES];
+  double F_UV_ang_r[NFLUX_ANGLES];
+  
 
   /*A version of the binned flux that is averaged over cycles */
-  double F_UV_ang_x_persist[NFLUX_ANGLES];
-  double F_UV_ang_y_persist[NFLUX_ANGLES];
-  double F_UV_ang_z_persist[NFLUX_ANGLES];
+  double F_UV_ang_theta_persist[NFLUX_ANGLES];
+  double F_UV_ang_phi_persist[NFLUX_ANGLES];
+  double F_UV_ang_r_persist[NFLUX_ANGLES];
 
   /* The term direct here means from photons which have not been scattered. These are photons which have been
      created by the central object, or the disk, or in the simple case the wind, but which have not undergone

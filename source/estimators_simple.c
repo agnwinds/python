@@ -284,10 +284,17 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 
   project_from_xyz_cyl (phot_mid->x, flux_orig, flux);  //Transform to the frame ine which fluxes are summed 
 
-  if (phot_mid->x[2] < 0)       //If the photon is in the lower hemisphere, reverse the sense of the z flux
-    flux[2] *= (-1);
-  angle = 0.0;
+  double theta;
+  double r = sqrt(pow(phot_mid->x[0],2)+pow(phot_mid->x[1],2));
 
+  if (phot_mid->x[2] < 0) {      //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+    flux[2] *= (-1);
+    theta = atan2(r,-phot_mid->x[2]);
+  } else {
+    theta = atan2(r,phot_mid->x[2]);
+  } 
+
+  angle = 0.0;
 
   if (flux[2] > 0 && flux[0] > 0)
     angle = (atan (flux[0] / flux[2]) * RADIAN);
@@ -302,9 +309,15 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 
 
   iangle = (angle) / binw;      //Turn the angle into an integer to pass into the flux array
-  xplasma->F_UV_ang_x[iangle] += flux[0];
-  xplasma->F_UV_ang_y[iangle] += flux[1];
-  xplasma->F_UV_ang_z[iangle] += flux[2];
+  
+  //xplasma->F_UV_ang_x[iangle] += flux[0];
+  //xplasma->F_UV_ang_y[iangle] += flux[1];
+  //xplasma->F_UV_ang_z[iangle] += flux[2];
+  
+  xplasma->F_UV_ang_r[iangle] += flux[0]*sin(theta)+flux[2]*cos(theta);
+  xplasma->F_UV_ang_phi[iangle] += flux[1];
+  xplasma->F_UV_ang_theta[iangle] += flux[0]*cos(theta)-flux[2]*sin(theta);
+
 
 
 
@@ -615,9 +628,9 @@ normalise_simple_estimators (xplasma)
 //OLD    thetamax = (i + 1) * RADIAN;
 
 //OLD    wedge_volume = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
-    xplasma->F_UV_ang_x[i] /= volume_obs;
-    xplasma->F_UV_ang_y[i] /= volume_obs;
-    xplasma->F_UV_ang_z[i] /= volume_obs;
+    xplasma->F_UV_ang_theta[i] /= volume_obs;
+    xplasma->F_UV_ang_phi[i] /= volume_obs;
+    xplasma->F_UV_ang_r[i] /= volume_obs;
 
     //   xplasma->idomega[i] /= (4. * PI * volume_obs);
 
