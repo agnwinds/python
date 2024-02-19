@@ -4,7 +4,7 @@
  * @date   January, 2018
  *
  * @brief functions for calculating emissivities and generating photons from macro-atoms and k-packets.
- *   during the spectral cycles. The actual functions which do the jumps inside an activated 
+ *   during the spectral cycles. The actual functions which do the jumps inside an activated
  *  macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
  *
  ***********************************************************/
@@ -12,36 +12,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 #include "atomic.h"
 #include "python.h"
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      returns the specific band-limited luminosity in macro-atoms
  *
  * @param [in] int  mode   variable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
  *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
  *            see #define statements in python.h and code in xdefine_phot().
- * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the 
+ * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the
  *            wavelength range required for the specrum calculation.
  *
  * @details
  * this routine calculates the luminosity in the band needed for the computation of the
  * spectrum. It gets the total energy radiated by the deactivation of macro atoms in the
- * required wavelength range. This can be a slow process, as there is no priori way 
- * (at least with our method) to work out where a photon is going to come out when a 
+ * required wavelength range. This can be a slow process, as there is no priori way
+ * (at least with our method) to work out where a photon is going to come out when a
  * macro-atom is generated
  *
  * ### Notes ###
- * Consult Matthews thesis. 
+ * Consult Matthews thesis.
  *
  **********************************************************/
 
@@ -69,14 +64,14 @@ get_matom_f (mode)
     int size_of_commbuffer;
     char *commbuffer;
 
-    /* the commbuffer needs to communicate 2 variables and the number of macor levels, 
+    /* the commbuffer needs to communicate 2 variables and the number of macor levels,
        plus the variable for how many cells each thread is doing */
     size_of_commbuffer = 8 * (3 + nlevels_macro) * (floor (NPLASMA / np_mpi_global) + 1);
 
     commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 #endif
 
-    /* if we are using the accelerated macro-atom scheme then we want to allocate an array 
+    /* if we are using the accelerated macro-atom scheme then we want to allocate an array
        for the macro-atom probabilities and various other quantities */
     /* these variables are only used in the non-accelerated scheme */
     struct photon ppp;
@@ -118,7 +113,7 @@ get_matom_f (mode)
     Log ("Number of macro-atom levels: %d\n", nlevels_macro);
 
 
-    /* For MPI parallelisation, the following loop will be distributed over multiple tasks. 
+    /* For MPI parallelisation, the following loop will be distributed over multiple tasks.
        Note that the mynmim and mynmax variables are still used even without MPI on */
     my_nmin = 0;
     my_nmax = NPLASMA;
@@ -253,7 +248,7 @@ get_matom_f (mode)
                 macro_gov (&ppp, &nres, 1, &which_out);
 
 
-                /* Now a macro atom has been excited and followed until an r-packet is made. Now, if that 
+                /* Now a macro atom has been excited and followed until an r-packet is made. Now, if that
                    r-packet is in the correct frequency range we record it. If not, we throw it away. */
               }
               else if (m == nlevels_macro)
@@ -407,12 +402,12 @@ get_matom_f (mode)
     free (commbuffer);
 #endif
 
-  }                             // end of if loop which controls whether to compute the emissivities or not 
+  }                             // end of if loop which controls whether to compute the emissivities or not
 
 
   /* this next loop just calculates lum to be the correct summed value in parallel mode */
   /* if mode == USE_STORED_MATOM_EMISSIVITIES this is all this routine does */
-  lum = 0.0;                    // need to rezero, fixes segfault bug #59 
+  lum = 0.0;                    // need to rezero, fixes segfault bug #59
 
   for (n = 0; n < NPLASMA; n++)
   {
@@ -433,25 +428,25 @@ get_matom_f (mode)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      returns the specific band-limited luminosity in macro-atoms
  *
  * @param [in] int  mode   vvariable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
  *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
  *            see #define statements in python.h and code in xdefine_phot().
- * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the 
+ * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the
  *            wavelength range required for the specrum calculation.
  *
  * @details
  * this routine calculates the luminosity in the band needed for the computation of the
  * spectrum. It gets the total energy radiated by the deactivation of macro atoms in the
- * required wavelength range. This can be a slow process, as there is no priori way 
- * (at least with our method) to work out where a photon is going to come out when a 
+ * required wavelength range. This can be a slow process, as there is no priori way
+ * (at least with our method) to work out where a photon is going to come out when a
  * macro-atom is generated
  *
  * ### Notes ###
- * Consult Matthews thesis. 
+ * Consult Matthews thesis.
  *
  **********************************************************/
 
@@ -481,14 +476,14 @@ get_matom_f_accelerate (mode)
     int size_of_commbuffer;
     char *commbuffer;
 
-    /* the commbuffer needs to communicate 2 variables and the number of macor levels, 
+    /* the commbuffer needs to communicate 2 variables and the number of macor levels,
        plus the variable for how many cells each thread is doing */
     size_of_commbuffer = 8 * (3 + nlevels_macro) * (floor (NPLASMA / np_mpi_global) + 1);
 
     commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 #endif
 
-    /* if we are using the accelerated macro-atom scheme then we want to allocate an array 
+    /* if we are using the accelerated macro-atom scheme then we want to allocate an array
        for the macro-atom probabilities and various other quantities */
     PlasmaPtr xplasma;
     int nrows = nlevels_macro + 1;
@@ -533,7 +528,7 @@ get_matom_f_accelerate (mode)
     Log ("Number of macro-atom levels: %d\n", nlevels_macro);
 
 
-    /* For MPI parallelisation, the following loop will be distributed over multiple tasks. 
+    /* For MPI parallelisation, the following loop will be distributed over multiple tasks.
        Note that the mynmim and mynmax variables are still used even without MPI on */
     my_nmin = 0;
     my_nmax = NPLASMA;
@@ -566,7 +561,7 @@ get_matom_f_accelerate (mode)
       /* use the accelerated macro-atom scheme */
       xplasma = &plasmamain[n];
       calc_matom_matrix (xplasma, matom_matrix);
-      /* before we calculate the emissivities we need to know what fraction of the energy 
+      /* before we calculate the emissivities we need to know what fraction of the energy
          from each level comes out in the frequency band we care about */
 
       for (i = 0; i < nlevels_macro; i++)
@@ -670,12 +665,12 @@ get_matom_f_accelerate (mode)
 
     free (matom_matrix);
 
-  }                             // end of if loop which controls whether to compute the emissivities or not 
+  }                             // end of if loop which controls whether to compute the emissivities or not
 
 
   /* this next loop just calculates lum to be the correct summed value in parallel mode */
   /* if mode == USE_STORED_MATOM_EMISSIVITIES this is all this routine does */
-  lum = 0.0;                    // need to rezero, fixes segfault bug #59 
+  lum = 0.0;                    // need to rezero, fixes segfault bug #59
 
   for (n = 0; n < NPLASMA; n++)
   {

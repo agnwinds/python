@@ -91,12 +91,13 @@ This process can be very computationally intensive, especially if the wavelength
 
 Once the emissivities have been calculated, the spectral synthesis can proceed. This is done in a different way to the ionization cycles. Photons are generated from the specified photon sources over the required wavelength range, but are now also generated according to the calculated macro-atom and :math:`k`-packet emissivities in each cell. These photons are "extracted" as with normal photon packets. In order to ensure that radiative equilibrium still holds, any photon that interacts with a macro-atom or :math:`k`-packet is immediately destroyed. The photons are tracked and extracted as normal until they escape the simulation; resonant scatters are dealt with by a combination of macro-atom photon production and destruction.
 
-.. admonition :: Developer note: Emissivites
+.. admonition :: Developer note: Emissivities
 
     We are a little lax in terms of what we actually call an emissivity in the code. The quantities stored in variables like ``kpkt_emiss`` and ``matom_emiss`` in the plasma and macro-atom structures are actually *comoving-frame energies* in erg, which are sampled when generating :math:`r`-packets in each cell. Roughly speaking, these are luminosities given that the code assumes a time unit of 1s. Similarly, when the code prints out level *emissivities* to screen and to the diag file, these are really a sum over all these quantities (and can approximately be thought of as level *luminosities*).
 
 Bound-free Continua of Simple Atoms
 =============================================
+.. todo:: this section is not yet completely accurate.
 
 Historically, when using the indivisible packet form of radiative transfer (`macro_atoms_thermal_trapping`, for example), the bound-free continua of simple atoms were treated in a simplified two-level framework. In this case, simple atoms are those `without` a full macro-atom model atom, usually the metals. In this two-level scheme, whenever a simple atom undergoes a bound-free interaction, it is excited into the continuum state, and this is immediately followed by recombination, and an :math:`r`-packet or :math:`k`-packet is created immediately. As a result, the scheme does not capture the physical situation whereby a recombination cascade can occur from an initial recombination to excited levels, leading to a gradual reddening of the photon if there are many interactions. This situation **is** modelled well by a full macro-atom treatment. 
 
@@ -109,3 +110,8 @@ This result in two changes to the code for ionization cycles:
 In the spectral cycles, interactions with simple bound-free continua now kill the photon, and :math:`k \to r` follow the same behaviour as above, because in these cycles we introduce a precalculated band-limited :math:`k`-packet emissivity. 
 
 **It is possible for some numerical problems to occur.** For example, there is nothing to stop the value of :math:`f_{\rm up}` being quite large, if the photon is being emitted close to the edge. This is most likely to happen when the electron temperature :math:`T_e` is quite low, but there is nothing to stop it happening anywhere. This is most likely to lead to problems when the factor :math:`f_{\rm up}` is comparable to the typical number of photon passages per cell, since then a single photon can dominate the heating or ionization estimators in a given cell and lead to convergence problems by dramatically exacerbating shot noise. 
+
+.. admonition :: Deactivating the scheme
+
+    This mode can be turned off using the :ref:`Diag.turn_off_upweighting_of_simple_macro_atoms`. 
+    In this case the code will go back to using the two-level framework for simple atom bound free continua.

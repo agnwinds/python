@@ -132,7 +132,6 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 double radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
 double sigma_phot(struct topbase_phot *x_ptr, double freq);
-double log_sigma_phot(struct topbase_phot *x_ptr, double log_freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
@@ -227,6 +226,7 @@ double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int allow_negative, int *hit);
 double disk_height(double s, void *params);
+double disk_colour_correction(double t);
 /* lines.c */
 double total_line_emission(PlasmaPtr xplasma, double f1, double f2);
 double lum_lines(PlasmaPtr xplasma, int nmin, int nmax);
@@ -328,6 +328,7 @@ void print_timer_duration(char *msg, struct timeval timer_t0);
 /* matom.c */
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
+double xalpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double freq_min, double freq_max);
 double alpha_sp_integrand(double freq, void *params);
@@ -425,6 +426,7 @@ double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
+void set_comp_func_values(double rand_cs, double max_cs, double energy_ratio);
 int compton_dir(PhotPtr p);
 double pdf_thermal(double x, void *params);
 int compton_get_thermal_velocity(double t, double *v);
@@ -475,7 +477,6 @@ double tb_exp(double freq, void *params);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne, double nh1, double nh2);
-int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplasma);
 /* para_update.c */
 int communicate_estimators_para(void);
 int gather_spectra_para(void);
@@ -503,10 +504,10 @@ double get_matom_f_accelerate(int mode);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
-int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[200][200], int radiative_flag[200][200], int conf_to_matrix[200]);
-int macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[200][200], int conf_to_matrix[200]);
-int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200], int n_iterations);
-void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[200]);
+int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[300][300], int radiative_flag[300][300], int conf_to_matrix[300]);
+int macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[300][300], int conf_to_matrix[300]);
+int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[300], int n_iterations);
+void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[300]);
 /* windsave2table_sub.c */
 int do_windsave2table(char *root, int ion_switch, int edge_switch);
 int create_master_table(int ndom, char rootname[]);
@@ -635,6 +636,10 @@ int calc_all_matom_matrices(void);
 /* atomic_extern_init.c */
 /* python_extern_init.o */
 /* models_extern_init.c */
+/* matrix_cpu.c */
+const char *get_matrix_error_string(int error_code);
+int solve_matrix(double *a_matrix, double *b_matrix, int size, double *x_matrix, int nplasma);
+int invert_matrix(double *matrix, double *inverted_matrix, int num_rows);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

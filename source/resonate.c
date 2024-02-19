@@ -233,7 +233,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity in CMF frame
 
   /* 
-    Multiply by scale factor to get to observer frame
+     Multiply by scale factor to get to observer frame
 
      The conversion factor for the opacity at least for electron scattering can be understood as occuring
      in two parts, one is a conversion of densities from the local frame to the observer frame, and
@@ -241,9 +241,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
      is going against the flow, thatn when the photon is moving in the direction of the flow.
 
      230918 - The current version of this added in 87e
-     */
+   */
 
-  kap_cont_obs = kap_cont * observer_to_local_frame_ds (p, 1.); 
+  kap_cont_obs = kap_cont * observer_to_local_frame_ds (p, 1.);
 
 
   /* Finally begin the loop over the resonances that can interact
@@ -587,20 +587,21 @@ kappa_bf (xplasma, freq, macro_all)
  *
  * @details
  *
- * This routine is now called before various cylces of the Monte Carlo calculation.
+ * This routine is now called before various cycles of the Monte Carlo calculation.
  * (in run.c) It determines which
  * bf processes are worth considering during the calculation that follows.
  *
- * To do this
- * it uses the edge position (must be inside, or close to, the spectral region of
- * interest) and the edge opacity (must be greater than a threshold value, currently
+ * To do this, it uses a typical distance a photon can travel within the cell,
+ * the threshold x-section, and the density of the ion of interest.  It retains
+ * x-sections if tau at the threshold frequency is greater than 
+ * a value set to
  * 10^-6.
  *
  * The need for the routine is just to prevent wasting time on unimportant bf
- * transitions.  It is called (currently) from resonate.
+ * transitions. 
  *
  * ### Notes ###
- * The dimensionalty of kbf_use is currently set to NTOP_PHOT, which is large enough
+ * The dimensionalty of kbf_use is set to nphot_total, which is large enough
  * to store every transition if necessary.
  *
  **********************************************************/
@@ -823,7 +824,7 @@ calls to two_level atom
       Error ("sobolev: If the problem occurs during the first ionization cycle, raising the temperature in the starting model may help.\n");
       Error
         ("sobelev: If that does not work, please reopen issue #1019 on github, and provide the .pf file and anything else needed to duplicate the problem.\n");
-      Exit (0);
+      // Exit (0);
     }
 
     else
@@ -1080,6 +1081,15 @@ scatter (p, nres, nnscat)
 
         prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
+        if (*nres - NLINES - 1 >= 0)
+        {
+          xplasma->n_bf_in[*nres - NLINES - 1] += 1;
+
+
+          //  XXXXXXXXXXXXXXXXXX  117 had and inordinate
+
+        }
+
         if (prob_kpkt < 0)
         {
           /* only report an error for a negative prob_kpkt if it's large-ish in magnitude. see #436 discussion */
@@ -1131,6 +1141,11 @@ scatter (p, nres, nnscat)
           }
         }
 
+
+        if (*nres - NLINES - 1 >= 0)
+        {
+          xplasma->n_bf_out[*nres - NLINES - 1] += 1;
+        }
       }
       else
       {

@@ -156,10 +156,10 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
     ii[1] = ix + 1;
     frac[1] = dr;
     *nelem = 2;
-    if (sane_check (dr))
-    {
-      Error ("coord_frac:sane_check dr=%f for spherical coords. \n", dr);
-    }
+//    if (sane_check (dr))
+//    {
+//      Error ("coord_frac:sane_check dr=%f for spherical coords. \n", dr);
+//    }
   }
   else
   {                             /* We are dealing with a 2d system */
@@ -179,10 +179,10 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
     frac[3] = (dz) * (dr);
     *nelem = 4;
 
-    if (sane_check (dr) || sane_check (dz))
-    {
-      Error ("coord_frac:sane_check dr=%f dz=%f for 2d coords\n", dr, dz);
-    }
+//    if (sane_check (dr) || sane_check (dz))
+//    {
+//      Error ("coord_frac:sane_check dr=%f dz=%f for 2d coords\n", dr, dz);
+//    }
   }
   /* At this point i,j are just outside the x position */
   /* Check to see if x is outside the region of the calculation */

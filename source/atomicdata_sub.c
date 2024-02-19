@@ -68,8 +68,9 @@ atomicdata2file ()
   for (n = 0; n < nions; n++)
   {
     fprintf (fptr,
-             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  phot_info %3d\n",
-             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].phot_info);
+             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  macro_info %2d phot_info %3d ntop %2d \n",
+             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].macro_info,
+             ion[n].phot_info, ion[n].ntop);
   }
 
   /* Write the excitation level data */
@@ -107,6 +108,29 @@ atomicdata2file ()
     fprintf (fptr, "Ground %3d %3d %6.3f %6.3f\n", ground_frac[n].z, ground_frac[n].istate, ground_frac[n].frac[0],
              ground_frac[n].frac[19]);
   }
+
+  /* Finally write out the actual photionization data */
+
+
+  /* Write the photoionization data  */
+
+  fprintf (fptr, "# Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
+  {
+    fprintf (fptr, "Photx n %5d z %2d istate %3d sigma %8.2e freq[0] %8.2e nlev %5d uplev %2d macro %2d  %2d %2d use %2d\n",
+             n, phot_top[n].z, phot_top[n].istate, phot_top[n].x[0], phot_top[n].freq[0],
+             phot_top[n].nlev, phot_top[n].uplev, phot_top[n].macro_info, phot_top[n].down_index, phot_top[n].up_index, phot_top[n].use);
+
+    int nn;
+    for (nn = 0; nn < phot_top[n].np; nn++)
+    {
+      fprintf (fptr, "Photz %4d %10.6e %10.6e %10.6f %10.6f\n", nn, phot_top[n].freq[nn], phot_top[n].x[nn], phot_top[n].log_freq[nn],
+               phot_top[n].log_x[nn]);
+    }
+
+
+  }
+
 
   fclose (fptr);
 
@@ -702,7 +726,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
 
@@ -732,7 +756,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
   return (upsilon);

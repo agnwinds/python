@@ -10,11 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -29,7 +24,7 @@ int matom_z = -1;
 int matom_cycle = -1;
 
 /**********************************************************/
-/** 
+/**
  * @brief The core of the implementation of Macro Atoms in python
  *
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
@@ -39,33 +34,33 @@ int matom_cycle = -1;
  * @return returns the number of level jumps before exiting the routine, or -1
  * if an error was encountered.
  *
- * @details 
+ * @details
  * Matom is the core of the implementation of Leon Lucy's Macro Atom
  * approach to dealing with radiation-matter interactions. It is called whenever
  * a photon packet activates a macro atom. As input it takes the process by
- * which activation occurred (identified by the label "nres") which allow it 
- * to deduce the level that has been excited. It then calculates all the 
+ * which activation occurred (identified by the label "nres") which allow it
+ * to deduce the level that has been excited. It then calculates all the
  * Macro Atom jumping/deactivation probabilities following Lucy and so deduces
- * the process by which deactivation occurs. 
- * 
+ * the process by which deactivation occurs.
+ *
  * The two possibilities are that the macro-atom deactivates by an r-packet
  * (radiative deactivations) or a k-packet (putting the energy  into the
  * thermal pool) as indicated by the variable escape.
- * 
+ *
  * At the point where the routine exits, nres idenifies the process of
- * deactivation and the packet information is also updated 
- * 
+ * deactivation and the packet information is also updated
+ *
  *
  * ###Notes###
- * 
- * in macro atom mode, nres = -1 indicates electron scattering, 
- * nres = -2 indicates ff, and nres > NLINES indicates bound-free. 
+ *
+ * in macro atom mode, nres = -1 indicates electron scattering,
+ * nres = -2 indicates ff, and nres > NLINES indicates bound-free.
  * [nres == NLINES is never used. Note also that NLINES is the *max* number of lines, whereas nlines
- * is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but 
+ * is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but
  * the entire range of nlines <= nres <= NLINES]
- * 
- * 
- * 
+ *
+ *
+ *
 ***********************************************************/
 
 int
@@ -161,11 +156,11 @@ matom (p, nres, escape)
     /*  The excited configuration is now known. Now compute all the probabilities of deactivation
        /jumping from this configuration. Then choose one. */
 
-    nbbd = xconfig[uplvl].n_bbd_jump;    // number of bb downward jumps
-    nbbu = xconfig[uplvl].n_bbu_jump;    // number of bb upward jump from this configuration
-    nbfd = xconfig[uplvl].n_bfd_jump;    // number of bf downward jumps from this transition
-    nbfu = xconfig[uplvl].n_bfu_jump;    // number of bf upward jumps from this transiion
-    nauger = xconfig[uplvl].nauger;      // number of auger jumps 
+    nbbd = xconfig[uplvl].n_bbd_jump;   // number of bb downward jumps
+    nbbu = xconfig[uplvl].n_bbu_jump;   // number of bb upward jump from this configuration
+    nbfd = xconfig[uplvl].n_bfd_jump;   // number of bf downward jumps from this transition
+    nbfu = xconfig[uplvl].n_bfu_jump;   // number of bf upward jumps from this transiion
+    nauger = xconfig[uplvl].nauger;     // number of auger jumps
     iauger = xconfig[uplvl].iauger;
 
     if (prbs_known[uplvl] == FALSE)
@@ -177,8 +172,8 @@ matom (p, nres, escape)
 
       for (n = 0; n < nbbd + nbfd; n++)
       {
-        eprbs_known[uplvl][n] = eprbs[n] = 0;   //zero the individual emission probabilities 
-        jprbs_known[uplvl][n] = jprbs[n] = 0;   //zero  the individual jump probabilities 
+        eprbs_known[uplvl][n] = eprbs[n] = 0;   //zero the individual emission probabilities
+        jprbs_known[uplvl][n] = jprbs[n] = 0;   //zero  the individual jump probabilities
       }
       for (n = nbbd + nbfd; n < nbbd + nbfd + nbbu + nbfu; n++)
       {
@@ -239,8 +234,8 @@ matom (p, nres, escape)
           target_level = auger_ptr->nconfig_target[n];
           auger_rate = auger_ptr->Avalue_auger * auger_ptr->branching_ratio[n];
 
-          jprbs_known[uplvl][m] = jprbs[m] = auger_rate * xconfig[target_level].ex;      //energy of lower state
-          eprbs_known[uplvl][m] = eprbs[m] = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex); //energy difference
+          jprbs_known[uplvl][m] = jprbs[m] = auger_rate * xconfig[target_level].ex;     //energy of lower state
+          eprbs_known[uplvl][m] = eprbs[m] = auger_rate * (xconfig[uplvl].ex - xconfig[target_level].ex);       //energy difference
 
           pjnorm += jprbs[m];
           penorm += eprbs[m];
@@ -251,7 +246,7 @@ matom (p, nres, escape)
       /* Now upwards jumps. */
 
       /* bb */
-      /* For bound-bound excitation the jump probability is B-coeff times Jbar with a correction 
+      /* For bound-bound excitation the jump probability is B-coeff times Jbar with a correction
          for stimulated emission. To avoid the need for recalculation all the time, the code will
          be designed to include the stimulated correction in Jbar - i.e. the stimulated correction
          factor will NOT be included here. (SS) */
@@ -323,7 +318,7 @@ matom (p, nres, escape)
     }
 
     /* Probabilities of jumping (j) and emission (e) are now known. The normalisation factor pnorm has
-       also been recorded. The integer m now gives the total number of possibilities too. 
+       also been recorded. The integer m now gives the total number of possibilities too.
        Now select what happens next. Start by choosing the random threshold value at which the
        event will occur. */
 
@@ -332,7 +327,7 @@ matom (p, nres, escape)
     if (((pjnorm_known[uplvl] / (pjnorm_known[uplvl] + penorm_known[uplvl])) < threshold) || (pjnorm_known[uplvl] == 0))
       break;                    // A deactivation of the macro-atom has occurred and so we leave the for loop.
 
-    /* Othewise, a transition/jump to another state of the macro-atom has occurred, so we need 
+    /* Othewise, a transition/jump to another state of the macro-atom has occurred, so we need
        to decide what the new state is. We use a running total to decide the new upper level */
 
     uplvl_old = uplvl;
@@ -347,7 +342,7 @@ matom (p, nres, escape)
       run_tot += jprbs_known[uplvl_old][n];
       n++;
     }
-    /* This added to prevent case where threshold is essentially 0. 
+    /* This added to prevent case where threshold is essentially 0.
      */
 
     if (n > 0)
@@ -400,7 +395,7 @@ matom (p, nres, escape)
 
   /* At this point we know the macro actom has deactivated and we know the level
    * at which the deactivation occurs.  We still need to decide the exact procees
-   * by which the macro actom deactivates.  
+   * by which the macro actom deactivates.
    */
 
   run_tot = 0;
@@ -493,13 +488,13 @@ matom (p, nres, escape)
 
 
 /************************************/
-/**  
+/**
  * @brief the b12 Einstein coefficient.
  *
  * @param [in] struct lines line_ptr line pointer to calculate
- * 
+ *
  * @return  retruns the B12 Einstein coefficient.
- * ###Notes### 
+ * ###Notes###
  * ksl OK, Probably should be moved to lines.c for consistency, but that can be done
  * later.
 ***********************************/
@@ -526,7 +521,7 @@ b12 (line_ptr)
 }
 
 /************************************************************/
-/* As for similar routines in recomb.c, in order to use the integrator the 
+/* As for similar routines in recomb.c, in order to use the integrator the
    following external structures are used (SS)*/
 /* This relates to the alpha_sp routines at the end of this file */
 
@@ -540,9 +535,9 @@ int temp_choice;                //choice of type of calcualation for alpha_sp
 
 
 /**********************************************************/
-/**  
+/**
  * @brief the matom estimator for the spontaneous recombination rate.
- * 
+ *
  * @param [in] struct topbase_phot cont_ptr pointer to calculate
  * @param [in] struct PlasmaPtr xplasma the plasma cell of interesest
  * @param [in] int ichoice one of several types or rates to calculate
@@ -550,20 +545,20 @@ int temp_choice;                //choice of type of calcualation for alpha_sp
  * @return the recombination rate is returned
  *
  * @details
- * The rate is given by 
- * 
- *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
+ * The rate is given by
+ *
+ *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2)
  * times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
- * 
+ *
  * The choices are
  * * ichoice = 0   --> spontanous recombination
- * * ichoice = 1   --> energy weighted recombination 
+ * * ichoice = 1   --> energy weighted recombination
  * * ichoice = 2   --> the difference between energy_weighted and spontaneous
- * 
+ *
  * ###Notes###
- * 
+ *
  *  Energy weighted means that the integrand has an extra factor nu/nu_threshold
- *  The difference case is (nu-nu_threshold)/nu_threhold 
+ *  The difference case is (nu-nu_threshold)/nu_threhold
 ***********************************************************/
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
@@ -589,7 +584,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   // alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
   alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
 
-  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
+  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
      through by the appropriate constant. */
   if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
   {
@@ -606,13 +601,13 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 }
 
 /**********************************************************/
-/**  
+/**
  *  @brief the matom estimator for the band-limited spontaneous recombination rate.
  *
  * @param [in] struct topbase_phot cont_ptr pointer to calculate
  * @param [in] struct PlasmaPtr xplasma the plasma cell of interesest
  * @param [in] int ichoice one of several types or rates to calculate
- * @param [in] double freq_min  the mimimum frequency                           
+ * @param [in] double freq_min  the mimimum frequency
  * @param [in] double freq_max  the maximum frequencey
  *
  * @returns  The routine returns the spontanous recombination rate, in various forms
@@ -620,21 +615,21 @@ alpha_sp (cont_ptr, xplasma, ichoice)
  * @details
  *
  * This routine differs from alpha_sp in that the reate is calculated over
- * a specific wavelength range. 
- * 
- * The rate is given by 
- * 
- *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
+ * a specific wavelength range.
+ *
+ * The rate is given by
+ *
+ *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2)
  * times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
  *
  * The choices are:
  *
  * * ichoice = 0   --> spontanous recombination
- * * ichoice = 1   --> energy weighted recombination 
+ * * ichoice = 1   --> energy weighted recombination
  * * ichoice = 2   --> the difference between energy_weighted spontaneous
- * 
+ *
  * ###Notes###
- * 
+ *
 ***********************************************************/
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
@@ -670,10 +665,10 @@ scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, freq_min, fre
 
 
 /**********************************************************/
-/** 
- *  @brief This returns the integrand for alpha_sp at a chosen frequency - 
+/**
+ *  @brief This returns the integrand for alpha_sp at a chosen frequency -
  *
- * @param [in] double freq 
+ * @param [in] double freq
  * @param [in] void *params
  *
  * Note:
@@ -711,7 +706,7 @@ alpha_sp_integrand (double freq, void *params)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief deals with the elimination of k-packets.
  *
  *
@@ -754,7 +749,7 @@ kpkt (p, nres, escape, mode)
 
   /* Idea is to calculated the cooling
      terms for all the processes and then choose one at random to destroy the k-packet and
-     turn it back into a photon bundle. 
+     turn it back into a photon bundle.
      The routine considers bound-free, collision excitation and ff
      emission. */
 
@@ -797,7 +792,7 @@ kpkt (p, nres, escape, mode)
   }
 
 /* This is the end of the cooling rate calculation, which is done only once for each cell
-   and once for each cycle.  
+   and once for each cycle.
 
    The next little section deals whith handling adiabatic cooling and shock heating.
    */
@@ -836,7 +831,7 @@ kpkt (p, nres, escape, mode)
   cooling_normalisation += cooling_bbtot + cooling_bf_coltot;
 
 
-  /* The cooling rates for the recombination and collisional processes are now known. 
+  /* The cooling rates for the recombination and collisional processes are now known.
 
      Choose which process destroys the k-packet with a random number. */
 
@@ -854,7 +849,7 @@ kpkt (p, nres, escape, mode)
   if (destruction_choice < mplasma->cooling_bftot)
   {                             //destruction by bf
 
-    /* JM 1503 -- we used to loop over ntop_phot here, 
+    /* JM 1503 -- we used to loop over ntop_phot here,
        but we should really loop over the tabulated Verner Xsections too
        see #86, #141 */
     for (i = 0; i < nphot_total; i++)
@@ -878,7 +873,7 @@ kpkt (p, nres, escape, mode)
 
         /* if the cross-section corresponds to a simple ion (macro_info == FALSE)
            or if we are treating all ions as simple, then adopt the total emissivity
-           approach to choosing photon weights - this means we 
+           approach to choosing photon weights - this means we
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
         if (!modes.turn_off_upweighting_of_simple_macro_atoms)
@@ -910,7 +905,7 @@ kpkt (p, nres, escape, mode)
     destruction_choice = destruction_choice - mplasma->cooling_bftot;
     for (i = 0; i < nlines; i++)
     {
-      /* this is a bit inelegant, but whether we want to consider the contribution 
+      /* this is a bit inelegant, but whether we want to consider the contribution
          here depends on the mode and type of line */
       if (mode == KPKT_MODE_ALL || line[i].macro_info == FALSE || geo.macro_simple == TRUE)
       {
@@ -1026,27 +1021,27 @@ kpkt (p, nres, escape, mode)
 
 
 /************************************************************
- ** 
+ **
  * @brief routine for dealing with bound-bound "simple ions" within the hybrid macro-atom framework
  *
  * @param [in,out] PhotPtr p   the packet at the point of activation
  * @param [in] int nres    the process which activates the Macro Atom
  * @param [out] int escape  TRUE if de-activation is
- *                           via an r-packet or FALSE if a k-packet. 
- * @return The routine alwas returns 0.  
+ *                           via an r-packet or FALSE if a k-packet.
+ * @return The routine alwas returns 0.
  * However, as noted above the escape indicates
- * whether the deactivation is via an r- or k-packet.  
+ * whether the deactivation is via an r- or k-packet.
  * If the deactivation is via an r-packet the frequency of the photon is
  * set to that of the line
  *
- * @details 
+ * @details
  *
  * fake_matom_bb is the macro atom routine that deals with line events involving
  * simple ions (i.e. ions for which a full macro atom treatment is not employed.
- * When this routine is called a simple line has absorbed a packet. This routine 
+ * When this routine is called a simple line has absorbed a packet. This routine
  * creates a fake two-level macro atom and determines whether the packet energy
  * is simply re-emitted in the line or is thermalised. If it is thermalised it
- * turns into a k-packet and the appropriate routine is called. 
+ * turns into a k-packet and the appropriate routine is called.
  *
 ************************************************************/
 
@@ -1079,9 +1074,9 @@ fake_matom_bb (p, nres, escape)
 
   /* Since both k- and r-packet emission have the same delta energy associated with them then
      we can ignore the energy factor that is otherwise needed in the de-activation probabilities.
-     The upper level population is also factored out. 
+     The upper level population is also factored out.
 
-     The relative rates are then given by 
+     The relative rates are then given by
      Einstein-A * escape probability  for radiative deactivations  and
      Collision de-excitation rate coeff. * electron density for where
      The extra factor of (1 - exp (-h nu / k T)) is explained in KSL's notes on Python. It appears because we are
@@ -1099,9 +1094,9 @@ fake_matom_bb (p, nres, escape)
 
   rprb = rprb / normalisation;
 
-  /* Now just use a random number to decide what happens. 
+  /* Now just use a random number to decide what happens.
 
-     If "choice" is less than rprb then we have chosen a radiative decay - for this fake macro atom there 
+     If "choice" is less than rprb then we have chosen a radiative decay - for this fake macro atom there
      is only one line so there's nothing to do - the energy is re-radiated in the line and that's it. We
      don't need to change nres. Otherwise we've chosen a collisional destruction and so we need to get
      kpkt to deal with the resulting k-packet and give us a new value of nres following thermalisation and
@@ -1125,31 +1120,31 @@ fake_matom_bb (p, nres, escape)
 
 
 /************************************************************
- ** 
- * @brief calculate the frequency with for a bound-free transition for "simple ions" 
+ **
+ * @brief calculate the frequency with for a bound-free transition for "simple ions"
  * within the hybrid macro-atom framework
  *
  * @param [in,out] PhotPtr p   the packet at the point of activation
  * @param [in]     int nres    the process which activates the Macro Atom
  * @param [out]   int escape  in principle this tells us whether de-activation is
- *                             via an r-packet or a k-packet. For this routine at the 
+ *                             via an r-packet or a k-packet. For this routine at the
  *                             moment only r-packets are possible so it always returns
  *                             escape = TRUE
  *
  * @return The routine always returns 0, and addition escape is always set to TRUE.
  *
- * @details 
- * fake_matom_bf is the macro atom routine that deals with photoionisation 
- * events involving simple ions (i.e. ions for which a full macro atom treatment 
- * is not employed). When this routine is called a photoionisation has absorbed a packet. 
+ * @details
+ * fake_matom_bf is the macro atom routine that deals with photoionisation
+ * events involving simple ions (i.e. ions for which a full macro atom treatment
+ * is not employed). When this routine is called a photoionisation has absorbed a packet.
  * The idea of this routine is to deal with the subsequenct
- * by creating a fake two-level atom. However, in the absense of collisional recombination 
- * (or something similar) there's only one thing that can happen - radiative 
+ * by creating a fake two-level atom. However, in the absense of collisional recombination
+ * (or something similar) there's only one thing that can happen - radiative
  * recombination. Therefore there's no need to do anything here unless
  * collisional recombination is to be introduced at some point in the
- * future. All this routine does for now is choose a new frequency for the 
+ * future. All this routine does for now is choose a new frequency for the
  * emitted r-packet.
- * 
+ *
 ************************************************************/
 
 int
@@ -1177,15 +1172,15 @@ fake_matom_bf (p, nres, escape)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief   calculate the band limited frequency emitted by a macro-atom during spectral cycles.
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in]     int upper   the upper level that we deactivate from
  * @param [in,out]  int nres    the process by which deactivation occurs
- * @param [in]     double freq_min  the lower limit to the desired frequency 
- * @param [in]    double freq_max   the upper limit to the desired frequency 
+ * @param [in]     double freq_min  the lower limit to the desired frequency
+ * @param [in]    double freq_max   the upper limit to the desired frequency
  * @return 0
  *
  * @details  emit matom is called to generate a photon frequency emitted in the
@@ -1198,7 +1193,7 @@ fake_matom_bf (p, nres, escape)
  *
  * emit_matom is a scaled down version of matom which deals with the emission due
  * to deactivating macro atoms in the detailed spectrum part of the calculation.
- * 
+ *
 ***********************************************************/
 
 int
@@ -1255,10 +1250,10 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
 
   /* bb */
 
-  /* First consider BB transitions 
+  /* First consider BB transitions
 
      Since we are only interested in making an r-packet here we can (a) ignore collisional
-     deactivation and (b) ignore lines outside the frequency range of interest. 
+     deactivation and (b) ignore lines outside the frequency range of interest.
 
    */
 
@@ -1275,9 +1270,9 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
     m++;
   }
 
-  /* Now deal with BF 
+  /* Now deal with BF
      If the edge is above the frequency range we are interested in then we need not consider this
-     bf process. 
+     bf process.
    */
 
   for (n = 0; n < nbfd; n++)
@@ -1295,7 +1290,7 @@ emit_matom (w, p, nres, upper, freq_min, freq_max)
   }
 
   /* Probabilities of emission (e) are now known. The normalisation factor pnorm has
-     also been recorded. the integer m now gives the total number of possibilities too. 
+     also been recorded. the integer m now gives the total number of possibilities too.
      now select what happens next. Start by choosing the random threshold value at which the
      event will occur. */
 

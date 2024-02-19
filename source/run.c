@@ -4,8 +4,8 @@
  * @author ksl
  * @date   May, 2018
  *
- * @brief  the driving routines to carry out calculation of 
- * the ionization of the plasma and also to extract detailed 
+ * @brief  the driving routines to carry out calculation of
+ * the ionization of the plasma and also to extract detailed
  * spectra after the inputs have been collected.
  *
  * ### Programming Comment ###
@@ -28,13 +28,13 @@
 #include "python.h"
 
 /**********************************************************/
-/** 
- * @brief      run the ionization cycles for a 
+/**
+ * @brief      run the ionization cycles for a
  * python model
  *
  * @param [in] int  restart_stat   FALSE if the is run is beginning from
  * scratch,  TRUE if this was a restart
- * @return     Always returns 0 
+ * @return     Always returns 0
  *
  * @details
  * This is the main routine for running the ionization
@@ -49,8 +49,8 @@ calculate_ionization (restart_stat)
      int restart_stat;
 {
   int n, nn;
-  double zz, z_abs_all, z_abs[N_ISTAT], z_else, ztot;
-  double radiated[20];
+  double zz, z_abs_all, z_abs_all_orig, z_orig[N_ISTAT], z_abs[N_ISTAT], z_else, z_else_orig, ztot;
+  double radiated[20], radiated_orig[20];
   int nphot_istat[N_ISTAT];
   WindPtr w;
   PhotPtr p;
@@ -95,7 +95,7 @@ calculate_ionization (restart_stat)
     xsignal (files.root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n", "COMMENT", geo.wcycle, geo.wcycles);
   else
   {
-    geo.pcycle = 0;             /* Set the spectrum cycles executed to 0, because 
+    geo.pcycle = 0;             /* Set the spectrum cycles executed to 0, because
                                    we are going to modify the wind and hence any
                                    previously calculated spectra must be recreated
                                  */
@@ -134,8 +134,8 @@ calculate_ionization (restart_stat)
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
 
 
-    /* calculate the B matrices if we are using the matrix macro-atom transition mode, 
-       and we are choosing to store the matrix in at least some cells and there are 
+    /* calculate the B matrices if we are using the matrix macro-atom transition mode,
+       and we are choosing to store the matrix in at least some cells and there are
        macro-atom levels */
 
     if (geo.rt_mode == RT_MODE_MACRO && geo.matom_transition_mode == MATOM_MATRIX && nlevels_macro > 0 && modes.store_matom_matrix)
@@ -175,8 +175,8 @@ calculate_ionization (restart_stat)
 
     /* Create the photons that need to be transported through the wind
      *
-     * NPHOT is the number of photon bundles which will equal the luminosity; 
-     * 0 => for ionization calculation 
+     * NPHOT is the number of photon bundles which will equal the luminosity;
+     * 0 => for ionization calculation
      */
 
     nphot_to_define = (long) NPHOT;
@@ -227,40 +227,78 @@ calculate_ionization (restart_stat)
     /* Determine how much energy was absorbed in the wind. first zero counters. 
        There are counters for total energy absorbed and for each entry in the istat enum,
        The second loop is for the energy radiated (i.e. that actually escapes) */
-    z_abs_all = z_else = 0.0;
+    z_abs_all = z_else = z_abs_all_orig = z_else_orig = 0.0;
     for (nn = 0; nn < N_ISTAT; nn++)
     {
       z_abs[nn] = 0.0;
+      z_orig[nn] = 0.0;
       nphot_istat[nn] = 0.0;
     }
     for (nn = 0; nn < 20; nn++)
     {
-      /* 20 entries to match declaration above */
       radiated[nn] = 0.0;
+      radiated_orig[nn] = 0.0;
     }
 
     /* loop over the different photon istats to determine where the luminosity went */
     for (nn = 0; nn < NPHOT; nn++)
     {
+
       z_abs_all += p[nn].w;
+      z_abs_all_orig += p[nn].w_orig;
 
       /* we want the istat to be >1 (not P_SCAT or P_INWIND) */
-      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
+//      if (p[nn].istat < N_ISTAT && p[nn].istat > 1)
+      if (p[nn].istat < N_ISTAT)
       {
         z_abs[p[nn].istat] += p[nn].w;
+        z_orig[p[nn].istat] += p[nn].w_orig;
         nphot_istat[p[nn].istat]++;
       }
       if (p[nn].istat == P_ESCAPE)
       {
         radiated[p[nn].origin] += p[nn].w;
+        radiated_orig[p[nn].origin] += p[nn].w_orig;
       }
       else
+      {
         z_else += p[nn].w;
+        z_else_orig += p[nn].w_orig;
+      }
     }
 
+
+    for (nn = 0; nn < N_ISTAT; nn++)
+    {
+      Log ("XXX stat %8d     %8d      %12.3e    %12.3e\n", nn, nphot_istat[nn], z_abs[nn], z_orig[nn]);
+    }
+    for (nn = 0; nn < 20; nn++)
+    {
+      Log ("XXX rad %8d     %12.3e    %12.3e\n", nn, radiated[nn], radiated_orig[nn]);
+    }
+    Log ("XXX  rad  abs_all  %12.3e    %12.3e\n", z_abs_all, z_abs_all_orig);
+    Log ("XXX  rad  else  l  %12.3e    %12.3e\n", z_else, z_else_orig);
+
+
+
+
+
     Log
-      ("!!python: Total photon luminosity after transphot  %18.12e (absorbed or lost  %18.12e). Radiated luminosity %18.12e\n",
-       z_abs_all, z_abs_all - zz, z_abs[P_ESCAPE]);
+      ("!!python: luminosity (radiated or lost) after transphot %18.12e (absorbed or lost  %18.12e  %18.12e). \n",
+       z_abs_all, z_abs_all - zz, z_abs_all - z_abs_all_orig);
+    Log ("\n");
+    Log ("!!python:  luminosity escaping                          %18.12e\n", z_abs[P_ESCAPE]);
+    Log ("!!python: stellar photon luminosity escaping            %18.12e \n", radiated[PTYPE_STAR] + radiated[PTYPE_STAR_MATOM]);
+    Log ("!!python: boundary layer photon luminosity escaping     %18.12e \n", radiated[PTYPE_BL] + radiated[PTYPE_BL_MATOM]);
+    Log ("!!python: disk photon luminosity escaping               %18.12e \n", radiated[PTYPE_DISK] + radiated[PTYPE_DISK_MATOM]);
+    Log ("!!python: wind photon luminosity escaping               %18.12e \n", radiated[PTYPE_WIND] + radiated[PTYPE_WIND_MATOM]);
+    Log ("!!python: agn photon luminosity escaping                %18.12e \n", radiated[PTYPE_AGN] + radiated[PTYPE_AGN_MATOM]);
+    Log ("!!python: luminosity lost by any process                %18.12e \n", z_else);
+    Log ("\n");
+    Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
+    Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
+    Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
+    Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", z_abs[P_HIT_DISK]);
     if (geo.rt_mode == RT_MODE_MACRO)
     {
       Log ("!!python: luminosity lost by adiabatic kpkt destruction %18.12e number of packets %d\n", z_abs[P_ADIABATIC],
@@ -268,20 +306,8 @@ calculate_ionization (restart_stat)
       Log ("!!python: luminosity lost to low-frequency free-free    %18.12e number of packets %d\n", z_abs[P_LOFREQ_FF],
            nphot_istat[P_LOFREQ_FF]);
     }
-    Log ("\n");
-    Log ("!!python: stellar photon luminosity escaping            %18.12e \n", radiated[PTYPE_STAR]);
-    Log ("!!python: boundary layer photon luminosity escaping     %18.12e \n", radiated[PTYPE_BL]);
-    Log ("!!python: disk photon luminosity escaping               %18.12e \n", radiated[PTYPE_DISK]);
-    Log ("!!python: wind photon luminosity escaping               %18.12e \n", radiated[PTYPE_WIND]);
-    Log ("!!python: agn photon luminosity escaping                %18.12e \n", radiated[PTYPE_AGN]);
-    Log ("\n");
-    Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", z_abs[P_ABSORB]);
-    Log ("!!python: luminosity lost by too many scatters          %18.12e \n", z_abs[P_TOO_MANY_SCATTERS]);
-    Log ("!!python: luminosity lost by hitting the central object %18.12e \n", z_abs[P_HIT_STAR]);
-    Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", z_abs[P_HIT_DISK]);
     Log ("!!python: luminosity lost by errors                     %18.12e \n",
          z_abs[P_ERROR] + z_abs[P_ERROR_MATOM] + z_abs[P_REPOSITION_ERROR]);
-    Log ("!!python: luminosity lost by the unknown                %18.12e \n", z_else);
     if (geo.binary == TRUE)
       Log ("!!python: luminosity lost by hitting the secondary %18.12e \n", z_abs[P_SEC]);
 
@@ -291,7 +317,7 @@ calculate_ionization (restart_stat)
 
 
 
-    /* At this point we should communicate all the useful infomation 
+    /* At this point we should communicate all the useful infomation
        that has been accummulated on differenet MPI tasks */
 
 #ifdef MPI_ON
@@ -347,7 +373,7 @@ calculate_ionization (restart_stat)
     {
 #endif
 
-/* The variables for spectrum_sumamry are the filename, the attribute for the file write, the minimum and maximum spectra to write out, 
+/* The variables for spectrum_sumamry are the filename, the attribute for the file write, the minimum and maximum spectra to write out,
  * the type of spectrum (RAW meaning internal luminosity units, the amount by which to renormalize (1 means use the existing
  * values, loglin (0=linear, 1=log for the wavelength scale), all photons or just wind photons
  */
@@ -363,7 +389,7 @@ calculate_ionization (restart_stat)
     MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
-    /* Save everything after each cycle and prepare for the next cycle 
+    /* Save everything after each cycle and prepare for the next cycle
        JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
     /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
@@ -373,8 +399,8 @@ calculate_ionization (restart_stat)
 
 
 /* Save only the windsave file from thread 0, to prevent many processors from writing to the same
- * file. 
-  
+ * file.
+
  Note that if one wants to write out the files from all threads, then one should comment out the
  MPI specific if statements below, leving MPI_Barrier, and replace the sprintf statment with
 
@@ -445,7 +471,7 @@ calculate_ionization (restart_stat)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      generates the detailed spectra
  *
  * @param [in] int  restart_stat   FALSE if the is run is beginning from
@@ -486,7 +512,7 @@ make_spectra (restart_stat)
   freqmin = VLIGHT / (geo.swavemax * ANGSTROM);
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
-     calculation of the spectrum.  
+     calculation of the spectrum.
 
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
@@ -496,7 +522,7 @@ make_spectra (restart_stat)
 /* Next steps to speed up extraction stage */
   if (!modes.keep_photoabs)
   {
-    DENSITY_PHOT_MIN = -1.0;    // Do not calculated photoabsorption in detailed spectrum 
+    DENSITY_PHOT_MIN = -1.0;    // Do not calculated photoabsorption in detailed spectrum
   }
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */
@@ -551,7 +577,7 @@ make_spectra (restart_stat)
     xsignal (files.root, "%-20s No spectrum needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
   else
   {
-    /* Then we are restarting a run with more spectral cycles, but we 
+    /* Then we are restarting a run with more spectral cycles, but we
        have already completed some. The memory for the spectral arrays
        should already have been allocated, and the spectrum was initialised
        on the original run, so we just need to renormalise the saved spectrum */
@@ -584,9 +610,9 @@ make_spectra (restart_stat)
     else
       iwind = 0;                /* Create wind photons but do not force reinitialization */
 
-    /* Create the initial photon bundles which need to be transported through the wind 
+    /* Create the initial photon bundles which need to be transported through the wind
 
-       For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 
+       For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity,
        1 implies that detailed spectra, as opposed to the ionization of the wind is being calculated
 
        JM 130306 must convert NPHOT and pcycles to double precision variable nphot_to_define
@@ -694,7 +720,7 @@ make_spectra (restart_stat)
 /* Finally done */
 
 #ifdef MPI_ON
-  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status    
+  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status
   error_summary (dummy);        // Summarize the errors that were recorded by the program
   Log ("Run py_error.py for full error report.\n");
 #else
@@ -707,6 +733,9 @@ make_spectra (restart_stat)
   Log_parallel ("Thread %d Finalized. All done\n", rank_global);
 #endif
 
+#ifdef CUDA_ON
+  cusolver_destroy ();
+#endif
 
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
   Log ("\nBrief Run Summary\nAt program completion, the elapsed TIME was %f\n", timer ());

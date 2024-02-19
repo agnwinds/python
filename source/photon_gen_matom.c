@@ -4,7 +4,7 @@
  * @date   January, 2018
  *
  * @brief functions for calculating emissivities and generating photons from macro-atoms and k-packets.
- *   during the spectral cycles. The actual functions which do the jumps inside an activated 
+ *   during the spectral cycles. The actual functions which do the jumps inside an activated
  *  macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
  *
  ***********************************************************/
@@ -12,22 +12,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_block.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 #include "atomic.h"
 #include "python.h"
 
 /**********************************************************/
-/** 
+/**
  * @brief      returns the specific luminosity in the band needed for the computation of the
  *        spectrum. It gets the total energy radiated by the process k-packet -> r-packet in the
  *        required wavelength range.
  *
- * @return double lum  The energy radiated by the process k-packet -> r-packet in the wind in the 
+ * @return double lum  The energy radiated by the process k-packet -> r-packet in the wind in the
  *            wavelength range required for the specrum calculation.
  *
  * ### Notes ###
@@ -53,15 +48,15 @@ get_kpkt_f ()
 }
 
 /**********************************************************/
-/** 
+/**
  * @brief returns the specific luminosity in kpkts from nonthermal ("shock")
  *        heating. This is used to generate kpkts in the ionization cycles.
- *        This also populates the cell-by-cell kpkt luminosities in the 
+ *        This also populates the cell-by-cell kpkt luminosities in the
  *        variable plasmamain[n].kpkt_emiss.
  *
- * @return double lum  
- *         The energy created by non-radiative heating throughout the 
- *         computational domain. 
+ * @return double lum
+ *         The energy created by non-radiative heating throughout the
+ *         computational domain.
  *
  **********************************************************/
 
@@ -104,8 +99,8 @@ get_kpkt_heating_f ()
 
 
 /**********************************************************/
-/** 
- * @brief produces photon packets to account for creating of r-packets by k-packets. 
+/**
+ * @brief produces photon packets to account for creating of r-packets by k-packets.
 
  *
  * @param [in, out] PhotPtr  p   the ptr to the entire structure for the photons
@@ -114,14 +109,14 @@ get_kpkt_heating_f ()
  * @param [in] int  nphot   the number of photons to be generated
  * @return int nphot  The number of photon packets that were generated from k-packet elliminations.
  *
- * @details produces photon packets to account for creating of r-packets by k-packets in the spectrum calculation. 
+ * @details produces photon packets to account for creating of r-packets by k-packets in the spectrum calculation.
  * It should only be used once the total energy emitted in this way in the wavelength range in question is well known
- * (calculated in the ionization cycles). This routine is closely related to photo_gen_wind from which much of the code 
+ * (calculated in the ionization cycles). This routine is closely related to photo_gen_wind from which much of the code
  * has been copied.
  *
- * Photons are generated at a position in the Observer frame.  
- * The weight of the photon should is the weight expected in the local 
- * frame since photon is first created in thea local 
+ * Photons are generated at a position in the Observer frame.
+ * The weight of the photon should is the weight expected in the local
+ * frame since photon is first created in thea local
  * rest frame, and then Doppler shifted to the Observer frame
  **********************************************************/
 
@@ -188,7 +183,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     pp.freq = 0.0;
     pp.grid = icell;
 
-    /* This following block is a bad way of doing it - kpkt could be modified to 
+    /* This following block is a bad way of doing it - kpkt could be modified to
        do what we want in a more elegant way. */
 
     test = pp.freq;
@@ -283,23 +278,23 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 }
 
 /**********************************************************/
-/** 
+/**
  * @brief      produces photon packets to account for creation of r-packets
- *      by deactivation of macro atoms in the spectrum calculation. It should only be used 
+ *      by deactivation of macro atoms in the spectrum calculation. It should only be used
  *      once the total energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
  * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
  * @param [in] int  photstart   The position in the photon structure of the first photon to generate
- * @param [in] int  nphot   the number of the photons to be generated 
+ * @param [in] int  nphot   the number of the photons to be generated
  * @return int nphot When it finishes it should have generated nphot photons from macro atom deactivations.
  *
  * @details
  * This routine is closely related to photo_gen_kpkt from which much of the code has been copied.
  *
  * ### Notes ###
- * Consult Matthews thesis. 
+ * Consult Matthews thesis.
  *
  **********************************************************/
 
@@ -375,7 +370,7 @@ photo_gen_matom (p, weight, photstart, nphot)
     pp.grid = icell;
 
     /* This following block is a bad way of doing it but it'll do as
-       a quick and dirty test for now. Really kpkt should be modified to 
+       a quick and dirty test for now. Really kpkt should be modified to
        do what we want in a more elegant way. */
 
 //OLD    test = pp.freq;

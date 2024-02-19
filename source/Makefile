@@ -12,9 +12,11 @@
 
 #MPICC is now default compiler
 CC = mpicc
-# CC = gcc	can use GCC either from command line or by uncommenting this
+# CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
+NVCC =
+# NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
 EXTRA_FLAGS =
 LDFLAGS =
@@ -55,7 +57,6 @@ ifeq (mpicc, $(CC))
 			COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
 		endif
 	endif
-
 else ifeq (gcc, $(CC))
 	# no mpicc,
 	MPI_FLAG =
@@ -80,12 +81,28 @@ else	# you must be using clang or icc
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 endif
 
+# If NVCC has been set, then we can define CUDA_FLAG = -DCUDA_ON, so the CUDA
+# options in the C source are compiled
+ifneq ($(NVCC), )
+	CUDA_FLAG = -DCUDA_ON
+	CUDA_SOURCE := $(wildcard *.cu)
+	CUDA_LIBS = -lcudart -lcusolver
+else
+	CUDA_FLAG =
+	CUDA_SOURCE =
+	CUDA_LIBS =
+endif
+
+# These variables are used to compile CUDA code, and don't have to be defined
+# conditionally
+NVCC_FLAGS = -O3 -Werror all-warnings
+CUDA_OBJECTS := $(patsubst %.cu,%.o,$(CUDA_SOURCE))
+
 # this command finds out how many files with uncommitted changes there are
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
-
-
+INDENT = yes
 INCLUDE = ../include
 LIB = ../lib
 BIN = ../bin
@@ -94,18 +111,18 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python"
 # this can be altered to whatever is best
-	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
+	CFLAGS = -g -pg $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS = -g -pg
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
         XDEBUG = True
 	ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
-		CFLAGS = -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
-		FFLAGS = -g 
+		CFLAGS = -g -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
+		FFLAGS = -g
 		PRINT_VAR = DEBUGGING, -g -Wall flags
 	endif
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE)  $(MPI_FLAG)
+	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG) ${CUDA_FLAG}
 	FFLAGS =
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
@@ -116,21 +133,23 @@ endif
 # LDFLAGS= -L$(LIB)  -lm -lkpar  -lgslcblas ../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
 # LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas
-LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas
+LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
+
 
 #Note that version should be a single string without spaces.
 
 
-VERSION = 87e
+VERSION = 87h
 
-
-INDENT = yes
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'Compiler is really  $(XVERSION)'
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
-	@echo 'MPI_FLAG=' $(MPI_FLAG)
+	@echo 'CFLAGS='$(CFLAGS)
+	@echo 'LDFLAGS='$(LDFLAGS)
+	@echo 'MPI_FLAG='$(MPI_FLAG)
+	@echo 'CUDA_FLAG='$(CUDA_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
@@ -138,7 +157,7 @@ startup:
 
 
 # To ensure a uniform style within .c programs, we enforce a indent style on .c code whe
-# modifications are made. For this portion of the installation to work properly, one must have 
+# modifications are made. For this portion of the installation to work properly, one must have
 # the python scripting installed, as well as gnuindent.  On linux systems, this is generally
 # not an inssue, but this is not the case for MAC OSX.  The run_indent.py routine below tries
 # to sort out whether one has gindent installed; if not it issues a woraning but does not
@@ -180,10 +199,7 @@ python_objects = bb.o atomicdata.o atomicdata_init.o atomicdata_sub.o photon2d.o
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o  \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
-		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o
-
-
-
+		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
 # Problems ocurr due to the prototypes that are generated.  ksl 160705
@@ -204,13 +220,11 @@ python_source= bb.c atomicdata.c atomicdata_init.c atomicdata_sub.c python.c pho
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup.c run.c brem.c synonyms.c walls.c xtest.c \
 		setup_reverb.c setup_line_transfer.c cv.c import_calloc.c charge_exchange.c frame.c \
-		macro_accelerate.c atomic_extern_init.c  python_extern_init.o  models_extern_init.c
+		macro_accelerate.c atomic_extern_init.c  python_extern_init.o  models_extern_init.c matrix_cpu.c
 
-#
 # kpar_source is now declared separately from python_source so that the file log.h
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c
-
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c windsave2table.c windsave2table_sub.c
 
 prototypes:
@@ -224,9 +238,16 @@ prototypes:
 	cproto  -I$(INCLUDE) atomicdata_init.c >> atomic_proto.h
 	cproto  -I$(INCLUDE) recipes.c random.c cdf.c vvector.c > math_proto.h
 
-python: startup python.o $(python_objects)
-	$(CC) ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-	cp $@ $(BIN)/py 
+# Recipe to create CUDA object code. If NVCC is blank, then nothing happens
+# in thie recipe
+$(CUDA_OBJECTS): $(CUDA_SOURCE)
+ifneq ($(CUDA_FLAG),)
+	$(NVCC) $(NVCC_FLAGS) -DCUDA_ON -I$(INCLUDE) -c $< -o $@
+endif
+
+python: startup python.o $(python_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) python.o $(python_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) -o python
+	cp $@ $(BIN)/py
         ifdef XDEBUG
 	  mv $@ $(BIN)/py$(VERSION)_debug
         else
@@ -254,13 +275,13 @@ py_wind_objects = py_wind.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_w
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o \
 		time.o reverb.o paths.o synonyms.o cooling.o windsave2table_sub.o \
 		rdpar_init.o import_calloc.o walls.o charge_exchange.o frame.o \
-		macro_accelerate.o  atomic_extern_init.o python_extern_init.o  models_extern_init.o
+		macro_accelerate.o  atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 
 
-py_wind: startup $(py_wind_objects)
-	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
+py_wind: startup $(py_wind_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(py_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o py_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -279,7 +300,7 @@ table_objects = windsave2table.o windsave2table_sub.o atomicdata.o atomicdata_in
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o py_wind_sub.o windsave.o py_wind_ion.o \
@@ -295,23 +316,23 @@ rhf_objects = rad_hydro_files.o atomicdata.o atomicdata_init.o atomicdata_sub.o 
 		bb.o rdpar.o rdpar_init.o xlog.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o frame.o walls.o charge_exchange.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
 
 
-windsave2table: $(table_objects)
-	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
+windsave2table: startup $(table_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(table_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o windsave2table
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 
-rad_hydro_files: $(rhf_objects)
-	$(CC) $(CFLAGS) $(rhf_objects) $(LDFLAGS) -o rad_hydro_files
+rad_hydro_files: startup $(rhf_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(rhf_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o rad_hydro_files
 	cp $@ $(BIN)
 	mv $@ $(BIN)/rad_hydro_files$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
@@ -332,14 +353,14 @@ modify_wind_objects = modify_wind.o windsave.o  windsave2table_sub.o\
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
-modify_wind:  $(modify_wind_objects)
-	$(CC) $(CFLAGS) $(modify_wind_objects) $(LDFLAGS) -o modify_wind
-	cp $@ $(BIN)                                                               
-	mv $@ $(BIN)/modify_wind$(VERSION)                                         
-	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi         
+modify_wind: startup $(modify_wind_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(modify_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o modify_wind
+	cp $@ $(BIN)
+	mv $@ $(BIN)/modify_wind$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
@@ -356,19 +377,19 @@ inspect_wind_objects = inspect_wind.o windsave.o  windsave2table_sub.o\
 		pi_rates.o photon_gen_matom.o  macro_gen_f.o macro_gov.o reverb.o paths.o time.o synonyms.o \
 		cooling.o import_calloc.o walls.o charge_exchange.o frame.o \
 		atomicdata.o atomicdata_init.o atomicdata_sub.o spectra.o macro_accelerate.o \
-		atomic_extern_init.o python_extern_init.o  models_extern_init.o
+		atomic_extern_init.o python_extern_init.o  models_extern_init.o matrix_cpu.o
 
 
 
-inspect_wind:  $(inspect_wind_objects)
-	$(CC) $(CFLAGS) $(inspect_wind_objects) $(LDFLAGS)  -o inspect_wind
+inspect_wind: startup $(inspect_wind_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(inspect_wind_objects) $(CUDA_OBJECTS) $(LDFLAGS)  -o inspect_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/inspect_wind$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 
 # unit_tests allows one to test low level routines, but one must be aware that one needs to define
-# everything in the main routine before one can probe a particular routine.  
+# everything in the main routine before one can probe a particular routine.
 unit_test: startup unit_test.o $(python_objects)
 	$(CC) ${CFLAGS} unit_test.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o unit_test
 	cp $@ $(BIN)/unit_test
@@ -394,15 +415,20 @@ py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o \
 		reverb.o paths.o setup.o run.o brem.o synonyms.o walls.o xtest.o \
 		setup_reverb.o setup_line_transfer.o rdpar_init.o cv.o import_calloc.o charge_exchange.o frame.o \
 		macro_accelerate.o atomic_extern_init.o python_extern_init.o  models_extern_init.o \
-		py_optd_extern_init.o
+		py_optd_extern_init.o matrix_cpu.o
 
-py_optd: startup $(py_optd_obj)
-	$(CC) $(CFLAGS) $(py_optd_obj) $(LDFLAGS) -o $@
+py_optd: startup $(py_optd_obj) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(py_optd_obj) $(CUDA_OBJECTS) $(LDFLAGS) -o $@
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_optd$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
+# The next recipe is used to run the unit tests, using the same CC and NVCC as
+# the Python source. It doesn't require anything to be compiled, actually, as
+# the Makefile in tests/ will compile what is requried
 
+check:
+	cd tests; make check NVCC=$(NVCC) CC=$(CC)
 
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
@@ -422,3 +448,4 @@ libatomic.a:  atomicdata.o atomicdata_init.o atomic.o
 
 clean :
 	rm -f *.o  *~
+	cd tests; make clean

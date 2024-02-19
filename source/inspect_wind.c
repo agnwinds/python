@@ -265,6 +265,82 @@ main (argc, argv)
 
   for (n = 0; n < NPLASMA; n++)
   {
+    fprintf (fptr, "%15s", "gamma");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
+    {
+      fprintf (fptr, "%8.2e ", macromain[n].gamma[i]);
+    }
+    fprintf (fptr, "\n");
+  }
+
+
+
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    fprintf (fptr, "%15s", "alpha_st");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
+    {
+      fprintf (fptr, "%8.2e ", macromain[n].alpha_st[i]);
+    }
+    fprintf (fptr, "\n");
+  }
+
+
+
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    fprintf (fptr, "%15s", "recomb_sp");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
+    {
+      fprintf (fptr, "%8.2e ", macromain[n].recomb_sp[i]);
+    }
+    fprintf (fptr, "\n");
+  }
+
+
+
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    fprintf (fptr, "%15s", "matom_abs");
+
+    nnwind = plasmamain[n].nwind;
+    ndom = wmain[nnwind].ndom;
+    wind_n_to_ij (ndom, nnwind, &ii, &jj);
+    fprintf (fptr, " %4d %4d %4d ", n, ii, jj);
+
+    for (i = 0; i < nlevels_macro; i++)
+    {
+      fprintf (fptr, "%8.2e ", macromain[n].matom_abs[i]);
+    }
+    fprintf (fptr, "\n");
+  }
+
+
+
+
+  for (n = 0; n < NPLASMA; n++)
+  {
     fprintf (fptr, "%15s", "matom_emiss");
 
     nnwind = plasmamain[n].nwind;
