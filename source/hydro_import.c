@@ -922,7 +922,7 @@ create_hydro_output_files (void)
 
   fprintf (fptr,
            "i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h rad_f_w rad_f_phi rad_f_z bf_f_w bf_f_phi bf_f_z\n");
-  fprintf (fptr2, "i j F_vis_x F_vis_y F_vis_z F_UV_x F_UV_y F_UV_z F_Xray_x F_Xray_y F_Xray_z\n");     //directional flux by band
+  fprintf (fptr2, "i j F_vis_x F_vis_y F_vis_z F_UV_theta F_UV_phi F_UV_r F_Xray_x F_Xray_y F_Xray_z\n");       //directional flux by band
 
   fprintf (fptr3, "nions %i\n", nions);
   for (i = 0; i < nions; i++)

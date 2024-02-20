@@ -285,13 +285,16 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
   project_from_xyz_cyl (phot_mid->x, flux_orig, flux);  //Transform to the frame ine which fluxes are summed 
 
   double theta;
-  double r = sqrt(pow(phot_mid->x[0],2)+pow(phot_mid->x[1],2));
+  double r = sqrt (pow (phot_mid->x[0], 2) + pow (phot_mid->x[1], 2));
 
-  if (phot_mid->x[2] < 0) {      //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
+  if (phot_mid->x[2] < 0)
+  {                             //If the photon is in the lower hemisphere - we need to reverse the sense of the z flux
     flux[2] *= (-1);
-    theta = atan2(r,-phot_mid->x[2]);
-  } else {
-    theta = atan2(r,phot_mid->x[2]);
+    theta = atan2 (r, -phot_mid->x[2]);
+  }
+  else
+  {
+    theta = atan2 (r, phot_mid->x[2]);
   }
 
   angle = 0.0;
@@ -310,13 +313,13 @@ update_flux_estimators (xplasma, phot_mid, ds_obs, w_ave, ndom)
 
   iangle = (angle) / binw;      //Turn the angle into an integer to pass into the flux array
 
-  //xplasma->F_UV_ang_x[iangle] += flux[0];
-  //xplasma->F_UV_ang_y[iangle] += flux[1];
-  //xplasma->F_UV_ang_z[iangle] += flux[2];
+  //xplasma->F_UV_ang_theta[iangle] += flux[0];
+  //xplasma->F_UV_ang_phi[iangle] += flux[1];
+  //xplasma->F_UV_ang_r[iangle] += flux[2];
 
-  xplasma->F_UV_ang_r[iangle] += flux[0]*sin(theta)+flux[2]*cos(theta);
+  xplasma->F_UV_ang_r[iangle] += flux[0] * sin (theta) + flux[2] * cos (theta);
   xplasma->F_UV_ang_phi[iangle] += flux[1];
-  xplasma->F_UV_ang_theta[iangle] += flux[0]*cos(theta)-flux[2]*sin(theta);
+  xplasma->F_UV_ang_theta[iangle] += flux[0] * cos (theta) - flux[2] * sin (theta);
 
 
 
@@ -654,9 +657,9 @@ update_persistent_directional_flux_estimators (int nplasma, double flux_persist_
 
     for (n = 0; n < NFLUX_ANGLES; n++)
     {
-      plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n];
-      plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n];
-      plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n];
+      plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] + plasmamain[nplasma].F_UV_ang_theta[n];
+      plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] + plasmamain[nplasma].F_UV_ang_phi[n];
+      plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] + plasmamain[nplasma].F_UV_ang_r[n];
     }
   }
   else
@@ -679,15 +682,15 @@ update_persistent_directional_flux_estimators (int nplasma, double flux_persist_
 
     for (n = 0; n < NFLUX_ANGLES; n++)
     {
-      plasmamain[nplasma].F_UV_ang_x_persist[n] = plasmamain[nplasma].F_UV_ang_x_persist[n] * (1 - flux_persist_scale);
-      plasmamain[nplasma].F_UV_ang_y_persist[n] = plasmamain[nplasma].F_UV_ang_y_persist[n] * (1 - flux_persist_scale);
-      plasmamain[nplasma].F_UV_ang_z_persist[n] = plasmamain[nplasma].F_UV_ang_z_persist[n] * (1 - flux_persist_scale);
-      plasmamain[nplasma].F_UV_ang_x_persist[n] =
-        plasmamain[nplasma].F_UV_ang_x_persist[n] + plasmamain[nplasma].F_UV_ang_x[n] * flux_persist_scale;
-      plasmamain[nplasma].F_UV_ang_y_persist[n] =
-        plasmamain[nplasma].F_UV_ang_y_persist[n] + plasmamain[nplasma].F_UV_ang_y[n] * flux_persist_scale;
-      plasmamain[nplasma].F_UV_ang_z_persist[n] =
-        plasmamain[nplasma].F_UV_ang_z_persist[n] + plasmamain[nplasma].F_UV_ang_z[n] * flux_persist_scale;
+      plasmamain[nplasma].F_UV_ang_theta_persist[n] = plasmamain[nplasma].F_UV_ang_theta_persist[n] * (1 - flux_persist_scale);
+      plasmamain[nplasma].F_UV_ang_phi_persist[n] = plasmamain[nplasma].F_UV_ang_phi_persist[n] * (1 - flux_persist_scale);
+      plasmamain[nplasma].F_UV_ang_r_persist[n] = plasmamain[nplasma].F_UV_ang_r_persist[n] * (1 - flux_persist_scale);
+      plasmamain[nplasma].F_UV_ang_theta_persist[n] =
+        plasmamain[nplasma].F_UV_ang_theta_persist[n] + plasmamain[nplasma].F_UV_ang_theta[n] * flux_persist_scale;
+      plasmamain[nplasma].F_UV_ang_phi_persist[n] =
+        plasmamain[nplasma].F_UV_ang_phi_persist[n] + plasmamain[nplasma].F_UV_ang_phi[n] * flux_persist_scale;
+      plasmamain[nplasma].F_UV_ang_r_persist[n] =
+        plasmamain[nplasma].F_UV_ang_r_persist[n] + plasmamain[nplasma].F_UV_ang_r[n] * flux_persist_scale;
     }
   }
   plasmamain[nplasma].F_vis_persistent[3] = length (plasmamain[nplasma].F_vis_persistent);

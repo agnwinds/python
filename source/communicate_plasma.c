@@ -143,12 +143,12 @@ broadcast_plasma_grid (const int n_start, const int n_stop, const int n_cells_ra
         MPI_Pack (cell->F_vis_persistent, 4, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (cell->F_UV_persistent, 4, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (cell->F_Xray_persistent, 4, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->F_UV_ang_x_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->F_UV_ang_y_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
-        MPI_Pack (cell->F_UV_ang_z_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (cell->F_UV_ang_theta, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (cell->F_UV_ang_phi, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (cell->F_UV_ang_r, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (cell->F_UV_ang_theta_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (cell->F_UV_ang_phi_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
+        MPI_Pack (cell->F_UV_ang_r_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&cell->j_direct, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&cell->j_scatt, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
         MPI_Pack (&cell->ip_direct, 1, MPI_DOUBLE, comm_buffer, comm_buffer_size, &position, MPI_COMM_WORLD);
@@ -298,12 +298,12 @@ broadcast_plasma_grid (const int n_start, const int n_stop, const int n_cells_ra
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_vis_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_Xray_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_x_persist, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_y_persist, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_z_persist, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_theta, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_phi, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_r, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_theta_persist, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_phi_persist, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, comm_buffer_size, &position, cell->F_UV_ang_r_persist, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &cell->j_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &cell->j_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, comm_buffer_size, &position, &cell->ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -668,14 +668,15 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
         MPI_Pack (plasmamain[n_plasma].F_vis_persistent, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_UV_persistent, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n_plasma].F_Xray_persistent, 4, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].F_UV_ang_x_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+        MPI_Pack (plasmamain[n_plasma].F_UV_ang_theta, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].F_UV_ang_y_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+        MPI_Pack (plasmamain[n_plasma].F_UV_ang_phi, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].F_UV_ang_r, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].F_UV_ang_theta_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
-        MPI_Pack (plasmamain[n_plasma].F_UV_ang_z_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+        MPI_Pack (plasmamain[n_plasma].F_UV_ang_phi_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
+                  MPI_COMM_WORLD);
+        MPI_Pack (plasmamain[n_plasma].F_UV_ang_r_persist, NFLUX_ANGLES, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position,
                   MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].j_direct, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n_plasma].j_scatt, 1, MPI_DOUBLE, comm_buffer, size_of_comm_buffer, &position, MPI_COMM_WORLD);
@@ -828,14 +829,16 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_vis_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_Xray_persistent, 4, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_x, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_y, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_z, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_x_persist, NFLUX_ANGLES, MPI_DOUBLE,
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_theta, NFLUX_ANGLES, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_y_persist, NFLUX_ANGLES, MPI_DOUBLE,
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_phi, NFLUX_ANGLES, MPI_DOUBLE,
                     MPI_COMM_WORLD);
-        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_z_persist, NFLUX_ANGLES, MPI_DOUBLE,
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_r, NFLUX_ANGLES, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_theta_persist, NFLUX_ANGLES, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_phi_persist, NFLUX_ANGLES, MPI_DOUBLE,
+                    MPI_COMM_WORLD);
+        MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, plasmamain[n_plasma].F_UV_ang_r_persist, NFLUX_ANGLES, MPI_DOUBLE,
                     MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (comm_buffer, size_of_comm_buffer, &position, &plasmamain[n_plasma].j_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1040,9 +1043,9 @@ reduce_simple_estimators (void)
     }
     for (mpi_j = 0; mpi_j < NFLUX_ANGLES; mpi_j++)
     {
-      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + mpi_j] = plasmamain[mpi_i].F_UV_ang_x[mpi_j] / np_mpi_global;
-      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + NFLUX_ANGLES + mpi_j] = plasmamain[mpi_i].F_UV_ang_y[mpi_j] / np_mpi_global;
-      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + 2 * NFLUX_ANGLES + mpi_j] = plasmamain[mpi_i].F_UV_ang_z[mpi_j] / np_mpi_global;
+      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + mpi_j] = plasmamain[mpi_i].F_UV_ang_theta[mpi_j] / np_mpi_global;
+      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + NFLUX_ANGLES + mpi_j] = plasmamain[mpi_i].F_UV_ang_phi[mpi_j] / np_mpi_global;
+      flux_helper[mpi_i * (3 * NFLUX_ANGLES) + 2 * NFLUX_ANGLES + mpi_j] = plasmamain[mpi_i].F_UV_ang_r[mpi_j] / np_mpi_global;
     }
   }
 
@@ -1128,9 +1131,9 @@ reduce_simple_estimators (void)
     }
     for (mpi_j = 0; mpi_j < NFLUX_ANGLES; mpi_j++)
     {
-      plasmamain[mpi_i].F_UV_ang_x[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + mpi_j];
-      plasmamain[mpi_i].F_UV_ang_y[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + NFLUX_ANGLES + mpi_j];
-      plasmamain[mpi_i].F_UV_ang_z[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + 2 * NFLUX_ANGLES + mpi_j];
+      plasmamain[mpi_i].F_UV_ang_theta[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + mpi_j];
+      plasmamain[mpi_i].F_UV_ang_phi[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + NFLUX_ANGLES + mpi_j];
+      plasmamain[mpi_i].F_UV_ang_r[mpi_j] = flux_helper2[mpi_i * (3 * NFLUX_ANGLES) + 2 * NFLUX_ANGLES + mpi_j];
     }
   }
 

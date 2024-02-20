@@ -1003,7 +1003,7 @@ typedef struct plasma
 #define NFLUX_ANGLES 36 /**< The number of bins into which the directional flux is calculated */
 
 
-  /*Binned fluxes*/
+  /*Binned fluxes */
   double F_UV_ang_theta[NFLUX_ANGLES];
   double F_UV_ang_phi[NFLUX_ANGLES];
   double F_UV_ang_r[NFLUX_ANGLES];

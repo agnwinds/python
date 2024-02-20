@@ -338,6 +338,7 @@ wind_update (WindPtr w)
     if (geo.rt_mode == RT_MODE_MACRO)
     {
       report_bf_simple_ionpool ();
+    }
   }
 
   /* report a warning if the induced Compton heating is greater than 10% of the heating, see #1016 */
@@ -346,7 +347,6 @@ wind_update (WindPtr w)
     Error ("!!wind_update: Induced Compton is responsible for %3.1f percent of radiative heating. Could cause problems.\n",
            icsum / xsum * 100.0);
   }
-
 
 
   if (modes.zeus_connect == 1 || modes.fixed_temp == 1) //There is no point in computing temperature changes, because we have fixed them!
@@ -621,13 +621,13 @@ init_plasma_rad_properties (void)
     {
       if (geo.wcycle == 0)      // Persistent values, so only initialise for first ionisation cycle
       {
-        plasmamain[i].F_UV_ang_x_persist[j] = 0.0;
-        plasmamain[i].F_UV_ang_y_persist[j] = 0.0;
-        plasmamain[i].F_UV_ang_z_persist[j] = 0.0;
+        plasmamain[i].F_UV_ang_theta_persist[j] = 0.0;
+        plasmamain[i].F_UV_ang_phi_persist[j] = 0.0;
+        plasmamain[i].F_UV_ang_r_persist[j] = 0.0;
       }
-      plasmamain[i].F_UV_ang_x[j] = 0.0;
-      plasmamain[i].F_UV_ang_y[j] = 0.0;
-      plasmamain[i].F_UV_ang_z[j] = 0.0;
+      plasmamain[i].F_UV_ang_theta[j] = 0.0;
+      plasmamain[i].F_UV_ang_phi[j] = 0.0;
+      plasmamain[i].F_UV_ang_r[j] = 0.0;
     }
 
     /* Initialise  the frequency banded radiation estimators used for estimating the coarse spectra in each i */
@@ -920,14 +920,16 @@ shell_output_wind_update_diagnostics (double xsum, double psum, double fsum, dou
       Log ("Wind_line_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n", lum_h_line / w[n].vol,
            lum_he_line / w[n].vol, lum_c_line / w[n].vol, lum_n_line / w[n].vol, lum_o_line / w[n].vol, lum_fe_line / w[n].vol);
       Log ("Wind_recomb_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
-           plasmamain[nshell].cool_rr_ion[0] / w[n].vol, (plasmamain[nshell].cool_rr_ion[2] + plasmamain[nshell].cool_rr_ion[3]) / w[n].vol,
-           c_rec / w[n].vol, n_rec / w[n].vol, o_rec / w[n].vol, fe_rec / w[n].vol, plasmamain[nshell].cool_rr_metals / w[n].vol);
+           plasmamain[nshell].cool_rr_ion[0] / w[n].vol,
+           (plasmamain[nshell].cool_rr_ion[2] + plasmamain[nshell].cool_rr_ion[3]) / w[n].vol, c_rec / w[n].vol, n_rec / w[n].vol,
+           o_rec / w[n].vol, fe_rec / w[n].vol, plasmamain[nshell].cool_rr_metals / w[n].vol);
       Log ("Wind_recomb_lum(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
            plasmamain[nshell].lum_rr_ion[0] / w[n].vol, (plasmamain[nshell].lum_rr_ion[2] + plasmamain[nshell].lum_rr_ion[3]) / w[n].vol,
            c_lum / w[n].vol, n_lum / w[n].vol, o_lum / w[n].vol, fe_lum / w[n].vol, plasmamain[nshell].lum_rr_metals / w[n].vol);
       Log ("Wind_dr_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
-           plasmamain[nshell].cool_dr_ion[0] / w[n].vol, (plasmamain[nshell].cool_dr_ion[2] + plasmamain[nshell].cool_dr_ion[3]) / w[n].vol,
-           c_dr / w[n].vol, n_dr / w[n].vol, o_dr / w[n].vol, fe_dr / w[n].vol, cool_dr_metals / w[n].vol);
+           plasmamain[nshell].cool_dr_ion[0] / w[n].vol,
+           (plasmamain[nshell].cool_dr_ion[2] + plasmamain[nshell].cool_dr_ion[3]) / w[n].vol, c_dr / w[n].vol, n_dr / w[n].vol,
+           o_dr / w[n].vol, fe_dr / w[n].vol, cool_dr_metals / w[n].vol);
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
       Log ("Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n", cool_sum, xsum, lum_sum, plasmamain[nshell].t_e);
 
