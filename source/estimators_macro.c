@@ -229,7 +229,13 @@ bf_estimators_increment (one, p, ds)
 
   y = weight_of_packet * kappa_ff (xplasma, freq_av) * ds;
 
-  xplasma->heat_ff += heat_contribution = y;    // record ff hea        
+  xplasma->heat_ff += heat_contribution = y;    // record ff hea   
+
+  /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
+  /* JM 2402 note that previously we incorrectly included Compton processes in kpkt_abs, which could lead to large 
+     amounts of radiation coming out incorrectly in other k->r channels in spectral cycles */
+  xplasma->kpkt_abs += heat_contribution;
+     
 
 
   /* Now for contribution to heating due to compton processes. (JM, Sep 013) */
@@ -250,32 +256,6 @@ bf_estimators_increment (one, p, ds)
 
 
   xplasma->heat_tot += heat_contribution;       // heat contribution is the contribution from compton, ind comp and ff processes
-
-
-
-  /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
-
-  xplasma->kpkt_abs += heat_contribution;
-
-
-  /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
-  /* Commented out by NSH 2018 - data no longer used */
-  // for (n = 0; n < nauger; n++)
-  // {
-  //   ft = augerion[n].freq_t;
-  //   if (freq_av > ft)
-  //   {
-  //     Log ("estimators: Adding a packet to AUGER %g \n", freq_av);
-
-  //     weight_of_packet = p->w;
-  //     x = sigma_phot_verner (&augerion[n], freq_av);    //this is the cross section
-  //     y = weight_of_packet * x * ds;
-
-  //     xplasma->gamma_inshl[n] += y / freq_av / PLANCK / xplasma->vol;
-  //   }
-  // }
-
-
 
   return (0);
 }
