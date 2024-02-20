@@ -607,7 +607,8 @@ normalise_simple_estimators (xplasma)
    * and densities
    */
 
-  electron_density_obs = xplasma->ne / wmain[nwind].xgamma_cen; // Mihalas & Mihalas p146
+  /* there was an error here before, see #1030. The observer frame density is gamma times the CMF one */ 
+  electron_density_obs = xplasma->ne * wmain[nwind].xgamma_cen; // Mihalas & Mihalas p146
   volume_obs = wmain[nwind].vol / wmain[nwind].xgamma_cen;
 
   for (i = 0; i < 4; i++)
