@@ -331,14 +331,27 @@ wind_update (WindPtr w)
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
      cool_sum, geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
-  /* If we have "indivisible packet" mode on but are using the
-     new BF_SIMPLE_EMISSIVITY_APPROACH then we report the flows into and out of the ion pool */
-  if (modes.turn_off_upweighting_of_simple_macro_atoms == FALSE)
+  if (modes.use_upweighting_of_simple_macro_atoms)
   {
+    /* If we have "indivisible packet" mode on but are using the
+       upweighting scheme for simple atoms then we report the flows into and out of the ion pool */
     if (geo.rt_mode == RT_MODE_MACRO)
     {
       report_bf_simple_ionpool ();
-    }
+  }
+
+  /* report a warning if the induced Compton heating is greater than 10% of the heating, see #1016 */
+  if (icsum >= (0.1 * xsum))
+  {
+    Error ("!!wind_update: Induced Compton is responsible for %3.1f percent of radiative heating. Could cause problems.\n",
+           icsum / xsum * 100.0);
+  }
+
+
+
+  if (modes.zeus_connect == 1 || modes.fixed_temp == 1) //There is no point in computing temperature changes, because we have fixed them!
+  {
+    Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
   }
 
   if (modes.zeus_connect != TRUE || modes.fixed_temp != TRUE)

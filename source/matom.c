@@ -486,6 +486,11 @@ matom (p, nres, escape)
 
 
 
+#define B12_CONSTANT 5.01983e25
+
+struct lines *b12_line_ptr;
+double b12_a;
+
 
 /************************************/
 /**
@@ -498,11 +503,6 @@ matom (p, nres, escape)
  * ksl OK, Probably should be moved to lines.c for consistency, but that can be done
  * later.
 ***********************************/
-
-#define B12_CONSTANT 5.01983e25
-
-struct lines *b12_line_ptr;
-double b12_a;
 
 double
 b12 (line_ptr)
@@ -533,6 +533,7 @@ int temp_choice;                //choice of type of calcualation for alpha_sp
 
 
 
+#define ALPHA_SP_CONSTANT 5.79618e-36
 
 /**********************************************************/
 /**
@@ -560,7 +561,6 @@ int temp_choice;                //choice of type of calcualation for alpha_sp
  *  Energy weighted means that the integrand has an extra factor nu/nu_threshold
  *  The difference case is (nu-nu_threshold)/nu_threhold
 ***********************************************************/
-#define ALPHA_SP_CONSTANT 5.79618e-36
 
 double
 alpha_sp (cont_ptr, xplasma, ichoice)
@@ -584,6 +584,9 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   // alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
   alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
 
+  // Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
+  //     cont_ptr->freq[0], cont_ptr->x[0]);
+
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
      through by the appropriate constant. */
   if (cont_ptr->macro_info == TRUE && geo.macro_simple == FALSE)
@@ -597,8 +600,12 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
   alpha_sp_value = alpha_sp_value * ALPHA_SP_CONSTANT;
 
+//  Log ("Xxxx %e  %e %d %d %d %d\n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev);
+
   return (alpha_sp_value);
 }
+
+#define ALPHA_SP_CONSTANT 5.79618e-36
 
 /**********************************************************/
 /**
@@ -631,7 +638,6 @@ alpha_sp (cont_ptr, xplasma, ichoice)
  * ###Notes###
  *
 ***********************************************************/
-#define ALPHA_SP_CONSTANT 5.79618e-36
 
 double
 scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, freq_min, freq_max)
@@ -645,7 +651,7 @@ scaled_alpha_sp_integral_band_limited (cont_ptr, xplasma, ichoice, freq_min, fre
 
   temp_choice = ichoice;
   temp_ext = xplasma->t_e;      //external for use in alph_sp_integrand
-  cont_ext_ptr = cont_ptr;      //"
+  cont_ext_ptr = cont_ptr;
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
   if ((H_OVER_K * (flast - fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
@@ -876,7 +882,7 @@ kpkt (p, nres, escape, mode)
            approach to choosing photon weights - this means we
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
-        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
+        if (modes.use_upweighting_of_simple_macro_atoms)
         {
           if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
           {
@@ -1020,8 +1026,8 @@ kpkt (p, nres, escape, mode)
 
 
 
-/************************************************************
- **
+/************************************************************/
+/**
  * @brief routine for dealing with bound-bound "simple ions" within the hybrid macro-atom framework
  *
  * @param [in,out] PhotPtr p   the packet at the point of activation
@@ -1119,8 +1125,8 @@ fake_matom_bb (p, nres, escape)
 }
 
 
-/************************************************************
- **
+/************************************************************/
+/**
  * @brief calculate the frequency with for a bound-free transition for "simple ions"
  * within the hybrid macro-atom framework
  *
@@ -1154,10 +1160,8 @@ fake_matom_bf (p, nres, escape)
      int *escape;
 {
   WindPtr one;
-//OLD  PlasmaPtr xplasma;
 
   one = &wmain[p->grid];
-//OLD  xplasma = &plasmamain[one->nplasma];
 
   *escape = TRUE;
 

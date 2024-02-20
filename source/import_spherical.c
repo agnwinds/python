@@ -213,6 +213,10 @@ import_spherical_setup_boundaries (int ndom)
  *
  * ### Notes ###
  *
+ * The velocity v_r is stored in v[0] of the wind array.
+ * See velocity_1d for how this is interpreted to generate
+ * a 3-d velocity
+ *
  **********************************************************/
 
 int
@@ -293,11 +297,11 @@ spherical_make_grid_import (w, ndom)
  *
  *
  * ### Notes ###
- * Note that v_r is stored in v_0
- *
- * Not also that In practice this routine is only used to initallize v in
- * wind structure.  This is consistent with the way velocities
- * are treated throughout Python
+
+ * Note that v_r has been  stored (see sperical_make_grid_import)
+ * in v_0 and this explains
+ * the way the speed is calculated, and then translated 
+ * to a velocity in a 3d space
  *
  **********************************************************/
 
@@ -314,8 +318,10 @@ velocity_1d (ndom, x, v)
   r = length (x);
   coord_fraction (ndom, 0, x, nnn, frac, &nelem);
 
-  speed = 0;
-  for (nn = 0; nn < nelem; nn++)
+  /* For imported spherical/1d models the total velocity is
+     stored in v[0], which explains the code below.  See
+     spherical_make_grid_import. See issue #787
+  */
   {
     speed += wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
   }

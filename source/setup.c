@@ -340,7 +340,7 @@ init_advanced_modes ()
 
   modes.jumps_for_detailed_spectra = FALSE;     //use old jumps mode for calculating macro atom
   //emissivites
-  modes.turn_off_upweighting_of_simple_macro_atoms = FALSE;     //use old mode for handling 
+  modes.use_upweighting_of_simple_macro_atoms = FALSE;     //use upweighting mode for handling 
   //bf interactions with simple macro atoms
 
   modes.store_matom_matrix = TRUE;      /* default is to store the macro-atom matrix */
@@ -528,7 +528,12 @@ init_observers ()
     }
     strcpy (answer, "no");
     ichoice = rdchoice ("@Spectrum.select_photons_by_position(yes,no)", "1,0", answer);
-    if (ichoice)
+    if (ichoice && !geo.select_extract)
+    {
+      Error ("setup.c: Cannot select photons by position if in Live.or.die mode. Use Extract mode!\n");
+      Exit (0);
+    }
+    else if (ichoice)
     {
       for (n = 0; n < geo.nangles; n++)
       {

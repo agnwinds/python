@@ -19,14 +19,16 @@
 
 /**********************************************************/
 /**
- * @brief      returns the specific band-limited luminosity in macro-atoms
+ * @brief      returns the specific band-limited luminosity in macro-atoms (and depending
+ * on the mode calculates the band-limited emisivities for the cells in the wind for
+ * use in detailed spectral models via a MC process.
  *
  * @param [in] int  mode   variable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
  *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
  *            see #define statements in python.h and code in xdefine_phot().
  * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the
- *            wavelength range required for the specrum calculation.
+ *            wavelength range required for the spectrum calculation.
  *
  * @details
  * this routine calculates the luminosity in the band needed for the computation of the
@@ -35,8 +37,10 @@
  * (at least with our method) to work out where a photon is going to come out when a
  * macro-atom is generated
  *
+ * This routine has been largely replaced by get_matom_f_accelerate()
+ *
  * ### Notes ###
- * Consult Matthews thesis.
+ * Consult Matthews thesis section 3.6.1.
  *
  **********************************************************/
 
@@ -357,7 +361,9 @@ get_matom_f (mode)
 
 /**********************************************************/
 /**
- * @brief      returns the specific band-limited luminosity in macro-atoms
+ * @brief      returns the specific band-limited luminosity in macro-atoms (and depending
+ * on the mode) calcuates the emisivities in each cell in the wind (using a matrix approach)
+ * used for the generation of detailed spectra.
  *
  * @param [in] int  mode   vvariable which controls whether or not we need to compute the
  *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
@@ -369,12 +375,15 @@ get_matom_f (mode)
  * @details
  * this routine calculates the luminosity in the band needed for the computation of the
  * spectrum. It gets the total energy radiated by the deactivation of macro atoms in the
- * required wavelength range. This can be a slow process, as there is no priori way
- * (at least with our method) to work out where a photon is going to come out when a
- * macro-atom is generated
+ * required wavelength range.
+ *
+ * When called in (CALCULATE_MATOM_EMISSIVITIES) mode it also calculatees the emissities
+ * that are used to generate kpkts from the wind.
  *
  * ### Notes ###
- * Consult Matthews thesis.
+ * Consult Matthews thesis section 3.6.1.
+ *
+ * This routine is considerably faster thasn get_matom_f()
  *
  **********************************************************/
 
