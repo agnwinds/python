@@ -321,7 +321,10 @@ velocity_1d (ndom, x, v)
   /* For imported spherical/1d models the total velocity is
      stored in v[0], which explains the code below.  See
      spherical_make_grid_import. See issue #787
-  */
+   */
+  speed = 0;
+  for (nn = 0; nn < nelem; nn++)
+
   {
     speed += wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
   }
