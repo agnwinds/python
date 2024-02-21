@@ -233,15 +233,15 @@ wind_read (filename)
   for (ndom = 0; ndom < geo.ndomain; ++ndom)
   {
     allocate_domain_wind_coords (ndom);
-    fread (zdom[ndom].wind_x, sizeof (double), zdom[ndom].ndim, fptr);
-    fread (zdom[ndom].wind_z, sizeof (double), zdom[ndom].mdim, fptr);
-    fread (zdom[ndom].wind_midx, sizeof (double), zdom[ndom].ndim, fptr);
-    fread (zdom[ndom].wind_midz, sizeof (double), zdom[ndom].mdim, fptr);
+    n += fread (zdom[ndom].wind_x, sizeof (double), zdom[ndom].ndim, fptr);
+    n += fread (zdom[ndom].wind_z, sizeof (double), zdom[ndom].mdim, fptr);
+    n += fread (zdom[ndom].wind_midx, sizeof (double), zdom[ndom].ndim, fptr);
+    n += fread (zdom[ndom].wind_midz, sizeof (double), zdom[ndom].mdim, fptr);
     if (zdom[ndom].coord_type == CYLVAR)
     {
       cylvar_allocate_domain (ndom);
-      fread (zdom[ndom].wind_z_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
-      fread (zdom[ndom].wind_midz_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
+      n += fread (zdom[ndom].wind_z_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
+      n += fread (zdom[ndom].wind_midz_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
     }
   }
 
