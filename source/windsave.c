@@ -73,15 +73,15 @@ wind_save (filename)
   n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   for (ndom = 0; ndom < geo.ndomain; ++ndom)
   {
-    fwrite (zdom[ndom].wind_x, sizeof (double), zdom[ndom].ndim, fptr);
-    fwrite (zdom[ndom].wind_z, sizeof (double), zdom[ndom].mdim, fptr);
-    fwrite (zdom[ndom].wind_midx, sizeof (double), zdom[ndom].ndim, fptr);
-    fwrite (zdom[ndom].wind_midz, sizeof (double), zdom[ndom].mdim, fptr);
+    n += fwrite (zdom[ndom].wind_x, sizeof (double), zdom[ndom].ndim, fptr);
+    n += fwrite (zdom[ndom].wind_z, sizeof (double), zdom[ndom].mdim, fptr);
+    n += fwrite (zdom[ndom].wind_midx, sizeof (double), zdom[ndom].ndim, fptr);
+    n += fwrite (zdom[ndom].wind_midz, sizeof (double), zdom[ndom].mdim, fptr);
 
     if (zdom[ndom].coord_type == CYLVAR)
     {
-      fwrite (zdom[ndom].wind_z_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
-      fwrite (zdom[ndom].wind_midz_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
+      n += fwrite (zdom[ndom].wind_z_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
+      n += fwrite (zdom[ndom].wind_midz_var, sizeof (double), zdom[ndom].ndim * zdom[ndom].mdim, fptr);
     }
   }
 
