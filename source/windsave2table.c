@@ -284,14 +284,8 @@ main (argc, argv)
     exit (0);
   }
 
-
   printf ("Read wind_file %s\n", windsavefile);
-
-  get_atomic_data (geo.atomic_filename);
-
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
-
-
 
   do_windsave2table (root, ion_switch, edge_switch);
 
