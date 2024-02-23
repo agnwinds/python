@@ -15,6 +15,28 @@
 #include "atomic.h"
 #include "python.h"
 
+/**********************************************************/
+/**
+ * @brief
+ *
+ * @param [in,out] PlasmaPtr  xplasma   The plasma cell to update
+ *
+ * @return
+ *
+ * @details
+ *
+ **********************************************************/
+
+void
+update_old_plasma_variables (PlasmaPtr xplasma)
+{
+  xplasma->dt_e_old = xplasma->dt_e;
+  xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
+  xplasma->t_e_old = xplasma->t_e;
+  xplasma->lum_tot_old = xplasma->lum_tot;
+  xplasma->heat_tot_old = xplasma->heat_tot;
+}
+
 
 /**********************************************************/
 /**
@@ -40,7 +62,6 @@ int
 ion_abundances (PlasmaPtr xplasma, int mode)
 {
   int ireturn;
-
 
   if (mode == IONMODE_ML93_FIXTE)
   {
@@ -84,11 +105,7 @@ ion_abundances (PlasmaPtr xplasma, int mode)
   else if (mode == IONMODE_MATRIX_BB)
   {
 
-    xplasma->dt_e_old = xplasma->dt_e;
-    xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-    xplasma->t_e_old = xplasma->t_e;
-    xplasma->lum_tot_old = xplasma->lum_tot;
-    xplasma->heat_tot_old = xplasma->heat_tot;
+    update_old_plasma_variables (xplasma);
     ireturn = one_shot (xplasma, mode);
 
     convergence (xplasma);
@@ -98,12 +115,7 @@ ion_abundances (PlasmaPtr xplasma, int mode)
 /*  spectral_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
 
     spectral_estimators (xplasma);
-
-    xplasma->dt_e_old = xplasma->dt_e;
-    xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-    xplasma->t_e_old = xplasma->t_e;
-    xplasma->lum_tot_old = xplasma->lum_tot;
-    xplasma->heat_tot_old = xplasma->heat_tot;
+    update_old_plasma_variables (xplasma);
     ireturn = one_shot (xplasma, mode);
 
     convergence (xplasma);

@@ -367,7 +367,8 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 /**
  * @brief the routine to normalise the matom bb and bf estimators. 
  *
- * @param [in] int n the cell for which the normalisation is to be done
+ * @param [in, out] PlasmaPtr xplasma  The plasma (and associated macro) cell to normalise
+ *
  * @return 0
  *
  * @details
@@ -394,20 +395,17 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
  **********************************************************/
 
 int
-normalise_macro_estimators (n)
-     int n;
+normalise_macro_estimators (PlasmaPtr xplasma)
 {
   double invariant_volume_time;
   int i, j, nlev_upper;
   double stimfac, line_freq, stat_weight_ratio;
   double heat_contribution, lower_density, upper_density;
   WindPtr one;
-  PlasmaPtr xplasma;
   MacroPtr mplasma;
 
-  one = &wmain[n];
-  xplasma = &plasmamain[one->nplasma];
   mplasma = &macromain[xplasma->nplasma];
+  one = &wmain[xplasma->nwind];
 
   /* one->vol contains the CMF volume. This converts it to
      observer frame volume, or perhaps more correctly, it calculates the
@@ -516,7 +514,6 @@ normalise_macro_estimators (n)
         Error ("normalise_macro_estimators: bb stimulated correction factor is out of bounds, 0 <= stimfac < 1 but got %g\n", stimfac);
         Error ("normalise_macro_estimators: upper_density %g lower_density %g xplasma->levden[config[nlev_upper].nden] %g\n",
                upper_density, lower_density, xplasma->levden[xconfig[nlev_upper].nden]);
-        // Exit (EXIT_FAILURE);
         stimfac = 0.0;
       }
       else
@@ -555,6 +552,10 @@ normalise_macro_estimators (n)
   /* Now that we have estimators, set the flag to use them for the level populations */
 
   geo.macro_ioniz_mode = MACRO_IONIZ_MODE_ESTIMATORS;
+
+  /* force recalculation of k-packet rates and matrices, if applicable */
+  mplasma->kpkt_rates_known = FALSE;
+  mplasma->matrix_rates_known = FALSE;
 
   return (0);
 }

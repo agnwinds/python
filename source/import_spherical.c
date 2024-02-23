@@ -177,9 +177,9 @@ import_1d (ndom, filename)
 int
 import_spherical_setup_boundaries (int ndom)
 {
-  zdom[ndom].wind_rhomin_at_disk = zdom[ndom].rho_min = 0;
+  zdom[ndom].wind_rhomin_at_disk = 0;
   zdom[ndom].rmin = imported_model[ndom].r[1];  // <- this assumes the 1st cell is a ghost cell
-  zdom[ndom].wind_rhomax_at_disk = zdom[ndom].zmax = zdom[ndom].rho_max = zdom[ndom].rmax = imported_model[ndom].r[imported_model[ndom].ncell - 2];     // <- this assumes the last 2 cells are ghost cells
+  zdom[ndom].wind_rhomax_at_disk = zdom[ndom].zmax = zdom[ndom].rmax = imported_model[ndom].r[imported_model[ndom].ncell - 2];  // <- this assumes the last 2 cells are ghost cells
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0;
 
   return 0;
@@ -324,7 +324,6 @@ velocity_1d (ndom, x, v)
    */
   speed = 0;
   for (nn = 0; nn < nelem; nn++)
-
   {
     speed += wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
   }

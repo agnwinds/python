@@ -196,6 +196,14 @@ main (argc, argv)
   sprintf (outfile, "%.150s.txt", inroot);
 
   printf ("Reading %s and writing to %s\n", infile, outfile);
+
+  zdom = calloc (MAX_DOM, sizeof (domain_dummy));
+  if (zdom == NULL)
+  {
+    printf ("Unable to allocate memory for domain\n");
+    return EXIT_FAILURE;
+  }
+
   wind_read (infile);
 
   if (nlevels_macro == 0)
