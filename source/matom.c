@@ -670,8 +670,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   }
 
 
-  Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
-       cont_ptr->freq[0], cont_ptr->x[0]);
+//  Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
+//       cont_ptr->freq[0], cont_ptr->x[0]);
 
   /* This is the end of the modification */
 
