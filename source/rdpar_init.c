@@ -77,10 +77,10 @@ init_choices ()
 {
   /* Initialize the structure that contains all of the types of possible radiation types */
 
-  char *xchoices[] = { "bb", "uniform", "power", "cloudy", "brems", "none", "models", "mono" };
+  char *xchoices[] = { "bb", "uniform", "power", "cloudy", "brems", "none", "models",  "mod_bb", "mono" };
   int xvals[] =
-    { SPECTYPE_BB, SPECTYPE_UNIFORM, SPECTYPE_POW, SPECTYPE_CL_TAB, SPECTYPE_BREM, SPECTYPE_NONE, SPECTYPE_MODEL, SPECTYPE_MONO };
-  int num_choices = 8;
+    { SPECTYPE_BB, SPECTYPE_UNIFORM, SPECTYPE_POW, SPECTYPE_CL_TAB, SPECTYPE_BREM, SPECTYPE_NONE, SPECTYPE_MODEL, SPECTYPE_BB_FCOL, SPECTYPE_MONO};
+  int num_choices = 9;
 
   if (xinit_choices)
     return (0);

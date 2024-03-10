@@ -109,6 +109,12 @@ get_stellar_params ()
     strcpy (answer, "yes");
     geo.star_radiation = rdchoice ("Central_object.radiation(yes,no)", "1,0", answer);
     get_spectype (geo.star_radiation, "Central_object.rad_type_to_make_wind(bb,models)", &geo.star_ion_spectype);
+    
+    if (geo.star_ion_spectype == SPECTYPE_BB_FCOL)
+    {
+      Error ("Colour corrected BB not implemented for star at this stage. Exiting.");
+      Exit (0);
+    }
 
     if (geo.star_radiation)
       rddoub ("Central_object.temp", &geo.tstar_init);
@@ -195,6 +201,11 @@ get_bl_and_agn_params (lstar)
     if (geo.agn_radiation)
       get_spectype (geo.agn_radiation, "Central_object.rad_type_to_make_wind(bb,models,power,cloudy,brems,mono)", &geo.agn_ion_spectype);
 
+    if (geo.agn_ion_spectype == SPECTYPE_BB_FCOL)
+    {
+      Error ("Colour corrected BB not implemented for AGN at this stage. Exiting.");
+      Exit (0);
+    }
   }
   else
   {
@@ -204,6 +215,12 @@ get_bl_and_agn_params (lstar)
 
     if (geo.bl_radiation)
       get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(bb,models,power)", &geo.bl_ion_spectype);
+  
+    if (geo.bl_ion_spectype == SPECTYPE_BB_FCOL)
+    {
+      Error ("Colour corrected BB not implemented for boundary layer. Exiting.");
+      Exit (0);
+    }
   }
 
 

@@ -672,8 +672,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   }
 
 
-  Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
-       cont_ptr->freq[0], cont_ptr->x[0]);
+//  Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
+//       cont_ptr->freq[0], cont_ptr->x[0]);
 
   /* This is the end of the modification */
 
@@ -977,7 +977,7 @@ kpkt (p, nres, escape, mode)
            approach to choosing photon weights - this means we
            multipy down the photon weight by a factor nu/(nu-nu_0)
            and we force a kpkt to be created */
-        if (!modes.turn_off_upweighting_of_simple_macro_atoms)
+        if (modes.use_upweighting_of_simple_macro_atoms)
         {
           if (phot_top[i].macro_info == FALSE || geo.macro_simple == TRUE)
           {

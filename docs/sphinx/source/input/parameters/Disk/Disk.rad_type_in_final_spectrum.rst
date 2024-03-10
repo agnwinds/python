@@ -7,13 +7,13 @@ Type
 
 Values
   bb
-    Multi-line description, must keep indentation.
+    Blackbody from each annulus
 
   models
-    Multi-line description, must keep indentation.
+    Use model files such as stellar atmosphers
 
-  uniform
-    Multi-line description, must keep indentation.
+  mod_bb
+    modified blackbody (colour correction)
 
 
 File
