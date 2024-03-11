@@ -321,8 +321,8 @@ radiation (PhotPtr p, double ds)
                 }
                 if (density > DENSITY_PHOT_MIN)
                 {
-//                  kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
-                  kappa_tot += x = exp (log_sigma_phot (x_top_ptr, log (freq_xs))) * density * frac_path * zdom[ndom].fill;
+                  kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
+//xxxx                  kappa_tot += x = exp (log_sigma_phot (x_top_ptr, log (freq_xs))) * density * frac_path * zdom[ndom].fill;
 
                   if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield != -1)    // Calculate during ionization cycles only
                   {
@@ -537,6 +537,14 @@ kappa_ff (xplasma, freq)
   double x1, x2, x3;
   int ndom;
 
+  if (xplasma->nwind < 0)
+  {
+    Error ("kappa_ff: xplasma->nplasma %d xplasma->nwind %d is invalid\n", xplasma->nplasma, xplasma->nwind);
+    return (0.0);
+  }
+
+
+
   ndom = wmain[xplasma->nwind].ndom;
 
   if (gaunt_n_gsqrd == 0)       //Maintain old behaviour if Sutherland gaunt factors are unavailable
@@ -610,11 +618,15 @@ sigma_phot (x_ptr, freq)
     nlast = x_ptr->nlast;
     if ((fbot = x_ptr->freq[nlast]) < freq && freq < (ftop = x_ptr->freq[nlast + 1]))
     {
-      frac = (log (freq) - log (fbot)) / (log (ftop) - log (fbot));
-      xsection = exp ((1. - frac) * log (x_ptr->x[nlast]) + frac * log (x_ptr->x[nlast + 1]));
+//  frac = (log (freq) - log (fbot)) / (log (ftop) - log (fbot));
+// xsection = exp ((1. - frac) * log (x_ptr->x[nlast]) + frac * log (x_ptr->x[nlast + 1]));
+      frac = (log (freq) - x_ptr->log_freq[nlast]) / (x_ptr->log_freq[nlast + 1] - x_ptr->log_freq[nlast]);
+      xsection = exp ((1. - frac) * x_ptr->log_x[nlast] + frac * x_ptr->log_x[nlast + 1]);
+
 
       x_ptr->sigma = xsection;
       x_ptr->f = freq;
+
       return (xsection);
     }
   }
@@ -623,92 +635,12 @@ sigma_phot (x_ptr, freq)
   nmax = x_ptr->np;
   x_ptr->nlast = linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection, 1);     //call linterp in log space
 
-
-
   x_ptr->sigma = xsection;
   x_ptr->f = freq;
 
   return (xsection);
 
 }
-
-
-/**********************************************************/
-/**
- * @brief      calculates the log of 
- *  photionization crossection due to a Topbase level associated with
- *  x_ptr at log frequency log_freq
- *
- * @param [in,out] struct topbase_phot *  x_ptr   The structure that contains
- * TopBase information about the photoionization x-section
- * @param [in] double  freq   The frequency where the x-section is to be calculated
- *
- * @return     The x-section
- *
- * @details
- * log_sigma_phot uses the Topbase x-sections to calculate the bound free
- * (or photoionization) xsection.   The data must have been into the
- * photoionization structures xphot with get_atomic_data and the
- * densities of individual ions must have been calculated previously.
- *
- * ### Notes ###
- * The logs of the x-section and frequency are stored in the topbase_phot struture
- * so that if one requests the same xsection with the same log frequency  
- * again, then the calculation of the x-section is avoided.
- * this was recast in   log space as part of an effort to speed up the code.
- *
- **********************************************************/
-
-double
-log_sigma_phot (x_ptr, log_freq)
-     struct topbase_phot *x_ptr;
-     double log_freq;
-{
-  int nmax;
-  double logxsection;
-  double frac, fbot, ftop;
-  int linterp ();
-  int nlast;
-
-
-  if (log_freq < x_ptr->log_freq[0])
-  {
-    return (0.0);               // Since this was below threshold
-  }
-  if (log_freq == x_ptr->log_f)
-    return (x_ptr->log_sigma);  // Avoid recalculating xsection
-
-  if (x_ptr->nlast > -1)
-  {
-    nlast = x_ptr->nlast;
-    if ((fbot = x_ptr->log_freq[nlast]) < log_freq && log_freq < (ftop = x_ptr->log_freq[nlast + 1]))
-    {
-      frac = (log_freq - fbot) / (ftop - fbot);
-      logxsection = (1. - frac) * x_ptr->log_x[nlast] + frac * x_ptr->log_x[nlast + 1];
-
-      x_ptr->log_sigma = logxsection;
-      x_ptr->log_f = log_freq;
-      return (logxsection);
-    }
-  }
-
-  nmax = x_ptr->np;
-  x_ptr->nlast = linterp (log_freq, &x_ptr->log_freq[0], &x_ptr->log_x[0], nmax, &logxsection, 0);      //call linterp in lin space
-
-  x_ptr->log_sigma = logxsection;
-  x_ptr->log_f = log_freq;
-
-  if (logxsection == 0.0)
-  {
-    printf ("ERROR %e %e\n", log_freq, x_ptr->log_freq[0]);
-
-    exit (0);
-  }
-
-  return (logxsection);
-
-}
-
 
 
 /**********************************************************/

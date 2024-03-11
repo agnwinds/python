@@ -15,11 +15,15 @@ The purpose of documentation is as follows:
 * to explain where the data currently used in Python and to explain how the raw data 
   is translated in to a format the Python accepts
 
-The routines used to translate raw data format (as well as much of the raw data)
+The routines used to translate raw data format for two-level atoms (as well as much of the raw data)
 are contained in a separate github `repository <https://github.com/agnwinds/data-gen>`_
 These routines are very "rough-and-ready", and not extensively documented, but so users
 should beware.  On the other hand, they are not exceptionally complicated so in most cases
 it should be fairly clear from the code what the various routines do. 
+
+The routines used to generate data for MacroAtoms are described in :doc:`Generating Macro Atom data <./py_progs/MakeMacro>`
+
+
 
 The "masterfile" that determines what data will be read into Python is determined by the
 line in the parameter file, which will read something like::
@@ -51,22 +55,26 @@ The main hierarchy is as follows
  * Elements
  * Ions
  * Energy levels
- *  Lines
+ * Lines
 
 Once these sets of data have been read in the order in which other information is read in 
 is irrelevant, that is one can read the collision data (which is indexed to lines) and 
 photoionization cross sections  (which are indexed to energy levels) in either order
 
+*It is important that all of the ions, energy levels, and line for an atom, appear before 
+photoionization cross sections and collisional data for that atom this data is only read in if it can be indexed to the corresponding levels and lines*
+
     
 
-(Note that although the  approach has advantages of allowing one to comment out atoms or ions, it also
-has the disadvantageby ignoring data, the program does not give you a particularly good summary of 
+(Note that although the  approach has advantages of allowing one to remove or add atoms or ions from a model easily, it requires
+one to be careful when doing this.  The 
+program does not give you a good summary of 
 what data has been omitted.  If concerned about this one should use the advanced 
 command::
 
  @Diag.write\_atomicdata(yes,no)
 
-which prints out an ascii version of the input data that was used.
+which prints out an ascii version of the input data that was used.)
 
 More information on the various types of input data can be found below:
 

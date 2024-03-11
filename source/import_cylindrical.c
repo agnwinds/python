@@ -298,8 +298,8 @@ import_cylindrical_setup_boundaries (int ndom)
     }
   }
 
-  zdom[ndom].wind_rhomin_at_disk = zdom[ndom].rho_min = rho_min;
-  zdom[ndom].wind_rhomax_at_disk = zdom[ndom].rho_max = rho_max;
+  zdom[ndom].wind_rhomin_at_disk = rho_min;
+  zdom[ndom].wind_rhomax_at_disk = rho_max;
   zdom[ndom].zmax = zmax;
   zdom[ndom].zmin = zmin;
 
@@ -316,10 +316,10 @@ import_cylindrical_setup_boundaries (int ndom)
   zdom[ndom].windplane[0].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
   zdom[ndom].windplane[0].lmn[2] = 1;
 
-  zdom[ndom].windplane[1].x[0] = zdom[ndom].windplane[0].x[1] = 0;
+  zdom[ndom].windplane[1].x[0] = zdom[ndom].windplane[1].x[1] = 0;
   zdom[ndom].windplane[1].x[2] = zdom[ndom].zmax;
 
-  zdom[ndom].windplane[1].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
+  zdom[ndom].windplane[1].lmn[0] = zdom[ndom].windplane[1].lmn[1] = 0;
   zdom[ndom].windplane[1].lmn[2] = 1;
 
   return 0;

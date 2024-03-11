@@ -581,7 +581,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (nmax == nmin)
   {
     Error ("cdf_gen_from_array - modified nmax=nmin followin interpolation at ends\n");
-    Exit (1);
+//XXX    Exit (1);
   }
 
 
@@ -639,15 +639,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   {
     Error ("cdf_gen_from_array: error %d on cdf_check - check CDF_err.diag\n", echeck);
     cdf_to_file (cdf, "CDF_err.diag");  //output the CDF to a file
-    Exit (1);
+//XXX    Exit (1);
   }
-//  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
 
   if (nmax == nmin)
   {
-//OLD    cdf_inputs_to_file (x, y, n_xy, xmin, xmax, "diag_cdf_inputs.txt");
     cdf_to_file (cdf, "cdf_gen_from_array with only two elements");
-//OL    Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
 //OLD    Exit (1);
   }
 

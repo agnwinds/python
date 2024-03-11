@@ -14,6 +14,9 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+
+#include <gsl/gsl_errno.h>
+
 #include "atomic.h"
 #include "python.h"
 #include "models.h"
@@ -68,25 +71,26 @@ main (argc, argv)
   WindPtr w;
 
   double freqmin, freqmax;
-  unsigned int n;
+  int n;
   char values[LINELENGTH], answer[LINELENGTH];
   int get_models ();            // Note: Needed because get_models cannot be included in templates.h
   int dummy_spectype;
-
-  FILE *fopen ();
-
   int opar_stat, restart_stat;
   double time_max;
   double lstar;
 
-/* Initicialize MPI */
+/* Initialize MPI */
 
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
 
-
 #ifdef MPI_ON
-  MPI_Init (&argc, &argv);
+  int mpi_err = MPI_Init (&argc, &argv);
+  if (mpi_err != EXIT_SUCCESS)
+  {
+    Error ("Failed to initialise MPI\n");
+    Exit (mpi_err);
+  }
   MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size (MPI_COMM_WORLD, &np_mpi);
 #else
@@ -94,12 +98,23 @@ main (argc, argv)
   np_mpi = 1;
 #endif
 
+#ifdef CUDA_ON
+  int cuda_err = cusolver_create ();
+  if (cuda_err != EXIT_SUCCESS)
+  {
+    Error ("Failed to initialise CUDA/cuSolver\n");
+    Exit (cuda_err);
+  }
+#endif
+
+  /* Turn off gsl error handling so that the code does not abort on error */
+  gsl_set_error_handler_off ();
+
   np_mpi_global = np_mpi;       // Global variable which holds the number of MPI processes
   rank_global = my_rank;        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
 
-/* This completes the intialization of mpi */
-
+/* This completes the initialisation of mpi */
 
   opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file,
                                    the assumption is that we are reading from the command line */
@@ -134,7 +149,7 @@ main (argc, argv)
 
   init_log_and_windsave (restart_stat);
 
-  Log_parallel ("Thread %d starting.\n", my_rank);
+  Log ("Thread %d starting.\n", my_rank);
 
   /* Start logging of errors and comments */
 
@@ -148,7 +163,7 @@ main (argc, argv)
     Log ("!!Git: This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
 
   Log ("!!Python is running with %d processors\n", np_mpi_global);
-  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
+  Log ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
@@ -158,7 +173,7 @@ main (argc, argv)
 
 /* Allocate the domain structure */
 
-  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MAX_DOM);
 
   /* BEGIN GATHERING INPUT DATA */
 
@@ -231,7 +246,7 @@ main (argc, argv)
          model,(presumably because that run produced a wind close to the one we are looking for,
          but we are going to change some parameters that do not affect the wind geometry,
          We will write use new filenames for the results, so all of the previous work is still saved,
-         Note that wind_read also reads the atomic data file that was used to create the previous run of the data. 
+         Note that wind_read also reads the atomic data file that was used to create the previous run of the data.
        */
 
       strcpy (files.old_windsave, "earlier.run");
@@ -302,18 +317,29 @@ main (argc, argv)
         geo.ndomain = 1;
         rdint ("Wind.number_of_components", &geo.ndomain);
 
+        if (geo.ndomain > MAX_DOM)
+        {
+          Error ("Maximum number of wind components allowed is %d\n", MAX_DOM);
+          Exit (EXIT_FAILURE);
+        }
 
         for (n = 0; n < geo.ndomain; n++)
         {
-
           get_domain_params (n);
-
         }
       }
 
     }
   }
 
+  /* zdom only temporarily needs to be MAX_DOM. Now that we know the number of domains, we'll reallocate
+   * the domain to make it smaller */
+  zdom = realloc (zdom, sizeof (domain_dummy) * geo.ndomain);
+  if (zdom == NULL)
+  {
+    Error ("python: unable to re-allocate space for domain structure from %d domains to %d domains\n", MAX_DOM, geo.ndomain);
+    Exit (EXIT_FAILURE);
+  }
 
 /* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,
    because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in
@@ -321,12 +347,8 @@ main (argc, argv)
    the flow of reading in data.
  */
 
-  /* All operating modes */
   rdpar_comment ("Parameters associated with photon number, cycles,ionization and radiative transfer options");
-
   init_photons ();
-
-
   init_ionization ();
 
   /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where
@@ -335,6 +357,13 @@ main (argc, argv)
 
   if (geo.run_type == RUN_TYPE_NEW)
   {
+
+    /* Getting the atomic data has been moved here as when it was deeply nested in init_ionization, it made it very
+     * difficult to write unit tests or other tests. The key issue is that init_ionization is initialising too
+     * much all at once, which makes it very difficult to initialise or modify specific things for testing or debug
+     * purposes */
+    rdstr ("Atomic_data", geo.atomic_filename);
+    setup_atomic_data (geo.atomic_filename);
 
     /* Describe the wind, by calling get_wind_params one or more times
        and then gets params by calling e.g. get_sv_wind_params() */
@@ -432,7 +461,7 @@ main (argc, argv)
     if (geo.disk_radiation)
     {
       geo.disk_spectype = geo.disk_ion_spectype;
-      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono)", &geo.disk_spectype);
+      get_spectype (geo.disk_radiation, "Disk.rad_type_in_final_spectrum(bb,models,uniform,mono,mod_bb)", &geo.disk_spectype);
     }
 
     if (geo.bl_radiation)
@@ -599,10 +628,10 @@ main (argc, argv)
 
 
 /* The next section sets up two represenations of the disk structure
- * 
+ *
  * disk_init is called primarily to get
  * a defined set of annular rings which are kept throughout the
- * ionization calculation.  
+ * ionization calculation.
  * disk_init calculates the flux from the disk in the energy range set by
  * freqmin and freqmax, and uses is this to identify the position of the
  * rings in the disk, so that each ring contributes the same amount to
@@ -619,6 +648,20 @@ main (argc, argv)
   qdisk_init (geo.disk_rad_min, geo.disk_rad_max, geo.mstar, geo.disk_mdot);
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
+
+  /* allow the user to quit after the wind has been defined */
+  if (modes.quit_after_wind_defined)
+  {
+    wind_save (files.windsave);
+    Log ("This was was run with the ---grid-only flag set, so quitting now wind has been defined.\n");
+    error_summary ("wind definition only (--grid-only).");
+#ifdef MPI_ON
+    MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Finalize ();
+#endif
+    return EXIT_SUCCESS;
+  }
+
 
   /* Allow for the possibility of running a special diagnostic mode in
      a stand alone routine xtest. This will happen with the command line
@@ -688,9 +731,50 @@ main (argc, argv)
 
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
 
-  // optical_depth_diagnostics (w);
-
   make_spectra (restart_stat);
+
+
+/* Finally done */
+
+#ifdef MPI_ON
+  char dummy[LINELENGTH];
+  sprintf (dummy, "End of program, Thread %d only", rank_global);       // added so we make clear these are just errors for thread ngit status
+  error_summary (dummy);        // Summarize the errors that were recorded by the program
+  Log ("Run py_error.py for full error report.\n");
+  MPI_Finalize ();
+#else
+  error_summary ("End of program");     // Summarize the errors that were recorded by the program
+#endif
+
+#ifdef CUDA_ON
+  cusolver_destroy ();
+#endif
+
+  xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
+  Log ("\nBrief Run Summary\nAt program completion, the elapsed TIME was %f\n", timer ());
+  Log ("There were %d of %d ionization cycles and %d of %d spectral cycles run\n", geo.wcycle, geo.wcycles, geo.pcycle, geo.pcycles);
+  if (geo.rt_mode == RT_MODE_MACRO)
+  {
+    if (nlevels_macro == 0)
+    {
+      Log ("THIS WAS A MACROATOM CALCULATION WITH NO MACROLEVELS. (Use for diagnostics only)\n");
+    }
+    else
+    {
+      Log ("This was a macro-atom calculation\n");
+    }
+  }
+  else
+  {
+    Log ("This was a simple atom calculation\n");
+  }
+
+  Log ("Convergence statistics for the wind after the ionization calculation:\n");
+  check_convergence ();
+  Log ("Information about luminosities and apparent fluxes due to various portions of the system:\n");
+  phot_status ();
+
+  clean_on_exit ();
 
   return (0);
 }

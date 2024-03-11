@@ -71,10 +71,10 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
   double logdr, logrmin, logrmax, logr;
   double f, ltot;
   double q1;
-  int nrings, i;
+  int nrings;
   int spectype;
   double emit;
-  double factor;
+  double factor, fcol;
 
 
 
@@ -159,10 +159,14 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
     {
       emit = emittance_continuum (spectype, freqmin, freqmax, t, log_g);
     }
+    else if (spectype == SPECTYPE_BB_FCOL)
+    {
+      fcol = disk_colour_correction(t);
+      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow(fcol, 4.0);
+    }
     else
     {
       emit = emittance_bb (freqmin, freqmax, t);
-
     }
     (*ftot) += emit * (2. * r + dr) * dr * factor;
   }
@@ -192,7 +196,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
   nrings = 1;
   f = 0;
 
-  i = 0;
   for (logr = logrmin; logr < logrmax; logr += logdr)
   {
     r = exp (logr);
@@ -215,13 +218,18 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
     {
       emit = emittance_continuum (spectype, freqmin, freqmax, t, log_g);
     }
+    else if (spectype == SPECTYPE_BB_FCOL)
+    {
+      fcol = disk_colour_correction(t);
+      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow(fcol, 4.0);
+    }
     else
     {
       emit = emittance_bb (freqmin, freqmax, t);
     }
 
     f += q1 * emit * (2. * r + dr) * dr * factor;
-    i++;
+
     /*
      * EPSILON to assure that roundoffs don't affect result of if
      * statement

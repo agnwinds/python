@@ -921,7 +921,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
 
   /* Write the rest of the header for the spectrum file */
 
-  fprintf (fptr, "# \nFreq.        Lambda    ");
+  fprintf (fptr, "# \nFreq.             Lambda    ");
 
   for (n = nspecmin; n <= nspecmax; n++)
   {
@@ -944,7 +944,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
     for (i = 1; i < nwave - 1; i++)
     {
       freq = freqmin + i * dfreq;
-      fprintf (fptr, "%-8e %9.3f ", freq, VLIGHT * 1e8 / freq);
+      fprintf (fptr, "%-8e %10.5e ", freq, VLIGHT * 1e8 / freq);
       for (n = nspecmin; n <= nspecmax; n++)
       {
         x = xxspec[n].f[i] * xxspec[n].renorm;
@@ -981,7 +981,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
     {
       freq = pow (10., (lfreqmin + i * ldfreq));
       dfreq = freq - freq1;
-      fprintf (fptr, "%-8e %.3f ", freq, VLIGHT * 1e8 / freq);
+      fprintf (fptr, "%-8e %-8.4g ", freq, VLIGHT * 1e8 / freq);
       for (n = nspecmin; n <= nspecmax; n++)
       {
         x = xxspec[n].lf[i] * xxspec[n].renorm;

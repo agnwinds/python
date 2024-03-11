@@ -394,7 +394,7 @@ rdpar_init ()
   if ((rdout_ptr = fopen ("tmp.rdpar", "w")) == NULL)
   {
     printf ("Error: rdpar_init: Problem opening tmp.rdpar\n");
-    exit (0);
+    exit (1);
   }
   rdpar_stat = 1;
   strcpy (current_filename, "tmp.rdpar.out");
@@ -489,7 +489,7 @@ string_process_from_command_line (question, dummy)
   if (fgets (tdummy, LINELEN, stdin) == NULL)
   {
     printf ("Exiting since rdpar got EOF in interactive mode\n");
-    exit (0);
+    exit (1);
   }
   else if (tdummy[0] == '\n')
   {                             //Use the current value
@@ -1155,7 +1155,7 @@ string2int (word, string_choices, string_values, string_answer)
      char *string_answer;
 {
   int i;
-  int nchoices, ncommas, vcommas;
+  int nchoices;
   char xs[MAX_CHOICES][LINELEN];
   int xv[MAX_CHOICES];
   char choices[LINELEN];
@@ -1191,25 +1191,21 @@ string2int (word, string_choices, string_values, string_answer)
   }
 
 
-  ncommas = 0;
   for (i = 0; i < strlen (string_choices); i++)
   {
     if (choices[i] == ',')
     {
       choices[i] = ' ';
-      ncommas++;
     }
   }
 
 
 
-  vcommas = 0;
   for (i = 0; i < strlen (string_values); i++)
   {
     if (values[i] == ',')
     {
       values[i] = ' ';
-      vcommas++;
     }
   }
 
@@ -1230,7 +1226,7 @@ string2int (word, string_choices, string_values, string_answer)
     if (xv[i] == -9998 || xv[i] == -9999)
     {
       Error ("string2int: Internal programming error: value for rdchoice is an error retrun value\n");
-      exit (0);
+      exit (1);
     }
   }
 
@@ -1447,7 +1443,6 @@ get_root (root, total)
     position = pf - total;
     strncpy (root, total, position);
     root[position] = '\0';
-    printf ("xxx %s\n", root);
     return (0);
   }
 

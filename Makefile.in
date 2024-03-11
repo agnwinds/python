@@ -1,48 +1,75 @@
 #
-# This is the makefile for the python related programs
+# This is the Makefile for the python related programs
 #
 # Make sure you have defined $PYTHON as this directory first
-# then type
-#   ./configure
+# then type:
+#
+#   ./configure [--with-cuda]
 # 	make install
 #
-# if this fails, consult https://github.com/agnwinds/python/wiki/Installing-Python
+# If this fails, consult https://github.com/agnwinds/python/wiki/Installing-Python
 # for manual install.
 
 CMAKE = mpicc
-GSL = $(PYTHON)/software/gsl-2.6
-LIBS = True
+GSL_LOCATION = $(PYTHON)/software/gsl-2.6
+CUNIT_LOCATION = $(PYTHON)/software/cunit-3.2.7
+INSTALL_LIBS = True
 
-MAKE_SOURCE = cd $(PYTHON)/source; make CC=$(CMAKE) INDENT=no python; make CC=$(CMAKE) INDENT=no py_wind; make CC=$(CMAKE) INDENT=no windsave2table
+ifeq (True, $(INSTALL_LIBS))
+	# GNU Science library -- math routines
+	MOVE_GSL = \
+		mkdir $(PYTHON)/include/gsl; \
+		mv $(GSL_LOCATION)/include/gsl/* $(PYTHON)/include/gsl; \
+		mv $(GSL_LOCATION)/lib/lib* $(PYTHON)/lib;
+	INSTALL_GSL = \
+		cd $(GSL_LOCATION); \
+		./configure --disable-shared --prefix=$(GSL_LOCATION) cc=gcc CPP=cpp; \
+		make -i; \
+		make check 2>&1; \
+		make -i install; \
+		make clean; \
+		$(MOVE_GSL)
+	INSTALL_GSL_NO_CHECK = \
+		cd $(GSL_LOCATION); \
+		./configure --disable-shared --prefix=$(GSL_LOCATION) cc=gcc CPP=cpp; \
+		make -i; \
+		make -i install; \
+		make clean; \
+		$(MOVE_GSL)
 
+	# CUnit -- unit test framework: built using CMake, so only build if installed
+	ifneq ($(shell which cmake), )
+		INSTALL_CUNIT = \
+			mkdir -p $(PYTHON)/include/CUnit; \
+			cd $(CUNIT_LOCATION); \
+			mkdir -p build; \
+			cd build; \
+			cmake ..; \
+			cmake --build .; \
+			mv CUnit/libcunit.a $(PYTHON)/lib; \
+			cp ../CUnit/CUnit/*.h $(PYTHON)/include/CUnit/; \
+			cd ..; \
+			rm -rf build;
 
-
-ifeq (True, $(LIBS))
-	INSTALL_GSL = cd $(GSL); ./configure --disable-shared --prefix=$(GSL) CC=gcc CCP=ccp; make -i; make check 2>&1; make -i install; make clean;
-	INSTALL_GSL_NOCHECK = cd $(GSL); ./configure --disable-shared --prefix=$(GSL) CC=gcc CCP=ccp; make -i; make -i install; make clean;
-	MOVE_GSL = mkdir $(PYTHON)/include/gsl/; mv $(GSL)/include/gsl/* $(PYTHON)/include/gsl; mv $(GSL)/lib/lib* $(PYTHON)/lib/;
+		MAKE_CHECK = \
+			cd $(PYTHON)/source; \
+			make check CC=$(CMAKE)
+	else
+		INSTALL_CUNIT = echo 'Unable to install CUnit as CMake (https://cmake.org) is not installed'
+		MAKE_CHECK =
+	endif
 else
-	INSTALL_GSL =
-	MOVE_GSL =
+	INSTALL_GSL = echo 'Not installing GSL due to INSTALL_LIBS != True'
+	INSTALL_GSL_NO_CHECK = echo 'Not installing GSL due to INSTALL_LIBS != True'
+	INSTALL_CUNIT = echo 'Not installing CUnit due to INSTALL_LIBS != True'
+	MAKE_CHECK =
 endif
 
-# install for travis
-gh_workflow_install:
-	@echo 'Installing Python. the radiative transfer code'
-	@echo 'Installing in directory '$(PYTHON)
+MAKE_PYTHON = \
+	cd $(PYTHON)/source; \
+	make CC=$(CMAKE) INDENT=no all \
 
-	# Then make GSL library
-	@echo 'Installing GSL library...'
-	$(INSTALL_GSL_NOCHECK)
-	$(MOVE_GSL)
-
-
-	#finally, make the latest release
-	@echo 'Making source code...'
-	$(MAKE_SOURCE)
-	@echo 'all done'
-
-
+# Compile and install the libraries and Python
 install:
 	@echo 'Installing Python. the radiative transfer code'
 	@echo 'Installing in directory '$(PYTHON)
@@ -50,26 +77,66 @@ install:
 	# Then make GSL library
 	@echo 'Installing GSL library...'
 	$(INSTALL_GSL)
-	$(MOVE_GSL)
 
+	# Now make the unit test framework
+	@echo 'Installing CUnit library...'
+	$(INSTALL_CUNIT)
+
+	# Finally, make the latest release
+	@echo 'Making source code...'
+	$(MAKE_PYTHON)
+	@echo 'all done'
+
+# Install Python for travis -- as above, minus post-installation checks for GSL
+gh_workflow_install:
+	@echo 'Installing Python. the radiative transfer code'
+	@echo 'Installing in directory '$(PYTHON)
+
+	# Then make GSL library
+	@echo 'Installing GSL library...'
+	$(INSTALL_GSL_NO_CHECK)
+
+	# Then make CUnit Library
+	@echo 'Installing CUnit library...'
+	$(INSTALL_CUNIT)
 
 	#finally, make the latest release
 	@echo 'Making source code...'
-	$(MAKE_SOURCE)
+	$(MAKE_PYTHON)
 	@echo 'all done'
 
+# Runs Python's unit tests
+check:
+	cd $(PYTHON)/source; make check
+
+# Runs through the install for GSL and post-installation checks
+gsl:
+	@echo 'Installing the GNU Science Library'
+	$(INSTALL_GSL)
+
+# Runs through the install for CUnit
+cunit:
+	@echo 'Installing CUnit unit test framework'
+	$(INSTALL_CUNIT)
+
+# Run the regular clean for the libraries and Python. CUnit doesn't need this,
+# as we delete the CMake build directory after installing it
 clean:
 	rm -f *.o *~
-	cd $(GSL); make clean;
+	cd $(GSL_LOCATION); make clean;
+	rm -rf $(CUNIT_LOCATION)/build
 	cd $(PYTHON)/source/; make clean
 
-# runs a more rigorous clean in gsl
+# Runs a more rigorous clean for the libraries and Python. CUnit doesn't need
+# this, as we delete the CMake build directory after installing it
 distclean:
 	rm -f *.o *~
-	cd $(GSL); make distclean
+	cd $(GSL_LOCATION); make distclean
+	rm -rf $(CUNIT_LOCATION)/build
 	cd $(PYTHON)/source/; make clean
 
-# actually removes the compiled libraries
+# Remove just the libraries
 rm_lib:
-	rm -rf $(PYTHON)/include/gsl/
+	rm -rf $(PYTHON)/include/gsl
+	rm -rf $(PYTHON)/include/CUnit
 	rm -f $(PYTHON)/lib/lib*

@@ -433,7 +433,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     }
     else if (spectype == SPECTYPE_MONO)
     {
-      p[i].w = 1.;
+      p[i].w = 1. / geo.pcycles;
       p[i].freq = geo.mono_freq;
     }
     else

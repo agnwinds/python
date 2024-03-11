@@ -253,6 +253,12 @@ parse_command_line (argc, argv)
         j = i;
       }
 
+      else if (strcmp (argv[i], "--grid-only") == 0)
+      {
+        modes.quit_after_wind_defined = 1;
+        j = i;
+      }
+
       else if (strcmp (argv[i], "--version") == 0)
       {
         /* give information about the pyhon version, such as commit hash */
@@ -362,6 +368,7 @@ and the switches have the following meanings \n\
                         the amount printed; smaller numbers decrease it.   \n\
  --dry-run              Create a new .pf file and stop \n\
  -i                     Same as --dry-run \n\
+ --grid-only            Define the wind grid and save to wind_save file, then stop \n\
  --version              Print out python version, commit hash and if there were files with uncommitted \n\
                         changes and stop \n\
  --rseed                Set the random number seed to be time-based, rather than fixed. \n\

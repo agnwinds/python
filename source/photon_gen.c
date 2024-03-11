@@ -405,9 +405,9 @@ iwind = -1 	Don't generate any wind photons at all
       geo.lum_wind = wind_luminosity (0.0, VERY_BIG, MODE_CMF_TIME);
     }
 
-    xxxpdfwind = 1;             // Turn on the portion of the line luminosity routine which creates pdfs
+//    xxxpdfwind = 1;             // Turn on the portion of the line luminosity routine which creates pdfs
     geo.f_wind = wind_luminosity (f1, f2, MODE_OBSERVER_FRAME_TIME);
-    xxxpdfwind = 0;             // Turn off the portion of the line luminosity routine which creates pdfs
+//    xxxpdfwind = 0;             // Turn off the portion of the line luminosity routine which creates pdfs
 
   }
 
@@ -934,7 +934,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     }
     else if (spectype == SPECTYPE_MONO)
     {
-      p[i].w = 1;
+      p[i].w = 1. / geo.pcycles;
       p[i].freq = geo.mono_freq;
     }
 

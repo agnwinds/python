@@ -68,8 +68,9 @@ atomicdata2file ()
   for (n = 0; n < nions; n++)
   {
     fprintf (fptr,
-             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  phot_info %3d\n",
-             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].phot_info);
+             "Ion %3d z %3d istate %3d firstlevel %5d nlevels %3d potential %8.3g  macro_info %2d phot_info %3d ntop %2d \n",
+             n, ion[n].z, ion[n].istate, ion[n].firstlevel, ion[n].nlevels, ion[n].ip / EV2ERGS, ion[n].macro_info,
+             ion[n].phot_info, ion[n].ntop);
   }
 
   /* Write the excitation level data */
@@ -107,6 +108,29 @@ atomicdata2file ()
     fprintf (fptr, "Ground %3d %3d %6.3f %6.3f\n", ground_frac[n].z, ground_frac[n].istate, ground_frac[n].frac[0],
              ground_frac[n].frac[19]);
   }
+
+  /* Finally write out the actual photionization data */
+
+
+  /* Write the photoionization data  */
+
+  fprintf (fptr, "# Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
+  {
+    fprintf (fptr, "Photx n %5d z %2d istate %3d sigma %8.2e freq[0] %8.2e nlev %5d uplev %2d macro %2d  %2d %2d use %2d\n",
+             n, phot_top[n].z, phot_top[n].istate, phot_top[n].x[0], phot_top[n].freq[0],
+             phot_top[n].nlev, phot_top[n].uplev, phot_top[n].macro_info, phot_top[n].down_index, phot_top[n].up_index, phot_top[n].use);
+
+    int nn;
+    for (nn = 0; nn < phot_top[n].np; nn++)
+    {
+      fprintf (fptr, "Photz %4d %10.6e %10.6e %10.6f %10.6f\n", nn, phot_top[n].freq[nn], phot_top[n].x[nn], phot_top[n].log_freq[nn],
+               phot_top[n].log_x[nn]);
+    }
+
+
+  }
+
 
   fclose (fptr);
 
@@ -519,7 +543,7 @@ double q21_a, q21_t_old;
 
 /**********************************************************/
 /**
- * @brief      Calculates the collisional de-excitation coefficient q21
+ * @brief      Calculates the collisional de-excitation coefficient q21 
  *
  * @param [in] struct lines *  line_ptr   A single line
  * @param [in] double  t   The temperature at which to calculate the coefficient
@@ -530,8 +554,18 @@ double q21_a, q21_t_old;
  * approximation if we do not.
  *
  * ### Notes ###
- * The relevant paper to consult here is 
+ * The relevant papers to consult here are 
  * [Van Regemorter 1962 (ApJ 136 906)](https://ui.adsabs.harvard.edu/abs/1962ApJ...136..906V/abstract). 
+ * or
+ * 
+ * [Storey & Sochi 2015, MNRAS, 449, 2974](https://ui.adsabs.harvard.edu/abs/2015MNRAS.449.2974S/abstract)
+ * 
+ * This is what is implemented
+ *
+ * Q_{ji} = \frac{2\sqrt\pi c \alpha a_o^2}{g_j} \sqrt{\frac{R}{k T}} \Upsilon 
+ * = \frac{8.629\times 10^{-6} \Upsilon}{g_j \sqrt T} \Upsilon
+ * 
+ * 
  * We use an effective gaunt factor to calculate collision strengths.  
  * 
 ************************************************************/
@@ -587,7 +621,7 @@ q21 (line_ptr, t)
 
 /**********************************************************/
 /**
- * @brief      Calculate the collisional excitation coefficient for a line
+ * @brief      Calculate the collisional excitation coefficient from a lower to upper level
  *
  * @param [in] struct lines *  line_ptr   The line of interest
  * @param [in] double  t   The temperature of interest
@@ -595,6 +629,13 @@ q21 (line_ptr, t)
  *
  * @details
  * The routine calls q21 and uses detailed balance to derive q12
+ *
+ * This is what is implemented:
+ *
+ * Q_{ij} = \frac{2\sqrt\pi c \alpha a_o^2}{g_i} \sqrt{\frac{R}{k T}} \Upsilon_s = \frac{8.629\times 10^{-6} \Upsilon_s}{g_i \sqrt T}
+ *
+ * See 
+ * [Storey & Sochi 2015, MNRAS, 449, 2974](https://ui.adsabs.harvard.edu/abs/2015MNRAS.449.2974S/abstract)
  *
  * ### Notes ###
  *
@@ -672,7 +713,7 @@ a21 (line_ptr)
  *
  * ### Notes ###
  * It uses data extracted from Chianti stored in coll_stren.
- * The paper to consult is Burgess and Tully A&A 254,436 (1992).
+ * The paper to consult is [Burgess and Tully A&A 254,436 (1992)](https://ui.adsabs.harvard.edu/abs/1992A%26A...254..436B/abstract).
  * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
  * divided by Plancks constant times the frequency of the line under analysis.
  *
@@ -702,7 +743,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
 
@@ -732,7 +773,7 @@ upsilon (n_coll, u0)
   }
   else
   {
-    Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
+    Error ("upsilon:  coll_stren %i has unknown type %d\n", n_coll, coll_stren[n_coll].type);
     exit (0);
   }
   return (upsilon);
@@ -779,7 +820,7 @@ upsilon (n_coll, u0)
  **********************************************************/
 
 void
-skiplines (FILE * fptr, int nskip)
+skiplines (FILE *fptr, int nskip)
 {
   int i, c;
 

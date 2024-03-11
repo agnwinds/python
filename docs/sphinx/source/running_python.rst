@@ -78,7 +78,8 @@ which may be useful in certain special cases.  These include:
   to help with solving various problems, and were regarded (by someone) as useful
   enough to maintain in the program.  The user is then queried regarding which
   of these diagnostics to enable for a specific run.  These diagnostic queries all start
-  with @ (and can co-exist in the ``.pf`` file, with normal commands.
+  with @ (and can co-exist in the ``.pf`` file, with normal commands. These options accessible
+  with this flag are described further in :ref:`Diag`.
 
 -e n
   Where ``n`` is a number, changes the number of errors of a specific type that
@@ -105,3 +106,9 @@ which may be useful in certain special cases.  These include:
 
 -no-matrix-storage 
    Do not store macro-atom transition matrices if using the macro-atom line transfer and the matrix matom_transition_mode.\n\
+
+-ignore_partial_cells
+   Ignore wind cells that are only partially filled by the wind (This is now the default) 
+
+-include_partial_cells
+ Include wind cells that are only partially filled by the wind
