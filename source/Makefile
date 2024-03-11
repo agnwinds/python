@@ -9,6 +9,13 @@
 # a different compiler other than mpicc.
 #
 
+# MATOM_VER is a temporary switch that allows one to compile the code so that it will
+# use the gsl routines wheen computing alpha_sp.  It should be invoked from the commad line, e.g
+# make MATOM_VER=2 python (or all); the Makefile should not be altered unless we change our mind
+# about the integration approach to use. The default is set to use the newer brute force technique
+
+MATOM_VER := 1
+
 #MPICC is now default compiler
 CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
@@ -17,7 +24,7 @@ FC = g77
 NVCC =
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
-EXTRA_FLAGS = -Wno-deprecated-non-prototype
+EXTRA_FLAGS = -Wno-deprecated-non-prototype -DMATOM_VER=$(MATOM_VER)
 LDFLAGS =
 
 # Use the next line if you want to change the c compiler that mpicc uses, or
@@ -140,7 +147,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 #Note that version should be a single string without spaces.
 
 
-VERSION = 87z
+VERSION = 88a
 
 
 

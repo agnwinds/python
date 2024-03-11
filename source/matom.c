@@ -608,13 +608,9 @@ alpha_sp (cont_ptr, xplasma, ichoice)
      PlasmaPtr xplasma;
      int ichoice;
 {
-  double alpha_sp_value, integrand;
+  double alpha_sp_value;
   double fthresh, flast;
-  int n, nmax;
-  double freq, dfreq;
   double temp;
-  double x;
-  double freq1, freq2;
 
   temp_choice = ichoice;
   temp = temp_ext = xplasma->t_e;       //external for use in alph_sp_integrand
@@ -627,10 +623,16 @@ alpha_sp (cont_ptr, xplasma, ichoice)
     //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
     flast = fthresh + temp * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
   }
+
+#if MATOM_VER == 1
   /* This is the line we want to replace */
   // alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
+  double freq, dfreq;
+  double freq1, freq2;
+  double x, integrand;
+  int n, nmax;
+
   alpha_sp_value = 0;
-  //nmax = cont_ptr->np - 2;      // so that there is one past this poit
 
   nmax = 10000;
   double log_fmin, dlog_freq;
@@ -668,6 +670,13 @@ alpha_sp (cont_ptr, xplasma, ichoice)
     alpha_sp_value += integrand * dfreq;
 
   }
+
+#elif MATOM_VER == 2
+  alpha_sp_value = num_int (alpha_sp_integrand, fthresh, flast, 1e-4);
+#warning "Using old gsl routine for alpha_sp"
+#else
+#error "Unsupported MATOM_VER value"
+#endif
 
 
 //  Log ("Xxxx %e  %e %d %d %d %d %e %e \n", alpha_sp_value, temp_ext, ichoice, cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev,
