@@ -142,7 +142,7 @@ int
 translate_in_space (pp)
      PhotPtr pp;
 {
-  double ds, delta, s, smax;
+  double ds, delta, s, smax,  prhosq;
   int ndom, ndom_next;
   struct photon ptest;
 
@@ -160,16 +160,23 @@ translate_in_space (pp)
     ds += DFUDGE;               //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
 
 
-
-    /* Note there is a possibility that we reach the other side 
+      /* Note there is a possibility that we reach the other side 
      * of the grid without actually encountering a
      * wind cell
      */
 
+    prhosq = (pp->x[0] * pp->x[0]) + (pp->x[1] * pp->x[1]);
+
+    if ((prhosq > (zdom[ndom].wind_rhomin_at_disk * zdom[ndom].wind_rhomin_at_disk)) &&
+        (prhosq < (zdom[ndom].wind_rhomax_at_disk * zdom[ndom].wind_rhomax_at_disk)))
+    {
+      stuff_phot (pp, &ptest);
+      ds = 0.0; 
+    }
+    
 
     if (where_in_wind (ptest.x, &ndom_next) < 0)
     {
-
       smax = ds_to_wind (&ptest, &ndom_next);   // This is the maximum distance can go in this domain
       s = 0;
       while (s < smax && where_in_wind (ptest.x, &ndom_next) < 0)
@@ -196,7 +203,6 @@ translate_in_space (pp)
   }
 
   move_phot (pp, ds + DFUDGE);
-
 
   return (pp->istat);
 }

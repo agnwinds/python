@@ -474,20 +474,23 @@ ds_to_plane (pl, p)
      struct photon *p;
 {
   double denom, diff[3], numer;
-  double dot ();
+  struct photon ptest;
 
+  stuff_phot(p, &ptest);
+  if (ptest.x[2] < 0 && ptest.lmn[2] < 0)
+  {
+    ptest.x[2] = -ptest.x[2]; /* force the photon to be in the positive x,z quadrant */
+    ptest.lmn[2] = -ptest.lmn[2]; /* force the photon to moving in the positive z direction */
+  }
 
-  if ((denom = dot (p->lmn, pl->lmn)) == 0)
+  if ((denom = dot (ptest.lmn, pl->lmn)) == 0)
     return (VERY_BIG);
 
-  vsub (pl->x, p->x, diff);
+  vsub (pl->x, ptest.x, diff);
 
   numer = dot (diff, pl->lmn);
 
   return (numer / denom);
-
-
-
 }
 
 
