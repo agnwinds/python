@@ -238,10 +238,12 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
     if os.path.isdir(pf_dir):
         pf_files=glob(pf_dir+'/*pf')
         txt_files=glob(pf_dir+'/*.txt')
+        dat_files=glob(pf_dir+'/*.dat')
         wind_save=glob(pf_dir+'/*.wind_save')
     elif os.path.isdir('%s/examples/%s' % (PYTHON,pf_dir)):
         pf_files=glob('%s/examples/%s/*pf' % (PYTHON,pf_dir))
         txt_files=glob('%s/examples/%s/*.txt' % (PYTHON,pf_dir))
+        dat_files=glob(pf_dir+'/*.dat')
         wind_save=glob(pf_dir+'/*.wind_save')
     else:
         print('Error: The pf directory %s does not appear to exist' % pf_dir)
@@ -269,7 +271,14 @@ def doit(version='py',pf_dir='',out_dir='',np=3,switches='',outputfile='Summary.
 
     for one in txt_files:
         shutil.copy(one,out_dir)
+
+    # Get any windsave files is any
     for one in wind_save:
+        shutil.copy(one,out_dir)
+
+    # get any dat files if any
+
+    for one in dat_files:
         shutil.copy(one,out_dir)
 
     # Lookd for a file with extra switches for some models
