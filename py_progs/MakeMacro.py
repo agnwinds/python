@@ -276,6 +276,38 @@ def get_levels(ion="h_1", nlevels=10):
     return xxtab
 
 
+
+MELEC=9.10956e-28
+C=2.997925e10
+ECHARGE=4.8035e-10 
+def get_f(one_line):
+    '''
+    Calculate an absorption oscillator strength
+    from an Einstein A
+    '''
+    print(one_line)
+    
+    factor=MELEC*C/(8.* np.pi*ECHARGE**2)
+    xwave=(one_line['Wave']*1e-8)**2
+    a=one_line['a']
+    f=factor*xwave*a
+    f*=one_line['gu']/one_line['gl']
+    # f=factor
+    return f
+
+def calculate_oscillator_strength(A_ij, wavelength_AA):
+    # Constants in CGS units
+    m_e = 9.109e-28  # Electron mass in grams
+    c = 2.997e10  # Speed of light in cm/s
+    h = 6.626e-27  # Planck's constant in erg s
+
+    wavelength_cm=wavelength_AA*1e8
+
+    # Calculate the absorption oscillator strength (f)
+    f = (4 * np.pi**2 * m_e * c**3 / (3 * h)) * (A_ij / wavelength_cm**2)
+    
+    return f
+
 # # Lines
 
 # The format of the lines file is a follows:
@@ -395,6 +427,8 @@ def get_lines(ion="h_4", nlevels=10):
                 % (one["ll"], one["ul"], one["Wave"])
             )
         if one["f"]<f_min:
+            fff=get_f(one)
+            print('Toast %f %g' % (one['a'],fff))
             one['f']=f_min
             print("Line with ll %d and ul %d is missing f.  Changing to %.6f so line has way out" 
                   % (one["ll"], one["ul"],one["f"]))
@@ -426,10 +460,12 @@ def get_phot(ion="c_4"):
     number of electrons that the ion of interest has, but we convert to
     astronomical notation in this routine
     """
+
+    os.makedirs('./Phot',exist_ok=True)
     x = ch.ion(ion, temperature=1e5)
     nelec = x.Z - x.Ion + 1
     fileroot = "p%02d.%02d" % (x.Z, nelec)
-    outroot = "p%02d.%02d" % (x.Z, x.Ion)
+    outroot = "./Phot/p%02d.%02d" % (x.Z, x.Ion)
     print("Looking for ", fileroot)
     if os.path.isfile("%s.txt" % outroot):
         print("TopBase Phot file for element %d and ion %d exists" % (x.Z, x.Ion))
@@ -497,7 +533,7 @@ def make_phot(ion="c_4",macro=True):
 
     fileroot = "p%02d.%02d" % (z, xion)
     try:
-        x = open("%s.txt" % fileroot)
+        x = open("./Phot/%s.txt" % fileroot)
         lines = x.readlines()
     except:
         print("Error: %s.txt not found  %s" % fileroot)
@@ -506,7 +542,7 @@ def make_phot(ion="c_4",macro=True):
     for line in lines:
         words = line.split()
         records.append(words)
-    f = open("%s.dat" % fileroot, "w")
+    f = open("./Phot/%s.dat" % fileroot, "w")
     # z=int(records[0][0])
     # xion=int(records[0][1])
     i = 1
@@ -667,20 +703,20 @@ def make_phot(ion="c_4",macro=True):
 # This simplfies the model that you have
 
 
-def write_phot(ion="c_4"):
+def write_phot(ion="c_4",outdir='./Adata'):
 
     x = ch.ion(ion, temperature=1e5)
     xion = x.Ion
     z = x.Z
 
-    fileroot = "p%02d.%02d" % (x.Z, x.Ion)
+    fileroot = "./Phot/p%02d.%02d" % (x.Z, x.Ion)
 
     # First strip of the headers of the phot_file
     try:
         phot = open(fileroot + ".dat")
         lines = xx = phot.readlines()
     except:
-        print("Error: Could not open %s.dat" % fileroot)
+        print("Error: write_phot: Could not open %s.dat" % fileroot)
 
     headers = []
     i = 0
@@ -705,20 +741,21 @@ def write_phot(ion="c_4"):
         dtype=["i", "i", "i", "i", "i", "f", "i"],
     )
 
-    # Write what we have so far for diagnostica prurposes. This file is not used.
-    xxhead.write("head.txt", format="ascii.fixed_width_two_line", overwrite=True)
+    # Write what we have so far for diagnostic purposes. This file is not used.
+    # xxhead.write("head.txt", format="ascii.fixed_width_two_line", overwrite=True)
 
     # Now find, if we can the parts of the photon file that match what we need
 
-    lev_file = ion + "_levels.dat"
+    # lev_file = ion + "_levels.dat"
+    lev_file = '%s/%s_levels.dat' %(outdir,ion)
     try:
         lev = ascii.read(lev_file)
     except:
-        print("Error: Could not open %s.dat" % lev_file)
+        print("Error: Could not open level file %s" % lev_file)
 
     # lev.info()
 
-    # Joine the levels to the photoionization data                                 
+    # Join the levels to the photoionization data                                 
 
     try:
         foo = join(
@@ -728,7 +765,7 @@ def write_phot(ion="c_4"):
         print("Error: join failed")
         xxhead.info()
         lev.info()
-        xxhead.write("head.txt", format="ascii.fixed_width_two_line", overwrite=True)
+        # xxhead.write("head.txt", format="ascii.fixed_width_two_line", overwrite=True)
         lev.write("levels.txt", format="ascii.fixed_width_two_line", overwrite=True)
 
 
@@ -753,7 +790,8 @@ def write_phot(ion="c_4"):
     # Now write out the PhotFile. We use the row in the original file
     # to understand which lines to write out.  
 
-    output_file = ion + "_phot.dat"
+    # output_file = ion + "_phot.dat"
+    output_file = '%s/%s_phot.dat' % (outdir,ion)
     f = open(output_file, "w")
     for one in foo:
         # print(one)
@@ -811,7 +849,7 @@ def write_phot(ion="c_4"):
 # In exploring the collisions in Chianti, I discovered that for H at least here are collisions strengths for between levels that do not have lines assoicated with them.  I am not sure why that is, but it must affect macro atoms, and it did it might be needed.  A simple join between the lines file and the collisions files reveals those that have both, but a left join easily shows you the ones that are just collision data
 
 
-def get_collisions(ion="h_1", nlev=20):
+def get_collisions(ion="h_1", nlev=20,outdir='./Adata'):
     """
     Given a set of levels, get the collision information associatred with these levels.  Note
     that as far as I can determine the scups file does not contain collisionl information 
@@ -867,8 +905,9 @@ def get_collisions(ion="h_1", nlev=20):
     )
 
     # xtab=Table([lower,upper,gf,ntemp,btemp,bscups],names=['ll','de','ul','gf','ntemp','btemp','bscups'])
+    upsfile='%s/%s__upsilon.dat' % (outdir,ion)
     # xxtab.info()
-    xout = open(ion + "_upsilon.dat", "w")
+    xout = open(upsfile, "w")
     for one in xxtab:
         # print(one)
         xstring = "CSTREN Line %3d %3d %10.6f %9.6f %2d %2d  %10.6f %10.6f " % (
@@ -946,7 +985,7 @@ def print_elvlc(ion="c_4"):
         i += 1
 
 
-def doit(atom="h_1", nlev=10, next_ion = False): 
+def doit(atom="h_1", nlev=10, next_ion = False,outdir='./Adata'): 
     """
     Create all of the necessary files for 
     a given atom
@@ -961,6 +1000,10 @@ def doit(atom="h_1", nlev=10, next_ion = False):
 
 
     """
+
+
+    os.makedirs(outdir,exist_ok=True)
+
     nlev = int(nlev)
 
     xion = ch.ion(atom, temperature=1e5)
@@ -1000,17 +1043,15 @@ def doit(atom="h_1", nlev=10, next_ion = False):
                 0,
             ]
         )
-    xlevels.write(
-        atom + "_levels.dat", format="ascii.fixed_width_two_line", overwrite=True
+    xlevels.write('%s/%s_levels.dat' % (outdir,atom), format="ascii.fixed_width_two_line", overwrite=True
     )
     xlines = get_lines(atom, nlev)
-    xlines.write(
-        atom + "_lines.dat", format="ascii.fixed_width_two_line", overwrite=True
+    xlines.write('%s/%s_lines.dat' % (outdir,atom) , format="ascii.fixed_width_two_line", overwrite=True
     )
 
     get_phot(atom)
     make_phot(atom)
-    write_phot(atom)
+    write_phot(atom,outdir)
     RedoPhot.redo_one('%s_phot.dat' % atom, atom)
 
     xcol = get_collisions(atom, nlev)
