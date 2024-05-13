@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: <utf-8> -*-
 """
 This script goes through the (non-blacklisted) input .c files, and identifies
 the input variables, their types and any notes (e.g. units, choices).
@@ -22,9 +24,12 @@ Arguments:
 
     -h / --help
         Prints this documentation.
+
+After the program has been run $PYTHON/parameters should contain a yaml file
+for every possible input, and any input that has changed significantly should
+be in $PYHON/parameters.old  One should normally be sure to add the new yaml
+files to the repository.
 """
-#!/usr/bin/env python
-# -*- coding: <utf-8> -*-
 import os
 import sys
 from typing import List, Union
