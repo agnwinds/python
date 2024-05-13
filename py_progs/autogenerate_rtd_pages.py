@@ -22,39 +22,8 @@ Notes:
 from typing import TextIO
 import os
 import sys
-import webbrowser
 from subprocess import call
 import yaml
-
-
-def image_from_latex(equation: str) -> str:
-    """
-    Converts a LaTeX equation into an image
-
-    Arguments:
-        equation: The string to convert into an image link
-
-    Returns:
-        A markdown image link to codecogs
-    """
-    return '![{}](https://latex.codecogs.com/gif.latex?{})'.format(equation, equation)
-
-
-def link_from_name(name: str) -> str:
-    """
-    Converts a name into a mediawiki link
-
-    Arguments:
-        name: The name to link to
-
-    Returns:
-        A mediawiki format link [[display name|link path]]
-    """
-    return '[[{}|{}#{}]]'.format(
-        name,
-        name.split('.')[0]+' Parameters',
-        name.lower().replace('.', '')
-    )
 
 
 def write_header_by_level(output_file: TextIO, string: str, level: int = 0):
