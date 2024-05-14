@@ -31,7 +31,7 @@ extern int nlevels;                    /**< These are the actual number of level
 extern int nlte_levels;                /**<  Actual number of levels to treat explicityly */
 
 /* AUGER NOTE: recommended to increase NLEVELS_MACRO to at least 500 for Auger macro-atoms */
-#define NLEVELS_MACRO   300     /**<  Maximum number of macro atom levels. (SS, June 04) */
+#define NLEVELS_MACRO   600     /**<  Maximum number of macro atom levels. (SS, June 04) */
 extern int nlevels_macro;              /**<  Actual number of macro atom levels. (SS, June 04) */
 #define NLINES 		200000  /**<  Maximum number of lines to be read */
 extern int nlines;                     /**<  Actual number of lines that were read in */
@@ -314,7 +314,7 @@ extern double phot_freq_min;           /**< The lowest frequency for which photo
 extern double inner_freq_min;          /**< The lowest frequency for which inner shell ionization can take place */
 
 #define NCROSS 3000            /**<  Maximum number of x-sections for a single photionization process */
-#define NTOP_PHOT 400           /**<  Maximum number of photoionisation processes.  */
+#define NTOP_PHOT 600           /**<  Maximum number of photoionisation processes.  */
 /* AUGER NOTE: recommended to increase NTOP_PHOT to 1000 for Auger macro-atoms */
 extern int ntop_phot;                  /**<  The actual number of TopBase photoionzation x-sections */
 extern int nphot_total;                /**<  total number of photoionzation x-sections = nxphot + ntop_phot */
