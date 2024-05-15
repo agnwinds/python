@@ -285,7 +285,7 @@ def get_f(one_line):
     Calculate an absorption oscillator strength
     from an Einstein A
     '''
-    print(one_line)
+    # print(one_line)
     
     factor=MELEC*C/(8.* np.pi*ECHARGE**2)
     xwave=(one_line['Wave']*1e-8)**2
@@ -418,22 +418,38 @@ def get_lines(ion="h_4", nlevels=10):
     # f value is compared to the value for collisions.
 
     f_min=0.000001
+    n_fmissing=0
 
     for one in xxtab:
         if one["Wave"] == 0:
             one["Wave"] = 12396.1914 / (one["eu"] - one["el"])
-            print(
-                "Line with ll %d and ul %d is missing wavelength.  Correcting to %.3f using el and eu"
-                % (one["ll"], one["ul"], one["Wave"])
-            )
+            # print(
+            #     "Line with ll %d and ul %d is missing wavelength.  Correcting to %.3f using el and eu"
+            #     % (one["ll"], one["ul"], one["Wave"])
+            # )
         if one["f"]<f_min:
             fff=get_f(one)
-            print('Toast %f %g' % (one['a'],fff))
+            # print('Toast %f %g' % (one['a'],fff))
             one['f']=f_min
-            print("Line with ll %d and ul %d is missing f.  Changing to %.6f so line has way out" 
-                  % (one["ll"], one["ul"],one["f"]))
+            n_fmissing+=1
+            # print("Line with ll %d and ul %d is missing f.  Changing to %.6f so line has way out" 
+            #       % (one["ll"], one["ul"],one["f"]))
 
-    xxtab["Wave"].format = "10.6f"
+    print('There were %d lies with missing f' % n_fmissing)
+
+
+    # Convert theoretical wavelengths (which are negative) to positive values
+    i=0
+    nnn=0
+    while i<len(xxtab):
+        if xxtab['Wave'][i]<0:
+            xxtab['Wave'][i]=-xxtab['Wave'][i]
+            nnn+=1
+        i+=1
+
+    print('There were %d theoretical wavelengths, converted to positive values' % nnn)
+    xxtab.write('xline.txt',format='ascii.fixed_width_two_line',overwrite=True)
+
     xxxtab = xxtab["Dtype", "z", "ion", "Wave", "f", "gl", "gu", "el", "eu", "ll", "ul"]
     return xxxtab
 
@@ -536,7 +552,7 @@ def make_phot(ion="c_4",macro=True):
         x = open("./Phot/%s.txt" % fileroot)
         lines = x.readlines()
     except:
-        print("Error: %s.txt not found  %s" % fileroot)
+        print("Error: make_phot %s.txt not found  %s" % fileroot)
         return
     records = []
     for line in lines:
@@ -1052,7 +1068,7 @@ def doit(atom="h_1", nlev=10, next_ion = False,outdir='./Adata'):
     get_phot(atom)
     make_phot(atom)
     write_phot(atom,outdir)
-    RedoPhot.redo_one('%s_phot.dat' % atom, atom)
+    RedoPhot.redo_one('Adata/%s_phot.dat' % atom, 'Adata/%s' % atom)
 
     xcol = get_collisions(atom, nlev)
     return

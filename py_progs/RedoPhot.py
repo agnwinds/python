@@ -225,16 +225,18 @@ def write_phot_tab(out_name,xsum,xcross):
             string='%s %12.4f %12.4e' % (one_x['Label'],one_x['e'],one_x['sigma'])
             # print(string)
             f.write('%s\n' % string)
-                                           
         i+=1
+
     f.close()
+    print('RedoPhot: Write extended phot file to %s' % (out_name))
+
 
 
 
 def redo_one(phot_file='o_2_phot.dat',outroot=''):
     phot_tab,xtab=extrap(phot_file,1e5)
     if len(phot_tab)==0:
-        print('Error: Exiting because of previous problems')
+        print('Error: RedoPhot - Exiting because of previous problems')
         return
 
     plot_phot(phot_sum=phot_tab,xcross=xtab)
