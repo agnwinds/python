@@ -17,7 +17,7 @@ Arguments:
 
     -w / --write
         Move any deprecated parameters to $PYTHON/parameters/old/,
-        then write any new parameters to file.
+        then write any new parameters to in $PYTHON/parameters/
 
         Note, this will not over-write any parameters that have changed types
         but not names e.g. rdflo('thing') to rdint('thing').
@@ -29,6 +29,41 @@ After the program has been run $PYTHON/parameters should contain a yaml file
 for every possible input, and any input that has changed significantly should
 be in $PYHON/parameters.old  One should normally be sure to add the new yaml
 files to the repository.
+
+Note:
+
+    This routine does not autormatial add new yaml files that have been 
+    created to the git repository, though it is possible that should 
+    be the default.
+
+    Therefore if one uses the -w option, it will create new files, 
+    and these will remaing in the local repositiory, even if one changes 
+    branches.  This can be confusing!!!
+
+    The program checks which files in the directories it writes to
+    are not committed, but it is up to the user to sort out what s/he
+    wants to do.
+
+    The command to list files in a directory that are not tracked is
+
+    git ls-files --other
+
+    if one is in the directory in question.
+
+    The command to remove files in a directory (from within that directory)
+    is:
+        git clean -f
+
+    The recommendation is to 
+
+    * to clean both $PYTHON/parameters/, and $PYTHON/parameters/old/ from your 
+    local directories before using writing files using this routine, and
+    then
+
+    * to add and comit  all of the files that are produced before going on to other 
+    stages of activities associated with documentation.
+
+
 """
 import os
 import sys
@@ -481,6 +516,18 @@ def autogenerate_parameter_docs():
             print_docs=('-p' in sys.argv or '--print' in sys.argv),
             write_docs=('-w' in sys.argv or '--write' in sys.argv)
         )
+
+    print('\n*** These are uncommitted files in the parameters directory ***\n')
+
+    os.system('git ls-files --other %s' % output_folder)
+
+    print('\n*** These are uncommitted files in the deprecated parameters directory ***\n')
+
+    os.system('git ls-files --other %s' % output_old_folder)
+
+    print('\n*** If either of the above showed uncommitted files, one should either commit them')
+    print('or rm them (see the help for more info.)  ***\n')
+
 
 # Next lines permit one to run the routine from the command line
 if __name__ == "__main__":
