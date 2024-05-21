@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auger Photon Yields &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Meta-documentation" href="../meta.html" />
+    <link rel="prev" title="Levels" href="levels.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../atomic.html">Atomic Data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bound_bound.html">Bound Bound</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_bound_electron_collision_strengths.html">Bound-bound electron collision strengths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_free.html">Bound Free (Overview)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_free_topbase.html">Bound Free (TopBase)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_free_verner.html">Bound Free (Verner)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="direct_ionization.html">Direct Ionization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electron_yields.html">Auger Electron Yields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elem_ions.html">Elements and Ions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="free-free.html">Free-Free Emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levels.html">Levels</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Auger Photon Yields</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../atomic.html">Atomic Data</a></li>
+      <li class="breadcrumb-item active">Auger Photon Yields</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/atomic/photon_yields.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="auger-photon-yields">
+<h1>Auger Photon Yields<a class="headerlink" href="#auger-photon-yields" title="Permalink to this heading"></a></h1>
+<p>When inner shell (or Auger) ionization takes place - there is a chance of photons being eected as the inner shells are re-filled. This data
+provies the information to compute the photons thus made. It is currently not used.</p>
+<section id="source">
+<h2>Source<a class="headerlink" href="#source" title="Permalink to this heading"></a></h2>
+<p>This data comes from <a class="reference external" href="http://articles.adsabs.harvard.edu/full/1993A%26AS...97..443K">Kaastra and Mewe 1993, A&amp;A, 97, 443</a> . The data is downloaded from the vizier site linked and put into a file called “fluorescent_yield.data”</p>
+</section>
+<section id="translation-to-python-format">
+<h2>Translation to Python format<a class="headerlink" href="#translation-to-python-format" title="Permalink to this heading"></a></h2>
+<p>The translation takes place using the python script “kaastra_2_py.py”. All identical to electron yield, but input file is “fluorescent_yield.data” and output is “kaastra_fluorescent_yield.data”</p>
+</section>
+<section id="data-format">
+<h2>Data format<a class="headerlink" href="#data-format" title="Permalink to this heading"></a></h2>
+<p>This is the data format of the electron yield data</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 4%" />
+<col style="width: 11%" />
+<col style="width: 6%" />
+<col style="width: 4%" />
+<col style="width: 35%" />
+<col style="width: 20%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Label</p></td>
+<td><p>z</p></td>
+<td><p>state</p></td>
+<td><p>n</p></td>
+<td><p>l</p></td>
+<td><p>photon_energy(eV)</p></td>
+<td><p>yield</p></td>
+</tr>
+<tr class="row-even"><td><p>Kphotyield</p></td>
+<td><p>5</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1.837e+02</p></td>
+<td><p>6.000e-04</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kphotyield</p></td>
+<td><p>5</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1.690e+01</p></td>
+<td><p>7.129e-01</p></td>
+</tr>
+<tr class="row-even"><td><p>Kphotyield</p></td>
+<td><p>6</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>2.768e+02</p></td>
+<td><p>2.600e-03</p></td>
+</tr>
+</tbody>
+</table>
+<p>The data is linked to the correct inner shell photoionization cross section (and hence rate) via z, state, n shell and l subshell. The photon energy field is thew energy of the fluorescent photon in eV, and yield is the number of said photons emitted per ionization multiplied by <span class="math notranslate nohighlight">\(10^4\)</span>.</p>
+</section>
+<section id="python-structure">
+<h2>Python structure<a class="headerlink" href="#python-structure" title="Permalink to this heading"></a></h2>
+<p>The data is stored in python in the inner_fluor_yield structure which contains</p>
+<ul class="simple">
+<li><p>int nion - Index to the ion which was the parent of the inner shell ionization</p></li>
+<li><p>int z, istate - element and ionization state of parent ion</p></li>
+<li><p>int n, l - Quantum numbers of shell</p></li>
+<li><p>double freq - the rest frequency of the photon emitted</p></li>
+<li><p>double yield - number of photons per ionization x <span class="math notranslate nohighlight">\(10^4\)</span></p></li>
+</ul>
+</section>
+<section id="comments">
+<h2>Comments<a class="headerlink" href="#comments" title="Permalink to this heading"></a></h2>
+<p>This data is not currently used</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="levels.html" class="btn btn-neutral float-left" title="Levels" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../meta.html" class="btn btn-neutral float-right" title="Meta-documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

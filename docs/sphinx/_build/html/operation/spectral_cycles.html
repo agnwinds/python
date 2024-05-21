@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spectral Cycles &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Radiation Sources" href="../radiation.html" />
+    <link rel="prev" title="Ionization Cycles" href="ionization_cycles.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../operation.html">Code Operation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ionization_cycles.html">Ionization Cycles</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Spectral Cycles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../operation.html">Code Operation</a></li>
+      <li class="breadcrumb-item active">Spectral Cycles</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/operation/spectral_cycles.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="spectral-cycles">
+<h1>Spectral Cycles<a class="headerlink" href="#spectral-cycles" title="Permalink to this heading"></a></h1>
+<p>The purpose of the ionization cycles is to establish the ionization state
+of the plasma. The purpose of the spectral cycles is to created simulated
+spectra given a defined ionization state in a wavelength range that is
+(usually) less wide than required to establish the ionization state.  For
+a cataclysminc variable, One might, for example, want to create a simulated
+spectrum to compare with an observed spectrum of that object in the ultraviolet.
+which is observed with a specific inclination angle with respect to the disk.</p>
+<p>For the simple atom case, the process is relatively straightforward.  One
+begins by generating photon packets that cover a range that slightly boarder
+than the spectral range of interest, slightly broader because one needs to
+allow for Doppler effects associated with scatters that can occur.  One then
+follows these photons through the wind, where the number of photons carred
+by the packet diminishes as it moves through the wind.</p>
+<p>Then one could simply create a spectrum from photon packets that exit the
+simulation volume at a particular incination angle (plus or minus some
+delta) to construct the spectrum.  This so-called live-or-die  option
+is implemented in Python, but only as a diagnostic option, because it is
+inefficient since most photon packets exit the system at inclination
+angles that are not of interest.</p>
+<p>Instead, the standard way of constructing detailed spectra is to use the method,
+termed the viewpoint technique, as described by <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1995MNRAS.273..225K/abstract">Knigge, Woods, &amp; Drew 1995</a>, also
+known as the peel-off method (<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1984ApJ...278..186Y/abstract">Yusef-Zedeh, Morris &amp; White 1984</a>.
+In this method, one follows a photon through the grid as before, but at point
+where the photon changes direction (including the inital point of photon generation),
+one creates a dummy photon headed in the desired direction.  One adjust the
+weight of the dummy photon accoring to
+the relative probability that a photon  will escape in the desired
+direction compared to the angle averaged probability, and adjusts the number
+of photons by that fraction, that is</p>
+<div class="math notranslate nohighlight">
+\[w_{\rm out}=\frac{P(\theta)}{\langle P \rangle} w_{\rm in}.\]</div>
+<p>For isotropic scattering the <span class="math notranslate nohighlight">\(w_{\rm out}==w_{\rm in}\)</span> but for resonant scattering the
+weight will increase if the desired photon direction is in the direction of maximum
+velocity gradient and decrease if it is along the direction of minumum velocity gradient (see <a class="reference internal" href="../physics/aniso.html"><span class="doc">Anisotropic Scattering</span></a>).
+For photons generated at the surface of a star of disk, the weight of the dummy photon
+is determined by the limb darkening law assumed. One then extracts the dummy photon along
+the line of sight reducing the weight of the photon by the total optical depth along that
+lien of sight.  Evidently, one can repeat this process at every interaction when one
+wishes to construct a spectrum along multiple lines of sight.</p>
+<section id="detailed-spectral-calculation-when-macro-atoms-are-used">
+<h2>Detailed Spectral Calculation when Macro-atoms are used<a class="headerlink" href="#detailed-spectral-calculation-when-macro-atoms-are-used" title="Permalink to this heading"></a></h2>
+<p>When a macro-atom is excited, photon packets can emerge at very different frequencies than
+the frequency of the photon packet before an interaction.  This requires a modification of
+the methods used during ionization cycles, where, in the macro-atom case, no photons or r-packets
+originate in the wind and a strict radiative equilibrium constraint is enforced
+(with a few exceptions, e.g. adiabatic cooling).</p>
+<p>During the ionization cycles, the amounts of energy flowing into each macro-atom level,
+and into the thermal k-packet pool, are recorded in the matom_abs and kpkt_abs quantities.
+In the spectral cycles, one needs to know where this energy comes out - if energy flows into
+a given state, what proportion of that energy comes out via the various possible transitions?
+This issue is dealt with in the “macro-atom emissivity calculation”, which is carried out
+at the start of the spectral cycles. The current procedure is to do a Monte Carlo sampling of
+the macro-atom machinery – a large number of packets are generated with initial macro-atom
+states in proportion to the estimators matom_abs and kpkt_abs. The fraction of times these packets
+de-activate from given states is then recorded, and the corresponding r-packet frequency is
+calculated. If the frequency falls within the requested range, the relevant macro-atom or k-packet
+emissivity is incremented by the appropriate fraction of matom_abs. If the frequency falls outside
+the range, the contribution is ignored. This procedure can be speeded up by using an implicit/matrix
+scheme where the matrix contains the mapping between the absorbed and emergent radiation; This
+method is currently in the development stage in the code.</p>
+<p>In the actual photon transport stage, r-packets are generated in the wind in proportion with
+these frequency-limited emissivities, in a broadly similar to wind photon generation in the non-macro atoms scheme.
+In the process, we also ensure that the photons are only generated over the correct frequency range.
+The photon transport is then carried out as normal, except that whenever a macro-atom is activated, or a k-packet is created,
+that photon / energy packet is immediately thrown away to avoid double-counting – the emission resulting from the interaction
+has already been (statistically speaking) accounted for in the emissivity calculation. The main difference to the approach in the
+ionization cycles is that now the radiative equilibrium condition is enforced by the fact that the
+emissivities should be consistent with the “absorbed” radiation, instead of being explicitly enforced by never
+destroying packets.</p>
+<p>When using indivisible packet line transfer (commonly referred to as macro-atom mode), the code is
+often used in a hybrid mode where some elements are treated as macro-atoms and some as simple-atoms.
+Simple atoms are treated differently to macro-atoms; there is no detailed model atom and internal
+transitions to other states are not possible. Instead, for both bound-free and bound-bound interactions,
+a fake two-level atom is excited, and the excited state either radiatively or collisionally decays.
+If it collisionally decays, this would normally excite a k-packet so the packet is destroyed for the
+same reasons as above (the emissivity from this is already accounted for). The k-packets generated from
+the emissivity are allowed to create simple-atom emission for consistency. If it radiatively decays, we treat
+the interaction like a resonant scatter and proceed, still tracking the packet.
+This is a reasonable approximation for resonant lines, but less so for bound-free continua, since the possible
+recombination cascade and potential reddening of the photons is not dealt with.
+Partially addressing this was the aim of the bound-free simple emissivity approach.</p>
+</section>
+<section id="other-issues">
+<h2>Other Issues<a class="headerlink" href="#other-issues" title="Permalink to this heading"></a></h2>
+<p>Spectral cycles are executed after the ionization and temperature state of the wind is computed
+by the ionization cycles. It is possible to modify the requested spectra (both wavelength
+range and observer angles) by making the changes to the spectral cycle parameters, setting the
+number if ionization cycles to zero, and then restarting the simulation.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ionization_cycles.html" class="btn btn-neutral float-left" title="Ionization Cycles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../radiation.html" class="btn btn-neutral float-right" title="Radiation Sources" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

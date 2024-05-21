@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Importing Models &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Coordinate grids" href="../coordinate.html" />
+    <link rel="prev" title="The stellar wind model" href="stellar.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../wind_models.html">Wind Models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sv.html">SV93 biconical wind prescription</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kwd.html">KWD biconical wind prescription</a></li>
+<li class="toctree-l2"><a class="reference internal" href="homologous.html">The homologous wind model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stellar.html">The stellar wind model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Importing Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../wind_models.html">Wind Models</a></li>
+      <li class="breadcrumb-item active">Importing Models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/wind_models/importing_models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="importing-models">
+<h1>Importing Models<a class="headerlink" href="#importing-models" title="Permalink to this heading"></a></h1>
+<p>Python can read 1D or 2.5D grids of density and velocity, instead of setting up
+the model from an analytic prescription. Caution should be exercised with this
+mode, as it is still in a development phase, and the mode requires the user to
+ensure that things like mass and angular momentum conservation are enforced.</p>
+<p>This mode is activated via wind type option “imported”, which triggers an extra
+question, e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Wind</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">SV</span><span class="p">,</span><span class="n">star</span><span class="p">,</span><span class="n">hydro</span><span class="p">,</span><span class="n">corona</span><span class="p">,</span><span class="n">kwd</span><span class="p">,</span><span class="n">homologous</span><span class="p">,</span><span class="n">shell</span><span class="p">,</span><span class="n">imported</span><span class="p">)</span>             <span class="n">imported</span>
+<span class="n">Wind</span><span class="o">.</span><span class="n">coord_system</span><span class="p">(</span><span class="n">spherical</span><span class="p">,</span><span class="n">cylindrical</span><span class="p">,</span><span class="n">polar</span><span class="p">,</span><span class="n">cyl_var</span><span class="p">)</span>          <span class="n">cylindrical</span>
+<span class="n">Wind</span><span class="o">.</span><span class="n">model2import</span>                    <span class="n">cv</span><span class="o">.</span><span class="n">import</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>An example in cylindrical geometry, <code class="code docutils literal notranslate"><span class="pre">cv_import.pf</span></code>, is given with a
+supplementary grid file in <code class="code docutils literal notranslate"><span class="pre">examples/beta/</span></code>.
+The format expected in the grid input file for such a cylindrical model is as
+follows, although the column headers lines are actually not read.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">i</span>  <span class="n">j</span>  <span class="n">inwind</span>    <span class="n">x</span>      <span class="n">z</span>     <span class="n">v_x</span>   <span class="n">v_y</span>   <span class="n">v_z</span>     <span class="n">rho</span>   <span class="n">t_e</span>    <span class="n">t_r</span>
+<span class="o">--</span> <span class="o">--</span> <span class="o">------</span>  <span class="o">-----</span>  <span class="o">-----</span>  <span class="o">-----</span> <span class="o">-----</span> <span class="o">-----</span>   <span class="o">-----</span> <span class="o">-----</span>  <span class="o">-----</span>
+<span class="mi">0</span>  <span class="mi">0</span>    <span class="o">-</span><span class="mi">1</span>    <span class="mf">1.4e9</span>  <span class="mf">3.5e9</span>   <span class="mf">0.0</span>   <span class="mf">0.0</span>   <span class="mf">6e5</span>     <span class="mf">0.0</span>   <span class="mf">0.0</span>    <span class="mf">0.0</span>
+<span class="mi">0</span>  <span class="mi">1</span>     <span class="mi">0</span>    <span class="mf">1.4e9</span>  <span class="mf">3.5e10</span>  <span class="mf">1e5</span>   <span class="mf">0.0</span>   <span class="mf">2e6</span>     <span class="mf">1e9</span>   <span class="mf">0.0</span>    <span class="mf">0.0</span>
+</pre></div>
+</div>
+<p>where all physical units are CGS. i and j refer to the rows and
+columns of the wind cells respectively, while inwind tells the code whether
+the cell is in the wind (<code class="code docutils literal notranslate"><span class="pre">0</span></code>), or out of the wind (<code class="code docutils literal notranslate"><span class="pre">-1</span></code>). If a
+partially in wind flag is provided (<code class="code docutils literal notranslate"><span class="pre">1</span></code>), the code defaults to treating
+this cell as not in the wind. This could in principle be adapted, but means that
+for the moment this mode is most useful when using models with sufficiently high
+resolution or covering factors that partially in wind cells are unimportant.</p>
+<p>The other input files have slightly different formats.  The best way to see the
+format is use the process described at the end of the page.</p>
+<section id="creating-your-own-model">
+<h2>Creating your own model<a class="headerlink" href="#creating-your-own-model" title="Permalink to this heading"></a></h2>
+<p>In order to create your own model, there are a few important things to consider:</p>
+<ul class="simple">
+<li><p>all units should be CGS (except for indices and flags, which are integers)</p></li>
+<li><p>x and z for cylindrical (or r and theta for spherical polar) coordinates are
+supplied at the edges, rather than centres, of cells. Thus, a given cell is
+described by the location of it’s bottom left hand corner in (x,z) space.</p></li>
+<li><p>Ghost cells <strong>must</strong> be included. This means that additional rows and columns
+of cells must be included at the edges of the grid, and they must be excluded
+from the wind so that their temperatures and densities are set to zero, but
+have a velocity that python can interpolate with.</p></li>
+<li><p>i and j correspond to rows and columns respectively, so that the first row of
+cells at the disk plane has i = 0.</p></li>
+<li><p>rho the density of the cell in cgs units</p></li>
+<li><p>The t_e and t_r columns are optional and correspond to the electron and
+radiation temperature</p></li>
+</ul>
+<p>Although <code class="code docutils literal notranslate"><span class="pre">cv_import.pf</span></code> is designed to closely match the
+<code class="code docutils literal notranslate"><span class="pre">cv_standard.pf</span></code> model, it does not match the model perfectly as
+the imported model does not deal with ‘partially in wind’ cells. As such,
+we generally recommend imported models are used for either wind models
+that entirely fill the grid or that have sufficiently high resolution
+that the partial filled cells are relatively unimportant.</p>
+<section id="spherical-grids">
+<h3>Spherical Grids<a class="headerlink" href="#spherical-grids" title="Permalink to this heading"></a></h3>
+<p>Using a spherical coordinate system, a 1D spherically symmetric model can be
+read into Python.</p>
+<p>To read in a grid of this type, the following columns are required for each cell:</p>
+<ul class="simple">
+<li><p>i                        :  the element number for each cell</p></li>
+<li><p><span class="math notranslate nohighlight">\(r\)</span>                :  the radial coordinate in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_{r}\)</span>            :  the radial velocity in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span>             :  the mass density in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{e}\)</span> (optional) :  the electron temperature in Kelvin</p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{r}\)</span> (optional) :  the radiation temperature in Kelvin</p></li>
+</ul>
+<div class="admonition-grid-coordinates admonition">
+<p class="admonition-title">Grid Coordinates</p>
+<p>The radial coordinates of the cells must be constantly increasing in size.</p>
+</div>
+</section>
+<section id="cylindrical-grids">
+<h3>Cylindrical Grids<a class="headerlink" href="#cylindrical-grids" title="Permalink to this heading"></a></h3>
+<p>Using cylindrical coordinates, a 2.5D model can be read into Python.</p>
+<div class="admonition-grid-coordinates admonition">
+<p class="admonition-title">Grid Coordinates</p>
+<p>Note that the grid coordinates and the velocity is specified in Cartesian
+coordinates.</p>
+</div>
+<p>To read in a grid of this type, the following columns are required for each cell:</p>
+<ul class="simple">
+<li><p>i                        :  the i element number (row)</p></li>
+<li><p>j                        :  the j element number (column)</p></li>
+<li><p>inwind                   :  a flag indicating whether the cell is in the wind or not</p></li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span>                :  the x coordinate in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(z\)</span>                :  the z coordinate in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_x\)</span>              :  the velocity in the x direction in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_y\)</span>              :  the velocity in the y direction in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_z\)</span>              :  the velocity in the z direction in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span>             :  the mass density in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{e}\)</span> (optional) :  the electron temperature in Kelvin</p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{r}\)</span> (optional) :  the radiation temperature in Kelvin</p></li>
+</ul>
+<div class="admonition-unstructed-non-linear-grids admonition">
+<p class="admonition-title">Unstructed/non-linear Grids</p>
+<p>In principle, it is possible to read in an unstructured or non-linear
+cylindrical grid, i.e. where the cells are not regularly spaced, however,
+Python has been designed for structured grids with regular grid spacing, and
+as such there may be undefined behaviour for unstructured grids.</p>
+</div>
+</section>
+<section id="polar-grids">
+<h3>Polar Grids<a class="headerlink" href="#polar-grids" title="Permalink to this heading"></a></h3>
+<p>Using polar coordinates, a 2.5D model can be read into Python.</p>
+<div class="admonition-cartesian-velocity admonition">
+<p class="admonition-title">Cartesian Velocity</p>
+<p>The velocity in for the polar grid is required to be in Cartesian
+coordinates due to conventions within the Python programming style. As such,
+any polar velocity components must first be projected into their Cartesian
+equivalent.</p>
+</div>
+<ul class="simple">
+<li><p>i                        :  the i element number (row)</p></li>
+<li><p>j                        :  the j element number (column)</p></li>
+<li><p>inwind                   :  a flag indicating whether the cell is in the wind or not</p></li>
+<li><p><span class="math notranslate nohighlight">\(r\)</span>                :  the radial coordinate in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(\theta\)</span>           :  the <span class="math notranslate nohighlight">\(\theta\)</span> coordinate in degrees</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_x\)</span>              :  the velocity in the x direction in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_y\)</span>              :  the velocity in the y direction in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_z\)</span>              :  the velocity in the z direction in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span>             :  the mass density in CGS</p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{e}\)</span> (optional) :  the electron temperature in Kelvin</p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{r}\)</span> (optional) :  the radiation temperature in Kelvin</p></li>
+</ul>
+<div class="admonition-math-theta-cells admonition">
+<p class="admonition-title"><span class="math notranslate nohighlight">\(\theta\)</span>-cells</p>
+<p>The <span class="math notranslate nohighlight">\(\theta\)</span> range should extend from at least 0 to 90°. It is
+possible to extend beyond 90°, but these cells should not be inwind and
+should be reserved as ghost cells.</p>
+</div>
+</section>
+<section id="setting-wind-temperatures">
+<h3>Setting Wind Temperatures<a class="headerlink" href="#setting-wind-temperatures" title="Permalink to this heading"></a></h3>
+<p>Reading in a temperature is optional when importing a model. However, if one
+temperature value for a cell is provided, then Python assumes that this is
+the electron temperature and the radiation temperature will be initialised as,</p>
+<div class="math notranslate nohighlight">
+\[T_{r} = 1.1 T_{e}.\]</div>
+<p>However, if two temperature values are provided for the cells, then the first
+temperature will be assumed as being the electron temperature and the second
+will be the radiation temperature.</p>
+<p>If no temperature is provided with the imported model, then the radiation
+temperature will be initialised using the parameter, e.g.,</p>
+<p><cite>Wind.t.init 40000</cite></p>
+<p>The electron temperature is then initialised using the Lucy approximation,</p>
+<div class="math notranslate nohighlight">
+\[T_{e} = 0.9 T_{r}\]</div>
+</section>
+<section id="ghost-cells-and-setting-values-for-inwind">
+<h3>Ghost Cells and Setting Values for <cite>inwind</cite><a class="headerlink" href="#ghost-cells-and-setting-values-for-inwind" title="Permalink to this heading"></a></h3>
+<p>The <cite>inwind</cite> flag is used to mark if a grid cell is either in the wind or not
+in the wind. The following enumerator flags are used,</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">W_IGNORE</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">-2</span><span class="w">   </span><span class="c1">// ignore this grid cell</span>
+<span class="n">W_NOT_INWIND</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="w">   </span><span class="c1">// this cell is not in the wind</span>
+<span class="n">W_ALL_INWIND</span><span class="w">  </span><span class="o">=</span><span class="w">  </span><span class="mi">0</span><span class="w">   </span><span class="c1">// this cell is in the wind</span>
+</pre></div>
+</div>
+<p>Whilst it is possible to set in <cite>inwind = 1</cite> for a grid cell, that is that the
+cell is partially in the wind, Python will instead set these cells with
+<cite>inwind = -2</cite> and ignore these grid cells.</p>
+<section id="spherical">
+<h4>Spherical<a class="headerlink" href="#spherical" title="Permalink to this heading"></a></h4>
+<p>Three guard cells are expected. One guard cell is expected at the inner edge of
+wind and two are expected at the outer edge of the wind. Guard cells should still
+have a velocity, but the mass density and temperatures should be zero.</p>
+</section>
+<section id="cylindrical">
+<h4>Cylindrical<a class="headerlink" href="#cylindrical" title="Permalink to this heading"></a></h4>
+<p>For cylindrical grids, the outer boundaries of the wind should have two layers
+of  guard cells in the same way as the a spherical grid, as above. For these
+cells, and all cells which do not make up the wind, an inwind value of -1 or -2
+should be set.</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/import_cylindrical_inwind.png"><img alt="../_images/import_cylindrical_inwind.png" src="../_images/import_cylindrical_inwind.png" style="width: 700px;" /></a>
+<figcaption>
+<p><span class="caption-text">A colour plot of the inwind variable for the cv_standard.pf example. Here, a
+SV model is being imposed on a cylindrical coordinate grid.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="polar">
+<h4>Polar<a class="headerlink" href="#polar" title="Permalink to this heading"></a></h4>
+<p>For polar grids, the outer boundaries of the wind should have two layers of
+guard cells in the same way as the a spherical grid, as above. For these cells,
+and all cells which do not make up the wind, an inwind value of -1 or -2 should be set.</p>
+<p>In this example, the theta cells extend beyond 90°. But, as they are not inwind,
+Python is happy to include these cells. For a stellar wind in polar coordinates,
+these extra <span class="math notranslate nohighlight">\(\theta\)</span> cells extending beyond 90° are required.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/import_polar_inwind.png"><img alt="../_images/import_polar_inwind.png" src="../_images/import_polar_inwind.png" style="width: 700px;" /></a>
+<figcaption>
+<p><span class="caption-text">A colour plot of the inwind variable for the rtheta.pf example. Here, a SV
+model is being imposed on an polar coordinate grid.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/import_stellar_polar_inwind.png"><img alt="../_images/import_stellar_polar_inwind.png" src="../_images/import_stellar_polar_inwind.png" style="width: 700px;" /></a>
+<figcaption>
+<p><span class="caption-text">A colour plot of the inwind variable for a stellar wind imposed on a polar
+coordinate grid. Important to note is the “halo” of inwind = -1 cells
+surrounding the inwind cells. The cells with inwind = 1 will be set to
+inwind = -2 when imported into Python and ignored.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="maximum-and-minimum-wind-radius">
+<h3>Maximum and Minimum Wind Radius<a class="headerlink" href="#maximum-and-minimum-wind-radius" title="Permalink to this heading"></a></h3>
+<p>The maximum and minimum spherical extent of the wind is calculated automatically
+by Python, and does not take into account guard cells when it is doing this.</p>
+</section>
+</section>
+<section id="generating-example-inputs-for-testing-and-familiarizing-oneself-with-python-s-import-capability">
+<h2>Generating example inputs for testing and familiarizing oneself with Python’s import capability<a class="headerlink" href="#generating-example-inputs-for-testing-and-familiarizing-oneself-with-python-s-import-capability" title="Permalink to this heading"></a></h2>
+<p>If one is trying to use the import capability of Python for the first time,
+it will be useful to familiarize oneself with the process, and the file format
+for a particular coordinate system, by running first running Python on a model
+that is something similar to model to be imported, but which takes advantage of
+one of the kinematic models available with the code.</p>
+<p>For example, suppose you have a hydrodynamical simulation of an AGN wind which
+is in polar coordinates and you want to use Python to calculate the spectrum.
+Then you might create a model of an AGN with a similar coordinate system using,
+say, a Knigge Wood &amp; Drew wind (and similar atomic data).
+For specificity, suppose this model has the root name “test”</p>
+<p>Once you have run the model, you can create an import file file by first running
+the routine <code class="code docutils literal notranslate"><span class="pre">windsave2table</span></code>, or more specifically:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>windsave2table<span class="w"> </span><span class="nb">test</span>
+</pre></div>
+</div>
+<p>This produces a large number of ascii tables, which are described elsewhere</p>
+<p>In the py_progs directory, you will find 3 scripts, <code class="code docutils literal notranslate"><span class="pre">import_1d.py</span></code>,
+<code class="code docutils literal notranslate"><span class="pre">import_cyl.py</span></code> and <code class="code docutils literal notranslate"><span class="pre">import_rtheta.py</span></code>, which will convert one of
+the output files <code class="code docutils literal notranslate"><span class="pre">test.0.master.txt</span></code> to an import file, <code class="code docutils literal notranslate"><span class="pre">test.import.txt</span></code>,
+that can be used with the import mode of Python. The 3 different routines are
+for 1d spherical coordinates, and polar (r-theta) coordinates respectively.</p>
+<p>Assuming the py_progs directory is in your PATH, and given that our example is
+for cylindrical coordinates, one would run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>import_cyl.py<span class="w"> </span><span class="nb">test</span>
+</pre></div>
+</div>
+<p>At that point, you can test this import file, by modifying the first .pf file to
+import mode (imported). Running Python on this file, will result in your being
+asked the name of the import file, and give you a “baseline” to import the
+hydrodynamical simulation to work.</p>
+<p>Note that one should not assume that spectra produced by the original run of
+Python and the run of the imported model will be identical. There are several
+reasons for this:</p>
+<p>First, in creating the original model, Python accounts for the possibility that
+some cells are partially in the wind. This is not possible in the imported
+models. Only cells that are complete in the wind are counted.</p>
+<p>Second, within Python, positions and velocities are assumed defined at the
+corners of cells, whereas densities are assumed to be cell centered. If one
+provides a table where all of the quantities are at the same exact position
+(namely density is at the same position as x), there will be a slight
+discrepancy between the way in model as calculated internally and as represented
+within Python.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="stellar.html" class="btn btn-neutral float-left" title="The stellar wind model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../coordinate.html" class="btn btn-neutral float-right" title="Coordinate grids" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

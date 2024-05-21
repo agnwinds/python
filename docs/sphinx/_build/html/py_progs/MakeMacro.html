@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MakeMacro &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">MakeMacro</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/py_progs/MakeMacro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="makemacro">
+<h1>MakeMacro<a class="headerlink" href="#makemacro" title="Permalink to this heading"></a></h1>
+<p>To facillitate generation of data for MacroAtoms several routines exist, including</p>
+<ul class="simple">
+<li><p>Makemacro.py</p></li>
+<li><p>RedoPhot.py</p></li>
+<li><p>MacroCombine.py</p></li>
+</ul>
+<p>These routines use data contained in a (local) Chianti repository and from TopBase to construct atomic data files that can be used to generate the atomic data
+needed for MacroAtoms.  Chiani is the primary source of data, but unfortunately for Python, it does not include photionization x-sections, and so these are obtained from TopBase.</p>
+<p><strong>It should be emphacised at the outset that these routines, while they generate that can be read and used within in Python, they do not guaranteed that the Macro atom models are physically sensible.  In particular, it is easy to generate models that are overly complex or ones that do not include all of the sublevels of a particular ion</strong></p>
+<section id="mechanics">
+<h2>Mechanics<a class="headerlink" href="#mechanics" title="Permalink to this heading"></a></h2>
+<p>All of the programs can be run from the command line.  All of the programs can be ruun with a -h flag to obtain helo information.</p>
+<p>The programs must be run in an enviroment in which astropy, matplotlib and ChiantiPy are installed.</p>
+</section>
+<section id="makemacro-py">
+<h2>MakeMacro.py<a class="headerlink" href="#makemacro-py" title="Permalink to this heading"></a></h2>
+<p>MakeMacro.py is the main program that needs to be run first.  It retrieves data from a local installation of the CChianti database and from an external version of Topbase using wget.</p>
+<p>If for example, one wishes to make C a macro atom, one needs to run MakeMacro as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MakeMacro</span><span class="o">.</span><span class="n">py</span> <span class="n">c_1</span> <span class="mi">20</span>
+<span class="n">MakeMacro</span><span class="o">.</span><span class="n">py</span> <span class="n">c_2</span> <span class="mi">20</span>
+<span class="n">MakeMacro</span><span class="o">.</span><span class="n">py</span> <span class="n">c_3</span> <span class="mi">20</span>
+<span class="n">MakeMacro</span><span class="o">.</span><span class="n">py</span> <span class="n">c_4</span> <span class="mi">20</span>
+<span class="n">MakeMacro</span><span class="o">.</span><span class="n">py</span> <span class="n">c_5</span> <span class="mi">20</span>
+<span class="n">MakeMacro</span><span class="o">.</span><span class="n">py</span> <span class="n">c_6</span> <span class="mi">20</span>  <span class="kc">True</span>
+</pre></div>
+</div>
+<p>These commands create all of the files needed to make carbon a macro atom.  The number 20 implies that one wants to create 20 levels for each of the ions, and need not be the same for each of the ions.  This number should be larger than the number of levels one wants to ulitmately use with Python, and can be smaller. The extra command line option True for c_6 imples causes a bare C ion to be created for C</p>
+<p>The files that will be created include:</p>
+<ul class="simple">
+<li><p>c_2_levels.dat -  A set of levels for C II taken from Chianti</p></li>
+<li><p>c_2_lines.dat  - A set of line files for C II taken from Chianti</p></li>
+<li><p>c_2_phot.dat - A set of photoionization x-section taken from Topbase, matched to the level files.  The photionization x-sections will have been extended to an energy (currently 100 keV by the routines contained in RedoPhot.py</p></li>
+<li><p>c_2_upsilon.dat - A set of collisional x-sections taken from Chianti</p></li>
+</ul>
+<p>There will also be a figure</p>
+<ul class="simple">
+<li><p>c_2_phot.png which shows how the photoionzation x-sections have been extended to higher energies.</p></li>
+</ul>
+</section>
+<section id="redophot-py">
+<h2>RedoPhot.py<a class="headerlink" href="#redophot-py" title="Permalink to this heading"></a></h2>
+<p>RedoPhot.py is the program that contains routines to extend x-sections to a higher energy.  it is normally called as a subroutine from MakeMacro.py, although it can be called from the command line for testing. .</p>
+<p>The underlying issue is that the TopBase x-sections, which are simple tables of photon encergy and x-sections,  do not extend to very high or consistent energies.  The routine assumes one can use the logarighmic slope of the x-sections at the high end of what TopBase provides to extend the x-sections.</p>
+<p>The routine called from MakeMacro.py rewrites the same file, but called from the command line can write the extended x-sections to a different file.</p>
+</section>
+<section id="macrocombine-py">
+<h2>MacroCombine.py<a class="headerlink" href="#macrocombine-py" title="Permalink to this heading"></a></h2>
+<p>MacroCombine.py is a routine that is intended to allow the user to selectively combine level generated by MakeMacro.py into level files that are physically reasonable but more compact that the models generated by MakeMacro.</p>
+<p>The underlying assumption made in MacroCombine is that levels that are combined have relative populations that are portional to g of the original uncombined level.</p>
+<p>Typically one would run MacroCombine.py as follows for C II</p>
+<p>MacroCombine.py  -guess c_2_levels.dat c_2_lines.dat  c_2_phot.dat</p>
+<p>The would produce the following files</p>
+<ul class="simple">
+<li><p>c_2_lev_final.dat  - A compressed level file based on the assumption that levels with very similar excitation energy should be combined</p></li>
+<li><p>c_2_lines_final.dat - A set of lines for the compressed files.</p></li>
+<li><p>c_2_phot_final.dat - A set of x-sections, matched to the other files</p></li>
+<li><p>c_2_levels_guess.dat - A file which has two extra columns, xlev and G, compared to a typical level file.  The xlev column shows which of the original levels been combined.</p></li>
+</ul>
+<p>The last file needs to be inspected carefully.  If the user wishes to change the choices that were made, he or she, should edit this file to reflect what levels should be combined.</p>
+<p>When this is done, one reruns the routine</p>
+<p>MacroCombine.py  c_2_levels_guess.dat c_2_lines.dat  c_2_phot.dat</p>
+<p>without the -guess option to produce a final set of files</p>
+<p><strong>Note that at present the routine does not handle the collisional x-sections, though this should be straightforward to add</strong></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

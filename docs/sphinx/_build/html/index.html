@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>python &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quick Guide to Python" href="quick.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><em>python</em></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="python">
+<h1><em>python</em><a class="headerlink" href="#python" title="Permalink to this heading"></a></h1>
+<section id="radiative-transfer-and-ionisation-code">
+<h2>Radiative transfer and ionisation code<a class="headerlink" href="#radiative-transfer-and-ionisation-code" title="Permalink to this heading"></a></h2>
+<p>Python is a Monte-Carlo radiative transfer code designed to simulate the spectrum of biconical (or spherical)
+winds in disk systems.  It was origianally written by
+<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2002ApJ...579..725L/abstract">Long and Knigge (2002)</a> and
+was intended for simulating the spectra of winds in cataclysmic variables. Since then, it has
+also been used to simulate the spectra of systems ranging from young stellar objects to AGN.</p>
+<p>The name Python is today unfortunate, and changing the name is an ongoing debate within the development team.
+The program is written in C and can be compiled on systems runining various flavors of linux, including OSX on Macs.</p>
+<p>The code is is available on <a class="reference external" href="https://github.com/agnwinds/python">github</a>  Issues regarding the code and suggestions for improvement the code regarding the should be reported there.  We actively
+encourage other to make use of the code for their own science.  If anyone has questions about
+whether the code might be useful for a project, we encourage you to contact one of the authors of
+the code.</p>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
+<p>Various documentation exists:</p>
+<ul class="simple">
+<li><p>A <a class="reference internal" href="quick.html"><span class="doc">Quick Guide</span></a> describing how to install and run Python (in a fairly mechanistic fashion).</p></li>
+</ul>
+<p>For more information on how this page was generated and how to create documentation for <em>python</em>,
+look at the page for <a class="reference internal" href="meta.html"><span class="doc">documentation on the documentation</span></a>.</p>
+</section>
+<section id="authors">
+<h2>Authors<a class="headerlink" href="#authors" title="Permalink to this heading"></a></h2>
+<p>The authors of the <em>python</em> code and their institutions are:</p>
+<dl class="simple">
+<dt>Knox Long</dt><dd><p>Space Telescope Science Institute, 3700 San Martin Drive, Baltimore, MD 21218, USA
+Eureka Scientific, Inc., 2452 Delmer St., Suite 100, Oakland, CA 94602-3017, USA</p>
+</dd>
+<dt>Christian Knigge</dt><dd><p>Department of Physics and Astronomy, University of Southampton, Southampton, SO17 1BJ, UK</p>
+</dd>
+<dt>Stuart Sim</dt><dd><p>School of Mathematics and Physics, Queen’s University Belfast, University Road, Belfast, BT7 1NN, UK</p>
+</dd>
+<dt>Nick Higginbottom</dt><dd><p>Department of Physics and Astronomy, University of Southampton, Southampton, SO17 1BJ, UK</p>
+</dd>
+<dt>James Matthews</dt><dd><p>Institute of Astronomy, University of Cambridge, Cambridge, CB3 0HA, UK</p>
+</dd>
+<dt>Sam Mangham</dt><dd><p>Department of Physics and Astronomy, University of Southampton, Southampton, SO17 1BJ, UK</p>
+</dd>
+<dt>Edward Parkinson</dt><dd><p>Department of Physics and Astronomy, University of Southampton, Southampton, SO17 1BJ, UK</p>
+</dd>
+<dt>Mandy Hewitt</dt><dd><p>School of Mathematics and Physics, Queen’s University Belfast, University Road, Belfast, BT7 1NN, UK</p>
+</dd>
+<dt>Nicolas Scepi</dt><dd><p>Univ. Grenoble Alpes, CNRS, IPAG, 38000 Grenoble, France</p>
+</dd>
+</dl>
+<hr class="docutils" />
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quick.html" class="btn btn-neutral float-right" title="Quick Guide to Python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

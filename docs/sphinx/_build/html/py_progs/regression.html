@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Regression &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Regression</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/py_progs/regression.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="regression">
+<h1>Regression<a class="headerlink" href="#regression" title="Permalink to this heading"></a></h1>
+<p>Primarily to verify that changes made to Python do not inadvertently cause unexpected changes
+if models, several rutines exist to run a fixed set of (relatively fast) models that are
+<strong>nominally</strong>  contained in Examples/regress.</p>
+<p>Developers are encouraged to use this routines, before they merge anything into one of the
+major branches of Python.</p>
+<p>The routines involved are</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>regression.py</p></li>
+<li><p>regression_check.py</p></li>
+<li><p>regression_plot.py</p></li>
+</ul>
+<p>The primary routine is regression.py.  All of the routines can be run with a -h switch
+to obtain information of the full set of command line options</p>
+<p>Typically one should set up a directory, e.g Regression to run the routines, and, if for example,
+py87f, is the version of Python being used when you set up the directory, being run.</p>
+<p>Python should be compiled with mpicc before running the regression program</p>
+</div></blockquote>
+<section id="basic-procedure">
+<h2>Basic Procedure<a class="headerlink" href="#basic-procedure" title="Permalink to this heading"></a></h2>
+<blockquote>
+<div><p>regression.py py87f</p>
+<p>This will create a directory py87f_231108 where 231108 is the current date.  The pf files from
+the regression directory as well as various ancillary files will be copied into this directory,
+and all of the models contained therein will run sequentially.
+In the absence of command line
+switches the routines will be run with a default number of processors (currently 3).
+Assuming this is the first time the program is run, no comparison to previous runs will be made</p>
+<p>The models have been selected
+to test a variety of types of models and/or to highlight areas of concern. As a result, the models that are run are likely
+to change occassionaly.</p>
+<p>Once changes have been made to python, one reruns the program, e.g.</p>
+<p>regression.py py</p>
+<p>This will created a directory py_2311108 (assuming it this is the same day) and repead the previous
+precedured.</p>
+<p><strong>If the program is run on the same day with the same version of python, the older models
+will be overwritten.  Typically one can avoid this by using py one time and py with the version number
+a second time.  But there is also a command line switch to specify the name of the run time directory</strong></p>
+<p>Assuming all of the various models run to complesion, regression.py will call subroutines in regression_check.py
+and regression_plot.py to make comparasions between the model just run and the previous one.  The plots (one for each model)
+will be contained in a directory called Xcompare.</p>
+<p>The models that are run are simple models, and to allow one to proceed quickly, none of the models is run to convergence.
+The outputs compare the spectra that were produced in the two runs of the program, both by looking to see how many lines in
+the ionization and detailed spectra have changed, and by generating plots that show comparisions of the spectra.</p>
+<p>Many times the results will be identical, but if a change between two versions of the program results in a different
+sequence of random numbers, then the spectra will change simply as a result of random noise, which is not a concern.
+There is no easy way to quantify changes that are due to this effect or something else, and
+so one simply through experience has to gauge the results by inspecting the plots that are produced..</p>
+</div></blockquote>
+</section>
+<section id="comments-and-additions">
+<h2>Comments and additions<a class="headerlink" href="#comments-and-additions" title="Permalink to this heading"></a></h2>
+<p>Although regression.py generally produces a comparison betwen the set of models being run and the last set of models that wre run, one can use
+regression_check.py to compare any two sets of runs.</p>
+<p>retression_check.py run1 run2</p>
+<p>where one gives the names of the two directories to be compared.</p>
+<p>While the regression procedure described here is generally set up to run on the models that are contained in the Examples/regress directory,
+regression.py has switches that allow one to do tests on models that are in any input directory.  This can be useful, if one wishes to test
+different models in order to solve specific problems, or to run a set of models sequentially.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

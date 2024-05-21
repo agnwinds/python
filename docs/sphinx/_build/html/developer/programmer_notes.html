@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programming Notes &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Matrix Acceleration using CUDA" href="cuda.html" />
+    <link rel="prev" title="Developer Documentation" href="../developer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../developer.html">Developer Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Programming Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cuda.html">Matrix Acceleration using CUDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html">Unit Test Framework</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../developer.html">Developer Documentation</a></li>
+      <li class="breadcrumb-item active">Programming Notes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/developer/programmer_notes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="programming-notes">
+<h1>Programming Notes<a class="headerlink" href="#programming-notes" title="Permalink to this heading"></a></h1>
+<p>Python is written in C and is normally tested on linux machines and on Macs, where the compiler usually turns out to be clang. It is also regularly compiled with gcc as part of the travis-CI tests. Certain portions of the code are parallelized using the Message Parsing Interface (MPI).</p>
+<p>Version control is (obviously) managed through <strong>git</strong>.  The stable version is on the <cite>master</cite> branch; the main development is carried out on the <cite>dev</cite> branch. This is generally the branch to start with in developing new code. If possible, a developer should use the so-called Fork and Pull model for their version control workflow. See e.g. <a class="reference external" href="https://gist.github.com/Chaser324/ce0505fbed06b947d962">this gist post</a>.</p>
+<p>If one modifies the code, a developer needs to be sure to have <code class="docutils literal notranslate"><span class="pre">$PYTHON/py_progs</span></code> both in <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> and <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.  One should also have a version of indent installed, preferably but not necessarily gnu_indent installed.  This is because, the Makefile will call a script run_indent.py on files that the developer has changed, which enforces a specific indent style on the code.</p>
+<p>In addition to indent, one should have cproto or something equivalent installed. cproto is used to prototypes for all of the subroutines (through the make command</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>prototypes
+</pre></div>
+</div>
+<p>(The many warnings that appear when cproto is run on OSX can so far be ignored. cproto for macs is available with brew)</p>
+<p>All new routines should have Doxygen headers.</p>
+<p>printf statements should be avoided, particular in the main code.  Python has its own replacements for these commands, e.g Log and Error which standardize the outputsand allow for managing what is printed to the screen in multprocessor mode.  There is alsoa command line switch that contorls the amount of information that is printed to the screen.  Specific errors are only logged for a limited number of times, after which theyare merely counted.  A log of the number of times each error has occurred is printed outat the end of each run and for each thread.  (Additional detailes can be found in the Doxygenheader for xlog.c)</p>
+<section id="structures">
+<h2>Structures<a class="headerlink" href="#structures" title="Permalink to this heading"></a></h2>
+<p>In order to understand the code, one needs to understand the data structures.</p>
+<p>The main header files  are:</p>
+<ul class="simple">
+<li><p>atomic.h - This contains all of the structures that hold atomic data, e.g oscillator
+strengths, photoionization cross-sections, elemental abundances, etc.  These data are
+read in at the beginning of the program (see atomicdata.c and other similarly named
+routines)</p></li>
+<li><p>python.h - This contains the structures and other data that comprise the wind as well
+as the parameters of the model.  (This is fairly well-documented, or should be)</p></li>
+</ul>
+</section>
+<section id="program-flow">
+<h2>Program Flow<a class="headerlink" href="#program-flow" title="Permalink to this heading"></a></h2>
+<p>Basically, (as decribed from a more scientific perspective elsewhere), the program consists
+of a number stages</p>
+<ul class="simple">
+<li><p>Data gathering and initialization: This consiss of reading in all of the parameters
+for the model to be calculated, reading in the associated atomic data, and setting up
+program to run.  This procuess involves allocating space for many of the data structures.</p></li>
+<li><p>Ionization cycles: During this portion of the program fleets of photons are generated
+and propogated through the wind, interacting with it in various ways. These photons are
+generated over a large range of frequencies, because their purpose is to allow the program
+to determine the ionization state of the wind.  During this
+process various estimators are accumulated that describe the interaction of the photons
+with the wind.  Once all of the photons have propagated through the wind the various
+estimators are used to calculate a new estimate of the ionization state of the various
+wind cells that constitute the wind.  This process is repeated for a number of cycles,
+by which time, hopefully, the wind will have reached a “steady state”.</p></li>
+<li><p>Spectral cycles: Once the ionization cycles have been completed, the ionization state
+of the wind is fixed, and more detailed spectra are calculated. For this, photons are generated
+in a limited spectral range, depending on the interests of the user.  In contrast to
+the ionization state, where “cycles” are  crucial concept, the only reason to have spectrl
+cycles in the “Spectral cycle” phase is to allow one to gradually improve the statistics
+of the spectrum.  At the end of each spectral cycle, the detailed spectra are written out,
+so one can see the spectra building up.</p></li>
+</ul>
+</section>
+<section id="parallel-operation">
+<h2>Parallel Operation<a class="headerlink" href="#parallel-operation" title="Permalink to this heading"></a></h2>
+<p>Python uses MPI to parallelize the most compute intensive portions of the routine.  It has
+been run on large machines with 100s of cores without problem.</p>
+<p>The portions of the routine that are parallelize are:</p>
+<ul class="simple">
+<li><p>Photon generation and transfer: When run in multiprocesser mode, each thread creates only a
+fraction of the total number of photons.  The weight of the photons in each thread is such
+that the sum of the weights is the total energy expected to be produced in one observer frame second.
+These photons are propagated through the wind, and estimators based on these photons are accumulated.
+At the end of photon transfer by all threads, the various quantities, including the spectra,  that
+have been accumulated in the separate threads are gathered together and averaged or summed as
+appropriate.  For ionization cycles, this means that all of the data needed to calculate the
+ionization in any cell is available on each of the threads.</p></li>
+<li><p>Ionization calculation:  Although all of the threads have all of the data needed to calculate
+the ionization in any cell, in practice what happens is that the program assigns a different set of
+cells to each thread to calculate the ionization.  After the thread calculates the new ionization
+state for its assigned cells, the ionization states are then gathered back and broadcast to all
+of the threads, in preparation for the next cycle.</p></li>
+<li><p>Preparation for detailed radiative transfer in the macro-atom mode.  When photons go through the
+grid in the simple-atom mode, photon frequencies do not change a great deal, however in macro-atom
+mode the frequencies can shift by large amounts. This creates a problem during the detailed spectral
+generation stage, because one does not know before hand how many photons that started out of the
+desired band end up in the desired band.  (In macro-atom mode, a photon bundle that starts out at
+8 keV photoionizes an Fe ion can turn (for example) into an Hbeta photon).  To handle this, one
+needs to estimate how often this happens and include this (effectively as a source function) in
+radiative transfer involving macro-atoms. This is parallelized, in the same manner as the ionization
+calculation by assigning various cells to various threads and gathering the results back before
+the radiative transfer step in the detailed spectrum phase.</p></li>
+</ul>
+<p>MPI requires intialization. For python this is carried out in python.c.  Various subroutines make
+use of MPI, and as a result, programmers need to be aware of this fact when they write auxiliary
+routines that use the various subroutines called by Python.</p>
+</section>
+<section id="input-naming-conventions">
+<h2>Input naming conventions<a class="headerlink" href="#input-naming-conventions" title="Permalink to this heading"></a></h2>
+<p>As is evident from an inspection of a typical input file, we have adopted a somewhat hierarchical scheme
+for the naming of the input variables, which groups variables associated with the same part of the system
+together.  So for example, all of the variables associated with the central object have names like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">### Parameters for the Central Object</span>
+<span class="n">Central_object</span><span class="o">.</span><span class="n">mass</span><span class="p">(</span><span class="n">msol</span><span class="p">)</span>                  <span class="mf">0.8</span>
+<span class="n">Central_object</span><span class="o">.</span><span class="n">radius</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>                  <span class="mf">7e+08</span>
+<span class="n">Central_object</span><span class="o">.</span><span class="n">radiation</span><span class="p">(</span><span class="n">yes</span><span class="p">,</span><span class="n">no</span><span class="p">)</span>                  <span class="n">yes</span>
+<span class="n">Central_object</span><span class="o">.</span><span class="n">rad_type_to_make_wind</span><span class="p">(</span><span class="n">bb</span><span class="p">,</span><span class="n">models</span><span class="p">)</span>                   <span class="n">bb</span>
+<span class="n">Central_object</span><span class="o">.</span><span class="n">temp</span>                        <span class="mi">40000</span>
+</pre></div>
+</div>
+<p>that is, they all begin with Central_object.  This convention should be followed.</p>
+</section>
+<section id="external-variables">
+<h2>External variables<a class="headerlink" href="#external-variables" title="Permalink to this heading"></a></h2>
+<p>Python uses lots (and likely too many), what are properly know as  external variables.   (In C, a global
+variable is a variable whose scope is all of the routines in a speciric file.  An external varriable
+is one that is shared across multiple files.)</p>
+<p>In the latest generations of gcc,  the standards for extenral variiables have been tightened.</p>
+<p>If one wishes to define an external variable, one must first declare it as eternal, and then one
+must initialize it outside a specific routine exactly in one place.</p>
+<p>The standard convention is that the variables are declared as external in a header file, e.g python.h,
+and then intialized in a separate .c file, e.g python_extern_init.c.   Unless, a variable is actually
+initialized, no space will be allocated for the variable.</p>
+<p>So if variables are added (or subtracted), one must make a change both in the relavant .h file.</p>
+<p>Currently has three.c files atomic_extern_init.c, models_extern_init.c, python_extern_init.c
+corresponding to the three main .h files, atommic.h, models.h and python.h</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../developer.html" class="btn btn-neutral float-left" title="Developer Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cuda.html" class="btn btn-neutral float-right" title="Matrix Acceleration using CUDA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

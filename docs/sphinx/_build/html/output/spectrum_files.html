@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spectra Files &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Issues with Generating Spectra" href="spectrum_generation_large_optical_depth.html" />
+    <link rel="prev" title="Model" href="model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Diagnostic files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">Model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Spectra Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrum_generation_large_optical_depth.html">Issues with Generating Spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../output.html">Outputs &amp; Evaluation</a></li>
+      <li class="breadcrumb-item active">Spectra Files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/output/spectrum_files.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="spectra-files">
+<h1>Spectra Files<a class="headerlink" href="#spectra-files" title="Permalink to this heading"></a></h1>
+<p>Python is intended to produce simulated spectra.  These spectra are all ascii tables intended to be accessible with software packages such as astropy.</p>
+<p>All of the ascii begin with commented headers that contain all of the parameters of associated with a run,
+along with the date of the run and the specific version of Python used to make the run.
+In principle, if one still has access to any of the spectra, one can reproduce the entire run again.</p>
+<p>Broad band spectra are created from the last ionization cycle. (More accurately the broad band spectra are written out at the end of each ionization cycle, so one the program is finished one has the
+broad band spectrum of the last cycle)</p>
+<p>Detailed are calculated from all of the spectral cycles. (Properly normalized spectra are written out at the
+end of each spectral cycle, and with each cycle the photon statistics improves.)</p>
+<p>The units in which the spectra are written out is also indicated in the header to the file.</p>
+<p>For a model with root name <em>cv</em>, the following broadband spectra will be created:</p>
+<ul class="simple">
+<li><p><strong>cv.spec_tot</strong></p></li>
+<li><p><strong>cv.log_spec_tot</strong></p></li>
+<li><p><strong>cv.spec_tot_wind</strong></p></li>
+<li><p><strong>cv.log_spec_tot_wind</strong></p></li>
+</ul>
+<section id="file-types">
+<h2>File types<a class="headerlink" href="#file-types" title="Permalink to this heading"></a></h2>
+<dl>
+<dt>.spec_tot</dt><dd><p>An ascii file that contains various spectra from the ionization-calculation phase of the program on a linear frequency scale.
+The first few lines of the file (omitting the header) are as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Freq</span><span class="o">.</span>        <span class="n">Lambda</span>     <span class="n">Created</span>    <span class="n">WCreated</span>   <span class="n">Emitted</span>    <span class="n">CenSrc</span>     <span class="n">Disk</span>       <span class="n">Wind</span>       <span class="n">HitSurf</span>
+<span class="mf">2.524334e+14</span> <span class="mf">11876.102</span>  <span class="mf">3.5244e+18</span>          <span class="mi">0</span> <span class="mf">3.5244e+18</span>          <span class="mi">0</span> <span class="mf">3.5244e+18</span>          <span class="mi">0</span> <span class="mf">1.1547e+16</span>
+<span class="mf">2.550397e+14</span> <span class="mf">11754.737</span>  <span class="mf">3.4721e+18</span>          <span class="mi">0</span> <span class="mf">3.4721e+18</span>          <span class="mi">0</span> <span class="mf">3.4721e+18</span>          <span class="mi">0</span> <span class="mf">2.8761e+15</span>
+<span class="mf">2.576461e+14</span> <span class="mf">11635.827</span>  <span class="mf">3.4433e+18</span>          <span class="mi">0</span> <span class="mf">3.4433e+18</span>          <span class="mi">0</span> <span class="mf">3.4433e+18</span>          <span class="mi">0</span> <span class="mf">2.8835e+15</span>
+<span class="mf">2.602524e+14</span> <span class="mf">11519.299</span>  <span class="mf">3.6858e+18</span>          <span class="mi">0</span> <span class="mf">3.6858e+18</span>          <span class="mi">0</span> <span class="mf">3.6858e+18</span>          <span class="mi">0</span> <span class="mf">2.8706e+15</span>
+<span class="mf">2.628587e+14</span> <span class="mf">11405.082</span>  <span class="mf">3.6711e+18</span>          <span class="mi">0</span> <span class="mf">3.6711e+18</span>          <span class="mi">0</span> <span class="mf">3.6711e+18</span>          <span class="mi">0</span> <span class="mf">1.1528e+16</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>The first two columns are fairly obvious. Lambda is in Angstroms.</p>
+<p>The remainder indicate the luminosity, that is <span class="math notranslate nohighlight">\(L_{\nu}\)</span> of the system for specific types of photons. The units are <span class="math notranslate nohighlight">\({\rm erg\: s}^{-1} {\rm Hz}^{-1}\)</span>.</p>
+<p>The remaining columns are:</p>
+<ul class="simple">
+<li><p>Created is the total spectrum of all of the photons paakets as created, that is before having been translated through the wind</p></li>
+<li><p>WCreated is the spectrum of the photons that are created in the wind before translation</p></li>
+<li><p>Emitted is the emergent spectrum after the photons have been translated through the wind</p></li>
+<li><p>CenSrc is the emergent spectrum from photon bundles originating from the Star or BL,</p></li>
+<li><p>Disk is the emergent spectrum from photon bundles originating from the disk,</p></li>
+<li><p>Wind is the emergent spectrum from photon bundles that have been reprocessed by the wind,</p></li>
+<li><p>HitSurf represents photons that did not escape the system but ran into a boundary</p></li>
+</ul>
+<dl>
+<dt>.log_spec_tot</dt><dd><p>An ascii file which contains the same information as <em>.spec_tot</em>, but with a logarithmically space frequency intervals.
+This gives better sampling of the SED in a lot of cases and is much better for plotting things such as the input spectrum.</p>
+</dd>
+<dt>.spec_tot_wind</dt><dd><p>Identical to <em>.spec_tot</em> but just including photons that were generated in the wind or scattered by the wind</p>
+</dd>
+<dt>.log_spec_tot_wind</dt><dd><p>A logarithmic version of <em>.spec_tot_wind</em></p>
+</dd>
+<dt>.spec</dt><dd><p>an ascii file that contains the final detailed spectra for the wavelengths of interest at a distance of <strong>100 pc</strong>.  The units for the detailed spectra are determined by the input parameter Spectrum.type.</p>
+<p>Photons bundles are generated in cycles in Python and the <em>.spec</em> file is actually written out at the end of each cycle
+as the program is running in the spectrum-generation phase of the program. So one can inspect the spectrum as it is building up.</p>
+<p>The beginning of the file (omitting the header) is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Freq</span><span class="o">.</span>        <span class="n">Lambda</span>     <span class="n">Created</span>    <span class="n">WCreated</span>   <span class="n">Emitted</span>    <span class="n">CenSrc</span>     <span class="n">Disk</span>       <span class="n">Wind</span>       <span class="n">HitSurf</span>    <span class="n">Scattered</span>  <span class="n">A01P0</span><span class="mf">.50</span>   <span class="n">A30P0</span><span class="mf">.50</span>   <span class="n">A60P0</span><span class="mf">.50</span>   <span class="n">A80P0</span><span class="mf">.50</span>
+<span class="mf">5.998778e+14</span>  <span class="mf">4997.560</span>  <span class="mf">5.5824e-13</span>          <span class="mi">0</span> <span class="mf">5.5824e-13</span>          <span class="mi">0</span> <span class="mf">5.5824e-13</span>          <span class="mi">0</span> <span class="mf">1.0097e-15</span>          <span class="mi">0</span> <span class="mf">1.9797e-12</span>  <span class="mf">1.141e-12</span> <span class="mf">4.0282e-13</span>  <span class="mf">1.068e-13</span>
+<span class="mf">6.001705e+14</span>  <span class="mf">4995.122</span>  <span class="mf">6.4224e-13</span>          <span class="mi">0</span> <span class="mf">6.4224e-13</span>          <span class="mi">0</span> <span class="mf">6.4224e-13</span>          <span class="mi">0</span> <span class="mf">1.3472e-15</span>          <span class="mi">0</span> <span class="mf">2.0123e-12</span> <span class="mf">1.2369e-12</span> <span class="mf">5.1482e-13</span> <span class="mf">1.0398e-13</span>
+<span class="mf">6.004632e+14</span>  <span class="mf">4992.687</span>  <span class="mf">7.2239e-13</span>          <span class="mi">0</span> <span class="mf">7.2239e-13</span>          <span class="mi">0</span> <span class="mf">7.2239e-13</span>          <span class="mi">0</span>          <span class="mi">0</span>          <span class="mi">0</span> <span class="mf">1.8656e-12</span> <span class="mf">1.2165e-12</span> <span class="mf">4.9179e-13</span> <span class="mf">1.3359e-13</span>
+<span class="mf">6.007560e+14</span>  <span class="mf">4990.254</span>  <span class="mf">7.4183e-13</span>          <span class="mi">0</span> <span class="mf">7.4183e-13</span>          <span class="mi">0</span> <span class="mf">7.4183e-13</span>          <span class="mi">0</span> <span class="mf">6.7702e-16</span>          <span class="mi">0</span> <span class="mf">1.7185e-12</span> <span class="mf">1.4226e-12</span> <span class="mf">5.9175e-13</span> <span class="mf">1.6808e-13</span>
+<span class="mf">6.010487e+14</span>  <span class="mf">4987.824</span>  <span class="mf">7.9709e-13</span>          <span class="mi">0</span> <span class="mf">7.9709e-13</span>          <span class="mi">0</span> <span class="mf">7.9709e-13</span>          <span class="mi">0</span> <span class="mf">3.3825e-16</span>          <span class="mi">0</span>  <span class="mf">2.262e-12</span> <span class="mf">1.6291e-12</span> <span class="mf">7.2959e-13</span> <span class="mf">1.4697e-13</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Where the first set columns are as follows:</p>
+<ul class="simple">
+<li><p>Frequency in Hz</p></li>
+<li><p>Wavelength in Angstorms</p></li>
+<li><p>The spectrum of photons which are created  (before passing through the wind)</p></li>
+<li><p>The spectrum of all photons which are created in the wind (before processing by the wind)</p></li>
+<li><p>The spectrum of all photons which escape the wind (after passing through the wind)</p></li>
+<li><p>The spectrum of all photons created by the star or BH (after passing through the wind)</p></li>
+<li><p>The spectrum of all photons created by the wind (after passing though the wind)</p></li>
+<li><p>The spectrum of all photons that are scattered by the wind (after passing through the wind)</p></li>
+</ul>
+<p>These data in the first set of columns do not reflect the angular dependence of the emission. They are effectively an angle averaged spectrum. Except for the fact that the units are different and the wavelength range is limited these should resemble the spectra in the output files (such as .spec_tot) that record the spectra constructed in the ionization cycles.</p>
+<p>The remaining columns are the spectra at various inclination angles and binary phases.  The label A30P0.50 means the spectrum is viewed at an inclination angle of 30 degrees and at a phase of 0.5 – for a binary system this is when the secondary was located behind the primary.</p>
+<dl class="simple">
+<dt>.log_spec</dt><dd><p>Identical to the spectrum .spec file except with logarithmic intervals.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="model.html" class="btn btn-neutral float-left" title="Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrum_generation_large_optical_depth.html" class="btn btn-neutral float-right" title="Issues with Generating Spectra" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

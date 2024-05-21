@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meta-documentation &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developer Documentation" href="developer.html" />
+    <link rel="prev" title="Auger Photon Yields" href="atomic/photon_yields.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atomic.html">Atomic Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Meta-documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/meta.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="meta-documentation">
+<h1>Meta-documentation<a class="headerlink" href="#meta-documentation" title="Permalink to this heading"></a></h1>
+<section id="how-to-document-python">
+<h2>How to document Python<a class="headerlink" href="#how-to-document-python" title="Permalink to this heading"></a></h2>
+<p>This documentation is written in <strong>ReStructured Text</strong>, and parsed by <strong>Sphinx</strong>.
+A general guide to <strong>ReStructured Text</strong> can be found <a class="reference external" href="http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html">here</a>.
+We’re trying to maintain a roughly consistent format for the documentation.</p>
+<section id="installing-the-documentation-tools">
+<h3>Installing the documentation tools<a class="headerlink" href="#installing-the-documentation-tools" title="Permalink to this heading"></a></h3>
+<p>This guide is produced using <strong>Sphinx</strong>.
+<strong>Sphinx</strong> is written in <strong>python</strong> and available from the <strong>pip</strong> package manager.
+We require the <strong>Python 3</strong> version of <strong>Sphinx</strong>. Install it, and the other modules required, as:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>docs/sphinx
+pip3<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</section>
+<section id="building-the-documentation">
+<h3>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this heading"></a></h3>
+<p>Once <strong>Sphinx</strong> is installed, you can make the documentation using a <strong>Makefile</strong> as:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>You can tell if the documentation was built successfully by looking at the output of <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code>.
+You should see:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">build</span> <span class="n">succeeded</span><span class="o">.</span>
+
+<span class="n">The</span> <span class="n">HTML</span> <span class="n">pages</span> <span class="n">are</span> <span class="ow">in</span> <span class="n">html</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>If the build was successful then the documentation can be viewed by opening <code class="docutils literal notranslate"><span class="pre">docs/sphinx/html/index.html</span></code>.
+Many errors will not stop the build process.
+Details on the build errors can be found in the section on <a class="reference internal" href="#common-errors-warnings"><span class="std std-ref">Common errors &amp; warnings</span></a>.</p>
+<p>You can make minor changes to the documentation and recompile using <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> again.
+If you add new pages or move existing ones, the table of contents will need to be regenerated.
+Do this via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean
+make<span class="w"> </span>html
+</pre></div>
+</div>
+</section>
+</section>
+<section id="general-documentation">
+<h2>General documentation<a class="headerlink" href="#general-documentation" title="Permalink to this heading"></a></h2>
+<section id="conventions">
+<h3>Conventions<a class="headerlink" href="#conventions" title="Permalink to this heading"></a></h3>
+<p>Each file should have a title, with subsections within it created by underlining the titles as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="gh">Title</span>
+<span class="gh">#####</span>
+
+<span class="gh">Section</span>
+<span class="gh">=======</span>
+
+<span class="gh">Subsection</span>
+<span class="gh">----------</span>
+
+<span class="gh">Subsubsection</span>
+<span class="gh">^^^^^^^^^^^^^</span>
+</pre></div>
+</div>
+<p>When referring to a parameter, link to the documentation page as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>The number of domains can be set by <span class="na">:ref:</span><span class="nv">`Wind.number_of_components`</span>.
+</pre></div>
+</div>
+<p>When referring to files, code (e.g. shell script) or values used by the code, render it as <code class="docutils literal notranslate"><span class="pre">monospaced</span></code> text as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>Run the program using <span class="s">``py``</span>.
+Set the parameter <span class="na">:ref:</span><span class="nv">`Wind.type`</span> to <span class="s">``SV``</span>.
+Outputs can be found in <span class="s">``filename.rst``</span>.
+</pre></div>
+</div>
+<p>When referring to a library or program name, render it in <strong>bold</strong> as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>Though this program is called <span class="gs">**Python**</span>, it is written in <span class="gs">**C**</span>, using the <span class="gs">**GSL**</span> library.
+</pre></div>
+</div>
+<p>Content of interest to developers but not users should be broken out into a callout as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="cp">.. admonition :: Developer Note</span>
+
+<span class="cp">    This value is only stored to single-precision</span>
+</pre></div>
+</div>
+<div class="admonition-developer-note admonition">
+<p class="admonition-title">Developer Note</p>
+<p>This is a developer note</p>
+</div>
+<p>Documentation that needs expanding should be indicated with a to-do callout as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="cp">.. todo :: Expand this section</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>This is a to-do note</p>
+</div>
+<p>Content relating to a specific <strong>GitHub</strong> issue/pull request can be linked directly to it as <a class="reference external" href="https://github.com/agnwinds/python/issues/1">#1</a>/<a class="reference external" href="https://github.com/agnwinds/python/pull/56">#56</a>:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>This arose due to issue <span class="na">:issue:</span><span class="nv">`1`</span>, which was fixed by <span class="na">:user:</span><span class="nv">`kslong`</span> using <span class="na">:pr:</span><span class="nv">`56`</span>.
+</pre></div>
+</div>
+<p>When writing a table, use the full form where possible as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>+----+----+
+|Name|X   |
++----+----+
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>X</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="parameter-documentation">
+<h2>Parameter documentation<a class="headerlink" href="#parameter-documentation" title="Permalink to this heading"></a></h2>
+<section id="formatting">
+<h3>Formatting<a class="headerlink" href="#formatting" title="Permalink to this heading"></a></h3>
+<p>Parameters are documented in a consistent way. They have a set of properties.
+Not every parameter will have all properties but you should fill them all in where possible.
+A full example outline is:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="gh">Title</span>
+<span class="gh">=====</span>
+Description.
+Use <span class="na">:ref:</span><span class="nv">`Parameter.name`</span> to link to other parameters, or other pages within the documentation.
+
+
+Type
+  Enumerator
+
+Values
+
+  option
+    Description
+    Multi-line if desired
+
+  other
+    More description
+
+    Child(ren)
+    <span class="m">*</span> <span class="na">:ref:</span><span class="nv">`Corona.radmin`</span>
+
+  yet_another
+    More description
+
+    Child(ren)
+    <span class="m">*</span> <span class="na">:ref:</span><span class="nv">`KWD.rmin`</span>
+    <span class="m">*</span> <span class="na">:ref:</span><span class="nv">`KWD.rmax`</span>
+
+File
+  <span class="s">`filename.c </span><span class="si">&lt;https://github.com/agnwinds/python/blob/master/source/filename.c&gt;</span><span class="s">`_</span>
+
+Parent(s)
+  * <span class="na">:ref:</span><span class="nv">`System_type`</span>: <span class="nv">`agn`</span>, <span class="nv">`binary`</span>
+</pre></div>
+</div>
+<p>The sections we expect are entered as a definition list.
+A definition list consists of titles followed by a definition block indented by 2 characters.
+The headings, in the order we expect, are:</p>
+<dl>
+<dt>Name</dt><dd><p>The parameter name, as used by Python input files.</p>
+</dd>
+<dt>Description</dt><dd><p>A description of the parameter and its function.
+This can include links to other pages and parameters, using the format</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>Use <span class="na">:ref:</span><span class="nv">`Parameter.name`</span> to link to other parameters, or other pages within the documentation.
+</pre></div>
+</div>
+</dd>
+<dt>Type</dt><dd><p>This is whether the parameter is an integer, float, or enumerator (a list of choices).</p>
+</dd>
+<dt>Unit</dt><dd><p>This is the unit. It can be something like <code class="docutils literal notranslate"><span class="pre">cm</span></code>, <code class="docutils literal notranslate"><span class="pre">m</span></code> or even derived from other parameters
+(e.g. <a class="reference internal" href="input/parameters/central_object/Central_object/Central_object.radius.html#central-object-radius"><span class="std std-ref">Central_object.radius</span></a>).</p>
+</dd>
+<dt>Values</dt><dd><p>If the parameter is an integer or float, this should describe the range of values it can take.
+For example, <code class="docutils literal notranslate"><span class="pre">Greater</span> <span class="pre">than</span> <span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">0-1</span></code>.</p>
+<p>If the variable type is <code class="docutils literal notranslate"><span class="pre">Enumerator</span></code>, then instead it should include a nested definition list of
+the possible choices. Where each choice implies a different set of possible children
+(e.g. <a class="reference internal" href="input/parameters/wind/Wind/Wind.type.html#wind-type"><span class="std std-ref">Wind.type</span></a>) then each choice should have its own <strong>Children</strong> definition list, e.g.</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>SV
+  * <span class="na">:ref:</span><span class="nv">`SV.thetamin`</span>
+  <span class="m">*</span> <span class="na">:ref:</span><span class="nv">`SV.thetamax`</span>
+</pre></div>
+</div>
+</dd>
+<dt>File</dt><dd><p>The file the parameter is found in. This is a link to the file on the <cite>master</cite> branch.</p>
+</dd>
+<dt>Child(ren)</dt><dd><p>If the parameter implies any others.
+For example, <a class="reference internal" href="input/parameters/Spectrum/Spectrum.no_observers.html#spectrum-no-observers"><span class="std std-ref">Spectrum.no_observers</span></a> has child parameters <a class="reference internal" href="input/parameters/Spectrum/Spectrum.angle.html#spectrum-angle"><span class="std std-ref">Spectrum.angle</span></a>.</p>
+</dd>
+<dt>Parent(s)</dt><dd><p>If the parameter depends on another.
+For example, <a class="reference internal" href="input/parameters/wind/KWD/KWD.rmax.html#kwd-rmax"><span class="std std-ref">KWD.rmax</span></a> is only required for a specific choice of <a class="reference internal" href="input/parameters/wind/Wind/Wind.type.html#wind-type"><span class="std std-ref">Wind.type</span></a>.</p>
+</dd>
+</dl>
+</section>
+<section id="locations">
+<h3>Locations<a class="headerlink" href="#locations" title="Permalink to this heading"></a></h3>
+<p>Parameters are stored in <code class="docutils literal notranslate"><span class="pre">`docs/sphinx/source/inputs/parameters/</span></code>.</p>
+<p>If multiple parameters share a root (i.e. <code class="docutils literal notranslate"><span class="pre">SV.radmin</span></code>, <code class="docutils literal notranslate"><span class="pre">SV.radmax</span></code>), then they should be stored within a directory with the
+same root name as the parameters (i.e. <code class="docutils literal notranslate"><span class="pre">SV/SV.radmin.rst</span></code>, <code class="docutils literal notranslate"><span class="pre">SV/SV.radmax.rst</span></code>). In the level above that directory, there should
+be a  <code class="docutils literal notranslate"><span class="pre">.rst</span></code> file with the same name that serves to link those files to the table of contents, as:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>SV
+==
+
+Some description of the parameter group.
+
+<span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:glob:</span>
+
+   SV/*
+</pre></div>
+</div>
+<p>Storing all the parameters in one folder would result in it being unreadably busy. Instead, we sift the parameters into groups.
+Where multiple different parameters or parameter folders fall into the same rough category (e.g. central object parameters,
+wind types and the like) we create subfolders to group them into. The order that these appear in the sidebar can be set if you
+enter the filenames explicitly in the <code class="docutils literal notranslate"><span class="pre">docs/sphinx/source/input/parameters.rst</span></code> file.</p>
+</section>
+</section>
+<section id="common-errors-warnings">
+<h2>Common errors &amp; warnings<a class="headerlink" href="#common-errors-warnings" title="Permalink to this heading"></a></h2>
+<dl>
+<dt>Undefined Label</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">.</span><span class="n">rst</span><span class="p">:</span><span class="n">line_number</span><span class="p">:</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">undefined</span> <span class="n">label</span><span class="p">:</span> <span class="n">label_name</span> <span class="p">(</span><span class="k">if</span> <span class="n">the</span> <span class="n">link</span> <span class="n">has</span> <span class="n">no</span> <span class="n">caption</span> <span class="n">the</span> <span class="n">label</span> <span class="n">must</span> <span class="n">precede</span> <span class="n">a</span> <span class="n">section</span> <span class="n">header</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This warning occurs when the <code class="code docutils literal notranslate"><span class="pre">:ref:'location'</span></code> format is used to link to a section that does not exist.
+Check the spelling</p>
+</dd>
+<dt>Duplicate Label</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">.</span><span class="n">rst</span><span class="p">:</span><span class="n">line_number</span><span class="p">:</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">duplicate</span> <span class="n">label</span> <span class="n">label_name</span><span class="p">,</span> <span class="n">other</span> <span class="n">instance</span> <span class="ow">in</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">other</span><span class="o">/</span><span class="n">file</span><span class="o">.</span><span class="n">rst</span>
+</pre></div>
+</div>
+<p>This warning occurs when two sections have the same name. The <strong>autosectionlabel</strong> addon automatically creates a label
+for each title and section component. This is generally not a problem unless you <em>really</em> need to</p>
+</dd>
+<dt>Inline emphasis</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="p">:</span><span class="n">line_number</span><span class="p">:</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">Inline</span> <span class="n">emphasis</span> <span class="n">start</span><span class="o">-</span><span class="n">string</span> <span class="n">without</span> <span class="n">end</span><span class="o">-</span><span class="n">string</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>This warning occurs when a line contains an un-escaped * character, as * is used to denote <em>emphasis</em>.
+Either escape it with \ (i.e. <code class="code docutils literal notranslate"><span class="pre">*</span></code>) or wrap it in a :code: tag.</p>
+</dd>
+<dt>Bullet list ends without a blank line</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="o">.</span><span class="n">rst</span><span class="p">:</span><span class="n">line_number</span><span class="p">:</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">Bullet</span> <span class="nb">list</span> <span class="n">ends</span> <span class="n">without</span> <span class="n">a</span> <span class="n">blank</span> <span class="n">line</span><span class="p">;</span> <span class="n">unexpected</span> <span class="n">unindent</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>This warning occurs when a bullet-list doesn’t have a blank line between it and the next bit of text.
+It commonly happens when you accidentally forget to space a bullet and the text following it, e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">blah1</span>
+<span class="o">*</span> <span class="n">blah2</span>
+<span class="o">*</span><span class="n">blah3</span>
+</pre></div>
+</div>
+</dd>
+<dt>Inline substitution_reference</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="p">:</span><span class="n">line_number</span><span class="p">:</span>
+<span class="n">WARNING</span><span class="p">:</span> <span class="n">Inline</span> <span class="n">substitution_reference</span> <span class="n">start</span><span class="o">-</span><span class="n">string</span> <span class="n">without</span> <span class="n">end</span><span class="o">-</span><span class="n">string</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>This warning occurs when you have a word immediately followed by a pipe that is not part of a table, e.g. <code class="code docutils literal notranslate"><span class="pre">something|</span></code>.
+It tends to occur during typos in table creation e.g.</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>+---+---+
+<span class="o">|</span> a||b  |
++---+---+
+</pre></div>
+</div>
+</dd>
+</dl>
+</section>
+<section id="documenting-python-scripts">
+<h2>Documenting Python Scripts<a class="headerlink" href="#documenting-python-scripts" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference internal" href="py_progs.html"><span class="doc">Python Scripts</span></a> page is intended to document various python scripts contained within the py_progs folder. The aim is to do this using Sphinx’s <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html">autodoc extension</a>, invoked by adding <code class="docutils literal notranslate"><span class="pre">sphinx.ext.autodoc</span></code> to extensions list in the conf.py file. py_progs is also added to the path using <code class="docutils literal notranslate"><span class="pre">sys.path.insert(0,</span> <span class="pre">'../../py_progs/')</span></code>.</p>
+<p>The above link contains full documentation of the commands. A module in py_progs can be documented by adding the following text to the rst file, where module.py is the name of the module you wish to document.</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="p">..</span> <span class="ow">automodule</span><span class="p">::</span> py_read_output.py
+    <span class="nc">:members:</span>
+</pre></div>
+</div>
+<p>For this to work properly, docstrings have to be in a reasonable rst format. We might consider using the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html">napoleon extension</a> if this is not to our taste.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="atomic/photon_yields.html" class="btn btn-neutral float-left" title="Auger Photon Yields" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="developer.html" class="btn btn-neutral float-right" title="Developer Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

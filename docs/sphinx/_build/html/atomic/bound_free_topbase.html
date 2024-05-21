@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bound Free (TopBase) &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bound Free (Verner)" href="bound_free_verner.html" />
+    <link rel="prev" title="Bound Free (Overview)" href="bound_free.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../atomic.html">Atomic Data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bound_bound.html">Bound Bound</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_bound_electron_collision_strengths.html">Bound-bound electron collision strengths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_free.html">Bound Free (Overview)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Bound Free (TopBase)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bound_free_verner.html">Bound Free (Verner)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="direct_ionization.html">Direct Ionization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electron_yields.html">Auger Electron Yields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elem_ions.html">Elements and Ions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="free-free.html">Free-Free Emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levels.html">Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="photon_yields.html">Auger Photon Yields</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py_progs.html">Python Scripts</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../atomic.html">Atomic Data</a></li>
+      <li class="breadcrumb-item active">Bound Free (TopBase)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/atomic/bound_free_topbase.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bound-free-topbase">
+<h1>Bound Free (TopBase)<a class="headerlink" href="#bound-free-topbase" title="Permalink to this heading"></a></h1>
+<section id="source">
+<h2>Source<a class="headerlink" href="#source" title="Permalink to this heading"></a></h2>
+<p>Obtained from The <a class="reference external" href="http://cdsweb.u-strasbg.fr/topbase/topbase.html">Opacity project</a>. See also <a class="reference external" href="http://articles.adsabs.harvard.edu/full/1993A%26A...275L...5C">Cunto et at 1993, A&amp;A, 275, L5</a></p>
+</section>
+<section id="translation-to-python-format">
+<h2>Translation to Python format<a class="headerlink" href="#translation-to-python-format" title="Permalink to this heading"></a></h2>
+<p>ksl - It’s not clear that we are now making use of the topbase data in this way but my original attempt to incorporate topbase photoinization data into Python is contained in the directory topbase. Processing of these files was done by py_top_phot. My feeling is that we can replace these remarks with those that are more up to date, once Nick and James discuss this section, and delete any mention of my original attempt on this in the data-gen archive.</p>
+</section>
+<section id="data-format">
+<h2>Data format<a class="headerlink" href="#data-format" title="Permalink to this heading"></a></h2>
+<p>Our original photoionization cross sectiions came from a combination of cite{verner96}, supplemented by a set of older values from cite{verner95}</p>
+<p>The TopBase photoionization files have the following format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PhotTopS</span>  <span class="mi">1</span>  <span class="mi">1</span> <span class="mi">200</span>    <span class="mi">1</span>    <span class="mf">13.605698</span>  <span class="mi">50</span>
+<span class="n">PhotTop</span>    <span class="mf">13.605698</span> <span class="mf">6.304e-18</span>
+<span class="n">PhotTop</span>    <span class="mf">16.627193</span> <span class="mf">3.679e-18</span>
+</pre></div>
+</div>
+<p>whereas the Macro Atoms look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PhotMacS</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mf">13.598430</span>     <span class="mi">100</span>
+<span class="n">PhotMac</span>       <span class="mf">13.598430</span>   <span class="mf">6.3039999e-18</span>
+<span class="n">PhotMac</span>       <span class="mf">13.942675</span>   <span class="mf">5.8969998e-18</span>
+</pre></div>
+</div>
+<p>The meaning of the columns is the same in both cases here. It may be simply a historical accident that we have both formats, or probably we were worried we would need to change. Topbase is generally the source for this information.</p>
+<p>The initial line contains (a) the element, (b) the ion, (c) the level, (d) the level up, (e), the energy threshold in eV, and (f)  the number of x-sections to be read in.
+The following lines gives the photon energy in eV, and the cross-section in cm$^{2}$.  To be a valid file the photon x-section  must not appear below the energy threshold</p>
+<p>“Level up” corresponds to how many levels the electron is moving in the transition: this is simply 1</p>
+<p>For the simple atom case, the header line can be parsed as follows</p>
+<ul class="simple">
+<li><p>z:  the atomic number</p></li>
+<li><p>ionization stage, in the astronomical  convention of the lower level ion, the one that gets ionized</p></li>
+<li><p>ISLP</p></li>
+<li><p>ll: the lower level index in the ion that gets ionized (with that ISLP)</p></li>
+<li><p>e: the energy threshold in eV (only photons above this energy ionize)</p></li>
+<li><p>npts: the number of points where the cross-section is measured</p></li>
+</ul>
+<p>For the simple atom case the combination ISLP and level is unique</p>
+<p>For the macro-atom case the entries in the header line are</p>
+<ul class="simple">
+<li><p>z:  the atomic number</p></li>
+<li><p>ionization stage, in the astronomical  convention of the lower level ion, the one that gets ionized</p></li>
+<li><p>ll: the lower level index in the ion that gets ionized (with that ISLP)</p></li>
+<li><p>ul: the upper level index in the ion after ionization (usually 1)</p></li>
+<li><p>e: the energy threshold in eV (only photons above this energy ionize)</p></li>
+<li><p>npts: the number of points where the cross-ection is measured</p></li>
+</ul>
+<p>For the macro atom case, the indices relate to the energy levels, that is these must be connected up properly</p>
+<p>The TopBase energies are inaccurate and so generally adjustments are made using Chianti or some other source to fix up the energy levels.</p>
+</section>
+<section id="python-structure">
+<h2>Python structure<a class="headerlink" href="#python-structure" title="Permalink to this heading"></a></h2>
+<p>The data are stored in the Topbase_phot stucture which can be found in atomic.h</p>
+</section>
+<section id="criteria-for-usage-in-python-run">
+<h2>Criteria for usage in Python run<a class="headerlink" href="#criteria-for-usage-in-python-run" title="Permalink to this heading"></a></h2>
+<p>Data has to be read into Python in a logical order.  For a set of  phototionization x-sections to be accepted, the energy levels (or configuratios) must already have been defiend.  See <a class="reference internal" href="levels.html"><span class="doc">Levels</span></a></p>
+<p>The items that must match are:</p>
+<ul class="simple">
+<li><p>the element (z)</p></li>
+<li><p>the ion (istate)</p></li>
+<li><p>the upper level, which will be a level in the next ion (ilv)</p></li>
+<li><p>the lower level, which will be in the ion that is being photoionized</p></li>
+</ul>
+</section>
+<section id="comments">
+<h2>Comments<a class="headerlink" href="#comments" title="Permalink to this heading"></a></h2>
+<p><strong>The upper level in the MacroAtom case</strong></p>
+<p>A common error that creates problems in reading in photoionization x-sections in the MacroAtom case is not to include the next ion up, partiulary the bare ion. If one encounters errors where the upper level is
+not found, one should check the level file to verify that that the upper level ion is present, and that the inputs allow for the existence of at least the first level
+of that ion.</p>
+<p>For example, if one wishes to read in photoionization x-sections for N VII (hydrogenic), the levels file should include lines like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IonM</span>    <span class="n">N</span>   <span class="mi">7</span>   <span class="mi">7</span>   <span class="mi">2</span>  <span class="mf">667.05100</span> <span class="mi">1000</span>   <span class="mi">5</span>     <span class="mi">1</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="n">S_</span><span class="p">{</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">})</span>
+<span class="n">IonM</span>    <span class="n">N</span>   <span class="mi">7</span>   <span class="mi">8</span>   <span class="mi">1</span> <span class="mf">1.0000e+20</span>   <span class="mi">1</span>   <span class="mi">1</span>     <span class="n">Bare</span>
+</pre></div>
+</div>
+<p>The following is incorect:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IonM</span>    <span class="n">N</span>   <span class="mi">7</span>   <span class="mi">7</span>   <span class="mi">2</span>  <span class="mf">667.05100</span> <span class="mi">1000</span>   <span class="mi">5</span>     <span class="mi">1</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="n">S_</span><span class="p">{</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">})</span>
+<span class="n">IonM</span>    <span class="n">N</span>   <span class="mi">7</span>   <span class="mi">8</span>   <span class="mi">1</span> <span class="mf">1.0000e+20</span>   <span class="mi">0</span>   <span class="mi">0</span>     <span class="n">Bare</span>
+</pre></div>
+</div>
+<p>because although the bare ion is present, the maximum number of levels is set to 0.   This is not an issue for the simple atom case.</p>
+<p><strong>Extrapolation to higher energies</strong></p>
+<p>Some topbase cross-sections do not extend to very high energies, for reasons that
+are not obvious.  This can cause non-physical edges to appear in spectra.  Therefore,
+is is important to inspect any additions to the atomic data based on x-sections
+retrieved from TopBas</p>
+<p>Some tools have been developed To address this probllem.  In particularly,  JM wrote a
+script to extrapolate the cross-section to higher energies, by
+calculating the gradient in log-space at the maximum energy and extrapolating
+to 100 keV. A number of cross-sections had unrealistic gradients at the original
+maximum energy, and were identified by eye and then forced to have a <span class="math notranslate nohighlight">\(\nu^{-3}\)</span> shape.
+This is the shape of a hydrogenic cross-section and whilst it is not accurate
+for non-hydrogenic ions, it is more realistic (and conservative) than some of
+the unphysically shallow gradients that were being found.
+This is also briefly described in section~3.7.2 of Matthews PhD thesis.
+The python scripts can be found in the <a class="reference external" href="https://github.com/agnwinds/data-gen">data-gen</a> repository progs/extrapolate_xs/
+with docstrings describing their use.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bound_free.html" class="btn btn-neutral float-left" title="Bound Free (Overview)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bound_free_verner.html" class="btn btn-neutral float-right" title="Bound Free (Verner)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

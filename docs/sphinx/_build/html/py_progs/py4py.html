@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>py4py &mdash; python 86g documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Utility, I/O and Imports" href="utilities.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            python
+          </a>
+              <div class="version">
+                86
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick.html"><em>Quick Guide to Python</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_python.html">Running Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input.html">Inputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Outputs &amp; Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting.html">Plotting &amp; Processing Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operation.html">Code Operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radiation.html">Radiation Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../wind_models.html">Wind Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coordinate.html">Coordinate grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../physics.html">Physics &amp; Radiative Transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atomic.html">Atomic Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meta.html">Meta-documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../py_progs.html">Python Scripts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html">Checking Runs and Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utilities.html">Utility, I/O and Imports</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">py4py</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../py_progs.html">Python Scripts</a></li>
+      <li class="breadcrumb-item active">py4py</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/py_progs/py4py.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="py4py">
+<h1>py4py<a class="headerlink" href="#py4py" title="Permalink to this heading"></a></h1>
+<p><cite>py4py</cite> is a module written in <em>Python</em> for reading, processing and visualising the input and output
+files of the <em>c</em> code <strong>Python</strong>.</p>
+<p>Installation instructions can be found in the associated README.md</p>
+<p>A reverberation mapping example using a Jupyter Notebook can be found under <a class="reference internal" href="../examples/reverb/reverb.html"><span class="doc">Reverberation Mapping</span></a></p>
+<section id="id1">
+<h2>py4py<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-py4py.py4py"></span><p>Functions designed for plotting output files</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="py4py.py4py.load_grid">
+<span class="sig-prename descclassname"><span class="pre">py4py.py4py.</span></span><span class="sig-name descname"><span class="pre">load_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.py4py.load_grid" title="Permalink to this definition"></a></dt>
+<dd><p>Loads a pair of grid files from a root name.</p>
+<dl class="simple">
+<dt>Use as:</dt><dd><p>x_r10, z_r10 = load_grid(‘r10/’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="py4py.py4py.plot_dat">
+<span class="sig-prename descclassname"><span class="pre">py4py.py4py.</span></span><span class="sig-name descname"><span class="pre">plot_dat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.py4py.plot_dat" title="Permalink to this definition"></a></dt>
+<dd><p>Plots a given .dat file</p>
+<dl class="simple">
+<dt>Use as:</dt><dd><p>plot_dat(table_h1_r01, x_r01, z_r01, ‘H-I, radius 1x’, ‘Log ion fraction’, volume=False)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="py4py.py4py.plot_dat_many">
+<span class="sig-prename descclassname"><span class="pre">py4py.py4py.</span></span><span class="sig-name descname"><span class="pre">plot_dat_many</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grids_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grids_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zlims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">titles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.py4py.plot_dat_many" title="Permalink to this definition"></a></dt>
+<dd><p>Plot many dat files on a single plot.</p>
+<dl class="simple">
+<dt>Use:</dt><dd><dl class="simple">
+<dt>plot_dat_many([table_h1_r01, table_h1_r10, table_h1_r30],</dt><dd><p>[x_r01, x_r10, x_r30], [z_r01, z_r10, z_r30],
+xlims=[(14.5, 17.5), (15.5, 17.5), (16, 17.5)],
+zlims=[(13, 17), (13, 17), (13, 17)],
+titles=[‘1x Radius’, ‘10x Radius’, ‘30x Radius’],
+title=’H-I ion fraction’, label=’Log ion fraction’,
+shared_y=True, volume=False, shared_cbar=True)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="py4py.py4py.plot_spec">
+<span class="sig-prename descclassname"><span class="pre">py4py.py4py.</span></span><span class="sig-name descname"><span class="pre">plot_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lim_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.py4py.plot_spec" title="Permalink to this definition"></a></dt>
+<dd><p>Plots an array of python spectra imported as Tables.</p>
+<dl class="simple">
+<dt>Use as:</dt><dd><p>plot_spec(‘A40P0.50’, [spec_r01, spec_r10], [‘1x’, ‘10x’])</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-py4py.reverb">
+<span id="py4py-reverb"></span><h2>py4py.reverb<a class="headerlink" href="#module-py4py.reverb" title="Permalink to this heading"></a></h2>
+<p>Reverberation Mapping module</p>
+<p>This contains the type used to create and manipulate reverberation maps from Python output files.</p>
+<p>Example:</p>
+<blockquote>
+<div><p>For an existing delay output file called ‘qso.delay_dump’, to generate a TF plot for the C4
+line for a specific spectrum, with axis of velocity offset vs days, you would do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qso_conn</span> <span class="o">=</span> <span class="n">open_database</span><span class="p">(</span><span class="s1">&#39;qso&#39;</span><span class="p">)</span>
+<span class="n">tf_c4_1</span> <span class="o">=</span> <span class="n">TransferFunction</span><span class="p">(</span>
+    <span class="n">qso_conn</span><span class="p">,</span> <span class="n">continuum</span><span class="o">=</span><span class="mf">1e43</span><span class="p">,</span> <span class="n">wave_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">delay_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;qso_c4_spectrum_1&#39;</span>
+<span class="p">)</span>
+<span class="n">tf_c4_1</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mi">443</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">tf_c4_1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Given database queries can take a long time, it is advisable to pickle a TF that has been run
+so you can access it later on. Note, however: Once a TF has been restored from a pickle,
+you can no longer change the filters and re-run.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>with open(‘qso_c4_spectrum_1’, ‘wb’) as file:</dt><dd><p>pickle.dump(tf_c4_1, file)</p>
+</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="py4py.reverb.Origin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">py4py.reverb.</span></span><span class="sig-name descname"><span class="pre">Origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.Origin" title="Permalink to this definition"></a></dt>
+<dd><p>The SQLalchemy table for the photon origins. Unused.
+Could be removed but will break backward compatibility.
+Information required for this is not stored in the output files.</p>
+<p># Todo: Implement or remove this table</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="py4py.reverb.Photon">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">py4py.reverb.</span></span><span class="sig-name descname"><span class="pre">Photon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.Photon" title="Permalink to this definition"></a></dt>
+<dd><p>SQLalchemy class for a photon. Why are all the properties capitalised?
+Changing them to lowercase as would make sense breaks backwards compatibility.</p>
+<p># Todo: Change to lower case.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="py4py.reverb.Spectrum">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">py4py.reverb.</span></span><span class="sig-name descname"><span class="pre">Spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.Spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>The SQLalchemy table for the spectra. Unused.
+Could be removed but will break backward compatibility.
+Information required for this is not stored in the output files.</p>
+<p># Todo: Implement or remove this table.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">py4py.reverb.</span></span><span class="sig-name descname"><span class="pre">TransferFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_different_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_different_spectrum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.TransferFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Used to create, store and query emissivity and response functions</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.cont_scatters">
+<span class="sig-name descname"><span class="pre">cont_scatters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scat_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scat_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.cont_scatters" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons that have scattered min-max times via a
+continuum scattering process (e.g. electron scattering).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>scat_min (int): Minimum number of continuum scatters
+scat_max (Optional[int]): Maximum number of continuum scatters, if desired</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.count" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the photon count in either one specific wavelength/delay bin, or all wavelength bins
+for a given delay.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>delay (Optional[float]):          Delay to return value for. Must provide this or delay_index.
+delay_index (Optional[int]):      Delay index to return value for. Must provide this or delay.
+wave (Optional[float]):           Wavelength to return value for</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[int, np.ndarray]: Either the count in one specific bin, or if wave is not specified</dt><dd><p>the counts in each wavelength bin at this delay</p>
+</dd>
+</dl>
+</dd>
+<dt>Todo:</dt><dd><p>Allow for only wavelength to be provided?</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.delay">
+<span class="sig-name descname"><span class="pre">delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.TransferFunction.delay" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the centroid delay for the current data</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>response (bool): </dt><dd><p>Whether or not to calculate the delay from the response</p>
+</dd>
+<dt>threshold (float): </dt><dd><p>Exclude all bins with value &lt; threshold</p>
+</dd>
+<dt>bounds (float): </dt><dd><p>Return the fractional bounds (i.e. bounds=0.25,
+the function will return [0.5, 0.25, 0.75]). Not implemented.</p>
+</dd>
+<dt>days (bool): </dt><dd><p>Whether to return the delay in days or seconds</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[float, Tuple[float, float, float]]:</dt><dd><p>Centroid delay, and lower and upper fractional bounds if bounds keyword provided</p>
+</dd>
+</dl>
+</dd>
+<dt>Todo:</dt><dd><p>Implement fractional bounds. Should just be able to call the centroid_delay function!</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.delay_bins">
+<span class="sig-name descname"><span class="pre">delay_bins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.delay_bins" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the range of delays covered by this TF.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>np.ndarray: Array of the bin boundaries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.delay_dynamic_range">
+<span class="sig-name descname"><span class="pre">delay_dynamic_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay_dynamic_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.delay_dynamic_range" title="Permalink to this definition"></a></dt>
+<dd><p>If set, the TF will generate delay bins to cover this dynamic range of responses,
+i.e. (1 - 10^-ddr) of the delays.
+So a ddr of 1 will generate photons with delays up to 1 - (1/10) = the 90th percentile
+of delays. ddr=2 will give up to the 99th percentile, 3=99.9th percentile, etc.</p>
+<p>Arguably this is a bit of an ambiguous name</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>delay_dynamic_range (float): The dynamic range to be used when</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.delay_peak">
+<span class="sig-name descname"><span class="pre">delay_peak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.delay_peak" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the peak delay for the transfer or response function,
+i.e. the delay at which the response is strongest.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>response (bool): Whether or not to calculate the peak transfer or response function.
+days (bool): Whether to return the value in seconds or days.</p>
+</dd>
+<dt>Returns:</dt><dd><p>float: The peak delay.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.delays">
+<span class="sig-name descname"><span class="pre">delays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.delays" title="Permalink to this definition"></a></dt>
+<dd><p>The delay range that should be considered when producing the TF.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>delay_min (float): Minimum delay time (in seconds or days)
+delay_max (float): Maximum delay time (in seconds or days)
+days (bool): Whether or not the delay range has been provided in days</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.emissivity">
+<span class="sig-name descname"><span class="pre">emissivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.emissivity" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the emissivity in either one specific wavelength/delay bin, or all wavelength bins
+for a given delay.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>delay (Optional[float]):          Delay to return value for. Must provide this or delay_index.
+delay_index (Optional[int]):      Delay index to return value for. Must provide this or delay.
+wave (Optional[float]):           Wavelength to return value for.</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[int, np.ndarray]: Either the emissivity in one specific bin, or if wave is not specified</dt><dd><p>the counts in each wavelengthin bin at this delay</p>
+</dd>
+</dl>
+</dd>
+<dt>Todo:</dt><dd><p>Allow for only wavelength to be provided?</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.TransferFunction.filter" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a SQLalchemy filter directly to the content.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: The list of filter arguments</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.fwhm">
+<span class="sig-name descname"><span class="pre">fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.TransferFunction.fwhm" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the full width half maximum of the delay-summed transfer function,
+roughly analogous to the line profile. Possibly meaningless for the response function?</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>response (bool): Whether to calculate the FWHM of the transfer or response function
+velocity (bool): Whether to return the FWHM in wavelength or velocity-space</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>float: Full width at half maximum for the function.</dt><dd><p>If the function is a doublet, this will not work properly.</p>
+</dd>
+</dl>
+</dd>
+<dt>Todo:</dt><dd><p>Catch doublets.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.line">
+<span class="sig-name descname"><span class="pre">line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.line" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons last interacting with a given line</p>
+<p>This includes being emitted in the specified line, or scattered off it</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>number (int): Python line number. Will vary based on data file!
+wavelength (float): Wavelength of the line in angstroms</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.lines">
+<span class="sig-name descname"><span class="pre">lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.lines" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons with a specific internal line number.
+This list number will be specific to the python atomic data file!</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>line_list (List[int]): List of lines</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalised</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescaled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keplerian</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.eps'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Takes the data gathered by calling ‘run’ and outputs a plot</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>log (bool):</dt><dd><p>Whether the plot should be linear or logarithmic.</p>
+</dd>
+<dt>normalised (bool):</dt><dd><p>Whether or not to rescale the plot such that the total emissivity = 1.</p>
+</dd>
+<dt>rescaled (bool):</dt><dd><p>Whether or not to rescale the plot such that the maximum emissivity = 1.</p>
+</dd>
+<dt>velocity (bool):</dt><dd><p>Whether the plot X-axis should be velocity (true) or wavelength (false).</p>
+</dd>
+<dt>name (Optional[str]):</dt><dd><p>The file will be output to ‘tf_filename.eps’. May add the ‘name’ component
+to modify it to ‘tf_filename_name.eps’. Useful for adding e.g. ‘c4’ or ‘log’.</p>
+</dd>
+<dt>days (bool):</dt><dd><p>Whether the plot Y-axis should be in days (true) or seconds (false).</p>
+</dd>
+<dt>response_map (bool):</dt><dd><p>Whether to plot the transfer function map or the response function.</p>
+</dd>
+<dt>keplerian (Optional[dict]):</dt><dd><p>A dictionary describing the profile of a keplerian disk, the bounds of which will
+be overlaid on the plot. Arguments include
+angle (float) - Angle of disk to the observer,
+mass (float) - Mass of the central object in M_sol,
+radius (Tuple(float, float)) - Inner and outer disk radii,
+include_minimum_velocity - Whether or not to include the outer disk velocity profile
+(default no).</p>
+</dd>
+<dt>dynamic_range (Optional[int]):</dt><dd><p>If the plot is logarithmic,
+the dynamic range the colour bar should show. If not provided,
+will attempt to use the base dynamic range property, otherwise
+will default to showing 99.9% of all emissivity.</p>
+</dd>
+<dt>max_delay (Optional[float]):</dt><dd><p>The optional maximum delay to plot out to.</p>
+</dd>
+<dt>rms (bool):</dt><dd><p>Whether or not the line profile panel should show the root mean squared line profile.</p>
+</dd>
+<dt>show (bool):</dt><dd><p>Whether or not to display the plot to screen.</p>
+</dd>
+<dt>format (str):</dt><dd><p>The output file format. .eps by default.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, for chaining outputs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.res_scatters">
+<span class="sig-name descname"><span class="pre">res_scatters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scat_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scat_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.res_scatters" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons that have scattered min-max times via a
+resonant scattering process (e.g. line scattering).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>scat_min (int): Minimum number of resonant scatters
+scat_max (Optional[int]): Maximum number of resonant scatters, if desired</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.response">
+<span class="sig-name descname"><span class="pre">response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.response" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the responsivity in either one specific wavelength/delay bin, or all wavelength bins
+for a given delay.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>delay (Optional[float]):          Delay to return value for. Must provide this or delay_index.
+delay_index (Optional[int]):      Delay index to return value for. Must provide this or delay.
+wave (Optional[float]):           Wavelength to return value for.</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>Union[int, np.ndarray]: Either the responsivity in one specific bin, or if wave is not specified</dt><dd><p>the counts in each wavelength bin at this delay</p>
+</dd>
+</dl>
+</dd>
+<dt>Todo:</dt><dd><p>Allow for only wavelength to be provided?</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.response_map_by_tf">
+<span class="sig-name descname"><span class="pre">response_map_by_tf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cf_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cf_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.response_map_by_tf" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a response function for this transfer function by subtracting two transfer functions bracketing it.
+Requires two other completed transfer functions, bracketing this one in luminosity,
+all with matching wavelength/velocity and delay bins.</p>
+<p>Correction factors are there to account for things like runs that have been terminated early,
+e.g. if you request 100 spectrum cycles and stop (or Python dies) after 80,
+the total photon luminosity will only be 80/100. A correction factor allows you to bump this up.
+Arguably correction factors should be applied during the ‘run()’ method.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>low_state (TransferFunction): A full, processed transfer function for a lower-luminosity system.
+high_state (TransferFunction): A full, processed transfer function for a higher-luminosity system.
+cf_low (float): Correction factor for low state. Multiplier to the whole transfer function.
+cf_high (float): Correction factor for high state. Multiplier to the whole transfer function.</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so plotting can be chained on.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.response_total">
+<span class="sig-name descname"><span class="pre">response_total</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.response_total" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the total response.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>float: Total response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.run" title="Permalink to this definition"></a></dt>
+<dd><p>Performs a query on the photon DB and bins it.</p>
+<p>A TF must be run <em>after</em> all filters are applied and before any attempts
+to retrieve or process data from it. This can be a time-consuming call,
+on the order of 1 minute per GB of input file.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>scaling_factor (float): </dt><dd><p>1/Number of cycles in the spectra file</p>
+</dd>
+<dt>limit (int): </dt><dd><p>Number of photons to limit the TF to, for testing.
+Recommend testing filters on a small number of photons to begin with.</p>
+</dd>
+<dt>verbose (bool): </dt><dd><p>Whether to output exactly what the query is.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction:   Self, for chaining commands</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.spectrum">
+<span class="sig-name descname"><span class="pre">spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to photons from a specific observer</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>number (int): Observer number from Python run</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.transfer_function_1d">
+<span class="sig-name descname"><span class="pre">transfer_function_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.transfer_function_1d" title="Permalink to this definition"></a></dt>
+<dd><p>Collapses the 2-d transfer/response function into a 1-d response function, and returns
+the bin midpoints and values in each bin for plotting.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>response (bool): Whether or not to return the response function data
+days (bool): Whether the bin midpoints should be in seconds or days</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>np.ndarray: A [bins, 2]-d array containing the midpoints of the delay bins,</dt><dd><p>and the value of the 1-d transfer or response function in each bin.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.velocities">
+<span class="sig-name descname"><span class="pre">velocities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.velocities" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons with a range of Doppler shifts</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>velocity (float): Maximum doppler shift velocity in m/s. Applies</dt><dd><p>to both positive and negative Doppler shift</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.wavelength_bins">
+<span class="sig-name descname"><span class="pre">wavelength_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wave_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.wavelength_bins" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons with a range of wavelengths, and to a specific set of bins</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>wave_range (np.ndarray): Array of bins to use</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="py4py.reverb.TransferFunction.wavelengths">
+<span class="sig-name descname"><span class="pre">wavelengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wave_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wave_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#py4py.reverb.TransferFunction" title="py4py.reverb.TransferFunction"><span class="pre">TransferFunction</span></a></span></span><a class="headerlink" href="#py4py.reverb.TransferFunction.wavelengths" title="Permalink to this definition"></a></dt>
+<dd><p>Constrain the TF to only photons with a range of wavelengths</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>wave_min (float): Minimum wavelength in angstroms
+wave_max (float): Maximum wavelength in angstroms</p>
+</dd>
+<dt>Returns:</dt><dd><p>TransferFunction: Self, so filters can be stacked</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="py4py.reverb.calculate_delay">
+<span class="sig-prename descclassname"><span class="pre">py4py.reverb.</span></span><span class="sig-name descname"><span class="pre">calculate_delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#py4py.reverb.calculate_delay" title="Permalink to this definition"></a></dt>
+<dd><p>Delay relative to continuum for emission from a point on the disk.</p>
+<p>Calculate delay for emission from a point on a keplerian disk, defined by
+its radius and disk angle, to an observer at a specified angle.</p>
+<p>Draw plane at r_rad_min out. Find x projection of disk position.
+Calculate distance travelled to that plane from the current disk position
+Delay relative to continuum is thus (distance from centre to plane)
++ distance from centre to point</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>angle (float):  Observer angle to disk normal, in radians
+phase (float):  Rotational angle of point on disk, in radians. 0 = in line to observer
+radius (float): Radius of the point on the disk, in m
+days (bool):    Whether the timescale should be seconds or days</p>
+</dd>
+<dt>Returns:</dt><dd><p>float:          Delay relative to continuum</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="py4py.reverb.open_database">
+<span class="sig-prename descclassname"><span class="pre">py4py.reverb.</span></span><span class="sig-name descname"><span class="pre">open_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#py4py.reverb.open_database" title="Permalink to this definition"></a></dt>
+<dd><p>Open or create a SQL database</p>
+<p>Will open a SQLite DB if one already exists, otherwise will create one from
+file. Note, though, that if the process is interrupted the code cannot
+intelligently resume- you must delete the half-written DB!</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>file_root (string): </dt><dd><p>Root of the filename (no ‘.db’ or ‘.delay_dump’)</p>
+</dd>
+<dt>user (string):      </dt><dd><p>Username. Here in case I change to PostgreSQL</p>
+</dd>
+<dt>password (string):  </dt><dd><p>Password. Here in case I change to PostgreSQL</p>
+</dd>
+<dt>batch_size (int):   </dt><dd><p>Number of photons to stage before committing. If
+too low, file creation is slow. If too high, get
+out-of-memory errors.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>sqlalchemy.engine.Connection:  Connection to the database opened</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="utilities.html" class="btn btn-neutral float-left" title="Utility, I/O and Imports" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
