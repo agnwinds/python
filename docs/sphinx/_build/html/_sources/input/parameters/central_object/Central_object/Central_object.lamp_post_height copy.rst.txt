@@ -1,13 +1,12 @@
 Central_object.lamp_post_height
 ===============================
-
 The distance above and below the disk plane of the two point sources used in the lamp-post model.
 
 Type
   Double
 
 Unit
-  Gravitational Radius
+  :ref:`Central_object.radius`
 
 Values
   Greater than 0

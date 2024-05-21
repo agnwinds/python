@@ -1,7 +1,7 @@
-Central_object.lamp_post_height
+Central_object.bubble_size
 ===============================
-
-The distance above and below the disk plane of the two point sources used in the lamp-post model.
+ 
+The radius of the bubble to generate isotropic photons at a random positions within a sphere.
 
 Type
   Double
@@ -15,8 +15,7 @@ Values
 File
   `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_
 
-
 Parent(s)
-  * :ref:`Central_object.geometry_for_source`: ``lamp_post``
+  * :ref:`Central_object.geometry_for_source`: ``bubble``
 
 

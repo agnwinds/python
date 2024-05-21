@@ -67,7 +67,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../Disk.html">Disk</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../wind.html">Wind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../wind.html">Winds</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../Spectrum.html">Spectrum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../other.html">Other</a></li>
@@ -121,9 +121,8 @@
              
   <section id="central-object-geometry-for-source">
 <h1>Central_object.geometry_for_source<a class="headerlink" href="#central-object-geometry-for-source" title="Permalink to this heading"></a></h1>
-<dl class="simple">
-<dt>If the central source in an AGN/BH system is radiating, what geometry should it radiate from?</dt><dd><p>This is applicable even for black-body sources, where the <em>luminosity</em> depends on <a class="reference internal" href="Central_object.radius.html#central-object-radius"><span class="std std-ref">Central_object.radius</span></a>.</p>
-</dd>
+<p>Setting the geometry model of the AGN/BH’s radiation. This is only specified if <a class="reference internal" href="Central_object.radiation.html#central-object-radiation"><span class="std std-ref">Central_object.radiation</span></a> is set to <code class="docutils literal notranslate"><span class="pre">yes</span></code>. This is applicable even for black-body sources, where the <em>luminosity</em> depends on <a class="reference internal" href="Central_object.radius.html#central-object-radius"><span class="std std-ref">Central_object.radius</span></a>.</p>
+<dl>
 <dt>Type</dt><dd><p>Enumerator</p>
 </dd>
 <dt>Values</dt><dd><dl class="simple">
@@ -137,6 +136,9 @@ Photons that would be spawned in an extended disk (if <a class="reference intern
 are re-generated.</p>
 </dd>
 </dl>
+<p>bubble</p>
+<p>The central source radiates from random positions within a sphere of a given radius.
+This model generates isotropic photons.</p>
 </dd>
 <dt>File</dt><dd><p><a class="reference external" href="https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c">setup_star_bh.c</a></p>
 </dd>

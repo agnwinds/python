@@ -1,7 +1,7 @@
 Central_object.temp
 ===================
 Temperature of the central star. Physically, this is used in blackbody radiation, shock heating and disk heating in
-YSO models. It is also used to help determine the frequency bands in which photons are emitted.
+young stellar object models. It is also used to help determine the frequency bands in which photons are emitted.
 
 Type
   Double
