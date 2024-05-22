@@ -1,23 +1,15 @@
 Diag.use_upweighting_of_simple_macro_atoms
 ================
 
-.. todo::
-   Fill in
+Advanced command, allows one to use the “upweighting” scheme for simple ions in indivisible packet mode, as described under the :ref:`Bound-free Continua of Simple Atoms` section.
 
 Type
-  
+  Boolean (yes/no)
+
 
 File
-
-..  `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
-
+   `diag.c <https://github.com/agnwinds/python/blob/master/source/diag.c>`_
 
 Parent(s)
-
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
-
-
-Child(ren)
-
-.. * :ref:`geo.xlog_scale`
+   * :ref:`Diag.extra`: ``True``
 
