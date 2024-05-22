@@ -47,22 +47,22 @@ def write_simple_levels(ion="h_1", nlevels=10):
     try:
         xtab=get_levels(ion,nlevels)
     except:
-        print('Could not get macro levels')
+        print('Could not get macro levels for ion %s %d' % (ion,nlevels))
         return ''
 
     xtab['Dtype']='LevTop'
     xtab['eqn']=-99.0
     
     ztab=xtab['Dtype','Element','Ion','islp','ilv','ion_pot','ex','g','eqn','rad_rate','config']
-    outfile='%s_levels_simple.dat' % ion
+    outfile='Adata/%s_levels_simple.dat' % ion
     ztab.write(outfile,format='ascii.fixed_width_two_line',overwrite=True)
     return outfile
 
 
 
 def write_simple_lines(ion="h_1"):
-    infile='%s_lines.dat' % ion
-    outfile='%s_lines_simple.dat' % ion
+    infile='Adata/%s_lines.dat' % ion
+    outfile='Adata/%s_lines_simple.dat' % ion
     try:
         x=ascii.read(infile)
     except:
