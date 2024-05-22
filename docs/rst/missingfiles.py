@@ -11,7 +11,7 @@ path_2 = t['Path_2']
 for i in range(len(filename)):
     # i
     if not isinstance(path_1[i], numpy.str_):
-        print('Add to Docs: {} Add to Docs'.format(filename[i]))
+        print('Add to Docs: {}'.format(filename[i]))
     if not isinstance(path_2[i], numpy.str_):
         print('Remove from Docs: {}'.format(filename[i]))
 # %%
