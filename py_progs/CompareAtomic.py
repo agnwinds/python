@@ -2,13 +2,7 @@
 # coding: utf-8
 
 '''
-                    Space Telescope Science Institute
-
-Synopsis:  
-
-Simple routine to determine differences between files 
-read in two
-sets of atomic data.  
+Simple routine to determine differences between files read in two sets of atomic data.
 
 
 Command line usage (if any):

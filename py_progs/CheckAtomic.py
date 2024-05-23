@@ -2,17 +2,15 @@
 # coding: utf-8
 
 '''
-                    Space Telescope Science Institute
-
-Synopsis:  
-
-Summarize an atomic data file in order to see
-how large arrays defined in atomic.h must be
+Summarize an atomic data file in order to see how large arrays defined in atomic.h must be
 
 
 Command line usage (if any):
 
-    usage: CheckAtomic.py masterfile
+    usage::
+
+        CheckAtomic.py masterfile
+
 
 Description:  
 
@@ -36,7 +34,7 @@ Notes:
                                        
 History:
 
-240511 ksl Coding begun
+    240511 ksl Coding begun
 
 '''
 

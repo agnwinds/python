@@ -1,13 +1,7 @@
 #!/usr/bin/env python 
 
 '''
-                    Space Telescope Science Institute
-
-Synopsis:  
-
-Extend phot tables retrieved from Topbase to higher energies
-and produce a plot file which shows the extended x-section
-file
+Extend phot tables retrieved from Topbase to higher energies and produce a plot file which shows the extended x-section file
 
 Command line usage (if any):
 

@@ -1,12 +1,9 @@
 #!/usr/bin/env python 
 '''
-	University of Cambridge -- JM -- October 2019
+Test the masterfiles specified in the arrays all point to the right files.
 
-				test_masterfiles
+needs python to be compiled.
 
-Synopsis:
-	test the masterfiles specified in the arrays all point to the right files.
-	needs python to be compiled.
 Usage:
 	test_masterfiles.py [PYTHON VERSION]
 '''

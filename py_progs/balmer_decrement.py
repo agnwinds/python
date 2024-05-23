@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 '''
-	balmer_decrement.py 
+Runs tests of the Balmer decrement for a one zone  thin shell Python model.
 
-runs tests of the Balmer decrement for a one zone 
-thin shell Python model. Involves running py_wind on
-a wind_save file and reading some output files. Compares
-to Osterbrock values.
+Involves running py_wind on a wind_save file and reading some output files.
+Compares to Osterbrock values.
 
 Usage:
-	python balmer_decrement.py  root_filename
-	python balmer_decrement.py  -h for help 
+
+	* `python balmer_decrement.py  root_filename`
+	* `python balmer_decrement.py  -h` for help
 
 Requirements:
 	py_wind
 	numpy 
 	matplotlib 
-	py_plot_util, py_read_output from $PYTHON/py_progs in the python path 
+	py_plot_util, py_read_output from $PYTHON/py_progs in the python path
+
 Notes:
 	This routine is a routine to check the results of running a one zone
 	model intended to produce the Balmer decrements.  It does not run the

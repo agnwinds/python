@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """
+Converts `.yml` format parameter descriptions to `.rst` files.
+
 This script goes through the created yaml documentation and converts them to
 .rst files, then writes them to an output directory
 

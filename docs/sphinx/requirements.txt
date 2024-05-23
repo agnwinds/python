@@ -11,3 +11,5 @@ scipy
 sqlalchemy
 jinja2==3.0.3
 sphinx_gallery
+sphinx-icon
+pyhdf

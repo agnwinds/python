@@ -2,10 +2,11 @@
 
 
 '''
-Synopsis:  
-    Read the master file produced by windsave2table for a
-    model created in cylindrical coordinates and produce 
-    a file which can be imported into Python and run
+Create a cylindrical `.pf` file from a `windsave2table` file.
+
+Read the master file produced by windsave2table for a
+model created in cylindrical coordinates and produce
+a file which can be imported into Python and run
 
 
 Command line usage (if any):

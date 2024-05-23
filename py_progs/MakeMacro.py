@@ -1,24 +1,28 @@
 #!/usr/bin/env python
 
 """
-                    Space Telescope Science Institute
+Uses Chianti and Topbase to create the base for macro-atom models.
 
-Synopsis:  Use Chianti and Topbase to create a set of data files that 
+Use Chianti and Topbase to create a set of data files that
 can be used as the basis for creating macro-atom models of various ions
 
 
 Command line usage (if any):
 
-    usage: MakeHMacro.py ion_name nlevels [True] 
+    usage::
+
+        MakeHMacro.py ion_name nlevels [True]
 
     where the ion name is in Chianti notation, e.g c_4 for C IV, fe_25 for Fe XXV and
     nlevels is the number of energy levels to include in the model
 
     and the optional True implies this is the top ion to include.  
     
-    *Changes as per 27/08/20
+    * Changes as per 27/08/20
     
-    usage (in terminal window): MakeMacro.py ion_name nlevels True/False
+    usage (in terminal window)::
+
+        MakeMacro.py ion_name nlevels True/False
 
 Description:  
 
@@ -48,9 +52,11 @@ Notes:
                                        
 History:
 
-191227 ksl Coding begun
-221227 ksl Relooked at routine, verified it seemed to work and cleaned up some of the comments.
-           The functionality is unchanged.
+191227 ksl
+    Coding begun
+221227 ksl
+    Relooked at routine, verified it seemed to work and cleaned up some of the comments.
+    The functionality is unchanged.
 
 """
 
