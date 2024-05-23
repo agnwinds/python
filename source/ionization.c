@@ -99,6 +99,11 @@ ion_abundances (PlasmaPtr xplasma, int mode)
     xplasma->heat_tot_old = xplasma->heat_tot;
     ireturn = 0;
     xplasma->t_e = 0.9 * xplasma->t_r;
+    if ((ireturn = nebular_concentrations (xplasma, NEBULARMODE_ML93)))
+    {
+      Error ("ionization_abundances: nebular_concentrations failed to converge\n");
+      Error ("ionization_abundances: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n", xplasma->j, xplasma->t_e, xplasma->w);
+    }
     convergence (xplasma);
 
   }
