@@ -1,23 +1,17 @@
 SV.gamma
 ================
 
-.. todo::
-   Fill in
+The gamma (:math:`\gamma`) exponent controlling the opening angle of the Shlosman & Vitello (SV) wind's streamline. A typical gamma value of 1.0 corresponds to a linear variation in theta (the opening angle) over the radial distance. See :ref:`SV93 biconical wind prescription`
 
 Type
-  
+  Double
+
+Values
+   Greater than 0
 
 File
-
-.. `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
-
+  `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
 
 Parent(s)
-
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
-
-
-Child(ren)
-
-.. * :ref:`geo.xlog_scale`
+   * :ref:`Wind.type`: :code:`sv`
 

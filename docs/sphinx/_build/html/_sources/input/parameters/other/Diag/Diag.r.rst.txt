@@ -1,23 +1,22 @@
 Diag.r
 ================
 
-.. todo::
-   Fill in
+This option defines the radial position from which all the photons are emitted in searchlight mode. The radial position is defined in units of the model's stellar radius. The default value is 4.
 
 Type
-  
+  Double
+
+Units
+   Units of :math:`R_{star}`
+
+Values
+  Greater than 0
 
 File
-
-.. `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
-
+  `diag.c <https://github.com/agnwinds/python/blob/master/source/diag.c>`_
 
 Parent(s)
-
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
-
-
-Child(ren)
-
-.. * :ref:`geo.xlog_scale`
+  * :ref:`Diag.extra`: :code:`yes`
+  * :ref:`Diag.invoke_searchlight_option` :code:`yes`
+  * :ref:`Diag.location` :code:`disk`
 

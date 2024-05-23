@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diag.angle &mdash; python 86g documentation</title>
+  <title>Diag.angle &mdash; python 88a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css" />
@@ -39,7 +39,7 @@
             python
           </a>
               <div class="version">
-                86
+                88
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -70,6 +70,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../Photon_sampling.html">Photon_sampling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Reverb.html">Reverb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../geo.html">geo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../monochromatic.html">monochromatic</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../Input_spectra.model_file.html">Input_spectra.model_file</a></li>
@@ -122,14 +123,23 @@
              
   <section id="diag-angle">
 <h1>Diag.angle<a class="headerlink" href="#diag-angle" title="Permalink to this heading"></a></h1>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Fill in</p>
-</div>
-<p>Type</p>
-<p>File</p>
-<p>Parent(s)</p>
-<p>Child(ren)</p>
+<p>This option defines the angle from which all the photons are emitted in searchlight mode. 0° is at the pole. The default value is 0°.</p>
+<dl class="simple">
+<dt>Type</dt><dd><p>Double</p>
+</dd>
+<dt>Units</dt><dd><p>Degrees</p>
+</dd>
+<dt>Values</dt><dd><p>Greater than 0</p>
+</dd>
+<dt>File</dt><dd><p><a class="reference external" href="https://github.com/agnwinds/python/blob/master/source/diag.c">diag.c</a></p>
+</dd>
+<dt>Parent(s)</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="Diag.extra.html#diag-extra"><span class="std std-ref">Diag.extra</span></a>: <code class="code docutils literal notranslate"><span class="pre">yes</span></code></p></li>
+<li><p><a class="reference internal" href="Diag.invoke_searchlight_option.html#diag-invoke-searchlight-option"><span class="std std-ref">Diag.invoke_searchlight_option</span></a> <code class="code docutils literal notranslate"><span class="pre">yes</span></code></p></li>
+<li><p><a class="reference internal" href="Diag.location.html#diag-location"><span class="std std-ref">Diag.location</span></a> <code class="code docutils literal notranslate"><span class="pre">central_object</span></code> <code class="code docutils literal notranslate"><span class="pre">disk</span></code></p></li>
+</ul>
+</dd>
+</dl>
 </section>
 
 
@@ -143,7 +153,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+    <p>&#169; Copyright 2018-2024, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

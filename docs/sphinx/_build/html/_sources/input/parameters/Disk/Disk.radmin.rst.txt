@@ -1,23 +1,20 @@
 Disk.radmin
 ================
 
-.. todo::
-   Fill in
+The inner edge of the accretion disk. Photons beyond the inner edge up to the outer edge are absorbed or re-radiated.
 
 Type
-  
+  Double
+
+Unit
+  cm
+
+Values
+  Equal to or greater than :ref:`Central_object.radius`.
 
 File
-
-..  `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
-
+  `setup_disk.c <https://github.com/agnwinds/python/blob/master/source/setup_disk.c>`_
 
 Parent(s)
-
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
-
-
-Child(ren)
-
-.. * :ref:`geo.xlog_scale`
+  * :ref:`Disk.type`: :code:`rmin>central.obj.rad`
 

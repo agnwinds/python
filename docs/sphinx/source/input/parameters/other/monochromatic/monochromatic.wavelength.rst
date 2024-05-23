@@ -1,23 +1,22 @@
 monochromatic.wavelength
 ================
 
-.. todo::
-   Fill in
+Currently if affected by an issue on Github repo. Monochromatic.wavelength option not prompting. #1071. Be warned!
+
+Sets the spectral energy distribution of the radiating object to be monochromatic. i.e. The object radiates at a single wavelength.
 
 Type
-  
+  Double
+
+Values
+   Greater than 0
 
 File
-
-.. `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
-
+  `setup.c <https://github.com/agnwinds/python/blob/master/source/setup.c>`_
 
 Parent(s)
+  :ref:`Central_object.rad_type_in_final_spectrum`: :code:`mono`
+  
+  :ref:`Disk.rad_type_in_final_spectrum`: :code:`mono`
 
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
-
-
-Child(ren)
-
-.. * :ref:`geo.xlog_scale`
 

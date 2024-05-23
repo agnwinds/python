@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Running Python &mdash; python 86g documentation</title>
+  <title>Running Python &mdash; python 88a documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
@@ -41,7 +41,7 @@
             python
           </a>
               <div class="version">
-                86
+                88
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -213,6 +213,23 @@ too distant future.</p>
 </dd>
 </dl>
 </section>
+<section id="running-different-versions-of-python">
+<h2>Running Different Versions of Python<a class="headerlink" href="#running-different-versions-of-python" title="Permalink to this heading"></a></h2>
+<p>Once you have Python up and running, you can also install and run different versions of Python. This is particularly useful if you want to run and compare an older model from a previous paper or how the outputs have evolved.</p>
+<p>You can store multiple older versions of Python by recompiling a newer version.</p>
+<ul class="simple">
+<li><p>Pull in the version of the program you want using git.</p></li>
+<li><p>Then navigate with the terminal into Python’s <code class="code docutils literal notranslate"><span class="pre">source</span></code> folder.</p></li>
+<li><p>Run “make all” to recompile all programs with the new updates.</p></li>
+<li><p>The process will put the new binaries into the <code class="code docutils literal notranslate"><span class="pre">bin/</span></code> directory and not delete what was already there.</p></li>
+</ul>
+<p>You can then run any installed version by replacing the py command, eg <code class="code docutils literal notranslate"><span class="pre">py</span> <span class="pre">root.pf</span></code>, with the version you desire, eg.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>py87a<span class="w"> </span>root.pf
+</pre></div>
+</div>
+</div></blockquote>
+</section>
 </section>
 
 
@@ -226,7 +243,7 @@ too distant future.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+    <p>&#169; Copyright 2018-2024, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Matom_transition_mode &mdash; python 86g documentation</title>
+  <title>Matom_transition_mode &mdash; python 88a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
@@ -39,7 +39,7 @@
             python
           </a>
               <div class="version">
-                86
+                88
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -125,12 +125,17 @@
              
   <section id="matom-transition-mode">
 <h1>Matom_transition_mode<a class="headerlink" href="#matom-transition-mode" title="Permalink to this heading"></a></h1>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Fill in</p>
-</div>
+<p>This option allows the user to determine which mode to use for the macro-atom transition probabilities. The macro atom is not a single atom; it represents an ensemble of atoms of a particular type. The mc_jumps method is a stochastic treatment and the matrix method is a state machine. The default is set to mc_jumping. More information on macro atoms can be found in the <a class="reference internal" href="../../../physics/macroatoms.html#macro-atoms"><span class="std std-ref">Macro Atoms</span></a> section. Be wary of using matrix mode due to the high memory requirements.</p>
 <dl class="simple">
 <dt>Type</dt><dd><p>Enumerator</p>
+</dd>
+<dt>Values</dt><dd><dl class="simple">
+<dt>mc_jumps</dt><dd><p>A straightforward implementation of the macro-atom scheme. The models follow the interactions step by step, drawing a random number at each stage of the process until an interaction that excites a macro atom (or creates a k-packet directly) generates a new r-packet.</p>
+</dd>
+<dt>matrix</dt><dd><p>Matrix mode treats the macro atoms as a state machine with a finite number of states. State machines allow the computation of transition outcomes through matrix inversions rather than step-by-step tracking. Transitions to absorbing states
+correspond to transitions that generate k-packets. Transitions between levels of the macro atom via collisions with the thermal pool correspond to internal transitions of the absorbing state machine. The advantage of an absorbing state machine is that the new r-packet is not generated probabilistically but through several matrix inversions. All of the macro atoms and the thermal pool are treated simultaneously.</p>
+</dd>
+</dl>
 </dd>
 <dt>File</dt><dd><p><a class="reference external" href="https://github.com/agnwinds/python/blob/master/source/setup_line_transfer.c">setup_line_transfer.c</a></p>
 </dd>
@@ -152,7 +157,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+    <p>&#169; Copyright 2018-2024, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

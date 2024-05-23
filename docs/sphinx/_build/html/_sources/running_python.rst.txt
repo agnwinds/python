@@ -113,3 +113,21 @@ which may be useful in certain special cases.  These include:
 
 -include_partial_cells
  Include wind cells that are only partially filled by the wind
+
+Running Different Versions of Python
+=================================
+
+Once you have Python up and running, you can also install and run different versions of Python. This is particularly useful if you want to run and compare an older model from a previous paper or how the outputs have evolved. 
+
+You can store multiple older versions of Python by recompiling a newer version.
+
+* Pull in the version of the program you want using git. 
+* Then navigate with the terminal into Python's :code:`source` folder. 
+* Run "make all" to recompile all programs with the new updates. 
+* The process will put the new binaries into the :code:`bin/` directory and not delete what was already there.
+ 
+You can then run any installed version by replacing the py command, eg :code:`py root.pf`, with the version you desire, eg. 
+  
+  .. code :: bash
+    
+    py87a root.pf

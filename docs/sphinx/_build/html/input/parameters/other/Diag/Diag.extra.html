@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diag.extra &mdash; python 86g documentation</title>
+  <title>Diag.extra &mdash; python 88a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css" />
@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Diag.fractional_distance_photon_may_travel" href="Diag.fractional_distance_photon_may_travel.html" />
-    <link rel="prev" title="Diag.adjust_grid" href="Diag.adjust_grid.html" /> 
+    <link rel="prev" title="Diag.angle" href="Diag.angle.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,7 +39,7 @@
             python
           </a>
               <div class="version">
-                86
+                88
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -62,7 +62,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../System_type.html">System_type</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../central_object.html">Central object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../Disk.html">Disk</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../wind.html">Wind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../wind.html">Winds</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../Spectrum.html">Spectrum</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../../other.html">Other</a><ul class="current">
@@ -70,6 +70,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../Photon_sampling.html">Photon_sampling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Reverb.html">Reverb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../geo.html">geo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../monochromatic.html">monochromatic</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../Input_spectra.model_file.html">Input_spectra.model_file</a></li>
@@ -133,12 +134,17 @@ the resonant scatters in the wind</p>
 </dd>
 <dt>Child(ren)</dt><dd><ul class="simple">
 <li><p><a class="reference internal" href="Diag.save_cell_statistics.html#diag-save-cell-statistics"><span class="std std-ref">Diag.save_cell_statistics</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.keep_ioncycle_windsaves.html#diag-keep-ioncycle-windsaves"><span class="std std-ref">Diag.keep_ioncycle_windsaves</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.keep_ioncycle_spectra.html#diag-keep-ioncycle-spectra"><span class="std std-ref">Diag.keep_ioncycle_spectra</span></a></p></li>
 <li><p><a class="reference internal" href="Diag.make_ioncycle_tables.html#diag-make-ioncycle-tables"><span class="std std-ref">Diag.make_ioncycle_tables</span></a></p></li>
-<li><p><a class="reference internal" href="Diag.print_dvds_info.html#diag-print-dvds-info"><span class="std std-ref">Diag.print_dvds_info</span></a></p></li>
 <li><p><a class="reference internal" href="Diag.save_photons.html#diag-save-photons"><span class="std std-ref">Diag.save_photons</span></a></p></li>
 <li><p><a class="reference internal" href="Diag.save_extract_photons.html#diag-save-extract-photons"><span class="std std-ref">Diag.save_extract_photons</span></a></p></li>
-<li><p><a class="reference internal" href="Diag.keep_ioncycle_windsaves.html#diag-keep-ioncycle-windsaves"><span class="std std-ref">Diag.keep_ioncycle_windsaves</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.print_dvds_info.html#diag-print-dvds-info"><span class="std std-ref">Diag.print_dvds_info</span></a></p></li>
 <li><p><a class="reference internal" href="Diag.track_resonant_scatters.html#diag-track-resonant-scatters"><span class="std std-ref">Diag.track_resonant_scatters</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.use_jumps_for_emissivities_in_detailed_spectra.html#diag-use-jumps-for-emissivities-in-detailed-spectra"><span class="std std-ref">Diag.use_jumps_for_emissivities_in_detailed_spectra</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.use_upweighting_of_simple_macro_atoms.html#diag-use-upweighting-of-simple-macro-atoms"><span class="std std-ref">Diag.use_upweighting_of_simple_macro_atoms</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.partial_cells.html#diag-partial-cells"><span class="std std-ref">Diag.partial_cells</span></a></p></li>
+<li><p><a class="reference internal" href="Diag.invoke_searchlight_option.html#diag-invoke-searchlight-option"><span class="std std-ref">Diag.invoke_searchlight_option</span></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -148,14 +154,14 @@ the resonant scatters in the wind</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Diag.adjust_grid.html" class="btn btn-neutral float-left" title="Diag.adjust_grid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Diag.angle.html" class="btn btn-neutral float-left" title="Diag.angle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Diag.fractional_distance_photon_may_travel.html" class="btn btn-neutral float-right" title="Diag.fractional_distance_photon_may_travel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+    <p>&#169; Copyright 2018-2024, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

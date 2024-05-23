@@ -1,23 +1,29 @@
 Diag.location
 ================
 
-.. todo::
-   Fill in
+This option allows the user to determine where their searchlight is located (:ref:`Diag.invoke_searchlight_option`). 
+
 
 Type
-  
+  Enumerator
+
+Values
+   Central_object
+      The searchlight originates at a user determined angle from the pole.
+
+   Disk
+      The searchlight originates at a user determined location and angle along the disk.
 
 File
-
-..  `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
+  `diag.c <https://github.com/agnwinds/python/blob/master/source/diag.c>`_
 
 
 Parent(s)
-
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
+  * :ref:`Diag.extra`: :code:`yes`
+  * :ref:`Diag.invoke_searchlight_option` :code:`yes`
 
 
 Child(ren)
-
-.. * :ref:`geo.xlog_scale`
+   * :ref:`Diag.angle`
+   * :ref:`Diag.r`
 

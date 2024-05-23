@@ -65,6 +65,7 @@ The following variables are used::
     SV.v_infinity(in_units_of_vescape          3
     SV.acceleration_length(cm)                 7e10
     SV.acceleration_exponent                   1.5
+    SV.gamma(streamline_skew;1=usually)         1
     SV.v_zero_mode(fixed,sound_speed)                  fixed 
     SV.v_zero(cm/s)                                                6e5
 

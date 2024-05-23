@@ -1,23 +1,19 @@
-Diag.keep_ioncycle_spectra.rst
+Diag.keep_ioncycle_spectra
 ================
 
-.. todo::
-   Fill in
+Decide whether or not to keep a copy of the log_spec_tot file after
+each spectral cycle in order to track the changes as the
+code converges. Produces files of format python01.log_spec_tot and so
+on (02,03...) for subsequent cycles.
 
 Type
-  
+  Boolean(yes/no)
 
 File
-
-..  `setup_domains.c <https://github.com/agnwinds/python/blob/master/source/setup_domains.c>`_
+  `diag.c <https://github.com/agnwinds/python/blob/master/source/diag.c>`_
 
 
 Parent(s)
+   * :ref:`Diag.extra` :code:`yes`
 
-.. * :ref:`Wind.number_of_components`: Greater than 0. Once per domain.
-
-
-Child(ren)
-
-.. * :ref:`geo.xlog_scale`
 

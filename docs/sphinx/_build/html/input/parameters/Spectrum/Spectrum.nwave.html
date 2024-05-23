@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spectrum.nwave &mdash; python 86g documentation</title>
+  <title>Spectrum.nwave &mdash; python 88a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
@@ -39,7 +39,7 @@
             python
           </a>
               <div class="version">
-                86
+                88
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -133,14 +133,19 @@
              
   <section id="spectrum-nwave">
 <h1>Spectrum.nwave<a class="headerlink" href="#spectrum-nwave" title="Permalink to this heading"></a></h1>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Fill in</p>
-</div>
-<p>Type</p>
-<p>File</p>
-<p>Parent(s)</p>
-<p>Child(ren)</p>
+<p>Sets the number of wavelength bins of a spectrum between the <a class="reference internal" href="Spectrum.wavemin.html#spectrum-wavemin"><span class="std std-ref">Spectrum.wavemin</span></a> and <a class="reference internal" href="Spectrum.wavemax.html#spectrum-wavemax"><span class="std std-ref">Spectrum.wavemax</span></a>. The wavelength value associated with a bin is left aligned. i.e. The wavelength value given in a .spec file is the minimum wavelength within that bin. The default is set to 10,000.</p>
+<dl class="simple">
+<dt>Type</dt><dd><p>int</p>
+</dd>
+<dt>Values</dt><dd><p>Greater than 100</p>
+</dd>
+<dt>File</dt><dd><p><a class="reference external" href="https://github.com/agnwinds/python/blob/master/source/setup.c">setup.c</a></p>
+</dd>
+<dt>Parent(s)</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="../rt_ion/Spectrum_cycles.html#spectrum-cycles"><span class="std std-ref">Spectrum_cycles</span></a>: Greater than or equal to 0</p></li>
+</ul>
+</dd>
+</dl>
 </section>
 
 
@@ -154,7 +159,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2023, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt.</p>
+    <p>&#169; Copyright 2018-2024, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Mandy Hewitt, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
