@@ -21,8 +21,10 @@ build:
   os: ubuntu-22.04
   apt_packages:
     - libhdf5-dev
+    - hdf5-tools
   tools:
     python: "3.12"
+
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
