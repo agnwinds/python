@@ -19,6 +19,8 @@ formats: all
 # Set the OS, Python version and other tools you might need
 build:
   os: ubuntu-22.04
+  apt_packages:
+    - libhdf5-dev
   tools:
     python: "3.12"
 
