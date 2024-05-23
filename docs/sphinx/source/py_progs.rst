@@ -13,7 +13,6 @@ The resulting output file can be found `here <../../pydocs/doc_index.html>`_.
     The scripts documented here form an incomplete and inhomogenous list, in the sense that they have been developed by different people at different times and do not fit nicely together as a single python package.
     Some of the scripts should still be useful, particularly if you consult example notebookes, but use with caution!
 
-.. todo:: Finish adding modules below.
 
 .. toctree::
     :maxdepth: 2
