@@ -21,7 +21,7 @@ Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_at
 Wind.radiation(yes,no)                          yes
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
-Atomic_data                                data/standard80_reduced.dat
+Atomic_data                                data/standard80.dat
 Stellar_wind.mdot(msol/yr)                 5.1e-6
 Stellar_wind.radmin(cm)                    1.32e12
 Stellar_wind.radmax(cm)                    1e13
