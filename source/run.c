@@ -347,9 +347,7 @@ calculate_ionization (restart_stat)
  * values, loglin (0=linear, 1=log for the wavelength scale), all photons or just wind photons
  */
 
-      spectrum_summary (files.wspec, 0, 6, SPECTYPE_RAW, 1., 0, 0);     /* .spec_tot */
       spectrum_summary (files.lwspec, 0, 6, SPECTYPE_RAW, 1., 1, 0);    /* .log_spec_tot */
-      spectrum_summary (files.wspec_wind, 0, 6, SPECTYPE_RAW, 1., 0, 1);        /* .spec_tot_wind  */
       spectrum_summary (files.lwspec_wind, 0, 6, SPECTYPE_RAW, 1., 1, 1);       /* .log_spec_tot_wind */
       disk_photon_summary (files.phot, "w");    /* Save info about the way photons are created and absorbed
                                                    by the disk */

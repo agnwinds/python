@@ -415,7 +415,7 @@ struct geometry
    */
 
 #define NSPEC   20
-  int nangles;   /**< The number of anbles to create spectra for */
+  int nangles;   /**< The number of angles to create spectra for */
   double angle[NSPEC], phase[NSPEC];  /**< The angle and associated binary phase (if relevant) for the extracted spectra */
   int scat_select[NSPEC], top_bot_select[NSPEC];  /**< Variables to constrain the spectra by number of scatters
                                                     * and whether the photons "originate" from above or relow the disk
@@ -1343,9 +1343,8 @@ extern PhotPtr photmain;               /**< A pointer to all of the photons that
        total emitted spectrum, the total spectrum of photons which are scattered and
        the total spectrum of photons which are absorbed.  The remainder of the spectra pertain
        to the spectrum as seen from various directions. Note that the space for the spectra
-       are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
-       was added.  This will be the first of the spectra.  It is simply the generated spectrum
-       before passing through the wind.  It has the orginal weights as generated.  */
+       are allocated using a calloc statement in spectrum_init.   
+       */
 
 
 
@@ -1650,12 +1649,8 @@ struct filenames
   char diagfolder[LINELENGTH];  /**< diag folder */
   char input[LINELENGTH];       /**< input name if creating new pf file */
   char new_pf[LINELENGTH];      /**< name of generated pf file */
-  char wspec[LINELENGTH];       /**< .spec_tot file (spectrum from last ionization cycle) */
   char lwspec[LINELENGTH];      /**< .log_spec_tot file (spectra from last ionization cycle
                                   * in log wavelength scale)
-                                  */
-  char wspec_wind[LINELENGTH];  /**< .spec_tot_wind (spectra of wind photons in last
-                                  * ionization cycle on a linear scale limited to wind photons
                                   */
   char lwspec_wind[LINELENGTH]; /**< .log_spec_tot_wind (same as above but in log units)  */
   char spec[LINELENGTH];        /**< .spec file (extracted spectra on linear scale) */
