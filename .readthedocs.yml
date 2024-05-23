@@ -20,8 +20,7 @@ formats: all
 build:
   os: ubuntu-22.04
   apt_packages:
-    - libhdf5-dev
-    - hdf5-tools
+    - libhdf4-dev
   tools:
     python: "3.12"
 
