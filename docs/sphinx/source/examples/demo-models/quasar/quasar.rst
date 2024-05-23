@@ -7,7 +7,7 @@ This particular document focuses on Model A from M20. As with most of the demo m
 
 The wind is equatorial, and illuminated by an isotropic SED. 
 
-.. todo::
+.. note::
 
     more description needed
 
