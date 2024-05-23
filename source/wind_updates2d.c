@@ -555,6 +555,8 @@ init_plasma_rad_properties (void)
     plasmamain[i].ntot_agn = 0;
     plasmamain[i].ntot_star = 0;
     plasmamain[i].ntot_bl = 0;
+    plasmamain[i].nscat_es = 0;
+    plasmamain[i].nscat_res = 0;
     plasmamain[i].ntot_wind = 0;
     plasmamain[i].nrad = 0;
     plasmamain[i].nioniz = 0;

@@ -147,7 +147,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 #Note that version should be a single string without spaces.
 
 
-VERSION = 88a
+VERSION = 88b
 
 
 
@@ -316,7 +316,7 @@ unit_test: startup unit_test.o $(python_objects)
 # the Python source. It doesn't require anything to be compiled, actually, as
 # the Makefile in tests/ will compile what is requried
 check:
-	cd tests; make check NVCC=$(NVCC) CC=$(CC)
+	cd tests; make check NVCC=$(NVCC) CC=$(CC) MATOM_VER=$(MATOM_VER)
 
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind

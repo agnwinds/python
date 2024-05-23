@@ -18,7 +18,6 @@ The units in which the spectra are written out is also indicated in the header t
 
 For a model with root name *cv*, the following broadband spectra will be created:
 
-* **cv.spec_tot**
 * **cv.log_spec_tot**
 * **cv.spec_tot_wind**
 * **cv.log_spec_tot_wind**
@@ -26,8 +25,8 @@ For a model with root name *cv*, the following broadband spectra will be created
 File types
 ==========
 
-.spec_tot
-  An ascii file that contains various spectra from the ionization-calculation phase of the program on a linear frequency scale.
+.log_spec_tot
+  An ascii file that contains various spectra from the ionization-calculation phase of the program on a log frequency scale.
   The first few lines of the file (omitting the header) are as follows:
 
   .. code::
@@ -55,21 +54,15 @@ The remaining columns are:
 * HitSurf represents photons that did not escape the system but ran into a boundary 
 
 
-.log_spec_tot
-  An ascii file which contains the same information as *.spec_tot*, but with a logarithmically space frequency intervals.
-  This gives better sampling of the SED in a lot of cases and is much better for plotting things such as the input spectrum.
-
-.spec_tot_wind
-  Identical to *.spec_tot* but just including photons that were generated in the wind or scattered by the wind
 
 .log_spec_tot_wind
-  A logarithmic version of *.spec_tot_wind*
-
+  Identical to *.log_spec_tot* but just including photons that were generated in the wind or scattered by the wind
 
 
 
 .spec
-  an ascii file that contains the final detailed spectra for the wavelengths of interest at a distance of **100 pc**.  The units for the detailed spectra are determined by the input parameter Spectrum.type.
+  an ascii file that contains the final detailed spectra for the wavelengths of interest at a distance of **100 pc** on a linear frequency scale.  
+  The units for the detailed spectra are determined by the input parameter Spectrum.type.
 
   Photons bundles are generated in cycles in Python and the *.spec* file is actually written out at the end of each cycle
   as the program is running in the spectrum-generation phase of the program. So one can inspect the spectrum as it is building up.
@@ -106,3 +99,9 @@ The remaining columns are the spectra at various inclination angles and binary p
 
 .log_spec
  Identical to the spectrum .spec file except with logarithmic intervals.  
+
+
+.. note::
+    Theree is no .spec_tot output spectrum.  The reason for this is that the wavelength/frequency range is so large in the tot spectrum that plots made 
+    on a linear scale do not represtent the spectrum well.  For the detailed spectra, which are over a more limited spectral range both types of 
+    spectra are produced.

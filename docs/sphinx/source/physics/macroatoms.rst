@@ -99,9 +99,10 @@ Bound-free Continua of Simple Atoms
 =============================================
 .. todo:: this section is not yet completely accurate.
 
-Historically, when using the indivisible packet form of radiative transfer (`macro_atoms_thermal_trapping`, for example), the bound-free continua of simple atoms were treated in a simplified two-level framework. In this case, simple atoms are those `without` a full macro-atom model atom, usually the metals. In this two-level scheme, whenever a simple atom undergoes a bound-free interaction, it is excited into the continuum state, and this is immediately followed by recombination, and an :math:`r`-packet or :math:`k`-packet is created immediately. As a result, the scheme does not capture the physical situation whereby a recombination cascade can occur from an initial recombination to excited levels, leading to a gradual reddening of the photon if there are many interactions. This situation **is** modelled well by a full macro-atom treatment. 
+Historically, when using the indivisible packet form of radiative transfer (`macro_atoms_thermal_trapping`, for example), the bound-free continua of simple atoms were treated in a simplified two-level framework. In this case, simple atoms are those `without` a full macro-atom model atom, usually the metals. In this two-level scheme, whenever a simple atom undergoes a bound-free interaction, it is excited into the continuum state, and this is immediately followed by recombination, and an :math:`r`-packet or :math:`k`-packet is created immediately. As a result, the scheme does not capture the physical situation whereby a recombination cascade can occur from an initial recombination to excited levels, leading to a gradual reddening of the photon if there are many interactions. This situation **is** modelled well by a full macro-atom treatment. As of 2024, this is once again the default behaviour. 
 
 To try and slightly improve this scheme, we implemented a "total emissivity" upweighting scheme around 2018. The basic idea is that we pay attention to only the heating and cooling. In particular, the rates of all simple atom bound-free emission are governed by the `emissivity` of the bound-free process. 
+**Currently, this mode is turned off by default**, due to `various issues <https://github.com/agnwinds/python/issues?q=is%3Aissue+label%3Aupweighting%3F+>`_ associated with energy conservation, as also described below.
 
 This result in two changes to the code for ionization cycles: 
    * whenever a k-packet is eliminated via a bound-free channel of a simple macro atom (simulating energy flow from the :math:`k`-packet pool to the radiation pool, :math:`k \to r`), we have that packet carry additional energy corresponding to the required ionization energy for that particular bf process. This means we upweight the energy of the packet by a factor :math:`f_{\rm up} = \nu / (\nu - \nu_0)`, where :math:`\nu` is the frequency of the new bound-free photon and :math:`\nu_0` is the threshold frequency. This quantity is the ratio of the total energy carried by photons in the packet to the energy supplied to photons in the packet from the thermal pool. 
@@ -111,7 +112,7 @@ In the spectral cycles, interactions with simple bound-free continua now kill th
 
 **It is possible for some numerical problems to occur.** For example, there is nothing to stop the value of :math:`f_{\rm up}` being quite large, if the photon is being emitted close to the edge. This is most likely to happen when the electron temperature :math:`T_e` is quite low, but there is nothing to stop it happening anywhere. This is most likely to lead to problems when the factor :math:`f_{\rm up}` is comparable to the typical number of photon passages per cell, since then a single photon can dominate the heating or ionization estimators in a given cell and lead to convergence problems by dramatically exacerbating shot noise. 
 
-.. admonition :: Deactivating the scheme
+.. admonition :: Activating the scheme
 
-    This mode can be turned off using the :ref:`Diag.turn_off_upweighting_of_simple_macro_atoms`. 
+    This mode can be turned on using the :ref:`Diag.use_upweighting_of_simple_macro_atoms`. 
     In this case the code will go back to using the two-level framework for simple atom bound free continua.
