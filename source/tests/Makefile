@@ -1,10 +1,11 @@
 C = gcc
 NVCC =
+MATOM_VER = 1
 TARGET = py_unit_test
 
 I_FLAGS = -I$(PYTHON)/include
 L_FLAGS = -L$(PYTHON)/lib
-C_FLAGS = -O3 -Wall -Wno-deprecated-non-prototype
+C_FLAGS = -O3 -Wall -Wno-deprecated-non-prototype -DMATOM_VER=$(MATOM_VER)
 CU_FLAGS = -O3
 
 INCLUDES =
