@@ -105,7 +105,7 @@ def get_levels(ion="h_1", nlevels=10):
     Python can read the astropy table for levels directly,
     so normally one would write this to a file
     """
-    print('Getting levels for %s and nlevels %s' % (ion,nlevels))
+    print('get_levels: Getting levels for %s and nlevels %s' % (ion,nlevels))
     try:
         x = ch.ion(ion, temperature=1e5)
     except:

@@ -66,7 +66,7 @@ def read_phot(photfile='o_2_phot.dat'):
     try: 
         f=open(photfile)
     except:
-        print('Error: %s not found' % photfile)
+        print('Error: RedoPhot.read_phot: %s not found' % photfile)
         return [],[]
 
     rlines=f.readlines()
@@ -212,6 +212,7 @@ def write_phot_tab(out_name,xsum,xcross):
     Note that this routine is not prevented from
     writing data to an existing file.
     '''
+    print('RedoPhot: Starting to write phot file to %s' % (out_name))
 
     f=open(out_name,'w')
     i=0
@@ -279,7 +280,7 @@ def steer(argv):
         i+=1
 
     if infile=='':
-        print('Error: not enught arguments: ',argv)
+        print('Error: not enough arguments: ',argv)
         return
 
     redo_one(infile,outroot)

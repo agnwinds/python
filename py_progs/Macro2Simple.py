@@ -48,6 +48,7 @@ def write_simple_levels(ion="h_1", nlevels=10):
         xtab=get_levels(ion,nlevels)
     except:
         print('Could not get macro levels for ion %s %d' % (ion,nlevels))
+        print('Was MakeMacroRun for this ion?')
         return ''
 
     xtab['Dtype']='LevTop'
@@ -67,6 +68,7 @@ def write_simple_lines(ion="h_1"):
         x=ascii.read(infile)
     except:
         print('Error: write_simple_lines: Could not read %s' % infile)
+        print('Was MakeMacroRun for this ion?')
         return []
     x['Dtype']='Line'
     x.write(outfile,format='ascii.fixed_width_two_line',overwrite=True)
@@ -85,9 +87,8 @@ def doit(ion='h_1',nlevels=10):
     line_file=write_simple_lines(ion)
     print(line_file)
     x = ch.ion(ion, temperature=1e5)
-    nelec = x.Z - x.Ion + 1
-    filename = "p%02d.%02d.dat" % (x.Z, nelec)
-    outfile = "%s_phot_simple.dat" % (ion)  
+    filename = "Phot/p%02d.%02d.dat" % (x.Z,x.Ion)
+    outfile = "Adata/%s_phot_simple.dat" % (ion)  
     phot_tab,xtab=RedoPhot.extrap(filename,1e5)
     if len(phot_tab)==0:
         print('Error: Exiting because of previous problems')
@@ -120,6 +121,12 @@ def steer(argv):
     if len(ion)==0:
         print('Error: No ins to convert: ',argv)
         return 
+
+    for one_ion in ion:
+        if one_ion.isdigit():
+            print('Improperly formatted  command line:',argv)
+            print(__doc__)
+            return
 
     for one_ion in ion:
         doit(one_ion,nlevels)
