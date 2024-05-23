@@ -45,7 +45,6 @@ extensions = [
     'sphinx.ext.autodoc.typehints',
     'sphinx.ext.napoleon',
     "sphinx_gallery.load_style",
-    "sphinxcontrib.icon",
 ]
 
 import os

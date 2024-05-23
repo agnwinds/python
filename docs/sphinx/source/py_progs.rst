@@ -1,7 +1,7 @@
-Python :icon:`fa-brands fa-python` Scripts
-##########################################
+Python Scripts
+################################
 
-There are several `Python` :icon:`fa-brands fa-python` scripts written to prepare input for
+There are several `Python` scripts written to prepare input for
 and analyse the output of *python* (the C code).
 
 Some of the more useful scripts/modules are documented below.
