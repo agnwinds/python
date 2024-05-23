@@ -64,7 +64,11 @@ import sys
 from astropy.io import ascii
 import numpy
 import os
-import ChiantiPy.core as ch
+
+# Do not call this when we're on ReadTheDocs
+if not os.environ.get('READTHEDOCS'):
+    import ChiantiPy.core as ch
+
 import numpy as np
 from astropy.table import Table, join
 from astropy.io import ascii

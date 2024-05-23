@@ -23,8 +23,12 @@ Notes:
 '''
 import numpy as np 
 import sys, os
-PYTHON = os.environ["PYTHON"]
-sys.path.append("$PYTHON/py_progs/")
+
+# Do not call this when we're on ReadTheDocs
+if not os.environ.get('READTHEDOCS'):
+	PYTHON = os.environ["PYTHON"]
+	sys.path.append("$PYTHON/py_progs/")
+
 import py_plot_util as util 
 import py_read_output as rd 
 

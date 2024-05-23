@@ -11,7 +11,9 @@ import py_read_output as rd
 import subprocess, os, sys
 
 # set env variable
-PYTHON = os.environ["PYTHON"]
+# Do not call this when we're on ReadTheDocs
+if not os.environ.get('READTHEDOCS'):
+	PYTHON = os.environ["PYTHON"]
 
 # change these if you want to test different files. These are all in data/ as of October 2019
 macro_files = ['h20', 'h10_hetop_lohe1_standard80', 'h10_standard80', 'h10_hetop_standard80', 'h20_hetop_standard80']
