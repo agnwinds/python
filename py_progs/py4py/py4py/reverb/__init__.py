@@ -1280,17 +1280,23 @@ def open_database(file_root: str, user: str = None, password: str = None, batch_
                 print("Malformed line: '{}'".format(line))
                 continue
 
-            if len(values) != 12:
-                # There should be 13 values per line in our base formatting!
+            if len(values) != 14:
+                # There should be 14 values per line in our base formatting!
                 print("Incorrect number of values in line: '{}'".format(line))
                 continue
 
             # Add the photo using the values. Some must be modified here; ideally, this would be done in Python.
-            session.add(Photon(Wavelength=values[1], Weight=values[2], X=values[3], Y=values[4], Z=values[5],
-                               ContinuumScatters=int(values[6]-values[7]), ResonantScatters=int(values[7]),
-                               Delay=values[8],
-                               Spectrum=int(values[9]), Origin=int(values[10] % 10), Resonance=int(values[11]),
-                               Origin_matom=(values[10] > 9)))
+            session.add(
+                Photon(
+                    Wavelength=values[2], Weight=values[3],
+                    X=values[4], Y=values[5], Z=values[6],
+                    ContinuumScatters=int(values[7]-values[8]), ResonantScatters=int(values[8]),
+                    Delay=values[9],
+                    Spectrum=int(values[10]), Origin=int(values[11] % 10),
+                    Resonance=int(values[12]), LineResonance=int(values[13]),
+                    Origin_matom=(values[11] > 9)
+                )
+            )
             added += 1
             if added > batch_size:
                 # We commit in batches in order to avoid out-of-memory errors
@@ -1355,6 +1361,7 @@ class Photon(Base):
     Spectrum = sqlalchemy.Column(sqlalchemy.Integer)
     Origin = sqlalchemy.Column(sqlalchemy.Integer)
     Resonance = sqlalchemy.Column(sqlalchemy.Integer)
+    LineResonance = sqlalchemy.Column(sqlalchemy.Integer)
     Origin_matom = sqlalchemy.Column(sqlalchemy.Boolean)
 
 
