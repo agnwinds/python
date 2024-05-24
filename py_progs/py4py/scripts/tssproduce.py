@@ -1,5 +1,6 @@
-# TODO: Sort out
-
+"""
+Produces a set of CARAMEL and MEMECHO-format synthetic lightcurves from a set of models.
+"""
 # -*- coding: utf-8 -*-
 import py4py.reverb.timeseries.output as tss_output
 import py4py.reverb.timeseries.input as tss_import
