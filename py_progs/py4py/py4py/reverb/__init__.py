@@ -1,7 +1,5 @@
 """
-Reverberation Mapping module
-
-This contains the type used to create and manipulate reverberation maps from Python output files.
+Contains the class used to create and manipulate reverberation maps from Python output files.
 
 Example:
 
@@ -45,9 +43,9 @@ from typing import List, Optional, Union, Tuple
 from py4py.array import calculate_fwhm, calculate_midpoints
 from py4py.physics import keplerian_velocity, doppler_shift_wave, doppler_shift_vel
 
-# Constant used for rescaling data.
-# Probably already exists in apc but I don't want to faff around with units
+
 SECONDS_PER_DAY = 60 * 60 * 24
+"""Constant used for rescaling data, that is probably superfluous and already present in Astropy"""
 
 
 # ==============================================================================
@@ -1333,7 +1331,7 @@ def open_database(file_root: str, user: str = None, password: str = None, batch_
 
 
 Base = sqlalchemy.ext.declarative.declarative_base()
-
+"""Base class declared dynamically to bind to SQLalchemy"""
 
 class Spectrum(Base):
     """
@@ -1366,7 +1364,7 @@ class Photon(Base):
     SQLalchemy class for a photon. Why are all the properties capitalised?
     Changing them to lowercase as would make sense breaks backwards compatibility.
 
-    # Todo: Change to lower case.
+    # ToDo: Change to lower case.
     """
     __tablename__ = "Photons"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -1385,5 +1383,8 @@ class Photon(Base):
     Origin_matom = sqlalchemy.Column(sqlalchemy.Boolean)
 
 
-kep_sey = {"angle": 40, "mass": 1e7, "radius": [50, 2000]}  # The default Keplerian outline settings for the Seyfert
-kep_qso = {"angle": 40, "mass": 1e9, "radius": [50, 20000]}  # The default Keplerian outline settings for the QSO
+kep_sey = {"angle": 40, "mass": 1e7, "radius": [50, 2000]}
+"""The default Keplerian outline settings for the Seyfert model"""
+
+kep_qso = {"angle": 40, "mass": 1e9, "radius": [50, 20000]}
+"""The default Keplerian outline settings for the QSO model"""

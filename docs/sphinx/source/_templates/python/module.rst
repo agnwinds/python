@@ -15,9 +15,6 @@
       {% block subpackages %}
          {% set visible_subpackages = obj.subpackages|selectattr("display")|list %}
          {% if visible_subpackages %}
-Subpackages
------------
-
 .. toctree::
    :maxdepth: 1
 
@@ -31,9 +28,6 @@ Subpackages
       {% block submodules %}
          {% set visible_submodules = obj.submodules|selectattr("display")|list %}
          {% if visible_submodules %}
-Submodules
-----------
-
 .. toctree::
    :maxdepth: 1
 
@@ -50,9 +44,6 @@ Submodules
             {% set visible_attributes = visible_children|selectattr("type", "equalto", "data")|list %}
             {% if visible_attributes %}
                {% if "attribute" in own_page_types or "show-module-summary" in autoapi_options %}
-Attributes
-----------
-
                   {% if "attribute" in own_page_types %}
 .. toctree::
    :hidden:
@@ -74,9 +65,6 @@ Attributes
             {% set visible_exceptions = visible_children|selectattr("type", "equalto", "exception")|list %}
             {% if visible_exceptions %}
                {% if "exception" in own_page_types or "show-module-summary" in autoapi_options %}
-Exceptions
-----------
-
                   {% if "exception" in own_page_types %}
 .. toctree::
    :hidden:
@@ -98,9 +86,6 @@ Exceptions
             {% set visible_classes = visible_children|selectattr("type", "equalto", "class")|list %}
             {% if visible_classes %}
                {% if "class" in own_page_types or "show-module-summary" in autoapi_options %}
-Classes
--------
-
                   {% if "class" in own_page_types %}
 .. toctree::
    :hidden:
@@ -122,9 +107,6 @@ Classes
             {% set visible_functions = visible_children|selectattr("type", "equalto", "function")|list %}
             {% if visible_functions %}
                {% if "function" in own_page_types or "show-module-summary" in autoapi_options %}
-Functions
----------
-
                   {% if "function" in own_page_types %}
 .. toctree::
    :hidden:

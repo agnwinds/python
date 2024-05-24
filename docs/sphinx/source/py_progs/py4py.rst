@@ -9,5 +9,6 @@ A reverberation mapping example using a Jupyter Notebook can be found under :doc
 
 
 .. toctree::
+    :titlesonly:
 
-    py4py_auto/index
+    py4py_auto/py4py/index

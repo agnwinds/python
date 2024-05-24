@@ -8,6 +8,7 @@ import py4py.reverb.timeseries.process as tss_process
 
 import astropy as ap
 from astropy import units as u
+# noinspection SpellCheckingInspection
 from astropy.units import cds as ucds
 
 import numpy as np
