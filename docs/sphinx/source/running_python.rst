@@ -126,7 +126,7 @@ You can store multiple older versions of Python by recompiling a newer version.
 * Run "make all" to recompile all programs with the new updates. 
 * The process will put the new binaries into the :code:`bin/` directory and not delete what was already there.
  
-You can then run any installed version by replacing the py command, eg :code:`py root.pf`, with the version you desire, eg. 
+You can then run a specific installed version by replacing the py command, eg :code:`py root.pf`, with the version you desire, eg. 
   
   .. code :: bash
     
