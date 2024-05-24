@@ -1,8 +1,6 @@
 #!/usr/bin/env python 
 '''
-Synopsis:  
-    Sumarize a model run with python, ultimately generating
-    an html file with various plots, etc.
+Sumarize a model run with python, ultimately generating an html file with various plots, etc.
 
 
 Command line usage (if any):

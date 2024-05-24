@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: <utf-8> -*-
 """
+Generates `.yml` format descriptions of the parameters in the C files.
+
 This script goes through the (non-blacklisted) input .c files, and identifies
 the input variables, their types and any notes (e.g. units, choices).
 
@@ -16,11 +18,11 @@ Arguments:
         Print the full text of all .yaml files that would be created to the screen.
 
     -w / --write
-        Move any deprecated parameters to $PYTHON/parameters/old/,
-        then write any new parameters to in $PYTHON/parameters/
+        Move any deprecated parameters to `$PYTHON/parameters/old/`,
+        then write any new parameters to in `$PYTHON/parameters/`
 
         Note, this will not over-write any parameters that have changed types
-        but not names e.g. rdflo('thing') to rdint('thing').
+        but not names e.g. `rdflo('thing')` to `rdint('thing')`.
 
     -h / --help
         Prints this documentation.
@@ -44,25 +46,22 @@ Note:
     are not committed, but it is up to the user to sort out what s/he
     wants to do.
 
-    The command to list files in a directory that are not tracked is
+    The command to list files in a directory that are not tracked is::
 
-    git ls-files --other
+        git ls-files --other
 
     if one is in the directory in question.
 
-    The command to remove files in a directory (from within that directory)
-    is:
+    The command to remove files in a directory (from within that directory) is::
+
         git clean -f
 
-    The recommendation is to 
+    The recommendation is to:
 
-    * to clean both $PYTHON/parameters/, and $PYTHON/parameters/old/ from your 
-    local directories before using writing files using this routine, and
-    then
-
-    * to add and comit  all of the files that are produced before going on to other 
-    stages of activities associated with documentation.
-
+    * to clean both $PYTHON/parameters/, and $PYTHON/parameters/old/ from your
+      local directories before using writing files using this routine, and then
+    * to add and comit  all of the files that are produced before going on to other
+      stages of activities associated with documentation.
 
 """
 import os
@@ -495,7 +494,7 @@ def autogenerate_parameter_docs():
         print("Cannot write documentation as it will not work in case-insensitive OSes (e.g. Mac, Windows)")
         return
 
-    if len(sys.argv) is 1:
+    if len(sys.argv) == 1:
         # If we're not running in write mode
         print("Documentation for parameters that no longer exist:")
         for param in deprecated_documentation:
