@@ -33,6 +33,10 @@ Notes:
     the number of photioniztion x-sections
     or the number of collisional x-sections
 
+    The routine must b run from a directory
+    in which the variious files in the 
+    master file are properly linked.
+
                                        
 History:
 

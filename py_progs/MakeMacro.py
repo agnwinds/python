@@ -105,7 +105,12 @@ def get_levels(ion="h_1", nlevels=10):
     Python can read the astropy table for levels directly,
     so normally one would write this to a file
     """
-    x = ch.ion(ion, temperature=1e5)
+    print('get_levels: Getting levels for %s and nlevels %s' % (ion,nlevels))
+    try:
+        x = ch.ion(ion, temperature=1e5)
+    except:
+        print('Error: get_levels: failed for %s' % ion)
+        raise IOError
     First_Ion_Pot = x.Ip
 
     # Find the ionization potential of lower ionization
@@ -273,6 +278,7 @@ def get_levels(ion="h_1", nlevels=10):
                 xxtab["ilv"][i] = n
             i += 1
 
+    print('The number of macro levels is %d' % (len(xxtab)))
     return xxtab
 
 
