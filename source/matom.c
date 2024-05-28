@@ -369,7 +369,7 @@ matom (p, nres, escape)
     }
     else if (n < (nbbd + nbfd + nbbu + nbfu + nauger))
     {                           /* auger ionization jump */
-      uplvl = auger_macro[iauger].nconfig_target[n - nbbd - nbfd - nbbu - nauger];
+      uplvl = auger_macro[iauger].nconfig_target[n - nbbd - nbfd - nbbu - nbfu];
 //OLD      icheck = 4;
     }
     else
