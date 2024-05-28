@@ -20,9 +20,8 @@ Values
     are re-generated.
 
   bubble
-
-  The central source radiates from random positions within a sphere of a given radius. 
-  This model generates isotropic photons.
+    The central source radiates from random positions within a sphere of a given radius. 
+    This model generates isotropic photons.
 
 File
   `setup_star_bh.c <https://github.com/agnwinds/python/blob/master/source/setup_star_bh.c>`_

@@ -1,6 +1,6 @@
 Diag.save_extract_photons
 =========================
-Multi-line description, must keep indentation.
+Saves output to <file_name>.ext.txt
 
 Type
   Boolean (yes/no)

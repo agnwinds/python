@@ -25,7 +25,7 @@ and :math:`r_o` refers to the footpoint of a streamline.
 The poloidal velocity along the streamlines is defined to be
 
 .. math::
-    v_l - v_o + (v_{\infty}(r_o)-v_o) \frac {(l/R_v)^{\alpha}}{(l/R_v)^{\alpha}+1}
+    v_l = v_o + (v_{\infty}(r_o)-v_o) \frac {(l/R_v)^{\alpha}}{(l/R_v)^{\alpha}+1}
 
 The scale length :math:`R_v` and the exponent :math:`\alpha` control the
 acceleration of the wind between a velocity :math:`v_o`, at the base of the wind 

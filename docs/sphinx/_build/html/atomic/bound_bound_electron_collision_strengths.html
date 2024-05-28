@@ -116,7 +116,7 @@
 <p>We use the Chianti atomic database, specifically the *.scups files. These “contain the effective electron collision strengths
 scaled according to the rules formulated by
 <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1992A%26A...254..436B/abstract">Burgess &amp; Tully 1992, A&amp;A, 254, 436</a>
-The values in the file are functional fits to <span class="math notranslate nohighlight">\(\Upsilon(T)\)</span>Omega` in our calculations for collisional de-excitation rate coefficient</p>
+The values in the file are functional fits to <span class="math notranslate nohighlight">\(\Upsilon(T)\)</span> which we referred to as <span class="math notranslate nohighlight">\(\Omega\)</span> in our calculations for collisional de-excitation rate coefficient</p>
 <p><span class="math notranslate nohighlight">\(q_{21}=\Omega\frac{8.629\times10^{-6}}{g_u\sqrt{T}}\)</span></p>
 <p>In the g-bar formulation</p>
 <p><span class="math notranslate nohighlight">\(\Omega=4.77\times10^{16}g_l\overline{g}\frac{f_{abs}}{\nu}\)</span></p>
@@ -152,19 +152,19 @@ The values in the file are functional fits to <span class="math notranslate nohi
 </ul>
 <p>The next two lines, with labels SCT and SCTUPS are the 5 or 9 point spline fits to  <span class="math notranslate nohighlight">\(\Upsilon\)</span> vs T
 in reduced units y,x.</p>
-<p>There are four different types of transitions, each with their own scaling between temperature of the transition and $Upsilon$</p>
+<p>There are four different types of transitions, each with their own scaling between temperature of the transition and <span class="math notranslate nohighlight">\(\Upsilon\)</span>.</p>
 <p>For example, for type 1 (the most common)</p>
 <p><span class="math notranslate nohighlight">\(x=1-\frac{lnC}{ln\left(\frac{kT}{E_ij}+C\right)}\)</span></p>
 <p>and</p>
 <p><span class="math notranslate nohighlight">\(y(x)=\frac{\Upsilon}{ln\left(\frac{kT}{E_{ij}}+e\right)}\)</span></p>
-<p>So, to get <span class="math notranslate nohighlight">\(\Upsilon\)</span> for a given T, one converts T to x via the correct equation,then linearly interpolate between values of y(x), then convert back to $Upsilon$</p>
+<p>So, to get <span class="math notranslate nohighlight">\(\Upsilon\)</span> for a given T, one converts T to x via the correct equation, then linearly interpolate between values of <span class="math notranslate nohighlight">\(y(x)\)</span>, then convert back to <span class="math notranslate nohighlight">\(\Upsilon\)</span>.</p>
 </section>
 <section id="python-structure">
 <h2>Python structure<a class="headerlink" href="#python-structure" title="Permalink to this heading"></a></h2>
 <p>The data is stored in Python in the Coll_stren structure which has memebers</p>
 <ul class="simple">
 <li><p>int n - internal index</p></li>
-<li><p>int lower,upper - the Chianti levels, not currently used</p></li>
+<li><p>int lower, upper - the Chianti levels, not currently used</p></li>
 <li><p>double energy - the energy of the transition</p></li>
 <li><p>double gf - the effective oscillator strength - just oscillator strength x multiplicity</p></li>
 <li><p>double hi_t_lim - the high temperature limit of y</p></li>

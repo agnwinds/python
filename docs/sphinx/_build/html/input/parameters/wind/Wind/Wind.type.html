@@ -75,7 +75,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../Spectrum.html">Spectrum</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../other.html">Other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../other.html">Others and Diagnostics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../Input_spectra.model_file.html">Input_spectra.model_file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../top_level_parameters.html">Top level parameters</a></li>
 </ul>
@@ -126,28 +126,26 @@
              
   <section id="wind-type">
 <h1>Wind.type<a class="headerlink" href="#wind-type" title="Permalink to this heading"></a></h1>
-<p>Multi-line description, must keep indentation.</p>
+<p>Sets the type of wind model the user wants to use. More information of model specifics can be found in <a class="reference internal" href="../../../wind_model_params.html#wind-model-parameters"><span class="std std-ref">Wind Model Parameters</span></a> and <a class="reference internal" href="../../../../wind_models.html#wind-models"><span class="std std-ref">Wind Models</span></a>.</p>
 <dl class="simple">
 <dt>Type</dt><dd><p>Enumerator</p>
 </dd>
 <dt>Values</dt><dd><dl class="simple">
-<dt>SV</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>SV</dt><dd><p>The Shlosman and Vitello parameterization of a bi-conical flow. (<a class="reference internal" href="../SV.html#sv"><span class="std std-ref">SV</span></a>)</p>
 </dd>
-<dt>corona</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>corona</dt><dd><p>A simple model for a corona above the disk. (<a class="reference internal" href="../Corona.html#corona"><span class="std std-ref">Corona</span></a>)</p>
 </dd>
-<dt>homologous</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>homologous</dt><dd><p>A homologous expansion law useful for simulating SNe. (<a class="reference internal" href="../Homologous.html#homologous"><span class="std std-ref">Homologous</span></a>)</p>
 </dd>
-<dt>hydro</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>hydro</dt><dd><p>A special purpose mode used by the python collaboration for importing models from Zeus and Pluto. (Depreciated) (<a class="reference internal" href="../Hydro.html#hydro"><span class="std std-ref">Hydro</span></a>)</p>
 </dd>
-<dt>imported</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>imported</dt><dd><p>A general purpose mode for importing a wind from an ascii file (see also <span class="xref std std-doc">Python Script documentation</span>).</p>
 </dd>
-<dt>kwd</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>kwd</dt><dd><p>The Knigge-Woods-Drew parameterization of a bi-conical flow. (<a class="reference internal" href="../KWD.html#kwd"><span class="std std-ref">KWD</span></a>)</p>
 </dd>
-<dt>shell</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>shell</dt><dd><p>A model of a thin shell useful for diagnostic studies. (<a class="reference internal" href="../Shell.html#shell"><span class="std std-ref">Shell</span></a>)</p>
 </dd>
-<dt>star</dt><dd><p>Multi-line description, must keep indentation.</p>
-</dd>
-<dt>yso</dt><dd><p>Multi-line description, must keep indentation.</p>
+<dt>star</dt><dd><p>A stellar-wind model. A fairly standard parameterization of a spherical outflow for a hot star. (<a class="reference internal" href="../Stellar_wind.html#stellar-wind"><span class="std std-ref">Stellar_wind</span></a>)</p>
 </dd>
 </dl>
 </dd>

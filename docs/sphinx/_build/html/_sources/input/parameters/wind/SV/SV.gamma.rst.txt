@@ -13,5 +13,5 @@ File
   `sv.c <https://github.com/agnwinds/python/blob/master/source/sv.c>`_
 
 Parent(s)
-   * :ref:`Wind.type`: :code:`sv`
+   * :ref:`Wind.type`: ``SV``
 

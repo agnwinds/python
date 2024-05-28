@@ -22,7 +22,7 @@ If the number of components exceeds 1, then the remaining questions relating to 
   The Shlosman and Vitello parameterization of a bi-conical flow.
 
 :ref:`Stellar_wind`
-  A fairly standard parameterization of a spherical outflow for a hot star.
+  A stellar-wind model. A fairly standard parameterization of a spherical outflow for a hot star.
 
 :ref:`hydro`
   A special purpose mode used by the python collaboration for importing models from Zeus and Pluto. (Depreciated)

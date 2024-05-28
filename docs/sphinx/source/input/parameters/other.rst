@@ -1,5 +1,5 @@
 #####
-Other
+Others and Diagnostics
 #####
 
 .. todo::

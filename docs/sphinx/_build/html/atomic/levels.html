@@ -20,6 +20,8 @@
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -184,7 +186,7 @@ between ions, and so it includes the ionization energy of the lower level ioniza
 Note that the radiative rates are not used. The original intention was to use this to define the
 difference between metastable and normal levels, with the expectation that if the level was metastable it
 would be put in Boltzmann equilibrium with the ground state.
-Right now python uses 10**15 seconds, essentially a Hubble time to do this, but this portion of the
+Right now python uses <span class="math notranslate nohighlight">\(10^{15}\)</span> seconds, essentially a Hubble time to do this, but this portion of the
 code is not, according to ss, tested.</p>
 <p>The primary source for this is usually the NIST database, although similar information is usually available in Chianti.
 One normally wants text output, and eV to describe the levels, and then one needs to put things in energy order.

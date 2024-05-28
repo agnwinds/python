@@ -1,6 +1,6 @@
 Wind.radiation
 ==============
-Whether or not the wind should radiate. Wind.radiation is an parameter enabled when a simple atom case is selected with the Line_transfer parameter option. This is not true with macro atom cases. This parameter allows for wind not only to scatter and absorb photons, but also to emit them by various processes, bound-bound, free-free, and recombination.  It is the default for simple radiative transfer.
+Whether or not the wind should radiate. Wind.radiation is an available parameter when the user selects a simple atom case with the :ref:`Line_transfer` parameter option. Macro atoms cases do not have this option. Wind.radiation allows the wind to scatter, absorb and emit photons through various processes, such as bound-bound, free-free, and recombination.  It is the default for simple radiative transfer.
 
 Type
   Boolean (yes/no)

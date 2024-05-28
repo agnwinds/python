@@ -18,5 +18,6 @@ File
 
 Parent(s)
   * :ref:`System_type`: ``star``, ``cv``
+  * :ref:`Central_object.radiation` : ``yes``
 
 
