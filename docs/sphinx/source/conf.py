@@ -45,6 +45,7 @@ extensions = [
     'sphinx.ext.autodoc.typehints',
     'sphinx.ext.napoleon',
     "sphinx_gallery.load_style",
+    'autoapi.extension',
 ]
 
 import os
@@ -106,6 +107,24 @@ pygments_style = 'sphinx'
 
 # Whether to include type hints in the doc, and where
 autodoc_typehints = 'both'
+autoclass_content = 'both'
+
+# -- Options for autoapi output=-------------------------------------------
+autoapi_add_toctree_entry = False
+autoapi_type = 'python'
+autoapi_dirs = [
+    "../../../py_progs/py4py/py4py",
+]
+autoapi_root = 'py_progs/py4py_auto'
+autoapi_python_class_content = 'both'
+autoapi_template_dir = '_templates'
+
+rst_prolog = """
+.. role:: summarylabel
+"""
+html_css_files = [
+    "css/custom.css",
+]
 
 # -- Options for HTML output ----------------------------------------------
 
