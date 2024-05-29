@@ -123,7 +123,34 @@
              
   <section id="diag-save-extract-photons">
 <h1>Diag.save_extract_photons<a class="headerlink" href="#diag-save-extract-photons" title="Permalink to this heading"></a></h1>
-<p>Saves output to &lt;file_name&gt;.ext.txt</p>
+<p>Saves output to <code class="docutils literal notranslate"><span class="pre">&lt;file_name&gt;.ext.txt</span></code>. This is a diagnostic that allows one to print out information about a photon at any time.
+Extract is called when a photon begins its flight and every time that photon scatters.
+Photons are saved before and after each Compton step determining the direction for a photon undergoing Compton scattering.
+Save_extract_photons uses the <code class="docutils literal notranslate"><span class="pre">save_photons</span></code> function.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">save_photons</span></code> columns in the output are assigned in order as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geo</span><span class="o">.</span><span class="n">pcycle</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">np</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">freq_orig</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">freq</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">w_orig</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">w</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">lmn</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">lmn</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">lmn</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">ds</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">tau</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">grid</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">istat</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">nscat</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">nres</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">frame</span><span class="p">,</span>
+<span class="n">comment</span><span class="p">;</span>
+</pre></div>
+</div>
 <dl class="simple">
 <dt>Type</dt><dd><p>Boolean (yes/no)</p>
 </dd>

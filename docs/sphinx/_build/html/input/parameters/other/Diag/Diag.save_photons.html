@@ -65,7 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../wind.html">Winds</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../rt_ion.html">Radiative Transfer &amp; Ionisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../Spectrum.html">Spectrum</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="../../other.html">Other</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../other.html">Others and Diagnostics</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="../Diag.html">Diag</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Photon_sampling.html">Photon_sampling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Reverb.html">Reverb</a></li>
@@ -109,7 +109,7 @@
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../../input.html">Inputs</a></li>
           <li class="breadcrumb-item"><a href="../../../parameters.html">Parameters</a></li>
-          <li class="breadcrumb-item"><a href="../../other.html">Other</a></li>
+          <li class="breadcrumb-item"><a href="../../other.html">Others and Diagnostics</a></li>
           <li class="breadcrumb-item"><a href="../Diag.html">Diag</a></li>
       <li class="breadcrumb-item active">Diag.save_photons</li>
       <li class="wy-breadcrumbs-aside">
@@ -123,7 +123,33 @@
              
   <section id="diag-save-photons">
 <h1>Diag.save_photons<a class="headerlink" href="#diag-save-photons" title="Permalink to this heading"></a></h1>
-<p>Multi-line description, must keep indentation.</p>
+<p>Saves output to <code class="docutils literal notranslate"><span class="pre">&lt;file_name&gt;.ext.txt</span></code>. This is a diagnostic that allows one to print out information about a photon at any time.
+The <code class="docutils literal notranslate"><span class="pre">modes.save_photons</span></code> option is entirely commented out of the code and seems inactive in it’s current state (2024-05-29).
+Save_photons uses the <code class="docutils literal notranslate"><span class="pre">save_photons</span></code> function.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">save_photons</span></code> columns in the output are assigned in order as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geo</span><span class="o">.</span><span class="n">pcycle</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">np</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">freq_orig</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">freq</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">w_orig</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">w</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">lmn</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">lmn</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">lmn</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">ds</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">tau</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">grid</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">istat</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">origin</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">nscat</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">nres</span><span class="p">,</span>
+<span class="n">p</span><span class="o">-&gt;</span><span class="n">frame</span><span class="p">,</span>
+<span class="n">comment</span><span class="p">;</span>
+</pre></div>
+</div>
 <dl class="simple">
 <dt>Type</dt><dd><p>Boolean (yes/no)</p>
 </dd>
