@@ -599,7 +599,7 @@ init_plasma_rad_properties (void)
     plasmamain[i].bf_simple_ionpool_out = 0.0;
     plasmamain[i].bf_simple_ionpool_in = 0.0;
 
-    for (j = 0; j < NUM_RAD_FORCE_DIRECTIONS; j++)
+    for (j = 0; j < N_DMO_DT_DIRECTIONS; j++)
     {
       plasmamain[i].dmo_dt[j] = 0.0;
     }
