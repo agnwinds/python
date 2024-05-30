@@ -392,7 +392,7 @@ double ds_to_cone(ConePtr cc, struct photon *p);
 double ds_to_sphere(double r, struct photon *p);
 double ds_to_sphere2(double x[], double r, struct photon *p);
 int quadratic(double a, double b, double c, double r[]);
-double ds_to_plane(struct plane *pl, struct photon *p);
+double ds_to_plane(struct plane *pl, struct photon *p, int force_positive_z);
 double ds_to_closest_approach(double x[], struct photon *p, double *impact_parameter);
 double ds_to_cylinder(double rho, struct photon *p);
 /* photon2d.c */

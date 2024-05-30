@@ -8,6 +8,9 @@ bin/modify_wind*
 
 # Run files
 *.spec*
+*.pf.old
+*.out.pf
+mod.pf
 
 # Object files
 *.o
