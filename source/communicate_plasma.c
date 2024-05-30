@@ -27,7 +27,7 @@
  *
  * @details
  *
- * The communication pattern is as outlined in broadcast_updated_plasma_properties.
+ * The communication pattern is as outlined in dated_plasma_properties.
  *
  **********************************************************/
 
@@ -376,12 +376,12 @@ broadcast_plasma_grid (const int n_start, const int n_stop, const int n_cells_ra
  *
  * @details
  *
- * The communication pattern is as outlined in broadcast_updated_plasma_properties.
+ * The communication pattern is as outlined in dated_plasma_properties.
  *
  * ### Notes ###
  *
  * When this is called in wind update, there is redundant information being
- * communicated in `broadcast_updated_plasma_properties` which communicates the exact (but
+ * communicated in `dated_plasma_properties` which communicates the exact (but
  * probably incorrect) data this function does. A refactor to clean this up could
  * be done in the future to avoid the extra communication latency from
  * communicating the data twice.
@@ -454,12 +454,12 @@ broadcast_wind_luminosity (const int n_start, const int n_stop, const int n_cell
  *
  * @details
  *
- * The communication pattern is as outlined in broadcast_updated_plasma_properties.
+ * The communication pattern is as outlined in dated_plasma_properties.
  *
  * ### Notes ###
  *
  * When this is called in wind update, there is redundant information being
- * communicated in `broadcast_updated_plasma_properties` which communicates the exact (but
+ * communicated in `dated_plasma_properties` which communicates the exact (but
  * probably incorrect) data this function does. A refactor to clean this up could
  * be done in the future to avoid the extra communication latency from
  * communicating the data twice.
@@ -570,9 +570,9 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
 
   d_xsignal (files.root, "%-20s Begin communicating updated plasma properties\n", "NOK");
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
-  const int num_ints = 1 + n_cells_max * (20 + nphot_total + 2 * NXBANDS + 2 * N_PHOT_PROC);
+  const int num_ints = 1 + n_cells_max * (20 + nphot_total + 2 * NXBANDS + 2 * N_PHOT_PROC + nions);
   const int num_doubles =
-    n_cells_max * (71 + 1 * 3 + 9 * 4 + 6 * NFLUX_ANGLES + 3 * NUM_RAD_FORCE_DIRECTIONS + 9 * nions + 1 * nlte_levels + 3 * nphot_total +
+    n_cells_max * (71 + 1 * 3 + 9 * 4 + 6 * NFLUX_ANGLES + 3 * NFORCE_DIRECTIONS + 9 * nions + 1 * nlte_levels + 3 * nphot_total +
                    1 * n_inner_tot + 9 * NXBANDS + 1 * NBINS_IN_CELL_SPEC);
   const int size_of_comm_buffer = calculate_comm_buffer_size (num_ints, num_doubles);
   char *const comm_buffer = malloc (size_of_comm_buffer);
