@@ -120,6 +120,8 @@ end of each spectral cycle, and with each cycle the photon statistics improves.)
 <li><p><strong>cv.log_spec_tot</strong></p></li>
 <li><p><strong>cv.spec_tot_wind</strong></p></li>
 <li><p><strong>cv.log_spec_tot_wind</strong></p></li>
+<li><p><strong>cv.spec</strong></p></li>
+<li><p><strong>cv.log_spec</strong></p></li>
 </ul>
 <section id="file-types">
 <h2>File types<a class="headerlink" href="#file-types" title="Permalink to this heading"></a></h2>
@@ -136,17 +138,18 @@ The first few lines of the file (omitting the header) are as follows:</p>
 </div>
 </dd>
 </dl>
-<p>The first two columns are fairly obvious. Lambda is in Angstroms.</p>
+<p>The first column describes the frequency of a particular bin in <span class="math notranslate nohighlight">\(Hz\)</span>. The frequency stated is placed on the left edge of the bin, i.e the smallest (minimum) frequency value within that bin range.
+The second column is the wavelength in Angstroms converted from the frequency in the first column.</p>
 <p>The remainder indicate the luminosity, that is <span class="math notranslate nohighlight">\(L_{\nu}\)</span> of the system for specific types of photons. The units are <span class="math notranslate nohighlight">\({\rm erg\: s}^{-1} {\rm Hz}^{-1}\)</span>.</p>
 <p>The remaining columns are:</p>
 <ul class="simple">
-<li><p>Created is the total spectrum of all of the photons paakets as created, that is before having been translated through the wind</p></li>
-<li><p>WCreated is the spectrum of the photons that are created in the wind before translation</p></li>
-<li><p>Emitted is the emergent spectrum after the photons have been translated through the wind</p></li>
-<li><p>CenSrc is the emergent spectrum from photon bundles originating from the Star or BL,</p></li>
-<li><p>Disk is the emergent spectrum from photon bundles originating from the disk,</p></li>
-<li><p>Wind is the emergent spectrum from photon bundles that have been reprocessed by the wind,</p></li>
-<li><p>HitSurf represents photons that did not escape the system but ran into a boundary</p></li>
+<li><p><strong>Created</strong> is the total spectrum of all of the photons paakets as created, that is before having been translated through the wind</p></li>
+<li><p><strong>WCreated</strong> is the spectrum of the photons that are created in the wind before translation</p></li>
+<li><p><strong>Emitted</strong> is the emergent spectrum after the photons have been translated through the wind</p></li>
+<li><p><strong>CenSrc</strong> is the emergent spectrum from photon bundles originating from the Star or BL,</p></li>
+<li><p><strong>Disk</strong> is the emergent spectrum from photon bundles originating from the disk,</p></li>
+<li><p><strong>Wind</strong> is the emergent spectrum from photon bundles that have been reprocessed by the wind,</p></li>
+<li><p><strong>HitSurf</strong> represents photons that did not escape the system but ran into a boundary</p></li>
 </ul>
 <dl>
 <dt>.log_spec_tot</dt><dd><p>An ascii file which contains the same information as <em>.spec_tot</em>, but with a logarithmically space frequency intervals.
@@ -183,6 +186,7 @@ as the program is running in the spectrum-generation phase of the program. So on
 </ul>
 <p>These data in the first set of columns do not reflect the angular dependence of the emission. They are effectively an angle averaged spectrum. Except for the fact that the units are different and the wavelength range is limited these should resemble the spectra in the output files (such as .spec_tot) that record the spectra constructed in the ionization cycles.</p>
 <p>The remaining columns are the spectra at various inclination angles and binary phases.  The label A30P0.50 means the spectrum is viewed at an inclination angle of 30 degrees and at a phase of 0.5 – for a binary system this is when the secondary was located behind the primary.</p>
+<p><strong>An important note to the user:</strong> Due to the nature of modelling with wavelength bounds on the SEDs, the edges (minimum and maximum wavelengths) of observers emergent spectra drop in flux artificially. This is expected behaviour and is not a bug. As a result, if one is interested with a certain spectral region or a particular line. Be sure to widen the pre-determined wavelength minimum and maximum bounds by 50 or so Angstroms extra. This will ensure that your region of interest is appropriately modelled.</p>
 <dl class="simple">
 <dt>.log_spec</dt><dd><p>Identical to the spectrum .spec file except with logarithmic intervals.</p>
 </dd>

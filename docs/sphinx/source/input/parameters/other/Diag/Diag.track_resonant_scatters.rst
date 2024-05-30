@@ -9,7 +9,7 @@ The ``track_scatters`` columns in the output are assigned in order as follows:
 
 .. code:: 
 
-   "Scattter",
+   "Scatter",
     p->np,
     p->x[0], 
     p->x[1], 
