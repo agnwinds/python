@@ -614,7 +614,7 @@ normalise_simple_estimators (xplasma)
   electron_density_obs = xplasma->ne * wmain[nwind].xgamma_cen; // Mihalas & Mihalas p146
   volume_obs = wmain[nwind].vol / wmain[nwind].xgamma_cen;
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < NFORCE_DIRECTIONS; i++)
   {
     xplasma->rad_force_es[i] *= (volume_obs * electron_density_obs) / (volume_obs * VLIGHT);
     xplasma->F_vis[i] /= volume_obs;

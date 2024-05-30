@@ -991,15 +991,6 @@ typedef struct plasma
 
   double cell_spec_flux[NBINS_IN_CELL_SPEC];    /**< The array where the cell spectra are accumulated. */
 
-  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux) */
-  double F_vis[4];
-  double F_UV[4];
-  double F_Xray[4];
-
-  double F_vis_persistent[4];
-  double F_UV_persistent[4];
-  double F_Xray_persistent[4];
-
 #define NFLUX_ANGLES 36 /**< The number of bins into which the directional flux is calculated */
 
 
@@ -1057,10 +1048,18 @@ typedef struct plasma
                                    compute compton cooling-  only needs computing once per cycle
                                  */
 
-#define NUM_RAD_FORCE_DIRECTIONS 3
+#define N_DMO_DT_DIRECTIONS 3
 #define NFORCE_DIRECTIONS 4
+  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux) */
+  double F_vis[NFORCE_DIRECTIONS];
+  double F_UV[NFORCE_DIRECTIONS];
+  double F_Xray[NFORCE_DIRECTIONS];
 
-  double dmo_dt[NUM_RAD_FORCE_DIRECTIONS];             /**< Radiative force of wind */
+  double F_vis_persistent[NFORCE_DIRECTIONS];
+  double F_UV_persistent[NFORCE_DIRECTIONS];
+  double F_Xray_persistent[NFORCE_DIRECTIONS];
+
+  double dmo_dt[N_DMO_DT_DIRECTIONS];             /**< Radiative force of wind */
   double rad_force_es[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
   double rad_force_ff[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
   double rad_force_bf[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
