@@ -142,7 +142,7 @@ int
 translate_in_space (pp)
      PhotPtr pp;
 {
-  double ds, delta, s, smax,  prhosq;
+  double ds, delta, s, smax, prhosq;
   int ndom, ndom_next;
   struct photon ptest;
 
@@ -160,7 +160,7 @@ translate_in_space (pp)
     ds += DFUDGE;               //Fix for Bug #592 - we need to keep track of the little DFUDGE we moved the test photon
 
 
-      /* Note there is a possibility that we reach the other side 
+    /* Note there is a possibility that we reach the other side 
      * of the grid without actually encountering a
      * wind cell
      */
@@ -171,9 +171,9 @@ translate_in_space (pp)
         (prhosq < (zdom[ndom].wind_rhomax_at_disk * zdom[ndom].wind_rhomax_at_disk)))
     {
       stuff_phot (pp, &ptest);
-      ds = 0.0; 
+      ds = 0.0;
     }
-    
+
 
     if (where_in_wind (ptest.x, &ndom_next) < 0)
     {
@@ -317,7 +317,7 @@ ds_to_wind (pp, ndom_current)
 
     else if (zdom[ndom].wind_type == CORONA || (zdom[ndom].wind_type == IMPORT && zdom[ndom].coord_type == CYLIND))
     {
-      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
+      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest, TRUE);
       if (x > 0 && x < ds)
       {
         stuff_phot (pp, &qtest);
@@ -330,7 +330,7 @@ ds_to_wind (pp, ndom_current)
           xxxbound = BOUND_ZMIN;
         }
       }
-      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
+      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest, TRUE);
       if (x > 0 && x < ds)
       {
         stuff_phot (pp, &qtest);
