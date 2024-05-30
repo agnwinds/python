@@ -106,36 +106,32 @@
   <section id="kwd-biconical-wind-prescription">
 <h1>KWD biconical wind prescription<a class="headerlink" href="#kwd-biconical-wind-prescription" title="Permalink to this heading"></a></h1>
 <p><a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1995MNRAS.273..225K/abstract">Knigge, Woods &amp; Drew (1995)</a> developed a parameterization for a bi-conical flow, which in slightly modified form is built into Python.
-in this parameterization, the wind is envisioned to have
+In this parameterization, the wind is envisioned to have
 poloidal streamlines that all point to a position a distance d below the disk, as is
 shown below:</p>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>This figure needs modification to account for the fact that we allow rmin and rmax to be specified.</p>
-</div>
 <figure class="align-center">
 <a class="reference internal image-reference" href="../_images/kwd.png"><img alt="../_images/kwd.png" src="../_images/kwd.png" style="width: 300px;" /></a>
 </figure>
-<p>As descried by KWD95, streamlines emerge thoughout the entire disk, with the innermost
+<p>As described by KWD95, streamlines emerge throughout the entire disk, with the innermost
 streamline just grazing the surface of the central object and the outermost streamline
 emerging from the outer radius of the disk.  In the current version of Python, while this
 is the default choice, the wind region can be restricted to streamlines that arise from
-between <span class="math notranslate nohighlight">\(r_{min}\)</span> and <span class="math notranslate nohighlight">\(r_{rmax}\)</span>.  For fixed values of  <span class="math notranslate nohighlight">\(r_{min}\)</span> and
+between <span class="math notranslate nohighlight">\(r_{min}\)</span> and <span class="math notranslate nohighlight">\(r_{rmax}\)</span> as depicted by the above diagram.  For fixed values of  <span class="math notranslate nohighlight">\(r_{min}\)</span> and
 <span class="math notranslate nohighlight">\(r_{rmax}\)</span>, the wind will tend to be more collimated the larger the value of d.</p>
-<p>In the KWD parameritization, the mass loss per unit area per unit area of the disk is given by</p>
+<p>In the KWD parametrization, the mass loss per unit area per unit area of the disk is given by</p>
 <div class="math notranslate nohighlight">
 \[\frac{\delta \dot{m}}{\delta A} \propto T(R)^{4\alpha}\]</div>
-<p>where T(R) is the temperature of the disk at radius R.  With this parameterization, the
+<p>where T(R) is the temperature of the disk at radius R.  With this parametrization, the
 mass loss rate per unit area is constant for <span class="math notranslate nohighlight">\(\alpha=0\)</span>
-and is porportional to the luminoous flux is <span class="math notranslate nohighlight">\(\alpha=1\)</span>.</p>
+and is proportional to the luminous flux is <span class="math notranslate nohighlight">\(\alpha=1\)</span>.</p>
 <p>The KWD95 model incorporates a velocity law reminiscent of a stellar wing, viz.</p>
 <div class="math notranslate nohighlight">
 \[v_l=(nc_{s}) + (v_{\infty} - nc_{s})\left(1- \frac{R_{v}}{l+R_{v}}
 \right)^{\beta}\]</div>
 <p>where <span class="math notranslate nohighlight">\(nc_s\)</span> is the speed at the base of flow,a multiple of the sound speed, <span class="math notranslate nohighlight">\(R_v\)</span> is the scale length, <span class="math notranslate nohighlight">\(beta\)</span>
 is the exponent that determines the number of scale lengths over
-which the wind acclerates, and <span class="math notranslate nohighlight">\(v_{\infty}\)</span> is defined as a multiple of
-the escape velocity at the footpoint of each stream line.</p>
+which the wind accelerates, and <span class="math notranslate nohighlight">\(v_{\infty}\)</span> is defined as a multiple of
+the escape velocity at the footpoint of each streamline.</p>
 <p>For the model, the sound speed of the disk is defined to be</p>
 <div class="math notranslate nohighlight">
 \[c_s(R) = 10 \sqrt{\frac{T_{eff}(R)}{10^4 K}} km s^{-1}\]</div>
