@@ -99,6 +99,11 @@ ion_abundances (PlasmaPtr xplasma, int mode)
     xplasma->heat_tot_old = xplasma->heat_tot;
     ireturn = 0;
     xplasma->t_e = 0.9 * xplasma->t_r;
+    if ((ireturn = nebular_concentrations (xplasma, NEBULARMODE_ML93)))
+    {
+      Error ("ionization_abundances: nebular_concentrations failed to converge\n");
+      Error ("ionization_abundances: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n", xplasma->j, xplasma->t_e, xplasma->w);
+    }
     convergence (xplasma);
 
   }
@@ -306,8 +311,8 @@ check_convergence (void)
 {
   int n;
   int nconverge, nconverging, ntot;
-  int nte, ntr, nhc;            //NSH 70g - three new counters for the different convergence criteria
-  int nmax;                     //NSH 130725 - counter for cells which are marked as converged, but over temp
+  int nte, ntr, nhc;
+  int nmax;
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
@@ -315,19 +320,22 @@ check_convergence (void)
 
   for (n = 0; n < NPLASMA; n++)
   {
-    ntot++;
-    if (plasmamain[n].converge_whole == CONVERGENCE_CHECK_PASS)
-      nconverge++;
-    if (plasmamain[n].trcheck == CONVERGENCE_CHECK_PASS)
-      ntr++;
-    if (plasmamain[n].techeck == CONVERGENCE_CHECK_PASS)
-      nte++;
-    if (plasmamain[n].hccheck == CONVERGENCE_CHECK_PASS)
-      nhc++;
-    if (plasmamain[n].techeck == CONVERGENCE_CHECK_OVER_TEMP)
-      nmax++;
-    if (plasmamain[n].converging == CELL_CONVERGING)
-      nconverging++;
+    if (wmain[plasmamain[n].nwind].inwind == W_ALL_INWIND || modes.partial_cells == PC_INCLUDE)
+    {
+      ntot++;
+      if (plasmamain[n].converge_whole == CONVERGENCE_CHECK_PASS)
+        nconverge++;
+      if (plasmamain[n].trcheck == CONVERGENCE_CHECK_PASS)
+        ntr++;
+      if (plasmamain[n].techeck == CONVERGENCE_CHECK_PASS)
+        nte++;
+      if (plasmamain[n].hccheck == CONVERGENCE_CHECK_PASS)
+        nhc++;
+      if (plasmamain[n].techeck == CONVERGENCE_CHECK_OVER_TEMP)
+        nmax++;
+      if (plasmamain[n].converging == CELL_CONVERGING)
+        nconverging++;
+    }
   }
 
   xconverge = ((double) nconverge) / ntot;

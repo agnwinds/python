@@ -464,9 +464,9 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   {
     ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
 
-    if (p->nres < 0)
+    if (p->nres == NRES_ES)
       xplasma->nscat_es++;
-    if (p->nres > 0)
+    else if (p->nres > 0)
       xplasma->nscat_res++;
 
     /* We now increment the radiation field in the cell, translate the photon and wrap
