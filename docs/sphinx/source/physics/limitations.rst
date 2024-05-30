@@ -1,28 +1,25 @@
 Limitations and Caveats
 -------------------------
 
-.. todo:: Write these descriptions and complete list.
+There are a number of limitations of Python as a code. This page is a non-exhaustive list, partly taken from the release paper.
 
-There are a number of limitations of Python as a code. This page is a non-exhaustive list.
+Specific issues and code problems
+======================================
 
-**Extreme optical depths** 
+**Pecular emission features in high optical depth models:** As described in `issue 659 <https://github.com/agnwinds/python/issues/659>`_ 
 
-**Pecular emission features in high optical depth models:** As described in `this issue <https://github.com/agnwinds/python/issues/659>`_ 
+**Free-free Gaunt factors:** As described in `issue 33 <https://github.com/agnwinds/python/issues/33>`_, we use a free-free integrated Gaunt factor for both free-free opacity and cooling calculations, but one should really use a frequency-specific (photon by photon) Gaunt factor for the opacity calculation. 
 
-**Free-free Gaunt factors:** As described in `this issue <https://github.com/agnwinds/python/issues/33>`_, we use a free-free integrated Gaunt factor for both free-free opacity and cooling calculations, but one should really use a frequency-specific (photon by photon) Gaunt factor for the opacity calculation. 
-
-**Compton heating energy leak:** As described in `this issue <https://github.com/agnwinds/python/issues/295>`_, 
+**Compton heating energy leak:** As described in `issue 295 <https://github.com/agnwinds/python/issues/295>`_, 
 there is the potential for a slight energy leak (or poor statistics) for Compton heating in non-macro atom mode.
 
-**Iron Fluorescence:** As described in `this issue <https://github.com/agnwinds/python/issues/499>`_,
+**Iron Fluorescence:** As described in `issue 499 <https://github.com/agnwinds/python/issues/499>`_,
 Fluorescence data is not dealt with properly in non-macro-atom mode. The user should use a Fe macro-atom data set for
 situations where this is important. 
 
-**The Sobolev and related approximations**
 
-**The Size of the Line List**
-
-**General Relativity**
+Conceptual and Practical difficulties
+======================================
 
 Python is a complex code that includes a wide range of physical processes. As a result, it is capable of synthesizing the electromagnetic signatures of a diverse set of astrophysical systems on all scales. However, there are, of course, important limitations that the user should be aware of. Perhaps most importantly, Python is *not* a stellar atmosphere code: it is not designed for hugely optically thick and/or static media. Below, we explore these and some other constraints in more detail.
 
@@ -50,18 +47,21 @@ Python is a complex code that includes a wide range of physical processes. As a 
 
 - **General Relativity**
 
-  Python self-consistently carries out the special relativistic frame transformations required as photon packets travel through the grid and interact with the moving material in each cell. However, it does not account for any purely *general* relativistic effects. In particular, photon packets in Python always travel in straight lines, rather than along geodesics. This will primarily affect the angular distributions of photon packets that are emitted or travel within, say, :math:`\simeq 10` gravitational radii of a compact object. This caveat should be kept in mind when modelling AGN and XRBs with \xcode. However, we console ourselves with the thought that the physical and radiative properties of accretion flows in this regime remain quite uncertain.
+Python self-consistently carries out the special relativistic frame transformations required as photon packets travel through the grid and interact with the moving material in each cell. However, it does not account for any purely *general* relativistic effects. In particular, photon packets in Python always travel in straight lines, rather than along geodesics. This will primarily affect the angular distributions of photon packets that are emitted or travel within, say, :math:`\simeq 10` gravitational radii of a compact object. This caveat should be kept in mind when modelling AGN and XRBs with Python. However, we console ourselves with the thought that the physical and radiative properties of accretion flows in this regime remain quite uncertain.
 
 - **Polarization**
 
-  In principle, polarization can be included quite naturally in Monte-Carlo radiative transfer, but the current version of Python does not include a treatment of polarization.
+In principle, polarization can be included quite naturally in Monte-Carlo radiative transfer, but the current version of Python does not include a treatment of polarization.
 
 - **Thermal and statistical equilibrium**
 
-  Python assumes that the flow is always and everywhere in thermal and statistical equilibrium. That is, the code iterates towards a temperature and ionization state for each cell in which the heating and cooling rates in each cell balance and the net transition rate *into* any given atomic/ionic level matches the net transition rate *out of* that level. This implies that there is no concept of time in Python -- the code is not designed to deal with non-equilibrium and/or time-dependent conditions.
+Python assumes that the flow is always and everywhere in thermal and statistical equilibrium. That is, the code iterates towards a temperature and ionization state for each cell in which the heating and cooling rates in each cell balance and the net transition rate *into* any given atomic/ionic level matches the net transition rate *out of* that level. This implies that there is no concept of time in Python -- the code is not designed to deal with non-equilibrium and/or time-dependent conditions.
 
-  This limitation can be important even if the input radiation field is steady. For example, if the flow velocity in a grid cell with characteristic size :math:`\Delta x` is given by :math:`v`, matter will flow through the cell on a time-scale :math:`t_{flow} \sim \Delta x / v`. However, ionization equilibrium can only be established on a time-scale of :math:`t_{rec} \sim \alpha N_e`, where :math:`\alpha` is the relevant recombination coefficient, and :math:`N_e` is the local electron density. Thus if :math:`t_{flow} < t_{rec}`, the cell cannot be in ionization equilibrium. In sufficiently fast-moving flows, the ionization state can then become "frozen-in", i.e. fixed to approximately the state at the last point where equilibrium could be established. Since Python currently has no concept of these time scales, it does not check for such non-equilibrium conditions. It is up to the user to carry out the relevant sanity checks on their models.
+This limitation can be important even if the input radiation field is steady. For example, if the flow velocity in a grid cell with characteristic size :math:`\Delta x` is given by :math:`v`, matter will flow through the cell on a time-scale :math:`t_{flow} \sim \Delta x / v`. However, ionization equilibrium can only be established on a time-scale of :math:`t_{rec} \sim \alpha N_e`, where :math:`\alpha` is the relevant recombination coefficient, and :math:`N_e` is the local electron density. Thus if :math:`t_{flow} < t_{rec}`, the cell cannot be in ionization equilibrium. In sufficiently fast-moving flows, the ionization state can then become "frozen-in", i.e. fixed to approximately the state at the last point where equilibrium could be established. Since Python currently has no concept of these time scales, it does not check for such non-equilibrium conditions. It is up to the user to carry out the relevant sanity checks on their models.
 
 - **Dimensionality and resolution limits**
 
-  At present, Python is (at most) a 
+At present, Python is (at most) a 2.5-dimensional code. That is, the coordinate grid is restricted to 2D and assumed to be symmetric about the y-axis. However, photon packet transport takes place in 2D and allows for a rotational component of motion around the y-axis. In principle, upgrading Python to "full" 3D is fairly straightforward, but running such models would require significantly more computing resources. Memory requirements, in particular, scale directly with the number of grid cells used in a simulation. This is actually already a limitation for high-resolution models in 2D (or 2.5-D) and the reason we have set an upper limit of 500x500 cells as a default.
+
+It is worth noting that Python's memory requirements for computationally demanding simulations are driven by the approach to parallelization that has been adopted. Currently, parallelization relies exclusively on ``MPI`` and requires the computational grid to be copied in full to each ``MPI`` process (i.e. each core). Memory requirements therefore increase rapidly as the number of processors is increased. This situation could be improved by adopting a hybrid ``OpenMP`` and ``MPI`` approach.
+
