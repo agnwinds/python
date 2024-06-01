@@ -108,6 +108,9 @@ pygments_style = 'sphinx'
 # Whether to include type hints in the doc, and where
 autodoc_typehints = 'both'
 autoclass_content = 'both'
+autodoc_mock_imports = [
+    'ChiantiPy', 'ChiantiPy.core'
+]
 
 # -- Options for autoapi output=-------------------------------------------
 autoapi_add_toctree_entry = False
