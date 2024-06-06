@@ -572,8 +572,8 @@ broadcast_updated_plasma_properties (const int n_start_rank, const int n_stop_ra
   const int n_cells_max = get_max_cells_per_rank (NPLASMA);
   const int num_ints = 1 + n_cells_max * (20 + nphot_total + 2 * NXBANDS + 2 * N_PHOT_PROC + nions);
   const int num_doubles =
-    n_cells_max * (71 + 1 * 3 + 6 * NFLUX_ANGLES + 12 * NFORCE_DIRECTIONS + 9 * nions + 1 * nlte_levels + 3 * nphot_total +
-
+    n_cells_max * (71 + 1 * 3 + 9 * 4 + 6 * NFLUX_ANGLES + 3 * NFORCE_DIRECTIONS + 9 * nions + 1 * nlte_levels + 3 * nphot_total +
+                   1 * n_inner_tot + 9 * NXBANDS + 1 * NBINS_IN_CELL_SPEC);
   const int size_of_comm_buffer = calculate_comm_buffer_size (num_ints, num_doubles);
   char *const comm_buffer = malloc (size_of_comm_buffer);
 
