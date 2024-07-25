@@ -1,5 +1,4 @@
 Diag.use_upweighting_of_simple_macro_atoms
-<<<<<<< HEAD
 =====================================================================================
 Advanced command, allows one to turn on the "upweighting"
 scheme for simple ions in indivisible packet mode, as described under the 
@@ -21,4 +20,3 @@ File
 Parent(s)
    * :ref:`Diag.extra`: ``True``
 
->>>>>>> xdoc

@@ -114,9 +114,5 @@ In the spectral cycles, interactions with simple bound-free continua now kill th
 
 .. admonition :: Activating the scheme
 
-<<<<<<< HEAD
     This mode can be turned on using the :ref:`Diag.use_upweighting_of_simple_macro_atoms`. 
-=======
-    This mode can be used using the :ref:`Diag.use_upweighting_of_simple_macro_atoms`. 
->>>>>>> xdoc
     In this case the code will go back to using the two-level framework for simple atom bound free continua.
