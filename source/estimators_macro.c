@@ -115,9 +115,9 @@ bf_estimators_increment (one, p, ds)
 
 
 
-  for (n = 0; n < nphot_total; n++)
+  for (nn = 0; nn < xplasma->kbf_nuse; nn++)
   {
-    // n = xplasma->kbf_use[nn];
+    n = xplasma->kbf_use[nn];
     ft = phot_top[n].freq[0];   //This is the edge frequency (SS)
 
     if (ion[phot_top[n].nion].phot_info > 0)    //topbase or hybrid
@@ -131,14 +131,13 @@ bf_estimators_increment (one, p, ds)
       llvl = 0;                 // shouldn't ever be used 
     }
 
-    if (freq_av > ft)           // does the photon cause bf heating?
+    if (kap_bf[nn] > 0.0 && (freq_av > ft))     // does the photon cause bf heating?
     {
 
       if (phot_top[n].macro_info == TRUE && geo.macro_simple == FALSE)  // it is a macro atom
       {
 
-        // x = kap_bf[nn] / (density * zdom[ndom].fill);   //this is the cross section
-        x = sigma_phot (&phot_top[n], freq_av);
+        x = kap_bf[nn] / (density * zdom[ndom].fill);   //this is the cross section
 
         /* Now identify which of the BF processes from this level this is. */
 
@@ -236,7 +235,7 @@ bf_estimators_increment (one, p, ds)
   /* JM 2402 note that previously we incorrectly included Compton processes in kpkt_abs, which could lead to large 
      amounts of radiation coming out incorrectly in other k->r channels in spectral cycles */
   xplasma->kpkt_abs += heat_contribution;
-
+     
 
 
   /* Now for contribution to heating due to compton processes. (JM, Sep 013) */

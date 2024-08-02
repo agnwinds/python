@@ -924,11 +924,14 @@ setup_atomic_data (const char *atomic_filename)
   {
     Log ("Unable to open atomic masterfile %s\n", atomic_filename);
     Log ("Running Setup_Py_Dir to try and fix the situation\n");
-    rc = system ("Setup_Py_Dir");
-    if (rc)
+    if (rank_global == 0)
     {
-      Error ("Unable to open %s and run Setup_Py_Dir\n", atomic_filename);
-      Exit (1);
+      rc = system ("Setup_Py_Dir");
+      if (rc)
+      {
+        Error ("Unable to open %s and run Setup_Py_Dir\n", atomic_filename);
+        Exit (1);
+      }
     }
   }
 
