@@ -29,13 +29,18 @@ Description:
     producing an 'intermediate level file' that contains information 
     extra columns indicating what to combine.
 
-    It then continues to produce final level fileline annd
+    It then continues to produce final level fileline and
     photoionization files that reflect this choice.
 
     Alternatively, without the -guess option the routine will read
     epects to read a level file which contains the extra columns
     that indcicate what needs to combine,  and uses this to produce
     final level, line and photoionization files.
+
+    Generally, speaking one should start with the -guess option
+    and then modify the xlev column to reflect a final choice
+    of levels to combine, and then one should rerun the routine
+    to synchronize the rest of the files.
 
 Primary routines:
 
@@ -54,6 +59,7 @@ from astropy.table import join, Table
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from scipy.interpolate import interp1d
 
 
 def read_phot(file='h_1_phot.dat'):
@@ -65,27 +71,36 @@ def read_phot(file='h_1_phot.dat'):
     different x-sections, and a list of tables, one table for
     each x-section.
     '''
+    print('Beginning read_phot ', file)
     f=open(file)
     lines=f.readlines()
     i=0
     summary=[]
     xsections=[] # This is going to have one table for each set of xsections
     i=0
+    elem=[]
+    ion=[]
+    level=[]
+    level_up=[]
+    ethresh=[]
+    nlines=[]
+    line_no=[]
+    
     for line in lines:
         word=line.split()
         if word[0][0]=='#':
             pass
         elif word[0].count('PhotMacS'):
-            elem=int(word[1])
-            ion=int(word[2])
-            level=int(word[3])
-            level_up=int(word[4])
-            ethresh=float(word[5])
-            nlines=int(word[6])
-            line_no=i
-            one_record=[elem,ion,level,level_up,ethresh,nlines,line_no]
-            summary.append(one_record)
-            if len(summary)>1:
+            elem.append(int(word[1]))
+            ion.append(int(word[2]))
+            level.append(int(word[3]))
+            level_up.append(int(word[4]))
+            ethresh.append(float(word[5]))
+            nlines.append(int(word[6]))
+            line_no.append(i)
+            # one_record=[elem,ion,level,level_up,ethresh,nlines,line_no]
+            # summary.append(one_record)
+            if len(line_no)>1:
                 # The we have already accumulated xsections
                 x=Table(np.array(one_xsection),names=['e','sigma'])
                 xsections.append(x)
@@ -96,10 +111,15 @@ def read_phot(file='h_1_phot.dat'):
     x=Table(np.array(one_xsection),names=['e','sigma'])
     xsections.append(x)
     
-    summary=np.array(summary)
-    # summary=np.transpose(summary)
-    tab_sum=Table(summary,names=['z','ion','ll','ul','ethresh','nlines','line_no'])
-    print(len(tab_sum),len(xsections))
+    tab_sum=Table([elem,ion,level,level_up,ethresh,nlines,line_no],names=['z','ion','ll','ul','ethresh','nlines','line_no'])
+
+    ncross=range(len(tab_sum))
+    tab_sum['Number']=ncross
+    
+    # Getting the right format would need to be done earlier, because summary contins floats
+    tab_sum.write('phot_sum.txt',format='ascii.fixed_width_two_line',overwrite=True)
+
+    print('Finished  read_phot %s %d %d' % (file,len(tab_sum),len(xsections)))
     
     return tab_sum,xsections
 
@@ -117,13 +137,16 @@ def write_phot(outfile,xtab,xsec):
     '''
 
     if len(xtab)!=len(xsec):
-        print('Error: Trying to write a photometry file witht the number of headers (%d) != number of x-sections (%d)' % (len(xtab),len(xsec)))
-        return
+        print('Error: Writing a file with  only %d of the %d levels have xsections'  % (len(xsec),len(xtab)))
+    else:
+        print('All levels have x-sections')
     
+    print(xtab)
     f=open(outfile,'w')
     i=0
-    while i<len(xtab):
-        one=xtab[i]
+    qtab=xtab[xtab['xsection']=='yes']
+    while i<len(qtab):
+        one=qtab[i]
         string='PhotMacS  %3d %3d %3d %3d %10.6f %3d' %  (one['z'],one['ion'],one['ll'],one['ul'],one['ethresh'],one['nlines'])
         print(string)
         f.write('%s\n' %string)
@@ -183,19 +206,33 @@ def reweight(levels,g,xtab):
     not be what we want.
 
     '''
-    # first check that the enegies are the same
+    # first check that the energies are the same
     
     xsig=[]
+    if len(levels)<1:
+        print('Houston we have a problem: the number of levels is ',len(levels),len(g),len(xtab))
+    else:
+        print('Houston we should be OK: the number of levels is ',len(levels),len(g),len(xtab))
+
     i=0
-    for one in levels:
-        # print(xtab[one])
-        if len(xsig)==0:
-            xsig=g[i]*np.array(xtab[one]['sigma'])
+    while i<len(g):
+        # for one in levels:
+        # print('test:',one)
+        # print('test\n',xtab[one])
+        if i==0:
+            xenergy=xtab[i]['e']
+            xsig=g[i]*np.array(xtab[i]['sigma'])
         else:
-            xsig+=g[i]*np.array(xtab[one]['sigma'])
+            energy=xtab[i]['e']
+            sigma=xtab[i]['sigma']
+            interpolation_func = interp1d(energy, sigma, kind='linear', bounds_error=False, fill_value='extrapolate')
+            xxsigma=interpolation_func(xenergy)
+            # print(i,len(xsig),len(xtab[i]['sigma']),len(xxsigma))
+            xsig+=g[i]*xxsigma
+            # print(len(xsig))
         i+=1
     xsig/=np.sum(g)
-    e=np.array(xtab[levels[0]]['e'])
+    e=np.array(xtab[0]['e'])
     qtab=Table([e,xsig],names=['e','sigma'])
     qtab['e'].format='.6f'
     qtab['sigma'].format='.7e'
@@ -241,44 +278,68 @@ def redo_phot(xlevel_file='h_1_lev2phot_guess.txt',phot_file_orig='h_1_phot.dat'
     # Strip off the next ion if it is there
     xlevel=xlevel[xlevel['config']!='Next']
     nlev=xlevel['xlev'][-1]
-    print('There are %d new levels' % nlev)
+
+    print('There are %d new levels' % (nlev))
+
+
+
     
     #create a place to put a revised level_file
     lev_out=xlevel[0:nlev]
     tab_sum_out=tab_sum[0:nlev]
     xsections_out=[]
+
+    tab_sum.rename_column('ll','lvl')
     j=0
     i=1
+    # i refers to the output level
+
+    good=[]
     while i<=nlev:
+        print('START %d ' % i)
+        # cur_leve is a table containing all the levels to map to i
         cur_lev=xlevel[xlevel['xlev']==i]
-        
-        # Now we need to find the corresponding set of objects 
-        # in the tab_sum and xsections file
-        lev_out[j]=cur_lev[0]
-        
-        gotcha=False
-        for one in tab_sum:
-            if one['ll']==cur_lev['lvl'][0]:
-                if gotcha==False:
-                    tab_sum_out[j]=one
-                    gotcha=True
-        if gotcha==False:
-            print('Failed')
-        # Now get the xsections
-        
-        if len(cur_lev)==1:
-            xsections_out.append(xsections[cur_lev['lvl'][0]-1])
+        xcur=join(cur_lev,tab_sum,keys='lvl',join_type='left')
+        zcur=xcur[xcur['Number']>=0]
+        if hasattr(xcur['Number'],'mask'):
+            xmask=xcur['Number'].mask
+            zcur=xcur[~xmask]
+            print('Levels to combine %d out of %d originally' % (len(zcur),len(xcur)))
+            print('Original levels with no x-sections')
+            print(xcur[xmask])
         else:
-            xlev=np.array(cur_lev['lvl'])
-            glev=np.array(cur_lev['g'])
+            print('All %d levels had x-sections' % (len(xcur)))
+            zcur=xcur
+       
+
+
+        if len(zcur)==0:
+            print('Level %d had no x-sections' % (i))
+            good.append('no')
+        if len(zcur)==1:
+            xsections_out.append(xsections[zcur[0]['Number']])
+            good.append('yes')
+        elif len(zcur)>1:
+            xlev=np.array(zcur['lvl'])
+            glev=np.array(zcur['g'])
+            n=np.array(zcur['Number'])
+            qsections=[]
+            for one in n:
+                qsections.append(xsections[one])
+            # qsections=xsections[n]
+
             xlev=xlev-1
-            vsections=reweight(xlev,glev,xsections)
+
+            vsections=reweight(xlev,glev,qsections)
             xsections_out.append(vsections)
+            good.append('yes')
                           
         i+=1
-        j+=1
     
+    # print('xfffff',i,len(xsections_out))
     lev_out['g']=lev_out['G']
+
+    # print('nada\n',tab_sum_out.info())
     i=0
     while i<nlev:
 
@@ -289,6 +350,7 @@ def redo_phot(xlevel_file='h_1_lev2phot_guess.txt',phot_file_orig='h_1_phot.dat'
     
     phot_file='%s_phot_final.dat' %   root_out
     lev_file='%s_lev_final.dat' % root_out
+    tab_sum_out['xsection']=good
     write_phot(phot_file,tab_sum_out,xsections_out)
     lev_out.write(lev_file,format='ascii.fixed_width_two_line',overwrite=True)
 
@@ -307,11 +369,19 @@ def add_gtot(filename='he_2_levels_comb.dat'):
     multiplicty associated with the final level
     
     '''
+    print('test',filename)
     
     x=ascii.read(filename)
     # x.info()
     x['G']=-1
-    levels=np.array(np.unique(x['xlev']))
+    try:
+        levels=np.array(np.unique(x['xlev']))
+    except:
+        print('Error: the levels file did not have the column xlev')
+        print('This means it does not know what levels to combine')
+        print('Rerun the routine with the -guess optio and then, modify as necessary')
+        return ''
+
     # print(levels)
     gg=np.zeros(len(levels))
     xion=x['Ion'][0]  # This is to allow us to avoid the next level up
@@ -374,7 +444,7 @@ def redo_lines(master='h_1_levels_comb2.dat',lines='h_1_lines.dat'):
     
     
     xlines.sort('ul')
-    xlines.info()
+    # xlines.info()
     xlines.write('foo_lines.dat',format='ascii.fixed_width_two_line',overwrite=True)
     
     z,xindex=np.unique(np.array(xlines['x']),return_index=True)
@@ -410,6 +480,112 @@ def redo_lines(master='h_1_levels_comb2.dat',lines='h_1_lines.dat'):
     xxx.write(out_name,format='ascii.fixed_width_two_line',overwrite=True)
     return xxx
 
+
+def read_collisions(col='he_1__upsilon.dat'):
+    '''
+    Read the collision file and put everything into table for retrieval
+    '''
+
+    x=open(col)
+    lines=x.readlines()
+    print(len(lines))
+    cstren_line=[]
+    sct_line=[]
+    scups_line=[]
+    for one_line in lines:
+        if one_line.count('CSTREN'):
+            cstren_line.append(one_line.strip())
+        elif one_line.count('SCT'):
+            sct_line.append(one_line.strip())
+        elif one_line.count('SCUPS'):
+            scups_line.append(one_line.strip())
+        else:
+            print('Could not interpret ',one_line)
+
+    print(len(cstren_line),len(sct_line),len(scups_line))
+
+    element=[]
+    ion=[]
+    lower=[]
+    upper=[]
+    xtype=[]
+    xlim=[]
+    ntemp=[]
+    for one in cstren_line:
+        word=one.split()
+        # print(len(word),word)
+        element.append(int(word[2]))
+        ion.append(int(word[3]))
+        lower.append(int(word[10]))
+        upper.append(int(word[11]))
+        xlim.append(float(word[16]))
+        ntemp.append(int(word[17]))
+        xtype.append(int(word[18]))
+
+    coltab=Table([element,ion,lower,upper,xtype,ntemp,xlim],names=['Element','Ion','ll','ul','type','ntemp','lim'])
+    coltab['Number']=range(len(coltab))
+    coltab.write('goo.txt',format='ascii.fixed_width_two_line',overwrite=True)
+    # coltab['CSTREN']=cstren_line
+    # coltab['SCT']=sct_line
+    # coltab['SCUPS']=scups_line
+
+
+    return coltab,cstren_line,sct_line,scups_line
+
+
+
+
+
+def redo_collisions(master='he_1_levels_guess.dat',col='he_1__upsilon.dat'):
+    '''
+    Write out a new line file, based on the intermidate
+    level file
+    '''
+    xmaster=ascii.read(master)
+    xmaster.info()
+    collisions,cstren,sct,scups=read_collisions(col)
+    
+    xlow=xmaster['Element','Ion','lvl','xlev','G']
+    xlow.rename_column('lvl','ll')
+    xlow.rename_column('xlev','xll')
+    xlow.rename_column('G','Gl')
+
+    xlow.write('low.txt',format='ascii.fixed_width_two_line',overwrite=True)
+    
+    xup=xmaster['Element','Ion','lvl','xlev','G']
+    xup.rename_column('lvl','ul')
+    xup.rename_column('xlev','xul')
+    xup.rename_column('G','Gu')
+    xup.write('up.txt',format='ascii.fixed_width_two_line',overwrite=True)
+    
+    xcollisions=join(collisions,xlow,join_type='left')
+        
+    xcollisions=join(xcollisions,xup,join_type='left')
+
+
+
+    xcollisions.info()
+
+    xcollisions.write('foo.txt',format='ascii.fixed_width_two_line',overwrite=True)
+
+    final_ll=np.unique(xcollisions['xll'])
+    for one_ll in final_ll:
+        xlower=xcollisions[xcollisions['xll']==one_ll]
+        print(one_ll,len(xlower))
+        final_ul=np.unique(xlower['xul'])
+        for one_ul in final_ul:
+            xupper=xlower[xlower['xul']==one_ul]
+            print(one_ll,one_ul,len(xupper))
+            print(xupper)
+            if len(xupper)>1:
+                f=open('test_%02d_%02d.txt' % (one_ll,one_ul), 'w')
+                for one_row in xupper:
+                    f.write('%s\n' % (cstren[one_row['Number']]))
+                    f.write('%s\n' % (sct[one_row['Number']]))
+                    f.write('%s\n' % (scups[one_row['Number']]))
+                f.close()
+    
+    return 
 
 
     
@@ -461,6 +637,7 @@ def steer(argv):
     level_file=''
     line_file=''
     phot_file=''
+    col_file=''
     iguess=False
 
     i=1
@@ -479,6 +656,8 @@ def steer(argv):
             line_file=argv[i]
         elif phot_file=='':
             phot_file=argv[i]
+        elif col_file=='':
+            col_file=argv[i]
         else:
             print(__doc__)
             print ('Too many arguments' % argv)
@@ -489,12 +668,32 @@ def steer(argv):
     if level_file=='':
         print('No level file provided')
         return
+    else:
+        if os.path.isfile(level_file)==False:
+            print('The level file does not appear to exist: ',level_file)
+            return
+
+    if iguess==False:
+        x=ascii.read(level_file)
+        colnames=x.colnames
+        check=False
+        for one in colnames:
+            if one=='xlev':
+                check=True
+        if check==False:
+            print('Error: levels file does not have columns to show what levels to combine')
+            print('Run wigh -guess option and then modfify the input levels file as necessary')
+            return
+
 
     if iguess:
         level_file=xguess(level_file)
         add_gtot(level_file)
 
     if line_file!='':
+        if os.path.isfile(line_file)==False:
+            print('The line file does not appear to exist: ',line_file)
+            return
         add_gtot(level_file)
         redo_lines(level_file,line_file)
     else:
@@ -502,9 +701,23 @@ def steer(argv):
         return
 
     if phot_file!='':
+        if os.path.isfile(phot_file)==False:
+            print('The phot file does ont appear to exist: ',phot_file)
+            return
         redo_phot(xlevel_file=level_file,phot_file_orig=phot_file,root_out='')
     else:
         print('No phot file provided')
+
+    if col_file!='':
+        if os.path.isfile(col_file)==False:
+            print('The line file does not appear to exist: ',col_file)
+            return
+        add_gtot(level_file)
+        redo_collisions(level_file,col_file)
+    else:
+        print('No col file provided')
+        return
+
 
                 
 
