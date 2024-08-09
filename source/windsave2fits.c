@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  inspect_wind.c
+/** @file  windsave2fits.c 
  * @author ksl
  * @date   October, 2021
  *
@@ -35,6 +35,233 @@ int model_flag, ksl_flag, cmf2obs_flag, obs2cmf_flag;
 double line_matom_lum_single (double lum[], PlasmaPtr xplasma, int uplvl);
 int line_matom_lum (int uplvl);
 int create_matom_level_map ();
+
+// Define a structure to hold spectral data
+typedef struct
+{
+  int num_wavelengths;
+  int num_spectra;
+  float **data;                 // 2D array to hold spectra data
+} Spectra;
+
+/* Next fucntions are utilities that it should be possitle to call repeatedly*/
+
+// Function to prepare 2D image data from a 2D array
+float *
+prepare_image_data (float **data, int width, int height)
+{
+  // Allocate memory for a contiguous 1D array to store the 2D image data
+  float *image_data = calloc (width * height, sizeof (float));
+  if (!image_data)
+  {
+    fprintf (stderr, "Memory allocation error\n");
+    return NULL;
+  }
+
+  // Flatten the 2D data into a 1D array for FITS writing
+  for (int i = 0; i < height; i++)
+  {
+    for (int j = 0; j < width; j++)
+    {
+      image_data[i * width + j] = data[i][j];
+    }
+  }
+
+  return image_data;
+}
+
+// Function to prepare binary table data
+void
+prepare_binary_table (int num_rows, int num_columns, float **table_data)
+{
+  // Allocate memory for each row of the table
+  for (int i = 0; i < num_rows; i++)
+  {
+    table_data[i] = malloc (num_columns * sizeof (float));
+    if (!table_data[i])
+    {
+      fprintf (stderr, "Memory allocation error\n");
+      return;
+    }
+
+    // Fill each row with some sample data
+    for (int j = 0; j < num_columns; j++)
+    {
+      table_data[i][j] = (float) (i * num_columns + j); // Example data
+    }
+  }
+}
+
+
+
+// Function to write a 2D image to a FITS extension with a given name
+int
+write_image_extension (fitsfile *fptr, float *image_data, int width, int height, const char *extname)
+{
+  int status = 0;               // CFITSIO status value MUST be initialized to zero
+  long naxes[2];                // Array to store dimension sizes
+
+  // Set the dimensions of the 2D image: [width, height]
+  naxes[0] = width;             // Number of columns
+  naxes[1] = height;            // Number of rows
+
+  // Create a new image extension of type FLOAT_IMG
+  if (fits_create_img (fptr, FLOAT_IMG, 2, naxes, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Set the extension name using the EXTNAME keyword
+  if (fits_update_key (fptr, TSTRING, "EXTNAME", (void *) extname, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Write the image data to the FITS extension
+  if (fits_write_img (fptr, TFLOAT, 1, width * height, image_data, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  return 0;
+}
+
+// Function to write a binary table to a FITS extension with a given name
+int
+write_binary_table_extension (fitsfile *fptr, int num_rows, int num_columns, float **table_data, const char *extname)
+{
+  int status = 0;
+  char *ttype[] = { "COL1" };   // Name for each column
+  char *tform[] = { "E" };      // Format for each column (E = float)
+  char *tunit[] = { "unit" };   // Unit for each column
+
+  // Create a new binary table extension
+  if (fits_create_tbl (fptr, BINARY_TBL, num_rows, num_columns, ttype, tform, tunit, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Set the extension name using the EXTNAME keyword
+  if (fits_update_key (fptr, TSTRING, "EXTNAME", (void *) extname, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Write the table data
+  for (int i = 0; i < num_rows; i++)
+  {
+    if (fits_write_col (fptr, TFLOAT, 1, i + 1, 1, num_columns, table_data[i], &status))
+    {
+      fits_report_error (stderr, status);
+      return status;
+    }
+  }
+
+  return 0;
+}
+
+
+
+
+
+
+int
+make_spec (inroot)
+     char *inroot;
+{
+
+  fitsfile *fptr;               // Pointer to the FITS file
+  int status = 0;               // CFITSIO status value MUST be initialized to zero
+
+  // Create a new FITS file
+  if (fits_create_file (&fptr, "!multi_extension.fits", &status))
+  {
+    fits_report_error (stderr, status); // Print any error message
+    return status;
+  }
+
+// Create an empty primary HDU
+  if (fits_create_img (fptr, FLOAT_IMG, 0, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+  }
+
+  printf ("Hello World %s \n", inroot);
+  printf ("Plasma  %d \n", NPLASMA);
+  printf ("NBINS in spec %d \n", NBINS_IN_CELL_SPEC);
+
+
+  Spectra spectra;
+  spectra.num_spectra = NPLASMA;
+  spectra.num_wavelengths = NBINS_IN_CELL_SPEC;
+  spectra.data = calloc (spectra.num_spectra, sizeof (float *));
+
+  for (int i = 0; i < spectra.num_spectra; i++)
+  {
+    spectra.data[i] = calloc (spectra.num_wavelengths, sizeof (float));
+
+    // Fill with sample data
+    for (int j = 0; j < spectra.num_wavelengths; j++)
+    {
+      // spectra.data[i][j] = (float) (i + j);
+      spectra.data[i][j] = (float) plasmamain[i].cell_spec_flux[j];
+    }
+  }
+
+  // Prepare image data for the first extension
+  float *image_data1 = prepare_image_data (spectra.data, spectra.num_wavelengths, spectra.num_spectra);
+  if (!image_data1)
+  {
+    // Free allocated memory before exiting
+    for (int i = 0; i < spectra.num_spectra; i++)
+    {
+      free (spectra.data[i]);
+    }
+    free (spectra.data);
+    return 1;
+  }
+
+
+  status = write_image_extension (fptr, image_data1, spectra.num_wavelengths, spectra.num_spectra, "Jnu");
+
+  Spectra freq;
+  freq.num_spectra = 1;
+  freq.num_wavelengths = NBINS_IN_CELL_SPEC;
+  freq.data = calloc (freq.num_spectra, sizeof (float *));
+  freq.data[0] = calloc (freq.num_wavelengths, sizeof (float));
+
+  for (int i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    freq.data[0][i] = (float) pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
+  }
+
+
+  float *image_data2 = prepare_image_data (freq.data, NBINS_IN_CELL_SPEC, 1);
+/*
+  double freq[2000][1];
+  int i;
+
+  for (i = 0; i < NBINS_IN_CELL_SPEC; i++)
+  {
+    freq[i][0] = (float) pow (10., geo.cell_log_freq_min + i * geo.cell_delta_lfreq);
+  }
+
+  float *image_data2 = prepare_image_data (freq, NBINS_IN_CELL_SPEC, 1);
+*/
+  status = write_image_extension (fptr, image_data2, NBINS_IN_CELL_SPEC, 1, "nu");
+
+  if (fits_close_file (fptr, &status))
+  {
+    fits_report_error (stderr, status);
+  }
+
+  return 0;
+}
 
 /**********************************************************/
 /**
@@ -178,6 +405,7 @@ xparse_command_line (argc, argv)
  **********************************************************/
 
 
+
 int
 main (argc, argv)
      int argc;
@@ -206,6 +434,8 @@ main (argc, argv)
   }
 
   wind_read (infile);
+
+  make_spec (inroot);
 
   if (nlevels_macro == 0)
   {
