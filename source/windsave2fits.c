@@ -2,19 +2,18 @@
 /***********************************************************/
 /** @file  windsave2fits.c 
  * @author ksl
- * @date   October, 2021
+ * @date   August,2024   
  *
- * @brief  Routines to inspect variables in a wind structure 
+ * @brief  Routines to write variious portions of  in a wind structure 
+ * to a fits file
  *
  *###Notes###
- * This is intended just as a diagnostic routine 
- * so that one can print out whatever variables in
- * a windstrucutre one wants in order to diagnose
- * a problem.  It was written so that we could inspect
- * some of the macro atom variables in paralell mode
- * in diagnosing issue #898 and #910, but anyon 
- * should change it so that other problems might 
- * be addressed.
+ * This routine was written primarily to better understand
+ * how well the spectra we use for estimating ionization rates
+ * model the actual cell spectra; but it can be rather
+ * straightforwardly adatpted to create images or table
+ * of other portions of a windsave file, that involve
+ * large amounts of data.
  *
  *
  ***********************************************************/
@@ -28,6 +27,9 @@
 #include "python.h"
 #include "fitsio.h"
 
+
+/* The first portions of the program contain some utility routines 
+   for working with cfitsio */
 
 char inroot[LINELENGTH], outroot[LINELENGTH], model_file[LINELENGTH], folder[LINELENGTH];
 int model_flag, ksl_flag, cmf2obs_flag, obs2cmf_flag;
@@ -44,9 +46,18 @@ typedef struct
   float **data;                 // 2D array to hold spectra data
 } Spectra;
 
-/* Next fucntions are utilities that it should be possitle to call repeatedly*/
+/* Next functions are utilities that it should be possitle to call repeatedly*/
 
-// Function to prepare 2D image data from a 2D array
+/**********************************************************/
+/**
+ * @brief      Function to perpare 2d image data from a 2d array
+ *
+ * @details The routine simply returns a flattened version of the 2d array
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
 float *
 prepare_image_data (float **data, int width, int height)
 {
@@ -70,31 +81,21 @@ prepare_image_data (float **data, int width, int height)
   return image_data;
 }
 
-// Function to prepare binary table data
-void
-prepare_binary_table (int num_rows, int num_columns, float **table_data)
-{
-  // Allocate memory for each row of the table
-  for (int i = 0; i < num_rows; i++)
-  {
-    table_data[i] = malloc (num_columns * sizeof (float));
-    if (!table_data[i])
-    {
-      fprintf (stderr, "Memory allocation error\n");
-      return;
-    }
-
-    // Fill each row with some sample data
-    for (int j = 0; j < num_columns; j++)
-    {
-      table_data[i][j] = (float) (i * num_columns + j); // Example data
-    }
-  }
-}
 
 
+/**********************************************************/
+/**
+ * @brief      Function to write a 2d image data to a fits file with
+ * a ginve extension name
+ *
+ * @details The routine normally returns 0                                
+ * ### Notes ###
+ * This routine is called after prepare_image data, which will
+ * have flattened and converted the original array to a float
+ *
+ *
+ **********************************************************/
 
-// Function to write a 2D image to a FITS extension with a given name
 int
 write_image_extension (fitsfile *fptr, float *image_data, int width, int height, const char *extname)
 {
@@ -129,14 +130,63 @@ write_image_extension (fitsfile *fptr, float *image_data, int width, int height,
   return 0;
 }
 
-// Function to write a binary table to a FITS extension with a given name
+
+
+
+/**********************************************************/
+/**
+ * @brief      Function to write a 1d image extension with
+ * a ginve extension name
+ *
+ * @details The routine normally returns 0                                   
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
 int
-write_binary_table_extension (fitsfile *fptr, int num_rows, int num_columns, float **table_data, const char *extname)
+write_1d_image_extension (fitsfile *fptr, float *data, long length, const char *extname)
+{
+  int status = 0;               // CFITSIO status value MUST be initialized to zero
+  long naxes[1];                // Array to store the dimension size (1D array)
+
+  naxes[0] = length;            // Length of the 1D array
+
+  // Create a new image extension of type FLOAT_IMG
+  if (fits_create_img (fptr, FLOAT_IMG, 1, naxes, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Set the extension name using the EXTNAME keyword
+  if (fits_update_key (fptr, TSTRING, "EXTNAME", (void *) extname, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Write the 1D array data to the FITS image extension
+  if (fits_write_img (fptr, TFLOAT, 1, length, data, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  return 0;
+}
+
+
+/* This routine is not longer used but has been kept for reference
+// Function to write a binary table with mixed data types to a FITS extension
+int
+write_mixed_table_extension (fitsfile *fptr, int num_rows, int num_columns, int *int_data, float *float_data, const char *extname)
 {
   int status = 0;
-  char *ttype[] = { "COL1" };   // Name for each column
-  char *tform[] = { "E" };      // Format for each column (E = float)
-  char *tunit[] = { "unit" };   // Unit for each column
+  // Define the names, formats, and units for each column
+  char *ttype[] = { "INT_COL", "FLOAT_COL" };   // Column names
+  char *tform[] = { "J", "E" }; // Formats: 'J' for integer, 'E' for float
+  char *tunit[] = { "", "" };   // Units
 
   // Create a new binary table extension
   if (fits_create_tbl (fptr, BINARY_TBL, num_rows, num_columns, ttype, tform, tunit, NULL, &status))
@@ -152,14 +202,151 @@ write_binary_table_extension (fitsfile *fptr, int num_rows, int num_columns, flo
     return status;
   }
 
-  // Write the table data
-  for (int i = 0; i < num_rows; i++)
+  // Write the integer data to the first column
+  if (fits_write_col (fptr, TINT, 1, 1, 1, num_rows, int_data, &status))
   {
-    if (fits_write_col (fptr, TFLOAT, 1, i + 1, 1, num_columns, table_data[i], &status))
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Write the float data to the second column
+  if (fits_write_col (fptr, TFLOAT, 2, 1, 1, num_rows, float_data, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  return 0;
+}
+*/
+
+/* This ends the utility routines */
+
+/**********************************************************/
+/**
+ * @brief      write_spectral_model_table extension to the
+ * fits file
+ *
+ * @details The routine normally returns 0                                   
+ * ### Notes ###
+ *
+ *
+ **********************************************************/
+
+int
+write_spectra_model_table (fitsfile *fptr)
+{
+
+  /* We need one row for each cell and band so
+     our table will be NPLASMA*nbands long
+   */
+
+  int i, j, k;
+  int num_rows, num_cols;
+  int nbands;
+  int *ichoice, *iplasma;
+  float *exp_w, *exp_temp, *pl_log_w, *pl_alpha;
+
+  nbands = geo.nxfreq;
+  num_rows = nbands * NPLASMA;
+  printf ("xtest %d %d\n", nbands, NPLASMA);
+  num_cols = 6;                 // for now
+  char *table_name = "spec_model";
+
+  ichoice = calloc (num_rows, sizeof (int *));
+  iplasma = calloc (num_rows, sizeof (int *));
+  exp_w = calloc (num_rows, sizeof (float *));
+  exp_temp = calloc (num_rows, sizeof (float *));
+  pl_log_w = calloc (num_rows, sizeof (float *));
+  pl_alpha = calloc (num_rows, sizeof (float *));
+
+  k = 0;
+  for (i = 0; i < NPLASMA; i++)
+  {
+    for (j = 0; j < nbands; j++)
     {
-      fits_report_error (stderr, status);
-      return status;
+      iplasma[k] = i;
+      ichoice[k] = plasmamain[i].spec_mod_type[j];
+      exp_w[k] = plasmamain[i].exp_w[j];
+      exp_temp[k] = plasmamain[i].exp_temp[j];
+      pl_log_w[k] = plasmamain[i].pl_log_w[j];
+      pl_alpha[k] = plasmamain[i].pl_alpha[j];
+      k++;
     }
+  }
+
+
+  int status = 0;
+  // Define the names, formats, and units for each column
+  char *ttype[] = { "nplasma", "spec_mod_type", "exp_w", "exp_temp", "pl_log_w", "pl_alpha" };  // Column names
+  char *tform[] = { "J", "J", "E", "E", "E", "E" };     // Formats: 'J' for integer, 'E' for float
+  char *tunit[] = { "", "", "", "", "", "" };   // Units
+
+  // Create a new binary table extension
+  if (fits_create_tbl (fptr, BINARY_TBL, num_rows, num_cols, ttype, tform, tunit, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Set the extension name using the EXTNAME keyword
+  if (fits_update_key (fptr, TSTRING, "EXTNAME", (void *) table_name, NULL, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  printf ("num_rows: %d\n", num_rows);
+  for (i = 0; i < num_rows; i++)
+  {
+    printf ("%d %d %d\n", i, iplasma[i], ichoice[i]);
+  }
+
+  // Write the integer data to the first column
+  if (fits_write_col (fptr, TINT, 1, 1, 1, num_rows, iplasma, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+  // Write the float data to the second column
+  if (fits_write_col (fptr, TINT, 2, 1, 1, num_rows, ichoice, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+
+  // Write the float data to the third  column
+  if (fits_write_col (fptr, TFLOAT, 3, 1, 1, num_rows, exp_w, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+
+
+  // Write the float data to the fourth  column
+  if (fits_write_col (fptr, TFLOAT, 4, 1, 1, num_rows, exp_temp, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+
+  // Write the float data to the fifth  column
+  if (fits_write_col (fptr, TFLOAT, 5, 1, 1, num_rows, pl_log_w, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+
+  // Write the float data to the sixth  column
+  if (fits_write_col (fptr, TFLOAT, 6, 1, 1, num_rows, pl_alpha, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
   }
 
   return 0;
@@ -167,6 +354,20 @@ write_binary_table_extension (fitsfile *fptr, int num_rows, int num_columns, flo
 
 
 
+
+/**********************************************************/
+/**
+ * @brief      write_a fits file that contains information
+ * releveant to how well the cell spectra are modelled
+ * fits file
+ *
+ * @details The routine normally returns 0                                   
+ * ### Notes ###
+ *
+ * This is the main routine, in the sense that everyting is
+ * controlled frrom here
+ *
+ **********************************************************/
 
 
 
@@ -177,9 +378,16 @@ make_spec (inroot)
 
   fitsfile *fptr;               // Pointer to the FITS file
   int status = 0;               // CFITSIO status value MUST be initialized to zero
+  char outfile[LINELENGTH];
+
+  sprintf (outfile, "%s_cellspec.fits", inroot);
+  printf ("outfile %s\n", outfile);
+
+
 
   // Create a new FITS file
-  if (fits_create_file (&fptr, "!multi_extension.fits", &status))
+  //if (fits_create_file (&fptr, "!multi_extension.fits", &status))
+  if (fits_create_file (&fptr, outfile, &status))
   {
     fits_report_error (stderr, status); // Print any error message
     return status;
@@ -253,7 +461,22 @@ make_spec (inroot)
 
   float *image_data2 = prepare_image_data (freq, NBINS_IN_CELL_SPEC, 1);
 */
-  status = write_image_extension (fptr, image_data2, NBINS_IN_CELL_SPEC, 1, "nu");
+  // status = write_image_extension (fptr, image_data2, NBINS_IN_CELL_SPEC, 1, "nu");
+  status = write_1d_image_extension (fptr, image_data2, NBINS_IN_CELL_SPEC, "nu");
+
+  /* Elimainate this for now
+
+     // Prepare data for the binary table
+     int num_rows = 5;
+     int int_data[] = { 1, 2, 3, 4, 5 };   // Example integer data
+     float float_data[] = { 0.1, 0.2, 0.3, 0.4, 0.5 };     // Example float data
+
+     write_mixed_table_extension (fptr, num_rows, 2, int_data, float_data, "Table_Ext");
+   */
+
+/* Now write my table */
+
+  write_spectra_model_table (fptr);
 
   if (fits_close_file (fptr, &status))
   {
@@ -280,6 +503,10 @@ make_spec (inroot)
  * Although this routine uses the standard Log and Error commands
  * the diag files have not been created yet and so this information
  * is really simply written to the terminal.
+ * 
+ * WARNING: this has not been updeated. Currently there
+ * routine expects only the rootname of a windsave file
+ *
  *
  **********************************************************/
 
@@ -396,10 +623,7 @@ xparse_command_line (argc, argv)
  * This routine oversees the effort.  The basic steps are
  *
  * - parse the command line to get the names of files
- * - read the old windsave file
- * - read the densities from in this case H
- * - modify the densities
- * - write out the new windsave file
+ * - call the routine to craetate fits file
  *
  *
  **********************************************************/
