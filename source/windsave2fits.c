@@ -244,17 +244,18 @@ write_spectra_model_table (fitsfile *fptr)
   int i, j, k;
   int num_rows, num_cols;
   int nbands;
-  int *ichoice, *iplasma;
+  int *ichoice, *iplasma, *iband;
   float *exp_w, *exp_temp, *pl_log_w, *pl_alpha;
 
   nbands = geo.nxfreq;
   num_rows = nbands * NPLASMA;
   printf ("xtest %d %d\n", nbands, NPLASMA);
-  num_cols = 6;                 // for now
+  num_cols = 7;                 // for now
   char *table_name = "spec_model";
 
   ichoice = calloc (num_rows, sizeof (int *));
   iplasma = calloc (num_rows, sizeof (int *));
+  iband = calloc (num_rows, sizeof (int *));
   exp_w = calloc (num_rows, sizeof (float *));
   exp_temp = calloc (num_rows, sizeof (float *));
   pl_log_w = calloc (num_rows, sizeof (float *));
@@ -266,6 +267,7 @@ write_spectra_model_table (fitsfile *fptr)
     for (j = 0; j < nbands; j++)
     {
       iplasma[k] = i;
+      iband[k] = j;
       ichoice[k] = plasmamain[i].spec_mod_type[j];
       exp_w[k] = plasmamain[i].exp_w[j];
       exp_temp[k] = plasmamain[i].exp_temp[j];
@@ -278,9 +280,9 @@ write_spectra_model_table (fitsfile *fptr)
 
   int status = 0;
   // Define the names, formats, and units for each column
-  char *ttype[] = { "nplasma", "spec_mod_type", "exp_w", "exp_temp", "pl_log_w", "pl_alpha" };  // Column names
-  char *tform[] = { "J", "J", "E", "E", "E", "E" };     // Formats: 'J' for integer, 'E' for float
-  char *tunit[] = { "", "", "", "", "", "" };   // Units
+  char *ttype[] = { "nplasma", "band", "spec_mod_type", "exp_w", "exp_temp", "pl_log_w", "pl_alpha" };  // Column names
+  char *tform[] = { "J", "J", "J", "E", "E", "E", "E" };        // Formats: 'J' for integer, 'E' for float
+  char *tunit[] = { "", "", "", "", "", "", "" };       // Units
 
   // Create a new binary table extension
   if (fits_create_tbl (fptr, BINARY_TBL, num_rows, num_cols, ttype, tform, tunit, NULL, &status))
@@ -309,16 +311,24 @@ write_spectra_model_table (fitsfile *fptr)
     return status;
   }
 
+
   // Write the float data to the second column
-  if (fits_write_col (fptr, TINT, 2, 1, 1, num_rows, ichoice, &status))
+  if (fits_write_col (fptr, TINT, 2, 1, 1, num_rows, iband, &status))
   {
     fits_report_error (stderr, status);
     return status;
   }
-
 
   // Write the float data to the third  column
-  if (fits_write_col (fptr, TFLOAT, 3, 1, 1, num_rows, exp_w, &status))
+  if (fits_write_col (fptr, TINT, 3, 1, 1, num_rows, ichoice, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+
+  // Write the float data to the fourth column
+  if (fits_write_col (fptr, TFLOAT, 4, 1, 1, num_rows, exp_w, &status))
   {
     fits_report_error (stderr, status);
     return status;
@@ -326,16 +336,8 @@ write_spectra_model_table (fitsfile *fptr)
 
 
 
-  // Write the float data to the fourth  column
-  if (fits_write_col (fptr, TFLOAT, 4, 1, 1, num_rows, exp_temp, &status))
-  {
-    fits_report_error (stderr, status);
-    return status;
-  }
-
-
-  // Write the float data to the fifth  column
-  if (fits_write_col (fptr, TFLOAT, 5, 1, 1, num_rows, pl_log_w, &status))
+  // Write the float data to the fifth columnmn
+  if (fits_write_col (fptr, TFLOAT, 5, 1, 1, num_rows, exp_temp, &status))
   {
     fits_report_error (stderr, status);
     return status;
@@ -343,7 +345,15 @@ write_spectra_model_table (fitsfile *fptr)
 
 
   // Write the float data to the sixth  column
-  if (fits_write_col (fptr, TFLOAT, 6, 1, 1, num_rows, pl_alpha, &status))
+  if (fits_write_col (fptr, TFLOAT, 6, 1, 1, num_rows, pl_log_w, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
+
+  // Write the float data to the seventh column
+  if (fits_write_col (fptr, TFLOAT, 7, 1, 1, num_rows, pl_alpha, &status))
   {
     fits_report_error (stderr, status);
     return status;
@@ -380,7 +390,10 @@ make_spec (inroot)
   int status = 0;               // CFITSIO status value MUST be initialized to zero
   char outfile[LINELENGTH];
 
-  sprintf (outfile, "%s_cellspec.fits", inroot);
+  /* The obscure exclamation mark at the beginning of the name means yu want to overwrie 
+     and existing file, if it exists */
+
+  sprintf (outfile, "!%s_cellspec.fits", inroot);
   printf ("outfile %s\n", outfile);
 
 
@@ -473,6 +486,19 @@ make_spec (inroot)
 
      write_mixed_table_extension (fptr, num_rows, 2, int_data, float_data, "Table_Ext");
    */
+
+
+/* Now create a 1d extension hold the frequencies of the broad bands */
+
+  int i;
+  float xfreq[100];
+
+  for (i = 0; i <= geo.nxfreq; i++)
+  {
+    xfreq[i] = geo.xfreq[i];
+  }
+
+  status = write_1d_image_extension (fptr, xfreq, geo.nxfreq + 1, "nu_model");
 
 /* Now write my table */
 
