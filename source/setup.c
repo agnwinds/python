@@ -208,7 +208,7 @@ get_spectype (yesno, question, spectype)
        SPEC_TYPE_MODEL.  Note that this assume that all other spectrum types
        have negative values
      */
- 
+
     if (*spectype >= 0 && (geo.run_type == RUN_TYPE_RESTART || geo.run_type == RUN_TYPE_PREVIOUS || geo.ioniz_or_extract == CYCLE_IONIZ))
     {
       *spectype = SPECTYPE_MODEL;
@@ -740,6 +740,13 @@ fixed concentration file. \n\
      This is fairly involved and so is a separate routine  */
 
   get_line_transfer_mode ();
+
+  /* we don't allow the user to use matrix_est ionization mode and macro-atom line transfer, see #875 */
+  if ((geo.ioniz_mode == IONMODE_MATRIX_ESTIMATORS) && (geo.rt_mode == RT_MODE_MACRO))
+  {
+    Error ("matrix_est ionization mode cannot be used with macro-atom line transfer. Exiting.\n");
+    Exit (EXIT_FAILURE);
+  }
 
 
   strcpy (answer, "reflect");
