@@ -481,9 +481,14 @@ def redo_lines(master='h_1_levels_comb2.dat',lines='h_1_lines.dat'):
     return xxx
 
 
-def read_collisions(col='he_1__upsilon.dat'):
+def read_collisions(col='he_1__upsilon.dat',return_original=False):
     '''
     Read the collision file and put everything into table for retrieval
+
+    Note that this table cannot be written in ascii.fixed_width_two_Line, one must used something like ascii.ecv
+
+    If return_original = True than the routine returns the lines it has read in as well as the table that
+    one would use going forward so that the data can be subsetted easily
     '''
 
     x=open(col)
@@ -509,28 +514,71 @@ def read_collisions(col='he_1__upsilon.dat'):
     lower=[]
     upper=[]
     xtype=[]
-    xlim=[]
     ntemp=[]
+    scaling_param=[]
+    tlim=[]
+    energy=[]
+    xlam=[]
+    sct=[]
+    scups=[]
     for one in cstren_line:
         word=one.split()
         # print(len(word),word)
         element.append(int(word[2]))
         ion.append(int(word[3]))
+        xlam.append(float(word[4]))
         lower.append(int(word[10]))
         upper.append(int(word[11]))
-        xlim.append(float(word[16]))
+        energy.append(float(word[14]))
+        tlim.append(float(word[16]))
         ntemp.append(int(word[17]))
         xtype.append(int(word[18]))
+        scaling_param.append(float(word[-1]))
 
-    coltab=Table([element,ion,lower,upper,xtype,ntemp,xlim],names=['Element','Ion','ll','ul','type','ntemp','lim'])
+    coltab=Table([element,ion,xlam,lower,upper,energy,xtype,ntemp,tlim,scaling_param],names=['Element','Ion','Wave','ll','ul','E_ryd','type','ntemp','temp_lim','scale_par'])
+
+    print('got here')
+
+    sct=[]
+    for one in sct_line:
+        word=one.split()
+        j=1
+        record=[]
+        while j<len(word):
+            record.append(float(word[j]))
+            j+=1
+        record=np.array(record)
+        sct.append(record)
+
+
+    scups=[]
+    for one in scups_line:
+        word=one.split()
+        j=1
+        record=[]
+        while j<len(word):
+            record.append(float(word[j]))
+            j+=1
+        record=np.array(record)
+        scups.append(record)
+
+    print(sct)
+
+    print(sct)
+
+
+    coltab['sct']=sct
+    coltab['scups']=scups
+
+
     coltab['Number']=range(len(coltab))
-    coltab.write('goo.txt',format='ascii.fixed_width_two_line',overwrite=True)
-    # coltab['CSTREN']=cstren_line
-    # coltab['SCT']=sct_line
-    # coltab['SCUPS']=scups_line
 
+    coltab.write('goo.txt',format='ascii.ecsv',overwrite=True)
 
-    return coltab,cstren_line,sct_line,scups_line
+    if return_original==True:
+        return coltab,cstren_line,sct_line,scups_line
+    else:
+        return coltab
 
 
 
@@ -541,9 +589,10 @@ def redo_collisions(master='he_1_levels_guess.dat',col='he_1__upsilon.dat'):
     Write out a new line file, based on the intermidate
     level file
     '''
+    print('***Processing collisions***')
     xmaster=ascii.read(master)
     xmaster.info()
-    collisions,cstren,sct,scups=read_collisions(col)
+    collisions,cstren,sct,scups=read_collisions(col,return_original=True)
     
     xlow=xmaster['Element','Ion','lvl','xlev','G']
     xlow.rename_column('lvl','ll')
@@ -566,7 +615,10 @@ def redo_collisions(master='he_1_levels_guess.dat',col='he_1__upsilon.dat'):
 
     xcollisions.info()
 
-    xcollisions.write('foo.txt',format='ascii.fixed_width_two_line',overwrite=True)
+    # xcollisions.write('collisions.txt',format='ascii.fixed_width_two_line',overwrite=True)
+    xcollisions.write('collisions.txt',format='ascii.ecsv',overwrite=True)
+
+    print('***Write out info about each set of collisions to combine')
 
     final_ll=np.unique(xcollisions['xll'])
     for one_ll in final_ll:
@@ -580,11 +632,13 @@ def redo_collisions(master='he_1_levels_guess.dat',col='he_1__upsilon.dat'):
             if len(xupper)>1:
                 f=open('test_%02d_%02d.txt' % (one_ll,one_ul), 'w')
                 for one_row in xupper:
+
                     f.write('%s\n' % (cstren[one_row['Number']]))
                     f.write('%s\n' % (sct[one_row['Number']]))
                     f.write('%s\n' % (scups[one_row['Number']]))
                 f.close()
     
+    print('***Finished collisions***')
     return 
 
 
