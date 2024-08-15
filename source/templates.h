@@ -25,7 +25,8 @@ double upsilon(int n_coll, double u0);
 void skiplines(FILE *fptr, int nskip);
 /* bands.c */
 int bands_init(int imode, struct xbands *band);
-int freqs_init(double freqmin, double freqmax);
+int ion_bands_init(int mode, double freqmin, double freqmax, struct xbands *band);
+void check_appropriate_banding(struct xbands *band, int mode);
 /* bb.c */
 double planck(double t, double freqmin, double freqmax);
 double get_rand_pow(double x1, double x2, double alpha);
