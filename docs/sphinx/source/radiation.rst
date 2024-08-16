@@ -7,7 +7,7 @@ Radiation Sources
 External Radiation Sources
 ==========================
 
-In generic terms, there are two main external radiation sources for any Sirocco calculation: a **Central Source** which can be a normal star, a WD, or a BH, and a **disk**.  Even though Sirocco supports the existence of a secondary star for the purposes of calculating when light from a disk system is occulted, the secondary star does not radiate.
+In generic terms, there are two main external radiation sources for any SIROCCO calculation: a **Central Source** which can be a normal star, a WD, or a BH, and a **disk**.  Even though SIROCCO supports the existence of a secondary star for the purposes of calculating when light from a disk system is occulted, the secondary star does not radiate.
 
 Photons for radiation from the central object emerge uniformly over its surface, except when a lamp-post geometry is
 specified for the ``bh`` or ``agn`` system types. In this lamp-post case, radiation originates from a point source above
@@ -64,10 +64,10 @@ the form :doc:`/input/parameters/Disk/Disk.rad_type_in_final_spectrum` is also n
 Spectra from a model grid (details)
 ===================================
 
-Sirocco was initially written to model the winds of cataclysmic variables (CVs).  Although the spectra of the disks of cataclymic
+SIROCCO was initially written to model the winds of cataclysmic variables (CVs).  Although the spectra of the disks of cataclymic
 variables are often modelled in terms of blackbodies, the spectra of CVs show clear evidence of features that arise from the i
 disk (as well as the wind).   The features that arise from the disk resemble in many respects those that arise from
-an appropriately weighted set of stellar atmospheres.  To allow for this possibility, Sirocco can be configured to read
+an appropriately weighted set of stellar atmospheres.  To allow for this possibility, SIROCCO can be configured to read
 a set of
 models characterized by a temperature and log g, and produce spectra of either the central object or the disk by interpolating on t
 and log g.  The data that must read in consists of a file that associates a temperature and log g with the indvidual spectra.
@@ -100,7 +100,7 @@ The 3 column format above is required.  If one wants to use a set of models that
 simply
 choose a value for the second column.  The use case here is fairly specific, especially with regard to the first parameter T.
 If the disk or central object temperature outside the
-temperatures in the grid, then Sirocco will "adjust" the spectrum assuming that the overall spectrum changes as a BB
+temperatures in the grid, then SIROCCO will "adjust" the spectrum assuming that the overall spectrum changes as a BB
 would, but
 the features in the spectrum are unchanged.  If the gravity goes outside the range of the grid, the closest value is chosen.
 

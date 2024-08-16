@@ -1,7 +1,7 @@
 Meta-documentation
 ##################
 
-How to document Sirocco
+How to document SIROCCO
 ======================
 
 This documentation is written in **ReStructured Text**, and parsed by **Sphinx**.
@@ -12,7 +12,7 @@ Installing the documentation tools
 ----------------------------------
 
 This guide is produced using **Sphinx**.
-**Sphinx** is written in Sirocco and available from the **pip** package manager.
+**Sphinx** is written in SIROCCO and available from the **pip** package manager.
 We require the **Python 3** version of **Sphinx**. Install it, and the other modules required, as:
 
 .. code :: bash
@@ -91,7 +91,7 @@ When referring to a library or program name, render it in **bold** as:
 
 .. code :: rst
 
-    Though this program is called *Sirocco*, it is written in **C**, using the **GSL** library.
+    Though this program is called *SIROCCO*, it is written in **C**, using the **GSL** library.
 
 Content of interest to developers but not users should be broken out into a callout as:
 
@@ -149,7 +149,7 @@ A definition list consists of titles followed by a definition block indented by 
 The headings, in the order we expect, are:
 
 Name
-  The parameter name, as used by Sirocco input files.
+  The parameter name, as used by SIROCCO input files.
 
 Description
   A description of the parameter and its function.

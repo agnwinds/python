@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-########
-Sirocco
-########
+####################################################################################
+SIROCCO - Simulating Ionization and Radiation in Outflows Created by Compact Objects
+####################################################################################
+
 --------------------------------------
 Radiative transfer and ionisation code
 --------------------------------------
 
-Sirocco is a Monte-Carlo radiative transfer code designed to simulate the spectrum of biconical (or spherical)
+SIROCCO is a Monte-Carlo radiative transfer code designed to simulate the spectrum of biconical (or spherical)
 winds in disk systems.  It was origianally written by
 `Long and Knigge (2002) <https://ui.adsabs.harvard.edu/abs/2002ApJ...579..725L/abstract>`_ and
 was intended for simulating the spectra of winds in cataclysmic variables. Since then, it has
@@ -29,15 +30,15 @@ Documentation
 
 Various documentation exists:
 
-* A :doc:`Quick Guide <quick>` describing how to install and run Sirocco (in a fairly mechanistic fashion).
+* A :doc:`Quick Guide <quick>` describing how to install and run SIROCCO (in a fairly mechanistic fashion).
 
-For more information on how this page was generated and how to create documentation for Sirocco,
+For more information on how this page was generated and how to create documentation for SIROCCO,
 look at the page for :doc:`documentation on the documentation <meta>`.
 
 -------
 Authors
 -------
-The authors of the Sirocco code and their institutions are:
+The authors of the SIROCCO code and their institutions are:
 
 Knox Long
   Space Telescope Science Institute, 3700 San Martin Drive, Baltimore, MD 21218, USA

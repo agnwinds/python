@@ -1,7 +1,7 @@
 Programming Notes
 #################
 
-Sirocco is written in C and is normally tested on linux machines and on Macs, where the compiler usually turns out to be clang. It is also regularly compiled with gcc as part of the travis-CI tests. Certain portions of the code are parallelized using the Message Parsing Interface (MPI).
+SIROCCO is written in C and is normally tested on linux machines and on Macs, where the compiler usually turns out to be clang. It is also regularly compiled with gcc as part of the travis-CI tests. Certain portions of the code are parallelized using the Message Parsing Interface (MPI).
 
 Version control is (obviously) managed through **git**.  The stable version is on the `master` branch; the main development is carried out on the `dev` branch. This is generally the branch to start with in developing new code. If possible, a developer should use the so-called Fork and Pull model for their version control workflow. See e.g. `this gist post <https://gist.github.com/Chaser324/ce0505fbed06b947d962>`_.
 
@@ -17,7 +17,7 @@ In addition to indent, one should have cproto or something equivalent installed.
 
 All new routines should have Doxygen headers.
 
-printf statements should be avoided, particular in the main code.  Sirocco has its own replacements for these commands, e.g Log and Error which standardize the outputsand allow for managing what is printed to the screen in multprocessor mode.  There is alsoa command line switch that contorls the amount of information that is printed to the screen.  Specific errors are only logged for a limited number of times, after which theyare merely counted.  A log of the number of times each error has occurred is printed outat the end of each run and for each thread.  (Additional detailes can be found in the Doxygenheader for xlog.c)
+printf statements should be avoided, particular in the main code.  SIROCCO has its own replacements for these commands, e.g Log and Error which standardize the outputsand allow for managing what is printed to the screen in multprocessor mode.  There is alsoa command line switch that contorls the amount of information that is printed to the screen.  Specific errors are only logged for a limited number of times, after which theyare merely counted.  A log of the number of times each error has occurred is printed outat the end of each run and for each thread.  (Additional detailes can be found in the Doxygenheader for xlog.c)
 
 Structures
 ==========
@@ -64,7 +64,7 @@ of a number stages
 Parallel Operation
 ==================
 
-Sirocco uses MPI to parallelize the most compute intensive portions of the routine.  It has
+SIROCCO uses MPI to parallelize the most compute intensive portions of the routine.  It has
 been run on large machines with 100s of cores without problem.
 
 The portions of the routine that are parallelize are:
@@ -96,7 +96,7 @@ The portions of the routine that are parallelize are:
 
 MPI requires intialization. For python this is carried out in python.c.  Various subroutines make
 use of MPI, and as a result, programmers need to be aware of this fact when they write auxiliary
-routines that use the various subroutines called by Sirocco.
+routines that use the various subroutines called by SIROCCO.
 
 Input naming conventions
 ========================
@@ -119,7 +119,7 @@ that is, they all begin with Central_object.  This convention should be followed
 External variables
 ==================
 
-Sirocco uses lots (and likely too many), what are properly know as  external variables.   (In C, a global
+SIROCCO uses lots (and likely too many), what are properly know as  external variables.   (In C, a global
 variable is a variable whose scope is all of the routines in a speciric file.  An external varriable
 is one that is shared across multiple files.)
 

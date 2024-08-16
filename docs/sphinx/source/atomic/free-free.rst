@@ -48,9 +48,9 @@ where
 
 :math:`\Delta=\log(x)-\log(\gamma^2)`
 
-Sirocco structure
+SIROCCO structure
 ================
-This data is held internally in Sirocco in the structure **gaunt_total** which has members
+This data is held internally in SIROCCO in the structure **gaunt_total** which has members
 
 - log_gsqrd
 - gff

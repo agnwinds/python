@@ -1,10 +1,10 @@
 Matrix Acceleration using CUDA
 ###############################
 
-Sirocco can use CUDA/GPUs to accelerate solving linear systems using the cuSOLVER library, which is part of the NVIDIA
+SIROCCO can use CUDA/GPUs to accelerate solving linear systems using the cuSOLVER library, which is part of the NVIDIA
 CUDA Toolkit.
 
-*This pilot study into using GPUs in Sirocco was conducted as an HPC RSE project at the University of Southampton.*
+*This pilot study into using GPUs in SIROCCO was conducted as an HPC RSE project at the University of Southampton.*
 
 When should you use CUDA?
 =========================
@@ -32,7 +32,7 @@ algorithm.
 Requirements
 ============
 
-To use the CUDA matrix acceleration in Sirocco, your machine needs to have the following installed,
+To use the CUDA matrix acceleration in SIROCCO, your machine needs to have the following installed,
 
 - A CUDA-capable NVIDIA GPU
 - NVIDIA CUDA Toolkit
@@ -65,16 +65,16 @@ How to Enable and Run CUDA
 Compilation
 -----------
 
-CUDA is an additional acceleration method and is therefore not enabled by default. To enable CUDA, Sirocco has to be
+CUDA is an additional acceleration method and is therefore not enabled by default. To enable CUDA, SIROCCO has to be
 compiled with the additional :code:`-DCUDA_ON` flag and linked with the appropriate libraries using the NVIDIDA CUDA
-compiler (nvcc). There are several ways to enable the CUDA components of Sirocco. The most simple is to run the configure
-script in the root Sirocco directory with the arguments :code:`--with-cuda`,
+compiler (nvcc). There are several ways to enable the CUDA components of SIROCCO. The most simple is to run the configure
+script in the root SIROCCO directory with the arguments :code:`--with-cuda`,
 
 .. code:: bash
 
     [$SIROCCO] $ ./configure --with-cuda
 
-    Configuring Makefile for Sirocco radiative transfer code
+    Configuring Makefile for SIROCCO radiative transfer code
     Checking for mpicc...yes
     Checking for gcc...yes
     Checking for nvcc...yes
@@ -83,7 +83,7 @@ script in the root Sirocco directory with the arguments :code:`--with-cuda`,
 If the NVIDIA CUDA Toolkit is found, you will see the output informing that the CUDA compiler :code:`nvcc` was found.
 
 What essentially happens when you run :code:`code` is that a value for the variable :code:`NVCC` is set in the Makefile
-in Sirocco's source directory. If you re-run :code:`configure` without :code:`--with-cuda`, then :code:`NVCC` will be
+in SIROCCO's source directory. If you re-run :code:`configure` without :code:`--with-cuda`, then :code:`NVCC` will be
 unset and CUDA will not be used. CUDA can be disabled or enabled *"on the fly"* by modifying this variable without
 running the configure script and by modifying the Makefile or passing the value of the variable when calling the
 Makefile, e.g.,
@@ -99,7 +99,7 @@ depending on if CUDA is enabled or not.
 Running
 -------
 
-To run Sirocco with CUDA, you run it in the exact way even parallel models running with MPI. On a HPC system the
+To run SIROCCO with CUDA, you run it in the exact way even parallel models running with MPI. On a HPC system the
 appropriate GPU resources will need to be requested in a job submission script. For example, on Iridis at the University
 of Southampton, a functional job submission script may look like this,
 
@@ -117,13 +117,13 @@ of Southampton, a functional job submission script may look like this,
 
     mpirun -n $SLURM_NTASKS py model.pf
 
-If CUDA is enabled and no GPU resources are found, Sirocco will exit early in the program with an appropriate error
+If CUDA is enabled and no GPU resources are found, SIROCCO will exit early in the program with an appropriate error
 message. Note that a CUDA-aware MPI implementation is not required, as no data is communicated between GPUs.
 
 Implementation
 ==============
 
-In this part of the documentation, we will cover the implementation details of cuSolver in Sirocco. cuSolver is a matrix
+In this part of the documentation, we will cover the implementation details of cuSolver in SIROCCO. cuSolver is a matrix
 library within the NVIDIA CUDA ecosystem, designed to accelerate both dense and sparse linear algebra problems,
 including matrix factorisation, linear system solving and matrix inversion. To use cuSolver, very little GPU specific
 code needs to be written, other than code to allocate memory on the GPU. There are therefore a number of similarities
@@ -150,7 +150,7 @@ A more detailed and thorough explanation of the CUDA programming model can be fo
 Basics
 ------
 
-Sirocco uses the dense matrix functions in cuSolver, which are accessed through the :code:`cusolverDn.h` header file. To
+SIROCCO uses the dense matrix functions in cuSolver, which are accessed through the :code:`cusolverDn.h` header file. To
 use cuSolver, it must first be initialised. To do so, we use :code:`cusolverDnCreate` to create a
 :code:`cuSolverDnHandle_t` variable which is used by cuSolver internally for resource and context management.
 
@@ -214,7 +214,7 @@ The GSL matrix code is kept in :code:`$SIROCCO/source/matrix_cpu.c` with functio
 
 To be able to switch between the CUDA and GSL matrix implementations with the minimal amount of code changes, a
 :code:`solve_matrix` wrapper function has been created. Either GSL or cuSolver is called within this wrapper, depending
-on if Sirocco was compiled with the flag :code:`-DCUDA_ON` as discussed earlier. This wrapper takes on the same name as
+on if SIROCCO was compiled with the flag :code:`-DCUDA_ON` as discussed earlier. This wrapper takes on the same name as
 the original GSL implementation, meaning no code changes have occurred in that regard.
 
 .. code:: c
@@ -329,7 +329,7 @@ simplified) example of the cuSolver implementation to solve a linear system.
         ));
 
         /* We now have to copy d_b_vector back to the CPU, so we can use that value in
-        the rest of Sirocco */
+        the rest of SIROCCO */
         copy_data_to_cpu();
 
         return EXIT_SUCCESS;
@@ -367,7 +367,7 @@ The steps for compiling and link GPU and CPU code are outlined below in pseudo-M
     NVCC = nvcc
 
     # Define C and CUDA libraries. We still include GSL as other GSL numerical routines are
-    # used in Sirocco
+    # used in SIROCCO
     C_LIBS = -lgsl -lgslcblas -lm
     CUDA_LIBS = -lcudart -lcusolver
 
@@ -408,7 +408,7 @@ shown below.
         $(NVCC) $(NVCC_FLAGS) -DCUDA_ON -I$(INCLUDE) -c $< -o $@
     endif
 
-    # So to compile Sirocco, we have something which looks vaguely like this. Note that
+    # So to compile SIROCCO, we have something which looks vaguely like this. Note that
     # we use the CUDA_OBJECTS recipe as a requirement for the python recipe. This CUSOLVER_STATUS_SUCCESS
     # the CUDA source to be compiled to object code *if* NVCC is defined
     python: startup python.o $(python_objects) $(CUDA_OBJECTS)

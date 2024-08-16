@@ -1,7 +1,7 @@
 py4py
 --------
-`py4py` is a module written in Sirocco for reading, processing and visualising the input and output
-files of the *c* code *Sirocco*.
+`py4py` is a module written in SIROCCO for reading, processing and visualising the input and output
+files of the *c* code *SIROCCO*.
 
 Installation instructions can be found in the associated README.md
 

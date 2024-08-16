@@ -1,7 +1,7 @@
 Getting Started
 ###############
 
-What machines will python run on? Sirocco is written C.  We have regularly run Sirocco on various linux systems as well as a variity of Mac machines.
+What machines will python run on? SIROCCO is written C.  We have regularly run SIROCCO on various linux systems as well as a variity of Mac machines.
 It is compiled using mpicc/gcc, but it can be compiled simply with gcc.
 
 It uses the Gnu Scientific Libraries (gsl)
@@ -11,8 +11,8 @@ It uses the Gnu Scientific Libraries (gsl)
 Installation
 ============
 
-Sirocco and the various routines associated are set up in a self-contained directory structure.
-The basic directory structure and the data files that one needs to run Sirocco need to be retrieved and compiled.
+SIROCCO and the various routines associated are set up in a self-contained directory structure.
+The basic directory structure and the data files that one needs to run SIROCCO need to be retrieved and compiled.
 
 If you want to obtain a stable (!) release, go to the `Releases <https://github.com/sirocco-rt/sirocco/releases/>`_ page.
 
@@ -44,10 +44,10 @@ note that export syntax is for bash- for csh use
     $ setenv SIROCCO /path/to/sirocco/
 
 
-The atomic data needed to run Sirocco is included in the distribution.
+The atomic data needed to run SIROCCO is included in the distribution.
 
 
-The source code for Sirocco is under actively development and is updated fairly often. Normally, one does not need to redo the entire installation process, since this includes GSL setup.
+The source code for SIROCCO is under actively development and is updated fairly often. Normally, one does not need to redo the entire installation process, since this includes GSL setup.
 Instead, one can pull in changes and recompile the source code by running
 
 .. code:: bash
@@ -70,7 +70,7 @@ You can then setup your symbolic links by running
 
 .. code:: bash
 
-    $ Setup_Sirocco_Dir
+    $ Setup_SIROCCO_Dir
 
 and run the code by typing, e.g.
 
@@ -82,9 +82,9 @@ and run the code by typing, e.g.
 Running in parallel mode
 ------------------------
 
-While Sirocco can be run in single processor mode, it is generally more efficient to run on multiple processors. in multiprocessor mode,
-When multiprocessing is invoked, Sirocco uses mulitple threads for photon transfer and in calcuation ionization equilibrium.  As these
-comprise the bulk of the computational load the total time to run is  roughly an inverse of the number of threads.  Sirocco uses `MPI <https://en.wikipedia.org/wiki/Message_Passing_Interface>`_ for parallel processing and so software libraries that implement this must be on the machine that is
+While SIROCCO can be run in single processor mode, it is generally more efficient to run on multiple processors. in multiprocessor mode,
+When multiprocessing is invoked, SIROCCO uses mulitple threads for photon transfer and in calcuation ionization equilibrium.  As these
+comprise the bulk of the computational load the total time to run is  roughly an inverse of the number of threads.  SIROCCO uses `MPI <https://en.wikipedia.org/wiki/Message_Passing_Interface>`_ for parallel processing and so software libraries that implement this must be on the machine that is
 being used.  For Macs, mpi can installed with HomeBrew or Fink.  For linux machines, two common libraries are `Open-MPI <https://www.open-mpi.org/>`_ and `MPICH <https://www.mpich.org/>`_  If not already installed, one should
 install them.
 
@@ -114,11 +114,11 @@ The two files are run as follows
 
 Brief descriptions of command line options for running these routines can obtained using a -h switch
 
-Sirocco scripts
+SIROCCO scripts
 --------------
 
 There are a number of Python, the programming language scripts, that can be used to plot results
-from a Sirocco run.  These are not particularly well documented and many have been developed
+from a SIROCCO run.  These are not particularly well documented and many have been developed
 for looking at various aspects of the code.  A few may require Python packages to be installed.
 However, a number are likely to be useful.
 

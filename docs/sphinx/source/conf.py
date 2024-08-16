@@ -77,7 +77,7 @@ templates_path = ['_templates']
 master_doc = 'index'
 
 # General information about the project.
-project = "Sirocco"
+project = "SIROCCO"
 
 copyright = '2018-2024, Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad'
 author = 'Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews, Sam Mangham, Edward Parkinson, Nicolas Scepi, Austen Wallis, Amin Mosallanezhad'
@@ -196,14 +196,14 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "sirocco.tex", "Sirocco Documentation", author, "manual"),
+    (master_doc, "sirocco.tex", "SIROCCO Documentation", author, "manual"),
 ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "Sirocco", "Sirocco Documentation", [author], 1)]
+man_pages = [(master_doc, "SIROCCO", "SIROCCO Documentation", [author], 1)]
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -213,10 +213,10 @@ man_pages = [(master_doc, "Sirocco", "Sirocco Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "Sirocco",
-        "Sirocco Documentation",
+        "SIROCCO",
+        "SIROCCO Documentation",
         author,
-        "Sirocco",
+        "SIROCCO",
         "One line description of project.",
         "Miscellaneous",
     ),

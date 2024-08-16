@@ -5,7 +5,7 @@ Macro Atoms
 
 .. todo:: Add description of accelerated macro-atom scheme
 
-The macro-atom scheme was created by Leon Lucy and is outlined in his 2002/03 papers. It was implemented in Sirocco by Stuart Sim, initially for the study of recombination lines in YSOs (Sim et al. 2005).
+The macro-atom scheme was created by Leon Lucy and is outlined in his 2002/03 papers. It was implemented in SIROCCO by Stuart Sim, initially for the study of recombination lines in YSOs (Sim et al. 2005).
 
 Lucy (2002,2004) hereafter L02, L03 has shown that it is possible to calculate the emissivity of a gas in statistical equilibrium without approximation for problems with large departures from LTE. His `macro-atom` scheme allows for all possible transition paths from a given level, dispensing with the two-level approximation, and provides a full non-LTE solution for the level populations based on Monte Carlo estimators. The macro-atom technique has already been used to model Wolf-Rayet star winds (Sim 2004), AGN disc winds (Sim et al. 2008), supernovae (Kromer and Sim 2009, Kerzendorf and Sim 2014) and YSOs (Sim et al. 2005). A full description of the approach can be found in L02 and L03.
 
@@ -85,7 +85,7 @@ This hybrid approach preserves the fast treatment of, for example, UV resonance 
 Macro-atom Emissivity Calculation
 ========================================
 
-In order to preserve the philosophy that a detailed spectrum is calculated in a limited wavelength regime, Sirocco carries out a macro-atom emissivity calculation before the spectral cycles. The aim of this step is to calculate the luminosity contributed by macro-atoms -- equivalent to the total amount of reprocessed emission -- in the wavelength range being considered.
+In order to preserve the philosophy that a detailed spectrum is calculated in a limited wavelength regime, SIROCCO carries out a macro-atom emissivity calculation before the spectral cycles. The aim of this step is to calculate the luminosity contributed by macro-atoms -- equivalent to the total amount of reprocessed emission -- in the wavelength range being considered.
 
 This process can be very computationally intensive, especially if the wavelength regime being simulated has very little emission from bound-free and line processes in the wind, but the overall broad-band emissivity is high. During the ionization cycles, the amount of energy absorbed into :math:`k`-packets and every macro-atom level is recorded using MC estimators. Once  the ionization cycles are finished, and the model has converged, these absorption energies are split into a certain number of packets and tracked through the macro-atom machinery until a deactivation occurs. When this happens, the emissivity of the level the macro-atom de-activated from is incremented if the packet lies in the requested wavelength range. If it does not, then  the packet is thrown away. It is easy to see how what is essentially a MC rejection method can be an inefficient way of sampling this parameter space. Fortunately, this problem is parallelised in the code.
 

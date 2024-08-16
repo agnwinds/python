@@ -1,7 +1,7 @@
 System Description
 ##################
 
-The first set of parameters which Sirocco needs are information about the overall system.
+The first set of parameters which SIROCCO needs are information about the overall system.
 
 .. code::
    

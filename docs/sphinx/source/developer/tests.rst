@@ -1,26 +1,26 @@
 Unit Test Framework
 ###################
 
-Unit tests are an excellent way to ensure that any code you write is robust and correct. To manage unit testing, Sirocco
+Unit tests are an excellent way to ensure that any code you write is robust and correct. To manage unit testing, SIROCCO
 uses the `CUnit <https://gitlab.com/cunity/cunit>`_ test framework. Unit tests are run by using :code:`make check` in
-either the root directory of Sirocco, or in the source/test directory.
+either the root directory of SIROCCO, or in the source/test directory.
 
 Installing CUnit
 ================
 
-Sirocco has been tested to work with CUnit (and CUnity) versions newer than 2.1-3. A recent version of CUnit is provided
-in the :code:`$SIROCCO/software` directory and can be installed as a static library by using the Makefile in Sirocco's
+SIROCCO has been tested to work with CUnit (and CUnity) versions newer than 2.1-3. A recent version of CUnit is provided
+in the :code:`$SIROCCO/software` directory and can be installed as a static library by using the Makefile in SIROCCO's
 root directory. To build CUnit from source, you will need `CMake <https://cmake.org/>`_ installed, which is a modern
 build system for C and C++ projects.
 
-CUnit will be installed (as a static library) at the same time as GSL and Sirocco during the first-time install, e.g.,
+CUnit will be installed (as a static library) at the same time as GSL and SIROCCO during the first-time install, e.g.,
 
 .. code:: bash
 
     $ [$SIROCCO] ./configure
     $ [$SIROCCO] make install
 
-It is also possible to install only CUnit, using the same Makefile, if Sirocco and GSL are already installed on your
+It is also possible to install only CUnit, using the same Makefile, if SIROCCO and GSL are already installed on your
 system,
 
 .. code:: bash
@@ -298,7 +298,7 @@ appropriately organised directories as shown below.
     │   └── tests.h
     └── unit_test_main.c
 
-We also need to include the Sirocco source code we are testing in the :code:`SIROCCO_SOURCES` variable of the Makefile.
+We also need to include the SIROCCO source code we are testing in the :code:`SIROCCO_SOURCES` variable of the Makefile.
 If there are any CUDA files required, these should be added to the :code:`CUDA_SOURCES` variable. In theory, we should
 only need to include the files containing the code we are testing. But in practise, we choose to instead include all of
-Sirocco's source files (as it makes our lives easier) which increases compile time and the size of the final binary.
+SIROCCO's source files (as it makes our lives easier) which increases compile time and the size of the final binary.

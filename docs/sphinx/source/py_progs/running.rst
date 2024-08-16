@@ -1,4 +1,4 @@
-Running Sirocco
+Running SIROCCO
 --------------
 
 .. autosummary::
@@ -8,7 +8,7 @@ Running Sirocco
     pf_grid
     run_many
 
-Several scripts have been developed to run *Sirocco* and **Cloudy** simulations for comparison.
+Several scripts have been developed to run *SIROCCO* and **Cloudy** simulations for comparison.
 
 .. autosummary::
     :toctree: running

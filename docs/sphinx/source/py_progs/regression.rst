@@ -1,12 +1,12 @@
 Regression
 ----------
 
-Primarily to verify that changes made to Sirocco do not inadvertently cause unexpected changes
+Primarily to verify that changes made to SIROCCO do not inadvertently cause unexpected changes
 if models, several routines exist to run a fixed set of (relatively fast) models that are
 **nominally**  contained in Examples/regress.
 
 Developers are encouraged to use this routines, before they merge anything into one of the
-major branches of Sirocco.
+major branches of SIROCCO.
 
 The routines involved are
 
@@ -21,9 +21,9 @@ Setup
 =====
 
 Typically one should set up a directory, e.g Regression to run the routines, and, if for example,
-sirocco87f, is the version of Sirocco being used when you set up the directory, being run.
+sirocco87f, is the version of SIROCCO being used when you set up the directory, being run.
 
-Sirocco should be compiled with mpicc before running the regression program
+SIROCCO should be compiled with mpicc before running the regression program
 
 Basic Procedure
 ===============
