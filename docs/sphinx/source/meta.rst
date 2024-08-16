@@ -13,7 +13,7 @@ Installing the documentation tools
 
 This guide is produced using **Sphinx**.
 **Sphinx** is written in Sirocco and available from the **pip** package manager.
-We require the **Sirocco 3** version of **Sphinx**. Install it, and the other modules required, as:
+We require the **Python 3** version of **Sphinx**. Install it, and the other modules required, as:
 
 .. code :: bash
 
