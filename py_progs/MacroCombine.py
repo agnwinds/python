@@ -60,6 +60,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from scipy.interpolate import interp1d
+from RedoUpsilon import convert_ups, rewrite
 
 
 def read_phot(file='h_1_phot.dat'):
@@ -481,6 +482,13 @@ def redo_lines(master='h_1_levels_comb2.dat',lines='h_1_lines.dat'):
     return xxx
 
 
+
+# ```
+#    "%*s %*s %d %2d %le %le %le %le %le %le %d %d %d %d %le %le %le %d %d %le",
+#     &z, &istate, &wave, &f, &gl, &gu, &el, &eu, &levl, &levu, &c_l, &c_u, &en, &gf, &hlt, &np, &type, &sp));
+# ```
+
+
 def read_collisions(col='he_1__upsilon.dat',return_original=False):
     '''
     Read the collision file and put everything into table for retrieval
@@ -511,13 +519,21 @@ def read_collisions(col='he_1__upsilon.dat',return_original=False):
 
     element=[]
     ion=[]
+    f=[]
+    gl=[]
+    gu=[]
+    el=[]
+    eu=[]
     lower=[]
     upper=[]
+    cl=[]
+    cu=[]
     xtype=[]
     ntemp=[]
     scaling_param=[]
     tlim=[]
     energy=[]
+    gf=[]
     xlam=[]
     sct=[]
     scups=[]
@@ -527,17 +543,31 @@ def read_collisions(col='he_1__upsilon.dat',return_original=False):
         element.append(int(word[2]))
         ion.append(int(word[3]))
         xlam.append(float(word[4]))
+        f.append(float(word[5]))
+        gl.append(int(word[6]))
+        gu.append(int(word[7]))
+        el.append(float(word[8]))
+        eu.append(float(word[9]))
+                  
+                        
         lower.append(int(word[10]))
         upper.append(int(word[11]))
+
+        cl.append(int(word[12]))
+        cu.append(int(word[13]))
+        
         energy.append(float(word[14]))
+        gf.append(float(word[15]))
         tlim.append(float(word[16]))
         ntemp.append(int(word[17]))
         xtype.append(int(word[18]))
         scaling_param.append(float(word[-1]))
 
-    coltab=Table([element,ion,xlam,lower,upper,energy,xtype,ntemp,tlim,scaling_param],names=['Element','Ion','Wave','ll','ul','E_ryd','type','ntemp','temp_lim','scale_par'])
+    coltab=Table([element,ion,xlam,f,gl,gu,el,eu,lower,upper,cl,cu, energy,gf, xtype,ntemp,tlim,scaling_param],
+                 names=['Element','Ion','Wave','f','gl','gu','el','eu','ll','ul','cl','cu','E_ryd','gf','type','ntemp','temp_lim','scale_par'])
 
-    print('got here')
+
+
 
     sct=[]
     for one in sct_line:
@@ -562,9 +592,6 @@ def read_collisions(col='he_1__upsilon.dat',return_original=False):
         record=np.array(record)
         scups.append(record)
 
-    print(sct)
-
-    print(sct)
 
 
     coltab['sct']=sct
@@ -572,6 +599,7 @@ def read_collisions(col='he_1__upsilon.dat',return_original=False):
 
 
     coltab['Number']=range(len(coltab))
+
 
     coltab.write('goo.txt',format='ascii.ecsv',overwrite=True)
 
@@ -581,7 +609,12 @@ def read_collisions(col='he_1__upsilon.dat',return_original=False):
         return coltab
 
 
-
+def combine_collisions(coltab):
+    result=convert_ups(xtable=coltab,xratio=30,npts=20)
+    result[0]['sct']=np.sum(result['sct'],axis=0)
+    print('Hello')
+    print(result.info)
+    return result[0]
 
 
 def redo_collisions(master='he_1_levels_guess.dat',col='he_1__upsilon.dat'):
@@ -591,52 +624,67 @@ def redo_collisions(master='he_1_levels_guess.dat',col='he_1__upsilon.dat'):
     '''
     print('***Processing collisions***')
     xmaster=ascii.read(master)
-    xmaster.info()
+    # xmaster.info()
+    # print(xmaster['xlev'])
     collisions,cstren,sct,scups=read_collisions(col,return_original=True)
+    final_collisions=collisions.copy()
+    final_collisions['sct']=np.empty(len(final_collisions),dtype=object)
+    final_collisions['scups']=np.empty(len(final_collisions),dtype=object)
     
-    xlow=xmaster['Element','Ion','lvl','xlev','G']
-    xlow.rename_column('lvl','ll')
-    xlow.rename_column('xlev','xll')
-    xlow.rename_column('G','Gl')
+    # final_collisions['sct']=np.array(final_collisions['sct'],dtype=object)
+    # final_collisions['scups']=np.array(final_collisions['scups'],dtype=object)
+    xcol=collisions['Number','ll','ul']
+    xmaster=xmaster['lvl','xlev']
+    xmaster['ll']=xmaster['lvl']
+    xmaster['ul']=xmaster['lvl']
+    ll=join(xmaster,xcol,keys=['ll'],join_type='inner')
+    ul=join(xmaster,xcol,keys=['ul'],join_type='inner')
+    ll['xlev_lower']=ll['xlev']
+    ul['xlev_upper']=ul['xlev']
+    q=join(ll['Number','xlev_lower'],ul['Number','xlev_upper'],join_type='left')
+    # At this point q contains what final upper level and what final lower level to associate
+    # with each collision strength, and so we need to work out the unique combinations
 
-    xlow.write('low.txt',format='ascii.fixed_width_two_line',overwrite=True)
-    
-    xup=xmaster['Element','Ion','lvl','xlev','G']
-    xup.rename_column('lvl','ul')
-    xup.rename_column('xlev','xul')
-    xup.rename_column('G','Gu')
-    xup.write('up.txt',format='ascii.fixed_width_two_line',overwrite=True)
-    
-    xcollisions=join(collisions,xlow,join_type='left')
-        
-    xcollisions=join(xcollisions,xup,join_type='left')
+    lval,counts=np.unique(q['xlev_lower'],return_counts=True)
+    uval,ucounts=np.unique(q['xlev_upper'],return_counts=True)
+    i=0
+    nfinal=0
+    while i <len(lval):
+        xlev_lower=q[q['xlev_lower']==lval[i]]
+        print(len(xlev_lower))
+        j=0
+        while j<len(uval):
+            xlev_upper=xlev_lower[xlev_lower['xlev_upper']==uval[j]]
+            print(lval[i],uval[j],len(xlev_upper))
+            if len(xlev_upper)==0:
+                print ('No x-section for  %d %d' % (lval[i],uval[j]))
+            elif len(xlev_upper)==1:
+                print('Copy x-section for %d %d' % (lval[i],uval[j]))
+                final_collisions[nfinal]=collisions[xlev_upper['Number'][0]]
+                final_collisions['ll'][nfinal]=final_collisions['cl'][nfinal]=lval[i]
+                final_collisions['ul'][nfinal]=final_collisions['cu'][nfinal]=uval[j]
+                nfinal+=1
+            else:
+                print('Combine x-section for %d %d' % (lval[i],uval[j]))
+                print(xlev_upper)
+                zcollisions=collisions[xlev_upper['Number']]
+                xcombine=combine_collisions(zcollisions)
+                print('testy',nfinal,len(final_collisions))
+                print(final_collisions.info)
+                for one_col in final_collisions.colnames:
+                    final_collisions[one_col][nfinal]=xcombine[one_col]
+                final_collisions['ll'][nfinal]=final_collisions['cl'][nfinal]=lval[i]
+                final_collisions['ul'][nfinal]=final_collisions['cu'][nfinal]=uval[j]
+                nfinal+=1
 
 
+            j+=1
+        i+=1
 
-    xcollisions.info()
+    final_collisions=final_collisions[:nfinal]
+    outfile=col.replace('.dat','_final.dat')
+    rewrite(final_collisions,outfile)
 
-    # xcollisions.write('collisions.txt',format='ascii.fixed_width_two_line',overwrite=True)
-    xcollisions.write('collisions.txt',format='ascii.ecsv',overwrite=True)
-
-    print('***Write out info about each set of collisions to combine')
-
-    final_ll=np.unique(xcollisions['xll'])
-    for one_ll in final_ll:
-        xlower=xcollisions[xcollisions['xll']==one_ll]
-        print(one_ll,len(xlower))
-        final_ul=np.unique(xlower['xul'])
-        for one_ul in final_ul:
-            xupper=xlower[xlower['xul']==one_ul]
-            print(one_ll,one_ul,len(xupper))
-            print(xupper)
-            if len(xupper)>1:
-                f=open('test_%02d_%02d.txt' % (one_ll,one_ul), 'w')
-                for one_row in xupper:
-
-                    f.write('%s\n' % (cstren[one_row['Number']]))
-                    f.write('%s\n' % (sct[one_row['Number']]))
-                    f.write('%s\n' % (scups[one_row['Number']]))
-                f.close()
     
     print('***Finished collisions***')
     return 
