@@ -48,9 +48,9 @@ where
 
 :math:`\Delta=\log(x)-\log(\gamma^2)`
 
-Python structure
+Sirocco structure
 ================
-This data is held internally in Python in the structure **gaunt_total** which has members
+This data is held internally in Sirocco in the structure **gaunt_total** which has members
 
 - log_gsqrd
 - gff
