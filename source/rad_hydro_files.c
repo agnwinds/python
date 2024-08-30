@@ -312,9 +312,18 @@ main (argc, argv)
       nplasma = wmain[nwind].nplasma;
       wind_n_to_ij (domain, plasmamain[nplasma].nwind, &i, &j);
 
-      fprintf (fptr_flux_theta, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);      //output geometric things
-      fprintf (fptr_flux_phi, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);        //output geometric things
-      fprintf (fptr_flux_r, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);  //output geometric things
+      if (zdom[domain].coord_type == SPHERICAL || zdom[domain].coord_type == RTHETA)
+      {
+        fprintf (fptr_flux_theta, "%3d %3d      %3d %10.8e %10.8e ", i, j, wmain[nwind].inwind, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN);     //output geometric things
+        fprintf (fptr_flux_phi, "%3d %3d      %3d %10.8e %10.8e ", i, j, wmain[nwind].inwind, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN);       //output geometric things
+        fprintf (fptr_flux_r, "%3d %3d      %3d %10.8e %10.8e ", i, j, wmain[nwind].inwind, wmain[nwind].rcen, wmain[nwind].thetacen / RADIAN); //output geometric things
+      }
+      else if (zdom[domain].coord_type == CYLIND)
+      {
+        fprintf (fptr_flux_theta, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);    //output geometric things
+        fprintf (fptr_flux_phi, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);      //output geometric things
+        fprintf (fptr_flux_r, "%3d %3d      %3d %10.3e %10.3e ", i, j, wmain[nwind].inwind, wmain[nwind].xcen[0], wmain[nwind].xcen[2]);        //output geometric things
+      }
       for (ii = 0; ii < NFLUX_ANGLES; ii++)
       {
         fprintf (fptr_flux_theta, "%10.3e ", plasmamain[nplasma].F_UV_ang_theta_persist[ii]);
