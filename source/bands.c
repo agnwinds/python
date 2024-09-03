@@ -581,6 +581,14 @@ bands_init (imode, band)
     Exit (0);
   }
 
+  if (geo.agn_ion_spectype == SPECTYPE_CL_TAB && mode != CLOUDY_TEST_BAND)
+  {
+    /* There's quite a lot of hardwired behaviour that means you need to use cloudy_test banding 
+       if you want a Cloudy broken power-law SED */
+    Error ("Using Cloudy broken-law: this only works with Photon_sampling.approach set to cloudy_test.\n");
+    Exit (0);
+  }
+
 
   Log ("bands_init: There are %d bands\n", band->nbands);
   for (nband = 0; nband < band->nbands; nband++)
@@ -592,11 +600,8 @@ bands_init (imode, band)
          band->f1[nband] * PLANCK / (BOLTZMANN * tmax), band->f2[nband] * PLANCK / (BOLTZMANN * tmax), band->min_fraction[nband]);
   }
 
-  /* Finally call the routine freqs_init which initializes the spectral bands 
-   * that are used to establish the coarse
-   * spectra in each cell for ionization calculations
-   */
-
+  /* we used to call freqs init here, but now the photon generation bands are 
+     also tied to the ionization bands, see e.g. gh issue #1084 */
 
   for (nband = 0; nband < band->nbands; nband++)
   {
