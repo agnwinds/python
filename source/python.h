@@ -1240,6 +1240,11 @@ extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      /**< matrix solver spectral model */
 #define NEBULARMODE_MATRIX_ESTIMATORS 10        /**<  matrix solver spectral model */
 
+#define NEBULAR_MATRIX_MULTISHOT   11    /**<  matrix solver spectral model based on power laws which
+                                          * updates T_e multiple times before arriving at a final
+                                          * solution 
+                                          */
+
 // modes for the wind_luminosity routine
 #define MODE_OBSERVER_FRAME_TIME 0
 #define MODE_CMF_TIME 1

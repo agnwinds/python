@@ -80,6 +80,10 @@ nebular_concentrations (xplasma, mode)
 
     m = matrix_ion_populations (xplasma, mode);
   }
+  else if (mode == NEBULAR_MATRIX_MULTISHOT)
+  {
+    m = matrix_ion_populations2 (xplasma, mode);
+  }
   else
   {
     Error ("nebular_concentrations: Unknown mode %d\n", mode);
