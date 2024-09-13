@@ -244,13 +244,13 @@ write_spectra_model_table (fitsfile *fptr)
   int i, j, k;
   int num_rows, num_cols;
   int nbands;
-  int *ichoice, *iplasma, *iband;
+  int *ichoice, *iplasma, *iband, *nxtot;
   float *exp_w, *exp_temp, *pl_log_w, *pl_alpha;
 
   nbands = geo.nxfreq;
   num_rows = nbands * NPLASMA;
   printf ("xtest %d %d\n", nbands, NPLASMA);
-  num_cols = 7;                 // for now
+  num_cols = 8;                 // for now
   char *table_name = "spec_model";
 
   ichoice = calloc (num_rows, sizeof (int *));
@@ -260,6 +260,7 @@ write_spectra_model_table (fitsfile *fptr)
   exp_temp = calloc (num_rows, sizeof (float *));
   pl_log_w = calloc (num_rows, sizeof (float *));
   pl_alpha = calloc (num_rows, sizeof (float *));
+  nxtot = calloc (num_rows, sizeof (int *));
 
   k = 0;
   for (i = 0; i < NPLASMA; i++)
@@ -273,6 +274,8 @@ write_spectra_model_table (fitsfile *fptr)
       exp_temp[k] = plasmamain[i].exp_temp[j];
       pl_log_w[k] = plasmamain[i].pl_log_w[j];
       pl_alpha[k] = plasmamain[i].pl_alpha[j];
+      nxtot[k] = plasmamain[i].nxtot[j];
+      printf ("nxtot %d\n", plasmamain[i].nxtot[j]);
       k++;
     }
   }
@@ -280,9 +283,9 @@ write_spectra_model_table (fitsfile *fptr)
 
   int status = 0;
   // Define the names, formats, and units for each column
-  char *ttype[] = { "nplasma", "band", "spec_mod_type", "exp_w", "exp_temp", "pl_log_w", "pl_alpha" };  // Column names
-  char *tform[] = { "J", "J", "J", "E", "E", "E", "E" };        // Formats: 'J' for integer, 'E' for float
-  char *tunit[] = { "", "", "", "", "", "", "" };       // Units
+  char *ttype[] = { "nplasma", "band", "spec_mod_type", "exp_w", "exp_temp", "pl_log_w", "pl_alpha", "nxtot" }; // Column names
+  char *tform[] = { "J", "J", "J", "E", "E", "E", "E", "J" };   // Formats: 'J' for integer, 'E' for float
+  char *tunit[] = { "", "", "", "", "", "", "", "" };   // Units
 
   // Create a new binary table extension
   if (fits_create_tbl (fptr, BINARY_TBL, num_rows, num_cols, ttype, tform, tunit, NULL, &status))
@@ -358,6 +361,14 @@ write_spectra_model_table (fitsfile *fptr)
     fits_report_error (stderr, status);
     return status;
   }
+
+  // Write the integer data to the eightth column
+  if (fits_write_col (fptr, TINT, 8, 1, 1, num_rows, nxtot, &status))
+  {
+    fits_report_error (stderr, status);
+    return status;
+  }
+
 
   return 0;
 }
