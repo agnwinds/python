@@ -1240,7 +1240,7 @@ extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      /**< matrix solver spectral model */
 #define NEBULARMODE_MATRIX_ESTIMATORS 10        /**<  matrix solver spectral model */
 
-#define NEBULAR_MATRIX_MULTISHOT   11    /**<  matrix solver spectral model based on power laws which
+#define NEBULARMODE_MATRIX_MULTISHOT   11    /**<  matrix solver spectral model based on power laws which
                                           * updates T_e multiple times before arriving at a final
                                           * solution 
                                           */

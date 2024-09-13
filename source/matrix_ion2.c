@@ -69,7 +69,6 @@ matrix_ion_populations2 (xplasma, mode)
   int matrix_err, niterate;     //counters for errors and the number of iterations we have tried to get a converged electron density
   double xnew;
   int xion[nions];              // This array keeps track of what ion is in each line
-//OLD  int xelem[nions];             // This array keeps track of the element for each ion
   double pi_rates[nions];       //photoionization rate coefficients
   double rr_rates[nions];       //radiative recombination rate coefficients
   double inner_rates[n_inner_tot];      //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
@@ -79,8 +78,13 @@ matrix_ion_populations2 (xplasma, mode)
   /* Copy some quantities from the cell into local variables */
 
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
-  t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes
 
+  // t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes
+  xplasma->t_e_old = xplasma->t_e;
+  // t_e = calc_te (xplasma, 0.7 * xplasma->t_e, 1.3 * xplasma->t_e);
+  t_e = calc_te (xplasma, 0.95 * xplasma->t_e, 1.05 * xplasma->t_e);
+  xplasma->t_e = t_e;
+  zero_emit (xplasma->t_e);     //Get the heating and cooling rates correctly for the new temperature
 
   /* We now calculate the total abundances for each element to allow us to use fractional abundances */
 
@@ -129,27 +133,21 @@ matrix_ion_populations2 (xplasma, mode)
       {
         pi_rates[mm] = calc_pi_rate (mm, xplasma, 1, 1);        // PI rate for an explicit spectral model
       }
+      else if (mode == NEBULARMODE_MATRIX_MULTISHOT)
+      {
+        pi_rates[mm] = calc_pi_rate (mm, xplasma, 1, 1);        // PI rate for an explicit spectral model
+      }
       else if (mode == NEBULARMODE_MATRIX_ESTIMATORS)
       {
         pi_rates[mm] = xplasma->ioniz[mm] / xplasma->density[mm];       // PI rate logged during the photon passage
       }
       else
       {
-        Error ("matrix_ion_populations: Unknown mode %d\n", mode);
+        Error ("matrix_ion_populations2: Unknown mode %d\n", mode);
         Exit (0);
       }
     }
 
-/* ksl: This whole lope is not actually used, and produces warnings in gcc11 */
-//OLD    for (nn = 0; nn < nelements; nn++)
-//OLD    {
-//OLD      if (ion[mm].z == ele[nn].z)
-//OLD      {
-//OLD        xelem[mm] = nn;         /* xelem logs which element each row in the arrays refers to. This is important because we need
-//OLD                                   to know what the total density will be for a group of rows all representing the same
-//OLD                                   element. */
-//OLD      }
-//OLD    }
   }
 
 
@@ -166,6 +164,10 @@ matrix_ion_populations2 (xplasma, mode)
         inner_rates[mm] = calc_pi_rate (mm, xplasma, 2, 2);
       }
       else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
+      {
+        inner_rates[mm] = calc_pi_rate (mm, xplasma, 1, 2);
+      }
+      else if (mode == NEBULARMODE_MATRIX_MULTISHOT)
       {
         inner_rates[mm] = calc_pi_rate (mm, xplasma, 1, 2);
       }
@@ -195,6 +197,10 @@ matrix_ion_populations2 (xplasma, mode)
     partition_functions (xplasma, NEBULARMODE_ML93);    // We use t_r and the radiative weight
   }
   else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL || mode == NEBULARMODE_MATRIX_ESTIMATORS)
+  {
+    partition_functions (xplasma, NEBULARMODE_LTE_GROUND);      // Set to ground state
+  }
+  else if (mode == NEBULARMODE_MATRIX_MULTISHOT)
   {
     partition_functions (xplasma, NEBULARMODE_LTE_GROUND);      // Set to ground state
   }
@@ -277,7 +283,7 @@ matrix_ion_populations2 (xplasma, mode)
 
     if (matrix_err)
     {
-      Error ("matrix_ion_populations: %s\n", get_matrix_error_string (matrix_err));
+      Error ("matrix_ion_populations2: %s\n", get_matrix_error_string (matrix_err));
     }
 
     /* free memory */
@@ -351,11 +357,15 @@ matrix_ion_populations2 (xplasma, mode)
       xnew = DENSITY_MIN;       /* fudge to keep a floor on ne */
 
 
-    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)        /* We have converged, or have the situation where we
-                                                                                   have a neutral plasma */
+//    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)        /* We have converged, or have the situation where we
+//                                                                                   have a neutral plasma */
+    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR)        /* We have converged, or have the situation where we
+                                                                   have a neutral plasma */
     {
       break;                    /* Break out of the while loop - we have finished our iterations */
     }
+
+    Log ("xxxxxx %3d  xnew %.2e  xne %.2e -> %.2e \n", niterate, xnew, xne, (xnew + xne) / 2.);
     xne = xxxne = (xnew + xne) / 2.;    /* New value of ne */
 
     niterate++;
@@ -363,7 +373,7 @@ matrix_ion_populations2 (xplasma, mode)
 
     if (niterate == MAXITERATIONS)
     {
-      Error ("matrix_ion_populations: failed to converge for cell %i t %e nh %e xnew %e\n", xplasma->nplasma, t_e, nh, xnew);
+      Error ("matrix_ion_populations2: failed to converge for cell %i t %e nh %e xnew %e\n", xplasma->nplasma, t_e, nh, xnew);
 
 
       for (nn = 0; nn < geo.nxfreq; nn++)
@@ -375,7 +385,7 @@ matrix_ion_populations2 (xplasma, mode)
            xplasma->pl_log_w[nn], xplasma->pl_alpha[nn], xplasma->exp_w[nn], xplasma->exp_temp[nn]);
       }
 
-      Error ("matrix_ion_populations: xxne %e theta %e\n", xxne);
+      Error ("matrix_ion_populations2: xxne %e theta %e\n", xxne);
 
       return (-1);              /* If we get to MAXITERATIONS, we return without copying the new populations into plasma */
     }
@@ -391,7 +401,7 @@ matrix_ion_populations2 (xplasma, mode)
       xplasma->density[nn] = newden[nn] * elem_dens[ion[nn].z]; //We return to absolute densities here
     }
     if ((sane_check (xplasma->density[nn])) || (xplasma->density[nn] < 0.0))
-      Error ("matrix_ion_populations: ion %i has population %8.4e in cell %i\n", nn, xplasma->density[nn], xplasma->nplasma);
+      Error ("matrix_ion_populations2: ion %i has population %8.4e in cell %i\n", nn, xplasma->density[nn], xplasma->nplasma);
   }
 
   xplasma->ne = get_ne (xplasma->density);
@@ -413,4 +423,3 @@ matrix_ion_populations2 (xplasma, mode)
 
   return (0);
 }
-
