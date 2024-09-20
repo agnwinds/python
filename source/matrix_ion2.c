@@ -81,8 +81,14 @@ matrix_ion_populations2 (xplasma, mode)
 
   // t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes
   xplasma->t_e_old = xplasma->t_e;
+
+
   // t_e = calc_te (xplasma, 0.7 * xplasma->t_e, 1.3 * xplasma->t_e);
+  Log ("xxxxxx before calc_te  %d  t_e %.1e n_e %.1e  heat_tot %.1e %.1e\n", geo.wcycle, xplasma->t_e, xplasma->ne, xplasma->heat_tot,
+       xplasma->cool_tot);
   t_e = calc_te (xplasma, 0.95 * xplasma->t_e, 1.05 * xplasma->t_e);
+  Log ("xxxxxx after calc_te  %d  t_e %.1e n_e %.1e  heat_tot %.1e %.1e\n", geo.wcycle, xplasma->t_e, xplasma->ne, xplasma->heat_tot,
+       xplasma->cool_tot);
   xplasma->t_e = t_e;
   zero_emit (xplasma->t_e);     //Get the heating and cooling rates correctly for the new temperature
 
@@ -221,6 +227,8 @@ matrix_ion_populations2 (xplasma, mode)
   /* We are now going to iterate on the electron density - MAXITERATIONS is set in python.h and is currently (78) set to 200.
      We would normally expect to converge much fater than this */
 
+  Log ("xxxxxx before_loop    %d  t_e %.1e n_e %.1e  heat_tot %.1e %.1e\n", geo.wcycle, xplasma->t_e, xplasma->ne, xplasma->heat_tot,
+       xplasma->cool_tot);
   niterate = 0;
   while (niterate < MAXITERATIONS)
   {
@@ -359,8 +367,10 @@ matrix_ion_populations2 (xplasma, mode)
 
 //    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)        /* We have converged, or have the situation where we
 //                                                                                   have a neutral plasma */
-    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR)        /* We have converged, or have the situation where we
-                                                                   have a neutral plasma */
+//    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR)        /* We have converged, or have the situation where we
+//                                                                   have a neutral plasma */
+    if (fabs ((xne - xnew) / (xnew)) < 0.01)    /* We have converged, or have the situation where we
+                                                   have a neutral plasma */
     {
       break;                    /* Break out of the while loop - we have finished our iterations */
     }
@@ -420,6 +430,8 @@ matrix_ion_populations2 (xplasma, mode)
    */
 
   partition_functions (xplasma, NEBULARMODE_LTE_GROUND);
+  Log ("xxxxxx after At_end   %d  t_e %.1e n_e %.1e  heat_tot %.1e %.1e\n", geo.wcycle, xplasma->t_e, xplasma->ne, xplasma->heat_tot,
+       xplasma->cool_tot);
 
   return (0);
 }
