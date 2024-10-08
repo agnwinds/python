@@ -161,8 +161,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
     }
     else if (spectype == SPECTYPE_BB_FCOL)
     {
-      fcol = disk_colour_correction(t);
-      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow(fcol, 4.0);
+      fcol = disk_colour_correction (t);
+      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow (fcol, 4.0);
     }
     else
     {
@@ -220,8 +220,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_extract, ftot)
     }
     else if (spectype == SPECTYPE_BB_FCOL)
     {
-      fcol = disk_colour_correction(t);
-      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow(fcol, 4.0);
+      fcol = disk_colour_correction (t);
+      emit = emittance_bb (freqmin, freqmax, fcol * t) / pow (fcol, 4.0);
     }
     else
     {
@@ -386,9 +386,7 @@ qdisk_save (diskfile, ztot)
   double area, theat, ttot;
   qptr = fopen (diskfile, "w");
   fprintf (qptr,
-           "         r          v      zdisk    t_disk         g      heat  nhit nhit/emit    t_heat  t_irrad    W_irrad     t_tot\n");
-//  fprintf (qptr,
-//           "---------- ---------- ---------- --------- --------- --------- ----- --------- --------- --------- --------- ---------\n");
+           "         r          v      zdisk    t_disk         g      heat  nhit nhit/emit    t_heat   t_irrad    W_irrad     t_tot\n");
 
   for (n = 0; n < NRINGS; n++)
   {
@@ -411,10 +409,16 @@ qdisk_save (diskfile, ztot)
       //Basic conversion from freq to T
       qdisk.w[n] = qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n]);
     }
+    else
+    {
+      qdisk.ave_freq[n] = 0.0;
+      qdisk.t_hit[n] = 0.0;
+      qdisk.w[n] = 0.0;
+    }
     ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
     ttot = pow (ttot, 0.25);
     fprintf (qptr,
-             "%9.4e %9.4e %0.4e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             "%9.4e %9.4e %0.4e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %10.3e %8.3e\n",
              qdisk.r[n], qdisk.v[n], zdisk (qdisk.r[n]), qdisk.t[n], qdisk.g[n],
              qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
   }

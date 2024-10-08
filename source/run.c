@@ -324,6 +324,13 @@ calculate_ionization (restart_stat)
       if (geo.disk_type != DISK_NONE)
       {
         qdisk_save (files.disk, ztot);
+        if (modes.make_tables)
+        {
+          strcpy (dummy, "");
+          sprintf (dummy, "diag_%.100s/%.100s.%02d.disk.diag", files.root, files.root, geo.wcycle + 1);
+          qdisk_save (dummy, ztot);
+
+        }
       }
 #ifdef MPI_ON
     }
