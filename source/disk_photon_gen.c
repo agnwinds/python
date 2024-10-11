@@ -189,7 +189,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     }
     else if (spectype == SPECTYPE_BB_FCOL)
     {
-      fcol = disk_colour_correction(disk.t[nring]);
+      fcol = disk_colour_correction (disk.t[nring]);
       p[i].freq = planck (fcol * disk.t[nring], freqmin, freqmax);
     }
     else if (spectype == SPECTYPE_UNIFORM)
@@ -277,7 +277,7 @@ disk_photon_summary (filename, mode)
       x = 0;
     else
       x = disk.nphot[n] / (disk.r[n] - disk.r[n - 1]);
-    fprintf (ptr, "%d %8.2e %8.2e %8d %8.2e %8d\n", n, disk.r[n], disk.t[n], disk.nphot[n], x, disk.nhit[n]);
+    fprintf (ptr, "%d %8.2e %8.2e %8lld %8.2e %8lld\n", n, disk.r[n], disk.t[n], disk.nphot[n], x, disk.nhit[n]);
   }
 
   fclose (ptr);

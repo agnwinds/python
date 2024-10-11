@@ -163,7 +163,8 @@ double disk_colour_correction(double t);
 /* disk_init.c */
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_extract, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
-int qdisk_save(char *diskfile, double ztot);
+int qdisk_reinit(PhotPtr p);
+int qdisk_save(char *diskfile, int ichoice);
 int read_non_standard_disk_profile(char *tprofile);
 /* disk_photon_gen.c */
 int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
