@@ -509,7 +509,7 @@ qdisk_save (diskfile, ichoice)
     ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
     ttot = pow (ttot, 0.25);
     fprintf (qptr,
-             "%9.4e %9.4e %0.4e %8.3e %8.3e  %8.3e %10lld %8.3e %10lld %8.3e %8.3e %8.3e %10.3e %8.3e\n",
+             "%9.4e %9.4e %0.4e %8.3e %8.3e  %8.3e %10ld %8.3e %10ld %8.3e %8.3e %8.3e %10.3e %8.3e\n",
              qdisk.r[n], qdisk.v[n], zdisk (qdisk.r[n]), qdisk.t[n], qdisk.g[n],
              qdisk.emit[n], qdisk.nphot[n], qdisk.heat[n], qdisk.nhit[n], ratio[n], theat, qdisk.t_hit[n], qdisk.w[n], ttot);
   }
