@@ -277,7 +277,7 @@ disk_photon_summary (filename, mode)
       x = 0;
     else
       x = disk.nphot[n] / (disk.r[n] - disk.r[n - 1]);
-    fprintf (ptr, "%d %8.2e %8.2e %8ld %8.2e %8ld\n", n, disk.r[n], disk.t[n], disk.nphot[n], x, disk.nhit[n]);
+    fprintf (ptr, "%d %8.2e %8.2e %8d %8.2e %8d\n", n, disk.r[n], disk.t[n], disk.nphot[n], x, disk.nhit[n]);
   }
 
   fclose (ptr);

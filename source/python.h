@@ -760,8 +760,8 @@ struct xdisk
   double ave_freq[NRINGS];      /**< The flux weighted average of frequency of photons hitting each annulus */
   double w[NRINGS];             /**< The weight relative to a BB of the photons that hit the disk */
   double t_hit[NRINGS];         /**< The effective T of photons hitting the disk, based on the average frequency */
-  int64_t nphot[NRINGS];        /**< The number of disk photons created in each annulus */
-  int64_t nhit[NRINGS];         /**< The number of photons which hit each annulus */
+  int nphot[NRINGS];        /**< The number of disk photons created in each annulus */
+  int nhit[NRINGS];         /**< The number of photons which hit each annulus */
 };
 extern struct xdisk disk, qdisk;   /**<  disk defines zones in the disk which in a specified frequency band emit equal amounts
                                    of radiation. disk gets reinitialized whenever the frequency interval of interest
