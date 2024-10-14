@@ -716,6 +716,9 @@ ion_bands_init (mode, freqmin, freqmax, band)
     xfreq[8] = 3.162e18;
     xfreq[9] = 1.2e19;          //This is the highest frequency defined in our ionization data
     xfreq[10] = freqmax;
+
+    Log ("ion_bands_init: only %d generation bands, so adopting default 10 ionization bands from %8.4e Hz to %8.4e Hz\n", band->nbands,
+         freqmin, freqmax);
   }
 
   Log ("ion_bands_init: %d ionization bands from %8.2feV (%8.2eHz) to %8.2feV (%8.2eHz)\n", nxfreq, freqmin * HEV, freqmin, freqmax * HEV,
@@ -802,26 +805,30 @@ check_appropriate_banding (band, mode)
   if (geo.system_type == SYSTEM_TYPE_AGN)
   {
     if (mode == CV_BAND)
-      Error ("Using CV banding for AGN system. Not recommended!");
+      Error ("Using CV banding for AGN system. Not recommended!\n");
     else if (mode == YSO_BAND)
-      Error ("Using YSO banding for AGN system. Not recommended!");
+      Error ("Using YSO banding for AGN system. Not recommended!\n");
+    else if (mode == T_STAR_BAND)
+      Error ("Using Tstar banding for AGN system. Not recommended!\n");
     else if (band->nbands < 4)
-      Error ("You only have %d photon generation bands for AGN system. Not recommended!");
+      Error ("You only have %d photon generation bands for AGN system. Not recommended!\n");
   }
   else if (geo.system_type == SYSTEM_TYPE_CV)
   {
     if (mode == YSO_BAND)
-      Error ("Using YSO banding for CV system. Not recommended!");
+      Error ("Using YSO banding for CV system. Not recommended!\n");
     else if (band->nbands < 4)
-      Error ("You only have %d photon generation bands for CV system. Not recommended!");
+      Error ("You only have %d photon generation bands for CV system. Not recommended!\n");
   }
   else if (geo.system_type == SYSTEM_TYPE_BH)
   {
     if (mode == CV_BAND)
-      Error ("Using CV banding for BH system. Not recommended!");
+      Error ("Using CV banding for BH system. Not recommended!\n");
     else if (mode == YSO_BAND)
-      Error ("Using YSO banding for BH system. Not recommended!");
+      Error ("Using YSO banding for BH system. Not recommended!\n");
+    else if (mode == T_STAR_BAND)
+      Error ("Using Tstar banding for BH system. Not recommended!\n");
     else if (band->nbands < 4)
-      Error ("You only have %d photon generation bands for BH system. Not recommended!");
+      Error ("You only have %d photon generation bands for BH system. Not recommended!\n");
   }
 }
