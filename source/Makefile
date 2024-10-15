@@ -201,7 +201,7 @@ python_source = agn.c anisowind.c atomic_extern_init.c atomicdata.c atomicdata_i
 	extract.c frame.c  gradv.c gridwind.c homologous.c hydro_import.c import.c  \
 	import_calloc.c import_cylindrical.c import_rtheta.c import_spherical.c ionization.c  \
 	janitor.c knigge.c levels.c lines.c macro_accelerate.c macro_gen_f.c macro_gov.c  \
-	matom.c matom_diag.c matrix_cpu.c matrix_ion.c matrix_ion2.c models_extern_init.c para_update.c  \
+	matom.c matom_diag.c matrix_cpu.c matrix_ion.c models_extern_init.c para_update.c  \
 	parse.c partition.c paths.c phot_util.c photon2d.c photon_gen.c photon_gen_matom.c  \
 	pi_rates.c python_extern_init.c radiation.c random.c rdpar.c rdpar_init.c recipes.c  \
 	recomb.c resonate.c reverb.c roche.c rtheta.c run.c saha.c setup.c setup_disk.c setup_domains.c  \
