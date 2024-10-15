@@ -1224,10 +1224,6 @@ extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_MATRIX_BB 8     /**<  matrix solver BB model */
 #define IONMODE_MATRIX_SPECTRALMODEL 9  /**< matrix solver spectral model based on power laws */
 #define IONMODE_MATRIX_ESTIMATORS 10    /**<  matrix solver spectral model based on power laws */
-#define IONMODE_MATRIX_MULTISHOT   11    /**<  matrix solver spectral model based on power laws which
-                                          * updates T_e multiple times before arriving at a final
-                                          * solution 
-                                          */
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0        /**< LTE using t_r */

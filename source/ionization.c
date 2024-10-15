@@ -125,19 +125,6 @@ ion_abundances (PlasmaPtr xplasma, int mode)
 
     convergence (xplasma);
   }
-  else if (mode == IONMODE_MATRIX_MULTISHOT)
-  {
-/* New mode to carry more extensive search for best fit 
- Note that it unclear that we could not simplify a lot of this
- routine but what is done here is most analagous to the other modes
- excetp we avoid one_shot*/
-    spectral_estimators (xplasma);
-    update_old_plasma_variables (xplasma);
-    // ireturn = one_shot (xplasma, mode);
-    ireturn = nebular_concentrations (xplasma, mode);
-
-    convergence (xplasma);
-  }
   else
   {
     Error ("ion_abundances: Could not calculate abundances for mode %d\n", mode);
