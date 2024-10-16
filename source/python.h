@@ -1209,7 +1209,7 @@ extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 //These constants are used in the various routines which compute ionization state
 #define SAHA 4.82907e15         /**<  2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
 #define MAXITERATIONS	200     /**< /The number of loops to do to try to converge in ne */
-#define FRACTIONAL_ERROR 0.001   /**< The change in n_e which causes a break out of the loop for ne */
+#define FRACTIONAL_ERROR 0.03   /**< The change in n_e which causes a break out of the loop for ne */
 #define THETAMAX	 1e4    /**< Used in initial calculation of n_e */
 #define MIN_TEMP	100.    /**<  ??? this is another minimum temperature, which is
                                   * used in saha.c and variable_temperature.c )
