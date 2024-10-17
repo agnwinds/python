@@ -574,6 +574,10 @@ estimate_temperature_from_mean_frequency (double mean_nu_target, double nu_min, 
  *
  **********************************************************/
 
+/* switch to choose how to calculate T_r. This could be made to depend on the ionization mode
+   if desired, or it may be that TRUE is the desired behaviour long-term */
+#define BAND_CORRECTED_TRAD FALSE
+
 int
 normalise_simple_estimators (xplasma)
      PlasmaPtr xplasma;
@@ -606,9 +610,17 @@ normalise_simple_estimators (xplasma)
 
     xplasma->t_r_old = xplasma->t_r;    // Store the previous t_r in t_r_old immediately before recalculating
 
-    radiation_temperature = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
-    radiation_temperature = xplasma->t_r =
-      estimate_temperature_from_mean_frequency (xplasma->ave_freq, xband.f1[0], xband.f2[xband.nbands - 1], radiation_temperature);
+    /* the method of calculation of the band corrected radiation temperature depends on 
+       the flag BAND_CORRECTED_TRAD -- see issue #1097 */
+    if (BAND_CORRECTED_TRAD == FALSE)
+    {
+      radiation_temperature = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
+    }
+    else 
+    {
+      radiation_temperature = xplasma->t_r =
+        estimate_temperature_from_mean_frequency (xplasma->ave_freq, xband.f1[0], xband.f2[xband.nbands - 1], radiation_temperature);
+    }
 
     xplasma->w =
       PI * xplasma->j / (STEFAN_BOLTZMANN * radiation_temperature * radiation_temperature * radiation_temperature * radiation_temperature);
