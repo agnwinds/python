@@ -614,7 +614,7 @@ normalise_simple_estimators (xplasma)
        the flag BAND_CORRECTED_TRAD -- see issue #1097 */
     if (BAND_CORRECTED_TRAD == FALSE)
     {
-      radiation_temperature = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
+      radiation_temperature = xplasma->t_r = PLANCK * xplasma->ave_freq / (BOLTZMANN * 3.832);
     }
     else 
     {
