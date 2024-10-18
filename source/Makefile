@@ -147,7 +147,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 #Note that version should be a single string without spaces.
 
 
-VERSION = 88x
+VERSION = 0.1
 
 
 
@@ -241,11 +241,11 @@ endif
 
 sirocco: startup sirocco.o $(sirocco_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) sirocco.o $(sirocco_objects) $(CUDA_OBJECTS) $(kpar_objects) $(LDFLAGS) -o sirocco
-	cp $@ $(BIN)/py
+	cp $@ $(BIN)/sirocco
         ifdef XDEBUG
-	  mv $@ $(BIN)/py$(VERSION)_debug
+	  mv $@ $(BIN)/sirocco-$(VERSION)_debug
         else
-	  mv $@ $(BIN)/py$(VERSION)
+	  mv $@ $(BIN)/sirocco-$(VERSION)
         endif
 	# Fix indenting, if necessary.
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
