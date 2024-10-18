@@ -129,7 +129,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
     }
 
     trans_phot_single (w, &p[nphot], iextract);
-
   }
 
   Log ("\n");
@@ -466,6 +465,22 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         }
       }
 
+      if (pp.w < weight_min)
+      {
+        pp.istat = P_ABSORB;
+        pp.tau = VERY_BIG;
+        stuff_phot (&pp, p);
+        break;
+      }
+
+      if (pp.istat == P_ERROR_MATOM || pp.istat == P_LOFREQ_FF || pp.istat == P_ADIABATIC)
+      {
+        p->istat = pp.istat;
+        pp.tau = VERY_BIG;
+        stuff_phot (&pp, p);
+        break;
+      }
+
       /* Now extract photons if we are in detailed the detailed spectrum portion of the program
        * N.B. To use the anisotropic scattering option, extract needs to follow scatter.
        * This is because the re-weighting which occurs in extract needs the pdf for scattering
@@ -520,7 +535,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     /* This is an insurance policy but it is not obvious that, for example nscat
      * and nrscat, need to be updated */
-
     p->istat = istat;
     p->nscat = pp.nscat;
     p->nrscat = pp.nrscat;
