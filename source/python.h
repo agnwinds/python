@@ -415,7 +415,7 @@ struct geometry
    */
 
 #define NSPEC   20
-  int nangles;   /**< The number of anbles to create spectra for */
+  int nangles;   /**< The number of angles to create spectra for */
   double angle[NSPEC], phase[NSPEC];  /**< The angle and associated binary phase (if relevant) for the extracted spectra */
   int scat_select[NSPEC], top_bot_select[NSPEC];  /**< Variables to constrain the spectra by number of scatters
                                                     * and whether the photons "originate" from above or relow the disk
@@ -755,12 +755,13 @@ struct xdisk
   double t[NRINGS];             /**< The temperature at the middle of the annulus */
   double g[NRINGS];             /**< The gravity at the middle of the annulus */
   double v[NRINGS];             /**< The velocity at the middle of the annulus */
+  double emit[NRINGS];          /**< The radiative energy of the photons emitted from the disk */
   double heat[NRINGS];          /**< The total energy flux of photons hitting each annulus */
   double ave_freq[NRINGS];      /**< The flux weighted average of frequency of photons hitting each annulus */
-  double w[NRINGS];             /**< The radiative weight of the photons that hit the disk */
-  double t_hit[NRINGS];         /**< The effective T of photons hitting the disk */
-  int nphot[NRINGS];            /**< The number of photons created in each annulus */
-  int nhit[NRINGS];             /**< The number of photons which hit each annulus */
+  double w[NRINGS];             /**< The weight relative to a BB of the photons that hit the disk */
+  double t_hit[NRINGS];         /**< The effective T of photons hitting the disk, based on the average frequency */
+  int nphot[NRINGS];        /**< The number of disk photons created in each annulus */
+  int nhit[NRINGS];         /**< The number of photons which hit each annulus */
 };
 extern struct xdisk disk, qdisk;   /**<  disk defines zones in the disk which in a specified frequency band emit equal amounts
                                    of radiation. disk gets reinitialized whenever the frequency interval of interest
@@ -991,15 +992,6 @@ typedef struct plasma
 
   double cell_spec_flux[NBINS_IN_CELL_SPEC];    /**< The array where the cell spectra are accumulated. */
 
-  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux) */
-  double F_vis[4];
-  double F_UV[4];
-  double F_Xray[4];
-
-  double F_vis_persistent[4];
-  double F_UV_persistent[4];
-  double F_Xray_persistent[4];
-
 #define NFLUX_ANGLES 36 /**< The number of bins into which the directional flux is calculated */
 
 
@@ -1057,10 +1049,18 @@ typedef struct plasma
                                    compute compton cooling-  only needs computing once per cycle
                                  */
 
-#define NUM_RAD_FORCE_DIRECTIONS 3
+#define N_DMO_DT_DIRECTIONS 3
 #define NFORCE_DIRECTIONS 4
+  /* directional fluxes (in observer frame) in 3 wavebands. - last element contains the  magnitude of flux) */
+  double F_vis[NFORCE_DIRECTIONS];
+  double F_UV[NFORCE_DIRECTIONS];
+  double F_Xray[NFORCE_DIRECTIONS];
 
-  double dmo_dt[NUM_RAD_FORCE_DIRECTIONS];             /**< Radiative force of wind */
+  double F_vis_persistent[NFORCE_DIRECTIONS];
+  double F_UV_persistent[NFORCE_DIRECTIONS];
+  double F_Xray_persistent[NFORCE_DIRECTIONS];
+
+  double dmo_dt[N_DMO_DT_DIRECTIONS];             /**< Radiative force of wind */
   double rad_force_es[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
   double rad_force_ff[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
   double rad_force_bf[NFORCE_DIRECTIONS];       /**< Radiative force of wind - 4th element is sum of magnitudes */
@@ -1223,8 +1223,7 @@ extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_ML93 3          /**<  Lucy Mazzali */
 #define IONMODE_MATRIX_BB 8     /**<  matrix solver BB model */
 #define IONMODE_MATRIX_SPECTRALMODEL 9  /**< matrix solver spectral model based on power laws */
-#define IONMODE_MATRIX_ESTIMATORS 10    /**<  matrix solver spectral model based on power laws
-                                          */
+#define IONMODE_MATRIX_ESTIMATORS 10    /**<  matrix solver spectral model based on power laws */
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0        /**< LTE using t_r */
@@ -1237,6 +1236,11 @@ extern int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_BB 8 /**<  matrix solver BB model */
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      /**< matrix solver spectral model */
 #define NEBULARMODE_MATRIX_ESTIMATORS 10        /**<  matrix solver spectral model */
+
+#define NEBULARMODE_MATRIX_MULTISHOT   11    /**<  matrix solver spectral model based on power laws which
+                                          * updates T_e multiple times before arriving at a final
+                                          * solution 
+                                          */
 
 // modes for the wind_luminosity routine
 #define MODE_OBSERVER_FRAME_TIME 0
@@ -1343,9 +1347,8 @@ extern PhotPtr photmain;               /**< A pointer to all of the photons that
        total emitted spectrum, the total spectrum of photons which are scattered and
        the total spectrum of photons which are absorbed.  The remainder of the spectra pertain
        to the spectrum as seen from various directions. Note that the space for the spectra
-       are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
-       was added.  This will be the first of the spectra.  It is simply the generated spectrum
-       before passing through the wind.  It has the orginal weights as generated.  */
+       are allocated using a calloc statement in spectrum_init.   
+       */
 
 
 
@@ -1626,6 +1629,8 @@ struct advanced_modes
                                   as they pass through the grid.  There are lots of
                                   issues with how the detailed spectra are constucted
                                   that make it less useful than it might seem. */
+  int no_macro_pops_for_ions;     /* if true, then use the ion densities from the ionization mode
+                                     for macro-atoms, rather than from macro_pops */
 };
 
 extern struct advanced_modes modes;
@@ -1650,12 +1655,8 @@ struct filenames
   char diagfolder[LINELENGTH];  /**< diag folder */
   char input[LINELENGTH];       /**< input name if creating new pf file */
   char new_pf[LINELENGTH];      /**< name of generated pf file */
-  char wspec[LINELENGTH];       /**< .spec_tot file (spectrum from last ionization cycle) */
   char lwspec[LINELENGTH];      /**< .log_spec_tot file (spectra from last ionization cycle
                                   * in log wavelength scale)
-                                  */
-  char wspec_wind[LINELENGTH];  /**< .spec_tot_wind (spectra of wind photons in last
-                                  * ionization cycle on a linear scale limited to wind photons
                                   */
   char lwspec_wind[LINELENGTH]; /**< .log_spec_tot_wind (same as above but in log units)  */
   char spec[LINELENGTH];        /**< .spec file (extracted spectra on linear scale) */
@@ -1738,11 +1739,12 @@ extern int xxxbound;
  * for each input variable.  At present, this is only
  * used for the selection of spec_types
  */
+#define MAX_RDPAR_CHOICES 20 
 
 typedef struct rdpar_choices
 {
-  char choices[10][LINELENGTH];
-  int vals[10];
+  char choices[MAX_RDPAR_CHOICES][LINELENGTH];
+  int vals[MAX_RDPAR_CHOICES];
   int n;
 } dummy_choices, *ChoicePtr;
 

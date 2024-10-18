@@ -25,7 +25,8 @@ double upsilon(int n_coll, double u0);
 void skiplines(FILE *fptr, int nskip);
 /* bands.c */
 int bands_init(int imode, struct xbands *band);
-int freqs_init(double freqmin, double freqmax);
+int ion_bands_init(int mode, double freqmin, double freqmax, struct xbands *band);
+void check_appropriate_banding(struct xbands *band, int mode);
 /* bb.c */
 double planck(double t, double freqmin, double freqmax);
 double get_rand_pow(double x1, double x2, double alpha);
@@ -163,7 +164,8 @@ double disk_colour_correction(double t);
 /* disk_init.c */
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_extract, double *ftot);
 int qdisk_init(double rmin, double rmax, double m, double mdot);
-int qdisk_save(char *diskfile, double ztot);
+int qdisk_reinit(PhotPtr p);
+int qdisk_save(char *diskfile, int ichoice);
 int read_non_standard_disk_profile(char *tprofile);
 /* disk_photon_gen.c */
 int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -200,6 +202,10 @@ double alpha_st_e_integrand(double freq, void *params);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave, int ndom);
 int update_flux_estimators(PlasmaPtr xplasma, PhotPtr phot_mid, double ds_obs, double w_ave, int ndom);
 int update_force_estimators(PlasmaPtr xplasma, PhotPtr p, PhotPtr phot_mid, double ds, double w_ave, int ndom, double z, double frac_ff, double frac_auger, double frac_tot);
+double planck_spectral_radiance(double nu, void *params);
+double nu_times_radiance(double nu, void *params);
+double mean_frequency_nu_range(double T, double nu_min, double nu_max);
+double estimate_temperature_from_mean_frequency(double mean_nu_target, double nu_min, double nu_max, double initial_guess);
 int normalise_simple_estimators(PlasmaPtr xplasma);
 void update_persistent_directional_flux_estimators(int nplasma, double flux_persist_scale);
 /* extract.c */
@@ -331,13 +337,14 @@ double get_matom_f_accelerate(int mode);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
-int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[300][300], int radiative_flag[300][300], int conf_to_matrix[300]);
-int macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[300][300], int conf_to_matrix[300]);
-int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[300], int n_iterations);
-void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[300]);
+int macro_pops_fill_rate_matrix(MacroPtr mplasma, PlasmaPtr xplasma, double xne, int index_element, double rate_matrix[600][600], int radiative_flag[600][600], int conf_to_matrix[600]);
+int macro_pops_check_for_population_inversion(int index_element, double *populations, int radiative_flag[600][600], int conf_to_matrix[600]);
+int macro_pops_check_densities_for_numerical_errors(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[600], int n_iterations);
+void macro_pops_copy_to_xplasma(PlasmaPtr xplasma, int index_element, double *populations, int conf_to_matrix[600]);
 /* matom.c */
 int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
+double xalpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double scaled_alpha_sp_integral_band_limited(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice, double freq_min, double freq_max);
 double alpha_sp_integrand(double freq, void *params);
@@ -354,6 +361,8 @@ int invert_matrix(double *matrix, double *inverted_matrix, int num_rows);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne, double nh1, double nh2);
+/* matrix_ion2.c */
+int matrix_ion_populations2(PlasmaPtr xplasma, int mode);
 /* models_extern_init.c */
 /* para_update.c */
 int get_parallel_nrange(int rank, int ntotal, int nproc, int *my_nmin, int *my_nmax);
@@ -391,7 +400,7 @@ double ds_to_cone(ConePtr cc, struct photon *p);
 double ds_to_sphere(double r, struct photon *p);
 double ds_to_sphere2(double x[], double r, struct photon *p);
 int quadratic(double a, double b, double c, double r[]);
-double ds_to_plane(struct plane *pl, struct photon *p);
+double ds_to_plane(struct plane *pl, struct photon *p, int force_positive_z);
 double ds_to_closest_approach(double x[], struct photon *p, double *impact_parameter);
 double ds_to_cylinder(double rho, struct photon *p);
 /* photon2d.c */

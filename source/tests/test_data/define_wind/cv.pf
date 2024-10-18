@@ -29,7 +29,7 @@ Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_at
 Wind.radiation(yes,no)                          yes
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)            adiabatic
-Atomic_data                                data/standard80_reduced.dat
+Atomic_data                                data/standard80.dat
 Wind.mdot(msol/yr)                         1e-9
 SV.diskmin(units_of_rstar)                 4
 SV.diskmax(units_of_rstar)                 12

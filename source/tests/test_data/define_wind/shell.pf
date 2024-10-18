@@ -19,7 +19,7 @@ Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_at
 Matom_transition_mode(mc_jumps,matrix)               matrix
 Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)               absorb
 Wind_heating.extra_processes(none,adiabatic,nonthermal,both)                 none
-Atomic_data                                data/h20.dat
+Atomic_data                                zdata/h20.dat
 Shell.wind_mdot(msol/yr)                   1e-20
 Shell.wind.radmin(cm)                      1e10
 Shell.wind.radmax(cm)                      1.00001e10

@@ -30,8 +30,9 @@ extern int nlevels;                    /**< These are the actual number of level
 #define NLTE_LEVELS	12000   /**<  Maximum number of levels to treat explicitly */
 extern int nlte_levels;                /**<  Actual number of levels to treat explicityly */
 
+
 /* AUGER NOTE: recommended to increase NLEVELS_MACRO to at least 500 for Auger macro-atoms */
-#define NLEVELS_MACRO   300     /**<  Maximum number of macro atom levels. (SS, June 04) */
+#define NLEVELS_MACRO   600     /**<  Maximum number of macro atom levels. (SS, June 04) */
 extern int nlevels_macro;              /**<  Actual number of macro atom levels. (SS, June 04) */
 #define NLINES 		200000  /**<  Maximum number of lines to be read */
 extern int nlines;                     /**<  Actual number of lines that were read in */
@@ -41,15 +42,24 @@ extern int nlines_macro;               /**<  Actual number of Macro Atom lines t
 extern int n_inner_tot;                /**< The actual number of inner shell ionization cross sections in total */
 
 
-/* AUGER NOTE: recommended to increase these values to at least 200 for Auger macro-atoms */
-#define NBBJUMPS         100    /**<  Maximum number of Macro Atom bound-bound jumps from any one configuration (SS) */
-#define NBFJUMPS         100    /**<  Maximum number of Macro Atom Bound-free jumps from any one configuration (SS) */
+#define LARGE_MACRO_ATOMS FALSE 
+/* sometimes we have to compile with larger hardwired values here for large macro-atoms e.g. Fe17to27 dataset */
+#if LARGE_MACRO_ATOMS
+  #define NBBJUMPS         200    /**<  Maximum number of Macro Atom bound-bound jumps from any one configuration (SS) */
+  #define NBFJUMPS         200    /**<  Maximum number of Macro Atom Bound-free jumps from any one configuration (SS) */
+  #define NAUGER_MACRO     2000        /* number of Auger processes */
+#else
+  /* AUGER NOTE: recommended to increase these values to at least 200 for Auger macro-atoms */
+  #define NBBJUMPS         100    /**<  Maximum number of Macro Atom bound-bound jumps from any one configuration (SS) */
+  #define NBFJUMPS         100    /**<  Maximum number of Macro Atom Bound-free jumps from any one configuration (SS) */
+  #define NAUGER_MACRO     200        /* number of Auger processes */
+#endif
+
+extern int nauger_macro;        /* the number of auger processes read in associated with macro atoms */
+#define NAUGER_ELECTRONS 4
 
 #define MAXJUMPS          1000000       /**<  The maximum number of Macro Atom jumps before emission (if this is exceeded
                                            it gives up (SS) */
-// XXXX  - the maxium number of jumps has been reduced for testing
-// #define MAXJUMPS          10000      /* The maximum number of Macro Atom jumps before emission (if this is exceeded
-//                                           it gives up (SS) */
 #define NAUGER 2                /**< Maximum number of "auger" processes */
 extern int nauger;                     /**< Actual number of innershell edges for which autoionization is to be computed */
 
@@ -204,11 +214,6 @@ config_dummy, *ConfigPtr;
 
 extern ConfigPtr xconfig;
 
-
-extern int nauger_macro;        /* the number of auger processes read in associated with macro atoms */
-#define NAUGER_MACRO 200        /* number of Auger processes */
-#define NAUGER_ELECTRONS 4
-
 typedef struct auger
 {
   int nion;                     /* The ion no (in python) of the transition */
@@ -314,8 +319,13 @@ extern double phot_freq_min;           /**< The lowest frequency for which photo
 extern double inner_freq_min;          /**< The lowest frequency for which inner shell ionization can take place */
 
 #define NCROSS 3000            /**<  Maximum number of x-sections for a single photionization process */
-#define NTOP_PHOT 400           /**<  Maximum number of photoionisation processes.  */
-/* AUGER NOTE: recommended to increase NTOP_PHOT to 1000 for Auger macro-atoms */
+
+#if LARGE_MACRO_ATOMS
+  #define NTOP_PHOT 600           /**<  Maximum number of photoionisation processes.  */
+#else
+  /* AUGER NOTE: recommended to increase NTOP_PHOT to 1000 for Auger macro-atoms */
+  #define NTOP_PHOT 1000           /**<  Maximum number of photoionisation processes.  */
+#endif
 extern int ntop_phot;                  /**<  The actual number of TopBase photoionzation x-sections */
 extern int nphot_total;                /**<  total number of photoionzation x-sections = nxphot + ntop_phot */
 

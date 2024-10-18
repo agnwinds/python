@@ -1,10 +1,11 @@
 C = gcc
 NVCC =
+MATOM_VER = 1
 TARGET = py_unit_test
 
 I_FLAGS = -I$(PYTHON)/include
 L_FLAGS = -L$(PYTHON)/lib
-C_FLAGS = -O3 -Wall -Wno-deprecated-non-prototype
+C_FLAGS = -O3 -Wall -Wno-deprecated-non-prototype -DMATOM_VER=$(MATOM_VER)
 CU_FLAGS = -O3
 
 INCLUDES =
@@ -46,7 +47,8 @@ TEST_SOURCES = \
 	tests/test_matrix.c \
 	tests/test_compton.c \
 	tests/test_define_wind.c \
-	tests/test_run_mode.c
+	tests/test_run_mode.c \
+	tests/test_translate.c
 
 # Using absolute paths
 PYTHON_SOURCES := $(patsubst %,$(PYTHON)/source/%, $(PYTHON_SOURCES))

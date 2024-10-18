@@ -1,9 +1,7 @@
 #!/usr/bin/env python 
 
 '''
-                    Space Telescope Science Institute
-
-Synopsis:  
+Create a  polar coordinate `.pf` file from a `windsave2table` file.
 
 Read the master file produced by windsave2table for a
 rtheta (polar-coordinate mode model and produce 
@@ -56,8 +54,10 @@ def read_file(filename,char=''):
 
     History:
     
-    110729    ksl    Added optional delimiters
-    141209    ksl    Reinstalled in my standard startup
+        110729    ksl
+            Added optional delimiters
+        141209    ksl
+            Reinstalled in my standard startup
             script so there was flexibility to
             read any ascii file
     '''

@@ -385,7 +385,7 @@ main (argc, argv)
 
   /* Calculate parameters associated with the binary star system */
 
-  if (geo.system_type == SYSTEM_TYPE_CV)
+  if (geo.binary)
     binary_basics ();
 
   /* Check that the parameters which have been supplied for the star, disk and boundary layer will

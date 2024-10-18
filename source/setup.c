@@ -340,13 +340,15 @@ init_advanced_modes ()
 
   modes.jumps_for_detailed_spectra = FALSE;     //use old jumps mode for calculating macro atom
   //emissivites
-  modes.use_upweighting_of_simple_macro_atoms = FALSE;     //use upweighting mode for handling 
+  modes.use_upweighting_of_simple_macro_atoms = FALSE;  //use upweighting mode for handling 
   //bf interactions with simple macro atoms
 
   modes.store_matom_matrix = TRUE;      /* default is to store the macro-atom matrix */
 
   modes.run_xtest_diagnostics = FALSE;  /* allow special xtest_diagnostics in the various routines */
   modes.partial_cells = PC_ZERO_DEN;    /* Default is to omit partial cells in calculation */
+
+  modes.no_macro_pops_for_ions = FALSE; /* use the ion densities from macro_pops where applicable */
 
   return (0);
 }
@@ -739,6 +741,13 @@ fixed concentration file. \n\
 
   get_line_transfer_mode ();
 
+  /* we don't allow the user to use matrix_est ionization mode and macro-atom line transfer, see #875 */
+  if ((geo.ioniz_mode == IONMODE_MATRIX_ESTIMATORS) && (geo.rt_mode == RT_MODE_MACRO))
+  {
+    Error ("matrix_est ionization mode cannot be used with macro-atom line transfer. Exiting.\n");
+    Exit (EXIT_FAILURE);
+  }
+
 
   strcpy (answer, "reflect");
   geo.absorb_reflect = rdchoice ("Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)", "1,0,2", answer);
@@ -922,11 +931,14 @@ setup_atomic_data (const char *atomic_filename)
   {
     Log ("Unable to open atomic masterfile %s\n", atomic_filename);
     Log ("Running Setup_Py_Dir to try and fix the situation\n");
-    rc = system ("Setup_Py_Dir");
-    if (rc)
+    if (rank_global == 0)
     {
-      Error ("Unable to open %s and run Setup_Py_Dir\n", atomic_filename);
-      Exit (1);
+      rc = system ("Setup_Py_Dir");
+      if (rc)
+      {
+        Error ("Unable to open %s and run Setup_Py_Dir\n", atomic_filename);
+        Exit (1);
+      }
     }
   }
 

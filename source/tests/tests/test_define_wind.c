@@ -27,6 +27,8 @@ char *PYTHON_ENV;
 char TEST_CWD[LINELENGTH];
 char ATOMIC_DATA_TARGET[LINELENGTH];
 char ATOMIC_DATA_DEST[LINELENGTH];
+char ATOMIC_DATA_TARGET_DEVELOPER[LINELENGTH];
+char ATOMIC_DATA_DEST_DEVELOPER[LINELENGTH];
 
 #define TEST_DATA_LENGTH 2056
 
@@ -316,7 +318,7 @@ test_shell_wind (void)
   WindPtr wind_cell;
   PlasmaPtr plasma_cell;
 
-  const int init_error = setup_model_grid ("shell", ATOMIC_DATA_DEST);
+  const int init_error = setup_model_grid ("shell", ATOMIC_DATA_DEST_DEVELOPER);
   if (init_error)
   {
     cleanup_model ("shell");
@@ -613,8 +615,29 @@ suite_init (void)
     perror ("Unable to find atomic data directory");
     return EXIT_FAILURE;
   }
+
   snprintf (ATOMIC_DATA_DEST, LINELENGTH, "%s/data", TEST_CWD);
   if (symlink (ATOMIC_DATA_TARGET, ATOMIC_DATA_DEST) != EXIT_SUCCESS)
+  {
+    /* If the symlink exists, we'll try not worry about it as if something is
+     * wrong with the atomic data it'll be caught later */
+    if (errno != EEXIST)
+    {
+      perror ("Unable to created symbolic link for atomic data for test case");
+      return EXIT_FAILURE;
+    }
+  }
+
+  /* Set global variables for atomic data for developers */
+  snprintf (ATOMIC_DATA_TARGET_DEVELOPER, LINELENGTH, "%s/zdata", PYTHON_ENV);
+  if (!(stat (ATOMIC_DATA_TARGET_DEVELOPER, &sb) == EXIT_SUCCESS && S_ISDIR (sb.st_mode)))
+  {
+    perror ("Unable to find atomic data directory");
+    return EXIT_FAILURE;
+  }
+
+  snprintf (ATOMIC_DATA_DEST_DEVELOPER, LINELENGTH, "%s/zdata", TEST_CWD);
+  if (symlink (ATOMIC_DATA_TARGET_DEVELOPER, ATOMIC_DATA_DEST_DEVELOPER) != EXIT_SUCCESS)
   {
     /* If the symlink exists, we'll try not worry about it as if something is
      * wrong with the atomic data it'll be caught later */

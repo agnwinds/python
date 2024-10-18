@@ -9,15 +9,22 @@
 # a different compiler other than mpicc.
 #
 
+# MATOM_VER is a temporary switch that allows one to compile the code so that it will
+# use the gsl routines wheen computing alpha_sp.  It should be invoked from the commad line, e.g
+# make MATOM_VER=2 python (or all); the Makefile should not be altered unless we change our mind
+# about the integration approach to use. The default is set to use the newer brute force technique
+
+MATOM_VER := 1
+
 #MPICC is now default compiler
 CC = mpicc
 # CC = gcc	# can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
-NVCC =
+NVCC = 
 # NVCC = nvcc  # default (and only?) CUDA compiler
 # specify any extra compiler flags here
-EXTRA_FLAGS = -Wno-deprecated-non-prototype
+EXTRA_FLAGS = -Wno-deprecated-non-prototype -DMATOM_VER=$(MATOM_VER)
 LDFLAGS =
 
 # Use the next line if you want to change the c compiler that mpicc uses, or
@@ -140,7 +147,7 @@ LDFLAGS+= -L$(LIB) -lm -lgsl -lgslcblas $(CUDA_LIBS)
 #Note that version should be a single string without spaces.
 
 
-VERSION = 88 
+VERSION = 88x
 
 
 
@@ -257,6 +264,7 @@ rhf_objects = rad_hydro_files.o $(python_objects)
 modify_wind_objects = modify_wind.o $(python_objects)
 inspect_wind_objects = inspect_wind.o $(python_objects)
 py_optd_obj = py_optd.o py_optd_output.o py_optd_trans.o py_optd_util.o py_optd_extern_init.o $(python_objects)
+windsave2fits_objects = windsave2fits.o $(python_objects)
 
 run_indent:
 	../py_progs/run_indent.py -all_no_headers
@@ -271,6 +279,12 @@ windsave2table: startup $(table_objects) $(CUDA_OBJECTS)
 	$(CC) $(CFLAGS) $(table_objects) $(CUDA_OBJECTS) $(LDFLAGS) -o windsave2table
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
+	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
+
+windsave2fits: startup $(windsave2fits_objects) $(CUDA_OBJECTS)
+	$(CC) $(CFLAGS) $(windsave2fits_objects) $(CUDA_OBJECTS) $(LDFLAGS) -lcfitsio -o windsave2fits 
+	cp $@ $(BIN)
+	mv $@ $(BIN)/windsave2fits$(VERSION)
 	@if [ $(INDENT) = yes ] ; then  ../py_progs/run_indent.py -changed ; fi
 
 rad_hydro_files: startup $(rhf_objects) $(CUDA_OBJECTS)
@@ -309,7 +323,7 @@ unit_test: startup unit_test.o $(python_objects)
 # the Python source. It doesn't require anything to be compiled, actually, as
 # the Makefile in tests/ will compile what is requried
 check:
-	cd tests; make check NVCC=$(NVCC) CC=$(CC)
+	cd tests; make check NVCC=$(NVCC) CC=$(CC) MATOM_VER=$(MATOM_VER)
 
 # The next line runs recompiles all of the routines after first cleaning the directory
 # all: clean run_indent python windsave2table py_wind
