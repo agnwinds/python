@@ -1,4 +1,4 @@
-name: "Python: continuous integration tests"
+name: "Sirocco: continuous integration tests"
 on:
   push:
     branches:
@@ -9,7 +9,7 @@ on:
       - "dev"
       - "main"
 env:
-  PYTHON: ${{ github.workspace }}
+  SIROCCO: ${{ github.workspace }}
 jobs:
   greeting:
     name: Greeting job
